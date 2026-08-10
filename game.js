@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const currentLevel = parseInt(urlParams.get('level')) || 1;
 
   document.getElementById('levelDisplay').innerText = currentLevel.toString().padStart(2, '0');
+  updateCoinDisplay();
 
   const grid = document.getElementById('puzzleGrid');
   const movesDisplay = document.getElementById('movesDisplay');
@@ -13,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let moves = 0;
   let seconds = 0;
   let timerInterval = null;
-  let tilesState = [0, 1, 2, 3, 4, 5, 6, 7, 8]; // All 9 tiles present
+  let tilesState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
   let selectedTilePos = null;
 
   const imageSrc = `image/level${currentLevel}.jpeg`;
@@ -27,6 +28,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const secs = (seconds % 60).toString().padStart(2, '0');
       timerDisplay.innerText = `${mins}:${secs}`;
     }, 1000);
+  }
+
+  function updateCoinDisplay() {
+    const totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
+    document.getElementById('coinCount').innerText = totalCoins;
   }
 
   function renderGrid() {
@@ -50,18 +56,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function handleTileClick(pos) {
-    AudioManager.playClick();
+    AudioManager.playSelect();
 
     if (selectedTilePos === null) {
-      // First tile selected
       selectedTilePos = pos;
       renderGrid();
     } else if (selectedTilePos === pos) {
-      // Deselect if tapping the same tile again
       selectedTilePos = null;
       renderGrid();
     } else {
-      // Swap selected tile with target tile
       [tilesState[selectedTilePos], tilesState[pos]] = [tilesState[pos], tilesState[selectedTilePos]];
       selectedTilePos = null;
       moves++;
@@ -72,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function shuffleGrid() {
-    // Perform random tile swaps
     for (let i = 0; i < 20; i++) {
       const idx1 = Math.floor(Math.random() * 9);
       const idx2 = Math.floor(Math.random() * 9);
@@ -86,22 +88,106 @@ document.addEventListener('DOMContentLoaded', () => {
     const isSolved = tilesState.every((val, idx) => val === idx);
     if (isSolved) {
       clearInterval(timerInterval);
-      setTimeout(() => {
-        alert(`Level ${currentLevel} Completed!`);
-        let savedLevel = parseInt(localStorage.getItem('currentLevel')) || 1;
-        if (currentLevel >= savedLevel) {
-          localStorage.setItem('currentLevel', currentLevel + 1);
-        }
-        window.location.href = 'index.html';
-      }, 200);
+      AudioManager.playVictory(currentLevel);
+
+      // Star Calculation (Moves based)
+      let stars = 1;
+      if (moves <= 14) stars = 3;
+      else if (moves <= 22) stars = 2;
+
+      // Coin Calculation Logic (Max 15 coins per level)
+      const currentLevelCoins = parseInt(localStorage.getItem(`levelCoins_${currentLevel}`)) || 0;
+      let targetCoins = stars * 5; // 3 stars = 15, 2 stars = 10, 1 star = 5
+      let newCoinsEarned = 0;
+
+      if (targetCoins > currentLevelCoins) {
+        newCoinsEarned = targetCoins - currentLevelCoins;
+        localStorage.setItem(`levelCoins_${currentLevel}`, targetCoins);
+
+        let totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
+        totalCoins += newCoinsEarned;
+        localStorage.setItem('totalCoins', totalCoins);
+      }
+
+      // Progression unlock logic
+      let maxUnlocked = parseInt(localStorage.getItem('currentLevel')) || 1;
+      if (currentLevel >= maxUnlocked) {
+        localStorage.setItem('currentLevel', currentLevel + 1);
+      }
+
+      showVictoryModal(stars, newCoinsEarned);
     }
   }
 
+  function showVictoryModal(stars, newCoins) {
+    document.getElementById('victoryImg').src = imageSrc;
+    document.getElementById('vTime').innerText = timerDisplay.innerText;
+    document.getElementById('vMoves').innerText = moves;
+    document.getElementById('vCoins').innerText = `+${newCoins}`;
+
+    // Render Stars
+    const starNodes = document.querySelectorAll('#victoryStars .star');
+    starNodes.forEach((star, index) => {
+      if (index < stars) {
+        star.classList.add('active');
+      } else {
+        star.classList.remove('active');
+      }
+    });
+
+    updateCoinDisplay();
+    document.getElementById('victoryModal').classList.remove('hidden');
+    startConfetti();
+  }
+
+  // Blasting Confetti Effect
+  function startConfetti() {
+    const canvas = document.getElementById('confettiCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = Array.from({ length: 70 }, () => ({
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      vx: (Math.random() - 0.5) * 12,
+      vy: (Math.random() - 0.7) * 14,
+      size: Math.random() * 8 + 4,
+      color: ['#ffd700', '#9d4edd', '#ff007f', '#00f0ff', '#ffffff'][Math.floor(Math.random() * 5)]
+    }));
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.3; // Gravity
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, p.size, p.size);
+      });
+      if (particles.some(p => p.y < canvas.height)) {
+        requestAnimationFrame(draw);
+      }
+    }
+    draw();
+  }
+
+  // Action listeners
   document.getElementById('shuffleBtn').addEventListener('click', () => {
-    AudioManager.playClick();
+    AudioManager.playShuffle();
     shuffleGrid();
   });
-  
+
+  document.getElementById('nextLevelBtn').addEventListener('click', () => {
+    AudioManager.playClick();
+    window.location.href = `game.html?level=${currentLevel + 1}`;
+  });
+
+  document.getElementById('victoryHomeBtn').addEventListener('click', () => {
+    AudioManager.playClick();
+    window.location.href = 'index.html';
+  });
+
   document.getElementById('backToHome').addEventListener('click', () => {
     AudioManager.playClick();
     window.location.href = 'index.html';
