@@ -8,8 +8,66 @@
 </head>
 <body>
   <div class="app-container">
-    <!-- Top Header Bar -->
-    <header class="top-bar">
+
+    <!-- 1. LOADING SCREEN -->
+    <section id="loadingView" class="view active full-screen-view">
+      <div class="loading-content">
+        <video id="loadingLogo" autoplay loop muted playsinline>
+          <source src="image/logo.webm" type="video/webm">
+        </video>
+        <div class="loading-text">Loading<span class="dots">...</span></div>
+      </div>
+    </section>
+
+    <!-- 2. LOGIN PAGE -->
+    <section id="loginView" class="view hidden full-screen-view">
+      <div class="auth-card">
+        <div class="auth-logo">
+          <video autoplay loop muted playsinline>
+            <source src="image/logo.webm" type="video/webm">
+          </video>
+        </div>
+        <h2>LOG IN</h2>
+        <form id="loginForm">
+          <div class="input-group">
+            <input type="text" id="loginUser" placeholder="Username" required>
+          </div>
+          <div class="input-group">
+            <input type="password" id="loginPass" placeholder="Password" required>
+          </div>
+          <p id="loginError" class="auth-error"></p>
+          <button type="submit" class="btn btn-primary">LOG IN</button>
+        </form>
+        <p class="auth-switch">Don't have an account? <a href="#" id="toRegister">Create Account</a></p>
+      </div>
+    </section>
+
+    <!-- 3. REGISTER PAGE -->
+    <section id="registerView" class="view hidden full-screen-view">
+      <div class="auth-card">
+        <h2>CREATE ACCOUNT</h2>
+        <form id="registerForm">
+          <div class="input-group">
+            <input type="text" id="regDisplayName" placeholder="Display Name (e.g. Vinz)" required>
+          </div>
+          <div class="input-group">
+            <input type="text" id="regUser" placeholder="Username" required>
+          </div>
+          <div class="input-group">
+            <input type="password" id="regPass" placeholder="Password" required>
+          </div>
+          <div class="input-group">
+            <input type="password" id="regPassConfirm" placeholder="Repeat Password" required>
+          </div>
+          <p id="regError" class="auth-error"></p>
+          <button type="submit" class="btn btn-primary">REGISTER</button>
+        </form>
+        <p class="auth-switch">Already have an account? <a href="#" id="toLogin">Log In</a></p>
+      </div>
+    </section>
+
+    <!-- Top Header Bar (Shown only when logged in) -->
+    <header class="top-bar hidden" id="mainHeader">
       <button class="icon-btn" id="menuBtn">☰</button>
       <div class="logo-container">
         <video id="logoVideo" autoplay loop muted playsinline>
@@ -20,10 +78,10 @@
     </header>
 
     <!-- HOME PAGE VIEW -->
-    <section id="homeView" class="view active">
+    <section id="homeView" class="view hidden">
       <div class="card welcome-card">
         <p class="sub-title">WELCOME</p>
-        <h2 class="user-name">Vinz</h2>
+        <h2 class="user-name" id="userDisplayName">Vinz</h2>
         <button class="btn btn-primary" id="playBtn">▶ PLAY</button>
       </div>
 
@@ -56,7 +114,7 @@
     </section>
 
     <!-- LEVELS PAGE VIEW -->
-    <section id="levelsView" class="view">
+    <section id="levelsView" class="view hidden">
       <div class="view-header">
         <button class="icon-btn back-btn">‹</button>
         <h2>LEVELS</h2>
@@ -68,7 +126,7 @@
     </section>
 
     <!-- COLLECTIONS PAGE VIEW -->
-    <section id="collectionsView" class="view">
+    <section id="collectionsView" class="view hidden">
       <div class="view-header">
         <button class="icon-btn back-btn">‹</button>
         <h2>COLLECTIONS</h2>
