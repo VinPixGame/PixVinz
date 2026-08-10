@@ -537,46 +537,10 @@ input:checked + .slider:before {
 }
 
 /* ==========================================
-   GAME PAGE STYLES (EXACT FIT & SPACING FIX)
+   GAME PAGE STYLES (EXPANDED BOARD & FLEX FIX)
    ========================================== */
 
-.game-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start; /* Stacks elements cleanly from top to bottom */
-  align-items: center;
-  gap: 10px; /* Controls exact vertical spacing between all elements */
-  padding: 12px 16px;
-  box-sizing: border-box;
-  height: 100vh;
-  max-height: 100vh;
-  overflow: hidden;
-}
-
-/* Full Width Top Header Bar */
-.game-container .top-bar {
-  display: flex;
-  justify-content: space-between; /* Pushes back button to far left, coins to far right */
-  align-items: center;
-  width: 100%;
-  margin-bottom: 0;
-  padding-top: 0;
-}
-
-.game-container .logo-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex: 1;
-}
-
-.game-container .logo-container video, 
-.game-container #logoVideo {
-  width: 110px;
-  height: auto;
-}
-
-/* Upgraded Glassmorphic Back Button */
+/* Upgraded Back Button */
 .top-bar .icon-btn#backToHome,
 .icon-btn.back-btn {
   background: radial-gradient(circle at top, rgba(157, 78, 221, 0.4) 0%, rgba(35, 16, 64, 0.8) 100%);
@@ -595,17 +559,54 @@ input:checked + .slider:before {
   align-items: center;
 }
 
-/* Level Title & Stats Section */
+/* Strict Layout Container for Desktop & Mobile */
+.game-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 430px;
+  height: 100vh;
+  max-height: 100vh;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+/* Header Bar Spread */
+.game-container .top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.game-container .logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.game-container .logo-container video, 
+.game-container #logoVideo {
+  width: 120px;
+  height: auto;
+}
+
+/* Stats Section */
 .game-header {
   width: 100%;
-  max-width: 340px;
   text-align: center;
-  margin: 0;
+  margin-bottom: 4px;
 }
 
 .game-header h2 {
   color: #ffd700;
-  font-size: 17px;
+  font-size: 18px;
   letter-spacing: 1px;
   margin-bottom: 6px;
 }
@@ -653,12 +654,12 @@ input:checked + .slider:before {
   font-weight: 800;
 }
 
-/* Scaled Puzzle Grid Wrapper */
+/* EXPANDED PUZZLE WRAPPER (~1cm margins on mobile) */
 .puzzle-wrapper {
-  width: 100%;
-  max-width: min(300px, 40vh);
+  width: calc(100% - 20px); /* 10px (~1cm) padding on left and right */
+  max-width: 380px;
   aspect-ratio: 1 / 1;
-  margin: 0 auto;
+  margin: 6px auto;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -693,17 +694,17 @@ input:checked + .slider:before {
   transform: scale(0.96);
 }
 
-/* Bottom Action Buttons Locked at Bottom */
+/* Bottom Action Buttons */
 .game-actions {
   display: flex;
   gap: 12px;
   width: 100%;
-  max-width: 340px;
-  margin-top: auto; /* Anchors buttons comfortably near the bottom */
+  margin-top: 4px;
+  margin-bottom: 8px;
 }
 
 .game-actions .btn {
   flex: 1;
-  padding: 13px;
+  padding: 14px;
   font-size: 15px;
 }
