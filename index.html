@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>PixVinz - Premium Puzzle Game</title>
+  <title>Puzzle Game</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -12,16 +12,19 @@
     <!-- 1. SPLASH SCREEN -->
     <div id="splash-screen" class="screen active">
       <div class="splash-content">
-        <img src="image/logo.webm" class="flash-logo" alt="PixVinz Logo" onerror="this.onerror=null; this.src='https://via.placeholder.com/150/FFD700/000000?text=PixVinz';" />
-        <h1 class="brand-title">PixVinz</h1>
-        <button id="btn-skip-splash" class="btn btn-secondary" style="margin-top: 20px; font-size: 0.8rem; padding: 6px 12px;">Tap if stuck</button>
+        <video class="flash-logo" autoplay loop muted playsinline>
+          <source src="image/logo.webm" type="video/webm" />
+        </video>
+        <button id="btn-skip-splash" class="btn btn-secondary" onclick="checkAuthStatus()" style="margin-top: 20px; font-size: 0.8rem; padding: 6px 12px;">Tap if stuck</button>
       </div>
     </div>
 
     <!-- 2. AUTH SCREEN -->
     <div id="auth-screen" class="screen">
       <div class="auth-card">
-        <img src="image/logo.webm" class="small-logo" alt="Logo" onerror="this.onerror=null; this.src='https://via.placeholder.com/65/FFD700/000000?text=PV';" />
+        <video class="small-logo" autoplay loop muted playsinline>
+          <source src="image/logo.webm" type="video/webm" />
+        </video>
         
         <!-- Login Form -->
         <form id="login-form" class="auth-form">
@@ -47,7 +50,9 @@
     <!-- 3. MAIN MENU SCREEN -->
     <div id="main-menu-screen" class="screen">
       <header class="top-header">
-        <img src="image/logo.webm" class="small-logo" alt="Logo" onerror="this.onerror=null; this.src='https://via.placeholder.com/65/FFD700/000000?text=PV';" />
+        <video class="small-logo" autoplay loop muted playsinline>
+          <source src="image/logo.webm" type="video/webm" />
+        </video>
         <h3 id="welcome-message">Welcome Player</h3>
         <div class="coin-display">💰 <span id="user-coins">0</span></div>
       </header>
@@ -76,7 +81,9 @@
     <!-- 5. PUZZLE BOARD SCREEN -->
     <div id="game-screen" class="screen">
       <header class="game-header">
-        <img src="image/logo.webm" class="small-logo" alt="Logo" onerror="this.onerror=null; this.src='https://via.placeholder.com/65/FFD700/000000?text=PV';" />
+        <video class="small-logo" autoplay loop muted playsinline>
+          <source src="image/logo.webm" type="video/webm" />
+        </video>
         <div class="game-stats">
           <span>⏳ <span id="timer">00:00</span></span>
           <span>👣 Moves: <span id="moves">0</span></span>
@@ -132,7 +139,7 @@
             <span class="slider"></span>
           </label>
         </div>
-        <button id="btn-about" class="btn btn-secondary">ℹ️ About PixVinz</button>
+        <button id="btn-about" class="btn btn-secondary">ℹ️ About</button>
         <button id="btn-close-settings" class="btn btn-danger">Close</button>
       </div>
     </div>
@@ -140,9 +147,10 @@
     <!-- 8. ABOUT POPUP -->
     <div id="about-modal" class="modal">
       <div class="modal-content">
-        <img src="image/logo.webm" class="small-logo" alt="Logo" onerror="this.onerror=null; this.src='https://via.placeholder.com/65/FFD700/000000?text=PV';" />
-        <h2>PixVinz</h2>
-        <p><strong>Developer:</strong> PixVinz Team</p>
+        <video class="small-logo" autoplay loop muted playsinline>
+          <source src="image/logo.webm" type="video/webm" />
+        </video>
+        <p><strong>Developer:</strong> Team</p>
         <p><strong>Version:</strong> 1.0.0</p>
         <p><strong>Year:</strong> 2026</p>
         <button id="btn-close-about" class="btn btn-primary">Back</button>
