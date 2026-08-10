@@ -26,17 +26,21 @@ STATE.audio.bg.loop = true;
 function playSound(type, levelNum = 1) {
   if (!STATE.settings.sound) return;
   
-  if (type === 'main') {
-    STATE.audio.bg.pause();
-    STATE.audio.main.play().catch(() => {});
-  } else if (type === 'bg') {
-    STATE.audio.main.pause();
-    STATE.audio.bg.play().catch(() => {});
-  } else if (type === 'victory') {
-    STATE.audio.bg.pause();
-    let trackIndex = ((levelNum - 1) % 10) + 1;
-    STATE.audio.victory.src = `sounds/victory${trackIndex}.mp3`;
-    STATE.audio.victory.play().catch(() => {});
+  try {
+    if (type === 'main') {
+      STATE.audio.bg.pause();
+      STATE.audio.main.play().catch(() => {});
+    } else if (type === 'bg') {
+      STATE.audio.main.pause();
+      STATE.audio.bg.play().catch(() => {});
+    } else if (type === 'victory') {
+      STATE.audio.bg.pause();
+      let trackIndex = ((levelNum - 1) % 10) + 1;
+      STATE.audio.victory.src = `sounds/victory${trackIndex}.mp3`;
+      STATE.audio.victory.play().catch(() => {});
+    }
+  } catch (err) {
+    console.warn('Audio playback error ignored:', err);
   }
 }
 
@@ -51,17 +55,20 @@ function getGridSize(level) {
 
 // --- INITIALIZATION & ROUTING ---
 document.addEventListener('DOMContentLoaded', () => {
-  // 3-Second Splash Delay
+  setupEventListeners();
+
+  // Guarantees screen transition after 3-second splash screen
   setTimeout(() => {
     checkAuthStatus();
   }, 3000);
-
-  setupEventListeners();
 });
 
 function navigateTo(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(screenId).classList.add('active');
+  const targetScreen = document.getElementById(screenId);
+  if (targetScreen) {
+    targetScreen.classList.add('active');
+  }
 
   if (['main-menu-screen', 'level-select-screen', 'auth-screen'].includes(screenId)) {
     playSound('main');
@@ -72,32 +79,51 @@ function navigateTo(screenId) {
 
 // --- AUTHENTICATION SYSTEM ---
 function checkAuthStatus() {
-  const savedUser = localStorage.getItem('pixvinz_active_user');
-  if (savedUser) {
-    STATE.user = JSON.parse(localStorage.getItem(`pixvinz_user_${savedUser}`));
-    loadUserProgress();
-    navigateTo('main-menu-screen');
-  } else {
-    navigateTo('auth-screen');
+  try {
+    const savedUser = localStorage.getItem('pixvinz_active_user');
+    if (savedUser) {
+      const userData = localStorage.getItem(`pixvinz_user_${savedUser}`);
+      if (userData) {
+        STATE.user = JSON.parse(userData);
+        loadUserProgress();
+        navigateTo('main-menu-screen');
+        return;
+      }
+    }
+  } catch (e) {
+    console.error('LocalStorage auth check fallback:', e);
   }
+  // Default fallback to login screen
+  navigateTo('auth-screen');
 }
 
 function loadUserProgress() {
-  if (!STATE.user.progress) {
+  if (!STATE.user || !STATE.user.progress) {
+    if (!STATE.user) STATE.user = { displayName: 'Player' };
     STATE.user.progress = { unlockedLevel: 1, coins: 0, levelStats: {} };
   }
-  document.getElementById('welcome-message').textContent = `Welcome ${STATE.user.displayName}`;
+  const welcomeEl = document.getElementById('welcome-message');
+  if (welcomeEl) welcomeEl.textContent = `Welcome ${STATE.user.displayName || 'Player'}`;
   updateCoinDisplays();
 }
 
 function saveUserData() {
-  localStorage.setItem(`pixvinz_user_${STATE.user.username}`, JSON.stringify(STATE.user));
+  try {
+    if (STATE.user && STATE.user.username) {
+      localStorage.setItem(`pixvinz_user_${STATE.user.username}`, JSON.stringify(STATE.user));
+    }
+  } catch (e) {
+    console.warn('Unable to save user data to localStorage:', e);
+  }
   updateCoinDisplays();
 }
 
 function updateCoinDisplays() {
-  document.getElementById('user-coins').textContent = STATE.user.progress.coins;
-  document.getElementById('level-user-coins').textContent = STATE.user.progress.coins;
+  const coins = (STATE.user && STATE.user.progress) ? STATE.user.progress.coins : 0;
+  const userCoinsEl = document.getElementById('user-coins');
+  const levelUserCoinsEl = document.getElementById('level-user-coins');
+  if (userCoinsEl) userCoinsEl.textContent = coins;
+  if (levelUserCoinsEl) levelUserCoinsEl.textContent = coins;
 }
 
 // --- EVENT LISTENERS ---
@@ -109,87 +135,138 @@ function setupEventListeners() {
   }, { once: true });
 
   // Auth Toggle
-  document.getElementById('show-signup').onclick = () => {
-    document.getElementById('login-form').classList.add('hidden');
-    document.getElementById('signup-form').classList.remove('hidden');
-  };
-  document.getElementById('show-login').onclick = () => {
-    document.getElementById('signup-form').classList.remove('hidden');
-    document.getElementById('login-form').classList.add('hidden');
-  };
+  const showSignup = document.getElementById('show-signup');
+  const showLogin = document.getElementById('show-login');
+  if (showSignup) {
+    showSignup.onclick = () => {
+      document.getElementById('login-form').classList.add('hidden');
+      document.getElementById('signup-form').classList.remove('hidden');
+    };
+  }
+  if (showLogin) {
+    showLogin.onclick = () => {
+      document.getElementById('signup-form').classList.add('hidden');
+      document.getElementById('login-form').classList.remove('hidden');
+    };
+  }
 
-  // Auth Form Handling
-  document.getElementById('login-form').onsubmit = (e) => {
-    e.preventDefault();
-    const u = document.getElementById('login-username').value;
-    const p = document.getElementById('login-password').value;
-    const stored = localStorage.getItem(`pixvinz_user_${u}`);
-    if (stored && JSON.parse(stored).password === p) {
-      STATE.user = JSON.parse(stored);
-      localStorage.setItem('pixvinz_active_user', u);
+  // Auth Forms
+  const loginForm = document.getElementById('login-form');
+  if (loginForm) {
+    loginForm.onsubmit = (e) => {
+      e.preventDefault();
+      const u = document.getElementById('login-username').value;
+      const p = document.getElementById('login-password').value;
+      try {
+        const stored = localStorage.getItem(`pixvinz_user_${u}`);
+        if (stored && JSON.parse(stored).password === p) {
+          STATE.user = JSON.parse(stored);
+          localStorage.setItem('pixvinz_active_user', u);
+          loadUserProgress();
+          navigateTo('main-menu-screen');
+        } else {
+          alert('Invalid Username or Password');
+        }
+      } catch (err) {
+        alert('Authentication error. Please try signing up.');
+      }
+    };
+  }
+
+  const signupForm = document.getElementById('signup-form');
+  if (signupForm) {
+    signupForm.onsubmit = (e) => {
+      e.preventDefault();
+      const d = document.getElementById('signup-displayname').value;
+      const u = document.getElementById('signup-username').value;
+      const p = document.getElementById('signup-password').value;
+      try {
+        if (localStorage.getItem(`pixvinz_user_${u}`)) {
+          alert('Username already taken!');
+          return;
+        }
+      } catch (e) {}
+
+      STATE.user = { displayName: d, username: u, password: p, progress: { unlockedLevel: 1, coins: 0, levelStats: {} } };
+      try {
+        localStorage.setItem('pixvinz_active_user', u);
+      } catch (e) {}
+      saveUserData();
       loadUserProgress();
       navigateTo('main-menu-screen');
-    } else {
-      alert('Invalid Username or Password');
-    }
-  };
+    };
+  }
 
-  document.getElementById('signup-form').onsubmit = (e) => {
-    e.preventDefault();
-    const d = document.getElementById('signup-displayname').value;
-    const u = document.getElementById('signup-username').value;
-    const p = document.getElementById('signup-password').value;
-    if (localStorage.getItem(`pixvinz_user_${u}`)) {
-      alert('Username already taken!');
-      return;
-    }
-    STATE.user = { displayName: d, username: u, password: p, progress: { unlockedLevel: 1, coins: 0, levelStats: {} } };
-    localStorage.setItem('pixvinz_active_user', u);
-    saveUserData();
-    loadUserProgress();
-    navigateTo('main-menu-screen');
-  };
-
-  document.getElementById('btn-logout').onclick = () => {
-    localStorage.removeItem('pixvinz_active_user');
-    location.reload();
-  };
+  const logoutBtn = document.getElementById('btn-logout');
+  if (logoutBtn) {
+    logoutBtn.onclick = () => {
+      try { localStorage.removeItem('pixvinz_active_user'); } catch(e){}
+      location.reload();
+    };
+  }
 
   // Navigation Buttons
-  document.getElementById('btn-play').onclick = () => startLevel(STATE.user.progress.unlockedLevel);
-  document.getElementById('btn-levels').onclick = () => { renderLevelGrid(); navigateTo('level-select-screen'); };
-  document.getElementById('btn-level-back').onclick = () => navigateTo('main-menu-screen');
-  document.getElementById('btn-game-back').onclick = () => { stopTimer(); navigateTo('main-menu-screen'); };
+  const playBtn = document.getElementById('btn-play');
+  if (playBtn) playBtn.onclick = () => startLevel((STATE.user && STATE.user.progress) ? STATE.user.progress.unlockedLevel : 1);
+  
+  const levelsBtn = document.getElementById('btn-levels');
+  if (levelsBtn) levelsBtn.onclick = () => { renderLevelGrid(); navigateTo('level-select-screen'); };
+  
+  const levelBackBtn = document.getElementById('btn-level-back');
+  if (levelBackBtn) levelBackBtn.onclick = () => navigateTo('main-menu-screen');
+  
+  const gameBackBtn = document.getElementById('btn-game-back');
+  if (gameBackBtn) gameBackBtn.onclick = () => { stopTimer(); navigateTo('main-menu-screen'); };
   
   // Modals
-  document.getElementById('btn-settings').onclick = () => document.getElementById('settings-modal').classList.add('active');
-  document.getElementById('btn-close-settings').onclick = () => document.getElementById('settings-modal').classList.remove('active');
-  document.getElementById('btn-about').onclick = () => document.getElementById('about-modal').classList.add('active');
-  document.getElementById('btn-close-about').onclick = () => document.getElementById('about-modal').classList.remove('active');
+  const settingsBtn = document.getElementById('btn-settings');
+  if (settingsBtn) settingsBtn.onclick = () => document.getElementById('settings-modal').classList.add('active');
+  
+  const closeSettingsBtn = document.getElementById('btn-close-settings');
+  if (closeSettingsBtn) closeSettingsBtn.onclick = () => document.getElementById('settings-modal').classList.remove('active');
+  
+  const aboutBtn = document.getElementById('btn-about');
+  if (aboutBtn) aboutBtn.onclick = () => document.getElementById('about-modal').classList.add('active');
+  
+  const closeAboutBtn = document.getElementById('btn-close-about');
+  if (closeAboutBtn) closeAboutBtn.onclick = () => document.getElementById('about-modal').classList.remove('active');
 
   // Victory Buttons
-  document.getElementById('btn-replay').onclick = () => { document.getElementById('victory-modal').classList.remove('active'); startLevel(STATE.currentLevel); };
-  document.getElementById('btn-next-level').onclick = () => { document.getElementById('victory-modal').classList.remove('active'); startLevel(STATE.currentLevel + 1); };
-  document.getElementById('btn-victory-menu').onclick = () => { document.getElementById('victory-modal').classList.remove('active'); navigateTo('main-menu-screen'); };
+  const replayBtn = document.getElementById('btn-replay');
+  if (replayBtn) replayBtn.onclick = () => { document.getElementById('victory-modal').classList.remove('active'); startLevel(STATE.currentLevel); };
+  
+  const nextLevelBtn = document.getElementById('btn-next-level');
+  if (nextLevelBtn) nextLevelBtn.onclick = () => { document.getElementById('victory-modal').classList.remove('active'); startLevel(STATE.currentLevel + 1); };
+  
+  const victoryMenuBtn = document.getElementById('btn-victory-menu');
+  if (victoryMenuBtn) victoryMenuBtn.onclick = () => { document.getElementById('victory-modal').classList.remove('active'); navigateTo('main-menu-screen'); };
 
   // Controls
-  document.getElementById('btn-shuffle').onclick = () => shuffleTiles();
-  document.getElementById('toggle-sound').onchange = (e) => {
-    STATE.settings.sound = e.target.checked;
-    if (!STATE.settings.sound) { STATE.audio.main.pause(); STATE.audio.bg.pause(); } 
-    else { playSound('main'); }
-  };
+  const shuffleBtn = document.getElementById('btn-shuffle');
+  if (shuffleBtn) shuffleBtn.onclick = () => shuffleTiles();
+  
+  const toggleSound = document.getElementById('toggle-sound');
+  if (toggleSound) {
+    toggleSound.onchange = (e) => {
+      STATE.settings.sound = e.target.checked;
+      if (!STATE.settings.sound) { STATE.audio.main.pause(); STATE.audio.bg.pause(); } 
+      else { playSound('main'); }
+    };
+  }
 }
 
 // --- LEVEL SELECTION GRID ---
 function renderLevelGrid() {
   const grid = document.getElementById('level-grid');
+  if (!grid) return;
   grid.innerHTML = '';
+  const unlocked = (STATE.user && STATE.user.progress) ? STATE.user.progress.unlockedLevel : 1;
+
   for (let i = 1; i <= STATE.totalLevels; i++) {
     const card = document.createElement('div');
-    const isUnlocked = i <= STATE.user.progress.unlockedLevel;
+    const isUnlocked = i <= unlocked;
     card.className = `level-card ${isUnlocked ? 'unlocked' : 'locked'}`;
-    const stats = STATE.user.progress.levelStats[i];
+    const stats = (STATE.user && STATE.user.progress && STATE.user.progress.levelStats) ? STATE.user.progress.levelStats[i] : null;
     const stars = stats ? '⭐'.repeat(stats.stars) : '';
     
     card.innerHTML = `<span>${i}</span><small style="font-size: 0.6rem; margin-top: 4px;">${isUnlocked ? (stars || 'PLAY') : '🔒'}</small>`;
@@ -204,7 +281,9 @@ function startLevel(levelNum) {
   STATE.moves = 0;
   STATE.timerSeconds = 0;
   STATE.selectedTileIndex = null;
-  document.getElementById('moves').textContent = '0';
+  
+  const movesEl = document.getElementById('moves');
+  if (movesEl) movesEl.textContent = '0';
   
   navigateTo('game-screen');
   startTimer();
@@ -218,6 +297,7 @@ function startLevel(levelNum) {
 
 function renderBoard() {
   const board = document.getElementById('puzzle-board');
+  if (!board) return;
   board.innerHTML = '';
   
   const gridSize = getGridSize(STATE.currentLevel);
@@ -250,21 +330,18 @@ function renderBoard() {
 }
 
 function handleTileClick(index) {
-  // First tap: Select tile and highlight border
   if (STATE.selectedTileIndex === null) {
     STATE.selectedTileIndex = index;
     renderBoard();
     return;
   }
 
-  // Tap same tile: Deselect
   if (STATE.selectedTileIndex === index) {
     STATE.selectedTileIndex = null;
     renderBoard();
     return;
   }
 
-  // Second tap: Swap tiles
   const firstIndex = STATE.selectedTileIndex;
   const secondIndex = index;
 
@@ -273,7 +350,8 @@ function handleTileClick(index) {
 
   STATE.selectedTileIndex = null;
   STATE.moves++;
-  document.getElementById('moves').textContent = STATE.moves;
+  const movesEl = document.getElementById('moves');
+  if (movesEl) movesEl.textContent = STATE.moves;
 
   renderBoard();
   checkWinCondition();
@@ -305,7 +383,8 @@ function startTimer() {
     STATE.timerSeconds++;
     const mins = String(Math.floor(STATE.timerSeconds / 60)).padStart(2, '0');
     const secs = String(STATE.timerSeconds % 60).padStart(2, '0');
-    document.getElementById('timer').textContent = `${mins}:${secs}`;
+    const timerEl = document.getElementById('timer');
+    if (timerEl) timerEl.textContent = `${mins}:${secs}`;
   }, 1000);
 }
 
@@ -319,18 +398,15 @@ function handleVictory() {
   const gridSize = getGridSize(STATE.currentLevel);
   const totalTiles = gridSize * gridSize;
 
-  // Star Rating Calculation based on grid size moves
   let stars = 1;
   if (STATE.moves <= totalTiles + 5) stars = 3;
   else if (STATE.moves <= totalTiles * 2) stars = 2;
 
-  // Tier Coin Calculation
   let tierMultiplier = Math.ceil(STATE.currentLevel / 30);
   let coinsPerStar = 5 * tierMultiplier;
   let potentialCoins = stars * coinsPerStar;
 
-  // Anti-Farming Rule
-  let previousStats = STATE.user.progress.levelStats[STATE.currentLevel] || { stars: 0, coinsEarned: 0 };
+  let previousStats = (STATE.user && STATE.user.progress && STATE.user.progress.levelStats) ? (STATE.user.progress.levelStats[STATE.currentLevel] || { stars: 0, coinsEarned: 0 }) : { stars: 0, coinsEarned: 0 };
   let newCoinsToAward = 0;
 
   if (stars > previousStats.stars) {
@@ -338,27 +414,34 @@ function handleVictory() {
     newCoinsToAward = potentialCoins - previousCoins;
   }
 
-  // Save Progress
-  STATE.user.progress.coins += newCoinsToAward;
-  if (STATE.currentLevel === STATE.user.progress.unlockedLevel && STATE.currentLevel < STATE.totalLevels) {
-    STATE.user.progress.unlockedLevel++;
+  if (STATE.user && STATE.user.progress) {
+    STATE.user.progress.coins += newCoinsToAward;
+    if (STATE.currentLevel === STATE.user.progress.unlockedLevel && STATE.currentLevel < STATE.totalLevels) {
+      STATE.user.progress.unlockedLevel++;
+    }
+    STATE.user.progress.levelStats[STATE.currentLevel] = {
+      stars: Math.max(stars, previousStats.stars),
+      coinsEarned: Math.max(potentialCoins, previousStats.coinsEarned)
+    };
   }
-
-  STATE.user.progress.levelStats[STATE.currentLevel] = {
-    stars: Math.max(stars, previousStats.stars),
-    coinsEarned: Math.max(potentialCoins, previousStats.coinsEarned)
-  };
 
   saveUserData();
 
-  // Populate Victory Screen Modal
   const victoryImg = document.getElementById('victory-img');
-  victoryImg.src = `image/level${STATE.currentLevel}.jpeg`;
-  victoryImg.onerror = () => { victoryImg.src = `https://via.placeholder.com/320/2575fc/ffffff?text=Level+${STATE.currentLevel}+Complete`; };
+  if (victoryImg) {
+    victoryImg.src = `image/level${STATE.currentLevel}.jpeg`;
+    victoryImg.onerror = () => { victoryImg.src = `https://via.placeholder.com/320/2575fc/ffffff?text=Level+${STATE.currentLevel}+Complete`; };
+  }
   
-  document.getElementById('victory-stars').textContent = '⭐'.repeat(stars);
-  document.getElementById('victory-time').textContent = document.getElementById('timer').textContent;
-  document.getElementById('victory-coins').textContent = `+${newCoinsToAward}`;
+  const vStars = document.getElementById('victory-stars');
+  const vTime = document.getElementById('victory-time');
+  const vCoins = document.getElementById('victory-coins');
+  const timerEl = document.getElementById('timer');
 
-  document.getElementById('victory-modal').classList.add('active');
+  if (vStars) vStars.textContent = '⭐'.repeat(stars);
+  if (vTime && timerEl) vTime.textContent = timerEl.textContent;
+  if (vCoins) vCoins.textContent = `+${newCoinsToAward}`;
+
+  const vModal = document.getElementById('victory-modal');
+  if (vModal) vModal.classList.add('active');
 }
