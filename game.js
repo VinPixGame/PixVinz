@@ -2,7 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const currentLevel = parseInt(urlParams.get('level')) || 1;
 
-  document.getElementById('levelDisplay').innerText = currentLevel.toString().padStart(2, '0');
+  const levelDisplay = document.getElementById('levelDisplay');
+  if (levelDisplay) {
+    levelDisplay.innerText = currentLevel.toString().padStart(2, '0');
+  }
+
   updateCoinDisplay();
 
   const grid = document.getElementById('puzzleGrid');
@@ -17,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const imageSrc = `image/level${currentLevel}.jpeg`;
 
-  // Start BGM on user tap
   function startGameBGM() {
     if (typeof AudioManager !== 'undefined' && AudioManager.musicEnabled) {
       AudioManager.playGame();
@@ -32,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
       seconds++;
       const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
       const secs = (seconds % 60).toString().padStart(2, '0');
-      timerDisplay.innerText = `${mins}:${secs}`;
+      if (timerDisplay) timerDisplay.innerText = `${mins}:${secs}`;
     }, 1000);
   }
 
@@ -43,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderGrid() {
+    if (!grid) return;
     grid.innerHTML = '';
     tilesState.forEach((tileIdx, currentPos) => {
       const tile = document.createElement('div');
@@ -72,11 +76,10 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedTilePos = null;
       renderGrid();
     } else {
-      // Swap tiles directly
       [tilesState[selectedTilePos], tilesState[pos]] = [tilesState[pos], tilesState[selectedTilePos]];
       selectedTilePos = null;
       moves++;
-      movesDisplay.innerText = moves;
+      if (movesDisplay) movesDisplay.innerText = moves;
       renderGrid();
       checkWin();
     }
@@ -102,7 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (moves <= 14) stars = 3;
       else if (moves <= 22) stars = 2;
 
-      // Capped coin distribution
       const currentLevelCoins = parseInt(localStorage.getItem(`levelCoins_${currentLevel}`)) || 0;
       let targetCoins = stars * 5; 
       let newCoinsEarned = 0;
@@ -126,10 +128,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showVictoryModal(stars, newCoins) {
-    document.getElementById('victoryImg').src = imageSrc;
-    document.getElementById('vTime').innerText = timerDisplay.innerText;
-    document.getElementById('vMoves').innerText = moves;
-    document.getElementById('vCoins').innerText = `+${newCoins}`;
+    const victoryImg = document.getElementById('victoryImg');
+    if (victoryImg) victoryImg.src = imageSrc;
+
+    const vTime = document.getElementById('vTime');
+    if (vTime && timerDisplay) vTime.innerText = timerDisplay.innerText;
+
+    const vMoves = document.getElementById('vMoves');
+    if (vMoves) vMoves.innerText = moves;
+
+    const vCoins = document.getElementById('vCoins');
+    if (vCoins) vCoins.innerText = `+${newCoins}`;
 
     const starNodes = document.querySelectorAll('#victoryStars .star');
     starNodes.forEach((star, index) => {
@@ -141,7 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     updateCoinDisplay();
-    document.getElementById('victoryModal').classList.remove('hidden');
+    const modal = document.getElementById('victoryModal');
+    if (modal) modal.classList.remove('hidden');
     startConfetti();
   }
 
@@ -177,32 +187,47 @@ document.addEventListener('DOMContentLoaded', () => {
     draw();
   }
 
-  document.getElementById('shuffleBtn').addEventListener('click', () => {
-    if (typeof AudioManager !== 'undefined') AudioManager.playShuffle();
-    shuffleGrid();
-  });
+  const shuffleBtn = document.getElementById('shuffleBtn');
+  if (shuffleBtn) {
+    shuffleBtn.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playShuffle();
+      shuffleGrid();
+    });
+  }
 
-  document.getElementById('nextLevelBtn').onclick = (e) => {
-    e.stopPropagation();
-    if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-    window.location.href = `game.html?level=${currentLevel + 1}`;
-  };
+  const nextLevelBtn = document.getElementById('nextLevelBtn');
+  if (nextLevelBtn) {
+    nextLevelBtn.onclick = (e) => {
+      e.stopPropagation();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      window.location.href = `game.html?level=${currentLevel + 1}`;
+    };
+  }
 
-  document.getElementById('victoryHomeBtn').onclick = (e) => {
-    e.stopPropagation();
-    if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-    window.location.href = 'index.html';
-  };
+  const victoryHomeBtn = document.getElementById('victoryHomeBtn');
+  if (victoryHomeBtn) {
+    victoryHomeBtn.onclick = (e) => {
+      e.stopPropagation();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      window.location.href = 'index.html';
+    };
+  }
 
-  document.getElementById('backToHome').addEventListener('click', () => {
-    if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-    window.location.href = 'index.html';
-  });
+  const backToHome = document.getElementById('backToHome');
+  if (backToHome) {
+    backToHome.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      window.location.href = 'index.html';
+    });
+  }
 
-  document.getElementById('collectionsBtn').addEventListener('click', () => {
-    if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-    window.location.href = 'index.html';
-  });
+  const collectionsBtn = document.getElementById('collectionsBtn');
+  if (collectionsBtn) {
+    collectionsBtn.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      window.location.href = 'index.html';
+    });
+  }
 
   shuffleGrid();
   startTimer();
