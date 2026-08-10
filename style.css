@@ -36,7 +36,6 @@ body {
   padding-top: 8px;
 }
 
-/* Enlarged Logo Container */
 .logo-container {
   display: flex;
   justify-content: center;
@@ -45,7 +44,7 @@ body {
 }
 
 .logo-container video, #logoVideo {
-  width: 160px; /* Scaled up logo for prominent view */
+  width: 160px;
   height: auto;
   object-fit: contain;
 }
@@ -84,9 +83,8 @@ body {
   display: flex;
 }
 
-/* Moves the Home view content down into the empty bottom space */
 #homeView {
-  margin-top: 38px; /* Shifts Welcome Vinz block down ~half an inch */
+  margin-top: 38px;
   padding-bottom: 20px;
 }
 
@@ -198,11 +196,105 @@ body {
   color: #a892ee;
 }
 
+/* COLLECTION CARDS WITH BADGES */
 .collection-item {
+  position: relative;
   border-radius: 12px;
   overflow: hidden;
   aspect-ratio: 1;
   border: 2px solid #9d4edd;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s ease;
 }
 
-.collection-item img { width: 100%; height: 100%; object-fit: cover; }
+.collection-item:active {
+  transform: scale(0.95);
+}
+
+.collection-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.collection-badge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(8, 3, 20, 0.85);
+  color: #ffd700;
+  font-size: 11px;
+  font-weight: bold;
+  text-align: center;
+  padding: 4px 0;
+  letter-spacing: 1px;
+  border-top: 1px solid rgba(157, 78, 221, 0.5);
+}
+
+/* ENLARGED PREVIEW MODAL */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(8, 3, 20, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+  padding: 20px;
+}
+
+.modal-overlay.hidden { display: none; }
+
+.image-modal-card {
+  width: 100%;
+  max-width: 360px;
+  background: radial-gradient(circle at top, #2d1054 0%, #120624 100%);
+  border: 2px solid #ffd700;
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+  animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.image-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.image-modal-header span {
+  color: #ffd700;
+  font-size: 18px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.close-modal-btn {
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+}
+
+.modal-img-container {
+  width: 100%;
+  aspect-ratio: 1; /* Exact same size/ratio as game puzzle container */
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid #7b2cbf;
+  box-shadow: 0 0 15px rgba(123, 44, 191, 0.4);
+}
+
+.modal-img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@keyframes popUp {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
