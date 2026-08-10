@@ -36,15 +36,40 @@
       </div>
     </div>
 
-    <!-- Puzzle Grid Area -->
+    <!-- Puzzle Area -->
     <div class="puzzle-container">
       <div class="puzzle-grid" id="puzzleGrid"></div>
     </div>
 
-    <!-- Action Controls -->
+    <!-- Action Buttons -->
     <div class="action-buttons">
       <button class="btn btn-action" id="shuffleBtn">🔀 SHUFFLE</button>
       <button class="btn btn-action" id="collectionsBtn">✨ COLLECTIONS</button>
+    </div>
+  </div>
+
+  <!-- VICTORY MODAL SCREEN -->
+  <div id="victoryModal" class="modal-overlay hidden">
+    <canvas id="confettiCanvas"></canvas>
+    <div class="victory-card">
+      <h2 class="victory-title">LEVEL SOLVED!</h2>
+      <div class="solved-preview">
+        <img id="victoryImg" src="" alt="Solved Puzzle">
+      </div>
+      <div class="stars-container" id="victoryStars">
+        <span class="star">★</span>
+        <span class="star">★</span>
+        <span class="star">★</span>
+      </div>
+      <div class="victory-stats">
+        <div class="v-stat"><span>⏱ TIME</span><b id="vTime">00:00</b></div>
+        <div class="v-stat"><span>🔄 MOVES</span><b id="vMoves">0</b></div>
+        <div class="v-stat"><span>🪙 COINS</span><b id="vCoins">+0</b></div>
+      </div>
+      <div class="victory-actions">
+        <button class="btn btn-primary" id="nextLevelBtn">NEXT LEVEL ▶</button>
+        <button class="btn btn-secondary" id="victoryHomeBtn">MAIN MENU</button>
+      </div>
     </div>
   </div>
 
