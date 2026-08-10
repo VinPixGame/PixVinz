@@ -281,7 +281,7 @@ body {
 
 .modal-img-container {
   width: 100%;
-  aspect-ratio: 1; /* Exact same size/ratio as game puzzle container */
+  aspect-ratio: 1;
   border-radius: 14px;
   overflow: hidden;
   border: 2px solid #7b2cbf;
@@ -298,7 +298,6 @@ body {
   0% { transform: scale(0.8); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
 }
-
 
 /* SETTINGS & ABOUT MODAL STYLES */
 .settings-card, .about-card {
@@ -439,8 +438,6 @@ input:checked + .slider:before {
   color: #a892ee;
 }
 
-
-
 /* FULL SCREEN & HIDDEN HELPERS */
 .hidden { display: none !important; }
 
@@ -537,4 +534,201 @@ input:checked + .slider:before {
   color: #ffd700;
   text-decoration: none;
   font-weight: bold;
+}
+
+/* ==========================================
+   GAME PAGE STYLES (NEW & REFINED)
+   ========================================== */
+
+.game-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  box-sizing: border-box;
+  min-height: 100vh;
+}
+
+.game-header {
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.game-header h2 {
+  color: #ffd700;
+  font-size: 22px;
+  letter-spacing: 1.5px;
+  margin-bottom: 10px;
+}
+
+/* PREMIUM GLASSMORPHIC STATS BADGES */
+.premium-stats-bar {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.stat-badge {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(35, 16, 64, 0.7);
+  border: 1px solid rgba(157, 78, 221, 0.5);
+  border-radius: 14px;
+  padding: 8px 14px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.stat-icon {
+  font-size: 20px;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: #a892ee;
+  letter-spacing: 1px;
+  font-weight: bold;
+}
+
+.stat-value {
+  font-size: 15px;
+  color: #ffffff;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+/* PUZZLE WRAPPER & GRID */
+.puzzle-wrapper {
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 1 / 1;
+  margin: 10px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.puzzle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+  background: #120624;
+  padding: 8px;
+  border-radius: 18px;
+  border: 2px solid #7b2cbf;
+  box-shadow: 0 0 25px rgba(123, 44, 191, 0.4);
+  box-sizing: border-box;
+}
+
+.tile {
+  background-size: 300% 300%;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.1s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.2);
+}
+
+.tile.selected {
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 12px #ffd700, inset 0 0 8px #ffd700;
+  transform: scale(0.96);
+}
+
+/* GAME ACTIONS */
+.game-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 360px;
+  margin-top: 10px;
+}
+
+.game-actions .btn {
+  flex: 1;
+}
+
+/* VICTORY MODAL & CONFETTI */
+.victory-card {
+  width: 100%;
+  max-width: 340px;
+  background: radial-gradient(circle at top, #2d1054 0%, #120624 100%);
+  border: 2px solid #ffd700;
+  border-radius: 20px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+  z-index: 202;
+  position: relative;
+  animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.victory-title {
+  color: #ffd700;
+  font-size: 24px;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+}
+
+.victory-img-container {
+  width: 160px;
+  height: 160px;
+  margin: 0 auto 12px auto;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #9d4edd;
+}
+
+.victory-img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.star-rating {
+  font-size: 24px;
+  color: #4a287a;
+  margin-bottom: 12px;
+}
+
+.star-rating .star.active {
+  color: #ffd700;
+}
+
+.victory-stats {
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #e0d0ff;
+  line-height: 1.6;
+}
+
+.victory-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.victory-buttons .btn {
+  flex: 1;
+}
+
+#confettiCanvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 201;
 }
