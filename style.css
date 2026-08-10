@@ -460,12 +460,12 @@ input:checked + .slider:before {
 }
 
 #loadingLogo {
-  width: 180px;
+  width: 240px;
   height: auto;
 }
 
 .loading-text {
-  font-size: 20px;
+  font-size: 30px;
   font-weight: bold;
   color: #ffd700;
   letter-spacing: 2px;
@@ -591,7 +591,7 @@ input:checked + .slider:before {
 
 .game-container .logo-container video, 
 .game-container #logoVideo {
-  width: 110px;
+  width: 115px;
   height: auto;
 }
 
@@ -652,7 +652,7 @@ input:checked + .slider:before {
   font-weight: 800;
 }
 
-/* EXPANDED PUZZLE WRAPPER (~1cm margins on mobile) */
+/* EXPANDED PUZZLE WRAPPER (~0.5cm margins on mobile) */
 .puzzle-wrapper {
   width: calc(100% - 20px);
   max-width: 380px;
@@ -719,7 +719,7 @@ input:checked + .slider:before {
   background: radial-gradient(circle at top, #2d1054 0%, #120624 100%);
   border: 2px solid #ffd700;
   border-radius: 22px;
-  padding: 24px 20px; /* Increased top/bottom padding to make it taller */
+  padding: 36px 20px; /* Increased top/bottom padding to make it taller */
   text-align: center;
   box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
   z-index: 202;
@@ -729,8 +729,8 @@ input:checked + .slider:before {
 
 /* Scaled-Up Image Preview Box */
 .victory-img-container {
-  width: 150px;  /* Increased image width (default was 110px) */
-  height: 150px; /* Increased image height */
+  width: 190px;  /* Increased image width (default was 110px) */
+  height: 190px; /* Increased image height */
   margin: 0 auto 12px auto;
   border-radius: 14px;
   overflow: hidden;
