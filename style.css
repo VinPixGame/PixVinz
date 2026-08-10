@@ -1050,3 +1050,25 @@ input:checked + .slider:before {
   z-index: 203 !important;
   cursor: pointer !important;
 }
+
+/* Fix Top Bar & Logo Video Scaling */
+.top-bar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 8px 16px !important;
+}
+
+.logo-container {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  max-height: 50px !important; /* Constrains vertical stretch */
+}
+
+#logoVideo {
+  max-height: 50px !important;
+  width: auto !important;
+  object-fit: contain !important;
+  filter: drop-shadow(0 0 8px rgba(157, 78, 221, 0.5)) !important; /* Adds subtle neon pop */
+}
