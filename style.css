@@ -1062,7 +1062,7 @@ input:checked + .slider:before {
   justify-content: center !important;
   align-items: center !important;
   min-height: 85px !important;
-  padding: 10px 16px !important;
+  padding: 20px 26px !important;
 }
 
 /* Pin Back Button to Left */
@@ -1085,8 +1085,8 @@ input:checked + .slider:before {
 
 /* 2. LARGER CENTERED LOGO */
 .logo-container {
-  width: 170px !important;
-  height: 80px !important;
+  width: 180px !important;
+  height: 120px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
