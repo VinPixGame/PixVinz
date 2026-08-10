@@ -1,24 +1,150 @@
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-body { background: #0f0c20; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  user-select: none;
+}
 
-.hidden { display: none !important; }
+body {
+  background: #0f0c20;
+  color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
 
-.logo-video { width: 140px; height: 140px; object-fit: contain; margin-bottom: 12px; }
+/* Strictly hide inactive screens */
+.hidden {
+  display: none !important;
+}
 
-.menu, .screen { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100vw; max-width: 400px; height: 100vh; padding: 20px; text-align: center; }
+/* Constrain video logo size */
+.logo-video {
+  max-width: 180px;
+  max-height: 180px;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  margin-bottom: 12px;
+}
 
-.btn { background: #2575fc; color: white; border: none; padding: 12px 24px; border-radius: 10px; font-weight: bold; margin: 8px; width: 80%; cursor: pointer; }
-.btn-sm { background: rgba(255,255,255,0.2); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+.menu, .screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  max-width: 400px;
+  height: 100vh;
+  padding: 20px;
+  text-align: center;
+}
 
-.header { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 16px; }
+.btn {
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 1rem;
+  margin: 8px 0;
+  width: 85%;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
 
-.board { width: 300px; height: 300px; display: grid; gap: 2px; background: #000; border: 2px solid #ffd700; border-radius: 8px; margin-bottom: 16px; }
-.tile { background-size: cover; cursor: pointer; border-radius: 2px; }
-.tile.selected { border: 2px solid #ffd700; box-shadow: 0 0 10px #ffd700; }
+.btn:active {
+  transform: scale(0.96);
+}
 
-.level-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; height: 70vh; overflow-y: auto; }
-.level-btn { background: rgba(255,255,255,0.1); border: 1px solid #ffd700; color: white; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+.btn-sm {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
 
-.popup { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; }
-.popup-box { background: #1a103c; border: 2px solid #ffd700; padding: 20px; border-radius: 12px; width: 80%; text-align: center; }
-.setting-row { display: flex; justify-content: space-between; margin: 16px 0; }
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.board {
+  width: 320px;
+  height: 320px;
+  display: grid;
+  gap: 2px;
+  background: #000;
+  border: 2px solid #ffd700;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+.tile {
+  background-size: cover;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.tile.selected {
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 12px #ffd700;
+  transform: scale(0.95);
+}
+
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  width: 100%;
+  height: 70vh;
+  overflow-y: auto;
+}
+
+.level-btn {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid #ffd700;
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.popup-box {
+  background: #1a103c;
+  border: 2px solid #ffd700;
+  padding: 24px;
+  border-radius: 16px;
+  width: 85%;
+  text-align: center;
+}
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 16px 0;
+  font-size: 1.1rem;
+}
