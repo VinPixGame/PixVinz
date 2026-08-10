@@ -20,10 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (['home', 'levels', 'collections'].includes(viewName)) {
-      mainHeader.classList.remove('hidden');
+      if (mainHeader) mainHeader.classList.remove('hidden');
       updateCoinDisplay();
     } else {
-      mainHeader.classList.add('hidden');
+      if (mainHeader) mainHeader.classList.add('hidden');
     }
   }
 
@@ -36,43 +36,45 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function getCurrentUser() {
-    return JSON.parse(localStorage.getItem('loggedInUser'));
+    try {
+      return JSON.parse(localStorage.getItem('loggedInUser'));
+    } catch(e) {
+      return null;
+    }
   }
 
-  // Safe wrapper to attempt music playback
-  function tryPlayMainBGM() {
-    try {
-      if (typeof AudioManager !== 'undefined') {
+  // Safe Main BGM Play Trigger
+  function playMainBGM() {
+    if (typeof AudioManager !== 'undefined' && AudioManager.musicEnabled) {
+      AudioManager.playMain();
+    }
+  }
+
+  // Global user interaction listener to allow audio playback across modern browsers
+  document.body.addEventListener('click', () => {
+    const user = getCurrentUser();
+    // Only play main BGM if the user is logged in
+    if (user && typeof AudioManager !== 'undefined' && AudioManager.musicEnabled) {
+      if (!AudioManager.bgmMain || AudioManager.bgmMain.paused) {
         AudioManager.playMain();
       }
-    } catch (err) {
-      console.log('Autoplay restriction or audio issue:', err);
     }
-  }
+  });
 
-  // Unlock web audio context on first user click/tap if blocked by browser
-  document.addEventListener('click', () => {
-    if (typeof AudioManager !== 'undefined' && AudioManager.musicEnabled) {
-      if (!AudioManager.bgmMain || AudioManager.bgmMain.paused) {
-        tryPlayMainBGM();
-      }
-    }
-  }, { once: true });
-
-  // --- LOADING PAGE: Wait exactly 4 seconds (4000ms) then switch ---
+  // --- 1. LOADING PAGE SWITCH (4 Seconds) ---
   setTimeout(() => {
     const loggedInUser = getCurrentUser();
     if (loggedInUser) {
       const nameElem = document.getElementById('userDisplayName');
       if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
       showView('home');
-      tryPlayMainBGM();
+      playMainBGM();
     } else {
       showView('login');
     }
   }, 4000);
 
-  // --- AUTH SYSTEM (LOGIN / REGISTER) ---
+  // --- 2. LOGIN / REGISTER AUTH SYSTEM ---
   const toRegBtn = document.getElementById('toRegister');
   if (toRegBtn) {
     toRegBtn.addEventListener('click', (e) => {
@@ -104,13 +106,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const errElem = document.getElementById('regError');
 
       if (pass !== passConfirm) {
-        errElem.innerText = "Passwords do not match!";
+        if (errElem) errElem.innerText = "Passwords do not match!";
         return;
       }
 
       let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
       if (users[username]) {
-        errElem.innerText = "Username already taken!";
+        if (errElem) errElem.innerText = "Username already taken!";
         return;
       }
 
@@ -118,14 +120,14 @@ document.addEventListener('DOMContentLoaded', () => {
       users[username] = newUser;
       localStorage.setItem('registeredUsers', JSON.stringify(users));
 
-      // Auto-login newly registered user
+      // Auto-login
       localStorage.setItem('loggedInUser', JSON.stringify(newUser));
       const nameElem = document.getElementById('userDisplayName');
       if (nameElem) nameElem.innerText = displayName;
       
-      errElem.innerText = "";
+      if (errElem) errElem.innerText = "";
       showView('home');
-      tryPlayMainBGM();
+      playMainBGM();
     });
   }
 
@@ -141,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
       
-      // Default fallback account if no accounts exist yet
+      // Default account if empty
       if (Object.keys(users).length === 0 && username === 'vinz' && pass === '1234') {
         users['vinz'] = { displayName: 'Vinz', username: 'vinz', password: '1234' };
         localStorage.setItem('registeredUsers', JSON.stringify(users));
@@ -151,16 +153,16 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('loggedInUser', JSON.stringify(users[username]));
         const nameElem = document.getElementById('userDisplayName');
         if (nameElem) nameElem.innerText = users[username].displayName;
-        errElem.innerText = "";
+        if (errElem) errElem.innerText = "";
         showView('home');
-        tryPlayMainBGM();
+        playMainBGM();
       } else {
-        errElem.innerText = "Invalid username or password!";
+        if (errElem) errElem.innerText = "Invalid username or password!";
       }
     });
   }
 
-  // --- HOME NAVIGATION ---
+  // --- 3. HOME NAVIGATION ---
   const playBtn = document.getElementById('playBtn');
   if (playBtn) {
     playBtn.addEventListener('click', () => {
@@ -195,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // --- SETTINGS & LOGOUT ---
+  // --- 4. SETTINGS & LOGOUT ---
   const settingsModal = document.getElementById('settingsModal');
   const aboutModal = document.getElementById('aboutModal');
   const sfxToggle = document.getElementById('sfxToggle');
@@ -210,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (navSettings) {
     navSettings.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      settingsModal.classList.remove('hidden');
+      if (settingsModal) settingsModal.classList.remove('hidden');
     });
   }
 
@@ -218,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (closeSettingsModal) {
     closeSettingsModal.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      settingsModal.classList.add('hidden');
+      if (settingsModal) settingsModal.classList.add('hidden');
     });
   }
 
@@ -243,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (aboutBtn) {
     aboutBtn.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      aboutModal.classList.remove('hidden');
+      if (aboutModal) aboutModal.classList.remove('hidden');
     });
   }
 
@@ -251,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (closeAboutModal) {
     closeAboutModal.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      aboutModal.classList.add('hidden');
+      if (aboutModal) aboutModal.classList.add('hidden');
     });
   }
 
@@ -261,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       if (confirm("Are you sure you want to log out?")) {
         localStorage.removeItem('loggedInUser');
-        settingsModal.classList.add('hidden');
+        if (settingsModal) settingsModal.classList.add('hidden');
         if (typeof AudioManager !== 'undefined') AudioManager.stopBGM();
         showView('login');
       }
