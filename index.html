@@ -1,1 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>PixVinz - Premium Puzzle Game</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app-container">
+    
+    <!-- 1. SPLASH SCREEN -->
+    <div id="splash-screen" class="screen active">
+      <div class="splash-content">
+        <video class="flash-logo" autoplay loop muted playsinline>
+          <source src="image/logo.webm" type="video/webm" />
+        </video>
+        <h1 class="brand-title">PixVinz</h1>
+      </div>
+    </div>
 
+    <!-- 2. AUTH SCREEN -->
+    <div id="auth-screen" class="screen">
+      <div class="auth-card">
+        <video class="small-logo" autoplay loop muted playsinline>
+          <source src="image/logo.webm" type="video/webm" />
+        </video>
+        
+        <!-- Login Form -->
+        <form id="login-form" class="auth-form">
+          <h2>Sign In</h2>
+          <input type="text" id="login-username" placeholder="Username" required />
+          <input type="password" id="login-password" placeholder="Password" required />
+          <button type="submit" class="btn btn-primary">Login</button>
+          <p class="auth-toggle">Need an account? <span id="show-signup">Create Account</span></p>
+        </form>
+
+        <!-- Signup Form -->
+        <form id="signup-form" class="auth-form hidden">
+          <h2>Create Account</h2>
+          <input type="text" id="signup-displayname" placeholder="Display Name" required />
+          <input type="text" id="signup-username" placeholder="Username" required />
+          <input type="password" id="signup-password" placeholder="Password" required />
+          <button type="submit" class="btn btn-primary">Sign Up</button>
+          <p class="auth-toggle">Already registered? <span id="show-login">Sign In</span></p>
+        </form>
+      </div>
+    </div>
+
+    <!-- 3. MAIN MENU SCREEN -->
+    <div id="main-menu-screen" class="screen">
+      <header class="top-header">
+        <video class="small-logo" autoplay loop muted playsinline>
+          <source src="image/logo.webm" type="video/webm" />
+        </video>
+        <h3 id="welcome-message">Welcome Player</h3>
+        <div class="coin-display">💰 <span id="user-coins">0</span></div>
+      </header>
+
+      <div class="menu-body">
+        <button id="btn-play" class="btn btn-gold btn-large">▶ Play</button>
+        <button id="btn-levels" class="btn btn-secondary">🎮 Levels</button>
+        <button id="btn-settings" class="btn btn-secondary">⚙️ Settings</button>
+      </div>
+
+      <footer class="bottom-footer">
+        <button id="btn-logout" class="btn btn-danger">Log Out</button>
+      </footer>
+    </div>
+
+    <!-- 4. LEVEL SELECT SCREEN -->
+    <div id="level-select-screen" class="screen">
+      <header class="screen-header">
+        <button id="btn-level-back" class="btn btn-icon">⬅</button>
+        <h2>Select Level</h2>
+        <div class="coin-display">💰 <span id="level-user-coins">0</span></div>
+      </header>
+      <div id="level-grid" class="level-grid"></div>
+    </div>
+
+    <!-- 5. PUZZLE BOARD SCREEN -->
+    <div id="game-screen" class="screen">
+      <header class="game-header">
+        <video class="small-logo" autoplay loop muted playsinline>
+          <source src="image/logo.webm" type="video/webm" />
+        </video>
+        <div class="game-stats">
+          <span>⏳ <span id="timer">00:00</span></span>
+          <span>👣 Moves: <span id="moves">0</span></span>
+          <span id="star-preview">⭐⭐⭐</span>
+        </div>
+      </header>
+
+      <main class="puzzle-container">
+        <div id="puzzle-board" class="puzzle-board"></div>
+      </main>
+
+      <footer class="game-controls">
+        <button id="btn-shuffle" class="btn btn-secondary">🔀 Shuffle</button>
+        <button id="btn-game-back" class="btn btn-danger">🔙 Quit</button>
+      </footer>
+    </div>
+
+    <!-- 6. VICTORY POPUP -->
+    <div id="victory-modal" class="modal">
+      <div class="modal-content victory-card">
+        <h2>Level 🎉 Complete</h2>
+        <div class="completed-image-wrapper">
+          <img id="victory-img" src="" alt="Completed Puzzle" />
+        </div>
+        <div class="victory-stats">
+          <div id="victory-stars" class="stars">⭐⭐⭐</div>
+          <p>Time Taken: <strong id="victory-time">00:00</strong></p>
+          <p>Coins Earned: <strong id="victory-coins">+0</strong> 💰</p>
+        </div>
+        <div class="modal-actions">
+          <button id="btn-next-level" class="btn btn-gold">Next Level</button>
+          <button id="btn-replay" class="btn btn-secondary">Try Again</button>
+          <button id="btn-victory-menu" class="btn btn-danger">Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. SETTINGS POPUP -->
+    <div id="settings-modal" class="modal">
+      <div class="modal-content">
+        <h2>Settings</h2>
+        <div class="setting-row">
+          <span>Audio / Music</span>
+          <label class="switch">
+            <input type="checkbox" id="toggle-sound" checked />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <span>Animations</span>
+          <label class="switch">
+            <input type="checkbox" id="toggle-animations" checked />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <button id="btn-about" class="btn btn-secondary">ℹ️ About PixVinz</button>
+        <button id="btn-close-settings" class="btn btn-danger">Close</button>
+      </div>
+    </div>
+
+    <!-- 8. ABOUT POPUP -->
+    <div id="about-modal" class="modal">
+      <div class="modal-content">
+        <video class="small-logo" autoplay loop muted playsinline>
+          <source src="image/logo.webm" type="video/webm" />
+        </video>
+        <h2>PixVinz</h2>
+        <p><strong>Developer:</strong>Kuya Vinz</p>
+        <p><strong>Version:</strong> 1.0.0</p>
+        <p><strong>Year:</strong> 2026</p>
+        <button id="btn-close-about" class="btn btn-primary">Back</button>
+      </div>
+    </div>
+
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>
