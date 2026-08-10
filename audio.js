@@ -2,6 +2,7 @@ const AudioManager = {
   bgmMain: null,
   bgmGame: null,
   victoryAudio: null,
+  ctx: null,
   
   musicEnabled: localStorage.getItem('musicEnabled') !== 'false',
   sfxEnabled: localStorage.getItem('sfxEnabled') !== 'false',
@@ -20,6 +21,8 @@ const AudioManager = {
     localStorage.setItem('musicEnabled', enabled);
     if (!enabled) {
       this.stopBGM();
+    } else {
+      this.playMain();
     }
   },
 
@@ -36,13 +39,21 @@ const AudioManager = {
   playMain() {
     if (!this.musicEnabled) return;
     this.stopBGM();
-    // BGM synth fallback
+    if (!this.bgmMain) {
+      this.bgmMain = new Audio('sounds/main.mp3');
+      this.bgmMain.loop = true;
+    }
+    this.bgmMain.play().catch(e => console.log('BGM Play blocked or missing: sounds/main.mp3'));
   },
 
   playGame() {
     if (!this.musicEnabled) return;
     this.stopBGM();
-    // BGM synth fallback
+    if (!this.bgmGame) {
+      this.bgmGame = new Audio('sounds/bgmusic.mp3');
+      this.bgmGame.loop = true;
+    }
+    this.bgmGame.play().catch(e => console.log('BGM Play blocked or missing: sounds/bgmusic.mp3'));
   },
 
   playSelect() {
@@ -103,20 +114,12 @@ const AudioManager = {
 
   playVictory(levelNum) {
     if (!this.sfxEnabled) return;
-    
-    // Stop previous victory audio if playing
     if (this.victoryAudio) {
       this.victoryAudio.pause();
       this.victoryAudio.currentTime = 0;
     }
-
-    // Rotates through victory1.mp3 to victory10.mp3 located in image/ folder
     const soundIndex = ((levelNum - 1) % 10) + 1;
-    const soundPath = `image/victory${soundIndex}.mp3`;
-
-    this.victoryAudio = new Audio(soundPath);
-    this.victoryAudio.play().catch(err => {
-      console.log("Audio play blocked or file missing:", err);
-    });
+    this.victoryAudio = new Audio(`sounds/victory${soundIndex}.mp3`);
+    this.victoryAudio.play().catch(err => console.log("Victory audio missing or blocked:", err));
   }
 };
