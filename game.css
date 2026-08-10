@@ -43,20 +43,21 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
-  gap: 2px;
+  gap: 3px;
 }
 
 .tile {
   background-size: 300% 300%;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: transform 0.1s ease-in-out;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.tile.empty {
-  background: none !important;
-  border: none;
-  cursor: default;
+.tile.selected {
+  border: 3px solid #ffd700;
+  box-shadow: 0 0 15px #ffd700;
+  transform: scale(0.95);
+  z-index: 2;
 }
 
 .action-buttons {
