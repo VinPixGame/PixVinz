@@ -1,14 +1,31 @@
 document.addEventListener('DOMContentLoaded', () => {
-  AudioManager.playMain();
-  updateCoinDisplay();
-
   const views = {
+    loading: document.getElementById('loadingView'),
+    login: document.getElementById('loginView'),
+    register: document.getElementById('registerView'),
     home: document.getElementById('homeView'),
     levels: document.getElementById('levelsView'),
     collections: document.getElementById('collectionsView')
   };
 
-  const currentLevel = parseInt(localStorage.getItem('currentLevel')) || 1;
+  const mainHeader = document.getElementById('mainHeader');
+
+  function showView(viewName) {
+    Object.values(views).forEach(v => {
+      if (v) v.classList.add('hidden');
+    });
+
+    if (views[viewName]) {
+      views[viewName].classList.remove('hidden');
+    }
+
+    if (['home', 'levels', 'collections'].includes(viewName)) {
+      mainHeader.classList.remove('hidden');
+      updateCoinDisplay();
+    } else {
+      mainHeader.classList.add('hidden');
+    }
+  }
 
   function updateCoinDisplay() {
     const totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
@@ -18,90 +35,244 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function switchView(viewName) {
-    updateCoinDisplay();
-    Object.values(views).forEach(v => v.classList.remove('active'));
-    views[viewName].classList.add('active');
+  function getCurrentUser() {
+    return JSON.parse(localStorage.getItem('loggedInUser'));
   }
 
-  document.getElementById('playBtn').addEventListener('click', () => {
-    AudioManager.playClick();
-    window.location.href = `game.html?level=${currentLevel}`;
-  });
+  // Safe wrapper to attempt music playback
+  function tryPlayMainBGM() {
+    try {
+      if (typeof AudioManager !== 'undefined') {
+        AudioManager.playMain();
+      }
+    } catch (err) {
+      console.log('Autoplay restriction or audio issue:', err);
+    }
+  }
 
-  document.getElementById('navLevels').addEventListener('click', () => {
-    AudioManager.playClick();
-    renderLevels();
-    switchView('levels');
-  });
+  // Unlock web audio context on first user click/tap if blocked by browser
+  document.addEventListener('click', () => {
+    if (typeof AudioManager !== 'undefined' && AudioManager.musicEnabled) {
+      if (!AudioManager.bgmMain || AudioManager.bgmMain.paused) {
+        tryPlayMainBGM();
+      }
+    }
+  }, { once: true });
 
-  document.getElementById('navCollections').addEventListener('click', () => {
-    AudioManager.playClick();
-    renderCollections();
-    switchView('collections');
-  });
+  // --- LOADING PAGE: Wait exactly 4 seconds (4000ms) then switch ---
+  setTimeout(() => {
+    const loggedInUser = getCurrentUser();
+    if (loggedInUser) {
+      const nameElem = document.getElementById('userDisplayName');
+      if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
+      showView('home');
+      tryPlayMainBGM();
+    } else {
+      showView('login');
+    }
+  }, 4000);
+
+  // --- AUTH SYSTEM (LOGIN / REGISTER) ---
+  const toRegBtn = document.getElementById('toRegister');
+  if (toRegBtn) {
+    toRegBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      showView('register');
+    });
+  }
+
+  const toLogBtn = document.getElementById('toLogin');
+  if (toLogBtn) {
+    toLogBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      showView('login');
+    });
+  }
+
+  const regForm = document.getElementById('registerForm');
+  if (regForm) {
+    regForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      
+      const displayName = document.getElementById('regDisplayName').value.trim();
+      const username = document.getElementById('regUser').value.trim().toLowerCase();
+      const pass = document.getElementById('regPass').value;
+      const passConfirm = document.getElementById('regPassConfirm').value;
+      const errElem = document.getElementById('regError');
+
+      if (pass !== passConfirm) {
+        errElem.innerText = "Passwords do not match!";
+        return;
+      }
+
+      let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+      if (users[username]) {
+        errElem.innerText = "Username already taken!";
+        return;
+      }
+
+      const newUser = { displayName, username, password: pass };
+      users[username] = newUser;
+      localStorage.setItem('registeredUsers', JSON.stringify(users));
+
+      // Auto-login newly registered user
+      localStorage.setItem('loggedInUser', JSON.stringify(newUser));
+      const nameElem = document.getElementById('userDisplayName');
+      if (nameElem) nameElem.innerText = displayName;
+      
+      errElem.innerText = "";
+      showView('home');
+      tryPlayMainBGM();
+    });
+  }
+
+  const logForm = document.getElementById('loginForm');
+  if (logForm) {
+    logForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+
+      const username = document.getElementById('loginUser').value.trim().toLowerCase();
+      const pass = document.getElementById('loginPass').value;
+      const errElem = document.getElementById('loginError');
+
+      let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+      
+      // Default fallback account if no accounts exist yet
+      if (Object.keys(users).length === 0 && username === 'vinz' && pass === '1234') {
+        users['vinz'] = { displayName: 'Vinz', username: 'vinz', password: '1234' };
+        localStorage.setItem('registeredUsers', JSON.stringify(users));
+      }
+
+      if (users[username] && users[username].password === pass) {
+        localStorage.setItem('loggedInUser', JSON.stringify(users[username]));
+        const nameElem = document.getElementById('userDisplayName');
+        if (nameElem) nameElem.innerText = users[username].displayName;
+        errElem.innerText = "";
+        showView('home');
+        tryPlayMainBGM();
+      } else {
+        errElem.innerText = "Invalid username or password!";
+      }
+    });
+  }
+
+  // --- HOME NAVIGATION ---
+  const playBtn = document.getElementById('playBtn');
+  if (playBtn) {
+    playBtn.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      const currentLevel = parseInt(localStorage.getItem('currentLevel')) || 1;
+      window.location.href = `game.html?level=${currentLevel}`;
+    });
+  }
+
+  const navLevels = document.getElementById('navLevels');
+  if (navLevels) {
+    navLevels.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      renderLevels();
+      showView('levels');
+    });
+  }
+
+  const navCollections = document.getElementById('navCollections');
+  if (navCollections) {
+    navCollections.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      renderCollections();
+      showView('collections');
+    });
+  }
 
   document.querySelectorAll('.back-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      AudioManager.playClick();
-      switchView('home');
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      showView('home');
     });
   });
 
-  // SETTINGS & ABOUT MODAL HANDLERS
+  // --- SETTINGS & LOGOUT ---
   const settingsModal = document.getElementById('settingsModal');
   const aboutModal = document.getElementById('aboutModal');
   const sfxToggle = document.getElementById('sfxToggle');
   const musicToggle = document.getElementById('musicToggle');
 
-  // Load saved sound states into toggles
-  if (sfxToggle) sfxToggle.checked = AudioManager.sfxEnabled;
-  if (musicToggle) musicToggle.checked = AudioManager.musicEnabled;
+  if (typeof AudioManager !== 'undefined') {
+    if (sfxToggle) sfxToggle.checked = AudioManager.sfxEnabled;
+    if (musicToggle) musicToggle.checked = AudioManager.musicEnabled;
+  }
 
-  document.getElementById('navSettings').addEventListener('click', () => {
-    AudioManager.playClick();
-    settingsModal.classList.remove('hidden');
-  });
+  const navSettings = document.getElementById('navSettings');
+  if (navSettings) {
+    navSettings.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      settingsModal.classList.remove('hidden');
+    });
+  }
 
-  document.getElementById('closeSettingsModal').addEventListener('click', () => {
-    AudioManager.playClick();
-    settingsModal.classList.add('hidden');
-  });
+  const closeSettingsModal = document.getElementById('closeSettingsModal');
+  if (closeSettingsModal) {
+    closeSettingsModal.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      settingsModal.classList.add('hidden');
+    });
+  }
 
   if (sfxToggle) {
     sfxToggle.addEventListener('change', (e) => {
-      AudioManager.setSFX(e.target.checked);
-      if (e.target.checked) AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') {
+        AudioManager.setSFX(e.target.checked);
+        if (e.target.checked) AudioManager.playClick();
+      }
     });
   }
 
   if (musicToggle) {
     musicToggle.addEventListener('change', (e) => {
-      AudioManager.setMusic(e.target.checked);
+      if (typeof AudioManager !== 'undefined') {
+        AudioManager.setMusic(e.target.checked);
+      }
     });
   }
 
-  document.getElementById('aboutBtn').addEventListener('click', () => {
-    AudioManager.playClick();
-    aboutModal.classList.remove('hidden');
-  });
+  const aboutBtn = document.getElementById('aboutBtn');
+  if (aboutBtn) {
+    aboutBtn.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      aboutModal.classList.remove('hidden');
+    });
+  }
 
-  document.getElementById('closeAboutModal').addEventListener('click', () => {
-    AudioManager.playClick();
-    aboutModal.classList.add('hidden');
-  });
+  const closeAboutModal = document.getElementById('closeAboutModal');
+  if (closeAboutModal) {
+    closeAboutModal.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      aboutModal.classList.add('hidden');
+    });
+  }
 
-  document.getElementById('logoutBtn').addEventListener('click', () => {
-    AudioManager.playClick();
-    if (confirm("Are you sure you want to log out?")) {
-      alert("Logged out successfully.");
-      location.reload();
-    }
-  });
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      if (confirm("Are you sure you want to log out?")) {
+        localStorage.removeItem('loggedInUser');
+        settingsModal.classList.add('hidden');
+        if (typeof AudioManager !== 'undefined') AudioManager.stopBGM();
+        showView('login');
+      }
+    });
+  }
 
   function renderLevels() {
     const grid = document.getElementById('levelsGrid');
+    if (!grid) return;
     grid.innerHTML = '';
+    const currentLevel = parseInt(localStorage.getItem('currentLevel')) || 1;
     
     for (let i = 1; i <= 200; i++) {
       const btn = document.createElement('div');
@@ -112,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isUnlocked) {
         btn.innerHTML = `<div class="level-num">${i.toString().padStart(2, '0')}</div><div class="stars">★★★</div>`;
         btn.addEventListener('click', () => {
-          AudioManager.playClick();
+          if (typeof AudioManager !== 'undefined') AudioManager.playClick();
           window.location.href = `game.html?level=${i}`;
         });
       } else {
@@ -121,13 +292,17 @@ document.addEventListener('DOMContentLoaded', () => {
       grid.appendChild(btn);
     }
 
-    document.getElementById('unlockInfoText').innerText = 
-      `COMPLETE LEVEL ${currentLevel.toString().padStart(2, '0')} TO UNLOCK LEVEL ${(currentLevel + 1).toString().padStart(2, '0')}`;
+    const infoText = document.getElementById('unlockInfoText');
+    if (infoText) {
+      infoText.innerText = `COMPLETE LEVEL ${currentLevel.toString().padStart(2, '0')} TO UNLOCK LEVEL ${(currentLevel + 1).toString().padStart(2, '0')}`;
+    }
   }
 
   function renderCollections() {
     const grid = document.getElementById('collectionsGrid');
+    if (!grid) return;
     grid.innerHTML = '';
+    const currentLevel = parseInt(localStorage.getItem('currentLevel')) || 1;
     
     for (let i = 1; i < currentLevel; i++) {
       const item = document.createElement('div');
@@ -139,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
 
       item.addEventListener('click', () => {
-        AudioManager.playClick();
+        if (typeof AudioManager !== 'undefined') AudioManager.playClick();
         openImageModal(i);
       });
 
@@ -152,21 +327,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalImg = document.getElementById('modalPreviewImg');
     const modalTitle = document.getElementById('modalLevelTitle');
 
-    modalTitle.innerText = `LEVEL ${levelNum.toString().padStart(2, '0')}`;
-    modalImg.src = `image/level${levelNum}.jpeg`;
+    if (modalTitle) modalTitle.innerText = `LEVEL ${levelNum.toString().padStart(2, '0')}`;
+    if (modalImg) modalImg.src = `image/level${levelNum}.jpeg`;
 
-    modal.classList.remove('hidden');
+    if (modal) modal.classList.remove('hidden');
   }
 
   function closeImageModal() {
-    AudioManager.playClick();
-    document.getElementById('imageModal').classList.add('hidden');
+    if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+    const modal = document.getElementById('imageModal');
+    if (modal) modal.classList.add('hidden');
   }
 
-  document.getElementById('closeImageModal').addEventListener('click', closeImageModal);
-  document.getElementById('imageModal').addEventListener('click', (e) => {
-    if (e.target.id === 'imageModal' || e.target.id === 'modalPreviewImg') {
-      closeImageModal();
-    }
-  });
+  const closeImgModalBtn = document.getElementById('closeImageModal');
+  if (closeImgModalBtn) closeImgModalBtn.addEventListener('click', closeImageModal);
+
+  const imgModal = document.getElementById('imageModal');
+  if (imgModal) {
+    imgModal.addEventListener('click', (e) => {
+      if (e.target.id === 'imageModal' || e.target.id === 'modalPreviewImg') {
+        closeImageModal();
+      }
+    });
+  }
 });
