@@ -32,7 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateCoinDisplay() {
     const totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
-    document.getElementById('coinCount').innerText = totalCoins;
+    const coinElem = document.getElementById('coinCount');
+    if (coinElem) {
+      coinElem.innerText = totalCoins;
+    }
   }
 
   function renderGrid() {
@@ -90,14 +93,13 @@ document.addEventListener('DOMContentLoaded', () => {
       clearInterval(timerInterval);
       AudioManager.playVictory(currentLevel);
 
-      // Star Calculation (Moves based)
       let stars = 1;
       if (moves <= 14) stars = 3;
       else if (moves <= 22) stars = 2;
 
-      // Coin Calculation Logic (Max 15 coins per level)
+      // Cumulative capping system: max 15 coins per level
       const currentLevelCoins = parseInt(localStorage.getItem(`levelCoins_${currentLevel}`)) || 0;
-      let targetCoins = stars * 5; // 3 stars = 15, 2 stars = 10, 1 star = 5
+      let targetCoins = stars * 5; 
       let newCoinsEarned = 0;
 
       if (targetCoins > currentLevelCoins) {
@@ -109,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('totalCoins', totalCoins);
       }
 
-      // Progression unlock logic
       let maxUnlocked = parseInt(localStorage.getItem('currentLevel')) || 1;
       if (currentLevel >= maxUnlocked) {
         localStorage.setItem('currentLevel', currentLevel + 1);
@@ -125,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('vMoves').innerText = moves;
     document.getElementById('vCoins').innerText = `+${newCoins}`;
 
-    // Render Stars
     const starNodes = document.querySelectorAll('#victoryStars .star');
     starNodes.forEach((star, index) => {
       if (index < stars) {
@@ -140,9 +140,9 @@ document.addEventListener('DOMContentLoaded', () => {
     startConfetti();
   }
 
-  // Blasting Confetti Effect
   function startConfetti() {
     const canvas = document.getElementById('confettiCanvas');
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
       particles.forEach(p => {
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.3; // Gravity
+        p.vy += 0.3;
         ctx.fillStyle = p.color;
         ctx.fillRect(p.x, p.y, p.size, p.size);
       });
@@ -172,21 +172,29 @@ document.addEventListener('DOMContentLoaded', () => {
     draw();
   }
 
-  // Action listeners
   document.getElementById('shuffleBtn').addEventListener('click', () => {
     AudioManager.playShuffle();
     shuffleGrid();
   });
 
-  document.getElementById('nextLevelBtn').addEventListener('click', () => {
-    AudioManager.playClick();
-    window.location.href = `game.html?level=${currentLevel + 1}`;
-  });
+  const nextBtn = document.getElementById('nextLevelBtn');
+  const homeBtn = document.getElementById('victoryHomeBtn');
 
-  document.getElementById('victoryHomeBtn').addEventListener('click', () => {
-    AudioManager.playClick();
-    window.location.href = 'index.html';
-  });
+  if (nextBtn) {
+    nextBtn.onclick = (e) => {
+      e.stopPropagation();
+      AudioManager.playClick();
+      window.location.href = `game.html?level=${currentLevel + 1}`;
+    };
+  }
+
+  if (homeBtn) {
+    homeBtn.onclick = (e) => {
+      e.stopPropagation();
+      AudioManager.playClick();
+      window.location.href = 'index.html';
+    };
+  }
 
   document.getElementById('backToHome').addEventListener('click', () => {
     AudioManager.playClick();
