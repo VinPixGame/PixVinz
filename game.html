@@ -52,68 +52,67 @@
     </div>
   </div>
 
-<!-- game.html -->
-<div id="victoryModal" class="modal-overlay hidden">
-  <canvas id="confettiCanvas"></canvas>
+  <!-- Victory Modal -->
+  <div id="victoryModal" class="modal-overlay hidden">
+    <canvas id="confettiCanvas"></canvas>
 
-  <div class="victory-card-pro">
-    <!-- Top Crest Badge -->
-    <div class="top-crest-badge">
-      <div class="badge-shield">⭐</div>
-    </div>
-
-    <!-- Banner Header -->
-    <div class="banner-ribbon">
-      <h1 class="victory-title-pro">LEVEL CLEARED!</h1>
-    </div>
-    <div class="victory-subtitle-pro">✦ Amazing work! ✦</div>
-
-    <!-- Solved Puzzle Image Container (Fixed IDs) -->
-    <div class="victory-img-container-pro">
-      <img id="victoryImg" src="" alt="Solved Puzzle">
-    </div>
-
-    <!-- 3D Stars Row -->
-    <div class="star-rating-pro">
-      <span class="star-pro active">★</span>
-      <span class="star-pro active">★</span>
-      <span class="star-pro active">★</span>
-    </div>
-
-    <!-- Segmented Stats Box -->
-    <div class="stats-panel-pro">
-      <div class="stat-col">
-        <span class="stat-icon-pro">⏱️</span>
-        <span class="stat-label-pro">TIME</span>
-        <span class="stat-value-pro" id="victoryTime">00:00</span>
+    <div class="victory-card-pro">
+      <!-- Top Crest Badge -->
+      <div class="top-crest-badge">
+        <div class="badge-shield">⭐</div>
       </div>
-      <div class="stat-divider"></div>
-      <div class="stat-col">
-        <span class="stat-icon-pro">👣</span>
-        <span class="stat-label-pro">MOVES</span>
-        <span class="stat-value-pro" id="victoryMoves">0</span>
-      </div>
-      <div class="stat-divider"></div>
-      <div class="stat-col">
-        <span class="stat-icon-pro">🪙</span>
-        <span class="stat-label-pro">EARNED</span>
-        <span class="stat-value-pro gold-val" id="victoryCoins">+0</span>
-      </div>
-    </div>
 
-    <!-- Bottom Buttons (Fixed IDs) -->
-    <div class="victory-buttons-pro">
-      <button class="btn-pro btn-home-pro" id="backToHome">
-        <span>🏠</span> HOME
-      </button>
-      <button class="btn-pro btn-next-pro" id="nextLevelBtn">
-        NEXT ▶
-      </button>
+      <!-- Banner Header -->
+      <div class="banner-ribbon">
+        <h1 class="victory-title-pro">LEVEL CLEARED!</h1>
+      </div>
+      <div class="victory-subtitle-pro">✦ Amazing work! ✦</div>
+
+      <!-- Solved Puzzle Image Container -->
+      <div class="victory-img-container-pro">
+        <img id="victoryImg" src="" alt="Solved Puzzle">
+      </div>
+
+      <!-- 3D Stars Row -->
+      <div class="star-rating-pro">
+        <span class="star-pro active">★</span>
+        <span class="star-pro active">★</span>
+        <span class="star-pro active">★</span>
+      </div>
+
+      <!-- Segmented Stats Box (Restored Standard JS IDs) -->
+      <div class="stats-panel-pro">
+        <div class="stat-col">
+          <span class="stat-icon-pro">⏱️</span>
+          <span class="stat-label-pro">TIME</span>
+          <span class="stat-value-pro" id="modalTime">00:00</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-col">
+          <span class="stat-icon-pro">👣</span>
+          <span class="stat-label-pro">MOVES</span>
+          <span class="stat-value-pro" id="modalMoves">0</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-col">
+          <span class="stat-icon-pro">🪙</span>
+          <span class="stat-label-pro">EARNED</span>
+          <span class="stat-value-pro gold-val" id="modalCoins">+0</span>
+        </div>
+      </div>
+
+      <!-- Bottom Buttons -->
+      <div class="victory-buttons-pro">
+        <button class="btn-pro btn-home-pro" id="backToHome">
+          <span>🏠</span> HOME
+        </button>
+        <button class="btn-pro btn-next-pro" id="nextLevelBtn">
+          NEXT ▶
+        </button>
+      </div>
     </div>
   </div>
-</div>
     
-  
   <script src="audio.js"></script>
   <script src="game.js"></script>
 </body>
