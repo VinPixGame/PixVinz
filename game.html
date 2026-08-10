@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <meta
+        name="theme-color"
+        content="#24113f">
+
+    <title>Level - PixVinz</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css">
+
+    <link
+        rel="stylesheet"
+        href="game.css">
+
+</head>
+
+
+<body>
+
+    <!-- =====================================================
+         PUZZLE SCREEN
+    ====================================================== -->
+
+    <main
+        id="gameScreen"
+        class="game-screen">
+
+
+        <!-- =========================
+             GAME TOP BAR
+        ========================== -->
+
+        <header class="game-topbar">
+
+
+            <!-- BACK -->
+
+            <button
+                id="gameBackButton"
+                class="game-back-button"
+                type="button"
+                aria-label="Back">
+
+                ‹
+
+            </button>
+
+
+            <!-- LOGO -->
+
+            <video
+                class="logo game-logo"
+                src="image/logo.webm"
+                autoplay
+                muted
+                loop
+                playsinline>
+            </video>
+
+
+            <!-- COINS -->
+
+            <div
+                class="coin-display game-coins">
+
+                <span>🪙</span>
+
+                <strong id="gameCoinCount">
+                    0
+                </strong>
+
+            </div>
+
+        </header>
+
+
+        <!-- =========================
+             LEVEL INFORMATION
+        ========================== -->
+
+        <section
+            class="game-info">
+
+
+            <div class="game-level-label">
+
+                <span>
+                    LEVEL
+                </span>
+
+                <strong id="levelNumber">
+                    1
+                </strong>
+
+            </div>
+
+
+            <div class="game-stat">
+
+                <span>
+                    TIME
+                </span>
+
+                <strong id="timer">
+                    00:00
+                </strong>
+
+            </div>
+
+
+            <div class="game-stat">
+
+                <span>
+                    MOVES
+                </span>
+
+                <strong id="moveCount">
+                    0
+                </strong>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- =========================
+             PUZZLE AREA
+        ========================== -->
+
+        <section
+            class="puzzle-section">
+
+
+            <div
+                id="puzzleBoard"
+                class="puzzle-board"
+                aria-label="Puzzle board">
+            </div>
+
+
+        </section>
+
+
+        <!-- =========================
+             GAME CONTROLS
+        ========================== -->
+
+        <section
+            class="game-controls">
+
+
+            <button
+                id="shuffleButton"
+                class="game-control-button"
+                type="button">
+
+                🔀
+                <span>
+                    Shuffle
+                </span>
+
+            </button>
+
+
+            <button
+                id="restartButton"
+                class="game-control-button"
+                type="button">
+
+                ↻
+                <span>
+                    Restart
+                </span>
+
+            </button>
+
+
+        </section>
+
+
+        <!-- =========================
+             GAME MESSAGE
+        ========================== -->
+
+        <p
+            id="gameMessage"
+            class="game-message"
+            aria-live="polite">
+        </p>
+
+
+    </main>
+
+
+    <!-- =====================================================
+         VICTORY MODAL
+         Hidden until puzzle is solved
+    ====================================================== -->
+
+    <div
+        id="victoryModal"
+        class="game-modal-overlay hidden">
+
+
+        <div
+            class="victory-modal">
+
+
+            <!-- CLOSE -->
+
+            <button
+                id="victoryCloseButton"
+                class="modal-close"
+                type="button"
+                aria-label="Close">
+
+                ×
+
+            </button>
+
+
+            <!-- TITLE -->
+
+            <div
+                class="victory-title">
+
+                🎉
+
+                <h2>
+                    Level Complete!
+                </h2>
+
+            </div>
+
+
+            <!-- SOLVED IMAGE -->
+
+            <div
+                class="victory-image-container">
+
+                <img
+                    id="victoryImage"
+                    src=""
+                    alt="Solved puzzle">
+
+            </div>
+
+
+            <!-- CURRENT RESULT -->
+
+            <div
+                class="victory-current-stats">
+
+
+                <div>
+
+                    <span>
+                        Stars
+                    </span>
+
+                    <strong id="victoryStars">
+                        ☆☆☆
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Time
+                    </span>
+
+                    <strong id="victoryTime">
+                        00:00
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Moves
+                    </span>
+
+                    <strong id="victoryMoves">
+                        0
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- BEST RESULTS -->
+
+            <div
+                class="best-results">
+
+
+                <div>
+
+                    <span>
+                        Best Time
+                    </span>
+
+                    <strong id="bestTime">
+                        --
+
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Best Moves
+                    </span>
+
+                    <strong id="bestMoves">
+                        --
+
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Best Stars
+                    </span>
+
+                    <strong id="bestStars">
+                        ☆☆☆
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- COINS -->
+
+            <div
+                class="coins-earned">
+
+                <span>
+                    🪙
+                </span>
+
+                <strong id="coinsEarned">
+                    +0
+                </strong>
+
+                <small>
+                    Coins Earned
+                </small>
+
+            </div>
+
+
+            <!-- ACTIONS -->
+
+            <div
+                class="victory-actions">
+
+
+                <button
+                    id="nextLevelButton"
+                    class="primary-button"
+                    type="button">
+
+                    NEXT LEVEL
+
+                </button>
+
+
+                <button
+                    id="replayLevelButton"
+                    class="secondary-game-button"
+                    type="button">
+
+                    PLAY AGAIN
+
+                </button>
+
+
+                <button
+                    id="levelsFromVictoryButton"
+                    class="secondary-game-button"
+                    type="button">
+
+                    LEVELS
+
+                </button>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SCRIPTS
+    ====================================================== -->
+
+    <script src="levels.js"></script>
+
+    <script src="save.js"></script>
+
+    <script src="audio.js"></script>
+
+    <script src="game.js"></script>
+
+
+</body>
+
+</html>
