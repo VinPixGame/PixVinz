@@ -5,61 +5,60 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>PixVinz - Game</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    .game-page-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      height: 100vh;
-      padding: 16px;
-      box-sizing: border-box;
-    }
-    .puzzle-board {
-      display: grid;
-      gap: 4px;
-      width: 100%;
-      max-width: 360px;
-      aspect-ratio: 1 / 1;
-      background: #11052c;
-      padding: 8px;
-      border-radius: 16px;
-      border: 3px solid #7b2cbf;
-      box-shadow: 0 0 20px rgba(123, 44, 191, 0.4);
-    }
-    .tile {
-      background-size: 360px 360px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: transform 0.1s ease;
-      box-shadow: inset 0 0 4px rgba(255,255,255,0.3);
-    }
-    .tile.empty {
-      background: rgba(255, 255, 255, 0.05) !important;
-      border: 2px dashed rgba(255, 255, 255, 0.2);
-      box-shadow: none;
-    }
-    .game-controls {
-      display: flex;
-      gap: 12px;
-      width: 100%;
-      max-width: 360px;
-    }
-    .game-controls .btn { flex: 1; }
-  </style>
 </head>
 <body>
-  <div class="app-container game-page-container">
-    <header class="top-bar" style="width: 100%;">
-      <button class="icon-btn" id="gameBackBtn">‹</button>
-      <h2 id="gameLevelTitle" style="color: #ffd700; font-size: 18px;">LEVEL 01</h2>
+  <div class="app-container">
+    <header class="top-bar">
+      <button class="icon-btn" id="backToHome">‹</button>
+      <div class="logo-container">
+        <video id="logoVideo" autoplay loop muted playsinline>
+          <source src="image/logo.webm" type="video/webm">
+        </video>
+      </div>
       <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
     </header>
 
-    <div class="puzzle-board" id="puzzleBoard"></div>
+    <div class="game-header">
+      <h2 id="levelTitle">LEVEL <span id="levelDisplay">01</span></h2>
+      <div class="game-stats">
+        <span>⏱️ <span id="timerDisplay">00:00</span></span>
+        <span>🔄 <span id="movesDisplay">0</span> Moves</span>
+      </div>
+    </div>
 
-    <div class="game-controls">
-      <button class="btn btn-secondary" id="shuffleBtn">🔀 SHUFFLE</button>
+    <!-- 3x3 TAP-TO-SWAP BOARD -->
+    <div class="puzzle-container">
+      <div class="puzzle-grid" id="puzzleGrid"></div>
+    </div>
+
+    <div class="game-actions">
+      <button class="btn btn-secondary" id="collectionsBtn">🖼️ PREVIEW</button>
+      <button class="btn btn-primary" id="shuffleBtn">🔀 SHUFFLE</button>
+    </div>
+  </div>
+
+  <!-- VICTORY POPUP MODAL -->
+  <div id="victoryModal" class="modal-overlay hidden">
+    <canvas id="confettiCanvas"></canvas>
+    <div class="victory-card">
+      <h2 class="victory-title">LEVEL CLEARED!</h2>
+      <div class="victory-img-container">
+        <img id="victoryImg" src="" alt="Completed Puzzle">
+      </div>
+      <div class="star-rating" id="victoryStars">
+        <span class="star active">★</span>
+        <span class="star active">★</span>
+        <span class="star active">★</span>
+      </div>
+      <div class="victory-stats">
+        <p>Time: <strong id="vTime">00:00</strong></p>
+        <p>Moves: <strong id="vMoves">0</strong></p>
+        <p>Earned: <strong id="vCoins" style="color:#ffd700;">+0</strong> 🪙</p>
+      </div>
+      <div class="victory-buttons">
+        <button class="btn btn-secondary" id="victoryHomeBtn">🏠 HOME</button>
+        <button class="btn btn-primary" id="nextLevelBtn">NEXT ▶</button>
+      </div>
     </div>
   </div>
 
