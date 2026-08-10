@@ -65,17 +65,18 @@ body {
 
 .hidden { display: none !important; }
 
-/* Video Logo Styling */
+/* Video Logo Styling (No Gold Glow) */
 video.flash-logo, video.small-logo {
   object-fit: contain;
   pointer-events: none;
   background: transparent;
+  filter: none !important; /* Gold glow completely removed */
 }
 
 .flash-logo {
   width: 150px;
   height: 150px;
-  animation: flash 1.5s infinite alternate ease-in-out;
+  animation: logoPulse 2s infinite alternate ease-in-out;
 }
 
 .small-logo {
@@ -85,9 +86,10 @@ video.flash-logo, video.small-logo {
   display: block;
 }
 
-@keyframes flash {
-  0% { opacity: 0.4; transform: scale(0.95); filter: drop-shadow(0 0 5px #ffd700); }
-  100% { opacity: 1; transform: scale(1.05); filter: drop-shadow(0 0 25px #ffd700); }
+/* Clean, smooth logo pulse without drop-shadow glow */
+@keyframes logoPulse {
+  0% { opacity: 0.6; transform: scale(0.96); }
+  100% { opacity: 1; transform: scale(1.04); }
 }
 
 /* Buttons */
