@@ -52,30 +52,66 @@
     </div>
   </div>
 
-  <!-- VICTORY POPUP MODAL -->
-  <div id="victoryModal" class="modal-overlay hidden">
-    <canvas id="confettiCanvas"></canvas>
-    <div class="victory-card">
-      <h2 class="victory-title">LEVEL CLEARED!</h2>
-      <div class="victory-img-container">
-        <img id="victoryImg" src="" alt="Completed Puzzle">
+  <!-- game.html -->
+<div id="victoryModal" class="modal-overlay hidden">
+  <canvas id="confettiCanvas"></canvas>
+
+  <div class="victory-card-pro">
+    <!-- Top Crest Badge -->
+    <div class="top-crest-badge">
+      <div class="badge-shield">⭐</div>
+    </div>
+
+    <!-- Banner Header -->
+    <div class="banner-ribbon">
+      <h1 class="victory-title-pro">LEVEL CLEARED!</h1>
+    </div>
+    <div class="victory-subtitle-pro">✦ Amazing work! ✦</div>
+
+    <!-- Solved Puzzle Image Container -->
+    <div class="victory-img-container-pro">
+      <img id="victoryPreviewImg" src="" alt="Solved Puzzle">
+    </div>
+
+    <!-- 3D Stars Row -->
+    <div class="star-rating-pro">
+      <span class="star-pro active">★</span>
+      <span class="star-pro active">★</span>
+      <span class="star-pro active">★</span>
+    </div>
+
+    <!-- Segmented Stats Box -->
+    <div class="stats-panel-pro">
+      <div class="stat-col">
+        <span class="stat-icon-pro">⏱️</span>
+        <span class="stat-label-pro">TIME</span>
+        <span class="stat-value-pro" id="victoryTime">00:31</span>
       </div>
-      <div class="star-rating" id="victoryStars">
-        <span class="star active">★</span>
-        <span class="star active">★</span>
-        <span class="star active">★</span>
+      <div class="stat-divider"></div>
+      <div class="stat-col">
+        <span class="stat-icon-pro">👣</span>
+        <span class="stat-label-pro">MOVES</span>
+        <span class="stat-value-pro" id="victoryMoves">10</span>
       </div>
-      <div class="victory-stats">
-        <p>Time: <strong id="vTime">00:00</strong></p>
-        <p>Moves: <strong id="vMoves">0</strong></p>
-        <p>Earned: <strong id="vCoins" style="color:#ffd700;">+0</strong> 🪙</p>
-      </div>
-      <div class="victory-buttons">
-        <button class="btn btn-secondary" id="victoryHomeBtn">🏠 HOME</button>
-        <button class="btn btn-primary" id="nextLevelBtn">NEXT ▶</button>
+      <div class="stat-divider"></div>
+      <div class="stat-col">
+        <span class="stat-icon-pro">🪙</span>
+        <span class="stat-label-pro">EARNED</span>
+        <span class="stat-value-pro gold-val" id="victoryCoins">+15 🪙</span>
       </div>
     </div>
+
+    <!-- Bottom Buttons -->
+    <div class="victory-buttons-pro">
+      <button class="btn-pro btn-home-pro" id="victoryHomeBtn">
+        <span>🏠</span> HOME
+      </button>
+      <button class="btn-pro btn-next-pro" id="victoryNextBtn">
+        NEXT ▶
+      </button>
+    </div>
   </div>
+</div>
 
   <script src="audio.js"></script>
   <script src="game.js"></script>
