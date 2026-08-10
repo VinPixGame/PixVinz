@@ -1032,3 +1032,21 @@ input:checked + .slider:before {
   transform: translateY(3px);
   box-shadow: 0 2px 0 transparent;
 }
+
+
+
+/* Fix button clickability over confetti */
+#confettiCanvas {
+  pointer-events: none !important;
+  z-index: 200 !important;
+}
+
+.victory-card-pro {
+  z-index: 202 !important;
+}
+
+.btn-pro {
+  position: relative !important;
+  z-index: 203 !important;
+  cursor: pointer !important;
+}
