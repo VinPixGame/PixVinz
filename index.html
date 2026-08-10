@@ -10,7 +10,7 @@
   <div class="app-container">
 
     <!-- 1. LOADING SCREEN -->
-    <section id="loadingView" class="view active full-screen-view">
+    <section id="loadingView" class="view active">
       <div class="loading-content">
         <video id="loadingLogo" autoplay loop muted playsinline>
           <source src="image/logo.webm" type="video/webm">
@@ -20,7 +20,7 @@
     </section>
 
     <!-- 2. LOGIN PAGE -->
-    <section id="loginView" class="view hidden full-screen-view">
+    <section id="loginView" class="view">
       <div class="auth-card">
         <div class="auth-logo">
           <video autoplay loop muted playsinline>
@@ -43,7 +43,7 @@
     </section>
 
     <!-- 3. REGISTER PAGE -->
-    <section id="registerView" class="view hidden full-screen-view">
+    <section id="registerView" class="view">
       <div class="auth-card">
         <h2>CREATE ACCOUNT</h2>
         <form id="registerForm">
@@ -66,7 +66,7 @@
       </div>
     </section>
 
-    <!-- Top Header Bar (Shown only when logged in) -->
+    <!-- Top Header Bar -->
     <header class="top-bar hidden" id="mainHeader">
       <button class="icon-btn" id="menuBtn">☰</button>
       <div class="logo-container">
@@ -78,7 +78,7 @@
     </header>
 
     <!-- HOME PAGE VIEW -->
-    <section id="homeView" class="view hidden">
+    <section id="homeView" class="view">
       <div class="card welcome-card">
         <p class="sub-title">WELCOME</p>
         <h2 class="user-name" id="userDisplayName">Vinz</h2>
@@ -114,7 +114,7 @@
     </section>
 
     <!-- LEVELS PAGE VIEW -->
-    <section id="levelsView" class="view hidden">
+    <section id="levelsView" class="view">
       <div class="view-header">
         <button class="icon-btn back-btn">‹</button>
         <h2>LEVELS</h2>
@@ -126,7 +126,7 @@
     </section>
 
     <!-- COLLECTIONS PAGE VIEW -->
-    <section id="collectionsView" class="view hidden">
+    <section id="collectionsView" class="view">
       <div class="view-header">
         <button class="icon-btn back-btn">‹</button>
         <h2>COLLECTIONS</h2>
@@ -135,7 +135,7 @@
     </section>
   </div>
 
-  <!-- ENLARGED IMAGE POPUP MODAL FOR COLLECTIONS -->
+  <!-- ENLARGED IMAGE POPUP MODAL -->
   <div id="imageModal" class="modal-overlay hidden">
     <div class="image-modal-card">
       <div class="image-modal-header">
