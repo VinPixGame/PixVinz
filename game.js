@@ -1,890 +1,1566 @@
 /* =========================================================
-   PIXVINZ — GAME.JS
-   Mobile-first sliding puzzle
-   ========================================================= */
+   PIXVINZ PUZZLE ENGINE
+   game.js
 
-(() => {
-  "use strict";
+   RESPONSIBILITY:
+   - Read current level
+   - Load puzzle image
+   - Determine grid size
+   - Create/shuffle puzzle pieces
+   - Handle player moves
+   - Timer
+   - Detect completion
+   - Calculate stars
+   - Display victory information
 
-  const CONFIG = {
-    size: 3,
-    shuffleMoves: 80,
-    coinReward: 25,
+   DOES NOT:
+   - Handle login
+   - Handle account creation
+   - Handle permanent save data
+   - Handle coins database/progression
+   - Handle global audio
+   - Generate the 200 level list
+========================================================= */
 
-    images: [
-      "images/level1.jpeg",
-      "images/level2.jpeg",
-      "images/level3.jpeg",
-      "images/level4.jpeg",
-      "images/level5.jpeg",
-      "images/level6.jpeg"
-    ]
-  };
+"use strict";
 
-  const $ = (selector, root = document) =>
-    root.querySelector(selector);
 
-  const dom = {
-    board: $("#gameBoard, .game-board, [data-game-board]"),
-    shuffle: $("#shuffleBtn, #shuffleButton, [data-action='shuffle']"),
+/* =========================================================
+   GAME STATE
+========================================================= */
 
-    moves: $("#moves, #moveCount, [data-stat='moves']"),
-    time: $("#timer, #time, [data-stat='time']"),
-    coins: $("#coins, #coinCount, [data-stat='coins']"),
+const PixVinzGame = {
 
-    progress: $("#progress, #progressBar, [data-progress]"),
+    level: 1,
 
-    collection:
-      $("#collection, .collection-grid, [data-collection]"),
+    gridSize: 3,
 
-    victory:
-      $("#victoryModal, #winModal, [data-victory-modal]"),
+    totalPieces: 9,
 
-    victoryMoves:
-      $("#victoryMoves, [data-victory='moves']"),
+    pieces: [],
 
-    victoryTime:
-      $("#victoryTime, [data-victory='time']"),
-
-    victoryCoins:
-      $("#victoryCoins, [data-victory='coins']"),
-
-    playAgain:
-      $("#playAgain, #nextPuzzle, [data-action='play-again']"),
-
-    closeVictory:
-      $("#closeVictory, [data-action='close-victory']"),
-
-    image:
-      $("#puzzleImage, [data-puzzle-image]")
-  };
-
-  const STORAGE = {
-    coins: "pixvinz_coins",
-    solved: "pixvinz_solved",
-    puzzle: "pixvinz_current_puzzle",
-    bestTime: "pixvinz_best_time"
-  };
-
-  let state = {
-    puzzleIndex:
-      Number(localStorage.getItem(STORAGE.puzzle)) || 0,
-
-    coins:
-      Number(localStorage.getItem(STORAGE.coins)) || 0,
-
-    solved:
-      Number(localStorage.getItem(STORAGE.solved)) || 0,
+    selectedIndex: null,
 
     moves: 0,
-    seconds: 0,
 
-    started: false,
-    locked: false,
+    elapsedSeconds: 0,
 
-    timerId: null,
-    tiles: []
-  };
+    timerInterval: null,
 
-  /* -------------------------------------------------------
-     IMAGE
-  ------------------------------------------------------- */
+    gameStarted: false,
 
-  function getImages() {
+    gameFinished: false
+
+};
+
+
+/* =========================================================
+   DOM ELEMENTS
+========================================================= */
+
+const gameElements = {
+
+    board: null,
+
+    levelNumber: null,
+
+    timer: null,
+
+    moveCount: null,
+
+    gameMessage: null,
+
+    gameCoinCount: null,
+
+    victoryModal: null,
+
+    victoryImage: null,
+
+    victoryStars: null,
+
+    victoryTime: null,
+
+    victoryMoves: null,
+
+    bestTime: null,
+
+    bestMoves: null,
+
+    bestStars: null,
+
+    coinsEarned: null,
+
+    nextLevelButton: null,
+
+    replayLevelButton: null,
+
+    levelsButton: null,
+
+    shuffleButton: null,
+
+    restartButton: null,
+
+    backButton: null,
+
+    victoryCloseButton: null
+
+};
+
+
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    initializeGame
+);
+
+
+function initializeGame() {
+
+    cacheGameElements();
+
+    PixVinzGame.level = getRequestedLevel();
+
+    PixVinzGame.gridSize =
+        getGridSize(PixVinzGame.level);
+
+    PixVinzGame.totalPieces =
+        PixVinzGame.gridSize *
+        PixVinzGame.gridSize;
+
+    updateLevelDisplay();
+
+    attachGameEvents();
+
+    loadPuzzle();
+
+}
+
+
+/* =========================================================
+   CACHE DOM
+========================================================= */
+
+function cacheGameElements() {
+
+    gameElements.board =
+        document.getElementById("puzzleBoard");
+
+    gameElements.levelNumber =
+        document.getElementById("levelNumber");
+
+    gameElements.timer =
+        document.getElementById("timer");
+
+    gameElements.moveCount =
+        document.getElementById("moveCount");
+
+    gameElements.gameMessage =
+        document.getElementById("gameMessage");
+
+    gameElements.gameCoinCount =
+        document.getElementById("gameCoinCount");
+
+    gameElements.victoryModal =
+        document.getElementById("victoryModal");
+
+    gameElements.victoryImage =
+        document.getElementById("victoryImage");
+
+    gameElements.victoryStars =
+        document.getElementById("victoryStars");
+
+    gameElements.victoryTime =
+        document.getElementById("victoryTime");
+
+    gameElements.victoryMoves =
+        document.getElementById("victoryMoves");
+
+    gameElements.bestTime =
+        document.getElementById("bestTime");
+
+    gameElements.bestMoves =
+        document.getElementById("bestMoves");
+
+    gameElements.bestStars =
+        document.getElementById("bestStars");
+
+    gameElements.coinsEarned =
+        document.getElementById("coinsEarned");
+
+    gameElements.nextLevelButton =
+        document.getElementById("nextLevelButton");
+
+    gameElements.replayLevelButton =
+        document.getElementById("replayLevelButton");
+
+    gameElements.levelsButton =
+        document.getElementById("levelsFromVictoryButton");
+
+    gameElements.shuffleButton =
+        document.getElementById("shuffleButton");
+
+    gameElements.restartButton =
+        document.getElementById("restartButton");
+
+    gameElements.backButton =
+        document.getElementById("gameBackButton");
+
+    gameElements.victoryCloseButton =
+        document.getElementById("victoryCloseButton");
+
+}
+
+
+/* =========================================================
+   READ LEVEL FROM URL
+========================================================= */
+
+function getRequestedLevel() {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const requestedLevel =
+        Number(
+            params.get("level")
+        );
+
     if (
-      Array.isArray(window.PIXVINZ_IMAGES) &&
-      window.PIXVINZ_IMAGES.length
+        !Number.isInteger(requestedLevel) ||
+        requestedLevel < 1
     ) {
-      return window.PIXVINZ_IMAGES;
+
+        return 1;
     }
 
-    return CONFIG.images;
-  }
+    return requestedLevel;
 
-  function getCurrentImage() {
-    const images = getImages();
+}
 
-    return images[
-      state.puzzleIndex % images.length
-    ];
-  }
 
-  /* -------------------------------------------------------
-     STORAGE
-  ------------------------------------------------------- */
+/* =========================================================
+   GRID SIZE
+========================================================= */
 
-  function saveState() {
-    localStorage.setItem(
-      STORAGE.coins,
-      String(state.coins)
+function getGridSize(level) {
+
+    if (level >= 1 && level <= 10) {
+        return 3;
+    }
+
+    if (level >= 11 && level <= 20) {
+        return 4;
+    }
+
+    if (level >= 21 && level <= 40) {
+        return 5;
+    }
+
+    if (level >= 41 && level <= 80) {
+        return 6;
+    }
+
+    return 7;
+
+}
+
+
+/* =========================================================
+   IMAGE PATH
+========================================================= */
+
+function getImagePath(level) {
+
+    return `image/level${level}.jpeg`;
+
+}
+
+
+/* =========================================================
+   UPDATE LEVEL DISPLAY
+========================================================= */
+
+function updateLevelDisplay() {
+
+    if (!gameElements.levelNumber) {
+        return;
+    }
+
+    gameElements.levelNumber.textContent =
+        String(
+            PixVinzGame.level
+        ).padStart(2, "0");
+
+}
+
+
+/* =========================================================
+   LOAD PUZZLE
+========================================================= */
+
+function loadPuzzle() {
+
+    stopTimer();
+
+    resetGameState();
+
+    clearBoard();
+
+    updateTimerDisplay();
+
+    updateMoveDisplay();
+
+    setGameMessage("");
+
+    createPuzzle();
+
+}
+
+
+/* =========================================================
+   RESET GAME STATE
+========================================================= */
+
+function resetGameState() {
+
+    PixVinzGame.pieces = [];
+
+    PixVinzGame.selectedIndex = null;
+
+    PixVinzGame.moves = 0;
+
+    PixVinzGame.elapsedSeconds = 0;
+
+    PixVinzGame.gameStarted = false;
+
+    PixVinzGame.gameFinished = false;
+
+}
+
+
+/* =========================================================
+   CLEAR BOARD
+========================================================= */
+
+function clearBoard() {
+
+    if (!gameElements.board) {
+        return;
+    }
+
+    gameElements.board.innerHTML = "";
+
+}
+
+
+/* =========================================================
+   CREATE PUZZLE
+========================================================= */
+
+function createPuzzle() {
+
+    const level =
+        PixVinzGame.level;
+
+    const grid =
+        PixVinzGame.gridSize;
+
+    const imagePath =
+        getImagePath(level);
+
+
+    /*
+       Create the correct piece order.
+
+       Example for 3x3:
+
+       0 1 2
+       3 4 5
+       6 7 8
+    */
+
+    PixVinzGame.pieces =
+        Array.from(
+            {
+                length:
+                    PixVinzGame.totalPieces
+            },
+            (_, index) => index
+        );
+
+
+    /*
+       Shuffle until the puzzle is
+       actually different from solved.
+    */
+
+    shufflePieces();
+
+
+    gameElements.board.style.gridTemplateColumns =
+        `repeat(${grid}, 1fr)`;
+
+
+    gameElements.board.style.gridTemplateRows =
+        `repeat(${grid}, 1fr)`;
+
+
+    createPuzzlePieces(imagePath);
+
+}
+
+
+/* =========================================================
+   SHUFFLE PIECES
+========================================================= */
+
+function shufflePieces() {
+
+    let attempts = 0;
+
+    do {
+
+        for (
+            let i =
+                PixVinzGame.pieces.length - 1;
+
+            i > 0;
+
+            i--
+        ) {
+
+            const randomIndex =
+                Math.floor(
+                    Math.random() * (i + 1)
+                );
+
+            [
+                PixVinzGame.pieces[i],
+                PixVinzGame.pieces[randomIndex]
+            ] = [
+                PixVinzGame.pieces[randomIndex],
+                PixVinzGame.pieces[i]
+            ];
+
+        }
+
+        attempts++;
+
+    } while (
+        isPuzzleSolved() &&
+        attempts < 10
     );
 
-    localStorage.setItem(
-      STORAGE.solved,
-      String(state.solved)
-    );
+}
 
-    localStorage.setItem(
-      STORAGE.puzzle,
-      String(state.puzzleIndex)
-    );
-  }
 
-  /* -------------------------------------------------------
-     TIMER
-  ------------------------------------------------------- */
+/* =========================================================
+   CREATE PUZZLE PIECES
+========================================================= */
 
-  function formatTime(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
+function createPuzzlePieces(imagePath) {
 
-    return (
-      String(minutes).padStart(2, "0") +
-      ":" +
-      String(secs).padStart(2, "0")
-    );
-  }
+    const grid =
+        PixVinzGame.gridSize;
 
-  function startTimer() {
-    if (state.timerId || state.locked) return;
 
-    state.started = true;
+    PixVinzGame.pieces.forEach(
+        (pieceNumber, boardIndex) => {
 
-    state.timerId = setInterval(() => {
-      state.seconds++;
-      updateStats();
-    }, 1000);
-  }
+            const piece =
+                document.createElement("button");
 
-  function stopTimer() {
-    if (state.timerId) {
-      clearInterval(state.timerId);
-      state.timerId = null;
-    }
-  }
+            piece.type =
+                "button";
 
-  /* -------------------------------------------------------
-     STATS
-  ------------------------------------------------------- */
+            piece.className =
+                "puzzle-piece";
 
-  function updateStats() {
-    if (dom.moves) {
-      dom.moves.textContent = state.moves;
-    }
+            piece.dataset.index =
+                String(boardIndex);
 
-    if (dom.time) {
-      dom.time.textContent =
-        formatTime(state.seconds);
-    }
+            piece.dataset.piece =
+                String(pieceNumber);
 
-    if (dom.coins) {
-      dom.coins.textContent = state.coins;
-    }
-
-    const total =
-      Math.max(getImages().length, 1);
-
-    const percent = Math.min(
-      100,
-      Math.round(
-        (state.solved / total) * 100
-      )
-    );
-
-    if (dom.progress) {
-      dom.progress.style.setProperty(
-        "--progress",
-        `${percent}%`
-      );
-
-      if ("value" in dom.progress) {
-        dom.progress.value = percent;
-      }
-    }
-
-    document
-      .querySelectorAll("[data-stat='solved']")
-      .forEach(el => {
-        el.textContent = state.solved;
-      });
-
-    document
-      .querySelectorAll("[data-stat='progress']")
-      .forEach(el => {
-        el.textContent = `${percent}%`;
-      });
-  }
-
-  /* -------------------------------------------------------
-     PUZZLE LOGIC
-  ------------------------------------------------------- */
-
-  function solvedBoard() {
-    return Array.from(
-      {
-        length:
-          CONFIG.size * CONFIG.size
-      },
-      (_, index) => index
-    );
-  }
-
-  function getNeighbors(position) {
-    const result = [];
-
-    const row =
-      Math.floor(position / CONFIG.size);
-
-    const column =
-      position % CONFIG.size;
-
-    if (row > 0) {
-      result.push(
-        position - CONFIG.size
-      );
-    }
-
-    if (row < CONFIG.size - 1) {
-      result.push(
-        position + CONFIG.size
-      );
-    }
-
-    if (column > 0) {
-      result.push(position - 1);
-    }
-
-    if (column < CONFIG.size - 1) {
-      result.push(position + 1);
-    }
-
-    return result;
-  }
-
-  function isSolved() {
-    return state.tiles.every(
-      (value, index) =>
-        value === index
-    );
-  }
-
-  function shuffleBoard() {
-    state.tiles = solvedBoard();
-
-    let blank =
-      state.tiles.length - 1;
-
-    let previous = -1;
-
-    for (
-      let i = 0;
-      i < CONFIG.shuffleMoves;
-      i++
-    ) {
-      let choices =
-        getNeighbors(blank)
-          .filter(
-            position =>
-              position !== previous
-          );
-
-      if (!choices.length) {
-        choices =
-          getNeighbors(blank);
-      }
-
-      const target =
-        choices[
-          Math.floor(
-            Math.random() *
-            choices.length
-          )
-        ];
-
-      [
-        state.tiles[blank],
-        state.tiles[target]
-      ] = [
-        state.tiles[target],
-        state.tiles[blank]
-      ];
-
-      previous = blank;
-      blank = target;
-    }
-
-    if (isSolved()) {
-      const target =
-        getNeighbors(blank)[0];
-
-      [
-        state.tiles[blank],
-        state.tiles[target]
-      ] = [
-        state.tiles[target],
-        state.tiles[blank]
-      ];
-    }
-  }
-
-  /* -------------------------------------------------------
-     BOARD
-  ------------------------------------------------------- */
-
-  function renderBoard() {
-    if (!dom.board) return;
-
-    dom.board.innerHTML = "";
-
-    dom.board.style.setProperty(
-      "--grid-size",
-      CONFIG.size
-    );
-
-    const fragment =
-      document.createDocumentFragment();
-
-    const lastTile =
-      CONFIG.size * CONFIG.size - 1;
-
-    state.tiles.forEach(
-      (tileValue, position) => {
-
-        const tile =
-          document.createElement("button");
-
-        tile.type = "button";
-
-        tile.className =
-          "puzzle-tile";
-
-        tile.dataset.position =
-          position;
-
-        tile.dataset.value =
-          tileValue;
-
-        if (tileValue === lastTile) {
-
-          tile.classList.add(
-            "is-empty"
-          );
-
-          tile.disabled = true;
-
-        } else {
-
-          const row =
-            Math.floor(
-              tileValue /
-              CONFIG.size
+            piece.setAttribute(
+                "aria-label",
+                `Puzzle piece ${pieceNumber + 1}`
             );
 
-          const column =
-            tileValue %
-            CONFIG.size;
 
-          tile.style.backgroundImage =
-            `url("${getCurrentImage()}")`;
+            /*
+               Every piece displays the same
+               original image.
 
-          const percentage =
-            100 /
-            (CONFIG.size - 1);
+               Background positioning determines
+               which section of the image appears.
+            */
 
-          tile.style.backgroundPosition =
-            `${column * percentage}% ${row * percentage}%`;
+            piece.style.backgroundImage =
+                `url("${imagePath}")`;
 
-          tile.addEventListener(
-            "click",
-            () => moveTile(position)
-          );
+
+            const originalRow =
+                Math.floor(
+                    pieceNumber / grid
+                );
+
+            const originalColumn =
+                pieceNumber % grid;
+
+
+            const positionX =
+                grid === 1
+                    ? 0
+                    : (
+                        originalColumn /
+                        (grid - 1)
+                    ) * 100;
+
+
+            const positionY =
+                grid === 1
+                    ? 0
+                    : (
+                        originalRow /
+                        (grid - 1)
+                    ) * 100;
+
+
+            piece.style.backgroundPosition =
+                `${positionX}% ${positionY}%`;
+
+
+            /*
+               Scale the original image so that
+               the correct section fills the tile.
+            */
+
+            piece.style.backgroundSize =
+                `${grid * 100}% ${grid * 100}%`;
+
+
+            piece.addEventListener(
+                "click",
+                handlePieceClick
+            );
+
+
+            gameElements.board.appendChild(
+                piece
+            );
+
         }
-
-        fragment.appendChild(tile);
-      }
     );
 
-    dom.board.appendChild(
-      fragment
-    );
-  }
+}
 
-  /* -------------------------------------------------------
-     MOVE
-  ------------------------------------------------------- */
 
-  function moveTile(position) {
-    if (state.locked) return;
+/* =========================================================
+   PIECE CLICK
+========================================================= */
 
-    const blank =
-      state.tiles.indexOf(
-        CONFIG.size *
-        CONFIG.size -
-        1
-      );
+function handlePieceClick(event) {
 
     if (
-      !getNeighbors(blank)
-        .includes(position)
+        PixVinzGame.gameFinished
     ) {
-      return;
+        return;
     }
 
-    if (!state.started) {
-      startTimer();
-    }
 
-    [
-      state.tiles[blank],
-      state.tiles[position]
-    ] = [
-      state.tiles[position],
-      state.tiles[blank]
-    ];
+    const piece =
+        event.currentTarget;
 
-    state.moves++;
 
-    renderBoard();
-    updateStats();
+    const index =
+        Number(
+            piece.dataset.index
+        );
 
-    if (isSolved()) {
-      finishPuzzle();
-    }
-  }
 
-  /* -------------------------------------------------------
-     NEW GAME
-  ------------------------------------------------------- */
-
-  function newPuzzle() {
-    stopTimer();
-
-    state.moves = 0;
-    state.seconds = 0;
-
-    state.started = false;
-    state.locked = false;
-
-    shuffleBoard();
-
-    renderBoard();
-    updateStats();
-
-    if (dom.image) {
-      dom.image.src =
-        getCurrentImage();
-    }
-
-    closeVictory();
-  }
-
-  /* -------------------------------------------------------
-     VICTORY
-  ------------------------------------------------------- */
-
-  function finishPuzzle() {
-    state.locked = true;
-
-    stopTimer();
-
-    const reward =
-      CONFIG.coinReward +
-      Math.max(
-        0,
-        15 -
-        Math.floor(
-          state.moves / 10
-        )
-      );
-
-    state.coins += reward;
-    state.solved++;
-
-    const best =
-      Number(
-        localStorage.getItem(
-          STORAGE.bestTime
-        )
-      ) || 0;
+    /*
+       First selection
+    */
 
     if (
-      !best ||
-      state.seconds < best
+        PixVinzGame.selectedIndex === null
     ) {
-      localStorage.setItem(
-        STORAGE.bestTime,
-        String(state.seconds)
-      );
+
+        selectPiece(index);
+
+        startGameIfNeeded();
+
+        return;
     }
 
-    saveState();
-    updateStats();
-    renderCollection();
 
-    if (dom.victoryMoves) {
-      dom.victoryMoves.textContent =
-        state.moves;
+    /*
+       Clicking the same piece again
+       cancels the selection.
+    */
+
+    if (
+        PixVinzGame.selectedIndex === index
+    ) {
+
+        deselectPiece();
+
+        return;
     }
 
-    if (dom.victoryTime) {
-      dom.victoryTime.textContent =
-        formatTime(state.seconds);
-    }
 
-    if (dom.victoryCoins) {
-      dom.victoryCoins.textContent =
-        `+${reward}`;
-    }
+    /*
+       Second piece selected.
+       Swap them.
+    */
 
-    openVictory();
-  }
-
-  function openVictory() {
-    if (!dom.victory) return;
-
-    dom.victory.hidden = false;
-
-    requestAnimationFrame(() => {
-      dom.victory.classList.add(
-        "is-open"
-      );
-    });
-
-    document.body.classList.add(
-      "modal-open"
-    );
-  }
-
-  function closeVictory() {
-    if (!dom.victory) return;
-
-    dom.victory.classList.remove(
-      "is-open"
+    swapPieces(
+        PixVinzGame.selectedIndex,
+        index
     );
 
-    dom.victory.hidden = true;
+}
 
-    document.body.classList.remove(
-      "modal-open"
-    );
-  }
 
-  /* -------------------------------------------------------
-     NEXT PUZZLE
-  ------------------------------------------------------- */
+/* =========================================================
+   SELECT PIECE
+========================================================= */
 
-  function nextPuzzle() {
-    const images = getImages();
+function selectPiece(index) {
 
-    state.puzzleIndex =
-      (
-        state.puzzleIndex + 1
-      ) % images.length;
+    deselectPiece();
 
-    saveState();
-    newPuzzle();
-  }
+    PixVinzGame.selectedIndex =
+        index;
 
-  /* -------------------------------------------------------
-     COLLECTION
-  ------------------------------------------------------- */
 
-  function renderCollection() {
-    if (!dom.collection) return;
+    const piece =
+        getBoardPiece(index);
 
-    const images = getImages();
 
-    dom.collection.innerHTML = "";
+    if (piece) {
 
-    images.forEach(
-      (src, index) => {
-
-        const item =
-          document.createElement("button");
-
-        item.type = "button";
-
-        item.className =
-          "collection-item";
-
-        item.classList.toggle(
-          "is-current",
-          index === state.puzzleIndex
+        piece.classList.add(
+            "selected"
         );
 
-        item.classList.toggle(
-          "is-unlocked",
-          index <= state.solved
-        );
+    }
 
-        const image =
-          document.createElement("img");
+}
 
-        image.src = src;
 
-        image.alt =
-          `PixVinz Puzzle ${index + 1}`;
+/* =========================================================
+   DESELECT PIECE
+========================================================= */
 
-        image.loading = "lazy";
-
-        const label =
-          document.createElement("span");
-
-        label.textContent =
-          index <= state.solved
-            ? `Puzzle ${index + 1}`
-            : `Locked ${index + 1}`;
-
-        item.appendChild(image);
-        item.appendChild(label);
-
-        if (index <= state.solved) {
-          item.addEventListener(
-            "click",
-            () => {
-
-              state.puzzleIndex =
-                index;
-
-              saveState();
-
-              newPuzzle();
-            }
-          );
-        }
-
-        dom.collection.appendChild(
-          item
-        );
-      }
-    );
+function deselectPiece() {
 
     document
-      .querySelectorAll(
-        "[data-collection-progress]"
-      )
-      .forEach(el => {
-        el.textContent =
-          `${Math.min(
-            state.solved,
-            images.length
-          )} / ${images.length}`;
-      });
-  }
+        .querySelectorAll(
+            ".puzzle-piece.selected"
+        )
+        .forEach(
+            piece => {
+                piece.classList.remove(
+                    "selected"
+                );
+            }
+        );
 
-  /* -------------------------------------------------------
-     KEYBOARD
-  ------------------------------------------------------- */
 
-  function keyboardControls(event) {
-    if (state.locked) return;
+    PixVinzGame.selectedIndex =
+        null;
 
-    const blank =
-      state.tiles.indexOf(
-        CONFIG.size *
-        CONFIG.size -
-        1
-      );
+}
 
-    const row =
-      Math.floor(
-        blank / CONFIG.size
-      );
 
-    const column =
-      blank % CONFIG.size;
+/* =========================================================
+   GET BOARD PIECE
+========================================================= */
 
-    let target = -1;
+function getBoardPiece(index) {
 
-    if (
-      event.key === "ArrowUp" &&
-      row <
-        CONFIG.size - 1
-    ) {
-      target =
-        blank + CONFIG.size;
-    }
+    return gameElements.board
+        .querySelector(
+            `.puzzle-piece[data-index="${index}"]`
+        );
 
-    if (
-      event.key === "ArrowDown" &&
-      row > 0
-    ) {
-      target =
-        blank - CONFIG.size;
-    }
+}
 
-    if (
-      event.key === "ArrowLeft" &&
-      column <
-        CONFIG.size - 1
-    ) {
-      target =
-        blank + 1;
-    }
 
-    if (
-      event.key === "ArrowRight" &&
-      column > 0
-    ) {
-      target =
-        blank - 1;
-    }
+/* =========================================================
+   SWAP PIECES
+========================================================= */
 
-    if (target >= 0) {
-      event.preventDefault();
-      moveTile(target);
-    }
-  }
+function swapPieces(firstIndex, secondIndex) {
 
-  /* -------------------------------------------------------
-     EVENTS
-  ------------------------------------------------------- */
+    const firstPiece =
+        PixVinzGame.pieces[firstIndex];
 
-  function bindEvents() {
+    const secondPiece =
+        PixVinzGame.pieces[secondIndex];
 
-    if (dom.shuffle) {
-      dom.shuffle.addEventListener(
-        "click",
-        newPuzzle
-      );
-    }
 
-    if (dom.playAgain) {
-      dom.playAgain.addEventListener(
-        "click",
-        nextPuzzle
-      );
-    }
+    PixVinzGame.pieces[firstIndex] =
+        secondPiece;
 
-    if (dom.closeVictory) {
-      dom.closeVictory.addEventListener(
-        "click",
-        closeVictory
-      );
-    }
+    PixVinzGame.pieces[secondIndex] =
+        firstPiece;
 
-    if (dom.victory) {
-      dom.victory.addEventListener(
-        "click",
-        event => {
-          if (
-            event.target ===
-            dom.victory
-          ) {
-            closeVictory();
-          }
+
+    PixVinzGame.moves++;
+
+    updateMoveDisplay();
+
+    deselectPiece();
+
+    renderPiecePositions();
+
+    checkPuzzleCompletion();
+
+}
+
+
+/* =========================================================
+   RENDER PIECE POSITIONS
+========================================================= */
+
+function renderPiecePositions() {
+
+    const grid =
+        PixVinzGame.gridSize;
+
+    const pieces =
+        gameElements.board
+            .querySelectorAll(
+                ".puzzle-piece"
+            );
+
+
+    pieces.forEach(
+        (piece, boardIndex) => {
+
+            const pieceNumber =
+                PixVinzGame.pieces[
+                    boardIndex
+                ];
+
+
+            piece.dataset.piece =
+                String(pieceNumber);
+
+
+            const originalRow =
+                Math.floor(
+                    pieceNumber / grid
+                );
+
+
+            const originalColumn =
+                pieceNumber % grid;
+
+
+            const positionX =
+                grid === 1
+                    ? 0
+                    : (
+                        originalColumn /
+                        (grid - 1)
+                    ) * 100;
+
+
+            const positionY =
+                grid === 1
+                    ? 0
+                    : (
+                        originalRow /
+                        (grid - 1)
+                    ) * 100;
+
+
+            piece.style.backgroundPosition =
+                `${positionX}% ${positionY}%`;
+
         }
-      );
-    }
-
-    document.addEventListener(
-      "keydown",
-      keyboardControls
     );
-  }
 
-  /* -------------------------------------------------------
-     MOBILE VIEWPORT FIT
-  ------------------------------------------------------- */
+}
 
-  function updateViewportHeight() {
 
-    const viewportHeight =
-      window.visualViewport
-        ? window.visualViewport.height
-        : window.innerHeight;
+/* =========================================================
+   START GAME
+========================================================= */
 
-    document.documentElement.style.setProperty(
-      "--pv-vh",
-      `${viewportHeight}px`
-    );
-  }
-
-  /* -------------------------------------------------------
-     PUBLIC API
-  ------------------------------------------------------- */
-
-  window.PixVinz = {
-
-    newGame: newPuzzle,
-
-    shuffle: newPuzzle,
-
-    nextPuzzle,
-
-    setPuzzle(index) {
-      const images = getImages();
-
-      if (
-        !Number.isInteger(index) ||
-        index < 0 ||
-        index >= images.length
-      ) {
-        return;
-      }
-
-      state.puzzleIndex = index;
-
-      saveState();
-      newPuzzle();
-    },
-
-    getState() {
-      return {
-        ...state,
-        tiles: [
-          ...state.tiles
-        ]
-      };
-    }
-  };
-
-  /* -------------------------------------------------------
-     INIT
-  ------------------------------------------------------- */
-
-  function init() {
-
-    updateViewportHeight();
-
-    if (!dom.board) {
-      console.warn(
-        "PixVinz: game board not found."
-      );
-      return;
-    }
-
-    bindEvents();
-    renderCollection();
-    newPuzzle();
-
-    window.addEventListener(
-      "resize",
-      updateViewportHeight,
-      { passive: true }
-    );
+function startGameIfNeeded() {
 
     if (
-      window.visualViewport
+        PixVinzGame.gameStarted
     ) {
-      window.visualViewport.addEventListener(
-        "resize",
-        updateViewportHeight,
-        { passive: true }
-      );
+        return;
     }
-  }
 
-  if (
-    document.readyState ===
-    "loading"
-  ) {
-    document.addEventListener(
-      "DOMContentLoaded",
-      init
+
+    PixVinzGame.gameStarted =
+        true;
+
+
+    startTimer();
+
+}
+
+
+/* =========================================================
+   TIMER
+========================================================= */
+
+function startTimer() {
+
+    stopTimer();
+
+
+    PixVinzGame.timerInterval =
+        window.setInterval(
+            () => {
+
+                if (
+                    PixVinzGame.gameFinished
+                ) {
+                    return;
+                }
+
+
+                PixVinzGame.elapsedSeconds++;
+
+                updateTimerDisplay();
+
+            },
+            1000
+        );
+
+}
+
+
+/* =========================================================
+   STOP TIMER
+========================================================= */
+
+function stopTimer() {
+
+    if (
+        PixVinzGame.timerInterval !== null
+    ) {
+
+        window.clearInterval(
+            PixVinzGame.timerInterval
+        );
+
+        PixVinzGame.timerInterval =
+            null;
+
+    }
+
+}
+
+
+/* =========================================================
+   FORMAT TIME
+========================================================= */
+
+function formatTime(totalSeconds) {
+
+    const minutes =
+        Math.floor(
+            totalSeconds / 60
+        );
+
+
+    const seconds =
+        totalSeconds % 60;
+
+
+    return (
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(seconds).padStart(2, "0")
     );
-  } else {
-    init();
-  }
 
-})();
+}
+
+
+/* =========================================================
+   UPDATE TIMER
+========================================================= */
+
+function updateTimerDisplay() {
+
+    if (!gameElements.timer) {
+        return;
+    }
+
+    gameElements.timer.textContent =
+        formatTime(
+            PixVinzGame.elapsedSeconds
+        );
+
+}
+
+
+/* =========================================================
+   UPDATE MOVES
+========================================================= */
+
+function updateMoveDisplay() {
+
+    if (!gameElements.moveCount) {
+        return;
+    }
+
+    gameElements.moveCount.textContent =
+        String(
+            PixVinzGame.moves
+        );
+
+}
+
+
+/* =========================================================
+   CHECK COMPLETION
+========================================================= */
+
+function checkPuzzleCompletion() {
+
+    if (
+        !isPuzzleSolved()
+    ) {
+        return;
+    }
+
+
+    finishPuzzle();
+
+}
+
+
+/* =========================================================
+   SOLVED CHECK
+========================================================= */
+
+function isPuzzleSolved() {
+
+    for (
+        let index = 0;
+
+        index < PixVinzGame.pieces.length;
+
+        index++
+    ) {
+
+        if (
+            PixVinzGame.pieces[index] !== index
+        ) {
+
+            return false;
+
+        }
+
+    }
+
+
+    return true;
+
+}
+
+
+/* =========================================================
+   FINISH PUZZLE
+========================================================= */
+
+function finishPuzzle() {
+
+    if (
+        PixVinzGame.gameFinished
+    ) {
+        return;
+    }
+
+
+    PixVinzGame.gameFinished =
+        true;
+
+
+    stopTimer();
+
+    deselectPiece();
+
+    markCorrectPieces();
+
+    const stars =
+        calculateStars(
+            PixVinzGame.elapsedSeconds,
+            PixVinzGame.moves,
+            PixVinzGame.level
+        );
+
+
+    showVictoryScreen(
+        stars
+    );
+
+
+    /*
+       Send a clean event for save.js.
+
+       save.js can listen to this event later
+       without us duplicating its saving logic here.
+    */
+
+    document.dispatchEvent(
+        new CustomEvent(
+            "pixvinz:puzzleComplete",
+            {
+                detail: {
+
+                    level:
+                        PixVinzGame.level,
+
+                    time:
+                        PixVinzGame.elapsedSeconds,
+
+                    moves:
+                        PixVinzGame.moves,
+
+                    stars:
+                        stars
+
+                }
+            }
+        )
+    );
+
+}
+
+
+/* =========================================================
+   MARK CORRECT PIECES
+========================================================= */
+
+function markCorrectPieces() {
+
+    const pieces =
+        gameElements.board
+            .querySelectorAll(
+                ".puzzle-piece"
+            );
+
+
+    pieces.forEach(
+        (piece, index) => {
+
+            if (
+                PixVinzGame.pieces[index] === index
+            ) {
+
+                piece.classList.add(
+                    "correct"
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   STAR CALCULATION
+=========================================================
+
+   Current temporary rule:
+
+   Level 1–50:
+   3 stars = 30 sec or less AND 30 moves or less
+
+   The remaining thresholds are intentionally
+   kept conservative until we finalize your
+   complete star rules.
+
+   This function is isolated so we can edit
+   the rules later without touching the
+   puzzle engine.
+========================================================= */
+
+function calculateStars(
+    time,
+    moves,
+    level
+) {
+
+    /*
+       Current requested 3-star condition.
+    */
+
+    if (
+        level >= 1 &&
+        level <= 50 &&
+        time <= 30 &&
+        moves <= 30
+    ) {
+
+        return 3;
+
+    }
+
+
+    /*
+       Temporary 2-star condition.
+
+       We can finalize these thresholds
+       before release.
+    */
+
+    if (
+        level >= 1 &&
+        level <= 50 &&
+        time <= 60 &&
+        moves <= 50
+    ) {
+
+        return 2;
+
+    }
+
+
+    /*
+       Every completed puzzle receives
+       at least one star.
+    */
+
+    return 1;
+
+}
+
+
+/* =========================================================
+   STARS DISPLAY
+========================================================= */
+
+function starsToText(stars) {
+
+    return (
+        "★".repeat(stars) +
+        "☆".repeat(3 - stars)
+    );
+
+}
+
+
+/* =========================================================
+   SHOW VICTORY SCREEN
+========================================================= */
+
+function showVictoryScreen(stars) {
+
+    const imagePath =
+        getImagePath(
+            PixVinzGame.level
+        );
+
+
+    if (gameElements.victoryImage) {
+
+        gameElements.victoryImage.src =
+            imagePath;
+
+    }
+
+
+    if (gameElements.victoryStars) {
+
+        gameElements.victoryStars.textContent =
+            starsToText(stars);
+
+    }
+
+
+    if (gameElements.victoryTime) {
+
+        gameElements.victoryTime.textContent =
+            formatTime(
+                PixVinzGame.elapsedSeconds
+            );
+
+    }
+
+
+    if (gameElements.victoryMoves) {
+
+        gameElements.victoryMoves.textContent =
+            String(
+                PixVinzGame.moves
+            );
+
+    }
+
+
+    /*
+       Best results are deliberately not
+       calculated here.
+
+       save.js will become the owner of
+       persistent best-score data.
+    */
+
+    if (gameElements.bestTime) {
+
+        gameElements.bestTime.textContent =
+            "--";
+
+    }
+
+
+    if (gameElements.bestMoves) {
+
+        gameElements.bestMoves.textContent =
+            "--";
+
+    }
+
+
+    if (gameElements.bestStars) {
+
+        gameElements.bestStars.textContent =
+            "☆☆☆";
+
+    }
+
+
+    /*
+       Coin calculation is intentionally
+       not performed here.
+
+       The coin system belongs in save.js
+       / progression logic so coins cannot
+       accidentally be farmed.
+    */
+
+    if (gameElements.coinsEarned) {
+
+        gameElements.coinsEarned.textContent =
+            "+0";
+
+    }
+
+
+    if (gameElements.victoryModal) {
+
+        gameElements.victoryModal.classList.remove(
+            "hidden"
+        );
+
+    }
+
+
+    /*
+       No next-level navigation is enabled
+       here yet.
+
+       We will connect it to the unlock
+       system after the core engine is tested.
+    */
+
+    updateNextLevelButton();
+
+}
+
+
+/* =========================================================
+   NEXT LEVEL BUTTON
+========================================================= */
+
+function updateNextLevelButton() {
+
+    if (!gameElements.nextLevelButton) {
+        return;
+    }
+
+
+    const nextLevel =
+        PixVinzGame.level + 1;
+
+
+    if (nextLevel > 200) {
+
+        gameElements.nextLevelButton.textContent =
+            "ALL LEVELS COMPLETE";
+
+        gameElements.nextLevelButton.disabled =
+            true;
+
+        gameElements.nextLevelButton.style.opacity =
+            "0.5";
+
+        return;
+
+    }
+
+
+    gameElements.nextLevelButton.textContent =
+        `NEXT LEVEL`;
+
+}
+
+
+/* =========================================================
+   SHUFFLE BUTTON
+========================================================= */
+
+function shuffleCurrentPuzzle() {
+
+    if (
+        PixVinzGame.gameFinished
+    ) {
+        return;
+    }
+
+
+    shufflePieces();
+
+    deselectPiece();
+
+    renderPiecePositions();
+
+
+    setGameMessage(
+        "Puzzle shuffled"
+    );
+
+
+    /*
+       Shuffling is considered a move
+       because the player requested a
+       new board arrangement.
+    */
+
+    PixVinzGame.moves++;
+
+    updateMoveDisplay();
+
+}
+
+
+/* =========================================================
+   RESTART BUTTON
+========================================================= */
+
+function restartCurrentPuzzle() {
+
+    loadPuzzle();
+
+}
+
+
+/* =========================================================
+   GAME MESSAGE
+========================================================= */
+
+function setGameMessage(message) {
+
+    if (!gameElements.gameMessage) {
+        return;
+    }
+
+    gameElements.gameMessage.textContent =
+        message;
+
+}
+
+
+/* =========================================================
+   CLOSE VICTORY MODAL
+========================================================= */
+
+function closeVictoryModal() {
+
+    if (!gameElements.victoryModal) {
+        return;
+    }
+
+    gameElements.victoryModal.classList.add(
+        "hidden"
+    );
+
+}
+
+
+/* =========================================================
+   GO BACK
+========================================================= */
+
+function returnToLevels() {
+
+    /*
+       For now, return to index.html.
+       The level screen will be restored by
+       the main application once progression
+       integration is completed.
+    */
+
+    window.location.href =
+        "index.html#levels";
+
+}
+
+
+/* =========================================================
+   REPLAY
+========================================================= */
+
+function replayCurrentLevel() {
+
+    closeVictoryModal();
+
+    loadPuzzle();
+
+}
+
+
+/* =========================================================
+   NEXT LEVEL
+========================================================= */
+
+function openNextLevel() {
+
+    const nextLevel =
+        PixVinzGame.level + 1;
+
+
+    if (nextLevel > 200) {
+        return;
+    }
+
+
+    window.location.href =
+        `game.html?level=${nextLevel}`;
+
+}
+
+
+/* =========================================================
+   ATTACH EVENTS
+========================================================= */
+
+function attachGameEvents() {
+
+    if (gameElements.shuffleButton) {
+
+        gameElements.shuffleButton.addEventListener(
+            "click",
+            shuffleCurrentPuzzle
+        );
+
+    }
+
+
+    if (gameElements.restartButton) {
+
+        gameElements.restartButton.addEventListener(
+            "click",
+            restartCurrentPuzzle
+        );
+
+    }
+
+
+    if (gameElements.backButton) {
+
+        gameElements.backButton.addEventListener(
+            "click",
+            returnToLevels
+        );
+
+    }
+
+
+    if (gameElements.replayLevelButton) {
+
+        gameElements.replayLevelButton.addEventListener(
+            "click",
+            replayCurrentLevel
+        );
+
+    }
+
+
+    if (gameElements.nextLevelButton) {
+
+        gameElements.nextLevelButton.addEventListener(
+            "click",
+            openNextLevel
+        );
+
+    }
+
+
+    if (gameElements.levelsButton) {
+
+        gameElements.levelsButton.addEventListener(
+            "click",
+            returnToLevels
+        );
+
+    }
+
+
+    if (gameElements.victoryCloseButton) {
+
+        gameElements.victoryCloseButton.addEventListener(
+            "click",
+            closeVictoryModal
+        );
+
+    }
+
+
+    /*
+       Prevent accidental closing when the
+       player taps inside the modal.
+    */
+
+    if (gameElements.victoryModal) {
+
+        gameElements.victoryModal.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    event.target ===
+                    gameElements.victoryModal
+                ) {
+
+                    closeVictoryModal();
+
+                }
+
+            }
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   CLEANUP
+========================================================= */
+
+window.addEventListener(
+    "beforeunload",
+    stopTimer
+);
