@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   AudioManager.playMain();
+  updateCoinDisplay();
 
   const views = {
     home: document.getElementById('homeView'),
@@ -9,7 +10,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const currentLevel = parseInt(localStorage.getItem('currentLevel')) || 1;
 
+  function updateCoinDisplay() {
+    const totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
+    const coinElem = document.getElementById('coinCount');
+    if (coinElem) {
+      coinElem.innerText = totalCoins;
+    }
+  }
+
   function switchView(viewName) {
+    updateCoinDisplay();
     Object.values(views).forEach(v => v.classList.remove('active'));
     views[viewName].classList.add('active');
   }
@@ -68,11 +78,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('collectionsGrid');
     grid.innerHTML = '';
     
+    // Shows all completed/solved level images
     for (let i = 1; i < currentLevel; i++) {
       const item = document.createElement('div');
       item.className = 'collection-item';
-      item.innerHTML = `<img src="image/level${i}.jpeg" alt="Level ${i}">`;
+      
+      item.innerHTML = `
+        <img src="image/level${i}.jpeg" alt="Level ${i}">
+        <div class="collection-badge">LEVEL ${i.toString().padStart(2, '0')}</div>
+      `;
+
+      // Tap to open enlarged popup modal
+      item.addEventListener('click', () => {
+        AudioManager.playClick();
+        openImageModal(i);
+      });
+
       grid.appendChild(item);
     }
   }
+
+  function openImageModal(levelNum) {
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalPreviewImg');
+    const modalTitle = document.getElementById('modalLevelTitle');
+
+    modalTitle.innerText = `LEVEL ${levelNum.toString().padStart(2, '0')}`;
+    modalImg.src = `image/level${levelNum}.jpeg`;
+
+    modal.classList.remove('hidden');
+  }
+
+  function closeImageModal() {
+    AudioManager.playClick();
+    document.getElementById('imageModal').classList.add('hidden');
+  }
+
+  document.getElementById('closeImageModal').addEventListener('click', closeImageModal);
+  document.getElementById('imageModal').addEventListener('click', (e) => {
+    if (e.target.id === 'imageModal' || e.target.id === 'modalPreviewImg') {
+      closeImageModal();
+    }
+  });
 });
