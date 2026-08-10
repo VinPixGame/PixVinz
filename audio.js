@@ -1,19 +1,22 @@
-// Global Audio Handler
-const bgAudio = new Audio('sounds/bgmusic.mp3');
-bgAudio.loop = true;
+// Single audio instances to prevent sound overlapping
+const clickSfx = new Audio('sounds/main.mp3');
+const bgMusic = new Audio('sounds/bgmusic.mp3');
+bgMusic.loop = true;
+
 let soundEnabled = true;
 
 function playClick() {
-    if (!soundEnabled) return;
-    const clickAudio = new Audio('sounds/main.mp3');
-    clickAudio.play().catch(() => {});
+  if (!soundEnabled) return;
+  clickSfx.currentTime = 0; // Reset sound position to avoid overlap
+  clickSfx.play().catch(() => {});
 }
 
 function toggleSound(enabled) {
-    soundEnabled = enabled;
-    if (!enabled) {
-        bgAudio.pause();
-    } else {
-        bgAudio.play().catch(() => {});
-    }
+  soundEnabled = enabled;
+  if (!enabled) {
+    bgMusic.pause();
+    clickSfx.pause();
+  } else {
+    bgMusic.play().catch(() => {});
+  }
 }
