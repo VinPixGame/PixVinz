@@ -2,89 +2,53 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#160b27">
-  <title>PixVinz — Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>PixVinz - Game</title>
+  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="game.css">
 </head>
 <body>
-  <main id="gameScreen" class="game-screen">
-    <header class="game-topbar">
-      <button id="backButton" class="icon-button" type="button" aria-label="Back">‹</button>
-
-      <video class="game-logo" src="image/logo.webm" autoplay muted loop playsinline aria-label="PixVinz logo"></video>
-
-      <div class="coin-display" aria-label="Coins">
-        <span class="coin-icon">🪙</span>
-        <strong id="coinCount">0</strong>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="top-bar">
+      <button class="icon-btn" id="backToHome">‹</button>
+      <div class="logo-container">
+        <video id="logoVideo" autoplay loop muted playsinline width="100">
+          <source src="image/logo.webm" type="video/webm">
+        </video>
       </div>
+      <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
     </header>
 
-    <section class="game-content">
-      <div class="game-stats" aria-label="Puzzle statistics">
-        <div class="stat-card">
-          <span>LEVEL</span>
-          <strong id="levelNumber">01</strong>
-        </div>
-        <div class="stat-card">
-          <span>TIME</span>
-          <strong id="timeDisplay">00:00</strong>
-        </div>
-        <div class="stat-card">
-          <span>MOVES</span>
-          <strong id="movesDisplay">0</strong>
-        </div>
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-box">
+        <span class="stat-label">LEVEL</span>
+        <span class="stat-value" id="levelDisplay">01</span>
       </div>
-
-      <p id="gameMessage" class="game-message" aria-live="polite"></p>
-
-      <section class="board-wrap" aria-label="Puzzle">
-        <div id="puzzleBoard" class="puzzle-board"></div>
-      </section>
-
-      <div class="game-controls">
-        <button id="shuffleButton" class="game-control shuffle-button" type="button">
-          <span>🔀</span> Shuffle
-        </button>
-
-        <button id="collectionsButton" class="game-control collection-button" type="button">
-          <span>✨</span> Collections
-        </button>
+      <div class="stat-box">
+        <span class="stat-label">TIME</span>
+        <span class="stat-value" id="timerDisplay">00:00</span>
       </div>
-    </section>
-  </main>
-
-  <div id="victoryOverlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="victoryTitle">
-    <div class="victory-card">
-      <div class="victory-burst">🎉</div>
-      <h2 id="victoryTitle">Level Complete!</h2>
-
-      <div class="solved-image-wrap">
-        <img id="solvedImage" src="" alt="Solved puzzle">
+      <div class="stat-box">
+        <span class="stat-label">MOVES</span>
+        <span class="stat-value" id="movesDisplay">0</span>
       </div>
+    </div>
 
-      <div class="result-stats">
-        <div><span>Stars</span><strong id="resultStars">★★★</strong></div>
-        <div><span>Time</span><strong id="resultTime">00:00</strong></div>
-        <div><span>Moves</span><strong id="resultMoves">0</strong></div>
-      </div>
+    <!-- Puzzle Grid Area -->
+    <div class="puzzle-container">
+      <div class="puzzle-grid" id="puzzleGrid"></div>
+    </div>
 
-      <div class="best-stats">
-        <div><span>Best Time</span><strong id="bestTime">—</strong></div>
-        <div><span>Best Moves</span><strong id="bestMoves">—</strong></div>
-        <div><span>Best Stars</span><strong id="bestStars">—</strong></div>
-      </div>
-
-      <div class="coins-earned">
-        <span>🪙</span>
-        <strong>+<span id="coinsEarned">0</span></strong>
-      </div>
-
-      <button id="nextLevelButton" class="primary-button" type="button">NEXT LEVEL</button>
-      <button id="victoryCollectionsButton" class="secondary-button" type="button">COLLECTIONS</button>
+    <!-- Action Controls -->
+    <div class="action-buttons">
+      <button class="btn btn-action" id="shuffleBtn">🔀 SHUFFLE</button>
+      <button class="btn btn-action" id="collectionsBtn">✨ COLLECTIONS</button>
     </div>
   </div>
 
+  <script src="audio.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
