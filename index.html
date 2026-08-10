@@ -8,18 +8,18 @@
 </head>
 <body>
   <div class="app-container">
-    <!-- Header -->
+    <!-- Top Header Bar -->
     <header class="top-bar">
       <button class="icon-btn" id="menuBtn">☰</button>
       <div class="logo-container">
-        <video id="logoVideo" autoplay loop muted playsinline width="100">
+        <video id="logoVideo" autoplay loop muted playsinline>
           <source src="image/logo.webm" type="video/webm">
         </video>
       </div>
       <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
     </header>
 
-    <!-- HOME PAGE -->
+    <!-- HOME PAGE VIEW -->
     <section id="homeView" class="view active">
       <div class="card welcome-card">
         <p class="sub-title">WELCOME</p>
@@ -55,7 +55,7 @@
       </div>
     </section>
 
-    <!-- LEVELS PAGE -->
+    <!-- LEVELS PAGE VIEW -->
     <section id="levelsView" class="view">
       <div class="view-header">
         <button class="icon-btn back-btn">‹</button>
@@ -67,7 +67,7 @@
       </div>
     </section>
 
-    <!-- COLLECTIONS PAGE -->
+    <!-- COLLECTIONS PAGE VIEW -->
     <section id="collectionsView" class="view">
       <div class="view-header">
         <button class="icon-btn back-btn">‹</button>
@@ -75,6 +75,19 @@
       </div>
       <div class="collections-grid" id="collectionsGrid"></div>
     </section>
+  </div>
+
+  <!-- ENLARGED IMAGE POPUP MODAL FOR COLLECTIONS -->
+  <div id="imageModal" class="modal-overlay hidden">
+    <div class="image-modal-card">
+      <div class="image-modal-header">
+        <span id="modalLevelTitle">LEVEL 01</span>
+        <button class="icon-btn close-modal-btn" id="closeImageModal">✕</button>
+      </div>
+      <div class="modal-img-container">
+        <img id="modalPreviewImg" src="" alt="Enlarged Preview">
+      </div>
+    </div>
   </div>
 
   <script src="audio.js"></script>
