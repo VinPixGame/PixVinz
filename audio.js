@@ -1,9 +1,9 @@
 const AudioManager = {
-  bgMusic: new Audio('sound/bgmusic.mp3'),
-  mainMusic: new Audio('sound/main.mp3'),
-  clickSound: new Audio('sound/click.mp3'),
-  selectSound: new Audio('sound/select.mp3'),
-  shuffleSound: new Audio('sound/shuffle.mp3'),
+  bgMusic: new Audio('sounds/bgmusic.mp3'),
+  mainMusic: new Audio('sounds/main.mp3'),
+  clickSound: new Audio('sounds/click.mp3'),
+  selectSound: new Audio('sounds/select.mp3'),
+  shuffleSound: new Audio('sounds/shuffle.mp3'),
   isUnlocked: false,
 
   init() {
