@@ -1051,24 +1051,37 @@ input:checked + .slider:before {
   cursor: pointer !important;
 }
 
-/* Fix Top Bar & Logo Video Scaling */
+/* Hard Lock Header & Logo Dimensions */
 .top-bar {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  padding: 8px 16px !important;
+  height: 60px !important;
+  min-height: 60px !important;
+  max-height: 60px !important;
+  padding: 0 12px !important;
+  box-sizing: border-box !important;
 }
 
 .logo-container {
+  height: 44px !important;
+  width: 140px !important;
   display: flex !important;
-  justify-content: center !important;
   align-items: center !important;
-  max-height: 50px !important; /* Constrains vertical stretch */
+  justify-content: center !important;
+  overflow: hidden !important;
 }
 
 #logoVideo {
-  max-height: 50px !important;
-  width: auto !important;
+  width: 100% !important;
+  height: 100% !important;
   object-fit: contain !important;
-  filter: drop-shadow(0 0 8px rgba(157, 78, 221, 0.5)) !important; /* Adds subtle neon pop */
+  display: block !important;
+}
+
+/* Align side icons to match header center */
+#backToHome,
+.coin-badge {
+  margin: 0 !important;
+  align-self: center !important;
 }
