@@ -10,6 +10,7 @@ const STATE = {
   timerSeconds: 0,
   timerInterval: null,
   boardState: [],
+  selectedTileIndex: null,
   settings: { sound: true, animations: true },
   audio: {
     main: new Audio('sounds/main.mp3'),
@@ -33,11 +34,19 @@ function playSound(type, levelNum = 1) {
     STATE.audio.bg.play().catch(() => {});
   } else if (type === 'victory') {
     STATE.audio.bg.pause();
-    // Rotates through victory1.mp3 to victory10.mp3 every 10 levels
     let trackIndex = ((levelNum - 1) % 10) + 1;
     STATE.audio.victory.src = `sounds/victory${trackIndex}.mp3`;
     STATE.audio.victory.play().catch(() => {});
   }
+}
+
+// --- DYNAMIC GRID HELPER ---
+function getGridSize(level) {
+  if (level <= 10) return 3;   // Levels 1-10: 3x3
+  if (level <= 20) return 4;   // Levels 11-20: 4x4
+  if (level <= 40) return 5;   // Levels 21-40: 5x5
+  if (level <= 60) return 6;   // Levels 41-60: 6x6
+  return 7;                    // Levels 61+: 7x7
 }
 
 // --- INITIALIZATION & ROUTING ---
@@ -93,7 +102,6 @@ function updateCoinDisplays() {
 
 // --- EVENT LISTENERS ---
 function setupEventListeners() {
-  // Start Audio Context on First Interaction
   document.body.addEventListener('click', () => {
     if (STATE.audio.main.paused && STATE.settings.sound && !document.getElementById('game-screen').classList.contains('active')) {
       playSound('main');
@@ -110,7 +118,7 @@ function setupEventListeners() {
     document.getElementById('login-form').classList.add('hidden');
   };
 
-  // Auth Submit
+  // Auth Form Handling
   document.getElementById('login-form').onsubmit = (e) => {
     e.preventDefault();
     const u = document.getElementById('login-username').value;
@@ -173,7 +181,7 @@ function setupEventListeners() {
   };
 }
 
-// --- LEVEL GRID ---
+// --- LEVEL SELECTION GRID ---
 function renderLevelGrid() {
   const grid = document.getElementById('level-grid');
   grid.innerHTML = '';
@@ -190,73 +198,95 @@ function renderLevelGrid() {
   }
 }
 
-// --- PUZZLE ENGINE (3x3 Sliding Puzzle) ---
+// --- PUZZLE ENGINE (Dynamic Tap-to-Swap) ---
 function startLevel(levelNum) {
   STATE.currentLevel = levelNum;
   STATE.moves = 0;
   STATE.timerSeconds = 0;
+  STATE.selectedTileIndex = null;
   document.getElementById('moves').textContent = '0';
   
   navigateTo('game-screen');
   startTimer();
 
-  // Board Setup (3x3 grid)
-  STATE.boardState = [0, 1, 2, 3, 4, 5, 6, 7, 8]; // 8 is empty space
-  renderBoard();
+  const gridSize = getGridSize(levelNum);
+  const totalTiles = gridSize * gridSize;
+  
+  STATE.boardState = Array.from({ length: totalTiles }, (_, i) => i);
   shuffleTiles();
 }
 
 function renderBoard() {
   const board = document.getElementById('puzzle-board');
   board.innerHTML = '';
+  
+  const gridSize = getGridSize(STATE.currentLevel);
+  board.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+  board.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
+
   const imgPath = `image/level${STATE.currentLevel}.jpeg`;
 
   STATE.boardState.forEach((tileVal, index) => {
     const tile = document.createElement('div');
     tile.className = 'tile';
     
-    if (tileVal === 8) {
-      tile.classList.add('empty');
-    } else {
-      const row = Math.floor(tileVal / 3);
-      const col = tileVal % 3;
-      tile.style.backgroundImage = `url('${imgPath}'), url('https://via.placeholder.com/320/2575fc/ffffff?text=Level+${STATE.currentLevel}')`;
-      tile.style.backgroundPosition = `-${col * 104}px -${row * 104}px`;
-      tile.onclick = () => moveTile(index);
+    if (index === STATE.selectedTileIndex) {
+      tile.classList.add('selected');
     }
+
+    const row = Math.floor(tileVal / gridSize);
+    const col = tileVal % gridSize;
+    
+    const posX = gridSize > 1 ? (col / (gridSize - 1)) * 100 : 0;
+    const posY = gridSize > 1 ? (row / (gridSize - 1)) * 100 : 0;
+
+    tile.style.backgroundImage = `url('${imgPath}'), url('https://via.placeholder.com/320/2575fc/ffffff?text=Level+${STATE.currentLevel}')`;
+    tile.style.backgroundSize = `${gridSize * 100}% ${gridSize * 100}%`;
+    tile.style.backgroundPosition = `${posX}% ${posY}%`;
+    
+    tile.onclick = () => handleTileClick(index);
     board.appendChild(tile);
   });
 }
 
-function moveTile(index) {
-  const emptyIndex = STATE.boardState.indexOf(8);
-  const validMoves = [index - 1, index + 1, index - 3, index + 3];
-
-  // Prevent wrapping row movements
-  if ((index % 3 === 0 && emptyIndex === index - 1) || (index % 3 === 2 && emptyIndex === index + 1)) return;
-
-  if (validMoves.includes(emptyIndex)) {
-    // Swap
-    [STATE.boardState[index], STATE.boardState[emptyIndex]] = [STATE.boardState[emptyIndex], STATE.boardState[index]];
-    STATE.moves++;
-    document.getElementById('moves').textContent = STATE.moves;
+function handleTileClick(index) {
+  // First tap: Select tile and highlight border
+  if (STATE.selectedTileIndex === null) {
+    STATE.selectedTileIndex = index;
     renderBoard();
-    checkWinCondition();
+    return;
   }
+
+  // Tap same tile: Deselect
+  if (STATE.selectedTileIndex === index) {
+    STATE.selectedTileIndex = null;
+    renderBoard();
+    return;
+  }
+
+  // Second tap: Swap tiles
+  const firstIndex = STATE.selectedTileIndex;
+  const secondIndex = index;
+
+  [STATE.boardState[firstIndex], STATE.boardState[secondIndex]] = 
+  [STATE.boardState[secondIndex], STATE.boardState[firstIndex]];
+
+  STATE.selectedTileIndex = null;
+  STATE.moves++;
+  document.getElementById('moves').textContent = STATE.moves;
+
+  renderBoard();
+  checkWinCondition();
 }
 
 function shuffleTiles() {
-  for (let i = 0; i < 100; i++) {
-    const emptyIndex = STATE.boardState.indexOf(8);
-    const possibleMoves = [];
-    if (emptyIndex % 3 > 0) possibleMoves.push(emptyIndex - 1);
-    if (emptyIndex % 3 < 2) possibleMoves.push(emptyIndex + 1);
-    if (emptyIndex >= 3) possibleMoves.push(emptyIndex - 3);
-    if (emptyIndex < 6) possibleMoves.push(emptyIndex + 3);
+  do {
+    for (let i = STATE.boardState.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [STATE.boardState[i], STATE.boardState[j]] = [STATE.boardState[j], STATE.boardState[i]];
+    }
+  } while (STATE.boardState.every((val, index) => val === index));
 
-    const randomMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
-    [STATE.boardState[emptyIndex], STATE.boardState[randomMove]] = [STATE.boardState[randomMove], STATE.boardState[emptyIndex]];
-  }
   renderBoard();
 }
 
@@ -286,13 +316,16 @@ function stopTimer() {
 function handleVictory() {
   playSound('victory', STATE.currentLevel);
 
-  // Calculate Stars (Based on moves)
-  let stars = 1;
-  if (STATE.moves <= 25) stars = 3;
-  else if (STATE.moves <= 45) stars = 2;
+  const gridSize = getGridSize(STATE.currentLevel);
+  const totalTiles = gridSize * gridSize;
 
-  // Calculate Coin Rules
-  let tierMultiplier = Math.ceil(STATE.currentLevel / 30); // Level 1-30 = 1x, 31-60 = 2x, etc.
+  // Star Rating Calculation based on grid size moves
+  let stars = 1;
+  if (STATE.moves <= totalTiles + 5) stars = 3;
+  else if (STATE.moves <= totalTiles * 2) stars = 2;
+
+  // Tier Coin Calculation
+  let tierMultiplier = Math.ceil(STATE.currentLevel / 30);
   let coinsPerStar = 5 * tierMultiplier;
   let potentialCoins = stars * coinsPerStar;
 
@@ -305,7 +338,7 @@ function handleVictory() {
     newCoinsToAward = potentialCoins - previousCoins;
   }
 
-  // Update Progress
+  // Save Progress
   STATE.user.progress.coins += newCoinsToAward;
   if (STATE.currentLevel === STATE.user.progress.unlockedLevel && STATE.currentLevel < STATE.totalLevels) {
     STATE.user.progress.unlockedLevel++;
@@ -318,7 +351,7 @@ function handleVictory() {
 
   saveUserData();
 
-  // Populate Victory Modal
+  // Populate Victory Screen Modal
   const victoryImg = document.getElementById('victory-img');
   victoryImg.src = `image/level${STATE.currentLevel}.jpeg`;
   victoryImg.onerror = () => { victoryImg.src = `https://via.placeholder.com/320/2575fc/ffffff?text=Level+${STATE.currentLevel}+Complete`; };
