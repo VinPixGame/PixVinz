@@ -15,21 +15,27 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.getElementById('playBtn').addEventListener('click', () => {
+    AudioManager.playClick();
     window.location.href = `game.html?level=${currentLevel}`;
   });
 
   document.getElementById('navLevels').addEventListener('click', () => {
+    AudioManager.playClick();
     renderLevels();
     switchView('levels');
   });
 
   document.getElementById('navCollections').addEventListener('click', () => {
+    AudioManager.playClick();
     renderCollections();
     switchView('collections');
   });
 
   document.querySelectorAll('.back-btn').forEach(btn => {
-    btn.addEventListener('click', () => switchView('home'));
+    btn.addEventListener('click', () => {
+      AudioManager.playClick();
+      switchView('home');
+    });
   });
 
   function renderLevels() {
@@ -45,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isUnlocked) {
         btn.innerHTML = `<div class="level-num">${i.toString().padStart(2, '0')}</div><div class="stars">★★★</div>`;
         btn.addEventListener('click', () => {
+          AudioManager.playClick();
           window.location.href = `game.html?level=${i}`;
         });
       } else {
