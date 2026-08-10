@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Puzzle Game</title>
+  <title>PixVinz</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -15,7 +15,6 @@
         <video class="flash-logo" autoplay loop muted playsinline>
           <source src="image/logo.webm" type="video/webm" />
         </video>
-        <button id="btn-skip-splash" class="btn btn-secondary" onclick="checkAuthStatus()" style="margin-top: 20px; font-size: 0.8rem; padding: 6px 12px;">Tap if stuck</button>
       </div>
     </div>
 
@@ -59,8 +58,8 @@
 
       <div class="menu-body">
         <button id="btn-play" class="btn btn-gold btn-large">▶ Play</button>
-        <button id="btn-levels" class="btn btn-secondary">🎮 Levels</button>
-        <button id="btn-settings" class="btn btn-secondary">⚙️ Settings</button>
+        <button id="btn-levels" class="btn btn-secondary">🏆 Levels</button>
+        <button id="btn-settings" class="btn btn-secondary">⚙ Settings</button>
       </div>
 
       <footer class="bottom-footer">
@@ -124,23 +123,23 @@
     <!-- 7. SETTINGS POPUP -->
     <div id="settings-modal" class="modal">
       <div class="modal-content">
-        <h2>Settings</h2>
+        <h2>⚙ Settings</h2>
         <div class="setting-row">
-          <span>Audio / Music</span>
+          <span>🎵 Audio / Music</span>
           <label class="switch">
             <input type="checkbox" id="toggle-sound" checked />
             <span class="slider"></span>
           </label>
         </div>
         <div class="setting-row">
-          <span>Animations</span>
+          <span>✨ Animations</span>
           <label class="switch">
             <input type="checkbox" id="toggle-animations" checked />
             <span class="slider"></span>
           </label>
         </div>
-        <button id="btn-about" class="btn btn-secondary">ℹ️ About</button>
-        <button id="btn-close-settings" class="btn btn-danger">Close</button>
+        <button id="btn-about" class="btn btn-secondary">ℹ About</button>
+        <button id="btn-close-settings" class="btn btn-danger">❌ Close</button>
       </div>
     </div>
 
