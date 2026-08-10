@@ -90,6 +90,52 @@
     </div>
   </div>
 
+  <!-- SETTINGS MODAL -->
+  <div id="settingsModal" class="modal-overlay hidden">
+    <div class="settings-card">
+      <div class="settings-header">
+        <h3>SETTINGS</h3>
+        <button class="icon-btn close-modal-btn" id="closeSettingsModal">✕</button>
+      </div>
+      
+      <div class="setting-item">
+        <span>Sound Effects</span>
+        <label class="switch">
+          <input type="checkbox" id="sfxToggle" checked>
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="setting-item">
+        <span>Music</span>
+        <label class="switch">
+          <input type="checkbox" id="musicToggle" checked>
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="settings-actions">
+        <button class="btn btn-secondary" id="aboutBtn">ℹ️ ABOUT</button>
+        <button class="btn btn-danger" id="logoutBtn">🚪 LOG OUT</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABOUT MODAL -->
+  <div id="aboutModal" class="modal-overlay hidden">
+    <div class="about-card">
+      <button class="icon-btn close-modal-btn close-about" id="closeAboutModal">✕</button>
+      <div class="about-logo">
+        <video autoplay loop muted playsinline>
+          <source src="image/logo.webm" type="video/webm">
+        </video>
+      </div>
+      <h2>PixVinz</h2>
+      <p class="about-dev">Developer: <strong>Kuya Vinz</strong></p>
+      <p class="about-year">© 2026</p>
+    </div>
+  </div>
+
   <script src="audio.js"></script>
   <script src="script.js"></script>
 </body>
