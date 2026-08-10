@@ -52,7 +52,7 @@
     </div>
   </div>
 
-  <!-- game.html -->
+<!-- game.html -->
 <div id="victoryModal" class="modal-overlay hidden">
   <canvas id="confettiCanvas"></canvas>
 
@@ -68,9 +68,9 @@
     </div>
     <div class="victory-subtitle-pro">✦ Amazing work! ✦</div>
 
-    <!-- Solved Puzzle Image Container -->
+    <!-- Solved Puzzle Image Container (Fixed IDs) -->
     <div class="victory-img-container-pro">
-      <img id="victoryPreviewImg" src="" alt="Solved Puzzle">
+      <img id="victoryImg" src="" alt="Solved Puzzle">
     </div>
 
     <!-- 3D Stars Row -->
@@ -85,34 +85,35 @@
       <div class="stat-col">
         <span class="stat-icon-pro">⏱️</span>
         <span class="stat-label-pro">TIME</span>
-        <span class="stat-value-pro" id="victoryTime">00:31</span>
+        <span class="stat-value-pro" id="victoryTime">00:00</span>
       </div>
       <div class="stat-divider"></div>
       <div class="stat-col">
         <span class="stat-icon-pro">👣</span>
         <span class="stat-label-pro">MOVES</span>
-        <span class="stat-value-pro" id="victoryMoves">10</span>
+        <span class="stat-value-pro" id="victoryMoves">0</span>
       </div>
       <div class="stat-divider"></div>
       <div class="stat-col">
         <span class="stat-icon-pro">🪙</span>
         <span class="stat-label-pro">EARNED</span>
-        <span class="stat-value-pro gold-val" id="victoryCoins">+15 🪙</span>
+        <span class="stat-value-pro gold-val" id="victoryCoins">+0</span>
       </div>
     </div>
 
-    <!-- Bottom Buttons -->
+    <!-- Bottom Buttons (Fixed IDs) -->
     <div class="victory-buttons-pro">
-      <button class="btn-pro btn-home-pro" id="victoryHomeBtn">
+      <button class="btn-pro btn-home-pro" id="backToHome">
         <span>🏠</span> HOME
       </button>
-      <button class="btn-pro btn-next-pro" id="victoryNextBtn">
+      <button class="btn-pro btn-next-pro" id="nextLevelBtn">
         NEXT ▶
       </button>
     </div>
   </div>
 </div>
 
+  
   <script src="audio.js"></script>
   <script src="game.js"></script>
 </body>
