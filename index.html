@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Puzzle Game</title>
+    <title>PixVinz</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 
@@ -13,7 +13,7 @@
     <video class="logo-video" autoplay loop muted playsinline>
         <source src="image/logo.webm" type="video/webm">
     </video>
-    <p>Piece Together The Fun!</p>
+    <p style="margin-bottom: 16px;">Piece Together The Fun!</p>
 
     <button class="btn" onclick="playClick(); startGame()">▶ PLAY</button>
     <button class="btn" onclick="playClick(); openLevels()">🏆 LEVELS</button>
@@ -43,7 +43,7 @@
 <!-- SETTINGS POPUP -->
 <div id="settingsPopup" class="popup hidden">
     <div class="popup-box">
-        <h2>⚙ Settings</h2>
+        <h2 style="margin-bottom: 16px;">⚙ Settings</h2>
         <div class="setting-row">
             <span>🎵 Sound</span>
             <input type="checkbox" id="soundToggle" checked onchange="toggleSound(this.checked)">
@@ -52,7 +52,7 @@
     </div>
 </div>
 
-<script src="audio.js"></script>
-<script src="script.js"></script>
+<script src="audio.js?v=3"></script>
+<script src="app.js.js?v=3"></script>
 </body>
 </html>
