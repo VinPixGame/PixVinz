@@ -11,17 +11,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const mainHeader = document.getElementById('mainHeader');
 
   function showView(targetView) {
-    // Hide all views first
     Object.values(views).forEach(v => {
       if (v) v.classList.remove('active');
     });
 
-    // Show selected view
     if (views[targetView]) {
       views[targetView].classList.add('active');
     }
 
-    // Toggle header visibility
     if (['home', 'levels', 'collections'].includes(targetView)) {
       if (mainHeader) mainHeader.classList.remove('hidden');
       updateCoinDisplay();
@@ -41,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function getCurrentUser() {
     try {
       return JSON.parse(localStorage.getItem('loggedInUser'));
-    } catch(e) {
+    } catch (e) {
       return null;
     }
   }
@@ -52,12 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // BGM Trigger on first tap
-  document.body.addEventListener('click', () => {
+  // Plays music automatically upon the user's first click after loading
+  document.addEventListener('click', () => {
     const user = getCurrentUser();
     if (user && typeof AudioManager !== 'undefined' && AudioManager.musicEnabled) {
       if (!AudioManager.bgmMain || AudioManager.bgmMain.paused) {
-        AudioManager.playMain();
+        playMainBGM();
       }
     }
   });
@@ -75,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, 4000);
 
-  // --- 2. AUTH NAVIGATION ---
+  // --- 2. AUTHENTICATION & FORM NAVIGATION ---
   const toRegBtn = document.getElementById('toRegister');
   if (toRegBtn) {
     toRegBtn.addEventListener('click', (e) => {
@@ -99,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
     regForm.addEventListener('submit', (e) => {
       e.preventDefault();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      
+
       const displayName = document.getElementById('regDisplayName').value.trim();
       const username = document.getElementById('regUser').value.trim().toLowerCase();
       const pass = document.getElementById('regPass').value;
@@ -121,11 +118,11 @@ document.addEventListener('DOMContentLoaded', () => {
       users[username] = newUser;
       localStorage.setItem('registeredUsers', JSON.stringify(users));
 
-      // Auto login
+      // Auto-login registered account
       localStorage.setItem('loggedInUser', JSON.stringify(newUser));
       const nameElem = document.getElementById('userDisplayName');
       if (nameElem) nameElem.innerText = displayName;
-      
+
       if (errElem) errElem.innerText = "";
       showView('home');
       playMainBGM();
@@ -143,7 +140,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const errElem = document.getElementById('loginError');
 
       let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
-      
+
+      // Default account fallback
       if (Object.keys(users).length === 0 && username === 'vinz' && pass === '1234') {
         users['vinz'] = { displayName: 'Vinz', username: 'vinz', password: '1234' };
         localStorage.setItem('registeredUsers', JSON.stringify(users));
@@ -162,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- 3. HOME MENU BUTTONS ---
+  // --- 3. HOME PAGE BUTTONS ---
   const playBtn = document.getElementById('playBtn');
   if (playBtn) {
     playBtn.addEventListener('click', () => {
@@ -197,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // --- 4. SETTINGS & LOGOUT ---
+  // --- 4. SETTINGS, ABOUT & LOGOUT ---
   const settingsModal = document.getElementById('settingsModal');
   const aboutModal = document.getElementById('aboutModal');
   const sfxToggle = document.getElementById('sfxToggle');
@@ -270,18 +268,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // --- 5. RENDER FUNCTIONS ---
   function renderLevels() {
     const grid = document.getElementById('levelsGrid');
     if (!grid) return;
     grid.innerHTML = '';
     const currentLevel = parseInt(localStorage.getItem('currentLevel')) || 1;
-    
+
     for (let i = 1; i <= 200; i++) {
       const btn = document.createElement('div');
       const isUnlocked = i <= currentLevel;
-      
+
       btn.className = `level-btn ${isUnlocked ? 'unlocked' : 'locked'}`;
-      
+
       if (isUnlocked) {
         btn.innerHTML = `<div class="level-num">${i.toString().padStart(2, '0')}</div><div class="stars">★★★</div>`;
         btn.addEventListener('click', () => {
@@ -305,11 +304,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!grid) return;
     grid.innerHTML = '';
     const currentLevel = parseInt(localStorage.getItem('currentLevel')) || 1;
-    
+
     for (let i = 1; i < currentLevel; i++) {
       const item = document.createElement('div');
       item.className = 'collection-item';
-      
+
       item.innerHTML = `
         <img src="image/level${i}.jpeg" alt="Level ${i}">
         <div class="collection-badge">LEVEL ${i.toString().padStart(2, '0')}</div>
