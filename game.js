@@ -13,7 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let moves = 0;
   let seconds = 0;
   let timerInterval = null;
-  let tilesState = [0, 1, 2, 3, 4, 5, 6, 7, 8]; // 8 is the empty space
+  let tilesState = [0, 1, 2, 3, 4, 5, 6, 7, 8]; // All 9 tiles present
+  let selectedTilePos = null;
 
   const imageSrc = `image/level${currentLevel}.jpeg`;
 
@@ -33,35 +34,36 @@ document.addEventListener('DOMContentLoaded', () => {
     tilesState.forEach((tileIdx, currentPos) => {
       const tile = document.createElement('div');
       tile.className = 'tile';
-
-      if (tileIdx === 8) {
-        tile.classList.add('empty');
-      } else {
-        tile.style.backgroundImage = `url(${imageSrc})`;
-        const row = Math.floor(tileIdx / 3);
-        const col = tileIdx % 3;
-        tile.style.backgroundPosition = `${col * 50}% ${row * 50}%`;
+      
+      if (selectedTilePos === currentPos) {
+        tile.classList.add('selected');
       }
 
-      tile.addEventListener('click', () => moveTile(currentPos));
+      tile.style.backgroundImage = `url(${imageSrc})`;
+      const row = Math.floor(tileIdx / 3);
+      const col = tileIdx % 3;
+      tile.style.backgroundPosition = `${col * 50}% ${row * 50}%`;
+
+      tile.addEventListener('click', () => handleTileClick(currentPos));
       grid.appendChild(tile);
     });
   }
 
-  function moveTile(pos) {
-    const emptyPos = tilesState.indexOf(8);
-    const validMoves = [
-      emptyPos - 1, emptyPos + 1, // Left, Right
-      emptyPos - 3, emptyPos + 3  // Up, Down
-    ];
+  function handleTileClick(pos) {
+    AudioManager.playClick();
 
-    // Prevent wrapping across horizontal edges
-    if ((emptyPos % 3 === 0 && pos === emptyPos - 1) || 
-        (emptyPos % 3 === 2 && pos === emptyPos + 1)) return;
-
-    if (validMoves.includes(pos)) {
-      // Swap tiles
-      [tilesState[emptyPos], tilesState[pos]] = [tilesState[pos], tilesState[emptyPos]];
+    if (selectedTilePos === null) {
+      // First tile selected
+      selectedTilePos = pos;
+      renderGrid();
+    } else if (selectedTilePos === pos) {
+      // Deselect if tapping the same tile again
+      selectedTilePos = null;
+      renderGrid();
+    } else {
+      // Swap selected tile with target tile
+      [tilesState[selectedTilePos], tilesState[pos]] = [tilesState[pos], tilesState[selectedTilePos]];
+      selectedTilePos = null;
       moves++;
       movesDisplay.innerText = moves;
       renderGrid();
@@ -69,19 +71,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Shuffle does NOT count as a move
   function shuffleGrid() {
-    for (let i = 0; i < 100; i++) {
-      const emptyPos = tilesState.indexOf(8);
-      const validMoves = [];
-      if (emptyPos % 3 !== 0) validMoves.push(emptyPos - 1);
-      if (emptyPos % 3 !== 2) validMoves.push(emptyPos + 1);
-      if (emptyPos >= 3) validMoves.push(emptyPos - 3);
-      if (emptyPos < 6) validMoves.push(emptyPos + 3);
-
-      const randomMove = validMoves[Math.floor(Math.random() * validMoves.length)];
-      [tilesState[emptyPos], tilesState[randomMove]] = [tilesState[randomMove], tilesState[emptyPos]];
+    // Perform random tile swaps
+    for (let i = 0; i < 20; i++) {
+      const idx1 = Math.floor(Math.random() * 9);
+      const idx2 = Math.floor(Math.random() * 9);
+      [tilesState[idx1], tilesState[idx2]] = [tilesState[idx2], tilesState[idx1]];
     }
+    selectedTilePos = null;
     renderGrid();
   }
 
@@ -100,17 +97,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  document.getElementById('shuffleBtn').addEventListener('click', shuffleGrid);
+  document.getElementById('shuffleBtn').addEventListener('click', () => {
+    AudioManager.playClick();
+    shuffleGrid();
+  });
   
   document.getElementById('backToHome').addEventListener('click', () => {
+    AudioManager.playClick();
     window.location.href = 'index.html';
   });
 
   document.getElementById('collectionsBtn').addEventListener('click', () => {
+    AudioManager.playClick();
     window.location.href = 'index.html';
   });
 
-  // Setup Init Game state
   shuffleGrid();
   startTimer();
 });
