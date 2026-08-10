@@ -1,13 +1,36 @@
 const AudioManager = {
-  bgMusic: new Audio(),
-  mainMusic: new Audio(),
+  bgMusic: new Audio('sound/bgmusic.mp3'),
+  mainMusic: new Audio('image/main.mp3'),
+  clickSound: new Audio('sound/click.mp3'),
+  isUnlocked: false,
 
   init() {
-    this.bgMusic.src = 'sound/bgmusic.mp3';
     this.bgMusic.loop = true;
-
-    this.mainMusic.src = 'image/main.mp3';
     this.mainMusic.loop = true;
+
+    // Unlocks browser autoplay policy on the first tap anywhere
+    const unlockAudio = () => {
+      if (!this.isUnlocked) {
+        this.isUnlocked = true;
+        if (window.location.pathname.includes('game.html')) {
+          this.playGame();
+        } else {
+          this.playMain();
+        }
+        document.removeEventListener('click', unlockAudio);
+        document.removeEventListener('touchstart', unlockAudio);
+      }
+    };
+
+    document.addEventListener('click', unlockAudio);
+    document.addEventListener('touchstart', unlockAudio);
+  },
+
+  playClick() {
+    if (localStorage.getItem('soundEnabled') !== 'false') {
+      const click = this.clickSound.cloneNode();
+      click.play().catch(() => {});
+    }
   },
 
   playMain() {
@@ -22,11 +45,6 @@ const AudioManager = {
     if (localStorage.getItem('soundEnabled') !== 'false') {
       this.bgMusic.play().catch(() => {});
     }
-  },
-
-  stopAll() {
-    this.mainMusic.pause();
-    this.bgMusic.pause();
   }
 };
 
