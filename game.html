@@ -1,438 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
-    <meta
-        name="theme-color"
-        content="#24113f">
-
-    <title>Level - PixVinz</title>
-
-    <link
-        rel="stylesheet"
-        href="style.css">
-
-    <link
-        rel="stylesheet"
-        href="game.css">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#160b27">
+  <title>PixVinz — Game</title>
+  <link rel="stylesheet" href="game.css">
 </head>
-
-
 <body>
-
-    <!-- =====================================================
-         PUZZLE SCREEN
-    ====================================================== -->
-
-    <main
-        id="gameScreen"
-        class="game-screen">
-
-
-        <!-- =========================
-             GAME TOP BAR
-        ========================== -->
-
-        <header class="game-topbar">
-
-
-            <!-- BACK -->
-
-            <button
-                id="gameBackButton"
-                class="game-back-button"
-                type="button"
-                aria-label="Back">
-
-                ‹
-
-            </button>
-
-
-            <!-- LOGO -->
-
-            <video
-                class="logo game-logo"
-                src="image/logo.webm"
-                autoplay
-                muted
-                loop
-                playsinline>
-            </video>
-
-
-            <!-- COINS -->
-
-            <div
-                class="coin-display game-coins">
-
-                <span>🪙</span>
-
-                <strong id="gameCoinCount">
-                    0
-                </strong>
-
-            </div>
-
-        </header>
-
-
-        <!-- =========================
-             LEVEL INFORMATION
-        ========================== -->
-
-        <section
-            class="game-info">
-
-
-            <div class="game-level-label">
-
-                <span>
-                    LEVEL
-                </span>
-
-                <strong id="levelNumber">
-                    1
-                </strong>
-
-            </div>
-
-
-            <div class="game-stat">
-
-                <span>
-                    TIME
-                </span>
-
-                <strong id="timer">
-                    00:00
-                </strong>
-
-            </div>
-
-
-            <div class="game-stat">
-
-                <span>
-                    MOVES
-                </span>
-
-                <strong id="moveCount">
-                    0
-                </strong>
-
-            </div>
-
-
-        </section>
-
-
-        <!-- =========================
-             PUZZLE AREA
-        ========================== -->
-
-        <section
-            class="puzzle-section">
-
-
-            <div
-                id="puzzleBoard"
-                class="puzzle-board"
-                aria-label="Puzzle board">
-            </div>
-
-
-        </section>
-
-
-        <!-- =========================
-             GAME CONTROLS
-        ========================== -->
-
-        <section
-            class="game-controls">
-
-
-            <button
-                id="shuffleButton"
-                class="game-control-button"
-                type="button">
-
-                🔀
-                <span>
-                    Shuffle
-                </span>
-
-            </button>
-
-
-            <button
-                id="restartButton"
-                class="game-control-button"
-                type="button">
-
-                ↻
-                <span>
-                    Restart
-                </span>
-
-            </button>
-
-
-        </section>
-
-
-        <!-- =========================
-             GAME MESSAGE
-        ========================== -->
-
-        <p
-            id="gameMessage"
-            class="game-message"
-            aria-live="polite">
-        </p>
-
-
-    </main>
-
-
-    <!-- =====================================================
-         VICTORY MODAL
-         Hidden until puzzle is solved
-    ====================================================== -->
-
-    <div
-        id="victoryModal"
-        class="game-modal-overlay hidden">
-
-
-        <div
-            class="victory-modal">
-
-
-            <!-- CLOSE -->
-
-            <button
-                id="victoryCloseButton"
-                class="modal-close"
-                type="button"
-                aria-label="Close">
-
-                ×
-
-            </button>
-
-
-            <!-- TITLE -->
-
-            <div
-                class="victory-title">
-
-                🎉
-
-                <h2>
-                    Level Complete!
-                </h2>
-
-            </div>
-
-
-            <!-- SOLVED IMAGE -->
-
-            <div
-                class="victory-image-container">
-
-                <img
-                    id="victoryImage"
-                    src=""
-                    alt="Solved puzzle">
-
-            </div>
-
-
-            <!-- CURRENT RESULT -->
-
-            <div
-                class="victory-current-stats">
-
-
-                <div>
-
-                    <span>
-                        Stars
-                    </span>
-
-                    <strong id="victoryStars">
-                        ☆☆☆
-                    </strong>
-
-                </div>
-
-
-                <div>
-
-                    <span>
-                        Time
-                    </span>
-
-                    <strong id="victoryTime">
-                        00:00
-                    </strong>
-
-                </div>
-
-
-                <div>
-
-                    <span>
-                        Moves
-                    </span>
-
-                    <strong id="victoryMoves">
-                        0
-                    </strong>
-
-                </div>
-
-
-            </div>
-
-
-            <!-- BEST RESULTS -->
-
-            <div
-                class="best-results">
-
-
-                <div>
-
-                    <span>
-                        Best Time
-                    </span>
-
-                    <strong id="bestTime">
-                        --
-
-                    </strong>
-
-                </div>
-
-
-                <div>
-
-                    <span>
-                        Best Moves
-                    </span>
-
-                    <strong id="bestMoves">
-                        --
-
-                    </strong>
-
-                </div>
-
-
-                <div>
-
-                    <span>
-                        Best Stars
-                    </span>
-
-                    <strong id="bestStars">
-                        ☆☆☆
-                    </strong>
-
-                </div>
-
-
-            </div>
-
-
-            <!-- COINS -->
-
-            <div
-                class="coins-earned">
-
-                <span>
-                    🪙
-                </span>
-
-                <strong id="coinsEarned">
-                    +0
-                </strong>
-
-                <small>
-                    Coins Earned
-                </small>
-
-            </div>
-
-
-            <!-- ACTIONS -->
-
-            <div
-                class="victory-actions">
-
-
-                <button
-                    id="nextLevelButton"
-                    class="primary-button"
-                    type="button">
-
-                    NEXT LEVEL
-
-                </button>
-
-
-                <button
-                    id="replayLevelButton"
-                    class="secondary-game-button"
-                    type="button">
-
-                    PLAY AGAIN
-
-                </button>
-
-
-                <button
-                    id="levelsFromVictoryButton"
-                    class="secondary-game-button"
-                    type="button">
-
-                    LEVELS
-
-                </button>
-
-
-            </div>
-
-
+  <main id="gameScreen" class="game-screen">
+    <header class="game-topbar">
+      <button id="backButton" class="icon-button" type="button" aria-label="Back">‹</button>
+
+      <video class="game-logo" src="image/logo.webm" autoplay muted loop playsinline aria-label="PixVinz logo"></video>
+
+      <div class="coin-display" aria-label="Coins">
+        <span class="coin-icon">🪙</span>
+        <strong id="coinCount">0</strong>
+      </div>
+    </header>
+
+    <section class="game-content">
+      <div class="game-stats" aria-label="Puzzle statistics">
+        <div class="stat-card">
+          <span>LEVEL</span>
+          <strong id="levelNumber">01</strong>
         </div>
+        <div class="stat-card">
+          <span>TIME</span>
+          <strong id="timeDisplay">00:00</strong>
+        </div>
+        <div class="stat-card">
+          <span>MOVES</span>
+          <strong id="movesDisplay">0</strong>
+        </div>
+      </div>
 
+      <p id="gameMessage" class="game-message" aria-live="polite"></p>
+
+      <section class="board-wrap" aria-label="Puzzle">
+        <div id="puzzleBoard" class="puzzle-board"></div>
+      </section>
+
+      <div class="game-controls">
+        <button id="shuffleButton" class="game-control shuffle-button" type="button">
+          <span>🔀</span> Shuffle
+        </button>
+
+        <button id="collectionsButton" class="game-control collection-button" type="button">
+          <span>✨</span> Collections
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <div id="victoryOverlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="victoryTitle">
+    <div class="victory-card">
+      <div class="victory-burst">🎉</div>
+      <h2 id="victoryTitle">Level Complete!</h2>
+
+      <div class="solved-image-wrap">
+        <img id="solvedImage" src="" alt="Solved puzzle">
+      </div>
+
+      <div class="result-stats">
+        <div><span>Stars</span><strong id="resultStars">★★★</strong></div>
+        <div><span>Time</span><strong id="resultTime">00:00</strong></div>
+        <div><span>Moves</span><strong id="resultMoves">0</strong></div>
+      </div>
+
+      <div class="best-stats">
+        <div><span>Best Time</span><strong id="bestTime">—</strong></div>
+        <div><span>Best Moves</span><strong id="bestMoves">—</strong></div>
+        <div><span>Best Stars</span><strong id="bestStars">—</strong></div>
+      </div>
+
+      <div class="coins-earned">
+        <span>🪙</span>
+        <strong>+<span id="coinsEarned">0</span></strong>
+      </div>
+
+      <button id="nextLevelButton" class="primary-button" type="button">NEXT LEVEL</button>
+      <button id="victoryCollectionsButton" class="secondary-button" type="button">COLLECTIONS</button>
     </div>
+  </div>
 
-
-    <!-- =====================================================
-         SCRIPTS
-    ====================================================== -->
-
-    <script src="levels.js"></script>
-
-    <script src="save.js"></script>
-
-    <script src="audio.js"></script>
-
-    <script src="game.js"></script>
-
-
+  <script src="game.js"></script>
 </body>
-
 </html>
