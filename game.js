@@ -1,115 +1,209 @@
 document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
-  let currentLevel = parseInt(urlParams.get('level')) || 1;
+  const currentLevel = parseInt(urlParams.get('level')) || 1;
 
-  const levelTitle = document.getElementById('gameLevelTitle');
-  const board = document.getElementById('puzzleBoard');
-  const shuffleBtn = document.getElementById('shuffleBtn');
-  const backBtn = document.getElementById('gameBackBtn');
-  const coinCountElem = document.getElementById('coinCount');
+  document.getElementById('levelDisplay').innerText = currentLevel.toString().padStart(2, '0');
+  updateCoinDisplay();
 
-  levelTitle.innerText = `LEVEL ${currentLevel.toString().padStart(2, '0')}`;
-  
-  const totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
-  if (coinCountElem) coinCountElem.innerText = totalCoins;
+  const grid = document.getElementById('puzzleGrid');
+  const movesDisplay = document.getElementById('movesDisplay');
+  const timerDisplay = document.getElementById('timerDisplay');
 
-  // Start Game Music (sounds/bgmusic.mp3) on user interaction
-  function startGameAudio() {
+  let moves = 0;
+  let seconds = 0;
+  let timerInterval = null;
+  let tilesState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+  let selectedTilePos = null;
+
+  const imageSrc = `image/level${currentLevel}.jpeg`;
+
+  // Start BGM on user tap
+  function startGameBGM() {
     if (typeof AudioManager !== 'undefined' && AudioManager.musicEnabled) {
       AudioManager.playGame();
     }
   }
+  document.body.addEventListener('click', startGameBGM, { once: true });
 
-  document.body.addEventListener('click', startGameAudio, { once: true });
+  function startTimer() {
+    clearInterval(timerInterval);
+    seconds = 0;
+    timerInterval = setInterval(() => {
+      seconds++;
+      const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+      const secs = (seconds % 60).toString().padStart(2, '0');
+      timerDisplay.innerText = `${mins}:${secs}`;
+    }, 1000);
+  }
 
-  // Grid setup (3x3 grid)
-  const gridCount = 3;
-  let tiles = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-  const imgSrc = `image/level${currentLevel}.jpeg`;
+  function updateCoinDisplay() {
+    const totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
+    const coinElem = document.getElementById('coinCount');
+    if (coinElem) coinElem.innerText = totalCoins;
+  }
 
-  board.style.gridTemplateColumns = `repeat(${gridCount}, 1fr)`;
-
-  function renderBoard() {
-    board.innerHTML = '';
-    tiles.forEach((val, idx) => {
+  function renderGrid() {
+    grid.innerHTML = '';
+    tilesState.forEach((tileIdx, currentPos) => {
       const tile = document.createElement('div');
       tile.className = 'tile';
       
-      if (val === 8) {
-        tile.classList.add('empty');
-      } else {
-        const row = Math.floor(val / gridCount);
-        const col = val % gridCount;
-        tile.style.backgroundImage = `url('${imgSrc}')`;
-        tile.style.backgroundPosition = `-${col * 112}px -${row * 112}px`;
+      if (selectedTilePos === currentPos) {
+        tile.classList.add('selected');
       }
 
-      tile.addEventListener('click', () => handleTileClick(idx));
-      board.appendChild(tile);
+      tile.style.backgroundImage = `url('${imageSrc}')`;
+      const row = Math.floor(tileIdx / 3);
+      const col = tileIdx % 3;
+      tile.style.backgroundPosition = `${col * 50}% ${row * 50}%`;
+
+      tile.addEventListener('click', () => handleTileClick(currentPos));
+      grid.appendChild(tile);
     });
   }
 
-  function handleTileClick(index) {
-    const emptyIndex = tiles.indexOf(8);
-    if (isAdjacent(index, emptyIndex)) {
-      if (typeof AudioManager !== 'undefined') AudioManager.playSelect();
-      [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
-      renderBoard();
+  function handleTileClick(pos) {
+    if (typeof AudioManager !== 'undefined') AudioManager.playSelect();
+
+    if (selectedTilePos === null) {
+      selectedTilePos = pos;
+      renderGrid();
+    } else if (selectedTilePos === pos) {
+      selectedTilePos = null;
+      renderGrid();
+    } else {
+      // Swap tiles directly
+      [tilesState[selectedTilePos], tilesState[pos]] = [tilesState[pos], tilesState[selectedTilePos]];
+      selectedTilePos = null;
+      moves++;
+      movesDisplay.innerText = moves;
+      renderGrid();
       checkWin();
     }
   }
 
-  function isAdjacent(idx1, idx2) {
-    const row1 = Math.floor(idx1 / gridCount), col1 = idx1 % gridCount;
-    const row2 = Math.floor(idx2 / gridCount), col2 = idx2 % gridCount;
-    return (Math.abs(row1 - row2) + Math.abs(col1 - col2)) === 1;
-  }
-
-  function shuffleTiles() {
-    if (typeof AudioManager !== 'undefined') AudioManager.playShuffle();
-    for (let i = 0; i < 100; i++) {
-      const emptyIdx = tiles.indexOf(8);
-      const validMoves = [];
-      [emptyIdx - 1, emptyIdx + 1, emptyIdx - gridCount, emptyIdx + gridCount].forEach(idx => {
-        if (idx >= 0 && idx < 9 && isAdjacent(emptyIdx, idx)) {
-          validMoves.push(idx);
-        }
-      });
-      const randomMove = validMoves[Math.floor(Math.random() * validMoves.length)];
-      [tiles[emptyIdx], tiles[randomMove]] = [tiles[randomMove], tiles[emptyIdx]];
+  function shuffleGrid() {
+    for (let i = 0; i < 20; i++) {
+      const idx1 = Math.floor(Math.random() * 9);
+      const idx2 = Math.floor(Math.random() * 9);
+      [tilesState[idx1], tilesState[idx2]] = [tilesState[idx2], tilesState[idx1]];
     }
-    renderBoard();
+    selectedTilePos = null;
+    renderGrid();
   }
 
   function checkWin() {
-    const isSolved = tiles.every((val, idx) => val === idx);
+    const isSolved = tilesState.every((val, idx) => val === idx);
     if (isSolved) {
+      clearInterval(timerInterval);
       if (typeof AudioManager !== 'undefined') AudioManager.playVictory(currentLevel);
-      
-      // Update coins & level progression
-      let coins = (parseInt(localStorage.getItem('totalCoins')) || 0) + 10;
-      localStorage.setItem('totalCoins', coins);
-      
-      let unlocked = parseInt(localStorage.getItem('currentLevel')) || 1;
-      if (currentLevel >= unlocked) {
+
+      let stars = 1;
+      if (moves <= 14) stars = 3;
+      else if (moves <= 22) stars = 2;
+
+      // Capped coin distribution
+      const currentLevelCoins = parseInt(localStorage.getItem(`levelCoins_${currentLevel}`)) || 0;
+      let targetCoins = stars * 5; 
+      let newCoinsEarned = 0;
+
+      if (targetCoins > currentLevelCoins) {
+        newCoinsEarned = targetCoins - currentLevelCoins;
+        localStorage.setItem(`levelCoins_${currentLevel}`, targetCoins);
+
+        let totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
+        totalCoins += newCoinsEarned;
+        localStorage.setItem('totalCoins', totalCoins);
+      }
+
+      let maxUnlocked = parseInt(localStorage.getItem('currentLevel')) || 1;
+      if (currentLevel >= maxUnlocked) {
         localStorage.setItem('currentLevel', currentLevel + 1);
       }
 
-      setTimeout(() => {
-        alert(`🎉 LEVEL ${currentLevel} COMPLETED! +10 🪙`);
-        window.location.href = 'index.html';
-      }, 300);
+      showVictoryModal(stars, newCoinsEarned);
     }
   }
 
-  shuffleBtn.addEventListener('click', shuffleTiles);
+  function showVictoryModal(stars, newCoins) {
+    document.getElementById('victoryImg').src = imageSrc;
+    document.getElementById('vTime').innerText = timerDisplay.innerText;
+    document.getElementById('vMoves').innerText = moves;
+    document.getElementById('vCoins').innerText = `+${newCoins}`;
 
-  backBtn.addEventListener('click', () => {
+    const starNodes = document.querySelectorAll('#victoryStars .star');
+    starNodes.forEach((star, index) => {
+      if (index < stars) {
+        star.classList.add('active');
+      } else {
+        star.classList.remove('active');
+      }
+    });
+
+    updateCoinDisplay();
+    document.getElementById('victoryModal').classList.remove('hidden');
+    startConfetti();
+  }
+
+  function startConfetti() {
+    const canvas = document.getElementById('confettiCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = Array.from({ length: 70 }, () => ({
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      vx: (Math.random() - 0.5) * 12,
+      vy: (Math.random() - 0.7) * 14,
+      size: Math.random() * 8 + 4,
+      color: ['#ffd700', '#9d4edd', '#ff007f', '#00f0ff', '#ffffff'][Math.floor(Math.random() * 5)]
+    }));
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.3;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, p.size, p.size);
+      });
+      if (particles.some(p => p.y < canvas.height)) {
+        requestAnimationFrame(draw);
+      }
+    }
+    draw();
+  }
+
+  document.getElementById('shuffleBtn').addEventListener('click', () => {
+    if (typeof AudioManager !== 'undefined') AudioManager.playShuffle();
+    shuffleGrid();
+  });
+
+  document.getElementById('nextLevelBtn').onclick = (e) => {
+    e.stopPropagation();
+    if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+    window.location.href = `game.html?level=${currentLevel + 1}`;
+  };
+
+  document.getElementById('victoryHomeBtn').onclick = (e) => {
+    e.stopPropagation();
+    if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+    window.location.href = 'index.html';
+  };
+
+  document.getElementById('backToHome').addEventListener('click', () => {
     if (typeof AudioManager !== 'undefined') AudioManager.playClick();
     window.location.href = 'index.html';
   });
 
-  // Initial setup
-  renderBoard();
-  shuffleTiles();
+  document.getElementById('collectionsBtn').addEventListener('click', () => {
+    if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+    window.location.href = 'index.html';
+  });
+
+  shuffleGrid();
+  startTimer();
 });
