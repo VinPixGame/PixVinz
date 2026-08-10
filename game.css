@@ -1,1229 +1,1445 @@
+ /* =========================================================
+    PIXVINZ PUZZLE SCREEN
+    game.css
+    Puzzle-specific styling only
+    ========================================================= */
+
+
 /* =========================================================
-   PIXVINZ — GAME.CSS
-   Full mobile-screen layout
-   Square puzzle — NEVER stretched
+   GAME SCREEN
    ========================================================= */
 
-:root {
-  --pv-bg: #090d19;
-  --pv-panel: rgba(22, 28, 48, 0.94);
-  --pv-text: #ffffff;
-  --pv-muted: #9ba6bb;
+.game-screen {
 
-  --pv-purple: #7857ff;
-  --pv-purple-light: #a98cff;
-  --pv-gold: #f5c451;
-  --pv-green: #48d69d;
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
 
-  --pv-border: rgba(255,255,255,.09);
+    display: flex;
+    flex-direction: column;
 
-  --pv-radius: 20px;
+    background:
 
-  /*
-    IMPORTANT:
-    The board uses BOTH width and height.
-    This prevents the board from becoming too tall
-    on short mobile screens.
-  */
-  --pv-vh: 100vh;
+        radial-gradient(
+            circle at 15% 15%,
+            rgba(122, 67, 170, 0.24),
+            transparent 30%
+        ),
+
+        radial-gradient(
+            circle at 85% 80%,
+            rgba(82, 45, 135, 0.22),
+            transparent 32%
+        ),
+
+        linear-gradient(
+            145deg,
+            #10081c,
+            #24113f
+        );
+
+    overflow-x: hidden;
 }
 
-/* ---------------------------------------------------------
-   RESET
---------------------------------------------------------- */
 
-* {
-  box-sizing: border-box;
-}
+/* =========================================================
+   TOP BAR
+   ========================================================= */
 
-html,
-body {
-  width: 100%;
-  min-width: 100%;
-  margin: 0;
-  padding: 0;
+.game-topbar {
 
-  background: var(--pv-bg);
-  color: var(--pv-text);
+    position: sticky;
+    top: 0;
 
-  overflow-x: hidden;
-}
+    z-index: 20;
 
-html {
-  min-height: 100%;
-}
+    width: 100%;
+    height: 68px;
 
-body {
-  min-height: 100svh;
-
-  font-family:
-    Inter,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-
-  background:
-    radial-gradient(
-      circle at 50% -15%,
-      rgba(120,87,255,.26),
-      transparent 38%
-    ),
-    radial-gradient(
-      circle at 0% 100%,
-      rgba(72,214,157,.07),
-      transparent 35%
-    ),
-    var(--pv-bg);
-}
-
-body.modal-open {
-  overflow: hidden;
-}
-
-button {
-  font: inherit;
-  -webkit-tap-highlight-color: transparent;
-}
-
-button:focus-visible {
-  outline: 3px solid
-    rgba(169,140,255,.85);
-
-  outline-offset: 3px;
-}
-
-/* ---------------------------------------------------------
-   MAIN GAME AREA
-
-   The main screen is deliberately locked to the viewport.
-   There is no unnecessary vertical scrolling.
---------------------------------------------------------- */
-
-.pixvinz-app,
-.game-page,
-.game-container {
-  width: 100%;
-  height: 100svh;
-  min-height: 100svh;
-  overflow: hidden;
-}
-
-.pixvinz-app {
-  display: flex;
-  justify-content: center;
-}
-
-.game-shell {
-  width: 100%;
-  height: 100%;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  /*
-    This keeps every major element inside
-    the phone screen.
-  */
-  padding:
-    clamp(6px, 1.5vh, 14px)
-    12px
-    clamp(8px, 1.5vh, 14px);
-
-  overflow: hidden;
-}
-
-/* ---------------------------------------------------------
-   LOGO
---------------------------------------------------------- */
-
-.pixvinz-logo,
-#pixvinzLogo {
-  display: block;
-
-  width:
-    clamp(
-      150px,
-      32vw,
-      255px
-    );
-
-  /*
-    Height is automatic.
-    The logo itself will NOT be stretched.
-  */
-  height: auto;
-
-  max-height: 10svh;
-
-  object-fit: contain;
-
-  margin:
-    0 auto
-    clamp(4px, 1vh, 10px);
-
-  filter:
-    drop-shadow(
-      0 8px 18px
-      rgba(0,0,0,.28)
-    );
-}
-
-/* ---------------------------------------------------------
-   STATS
---------------------------------------------------------- */
-
-.game-header {
-  width: min(100%, 520px);
-
-  display: grid;
-
-  grid-template-columns:
-    repeat(3, 1fr);
-
-  gap:
-    clamp(5px, 1.5vw, 9px);
-
-  margin-bottom:
-    clamp(5px, 1vh, 9px);
-}
-
-.stat-card {
-  min-width: 0;
-
-  padding:
-    clamp(6px, 1.1vh, 10px)
-    6px;
-
-  text-align: center;
-
-  border:
-    1px solid
-    var(--pv-border);
-
-  border-radius:
-    clamp(12px, 2vw, 17px);
-
-  background:
-    var(--pv-panel);
-
-  box-shadow:
-    0 8px 22px
-    rgba(0,0,0,.18);
-
-  backdrop-filter:
-    blur(12px);
-}
-
-.stat-label {
-  display: block;
-
-  margin-bottom: 3px;
-
-  color:
-    var(--pv-muted);
-
-  font-size:
-    clamp(.52rem, 1.6vw, .68rem);
-
-  line-height: 1;
-
-  font-weight: 800;
-
-  letter-spacing: .06em;
-
-  text-transform:
-    uppercase;
-}
-
-.stat-value {
-  display: block;
-
-  font-size:
-    clamp(.82rem, 3vw, 1.05rem);
-
-  line-height: 1;
-
-  font-weight: 950;
-}
-
-/* ---------------------------------------------------------
-   PUZZLE BOARD
-
-   THIS IS THE IMPORTANT PART.
-
-   The board remains EXACTLY square.
-
-   It is limited by:
-   - phone width
-   - remaining screen height
-
-   It can therefore shrink on short phones without
-   stretching or forcing the page to scroll.
---------------------------------------------------------- */
-
-.game-board,
-#gameBoard {
-  --grid-size: 3;
-
-  /*
-    Width cannot exceed the available phone width.
-    Height cannot exceed the remaining viewport.
-
-    72svh gives the board room while leaving space
-    for logo, stats and button.
-  */
-
-  width:
-    min(
-      calc(100vw - 24px),
-      72svh,
-      500px
-    );
-
-  height:
-    min(
-      calc(100vw - 24px),
-      72svh,
-      500px
-    );
-
-  /*
-    ABSOLUTELY square.
-  */
-  aspect-ratio: 1 / 1;
-
-  flex: 0 0 auto;
-
-  display: grid;
-
-  grid-template-columns:
-    repeat(var(--grid-size), 1fr);
-
-  grid-template-rows:
-    repeat(var(--grid-size), 1fr);
-
-  gap:
-    clamp(
-      3px,
-      1vw,
-      7px
-    );
-
-  padding:
-    clamp(
-      4px,
-      1.1vw,
-      8px
-    );
-
-  border:
-    1px solid
-    rgba(255,255,255,.12);
-
-  border-radius:
-    clamp(
-      15px,
-      3.5vw,
-      25px
-    );
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255,255,255,.12),
-      rgba(255,255,255,.025)
-    ),
-    rgba(7,11,25,.95);
-
-  box-shadow:
-    0 20px 55px
-    rgba(0,0,0,.40),
-
-    inset
-    0 1px 0
-    rgba(255,255,255,.08);
-
-  overflow: hidden;
-}
-
-/* ---------------------------------------------------------
-   PUZZLE TILES
---------------------------------------------------------- */
-
-.puzzle-tile {
-  position: relative;
-
-  width: 100%;
-  height: 100%;
-
-  min-width: 0;
-  min-height: 0;
-
-  appearance: none;
-
-  border: 0;
-  padding: 0;
-
-  border-radius:
-    clamp(
-      5px,
-      1.4vw,
-      11px
-    );
-
-  background-color:
-    #202940;
-
-  background-repeat:
-    no-repeat;
-
-  /*
-    For a 3x3 puzzle.
-    JS also controls the exact background position.
-  */
-  background-size:
-    300% 300%;
-
-  overflow: hidden;
-
-  cursor: pointer;
-
-  box-shadow:
-    inset
-    0 1px 0
-    rgba(255,255,255,.13),
-
-    0 3px 8px
-    rgba(0,0,0,.22);
-
-  transition:
-    transform .1s ease,
-    filter .1s ease,
-    box-shadow .1s ease;
-}
-
-.puzzle-tile::after {
-  content: "";
-
-  position: absolute;
-  inset: 0;
-
-  background:
-    linear-gradient(
-      135deg,
-      rgba(255,255,255,.08),
-      transparent 45%,
-      rgba(0,0,0,.12)
-    );
-
-  pointer-events: none;
-}
-
-.puzzle-tile:not(.is-empty):hover {
-  filter: brightness(1.06);
-
-  transform:
-    translateY(-1px);
-}
-
-.puzzle-tile:not(.is-empty):active {
-  transform:
-    scale(.95);
-}
-
-.puzzle-tile.is-empty {
-  cursor: default;
-
-  background:
-    radial-gradient(
-      circle,
-      rgba(120,87,255,.10),
-      transparent 70%
-    ),
-    rgba(255,255,255,.025);
-
-  box-shadow:
-    inset
-    0 0 0
-    1px
-    rgba(255,255,255,.035);
-}
-
-/* ---------------------------------------------------------
-   SHUFFLE BUTTON
-
-   The button is kept inside the screen.
---------------------------------------------------------- */
-
-.game-controls {
-  width: min(100%, 500px);
-
-  display: flex;
-  justify-content: center;
-
-  margin-top:
-    clamp(5px, 1vh, 10px);
-
-  flex: 0 0 auto;
-}
-
-.shuffle-btn,
-#shuffleBtn,
-#shuffleButton {
-  width:
-    min(
-      100%,
-      340px
-    );
-
-  min-height:
-    clamp(
-      43px,
-      7vh,
-      57px
-    );
-
-  padding:
-    0 24px;
-
-  border: 0;
-
-  border-radius:
-    clamp(
-      13px,
-      2.5vw,
-      18px
-    );
-
-  color: #fff;
-
-  background:
-    linear-gradient(
-      135deg,
-      var(--pv-purple),
-      #6241dc
-    );
-
-  box-shadow:
-    0 10px 25px
-    rgba(120,87,255,.28),
-
-    inset
-    0 1px 0
-    rgba(255,255,255,.20);
-
-  font-size:
-    clamp(
-      .85rem,
-      3.5vw,
-      1.02rem
-    );
-
-  font-weight: 900;
-
-  cursor: pointer;
-
-  transition:
-    transform .15s ease,
-    filter .15s ease;
-}
-
-.shuffle-btn:hover,
-#shuffleBtn:hover,
-#shuffleButton:hover {
-  transform:
-    translateY(-2px);
-
-  filter:
-    brightness(1.08);
-}
-
-.shuffle-btn:active,
-#shuffleBtn:active,
-#shuffleButton:active {
-  transform:
-    scale(.97);
-}
-
-/* ---------------------------------------------------------
-   PROGRESS
-
-   Keep this compact so it does not push the page down.
---------------------------------------------------------- */
-
-.progress-wrap {
-  width:
-    min(100%, 500px);
-
-  margin:
-    clamp(3px, .7vh, 7px)
-    0
-    0;
-
-  flex: 0 0 auto;
-}
-
-.progress-meta {
-  display: flex;
-  justify-content: space-between;
-
-  margin-bottom: 4px;
-
-  color:
-    var(--pv-muted);
-
-  font-size:
-    .65rem;
-
-  font-weight: 800;
-}
-
-.progress-track {
-  position: relative;
-
-  height: 5px;
-
-  overflow: hidden;
-
-  border-radius: 999px;
-
-  background:
-    rgba(255,255,255,.07);
-}
-
-.progress-track::before {
-  content: "";
-
-  position: absolute;
-
-  inset:
-    0 auto 0 0;
-
-  width:
-    var(--progress, 0%);
-
-  border-radius:
-    inherit;
-
-  background:
-    linear-gradient(
-      90deg,
-      var(--pv-purple),
-      var(--pv-purple-light)
-    );
-
-  transition:
-    width .3s ease;
-}
-
-/* ---------------------------------------------------------
-   COLLECTION
-
-   Hidden from the main game viewport unless your HTML
-   explicitly places it in a separate scrollable section.
---------------------------------------------------------- */
-
-.collection-section {
-  width:
-    min(100%, 600px);
-
-  margin-top:
-    16px;
-}
-
-.collection-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: end;
-
-  margin-bottom: 10px;
-}
-
-.collection-title {
-  margin: 0;
-
-  font-size: 1.1rem;
-  font-weight: 950;
-}
-
-.collection-subtitle {
-  margin: 3px 0 0;
-
-  color:
-    var(--pv-muted);
-
-  font-size: .78rem;
-}
-
-.collection-grid,
-#collection {
-  display: grid;
-
-  grid-template-columns:
-    repeat(3, 1fr);
-
-  gap: 8px;
-}
-
-.collection-item {
-  min-width: 0;
-
-  padding: 0;
-
-  overflow: hidden;
-
-  border:
-    1px solid
-    var(--pv-border);
-
-  border-radius: 14px;
-
-  background:
-    var(--pv-panel);
-
-  color:
-    var(--pv-text);
-
-  cursor: pointer;
-}
-
-.collection-item img {
-  display: block;
-
-  width: 100%;
-
-  aspect-ratio: 1 / 1;
-
-  object-fit: cover;
-}
-
-.collection-item span {
-  display: block;
-
-  padding: 7px;
-
-  font-size: .68rem;
-
-  font-weight: 800;
-}
-
-.collection-item.is-current {
-  border-color:
-    rgba(169,140,255,.8);
-
-  box-shadow:
-    0 0 0 2px
-    rgba(120,87,255,.18);
-}
-
-.collection-item:not(.is-unlocked) {
-  cursor: not-allowed;
-}
-
-.collection-item:not(.is-unlocked) img {
-  filter:
-    grayscale(1)
-    brightness(.45);
-}
-
-/* ---------------------------------------------------------
-   VICTORY MODAL
---------------------------------------------------------- */
-
-.victory-modal,
-#victoryModal,
-#winModal {
-  position: fixed;
-
-  inset: 0;
-
-  z-index: 9999;
-
-  display: grid;
-
-  place-items: center;
-
-  padding: 16px;
-
-  background:
-    rgba(3,6,15,.76);
-
-  backdrop-filter:
-    blur(10px);
-
-  opacity: 0;
-
-  visibility: hidden;
-
-  pointer-events: none;
-
-  transition:
-    opacity .2s ease,
-    visibility .2s ease;
-}
-
-.victory-modal.is-open,
-#victoryModal.is-open,
-#winModal.is-open {
-  opacity: 1;
-
-  visibility: visible;
-
-  pointer-events: auto;
-}
-
-.victory-card {
-  width:
-    min(100%, 370px);
-
-  max-height:
-    calc(100svh - 32px);
-
-  overflow-y: auto;
-
-  padding:
-    25px 18px 18px;
-
-  text-align: center;
-
-  border:
-    1px solid
-    rgba(255,255,255,.12);
-
-  border-radius:
-    25px;
-
-  background:
-    radial-gradient(
-      circle at 50% 0%,
-      rgba(120,87,255,.22),
-      transparent 55%
-    ),
-    var(--pv-panel);
-
-  box-shadow:
-    0 25px 70px
-    rgba(0,0,0,.45);
-
-  transform:
-    translateY(12px)
-    scale(.97);
-
-  transition:
-    transform .22s ease;
-}
-
-.victory-modal.is-open
-.victory-card,
-#victoryModal.is-open
-.victory-card,
-#winModal.is-open
-.victory-card {
-  transform:
-    translateY(0)
-    scale(1);
-}
-
-.victory-icon {
-  display: grid;
-
-  place-items: center;
-
-  width: 62px;
-  height: 62px;
-
-  margin:
-    0 auto
-    12px;
-
-  border-radius: 50%;
-
-  background:
-    rgba(72,214,157,.12);
-
-  font-size: 1.8rem;
-}
-
-.victory-card h2 {
-  margin: 0;
-
-  font-size:
-    clamp(
-      1.5rem,
-      6vw,
-      2rem
-    );
-
-  font-weight: 950;
-}
-
-.victory-card p {
-  margin:
-    6px 0 16px;
-
-  color:
-    var(--pv-muted);
-
-  font-size: .86rem;
-}
-
-.victory-stats {
-  display: grid;
-
-  grid-template-columns:
-    repeat(3, 1fr);
-
-  gap: 7px;
-
-  margin-bottom: 15px;
-}
-
-.victory-stat {
-  padding:
-    9px 5px;
-
-  border-radius: 13px;
-
-  background:
-    rgba(255,255,255,.045);
-}
-
-.victory-stat strong {
-  display: block;
-
-  margin-bottom: 3px;
-
-  font-size: .95rem;
-}
-
-.victory-stat span {
-  color:
-    var(--pv-muted);
-
-  font-size: .58rem;
-
-  font-weight: 800;
-
-  text-transform:
-    uppercase;
-}
-
-.victory-actions {
-  display: flex;
-
-  gap: 8px;
-}
-
-.victory-actions button {
-  flex: 1;
-
-  min-height: 46px;
-
-  border: 0;
-
-  border-radius: 14px;
-
-  font-weight: 900;
-
-  cursor: pointer;
-}
-
-#playAgain,
-#nextPuzzle {
-  color: #fff;
-
-  background:
-    linear-gradient(
-      135deg,
-      var(--pv-purple),
-      #6241dc
-    );
-}
-
-#closeVictory {
-  color:
-    var(--pv-text);
-
-  background:
-    rgba(255,255,255,.07);
-}
-
-/* ---------------------------------------------------------
-   VERY SHORT PHONES
-   Examples: 568px, 600px height
---------------------------------------------------------- */
-
-@media (max-height: 700px) {
-
-  .game-shell {
-    padding-top: 5px;
-    padding-bottom: 6px;
-  }
-
-  .pixvinz-logo,
-  #pixvinzLogo {
-    width: min(145px, 27vw);
-    max-height: 7.5svh;
-
-    margin-bottom: 4px;
-  }
-
-  .game-header {
-    margin-bottom: 5px;
-  }
-
-  .stat-card {
-    padding-top: 5px;
-    padding-bottom: 5px;
-  }
-
-  .game-board,
-  #gameBoard {
-    width:
-      min(
-        calc(100vw - 20px),
-        67svh,
-        460px
-      );
-
-    height:
-      min(
-        calc(100vw - 20px),
-        67svh,
-        460px
-      );
-  }
-
-  .game-controls {
-    margin-top: 5px;
-  }
-
-  .shuffle-btn,
-  #shuffleBtn,
-  #shuffleButton {
-    min-height: 42px;
-  }
-
-  .progress-wrap {
-    margin-top: 3px;
-  }
-}
-
-/* ---------------------------------------------------------
-   EXTRA SHORT PHONES
---------------------------------------------------------- */
-
-@media (max-height: 600px) {
-
-  .game-shell {
-    padding-top: 3px;
-    padding-bottom: 4px;
-  }
-
-  .pixvinz-logo,
-  #pixvinzLogo {
-    width: min(120px, 25vw);
-    max-height: 6.5svh;
-
-    margin-bottom: 2px;
-  }
-
-  .stat-card {
-    padding: 4px 5px;
-  }
-
-  .stat-label {
-    font-size: .48rem;
-  }
-
-  .stat-value {
-    font-size: .78rem;
-  }
-
-  .game-board,
-  #gameBoard {
-    width:
-      min(
-        calc(100vw - 18px),
-        62svh,
-        420px
-      );
-
-    height:
-      min(
-        calc(100vw - 18px),
-        62svh,
-        420px
-      );
-  }
-
-  .game-controls {
-    margin-top: 3px;
-  }
-
-  .shuffle-btn,
-  #shuffleBtn,
-  #shuffleButton {
-    min-height: 38px;
-
-    font-size: .8rem;
-  }
-
-  .progress-wrap {
-    display: none;
-  }
-}
-
-/* ---------------------------------------------------------
-   NARROW PHONES
---------------------------------------------------------- */
-
-@media (max-width: 360px) {
-
-  .game-shell {
-    padding-left: 7px;
-    padding-right: 7px;
-  }
-
-  .game-board,
-  #gameBoard {
-    width:
-      min(
-        calc(100vw - 14px),
-        68svh
-      );
-
-    height:
-      min(
-        calc(100vw - 14px),
-        68svh
-      );
-
-    padding: 4px;
-
-    gap: 3px;
-  }
-
-  .puzzle-tile {
-    border-radius: 5px;
-  }
-
-  .shuffle-btn,
-  #shuffleBtn,
-  #shuffleButton {
-    width: 250px;
-  }
-}
-
-/* ---------------------------------------------------------
-   LANDSCAPE MOBILE
---------------------------------------------------------- */
-
-@media (
-  orientation: landscape
-) and (max-height: 600px) {
-
-  .game-shell {
     display: grid;
 
     grid-template-columns:
-      auto
-      minmax(0, 1fr);
+        1fr auto 1fr;
 
-    grid-template-rows:
-      auto
-      auto
-      auto;
+    align-items: center;
+
+    padding:
+        8px 14px;
+
+    background:
+        rgba(22, 11, 37, 0.82);
+
+    border-bottom:
+        1px solid rgba(255, 255, 255, 0.08);
+
+    backdrop-filter:
+        blur(16px);
+
+    -webkit-backdrop-filter:
+        blur(16px);
+}
+
+
+/* =========================================================
+   BACK BUTTON
+   ========================================================= */
+
+.game-back-button {
+
+    justify-self: start;
+
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 14px;
+
+    color:
+        rgba(255, 255, 255, 0.92);
+
+    background:
+        rgba(255, 255, 255, 0.075);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.08);
+
+    font-size:
+        1.8rem;
+
+    line-height:
+        1;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 6px 15px rgba(0, 0, 0, 0.2);
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease;
+}
+
+
+.game-back-button:hover {
+
+    background:
+        rgba(255, 255, 255, 0.13);
+
+    transform:
+        translateX(-2px);
+}
+
+
+.game-back-button:active {
+
+    transform:
+        scale(0.94);
+}
+
+
+/* =========================================================
+   GAME LOGO
+   ========================================================= */
+
+.game-logo {
+
+    width: 86px;
+    height: 48px;
+
+    object-fit:
+        contain;
+
+    filter:
+        drop-shadow(
+            0 7px 13px rgba(0, 0, 0, 0.35)
+        );
+}
+
+
+/* =========================================================
+   GAME COINS
+   ========================================================= */
+
+.game-coins {
+
+    justify-self: end;
+
+    min-width:
+        64px;
+
+    justify-content:
+        center;
+}
+
+
+/* =========================================================
+   GAME INFORMATION
+   ========================================================= */
+
+.game-info {
+
+    width: min(94vw, 650px);
+
+    margin:
+        16px auto 8px;
+
+    padding:
+        0 4px;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap:
+        8px;
+}
+
+
+/* =========================================================
+   LEVEL LABEL
+   ========================================================= */
+
+.game-level-label,
+.game-stat {
+
+    min-height:
+        58px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
 
     justify-content: center;
 
-    column-gap: 18px;
+    border-radius:
+        16px;
+
+    background:
+        rgba(255, 255, 255, 0.055);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.08);
+
+    box-shadow:
+        0 7px 18px rgba(0, 0, 0, 0.16);
+
+    backdrop-filter:
+        blur(10px);
+}
+
+
+.game-level-label span,
+.game-stat span {
+
+    color:
+        rgba(255, 255, 255, 0.48);
+
+    font-size:
+        0.56rem;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.12em;
+}
+
+
+.game-level-label strong {
+
+    margin-top:
+        2px;
+
+    color:
+        #ffd978;
+
+    font-size:
+        1.12rem;
+
+    font-weight:
+        900;
+}
+
+
+.game-stat strong {
+
+    margin-top:
+        2px;
+
+    color:
+        rgba(255, 255, 255, 0.92);
+
+    font-size:
+        1rem;
+
+    font-weight:
+        850;
+
+    font-variant-numeric:
+        tabular-nums;
+}
+
+
+/* =========================================================
+   PUZZLE SECTION
+   ========================================================= */
+
+.puzzle-section {
+
+    width: 100%;
+
+    flex:
+        1;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
 
     padding:
-      5px 15px;
-  }
+        14px 12px 10px;
+}
 
-  .pixvinz-logo,
-  #pixvinzLogo {
-    grid-column: 1;
-    grid-row: 1;
 
-    width: 130px;
+/* =========================================================
+   PUZZLE BOARD
+   ========================================================= */
 
-    margin: 0 auto 5px;
-  }
+.puzzle-board {
 
-  .game-header {
-    grid-column: 1;
-    grid-row: 2;
-
-    width: 150px;
-
-    grid-template-columns:
-      1fr;
-
-    margin: 0;
-  }
-
-  .game-board,
-  #gameBoard {
-    grid-column: 2;
-    grid-row: 1 / 4;
+    /*
+       The board uses a viewport-aware size so that
+       7x7 puzzles remain inside small phone screens.
+    */
 
     width:
-      min(
-        92svh,
-        70vw
-      );
+        min(
+            calc(100vw - 28px),
+            calc(100dvh - 250px),
+            620px
+        );
+
+    aspect-ratio:
+        1 / 1;
+
+    display: grid;
+
+    gap:
+        2px;
+
+    padding:
+        4px;
+
+    border-radius:
+        18px;
+
+    background:
+        rgba(255, 255, 255, 0.12);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.15);
+
+    box-shadow:
+
+        0 20px 45px rgba(0, 0, 0, 0.38),
+
+        0 0 22px rgba(142, 80, 190, 0.14),
+
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.1);
+
+    overflow:
+        hidden;
+
+    touch-action:
+        manipulation;
+
+    user-select:
+        none;
+
+    -webkit-user-select:
+        none;
+}
+
+
+/* =========================================================
+   PUZZLE TILE
+   ========================================================= */
+
+.puzzle-piece {
+
+    position: relative;
+
+    min-width:
+        0;
+
+    min-height:
+        0;
+
+    overflow:
+        hidden;
+
+    cursor:
+        pointer;
+
+    background-repeat:
+        no-repeat;
+
+    background-color:
+        #21112f;
+
+    border:
+        0;
+
+    transition:
+        transform 0.14s ease,
+        filter 0.14s ease,
+        box-shadow 0.14s ease;
+
+    box-shadow:
+        inset 0 0 0 1px
+        rgba(255, 255, 255, 0.07);
+}
+
+
+.puzzle-piece:hover {
+
+    filter:
+        brightness(1.06);
+}
+
+
+.puzzle-piece:active {
+
+    transform:
+        scale(0.96);
+
+    filter:
+        brightness(1.12);
+}
+
+
+/* =========================================================
+   SELECTED PIECE
+   ========================================================= */
+
+.puzzle-piece.selected {
+
+    z-index:
+        3;
+
+    box-shadow:
+
+        inset 0 0 0 2px
+        rgba(255, 217, 120, 0.95),
+
+        0 0 12px
+        rgba(255, 217, 120, 0.45);
+
+    filter:
+        brightness(1.08);
+}
+
+
+/* =========================================================
+   CORRECT PIECE
+   ========================================================= */
+
+.puzzle-piece.correct {
+
+    box-shadow:
+
+        inset 0 0 0 1px
+        rgba(255, 255, 255, 0.1),
+
+        inset 0 0 8px
+        rgba(255, 217, 120, 0.12);
+}
+
+
+/* =========================================================
+   GAME CONTROLS
+   ========================================================= */
+
+.game-controls {
+
+    width:
+        min(94vw, 650px);
+
+    margin:
+        2px auto 0;
+
+    padding:
+        4px 4px 18px;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:
+        10px;
+}
+
+
+.game-control-button {
+
+    min-height:
+        48px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        7px;
+
+    border-radius:
+        15px;
+
+    color:
+        rgba(255, 255, 255, 0.9);
+
+    background:
+        rgba(255, 255, 255, 0.065);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.09);
+
+    box-shadow:
+        0 7px 17px rgba(0, 0, 0, 0.18);
+
+    font-size:
+        0.78rem;
+
+    font-weight:
+        800;
+
+    cursor:
+        pointer;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease;
+}
+
+
+.game-control-button:hover {
+
+    background:
+        rgba(255, 255, 255, 0.105);
+
+    transform:
+        translateY(-2px);
+}
+
+
+.game-control-button:active {
+
+    transform:
+        scale(0.97);
+}
+
+
+/* =========================================================
+   GAME MESSAGE
+   ========================================================= */
+
+.game-message {
+
+    min-height:
+        20px;
+
+    width:
+        min(90vw, 600px);
+
+    margin:
+        -8px auto 10px;
+
+    text-align:
+        center;
+
+    color:
+        rgba(255, 255, 255, 0.55);
+
+    font-size:
+        0.7rem;
+
+    pointer-events:
+        none;
+}
+
+
+/* =========================================================
+   GAME MODAL OVERLAY
+   ========================================================= */
+
+.game-modal-overlay {
+
+    position:
+        fixed;
+
+    inset:
+        0;
+
+    z-index:
+        100;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    padding:
+        18px;
+
+    background:
+        rgba(7, 3, 12, 0.78);
+
+    backdrop-filter:
+        blur(8px);
+
+    -webkit-backdrop-filter:
+        blur(8px);
+
+    animation:
+        victoryOverlayIn 0.25s ease both;
+}
+
+
+@keyframes victoryOverlayIn {
+
+    from {
+        opacity:
+            0;
+    }
+
+    to {
+        opacity:
+            1;
+    }
+}
+
+
+/* =========================================================
+   VICTORY MODAL
+   ========================================================= */
+
+.victory-modal {
+
+    position:
+        relative;
+
+    width:
+        min(92vw, 390px);
+
+    max-height:
+        94dvh;
+
+    overflow-y:
+        auto;
+
+    padding:
+        22px 18px 20px;
+
+    text-align:
+        center;
+
+    border-radius:
+        25px;
+
+    background:
+
+        linear-gradient(
+            145deg,
+            rgba(67, 39, 91, 0.98),
+            rgba(28, 15, 45, 0.99)
+        );
+
+    border:
+        1px solid rgba(255, 255, 255, 0.13);
+
+    box-shadow:
+
+        0 30px 70px rgba(0, 0, 0, 0.55),
+
+        0 0 30px
+        rgba(177, 102, 225, 0.13);
+
+    animation:
+        victoryModalIn 0.32s cubic-bezier(.2,.8,.2,1) both;
+}
+
+
+@keyframes victoryModalIn {
+
+    from {
+
+        opacity:
+            0;
+
+        transform:
+            translateY(20px)
+            scale(0.94);
+    }
+
+    to {
+
+        opacity:
+            1;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
+}
+
+
+/* =========================================================
+   VICTORY CLOSE
+   ========================================================= */
+
+.victory-modal .modal-close {
+
+    z-index:
+        3;
+
+    cursor:
+        pointer;
+}
+
+
+/* =========================================================
+   VICTORY TITLE
+   ========================================================= */
+
+.victory-title {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    margin-bottom:
+        12px;
+}
+
+
+.victory-title > span {
+
+    font-size:
+        2rem;
+}
+
+
+.victory-title h2 {
+
+    margin:
+        3px 0 0;
+
+    color:
+        #ffd978;
+
+    font-size:
+        1.42rem;
+
+    font-weight:
+        950;
+}
+
+
+/* =========================================================
+   VICTORY IMAGE
+   ========================================================= */
+
+.victory-image-container {
+
+    width:
+        min(58vw, 220px);
+
+    aspect-ratio:
+        1 / 1;
+
+    margin:
+        0 auto 14px;
+
+    padding:
+        4px;
+
+    border-radius:
+        17px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #ffd978,
+            #d28c13
+        );
+
+    box-shadow:
+
+        0 0 18px
+        rgba(255, 201, 63, 0.38),
+
+        0 10px 25px
+        rgba(0, 0, 0, 0.3);
+
+    overflow:
+        hidden;
+}
+
+
+.victory-image-container img {
+
+    display:
+        block;
+
+    width:
+        100%;
 
     height:
-      min(
-        92svh,
-        70vw
-      );
-  }
+        100%;
 
-  .game-controls {
-    grid-column: 1;
-    grid-row: 3;
+    object-fit:
+        cover;
 
-    margin: 5px 0 0;
-  }
-
-  .progress-wrap {
-    display: none;
-  }
+    border-radius:
+        13px;
 }
 
-/* ---------------------------------------------------------
-   HIDDEN ELEMENT
---------------------------------------------------------- */
 
-[hidden] {
-  display: none !important;
+/* =========================================================
+   CURRENT RESULT
+   ========================================================= */
+
+.victory-current-stats {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap:
+        6px;
+
+    margin-bottom:
+        9px;
 }
 
-/* ---------------------------------------------------------
+
+.victory-current-stats > div {
+
+    padding:
+        8px 4px;
+
+    border-radius:
+        12px;
+
+    background:
+        rgba(255, 255, 255, 0.06);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.07);
+}
+
+
+.victory-current-stats span,
+.best-results span {
+
+    display:
+        block;
+
+    margin-bottom:
+        3px;
+
+    color:
+        rgba(255, 255, 255, 0.45);
+
+    font-size:
+        0.5rem;
+
+    font-weight:
+        800;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        0.07em;
+}
+
+
+.victory-current-stats strong {
+
+    display:
+        block;
+
+    color:
+        rgba(255, 255, 255, 0.92);
+
+    font-size:
+        0.78rem;
+
+    font-weight:
+        900;
+
+    font-variant-numeric:
+        tabular-nums;
+}
+
+
+#victoryStars {
+
+    color:
+        #ffd04a;
+
+    letter-spacing:
+        1px;
+}
+
+
+/* =========================================================
+   BEST RESULTS
+   ========================================================= */
+
+.best-results {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap:
+        5px;
+
+    padding:
+        7px 4px;
+
+    margin-bottom:
+        10px;
+
+    border-radius:
+        12px;
+
+    background:
+        rgba(0, 0, 0, 0.14);
+}
+
+
+.best-results > div {
+
+    min-width:
+        0;
+}
+
+
+.best-results strong {
+
+    display:
+        block;
+
+    color:
+        rgba(255, 255, 255, 0.76);
+
+    font-size:
+        0.67rem;
+
+    font-weight:
+        850;
+
+    white-space:
+        nowrap;
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
+
+    font-variant-numeric:
+        tabular-nums;
+}
+
+
+#bestStars {
+
+    color:
+        #ffd04a;
+}
+
+
+/* =========================================================
+   COINS EARNED
+   ========================================================= */
+
+.coins-earned {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        4px;
+
+    margin:
+        7px auto 14px;
+
+    padding:
+        8px 14px;
+
+    width:
+        fit-content;
+
+    border-radius:
+        999px;
+
+    background:
+        rgba(255, 194, 50, 0.1);
+
+    border:
+        1px solid rgba(255, 207, 81, 0.18);
+}
+
+
+.coins-earned span {
+
+    font-size:
+        1rem;
+}
+
+
+.coins-earned strong {
+
+    color:
+        #ffd978;
+
+    font-size:
+        0.95rem;
+
+    font-weight:
+        950;
+}
+
+
+.coins-earned small {
+
+    width:
+        100%;
+
+    color:
+        rgba(255, 255, 255, 0.45);
+
+    font-size:
+        0.48rem;
+
+    font-weight:
+        800;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        0.08em;
+}
+
+
+/* =========================================================
+   VICTORY ACTIONS
+   ========================================================= */
+
+.victory-actions {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr;
+
+    gap:
+        7px;
+}
+
+
+.victory-actions .primary-button {
+
+    width:
+        100%;
+
+    min-height:
+        45px;
+}
+
+
+.secondary-game-button {
+
+    width:
+        100%;
+
+    min-height:
+        42px;
+
+    border-radius:
+        14px;
+
+    color:
+        rgba(255, 255, 255, 0.78);
+
+    background:
+        rgba(255, 255, 255, 0.055);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.08);
+
+    font-size:
+        0.72rem;
+
+    font-weight:
+        850;
+
+    cursor:
+        pointer;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease;
+}
+
+
+.secondary-game-button:hover {
+
+    background:
+        rgba(255, 255, 255, 0.1);
+
+    transform:
+        translateY(-1px);
+}
+
+
+.secondary-game-button:active {
+
+    transform:
+        scale(0.98);
+}
+
+
+/* =========================================================
+   DESKTOP / TABLET
+   ========================================================= */
+
+@media (min-width: 650px) {
+
+    .game-topbar {
+
+        padding-left:
+            22px;
+
+        padding-right:
+            22px;
+    }
+
+
+    .puzzle-section {
+
+        padding-top:
+            20px;
+    }
+
+
+    .puzzle-board {
+
+        width:
+            min(
+                620px,
+                calc(100vw - 80px),
+                calc(100dvh - 270px)
+            );
+    }
+
+
+    .game-controls {
+
+        padding-bottom:
+            24px;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+    .game-topbar {
+
+        height:
+            62px;
+
+        padding:
+            6px 9px;
+    }
+
+
+    .game-back-button {
+
+        width:
+            38px;
+
+        height:
+            38px;
+    }
+
+
+    .game-logo {
+
+        width:
+            76px;
+
+        height:
+            42px;
+    }
+
+
+    .game-info {
+
+        margin-top:
+            10px;
+
+        gap:
+            5px;
+    }
+
+
+    .game-level-label,
+    .game-stat {
+
+        min-height:
+            50px;
+
+        border-radius:
+            13px;
+    }
+
+
+    .game-level-label span,
+    .game-stat span {
+
+        font-size:
+            0.48rem;
+    }
+
+
+    .game-level-label strong {
+
+        font-size:
+            0.95rem;
+    }
+
+
+    .game-stat strong {
+
+        font-size:
+            0.86rem;
+    }
+
+
+    .puzzle-section {
+
+        padding:
+            8px 8px 5px;
+    }
+
+
+    .puzzle-board {
+
+        width:
+            calc(100vw - 18px);
+
+        border-radius:
+            14px;
+
+        gap:
+            1px;
+
+        padding:
+            3px;
+    }
+
+
+    .game-controls {
+
+        gap:
+            7px;
+
+        padding:
+            2px 8px 12px;
+    }
+
+
+    .game-control-button {
+
+        min-height:
+            43px;
+
+        font-size:
+            0.7rem;
+    }
+
+
+    .victory-modal {
+
+        width:
+            94vw;
+
+        padding:
+            20px 14px 16px;
+
+        border-radius:
+            21px;
+    }
+
+
+    .victory-image-container {
+
+        width:
+            min(58vw, 190px);
+    }
+
+}
+
+
+/* =========================================================
    REDUCED MOTION
---------------------------------------------------------- */
+   ========================================================= */
 
-@media (
-  prefers-reduced-motion: reduce
-) {
+@media (prefers-reduced-motion: reduce) {
 
-  *,
-  *::before,
-  *::after {
-    animation-duration:
-      .01ms !important;
+    .game-modal-overlay,
+    .victory-modal {
 
-    animation-iteration-count:
-      1 !important;
+        animation:
+            none;
+    }
 
-    transition-duration:
-      .01ms !important;
-  }
+}
+/* =========================================================
+   MOBILE FIT FIX
+========================================================= */
+
+html,
+body {
+
+    width: 100%;
+    max-width: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    overflow-x: hidden;
+}
+
+
+*,
+*::before,
+*::after {
+
+    box-sizing: border-box;
+}
+
+
+/* Small phones */
+
+@media (max-width: 480px) {
+
+    .game-topbar {
+
+        width: 100%;
+        height: 60px;
+
+        padding:
+            5px 8px;
+    }
+
+
+    .game-info {
+
+        width: calc(100% - 16px);
+
+        margin:
+            8px auto 4px;
+    }
+
+
+    .puzzle-section {
+
+        width: 100%;
+
+        padding:
+            8px 8px;
+    }
+
+
+    .puzzle-board {
+
+        width:
+            calc(100vw - 20px);
+
+        max-width:
+            calc(100vw - 20px);
+
+        padding:
+            3px;
+
+        gap:
+            1px;
+
+        border-radius:
+            14px;
+    }
+
+
+    .game-controls {
+
+        width:
+            calc(100% - 16px);
+
+        padding:
+            2px 0 10px;
+    }
+
 }
