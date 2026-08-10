@@ -1,533 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
-    <meta name="theme-color" content="#24113f">
-
-    <title>PixVinz</title>
-
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>PixVinz</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
-    <!-- =========================
-         LOADING SCREEN
-    ========================== -->
-    <section id="loadingScreen" class="screen loading-screen">
-
-        <video
-            class="logo loading-logo"
-            src="image/logo.webm"
-            autoplay
-            muted
-            playsinline>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="top-bar">
+      <button class="icon-btn" id="menuBtn">☰</button>
+      <div class="logo-container">
+        <video id="logoVideo" autoplay loop muted playsinline width="100">
+          <source src="image/logo.webm" type="video/webm">
         </video>
+      </div>
+      <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
+    </header>
 
-        <div class="loading-indicator">
-            <span></span>
-            <span></span>
-            <span></span>
+    <!-- HOME PAGE -->
+    <section id="homeView" class="view active">
+      <div class="card welcome-card">
+        <p class="sub-title">WELCOME</p>
+        <h2 class="user-name">Vinz</h2>
+        <button class="btn btn-primary" id="playBtn">▶ PLAY</button>
+      </div>
+
+      <div class="card menu-card" id="navLevels">
+        <div class="card-icon">🎮</div>
+        <div class="card-text">
+          <h3>LEVELS</h3>
+          <p>Play and unlock new puzzles</p>
         </div>
+        <span class="arrow">›</span>
+      </div>
 
-    </section>
-
-
-    <!-- =========================
-         AUTHENTICATION
-    ========================== -->
-    <section id="authScreen" class="screen hidden">
-
-        <div class="auth-container">
-
-            <video
-                class="logo auth-logo"
-                src="image/logo.webm"
-                autoplay
-                muted
-                loop
-                playsinline>
-            </video>
-
-            <div class="auth-card">
-
-                <div class="auth-tabs">
-
-                    <button
-                        id="loginTab"
-                        class="auth-tab active">
-                        Sign In
-                    </button>
-
-                    <button
-                        id="registerTab"
-                        class="auth-tab">
-                        Create Account
-                    </button>
-
-                </div>
-
-
-                <!-- LOGIN -->
-                <form id="loginForm">
-
-                    <div class="input-group">
-                        <label for="loginUsername">
-                            Username
-                        </label>
-
-                        <input
-                            id="loginUsername"
-                            type="text"
-                            autocomplete="username"
-                            required>
-                    </div>
-
-
-                    <div class="input-group">
-                        <label for="loginPassword">
-                            Password
-                        </label>
-
-                        <input
-                            id="loginPassword"
-                            type="password"
-                            autocomplete="current-password"
-                            required>
-                    </div>
-
-
-                    <button
-                        type="submit"
-                        class="primary-button">
-                        Sign In
-                    </button>
-
-                    <p
-                        id="loginMessage"
-                        class="form-message">
-                    </p>
-
-                </form>
-
-
-                <!-- REGISTER -->
-                <form
-                    id="registerForm"
-                    class="hidden">
-
-                    <div class="input-group">
-                        <label for="registerUsername">
-                            Username
-                        </label>
-
-                        <input
-                            id="registerUsername"
-                            type="text"
-                            minlength="3"
-                            autocomplete="username"
-                            required>
-                    </div>
-
-
-                    <div class="input-group">
-                        <label for="registerDisplayName">
-                            Display Name
-                        </label>
-
-                        <input
-                            id="registerDisplayName"
-                            type="text"
-                            maxlength="30"
-                            required>
-                    </div>
-
-
-                    <div class="input-group">
-                        <label for="registerPassword">
-                            Password
-                        </label>
-
-                        <input
-                            id="registerPassword"
-                            type="password"
-                            minlength="6"
-                            autocomplete="new-password"
-                            required>
-                    </div>
-
-
-                    <button
-                        type="submit"
-                        class="primary-button">
-                        Create Account
-                    </button>
-
-                    <p
-                        id="registerMessage"
-                        class="form-message">
-                    </p>
-
-                </form>
-
-            </div>
-
+      <div class="card menu-card" id="navCollections">
+        <div class="card-icon">✨</div>
+        <div class="card-text">
+          <h3>COLLECTIONS</h3>
+          <p>View your solved puzzles</p>
         </div>
-
-    </section>
-
-
-    <!-- =========================
-         HOME
-    ========================== -->
-    <section id="homeScreen" class="screen hidden">
-
-        <header class="topbar">
-
-            <video
-                class="logo top-logo"
-                src="image/logo.webm"
-                autoplay
-                muted
-                loop
-                playsinline>
-            </video>
-
-
-            <div class="coin-display">
-                <span>🪙</span>
-                <strong id="coinCount">0</strong>
-            </div>
-
-        </header>
-
-
-        <main class="home-content">
-
-            <div class="welcome-card">
-
-                <p class="eyebrow">
-                    WELCOME
-                </p>
-
-                <h1 id="displayName">
-                    Player
-                </h1>
-
-                <button
-                    id="playButton"
-                    class="primary-button play-button">
-                    PLAY
-                </button>
-
-            </div>
-
-
-            <div class="home-menu">
-
-                <button
-                    id="levelsButton"
-                    class="menu-card">
-
-                    <span class="menu-icon">
-                        🎮
-                    </span>
-
-                    <strong>
-                        Levels
-                    </strong>
-
-                    <small>
-                        Choose a puzzle
-                    </small>
-
-                </button>
-
-
-                <button
-                    id="collectionsButton"
-                    class="menu-card">
-
-                    <span class="menu-icon">
-                        ✨
-                    </span>
-
-                    <strong>
-                        Collections
-                    </strong>
-
-                    <small>
-                        Solved puzzles
-                    </small>
-
-                </button>
-
-
-                <button
-                    id="settingsButton"
-                    class="menu-card">
-
-                    <span class="menu-icon">
-                        ⚙️
-                    </span>
-
-                    <strong>
-                        Settings
-                    </strong>
-
-                    <small>
-                        Sound & account
-                    </small>
-
-                </button>
-
-            </div>
-
-        </main>
-
-    </section>
-
-
-    <!-- =========================
-         LEVELS
-    ========================== -->
-    <section id="levelsScreen" class="screen hidden">
-
-        <header class="topbar">
-
-            <button
-                class="back-button"
-                data-back="homeScreen">
-                ‹
-            </button>
-
-            <video
-                class="logo top-logo"
-                src="image/logo.webm"
-                autoplay
-                muted
-                loop
-                playsinline>
-            </video>
-
-            <div class="coin-display">
-                <span>🪙</span>
-                <strong id="levelCoinCount">0</strong>
-            </div>
-
-        </header>
-
-
-        <main class="page-content">
-
-            <div class="page-heading">
-
-                <p class="eyebrow">
-                    CHOOSE A PUZZLE
-                </p>
-
-                <h1>
-                    Levels
-                </h1>
-
-            </div>
-
-
-            <div
-                id="levelGrid"
-                class="level-grid">
-            </div>
-
-        </main>
-
-    </section>
-
-
-    <!-- =========================
-         COLLECTIONS
-    ========================== -->
-    <section id="collectionsScreen" class="screen hidden">
-
-        <header class="topbar">
-
-            <button
-                class="back-button"
-                data-back="homeScreen">
-                ‹
-            </button>
-
-            <video
-                class="logo top-logo"
-                src="image/logo.webm"
-                autoplay
-                muted
-                loop
-                playsinline>
-            </video>
-
-            <div></div>
-
-        </header>
-
-
-        <main class="page-content">
-
-            <div class="page-heading">
-
-                <p class="eyebrow">
-                    YOUR GALLERY
-                </p>
-
-                <h1>
-                    Collections
-                </h1>
-
-            </div>
-
-
-            <div
-                id="collectionGrid"
-                class="collection-grid">
-            </div>
-
-        </main>
-
-    </section>
-
-
-    <!-- =========================
-         SETTINGS
-    ========================== -->
-    <section id="settingsScreen" class="screen hidden">
-
-        <header class="topbar">
-
-            <button
-                class="back-button"
-                data-back="homeScreen">
-                ‹
-            </button>
-
-            <video
-                class="logo top-logo"
-                src="image/logo.webm"
-                autoplay
-                muted
-                loop
-                playsinline>
-            </video>
-
-            <div></div>
-
-        </header>
-
-
-        <main class="page-content">
-
-            <div class="settings-card">
-
-                <button
-                    id="soundButton"
-                    class="setting-row">
-
-                    <span>
-                        🔊 Sound
-                    </span>
-
-                    <strong id="soundState">
-                        ON
-                    </strong>
-
-                </button>
-
-
-                <button
-                    id="aboutButton"
-                    class="setting-row">
-
-                    <span>
-                        ⓘ About
-                    </span>
-
-                    <span>
-                        ›
-                    </span>
-
-                </button>
-
-
-                <button
-                    id="logoutButton"
-                    class="setting-row danger">
-
-                    <span>
-                        ↪ Log out
-                    </span>
-
-                    <span>
-                        ›
-                    </span>
-
-                </button>
-
-            </div>
-
-        </main>
-
-    </section>
-
-
-    <!-- =========================
-         ABOUT MODAL
-    ========================== -->
-    <div
-        id="aboutModal"
-        class="modal-overlay hidden">
-
-        <div class="modal">
-
-            <button
-                class="modal-close"
-                data-close="aboutModal">
-                ×
-            </button>
-
-
-            <video
-                class="logo modal-logo"
-                src="image/logo.webm"
-                autoplay
-                muted
-                loop
-                playsinline>
-            </video>
-
-
-            <h2>
-                About
-            </h2>
-
-            <p>
-                A fun and challenging image puzzle experience.
-            </p>
-
-            <p class="muted">
-                Created 2026
-            </p>
-
-            <p class="muted">
-                Built for future expansion.
-            </p>
-
+        <span class="arrow">›</span>
+      </div>
+
+      <div class="card menu-card" id="navSettings">
+        <div class="card-icon">⚙️</div>
+        <div class="card-text">
+          <h3>SETTINGS</h3>
+          <p>Sound, account and more</p>
         </div>
+        <span class="arrow">›</span>
+      </div>
+    </section>
 
-    </div>
+    <!-- LEVELS PAGE -->
+    <section id="levelsView" class="view">
+      <div class="view-header">
+        <button class="icon-btn back-btn">‹</button>
+        <h2>LEVELS</h2>
+      </div>
+      <div class="levels-grid" id="levelsGrid"></div>
+      <div class="bottom-info-bar">
+        🔒 <span id="unlockInfoText">COMPLETE LEVEL 01 TO UNLOCK LEVEL 02</span>
+      </div>
+    </section>
 
+    <!-- COLLECTIONS PAGE -->
+    <section id="collectionsView" class="view">
+      <div class="view-header">
+        <button class="icon-btn back-btn">‹</button>
+        <h2>COLLECTIONS</h2>
+      </div>
+      <div class="collections-grid" id="collectionsGrid"></div>
+    </section>
+  </div>
 
-    <script src="levels.js"></script>
-<script src="script.js"></script>
+  <script src="audio.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
