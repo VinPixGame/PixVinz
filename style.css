@@ -774,3 +774,34 @@ input:checked + .slider:before { transform: translateX(22px); }
   0% { transform: scale(0.8); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
 }
+
+
+/* FORCE HIDE INACTIVE VIEWS */
+.view {
+  display: none !important;
+}
+
+.view.active {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Fix Full Screen Views (Login/Register/Loading) when active */
+.full-screen-view {
+  display: none !important;
+}
+
+.full-screen-view.active {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 100vh !important;
+  width: 100% !important;
+}
+
+/* Prevent image overflowing inside login/register containers */
+.auth-card, .image-modal-card, .settings-card {
+  position: relative !important;
+  z-index: 10 !important;
+}
