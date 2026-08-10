@@ -708,14 +708,18 @@ input:checked + .slider:before {
   font-size: 15px;
 }
 
-/* FIXED VICTORY MODAL & SMALLER VICTORY IMAGE */
+/* ==========================================
+   VICTORY MODAL & IMAGE SIZE ADJUSTMENTS
+   ========================================== */
+
+/* Main Victory Card Box */
 .victory-card {
   width: 100%;
-  max-width: 310px;
+  max-width: 360px; /* Increased width (default was 310px) */
   background: radial-gradient(circle at top, #2d1054 0%, #120624 100%);
   border: 2px solid #ffd700;
-  border-radius: 20px;
-  padding: 16px;
+  border-radius: 22px;
+  padding: 24px 20px; /* Increased top/bottom padding to make it taller */
   text-align: center;
   box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
   z-index: 202;
@@ -723,21 +727,15 @@ input:checked + .slider:before {
   animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.victory-title {
-  color: #ffd700;
-  font-size: 20px;
-  margin-bottom: 8px;
-  letter-spacing: 1px;
-}
-
-/* Sized Down Victory Preview Container */
+/* Scaled-Up Image Preview Box */
 .victory-img-container {
-  width: 110px;
-  height: 110px;
-  margin: 0 auto 8px auto;
-  border-radius: 12px;
+  width: 150px;  /* Increased image width (default was 110px) */
+  height: 150px; /* Increased image height */
+  margin: 0 auto 12px auto;
+  border-radius: 14px;
   overflow: hidden;
   border: 2px solid #9d4edd;
+  box-shadow: 0 0 12px rgba(157, 78, 221, 0.5);
 }
 
 .victory-img-container img {
