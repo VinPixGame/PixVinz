@@ -1,40 +1,95 @@
 /* =========================================================
-   PIXVINZ - STAGE 1 APPLICATION FLOW
+   PIXVINZ - APPLICATION FLOW
    ========================================================= */
 
-const loadingScreen = document.getElementById("loadingScreen");
-const authScreen = document.getElementById("authScreen");
-const homeScreen = document.getElementById("homeScreen");
-const levelsScreen = document.getElementById("levelsScreen");
-const collectionsScreen = document.getElementById("collectionsScreen");
-const settingsScreen = document.getElementById("settingsScreen");
 
-const loginTab = document.getElementById("loginTab");
-const registerTab = document.getElementById("registerTab");
+/* =========================================================
+   SCREEN REFERENCES
+   ========================================================= */
 
-const loginForm = document.getElementById("loginForm");
-const registerForm = document.getElementById("registerForm");
+const loadingScreen =
+    document.getElementById("loadingScreen");
 
-const loginMessage = document.getElementById("loginMessage");
-const registerMessage = document.getElementById("registerMessage");
+const authScreen =
+    document.getElementById("authScreen");
 
-const displayNameElement = document.getElementById("displayName");
-const coinCountElement = document.getElementById("coinCount");
-const levelCoinCountElement = document.getElementById("levelCoinCount");
+const homeScreen =
+    document.getElementById("homeScreen");
 
-const soundButton = document.getElementById("soundButton");
-const soundState = document.getElementById("soundState");
+const levelsScreen =
+    document.getElementById("levelsScreen");
 
-const aboutModal = document.getElementById("aboutModal");
+const collectionsScreen =
+    document.getElementById("collectionsScreen");
+
+const settingsScreen =
+    document.getElementById("settingsScreen");
+
+
+/* =========================================================
+   AUTH REFERENCES
+   ========================================================= */
+
+const loginTab =
+    document.getElementById("loginTab");
+
+const registerTab =
+    document.getElementById("registerTab");
+
+const loginForm =
+    document.getElementById("loginForm");
+
+const registerForm =
+    document.getElementById("registerForm");
+
+const loginMessage =
+    document.getElementById("loginMessage");
+
+const registerMessage =
+    document.getElementById("registerMessage");
+
+
+/* =========================================================
+   PLAYER REFERENCES
+   ========================================================= */
+
+const displayNameElement =
+    document.getElementById("displayName");
+
+const coinCountElement =
+    document.getElementById("coinCount");
+
+const levelCoinCountElement =
+    document.getElementById("levelCoinCount");
+
+const soundButton =
+    document.getElementById("soundButton");
+
+const soundState =
+    document.getElementById("soundState");
+
+const levelGrid =
+    document.getElementById("levelGrid");
+
+const collectionGrid =
+    document.getElementById("collectionGrid");
+
+const aboutModal =
+    document.getElementById("aboutModal");
 
 
 /* =========================================================
    STORAGE KEYS
    ========================================================= */
 
-const USERS_KEY = "pixvinz_users";
-const CURRENT_USER_KEY = "pixvinz_current_user";
-const PLAYER_DATA_PREFIX = "pixvinz_player_";
+const USERS_KEY =
+    "pixvinz_users";
+
+const CURRENT_USER_KEY =
+    "pixvinz_current_user";
+
+const PLAYER_DATA_PREFIX =
+    "pixvinz_player_";
 
 
 /* =========================================================
@@ -45,17 +100,34 @@ function createDefaultPlayerData() {
 
     const levels = {};
 
-    for (let level = 1; level <= 200; level++) {
+    for (
+        let level = 1;
+        level <= TOTAL_LEVELS;
+        level++
+    ) {
 
         levels[level] = {
-            unlocked: level === 1,
-            completed: false,
-            stars: 0,
-            bestTime: null,
-            bestMoves: null,
-            coinsEarned: 0
+
+            unlocked:
+                level === 1,
+
+            completed:
+                false,
+
+            stars:
+                0,
+
+            bestTime:
+                null,
+
+            bestMoves:
+                null,
+
+            coinsEarned:
+                0
         };
     }
+
 
     return {
 
@@ -65,7 +137,7 @@ function createDefaultPlayerData() {
 
         soundEnabled: true,
 
-        levels: levels
+        levels
     };
 }
 
@@ -106,41 +178,113 @@ function getCurrentUsername() {
 }
 
 
+/* =========================================================
+   PLAYER STORAGE
+   ========================================================= */
+
 function getPlayerData(username) {
 
     const key =
         PLAYER_DATA_PREFIX + username;
+
 
     try {
 
         const saved =
             localStorage.getItem(key);
 
+
         if (!saved) {
 
             const data =
                 createDefaultPlayerData();
 
-            savePlayerData(username, data);
+            savePlayerData(
+                username,
+                data
+            );
 
             return data;
         }
 
-        return JSON.parse(saved);
+
+        const data =
+            JSON.parse(saved);
+
+
+        /*
+         * Safety migration:
+         * If we add levels in the future,
+         * old accounts receive them automatically.
+         */
+
+        for (
+            let level = 1;
+            level <= TOTAL_LEVELS;
+            level++
+        ) {
+
+            if (!data.levels[level]) {
+
+                data.levels[level] = {
+
+                    unlocked:
+                        level === 1,
+
+                    completed:
+                        false,
+
+                    stars:
+                        0,
+
+                    bestTime:
+                        null,
+
+                    bestMoves:
+                        null,
+
+                    coinsEarned:
+                        0
+                };
+            }
+        }
+
+
+        /*
+         * Level 1 must always be available.
+         */
+
+        data.levels[1].unlocked =
+            true;
+
+
+        savePlayerData(
+            username,
+            data
+        );
+
+
+        return data;
 
     } catch {
 
         const data =
             createDefaultPlayerData();
 
-        savePlayerData(username, data);
+        savePlayerData(
+            username,
+            data
+        );
 
         return data;
     }
 }
 
 
-function savePlayerData(username, data) {
+function savePlayerData(
+    username,
+    data
+) {
 
     localStorage.setItem(
         PLAYER_DATA_PREFIX + username,
@@ -169,6 +313,7 @@ let currentPlayer =
 function showScreen(screen) {
 
     const screens = [
+
         loadingScreen,
         authScreen,
         homeScreen,
@@ -177,41 +322,25 @@ function showScreen(screen) {
         settingsScreen
     ];
 
+
     screens.forEach(element => {
 
-        if (!element) return;
-
-        element.classList.add("hidden");
+        if (element) {
+            element.classList.add("hidden");
+        }
 
     });
 
-    screen.classList.remove("hidden");
+
+    if (screen) {
+        screen.classList.remove("hidden");
+    }
 }
 
 
 /* =========================================================
-   UPDATE HOME INFORMATION
+   DISPLAY NAME
    ========================================================= */
-
-function updatePlayerUI() {
-
-    if (!currentPlayer) return;
-
-    displayNameElement.textContent =
-        getDisplayName();
-
-    coinCountElement.textContent =
-        currentPlayer.coins;
-
-    levelCoinCountElement.textContent =
-        currentPlayer.coins;
-
-    soundState.textContent =
-        currentPlayer.soundEnabled
-            ? "ON"
-            : "OFF";
-}
-
 
 function getDisplayName() {
 
@@ -221,8 +350,291 @@ function getDisplayName() {
     const user =
         users[currentUsername];
 
-    return user?.displayName || "Player";
+
+    return user?.displayName ||
+        "Player";
 }
+
+
+/* =========================================================
+   UPDATE PLAYER UI
+   ========================================================= */
+
+function updatePlayerUI() {
+
+    if (!currentPlayer) {
+        return;
+    }
+
+
+    displayNameElement.textContent =
+        getDisplayName();
+
+
+    coinCountElement.textContent =
+        currentPlayer.coins;
+
+
+    levelCoinCountElement.textContent =
+        currentPlayer.coins;
+
+
+    soundState.textContent =
+        currentPlayer.soundEnabled
+            ? "ON"
+            : "OFF";
+}
+
+
+/* =========================================================
+   CREATE LEVEL CARD
+   ========================================================= */
+
+function createLevelCard(level) {
+
+    const data =
+        currentPlayer.levels[level];
+
+
+    const status =
+        getLevelStatus(
+            currentPlayer,
+            level
+        );
+
+
+    const levelInfo =
+        getLevel(level);
+
+
+    const card =
+        document.createElement("button");
+
+
+    card.className =
+        `level-card ${status}`;
+
+
+    card.dataset.level =
+        level;
+
+
+    /* -----------------------------------------------------
+       LOCKED
+    ----------------------------------------------------- */
+
+    if (status === "locked") {
+
+        card.innerHTML = `
+
+            <span class="level-lock">
+                🔒
+            </span>
+
+            <span class="level-number">
+                ${level}
+            </span>
+
+            <span class="level-status">
+                LOCKED
+            </span>
+
+        `;
+
+
+        card.disabled = true;
+
+
+        return card;
+    }
+
+
+    /* -----------------------------------------------------
+       UNLOCKED / COMPLETED
+    ----------------------------------------------------- */
+
+    const stars =
+        data.stars > 0
+            ? "★".repeat(data.stars) +
+              "☆".repeat(3 - data.stars)
+            : "☆☆☆";
+
+
+    const time =
+        data.bestTime !== null
+            ? formatTime(data.bestTime)
+            : "--:--";
+
+
+    const moves =
+        data.bestMoves !== null
+            ? data.bestMoves
+            : "--";
+
+
+    card.innerHTML = `
+
+        <span class="level-number">
+            ${String(level).padStart(2, "0")}
+        </span>
+
+        <span class="level-size">
+            ${levelInfo.size} × ${levelInfo.size}
+        </span>
+
+        <span class="level-stars">
+            ${stars}
+        </span>
+
+        <span class="level-stats">
+            ${time}
+            <span>•</span>
+            ${moves} moves
+        </span>
+
+    `;
+
+
+    card.addEventListener(
+        "click",
+        () => {
+
+            startLevel(level);
+
+        }
+    );
+
+
+    return card;
+}
+
+
+/* =========================================================
+   RENDER LEVEL GRID
+   ========================================================= */
+
+function renderLevelGrid() {
+
+    if (!levelGrid || !currentPlayer) {
+        return;
+    }
+
+
+    levelGrid.innerHTML = "";
+
+
+    for (
+        let level = 1;
+        level <= TOTAL_LEVELS;
+        level++
+    ) {
+
+        const card =
+            createLevelCard(level);
+
+        levelGrid.appendChild(card);
+    }
+}
+
+
+/* =========================================================
+   FORMAT TIME
+   ========================================================= */
+
+function formatTime(seconds) {
+
+    if (
+        seconds === null ||
+        seconds === undefined
+    ) {
+
+        return "--:--";
+    }
+
+
+    const minutes =
+        Math.floor(seconds / 60);
+
+    const remainingSeconds =
+        seconds % 60;
+
+
+    return (
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(remainingSeconds).padStart(2, "0")
+    );
+}
+
+
+/* =========================================================
+   START LEVEL
+   ========================================================= */
+
+function startLevel(level) {
+
+    const data =
+        currentPlayer.levels[level];
+
+
+    /*
+     * Security check:
+     * Never allow a locked level to start.
+     */
+
+    if (
+        !data ||
+        !data.unlocked
+    ) {
+
+        return;
+    }
+
+
+    currentPlayer.lastPlayedLevel =
+        level;
+
+
+    savePlayerData(
+        currentUsername,
+        currentPlayer
+    );
+
+
+    /*
+     * The actual puzzle page will be
+     * connected in Stage 3.
+     */
+
+    window.location.href =
+        `game.html?level=${level}`;
+}
+
+
+/* =========================================================
+   HOME PLAY BUTTON
+   ========================================================= */
+
+document
+    .getElementById("playButton")
+    .addEventListener(
+        "click",
+        () => {
+
+            if (!currentPlayer) {
+                return;
+            }
+
+
+            const level =
+                getLastPlayableLevel(
+                    currentPlayer
+                );
+
+
+            startLevel(level);
+        }
+    );
 
 
 /* =========================================================
@@ -273,6 +685,7 @@ registerForm.addEventListener(
 
         registerMessage.textContent = "";
 
+
         const username =
             document
                 .getElementById("registerUsername")
@@ -280,11 +693,13 @@ registerForm.addEventListener(
                 .trim()
                 .toLowerCase();
 
+
         const displayName =
             document
                 .getElementById("registerDisplayName")
                 .value
                 .trim();
+
 
         const password =
             document
@@ -301,7 +716,7 @@ registerForm.addEventListener(
         }
 
 
-        if (displayName.length < 1) {
+        if (!displayName) {
 
             registerMessage.textContent =
                 "Please enter a display name.";
@@ -334,9 +749,8 @@ registerForm.addEventListener(
 
         users[username] = {
 
-            username: username,
-
-            displayName: displayName
+            username,
+            displayName
         };
 
 
@@ -345,6 +759,7 @@ registerForm.addEventListener(
 
         const playerData =
             createDefaultPlayerData();
+
 
         savePlayerData(
             username,
@@ -387,12 +802,14 @@ loginForm.addEventListener(
 
         loginMessage.textContent = "";
 
+
         const username =
             document
                 .getElementById("loginUsername")
                 .value
                 .trim()
                 .toLowerCase();
+
 
         const password =
             document
@@ -414,10 +831,9 @@ loginForm.addEventListener(
 
 
         /*
-         * Stage 1 deliberately does not store
-         * passwords as production authentication.
-         *
-         * This is only a temporary local prototype.
+         * Temporary local-development login.
+         * Proper authentication will be implemented
+         * before production release.
          */
 
         localStorage.setItem(
@@ -435,6 +851,7 @@ loginForm.addEventListener(
 
         loginForm.reset();
 
+
         updatePlayerUI();
 
         showScreen(homeScreen);
@@ -443,7 +860,7 @@ loginForm.addEventListener(
 
 
 /* =========================================================
-   HOME NAVIGATION
+   LEVELS BUTTON
    ========================================================= */
 
 document
@@ -452,10 +869,16 @@ document
         "click",
         () => {
 
+            renderLevelGrid();
+
             showScreen(levelsScreen);
         }
     );
 
+
+/* =========================================================
+   COLLECTIONS BUTTON
+   ========================================================= */
 
 document
     .getElementById("collectionsButton")
@@ -463,10 +886,16 @@ document
         "click",
         () => {
 
+            renderCollections();
+
             showScreen(collectionsScreen);
         }
     );
 
+
+/* =========================================================
+   SETTINGS BUTTON
+   ========================================================= */
 
 document
     .getElementById("settingsButton")
@@ -475,28 +904,6 @@ document
         () => {
 
             showScreen(settingsScreen);
-        }
-    );
-
-
-/* =========================================================
-   PLAY BUTTON
-   ========================================================= */
-
-document
-    .getElementById("playButton")
-    .addEventListener(
-        "click",
-        () => {
-
-            /*
-             * Game engine will be connected here
-             * in the next stage.
-             */
-
-            alert(
-                "Puzzle engine coming next."
-            );
         }
     );
 
@@ -518,8 +925,8 @@ document
                         button.dataset.back
                     );
 
-                if (target) {
 
+                if (target) {
                     showScreen(target);
                 }
             }
@@ -528,22 +935,27 @@ document
 
 
 /* =========================================================
-   SOUND SETTING
+   SOUND
    ========================================================= */
 
 soundButton.addEventListener(
     "click",
     () => {
 
-        if (!currentPlayer) return;
+        if (!currentPlayer) {
+            return;
+        }
+
 
         currentPlayer.soundEnabled =
             !currentPlayer.soundEnabled;
+
 
         savePlayerData(
             currentUsername,
             currentPlayer
         );
+
 
         updatePlayerUI();
     }
@@ -580,23 +992,25 @@ document
                         button.dataset.close
                     );
 
-                modal.classList.add(
-                    "hidden"
-                );
+
+                if (modal) {
+
+                    modal.classList.add(
+                        "hidden"
+                    );
+                }
             }
         );
     });
 
 
-/* =========================================================
-   CLOSE MODAL WHEN CLICKING OUTSIDE
-   ========================================================= */
-
 aboutModal.addEventListener(
     "click",
     event => {
 
-        if (event.target === aboutModal) {
+        if (
+            event.target === aboutModal
+        ) {
 
             aboutModal.classList.add(
                 "hidden"
@@ -604,6 +1018,98 @@ aboutModal.addEventListener(
         }
     }
 );
+
+
+/* =========================================================
+   COLLECTIONS
+   ========================================================= */
+
+function renderCollections() {
+
+    if (!collectionGrid || !currentPlayer) {
+        return;
+    }
+
+
+    collectionGrid.innerHTML = "";
+
+
+    let completedCount = 0;
+
+
+    for (
+        let level = 1;
+        level <= TOTAL_LEVELS;
+        level++
+    ) {
+
+        const data =
+            currentPlayer.levels[level];
+
+
+        if (
+            !data ||
+            !data.completed
+        ) {
+
+            continue;
+        }
+
+
+        completedCount++;
+
+
+        const levelInfo =
+            getLevel(level);
+
+
+        const item =
+            document.createElement("div");
+
+
+        item.className =
+            "collection-item";
+
+
+        item.innerHTML = `
+
+            <img
+                src="${levelInfo.image}"
+                alt="Level ${level}"
+                loading="lazy"
+            >
+
+            <div class="collection-level">
+                Level ${level}
+            </div>
+
+        `;
+
+
+        collectionGrid.appendChild(item);
+    }
+
+
+    if (completedCount === 0) {
+
+        collectionGrid.innerHTML = `
+
+            <div class="empty-collection">
+
+                <div>
+                    ✨
+                </div>
+
+                <p>
+                    Complete puzzles to build
+                    your collection.
+                </p>
+
+            </div>
+
+        `;
+    }
+}
 
 
 /* =========================================================
@@ -620,8 +1126,10 @@ document
                 CURRENT_USER_KEY
             );
 
+
             currentUsername = null;
             currentPlayer = null;
+
 
             showScreen(authScreen);
         }
@@ -629,7 +1137,7 @@ document
 
 
 /* =========================================================
-   INITIAL APPLICATION START
+   APPLICATION START
    ========================================================= */
 
 function startApplication() {
@@ -643,6 +1151,7 @@ function startApplication() {
                     getPlayerData(
                         currentUsername
                     );
+
 
                 updatePlayerUI();
 
@@ -658,9 +1167,5 @@ function startApplication() {
     );
 }
 
-
-/* =========================================================
-   START
-   ========================================================= */
 
 startApplication();
