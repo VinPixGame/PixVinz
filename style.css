@@ -1051,84 +1051,37 @@ input:checked + .slider:before {
   cursor: pointer !important;
 }
 
-/* Fix Top Bar & Logo Video Scaling */
+/* Clean Logo Resize & Board Positioning */
 .top-bar {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  padding: 8px 16px !important;
+  padding: 10px 16px !important;
 }
 
+/* Enlarge video without breaking header height */
 .logo-container {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  max-height: 50px !important; /* Constrains vertical stretch */
-}
-
-#logoVideo {
-  max-height: 50px !important;
-  width: auto !important;
-  object-fit: contain !important;
-  filter: drop-shadow(0 0 8px rgba(157, 78, 221, 0.5)) !important; /* Adds subtle neon pop */
-}
-
-
-
-/* ==========================================
-   BIGGER CENTERED LOGO & DOWNWARD SHIFT
-   ========================================== */
-
-/* 1. Expand main screen container to utilize full vertical height */
-.game-container {
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: space-between !important;
-  min-height: 92vh !important;
-  padding-bottom: 24px !important;
-  box-sizing: border-box !important;
-}
-
-/* 2. Top Bar Layout & Alignment */
-.top-bar {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  padding: 12px 16px 0 16px !important;
+  width: 140px !important;
   height: auto !important;
-}
-
-/* 3. Scale Up Logo Video Box */
-.logo-container {
-  height: 85px !important; /* Significantly larger logo */
-  width: 180px !important;
   display: flex !important;
-  align-items: center !important;
   justify-content: center !important;
+  align-items: center !important;
 }
 
 #logoVideo {
-  height: 100% !important;
-  width: auto !important;
-  max-height: 85px !important;
+  width: 100% !important;
+  height: auto !important;
+  max-height: 70px !important;
   object-fit: contain !important;
-  filter: drop-shadow(0 0 12px rgba(157, 78, 221, 0.6)) !important;
 }
 
-/* 4. Shift Level Title & Stats Down */
-.game-header {
-  margin-top: 12px !important;
-  margin-bottom: 8px !important;
-}
-
-/* 5. Push Puzzle Grid into Open Space */
+/* Shift puzzle board & action buttons into bottom empty space */
 .puzzle-wrapper {
-  margin-top: 10px !important;
-  margin-bottom: 15px !important;
+  margin-top: 35px !important;
+  margin-bottom: 25px !important;
 }
 
-/* 6. Push Action Buttons Near the Bottom */
 .game-actions {
-  margin-top: 10px !important;
-  margin-bottom: 10px !important;
+  margin-top: 15px !important;
+  margin-bottom: 30px !important;
 }
