@@ -48,6 +48,57 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // SETTINGS & ABOUT MODAL HANDLERS
+  const settingsModal = document.getElementById('settingsModal');
+  const aboutModal = document.getElementById('aboutModal');
+  const sfxToggle = document.getElementById('sfxToggle');
+  const musicToggle = document.getElementById('musicToggle');
+
+  // Load saved sound states into toggles
+  if (sfxToggle) sfxToggle.checked = AudioManager.sfxEnabled;
+  if (musicToggle) musicToggle.checked = AudioManager.musicEnabled;
+
+  document.getElementById('navSettings').addEventListener('click', () => {
+    AudioManager.playClick();
+    settingsModal.classList.remove('hidden');
+  });
+
+  document.getElementById('closeSettingsModal').addEventListener('click', () => {
+    AudioManager.playClick();
+    settingsModal.classList.add('hidden');
+  });
+
+  if (sfxToggle) {
+    sfxToggle.addEventListener('change', (e) => {
+      AudioManager.setSFX(e.target.checked);
+      if (e.target.checked) AudioManager.playClick();
+    });
+  }
+
+  if (musicToggle) {
+    musicToggle.addEventListener('change', (e) => {
+      AudioManager.setMusic(e.target.checked);
+    });
+  }
+
+  document.getElementById('aboutBtn').addEventListener('click', () => {
+    AudioManager.playClick();
+    aboutModal.classList.remove('hidden');
+  });
+
+  document.getElementById('closeAboutModal').addEventListener('click', () => {
+    AudioManager.playClick();
+    aboutModal.classList.add('hidden');
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    AudioManager.playClick();
+    if (confirm("Are you sure you want to log out?")) {
+      alert("Logged out successfully.");
+      location.reload();
+    }
+  });
+
   function renderLevels() {
     const grid = document.getElementById('levelsGrid');
     grid.innerHTML = '';
@@ -78,7 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('collectionsGrid');
     grid.innerHTML = '';
     
-    // Shows all completed/solved level images
     for (let i = 1; i < currentLevel; i++) {
       const item = document.createElement('div');
       item.className = 'collection-item';
@@ -88,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="collection-badge">LEVEL ${i.toString().padStart(2, '0')}</div>
       `;
 
-      // Tap to open enlarged popup modal
       item.addEventListener('click', () => {
         AudioManager.playClick();
         openImageModal(i);
