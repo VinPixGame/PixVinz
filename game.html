@@ -5,71 +5,61 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>PixVinz - Game</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="game.css">
+  <style>
+    .game-page-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      height: 100vh;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    .puzzle-board {
+      display: grid;
+      gap: 4px;
+      width: 100%;
+      max-width: 360px;
+      aspect-ratio: 1 / 1;
+      background: #11052c;
+      padding: 8px;
+      border-radius: 16px;
+      border: 3px solid #7b2cbf;
+      box-shadow: 0 0 20px rgba(123, 44, 191, 0.4);
+    }
+    .tile {
+      background-size: 360px 360px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+      box-shadow: inset 0 0 4px rgba(255,255,255,0.3);
+    }
+    .tile.empty {
+      background: rgba(255, 255, 255, 0.05) !important;
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      box-shadow: none;
+    }
+    .game-controls {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      max-width: 360px;
+    }
+    .game-controls .btn { flex: 1; }
+  </style>
 </head>
 <body>
-  <div class="app-container">
-    <!-- Header -->
-    <header class="top-bar">
-      <button class="icon-btn" id="backToHome">‹</button>
-      <div class="logo-container">
-        <video id="logoVideo" autoplay loop muted playsinline width="100">
-          <source src="image/logo.webm" type="video/webm">
-        </video>
-      </div>
+  <div class="app-container game-page-container">
+    <header class="top-bar" style="width: 100%;">
+      <button class="icon-btn" id="gameBackBtn">‹</button>
+      <h2 id="gameLevelTitle" style="color: #ffd700; font-size: 18px;">LEVEL 01</h2>
       <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
     </header>
 
-    <!-- Stats Bar -->
-    <div class="stats-bar">
-      <div class="stat-box">
-        <span class="stat-label">LEVEL</span>
-        <span class="stat-value" id="levelDisplay">01</span>
-      </div>
-      <div class="stat-box">
-        <span class="stat-label">TIME</span>
-        <span class="stat-value" id="timerDisplay">00:00</span>
-      </div>
-      <div class="stat-box">
-        <span class="stat-label">MOVES</span>
-        <span class="stat-value" id="movesDisplay">0</span>
-      </div>
-    </div>
+    <div class="puzzle-board" id="puzzleBoard"></div>
 
-    <!-- Puzzle Area -->
-    <div class="puzzle-container">
-      <div class="puzzle-grid" id="puzzleGrid"></div>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="action-buttons">
-      <button class="btn btn-action" id="shuffleBtn">🔀 SHUFFLE</button>
-      <button class="btn btn-action" id="collectionsBtn">✨ COLLECTIONS</button>
-    </div>
-  </div>
-
-  <!-- VICTORY MODAL SCREEN -->
-  <div id="victoryModal" class="modal-overlay hidden">
-    <canvas id="confettiCanvas"></canvas>
-    <div class="victory-card">
-      <h2 class="victory-title">LEVEL SOLVED!</h2>
-      <div class="solved-preview">
-        <img id="victoryImg" src="" alt="Solved Puzzle">
-      </div>
-      <div class="stars-container" id="victoryStars">
-        <span class="star">★</span>
-        <span class="star">★</span>
-        <span class="star">★</span>
-      </div>
-      <div class="victory-stats">
-        <div class="v-stat"><span>⏱ TIME</span><b id="vTime">00:00</b></div>
-        <div class="v-stat"><span>🔄 MOVES</span><b id="vMoves">0</b></div>
-        <div class="v-stat"><span>🪙 COINS</span><b id="vCoins">+0</b></div>
-      </div>
-      <div class="victory-actions">
-        <button class="btn btn-primary" id="nextLevelBtn">NEXT LEVEL ▶</button>
-        <button class="btn btn-secondary" id="victoryHomeBtn">MAIN MENU</button>
-      </div>
+    <div class="game-controls">
+      <button class="btn btn-secondary" id="shuffleBtn">🔀 SHUFFLE</button>
     </div>
   </div>
 
