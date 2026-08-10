@@ -1,6 +1,6 @@
 const AudioManager = {
   bgMusic: new Audio('sound/bgmusic.mp3'),
-  mainMusic: new Audio('image/main.mp3'),
+  mainMusic: new Audio('sound/main.mp3'),
   clickSound: new Audio('sound/click.mp3'),
   isUnlocked: false,
 
