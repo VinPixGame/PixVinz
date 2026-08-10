@@ -8,18 +8,20 @@
 /* =========================================================
    GAME SCREEN
    ========================================================= */
-
 .game-screen {
 
     width: 100%;
+    max-width: 100vw;
+
     min-height: 100vh;
     min-height: 100dvh;
 
     display: flex;
     flex-direction: column;
 
-    background:
+    overflow-x: hidden;
 
+    background:
         radial-gradient(
             circle at 15% 15%,
             rgba(122, 67, 170, 0.24),
@@ -37,8 +39,6 @@
             #10081c,
             #24113f
         );
-
-    overflow-x: hidden;
 }
 
 
@@ -294,17 +294,17 @@
 .puzzle-section {
 
     width: 100%;
-
-    flex:
-        1;
+    max-width: 100vw;
 
     display: flex;
 
     align-items: center;
     justify-content: center;
 
+    box-sizing: border-box;
+
     padding:
-        14px 12px 10px;
+        10px 8px;
 }
 
 
@@ -315,21 +315,32 @@
 .puzzle-board {
 
     /*
-       The board uses a viewport-aware size so that
-       7x7 puzzles remain inside small phone screens.
+       IMPORTANT:
+       The board is now controlled primarily
+       by the PHONE WIDTH.
+
+       This prevents the 3x3, 4x4, 5x5,
+       6x6 and 7x7 boards from becoming
+       wider than the mobile screen.
     */
 
     width:
         min(
-            calc(100vw - 28px),
-            calc(100dvh - 250px),
-            620px
+            100%,
+            600px
         );
+
+    max-width:
+        calc(100vw - 20px);
 
     aspect-ratio:
         1 / 1;
 
-    display: grid;
+    box-sizing:
+        border-box;
+
+    display:
+        grid;
 
     gap:
         2px;
@@ -344,13 +355,16 @@
         rgba(255, 255, 255, 0.12);
 
     border:
-        1px solid rgba(255, 255, 255, 0.15);
+        1px solid
+        rgba(255, 255, 255, 0.15);
 
     box-shadow:
 
-        0 20px 45px rgba(0, 0, 0, 0.38),
+        0 20px 45px
+        rgba(0, 0, 0, 0.38),
 
-        0 0 22px rgba(142, 80, 190, 0.14),
+        0 0 22px
+        rgba(142, 80, 190, 0.14),
 
         inset 0 1px 0
         rgba(255, 255, 255, 0.1);
@@ -367,6 +381,7 @@
     -webkit-user-select:
         none;
 }
+        
 
 
 /* =========================================================
