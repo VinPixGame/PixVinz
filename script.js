@@ -10,16 +10,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const mainHeader = document.getElementById('mainHeader');
 
-  function showView(viewName) {
+  function showView(targetView) {
+    // Hide all views first
     Object.values(views).forEach(v => {
-      if (v) v.classList.add('hidden');
+      if (v) v.classList.remove('active');
     });
 
-    if (views[viewName]) {
-      views[viewName].classList.remove('hidden');
+    // Show selected view
+    if (views[targetView]) {
+      views[targetView].classList.add('active');
     }
 
-    if (['home', 'levels', 'collections'].includes(viewName)) {
+    // Toggle header visibility
+    if (['home', 'levels', 'collections'].includes(targetView)) {
       if (mainHeader) mainHeader.classList.remove('hidden');
       updateCoinDisplay();
     } else {
@@ -43,17 +46,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Safe Main BGM Play Trigger
   function playMainBGM() {
     if (typeof AudioManager !== 'undefined' && AudioManager.musicEnabled) {
       AudioManager.playMain();
     }
   }
 
-  // Global user interaction listener to allow audio playback across modern browsers
+  // BGM Trigger on first tap
   document.body.addEventListener('click', () => {
     const user = getCurrentUser();
-    // Only play main BGM if the user is logged in
     if (user && typeof AudioManager !== 'undefined' && AudioManager.musicEnabled) {
       if (!AudioManager.bgmMain || AudioManager.bgmMain.paused) {
         AudioManager.playMain();
@@ -61,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // --- 1. LOADING PAGE SWITCH (4 Seconds) ---
+  // --- 1. LOADING SCREEN (4 Seconds) ---
   setTimeout(() => {
     const loggedInUser = getCurrentUser();
     if (loggedInUser) {
@@ -74,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, 4000);
 
-  // --- 2. LOGIN / REGISTER AUTH SYSTEM ---
+  // --- 2. AUTH NAVIGATION ---
   const toRegBtn = document.getElementById('toRegister');
   if (toRegBtn) {
     toRegBtn.addEventListener('click', (e) => {
@@ -120,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
       users[username] = newUser;
       localStorage.setItem('registeredUsers', JSON.stringify(users));
 
-      // Auto-login
+      // Auto login
       localStorage.setItem('loggedInUser', JSON.stringify(newUser));
       const nameElem = document.getElementById('userDisplayName');
       if (nameElem) nameElem.innerText = displayName;
@@ -143,7 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
       
-      // Default account if empty
       if (Object.keys(users).length === 0 && username === 'vinz' && pass === '1234') {
         users['vinz'] = { displayName: 'Vinz', username: 'vinz', password: '1234' };
         localStorage.setItem('registeredUsers', JSON.stringify(users));
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- 3. HOME NAVIGATION ---
+  // --- 3. HOME MENU BUTTONS ---
   const playBtn = document.getElementById('playBtn');
   if (playBtn) {
     playBtn.addEventListener('click', () => {
