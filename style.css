@@ -298,3 +298,144 @@ body {
   0% { transform: scale(0.8); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
 }
+
+
+/* SETTINGS & ABOUT MODAL STYLES */
+.settings-card, .about-card {
+  width: 100%;
+  max-width: 340px;
+  background: radial-gradient(circle at top, #2d1054 0%, #120624 100%);
+  border: 2px solid #ffd700;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+  animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(157, 78, 221, 0.3);
+  padding-bottom: 10px;
+}
+
+.settings-header h3 {
+  color: #ffd700;
+  font-size: 20px;
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-weight: bold;
+}
+
+.settings-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-secondary {
+  background: rgba(157, 78, 221, 0.3);
+  border: 1px solid #9d4edd;
+  color: #fff;
+}
+
+.btn-danger {
+  background: rgba(220, 53, 69, 0.2);
+  border: 1px solid #ff4d4d;
+  color: #ff4d4d;
+}
+
+/* TOGGLE SWITCHES */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #33145a;
+  transition: .3s;
+  border: 1px solid #7b2cbf;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #9d4edd;
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+/* ABOUT CARD */
+.about-card {
+  text-align: center;
+  padding: 30px 20px 20px 20px;
+}
+
+.about-card .close-about {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+.about-logo video {
+  width: 100px;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.about-card h2 {
+  color: #ffd700;
+  margin-bottom: 8px;
+}
+
+.about-dev {
+  font-size: 16px;
+  color: #e0d0ff;
+  margin-bottom: 4px;
+}
+
+.about-year {
+  font-size: 13px;
+  color: #a892ee;
+}
+
