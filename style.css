@@ -1292,3 +1292,59 @@ video {
   object-fit: contain;
   background: transparent !important;
 }
+
+/* ==========================================
+   MOBILE APP GAME VIEW ADAPTIVE FIXES
+   ========================================== */
+@media screen and (max-width: 480px) {
+  .game-container {
+    justify-content: center;
+    padding: 10px 14px;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .game-container .top-bar {
+    height: 130px;
+    margin-bottom: 4px;
+  }
+
+  .game-header {
+    margin-bottom: 6px;
+  }
+
+  .game-header h2 {
+    font-size: 17px;
+    margin-bottom: 6px;
+  }
+
+  .premium-stats-bar {
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  .stat-badge {
+    padding: 10px 12px;
+    border-radius: 16px;
+  }
+
+  .stat-value {
+    font-size: 17px;
+  }
+
+  .puzzle-wrapper {
+    width: 100%;
+    max-width: 360px;
+    margin: 8px auto;
+  }
+
+  .game-actions {
+    margin-top: 8px;
+    margin-bottom: 10px;
+  }
+
+  .game-actions .btn {
+    padding: 14px;
+    font-size: 15px;
+  }
+}
