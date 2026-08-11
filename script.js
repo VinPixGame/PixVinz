@@ -308,9 +308,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (isUnlocked) {
         if (!isSolved) {
-          btn.classList.add('unsolved-bg');
+          btn.classList.add('unsolved');
         } else {
-          btn.classList.add('solved-bg');
+          btn.classList.add('solved');
         }
 
         const levelCoins = parseInt(localStorage.getItem(getUserKey(`levelCoins_${i}`))) || 0;
@@ -349,8 +349,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let starsHTML = '';
+        let starClass = 'star-icon-small';
         for (let s = 1; s <= 3; s++) {
-          starsHTML += `<span class="star-icon-small ${s <= starsEarned ? 'earned' : ''}">★</span>`;
+          starsHTML += `<span class="${starClass} ${s <= starsEarned ? 'earned' : ''}">★</span>`;
         }
 
         const displayMoves = moves ? moves : '--';
