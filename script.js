@@ -295,12 +295,31 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isUnlocked) {
         const levelCoins = parseInt(localStorage.getItem(getUserKey(`levelCoins_${i}`))) || 0;
         const starsEarned = Math.min(3, Math.floor(levelCoins / 5)) || (i < currentLevel ? 3 : 0);
-        const moves = localStorage.getItem(getUserKey(`levelMoves_${i}`));
-        const timeStr = localStorage.getItem(getUserKey(`levelTime_${i}`));
+        
+        let moves = localStorage.getItem(getUserKey(`levelMoves_${i}`));
+        let timeStr = localStorage.getItem(getUserKey(`levelTime_${i}`));
+
+        // --- LEGACY FALLBACK FOR PREVIOUSLY CLEARED LEVELS ---
+        if (i < currentLevel) {
+          const gSize = i <= 10 ? 3 : i <= 30 ? 4 : i <= 60 ? 5 : i <= 100 ? 6 : i <= 150 ? 7 : 8;
+          
+          if (!moves) {
+            moves = gSize * 6; // Baseline estimate based on grid size
+          }
+          if (!timeStr || timeStr === '--:--') {
+            const estSec = gSize * 15;
+            const m = Math.floor(estSec / 60).toString().padStart(2, '0');
+            const s = (estSec % 60).toString().padStart(2, '0');
+            timeStr = `${m}:${s}`;
+          }
+        }
 
         // Track Overall Best Records
-        if (moves && parseInt(moves) < overallFewestMoves) {
-          overallFewestMoves = parseInt(moves);
+        if (moves) {
+          const parsedMoves = parseInt(moves);
+          if (parsedMoves < overallFewestMoves) {
+            overallFewestMoves = parsedMoves;
+          }
         }
         if (timeStr && timeStr !== '--:--') {
           const parts = timeStr.split(':');
