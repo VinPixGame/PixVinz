@@ -27,6 +27,10 @@ jobs:
           # Point the app to your live GitHub Pages URL for automatic online updates
           sed -i 's|<content src="index.html" />|<content src="https://vinpixgame.github.io/PixVinz/" />|g' config.xml
           
+          # Force the app to stay inside the app container instead of opening an external browser
+          sed -i '/<widget /a \    <allow-navigation href="https://vinpixgame.github.io/*" />' config.xml
+          sed -i '/<widget /a \    <access origin="https://vinpixgame.github.io/*" />' config.xml
+          
           # Set up your custom app icon from the image folder
           if [ -f ../image/pixvinz.png ]; then
             mkdir -p res/icon/android
@@ -36,8 +40,13 @@ jobs:
 
           cordova build android --debug
 
+      - name: Rename and Prepare APK
+        run: |
+          mkdir -p final-apk
+          cp myApp/platforms/android/app/build/outputs/apk/debug/app-debug.apk final-apk/PixVinz.apk
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: PixVinz-App
-          path: myApp/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          path: final-apk/PixVinz.apk
