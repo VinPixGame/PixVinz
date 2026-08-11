@@ -23,7 +23,17 @@ jobs:
           cordova create myApp com.pixvinz.app PixVinzApp
           cd myApp
           cordova platform add android
-          cp -r ../* www/ 2>/dev/null || true
+          
+          # Point the app to your live GitHub Pages URL for automatic online updates
+          sed -i 's|<content src="index.html" />|<content src="https://vinpixgame.github.io/PixVinz/" />|g' config.xml
+          
+          # Set up your custom app icon from the image folder
+          if [ -f ../image/pixvinz.png ]; then
+            mkdir -p res/icon/android
+            cp ../image/pixvinz.png res/icon/android/icon.png
+            sed -i '/<widget /a \    <icon src="res/icon/android/icon.png" />' config.xml
+          fi
+
           cordova build android --debug
 
       - name: Upload APK Artifact
