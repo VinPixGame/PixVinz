@@ -334,6 +334,7 @@ body {
 /* LEVEL CARD BUTTON */
 .level-btn {
   position: relative;
+  background-image: var(--level-bg) !important;
   background: radial-gradient(circle at top, #240a42 0%, #100424 100%);
   border: 1.5px solid #5a2a9c;
   border-radius: 18px;
