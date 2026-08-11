@@ -1363,3 +1363,22 @@ input:checked + .slider:before {
     object-fit: contain;
   }
 }
+
+
+/* 1. Change the default app background from white to dark/transparent to kill the white box flash */
+body, html, .app-container {
+  background-color: #0d0d0d; /* Change this to match your app's dark background color */
+}
+
+/* 2. Hide any default browser play controls or video placeholders trying to force themselves on mobile */
+video::-webkit-media-controls,
+video::-webkit-media-controls-panel,
+video::-webkit-media-controls-play-button {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+video {
+  object-fit: contain;
+  background: transparent !important;
+}
