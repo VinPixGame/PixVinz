@@ -148,6 +148,26 @@ document.addEventListener('DOMContentLoaded', () => {
       const levelCoinsKey = getUserKey(`levelCoins_${currentLevel}`);
       const totalCoinsKey = getUserKey('totalCoins');
       const currentLevelKey = getUserKey('currentLevel');
+      const levelMovesKey = getUserKey(`levelMoves_${currentLevel}`);
+      const levelTimeKey = getUserKey(`levelTime_${currentLevel}`);
+
+      // --- SAVE FEWEST MOVES RECORD ---
+      const prevMoves = parseInt(localStorage.getItem(levelMovesKey)) || Infinity;
+      if (moves < prevMoves) {
+        localStorage.setItem(levelMovesKey, moves);
+      }
+
+      // --- SAVE BEST TIME RECORD ---
+      const timeString = timerDisplay ? timerDisplay.innerText : "00:00";
+      const prevTimeStr = localStorage.getItem(levelTimeKey);
+      if (!prevTimeStr || prevTimeStr === '--:--') {
+        localStorage.setItem(levelTimeKey, timeString);
+      } else {
+        const [pMin, pSec] = prevTimeStr.split(':').map(Number);
+        if (seconds < (pMin * 60 + pSec)) {
+          localStorage.setItem(levelTimeKey, timeString);
+        }
+      }
 
       const currentLevelCoins = parseInt(localStorage.getItem(levelCoinsKey)) || 0;
       let targetCoins = stars * 5; 
