@@ -190,17 +190,35 @@ document.addEventListener('DOMContentLoaded', () => {
   if (navCollections) {
     navCollections.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      renderCollections();
+      renderCollectionFolders(); // Render Folders First
       showView('collections');
     });
   }
 
+  // Standard back buttons handling
   document.querySelectorAll('.back-btn').forEach(btn => {
+    if (btn.id === 'collectionsBackBtn') return; // Handled separately
     btn.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       showView('home');
     });
   });
+
+  // Collections Custom Back Button (Folder vs Home navigation)
+  const collectionsBackBtn = document.getElementById('collectionsBackBtn');
+  if (collectionsBackBtn) {
+    collectionsBackBtn.addEventListener('click', (e) => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      const imagesContainer = document.getElementById('collectionsImagesContainer');
+      
+      if (imagesContainer && !imagesContainer.classList.contains('hidden')) {
+        e.stopImmediatePropagation();
+        renderCollectionFolders(); // Return back to folder view
+      } else {
+        showView('home'); // Return back to home
+      }
+    });
+  }
 
   // --- 4. SETTINGS, ABOUT & LOGOUT ---
   const settingsModal = document.getElementById('settingsModal');
@@ -381,25 +399,86 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function renderCollections() {
+  // --- 6. COLLECTION FOLDERS LOGIC (1-10, 11-20, etc.) ---
+  function renderCollectionFolders() {
+    const folderGrid = document.getElementById('collectionsFolderGrid');
+    if (!folderGrid) return;
+    folderGrid.innerHTML = '';
+
+    const totalLevels = 200; // Matches max levels available
+    const levelsPerFolder = 10;
+    const totalFolders = Math.ceil(totalLevels / levelsPerFolder);
+
+    for (let i = 0; i < totalFolders; i++) {
+      const start = i * levelsPerFolder + 1;
+      const end = Math.min((i + 1) * levelsPerFolder, totalLevels);
+
+      const folderCard = document.createElement('div');
+      folderCard.className = 'collection-folder-btn';
+      folderCard.innerHTML = `
+        <div class="collection-folder-icon">📁</div>
+        <div class="collection-folder-title">LEVELS ${start} - ${end}</div>
+        <div class="collection-folder-sub">Tap to view</div>
+      `;
+      
+      folderCard.addEventListener('click', () => {
+        if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+        openCollectionFolder(start, end);
+      });
+
+      folderGrid.appendChild(folderCard);
+    }
+
+    // Toggle views: show folders container, hide images container
+    const folderContainer = document.getElementById('collectionsFolderContainer');
+    const imagesContainer = document.getElementById('collectionsImagesContainer');
+    const titleElem = document.getElementById('collectionsTitle');
+
+    if (folderContainer) folderContainer.classList.remove('hidden');
+    if (imagesContainer) imagesContainer.classList.add('hidden');
+    if (titleElem) titleElem.innerText = 'COLLECTIONS';
+  }
+
+  function openCollectionFolder(start, end) {
+    const folderContainer = document.getElementById('collectionsFolderContainer');
+    const imagesContainer = document.getElementById('collectionsImagesContainer');
+    const titleElem = document.getElementById('collectionsTitle');
+
+    if (folderContainer) folderContainer.classList.add('hidden');
+    if (imagesContainer) imagesContainer.classList.remove('hidden');
+    if (titleElem) titleElem.innerText = `LVL ${start}-${end}`;
+
+    renderFilteredCollections(start, end);
+  }
+
+  function renderFilteredCollections(start, end) {
     const grid = document.getElementById('collectionsGrid');
     if (!grid) return;
     grid.innerHTML = '';
     const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
 
-    for (let i = 1; i < currentLevel; i++) {
+    for (let i = start; i <= end; i++) {
+      const isUnlocked = i < currentLevel;
       const item = document.createElement('div');
       item.className = 'collection-item';
 
-      item.innerHTML = `
-        <img src="image/level${i}.jpeg" alt="Level ${i}">
-        <div class="collection-badge">LEVEL ${i.toString().padStart(2, '0')}</div>
-      `;
+      if (isUnlocked) {
+        item.innerHTML = `
+          <img src="image/level${i}.jpeg" alt="Level ${i}">
+          <div class="collection-badge">LEVEL ${i.toString().padStart(2, '0')}</div>
+        `;
 
-      item.addEventListener('click', () => {
-        if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-        openImageModal(i);
-      });
+        item.addEventListener('click', () => {
+          if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+          openImageModal(i);
+        });
+      } else {
+        item.style.opacity = '0.4';
+        item.innerHTML = `
+          <div style="display:flex; align-items:center; justify-content:center; height:100%; font-size:24px;">🔒</div>
+          <div class="collection-badge">LEVEL ${i.toString().padStart(2, '0')}</div>
+        `;
+      }
 
       grid.appendChild(item);
     }
