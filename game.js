@@ -13,10 +13,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const movesDisplay = document.getElementById('movesDisplay');
   const timerDisplay = document.getElementById('timerDisplay');
 
+  // --- DYNAMIC GRID SIZE CALCULATION ---
+  function getGridSize(level) {
+    if (level <= 10) return 3;       // Level 1-10 (3x3)
+    if (level <= 30) return 4;       // Level 11-30 (4x4)
+    if (level <= 60) return 5;       // Level 31-60 (5x5)
+    if (level <= 100) return 6;      // Level 61-100 (6x6)
+    if (level <= 150) return 7;      // Level 101-150 (7x7)
+    return 8;                        // Level 151-200 (8x8)
+  }
+
+  const gridSize = getGridSize(currentLevel);
+  const totalTiles = gridSize * gridSize;
+
   let moves = 0;
   let seconds = 0;
   let timerInterval = null;
-  let tilesState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+  let tilesState = Array.from({ length: totalTiles }, (_, i) => i);
   let selectedTilePos = null;
 
   const imageSrc = `image/level${currentLevel}.jpeg`;
@@ -45,9 +58,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (coinElem) coinElem.innerText = totalCoins;
   }
 
+  // --- DYNAMIC TILE CUTTING & RENDERING ---
   function renderGrid() {
     if (!grid) return;
     grid.innerHTML = '';
+
+    // Apply dynamic CSS grid template
+    grid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+    grid.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
+
+    const percentStep = 100 / (gridSize - 1);
+
     tilesState.forEach((tileIdx, currentPos) => {
       const tile = document.createElement('div');
       tile.className = 'tile';
@@ -57,9 +78,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       tile.style.backgroundImage = `url('${imageSrc}')`;
-      const row = Math.floor(tileIdx / 3);
-      const col = tileIdx % 3;
-      tile.style.backgroundPosition = `${col * 50}% ${row * 50}%`;
+      tile.style.backgroundSize = `${gridSize * 100}% ${gridSize * 100}%`;
+
+      const row = Math.floor(tileIdx / gridSize);
+      const col = tileIdx % gridSize;
+      tile.style.backgroundPosition = `${col * percentStep}% ${row * percentStep}%`;
 
       tile.addEventListener('click', () => handleTileClick(currentPos));
       grid.appendChild(tile);
@@ -85,10 +108,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // --- DYNAMIC SHUFFLE ---
   function shuffleGrid() {
-    for (let i = 0; i < 20; i++) {
-      const idx1 = Math.floor(Math.random() * 9);
-      const idx2 = Math.floor(Math.random() * 9);
+    const tileCount = tilesState.length;
+    for (let i = 0; i < tileCount * 3; i++) {
+      const idx1 = Math.floor(Math.random() * tileCount);
+      const idx2 = Math.floor(Math.random() * tileCount);
       [tilesState[idx1], tilesState[idx2]] = [tilesState[idx2], tilesState[idx1]];
     }
     selectedTilePos = null;
@@ -102,8 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playVictory(currentLevel);
 
       let stars = 1;
-      if (moves <= 14) stars = 3;
-      else if (moves <= 22) stars = 2;
+      if (moves <= gridSize * 5) stars = 3;
+      else if (moves <= gridSize * 8) stars = 2;
 
       const currentLevelCoins = parseInt(localStorage.getItem(`levelCoins_${currentLevel}`)) || 0;
       let targetCoins = stars * 5; 
