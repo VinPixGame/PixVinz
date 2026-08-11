@@ -280,7 +280,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('levelsGrid');
     if (!grid) return;
     grid.innerHTML = '';
+
     const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+
+    let overallBestTimeSeconds = Infinity;
+    let overallFewestMoves = Infinity;
 
     for (let i = 1; i <= 200; i++) {
       const btn = document.createElement('div');
@@ -289,20 +293,72 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.className = `level-btn ${isUnlocked ? 'unlocked' : 'locked'}`;
 
       if (isUnlocked) {
-        btn.innerHTML = `<div class="level-num">${i.toString().padStart(2, '0')}</div><div class="stars">★★★</div>`;
+        const levelCoins = parseInt(localStorage.getItem(getUserKey(`levelCoins_${i}`))) || 0;
+        const starsEarned = Math.min(3, Math.floor(levelCoins / 5)) || (i < currentLevel ? 3 : 0);
+        const moves = localStorage.getItem(getUserKey(`levelMoves_${i}`));
+        const timeStr = localStorage.getItem(getUserKey(`levelTime_${i}`));
+
+        // Track Overall Best Records
+        if (moves && parseInt(moves) < overallFewestMoves) {
+          overallFewestMoves = parseInt(moves);
+        }
+        if (timeStr && timeStr !== '--:--') {
+          const parts = timeStr.split(':');
+          if (parts.length === 2) {
+            const totalSec = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+            if (totalSec < overallBestTimeSeconds) {
+              overallBestTimeSeconds = totalSec;
+            }
+          }
+        }
+
+        let starsHTML = '';
+        for (let s = 1; s <= 3; s++) {
+          starsHTML += `<span class="star-icon-small ${s <= starsEarned ? 'earned' : ''}">★</span>`;
+        }
+
+        const displayMoves = moves ? moves : '--';
+        const displayTime = timeStr ? timeStr : '--:--';
+
+        btn.innerHTML = `
+          <div class="level-num">${i.toString().padStart(2, '0')}</div>
+          <div class="stars">${starsHTML}</div>
+          <div class="level-card-pill">
+            <div class="pill-stat">⏱️ ${displayTime}</div>
+            <div class="pill-stat">🔀 ${displayMoves} <span class="unit">MOVES</span></div>
+          </div>
+        `;
+
         btn.addEventListener('click', () => {
           if (typeof AudioManager !== 'undefined') AudioManager.playClick();
           window.location.href = `game.html?level=${i}`;
         });
       } else {
-        btn.innerHTML = `<div class="level-num" style="opacity:0.4">${i.toString().padStart(2, '0')}</div><div class="lock-icon">🔒</div>`;
+        btn.innerHTML = `
+          <div class="level-num" style="opacity:0.3">${i.toString().padStart(2, '0')}</div>
+          <div class="lock-icon" style="font-size:22px; opacity:0.6;">🔒</div>
+          <div class="locked-text">LOCKED</div>
+        `;
       }
+
       grid.appendChild(btn);
     }
 
-    const infoText = document.getElementById('unlockInfoText');
-    if (infoText) {
-      infoText.innerText = `COMPLETE LEVEL ${currentLevel.toString().padStart(2, '0')} TO UNLOCK LEVEL ${(currentLevel + 1).toString().padStart(2, '0')}`;
+    // Update Global Best Banner
+    const timeElem = document.getElementById('globalBestTime');
+    if (timeElem) {
+      if (overallBestTimeSeconds !== Infinity) {
+        const m = Math.floor(overallBestTimeSeconds / 60).toString().padStart(2, '0');
+        const s = (overallBestTimeSeconds % 60).toString().padStart(2, '0');
+        timeElem.innerText = `${m}:${s}`;
+      } else {
+        timeElem.innerText = '--:--';
+      }
+    }
+
+    const movesElem = document.getElementById('globalFewestMoves');
+    if (movesElem) {
+      movesElem.innerText = overallFewestMoves !== Infinity ? overallFewestMoves : '--';
     }
   }
 
