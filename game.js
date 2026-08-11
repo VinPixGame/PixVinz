@@ -7,6 +7,21 @@ document.addEventListener('DOMContentLoaded', () => {
     levelDisplay.innerText = currentLevel.toString().padStart(2, '0');
   }
 
+  function getCurrentUser() {
+    try {
+      return JSON.parse(localStorage.getItem('loggedInUser'));
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Generates user-specific localStorage keys (e.g., 'vinz_currentLevel')
+  function getUserKey(keyName) {
+    const user = getCurrentUser();
+    if (!user || !user.username) return keyName;
+    return `${user.username}_${keyName}`;
+  }
+
   updateCoinDisplay();
 
   const grid = document.getElementById('puzzleGrid');
@@ -53,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateCoinDisplay() {
-    const totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
+    const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
     const coinElem = document.getElementById('coinCount');
     if (coinElem) coinElem.innerText = totalCoins;
   }
@@ -130,22 +145,26 @@ document.addEventListener('DOMContentLoaded', () => {
       if (moves <= gridSize * 5) stars = 3;
       else if (moves <= gridSize * 8) stars = 2;
 
-      const currentLevelCoins = parseInt(localStorage.getItem(`levelCoins_${currentLevel}`)) || 0;
+      const levelCoinsKey = getUserKey(`levelCoins_${currentLevel}`);
+      const totalCoinsKey = getUserKey('totalCoins');
+      const currentLevelKey = getUserKey('currentLevel');
+
+      const currentLevelCoins = parseInt(localStorage.getItem(levelCoinsKey)) || 0;
       let targetCoins = stars * 5; 
       let newCoinsEarned = 0;
 
       if (targetCoins > currentLevelCoins) {
         newCoinsEarned = targetCoins - currentLevelCoins;
-        localStorage.setItem(`levelCoins_${currentLevel}`, targetCoins);
+        localStorage.setItem(levelCoinsKey, targetCoins);
 
-        let totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
+        let totalCoins = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
         totalCoins += newCoinsEarned;
-        localStorage.setItem('totalCoins', totalCoins);
+        localStorage.setItem(totalCoinsKey, totalCoins);
       }
 
-      let maxUnlocked = parseInt(localStorage.getItem('currentLevel')) || 1;
+      let maxUnlocked = parseInt(localStorage.getItem(currentLevelKey)) || 1;
       if (currentLevel >= maxUnlocked) {
-        localStorage.setItem('currentLevel', currentLevel + 1);
+        localStorage.setItem(currentLevelKey, currentLevel + 1);
       }
 
       showVictoryModal(stars, newCoinsEarned);
