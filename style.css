@@ -100,7 +100,6 @@ body {
   display: flex;
 }
 
-/* Perfect Centering for Login & Account Creation */
 #loginView.active,
 #registerView.active {
   justify-content: center;
@@ -331,10 +330,11 @@ body {
   padding-bottom: 10px;
 }
 
-/* LEVEL CARD BUTTON */
+/* LEVEL CARD BUTTON & DYNAMIC BACKGROUNDS */
 .level-btn {
   position: relative;
-  background: radial-gradient(circle at top, #240a42 0%, #100424 100%);
+  background-size: cover;
+  background-position: center;
   border: 1.5px solid #5a2a9c;
   border-radius: 18px;
   padding: 10px 4px 8px 4px;
@@ -342,9 +342,10 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  min-height: 118px;
+  min-height: 128px;
   cursor: pointer;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
   transition: transform 0.15s ease, border-color 0.15s ease;
 }
 
@@ -356,6 +357,7 @@ body {
   transform: translateX(-50%);
   font-size: 8px;
   color: #5a2a9c;
+  z-index: 3;
 }
 
 .level-btn.unlocked {
@@ -364,6 +366,39 @@ body {
 
 .level-btn.unlocked::before {
   color: #ffd700;
+}
+
+/* Unsolved / Locked background overlay with blur */
+.level-btn.unsolved-bg {
+  background-image: var(--level-bg);
+}
+
+.level-btn.unsolved-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(16, 4, 36, 0.75);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 1;
+}
+
+/* Solved background overlay (clear/unblurred) */
+.level-btn.solved-bg {
+  background-image: var(--level-bg);
+}
+
+.level-btn.solved-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(16, 4, 36, 0.35);
+  z-index: 1;
+}
+
+.level-btn > * {
+  position: relative;
+  z-index: 2;
 }
 
 .level-num {
@@ -389,25 +424,29 @@ body {
   filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.8));
 }
 
-/* CARD STATS PILL */
+/* LEVEL CARD PILL (TIME STACKED ON TOP OF MOVES) */
 .level-card-pill {
   width: 95%;
-  background: rgba(12, 5, 28, 0.85);
-  border: 1px solid rgba(138, 43, 226, 0.4);
+  background: rgba(12, 5, 28, 0.9);
+  border: 1px solid rgba(138, 43, 226, 0.5);
   border-radius: 10px;
-  padding: 4px 2px;
+  padding: 5px 6px;
   display: flex;
-  justify-content: space-evenly;
+  flex-direction: column;
+  gap: 3px;
   align-items: center;
+  justify-content: center;
 }
 
 .pill-stat {
   display: flex;
   align-items: center;
-  gap: 2px;
-  font-size: 8px;
+  justify-content: center;
+  gap: 4px;
+  font-size: 9px;
   font-weight: 800;
   color: #ffffff;
+  width: 100%;
 }
 
 .pill-stat .unit {
@@ -443,7 +482,7 @@ body {
 }
 
 /* ==========================================
-   COLLECTION CARDS WITH BADGES
+   COLLECTION CARDS & FOLDERS
    ========================================== */
 
 #collectionsView .view-header {
@@ -490,25 +529,21 @@ body {
   border-top: 1px solid rgba(157, 78, 221, 0.5);
 }
 
-/* ==========================================
-   COLLECTION FOLDERS STYLING
-   ========================================== */
-
 .collection-folder-btn {
   position: relative;
   background: radial-gradient(circle at top, #240a42 0%, #100424 100%);
-  border: 1.5px solid #8a2be2;
+  border: 2px solid #9d4edd;
   border-radius: 18px;
   padding: 20px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 118px;
+  min-height: 125px;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
   transition: transform 0.15s ease, border-color 0.15s ease;
-  gap: 8px;
+  gap: 6px;
 }
 
 .collection-folder-btn:hover {
@@ -517,11 +552,11 @@ body {
 }
 
 .collection-folder-icon {
-  font-size: 28px;
+  font-size: 30px;
 }
 
 .collection-folder-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 900;
   color: #ffffff;
   letter-spacing: 1px;
@@ -530,14 +565,15 @@ body {
 }
 
 .collection-folder-sub {
-  font-size: 9px;
-  color: #a892ee;
-  font-weight: bold;
-  letter-spacing: 0.5px;
+  font-size: 10px;
+  color: #ffd700;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 /* ==========================================
-   ENLARGED PREVIEW MODAL
+   MODALS & OVERLAYS
    ========================================== */
 
 .modal-overlay {
@@ -616,10 +652,6 @@ body {
   }
 }
 
-/* ==========================================
-   SETTINGS & ABOUT MODAL STYLES
-   ========================================== */
-
 .settings-card,
 .about-card {
   width: 100%;
@@ -676,7 +708,6 @@ body {
 }
 
 /* TOGGLE SWITCHES */
-
 .switch {
   position: relative;
   display: inline-block;
@@ -729,8 +760,6 @@ input:checked + .slider:before {
   transform: translateX(22px);
 }
 
-/* ABOUT CARD */
-
 .about-card {
   text-align: center;
   padding: 30px 20px 20px 20px;
@@ -764,23 +793,11 @@ input:checked + .slider:before {
   color: #a892ee;
 }
 
-/* FULL SCREEN & HIDDEN HELPERS */
-
 .hidden {
   display: none !important;
 }
 
-.full-screen-view {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  width: 100%;
-}
-
 /* LOADING SCREEN */
-
 #loadingView.active {
   justify-content: center;
   align-items: center;
@@ -810,8 +827,7 @@ input:checked + .slider:before {
   text-align: center;
 }
 
-/* AUTH CARDS (LOGIN & REGISTER) */
-
+/* AUTH CARDS */
 .auth-card {
   width: 100%;
   max-width: 350px;
@@ -877,12 +893,7 @@ input:checked + .slider:before {
   font-weight: bold;
 }
 
-/* ==========================================
-   GAME PAGE STYLES
-   ========================================== */
-
-/* Upgraded Back Button */
-
+/* GAME PAGE STYLES */
 .top-bar .icon-btn#backToHome,
 .icon-btn.back-btn {
   background: radial-gradient(
@@ -905,8 +916,6 @@ input:checked + .slider:before {
   align-items: center;
 }
 
-/* GAME CONTAINER */
-
 .game-container {
   display: flex;
   flex-direction: column;
@@ -919,8 +928,6 @@ input:checked + .slider:before {
   margin: 0 auto;
 }
 
-/* TOP HEADER BAR LOGO CENTERED WITH BACK + COINS */
-
 .game-container .top-bar {
   position: relative;
   display: flex;
@@ -931,8 +938,6 @@ input:checked + .slider:before {
   margin-bottom: 10px;
   padding: 0;
 }
-
-/* LOGO */
 
 .game-container .logo-container {
   position: absolute;
@@ -950,8 +955,6 @@ input:checked + .slider:before {
   overflow: visible;
 }
 
-/* WEBM LOGO */
-
 .game-container .logo-container video,
 .game-container #logoVideo {
   display: block;
@@ -962,18 +965,12 @@ input:checked + .slider:before {
   object-fit: contain;
 }
 
-/* BACK BUTTON & COINS */
-
 .game-container .icon-btn#backToHome,
 .game-container .coin-badge {
   position: relative;
   z-index: 10;
   flex-shrink: 0;
 }
-
-/* ==========================================
-   LEVEL HEADER & STATS
-   ========================================== */
 
 .game-header {
   width: 100%;
@@ -989,28 +986,31 @@ input:checked + .slider:before {
   margin-bottom: 6px;
 }
 
+/* LARGER GAME PAGE STATS TABS */
 .premium-stats-bar {
   display: flex;
   justify-content: center;
-  gap: 12px;
+  gap: 14px;
   width: 100%;
+  margin-top: 4px;
 }
 
 .stat-badge {
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(35, 16, 64, 0.7);
-  border: 1px solid rgba(157, 78, 221, 0.5);
-  border-radius: 12px;
-  padding: 6px 12px;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(35, 16, 64, 0.85);
+  border: 1.5px solid rgba(157, 78, 221, 0.7);
+  border-radius: 16px;
+  padding: 10px 14px;
   backdrop-filter: blur(8px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
 }
 
 .stat-icon {
-  font-size: 16px;
+  font-size: 20px;
 }
 
 .stat-info {
@@ -1020,21 +1020,17 @@ input:checked + .slider:before {
 }
 
 .stat-label {
-  font-size: 9px;
+  font-size: 10px;
   color: #a892ee;
-  letter-spacing: 1px;
-  font-weight: bold;
-}
-
-.stat-value {
-  font-size: 14px;
-  color: #ffffff;
+  letter-spacing: 1.2px;
   font-weight: 800;
 }
 
-/* ==========================================
-   PUZZLE BOARD
-   ========================================== */
+.stat-value {
+  font-size: 17px;
+  color: #ffffff;
+  font-weight: 900;
+}
 
 .puzzle-wrapper {
   width: calc(100% - 20px);
@@ -1075,8 +1071,6 @@ input:checked + .slider:before {
   transform: scale(0.96);
 }
 
-/* ACTION BUTTONS */
-
 .game-actions {
   display: flex;
   gap: 12px;
@@ -1092,117 +1086,7 @@ input:checked + .slider:before {
   font-size: 15px;
 }
 
-/* ==========================================
-   VICTORY MODAL & IMAGE SIZE ADJUSTMENTS
-   ========================================== */
-
-.victory-card {
-  width: 100%;
-  max-width: 360px;
-  background: radial-gradient(circle at top, #2d1054 0%, #120624 100%);
-  border: 2px solid #ffd700;
-  border-radius: 22px;
-  padding: 36px 20px;
-  text-align: center;
-  box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
-  z-index: 202;
-  position: relative;
-  animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.victory-img-container {
-  width: 190px;
-  height: 190px;
-  margin: 0 auto 12px auto;
-  border-radius: 14px;
-  overflow: hidden;
-  border: 2px solid #9d4edd;
-  box-shadow: 0 0 12px rgba(157, 78, 221, 0.5);
-}
-
-.victory-img-container img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.star-rating {
-  font-size: 20px;
-  color: #4a287a;
-  margin-bottom: 8px;
-}
-
-.star-rating .star.active {
-  color: #ffd700;
-}
-
-.victory-stats {
-  margin-bottom: 12px;
-  font-size: 13px;
-  color: #e0d0ff;
-  line-height: 1.4;
-}
-
-.victory-buttons {
-  display: flex;
-  gap: 10px;
-}
-
-.victory-buttons .btn {
-  flex: 1;
-  padding: 12px;
-  font-size: 14px;
-}
-
-#confettiCanvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  pointer-events: none;
-  z-index: 201;
-}
-
-/* ==========================================
-   ANIMATED RUNNING NEON BORDERS
-   ========================================== */
-
-@keyframes neonBorderRun {
-  0% { border-image-source: linear-gradient(0deg, #ffd700, #9d4edd, #00f0ff, #ffd700); }
-  25% { border-image-source: linear-gradient(90deg, #ffd700, #9d4edd, #00f0ff, #ffd700); }
-  50% { border-image-source: linear-gradient(180deg, #ffd700, #9d4edd, #00f0ff, #ffd700); }
-  75% { border-image-source: linear-gradient(270deg, #ffd700, #9d4edd, #00f0ff, #ffd700); }
-  100% { border-image-source: linear-gradient(360deg, #ffd700, #9d4edd, #00f0ff, #ffd700); }
-}
-
-.welcome-card {
-  border: 2px solid transparent !important;
-  border-image-slice: 1 !important;
-  animation: neonBorderRun 3s linear infinite !important;
-  box-shadow: 0 0 15px rgba(157, 78, 221, 0.6) !important;
-}
-
-.nav-card,
-.menu-card {
-  border: 2px solid transparent !important;
-  border-image-slice: 1 !important;
-  animation: neonBorderRun 4s linear infinite !important;
-  box-shadow: 0 0 12px rgba(123, 44, 191, 0.5) !important;
-}
-
-.nav-card:hover,
-.nav-card:active,
-.menu-card:hover,
-.menu-card:active {
-  animation-duration: 1.5s !important;
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.8) !important;
-}
-
-/* ==========================================
-   EXACT PRO VICTORY SCREEN STYLES
-   ========================================== */
-
+/* PRO VICTORY SCREEN STYLES */
 .victory-card-pro {
   position: relative;
   width: 90%;
@@ -1393,30 +1277,10 @@ input:checked + .slider:before {
   box-shadow: 0 2px 0 transparent;
 }
 
-/* MOBILE SAFETY */
-
-@media (max-width: 600px) {
-  .game-container .top-bar {
-    height: 150px;
-  }
-
-  .game-container .logo-container,
-  .game-container .logo-container video,
-  .game-container #logoVideo {
-    width: 145px;
-    height: 140px;
-    max-width: 145px;
-    max-height: 140px;
-    object-fit: contain;
-  }
-}
-
-/* 1. Change the default app background from white to dark/transparent to kill the white box flash */
 body, html, .app-container {
   background-color: #0d0d0d;
 }
 
-/* 2. Hide any default browser play controls or video placeholders trying to force themselves on mobile */
 video::-webkit-media-controls,
 video::-webkit-media-controls-panel,
 video::-webkit-media-controls-play-button {
