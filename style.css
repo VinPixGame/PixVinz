@@ -29,17 +29,28 @@ body {
 }
 
 /* ==========================================
-   GENERAL TOP BAR
+   GENERAL TOP BAR (CENTER ALIGNED)
    ========================================== */
 
 .top-bar {
-  position: relative;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   width: 100%;
   margin-bottom: 10px;
   padding-top: 8px;
+}
+
+.top-bar > *:nth-child(1) {
+  justify-self: start;
+}
+
+.top-bar > *:nth-child(2) {
+  justify-self: center;
+}
+
+.top-bar > *:nth-child(3) {
+  justify-self: end;
 }
 
 .logo-container {
@@ -177,10 +188,16 @@ body {
 }
 
 .view-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
   align-items: center;
-  gap: 16px;
+  width: 100%;
   margin-bottom: 6px;
+}
+
+.view-header .icon-btn,
+.view-header .back-btn {
+  grid-column: 1;
 }
 
 /* ==========================================
@@ -188,10 +205,11 @@ body {
    ========================================== */
 
 .header-title-group {
+  grid-column: 2;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1;
+  width: 100%;
 }
 
 .level-title-wrapper {
@@ -207,6 +225,7 @@ body {
   font-size: 24px;
   font-family: 'Impact', 'Segoe UI Black', sans-serif;
   letter-spacing: 2px;
+  text-align: center;
 }
 
 .diamond-line {
