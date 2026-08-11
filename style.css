@@ -404,26 +404,34 @@ body {
 /* CARD STATS PILL */
 .level-card-pill {
   width: 95%;
-  background: rgba(12, 5, 28, 0.85);
-  border: 1px solid rgba(138, 43, 226, 0.4);
+  background: rgba(12, 5, 28, 0.9);
+  border: 1px solid rgba(138, 43, 226, 0.5);
   border-radius: 10px;
   padding: 4px 2px;
   display: flex;
+  flex-direction: column;
   justify-content: space-evenly;
   align-items: center;
+}
+
+.level-num {
+  font-size: 16px; /* Adjust this value to make it bigger */
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
 }
 
 .pill-stat {
   display: flex;
   align-items: center;
   gap: 2px;
-  font-size: 8px;
+  font-size: 13px;
   font-weight: 800;
   color: #ffffff;
 }
 
 .pill-stat .unit {
-  font-size: 7px;
+  font-size: 10px;
   color: #a892ee;
 }
 
@@ -436,7 +444,7 @@ body {
 }
 
 .locked-text {
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 800;
   color: #a892ee;
   letter-spacing: 1px;
