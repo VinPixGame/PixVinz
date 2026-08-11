@@ -352,8 +352,8 @@ body {
 
 .level-btn {
   position: relative;
-  background-size: cover;
-  background-position: center;
+  background-size: cover !important;
+  background-position: center !important;
   border: 2px solid #9333ea;
   border-radius: 18px;
   padding: 8px 4px 6px 4px;
@@ -373,13 +373,13 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(15, 5, 29, 0.75); /* Blurred/darkened shade for unsolved levels */
+  background: rgba(15, 5, 29, 0.75); /* Darkened blur shade for unsolved levels */
   z-index: 1;
-  transition: background 0.2s ease;
+  pointer-events: none;
 }
 
 .level-btn.solved::after {
-  background: rgba(15, 5, 29, 0.25); /* Clear picture view for solved levels */
+  background: rgba(15, 5, 29, 0.25); /* Clear view for solved levels */
 }
 
 .level-btn > * {
@@ -391,7 +391,7 @@ body {
   font-size: 22px;
   font-weight: 900;
   color: #ffffff;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
   font-family: 'Segoe UI Black', sans-serif;
 }
 
@@ -402,7 +402,7 @@ body {
 }
 
 .star-icon-small {
-  font-size: 13px; /* Slightly bigger star size */
+  font-size: 13px;
   color: #3b0764;
 }
 
@@ -411,7 +411,7 @@ body {
   filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.9));
 }
 
-/* CARD STATS PILL (Time on top of Move) */
+/* CARD STATS PILL (Time stacked on top of Moves) */
 .level-card-pill {
   width: 96%;
   background: rgba(12, 5, 28, 0.9);
@@ -419,7 +419,7 @@ body {
   border-radius: 10px;
   padding: 4px 2px;
   display: flex;
-  flex-direction: column; /* Time stacked directly on top of move */
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 2px;
@@ -443,7 +443,7 @@ body {
 
 .level-btn.locked {
   opacity: 0.5;
-  background: rgba(16, 4, 36, 0.8);
+  background: rgba(16, 4, 36, 0.8) !important;
   border-color: rgba(90, 42, 156, 0.3);
   justify-content: center;
   gap: 6px;
@@ -995,7 +995,7 @@ input:checked + .slider:before {
 }
 
 /* ==========================================
-   LEVEL HEADER & STATS (ENLARGED & SHIFTED DOWN)
+   LEVEL HEADER & STATS
    ========================================== */
 
 .game-header {
@@ -1060,7 +1060,7 @@ input:checked + .slider:before {
 }
 
 /* ==========================================
-   PUZZLE BOARD & BUTTONS (SHIFTED DOWN SPACING)
+   PUZZLE BOARD & BUTTONS
    ========================================== */
 
 .puzzle-wrapper {
@@ -1153,7 +1153,7 @@ input:checked + .slider:before {
 }
 
 /* ==========================================
-   EXACT PRO VICTORY SCREEN (ALIGNMENT UNTOUCHED)
+   EXACT PRO VICTORY SCREEN (STRICTLY CENTERED)
    ========================================== */
 
 .victory-card-pro {
