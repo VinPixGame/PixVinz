@@ -117,11 +117,45 @@
     <section id="levelsView" class="view">
       <div class="view-header">
         <button class="icon-btn back-btn">‹</button>
-        <h2>LEVELS</h2>
+        <div class="header-title-group">
+          <div class="level-title-wrapper">
+            <span class="diamond-line">◇───</span>
+            <h2>LEVELS</h2>
+            <span class="diamond-line">───◇</span>
+          </div>
+        </div>
       </div>
-      <div class="levels-grid" id="levelsGrid"></div>
-      <div class="bottom-info-bar">
-        🔒 <span id="unlockInfoText">COMPLETE LEVEL 01 TO UNLOCK LEVEL 02</span>
+
+      <!-- OVERALL BEST RECORD CARD -->
+      <div class="overall-best-card">
+        <div class="best-stat-item">
+          <div class="stat-circle-icon">⏱️</div>
+          <div class="stat-text-group">
+            <span class="stat-title">BEST TIME</span>
+            <div class="stat-val-row">
+              <span id="globalBestTime">--:--</span>
+              <span class="stat-unit">MIN</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="best-stat-divider"></div>
+
+        <div class="best-stat-item">
+          <div class="stat-circle-icon">🔀</div>
+          <div class="stat-text-group">
+            <span class="stat-title">FEWEST MOVES</span>
+            <div class="stat-val-row">
+              <span id="globalFewestMoves">--</span>
+              <span class="stat-unit">MOVES</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEVEL GRID CONTAINER -->
+      <div class="levels-scroll-container">
+        <div class="levels-grid" id="levelsGrid"></div>
       </div>
     </section>
 
