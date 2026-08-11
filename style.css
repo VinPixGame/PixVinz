@@ -375,6 +375,26 @@ body {
   pointer-events: none;
 }
 
+/* Locked levels: Heavy blur and dark overlay so the image isn't clear */
+.level-btn.locked {
+  opacity: 1; /* Reset opacity so the blurred background shines through nicely instead of just fading */
+  background: rgba(16, 4, 36, 0.85);
+  border-color: rgba(90, 42, 156, 0.3);
+  justify-content: center;
+  gap: 6px;
+}
+
+.level-btn.locked::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 3, 20, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1;
+  pointer-events: none;
+}
+
 /* Ensures level numbers, stars, and stats stay on top of the background image overlay */
 .level-btn > * {
   position: relative;
@@ -408,7 +428,7 @@ body {
 }
 
 .level-btn.locked {
-  opacity: 0.5;
+  opacity: 0.7;
   background: rgba(16, 4, 36, 0.8);
   border-color: rgba(90, 42, 156, 0.3);
   justify-content: center;
