@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Generates user-specific localStorage keys (e.g., 'vinz_currentLevel')
   function getUserKey(keyName) {
     const user = getCurrentUser();
     if (!user || !user.username) return keyName;
@@ -27,13 +28,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const movesDisplay = document.getElementById('movesDisplay');
   const timerDisplay = document.getElementById('timerDisplay');
 
+  // --- DYNAMIC GRID SIZE CALCULATION ---
   function getGridSize(level) {
-    if (level <= 10) return 3;
-    if (level <= 30) return 4;
-    if (level <= 60) return 5;
-    if (level <= 100) return 6;
-    if (level <= 150) return 7;
-    return 8;
+    if (level <= 10) return 3;       // Level 1-10 (3x3)
+    if (level <= 30) return 4;       // Level 11-30 (4x4)
+    if (level <= 60) return 5;       // Level 31-60 (5x5)
+    if (level <= 100) return 6;      // Level 61-100 (6x6)
+    if (level <= 150) return 7;      // Level 101-150 (7x7)
+    return 8;                        // Level 151-200 (8x8)
   }
 
   const gridSize = getGridSize(currentLevel);
@@ -71,10 +73,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (coinElem) coinElem.innerText = totalCoins;
   }
 
+  // --- DYNAMIC TILE CUTTING & RENDERING ---
   function renderGrid() {
     if (!grid) return;
     grid.innerHTML = '';
 
+    // Apply dynamic CSS grid template
     grid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
     grid.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
 
@@ -119,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // --- DYNAMIC SHUFFLE ---
   function shuffleGrid() {
     const tileCount = tilesState.length;
     for (let i = 0; i < tileCount * 3; i++) {
@@ -146,11 +151,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const levelMovesKey = getUserKey(`levelMoves_${currentLevel}`);
       const levelTimeKey = getUserKey(`levelTime_${currentLevel}`);
 
+      // --- SAVE FEWEST MOVES RECORD ---
       const prevMoves = parseInt(localStorage.getItem(levelMovesKey)) || Infinity;
       if (moves < prevMoves) {
         localStorage.setItem(levelMovesKey, moves);
       }
 
+      // --- SAVE BEST TIME RECORD ---
       const timeString = timerDisplay ? timerDisplay.innerText : "00:00";
       const prevTimeStr = localStorage.getItem(levelTimeKey);
       if (!prevTimeStr || prevTimeStr === '--:--') {
