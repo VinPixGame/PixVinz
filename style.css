@@ -1020,7 +1020,7 @@ input:checked + .slider:before {
 }
 
 .stat-icon {
-  font-size: 24px;
+  font-size: 16px;
 }
 
 .stat-info {
@@ -1030,14 +1030,14 @@ input:checked + .slider:before {
 }
 
 .stat-label {
-  font-size: 12px;
+  font-size: 9px;
   color: #a892ee;
   letter-spacing: 1px;
   font-weight: bold;
 }
 
 .stat-value {
-  font-size: 18px;
+  font-size: 14px;
   color: #ffffff;
   font-weight: 800;
 }
