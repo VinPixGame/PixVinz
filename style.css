@@ -573,22 +573,23 @@ body {
 }
 
 /* ==========================================
-   MODALS & OVERLAYS
+   MODALS & OVERLAYS (FIXED CENTERING)
    ========================================== */
 
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   background: rgba(8, 3, 20, 0.85);
   backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 200;
-  padding: 20px;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
 .modal-overlay.hidden {
@@ -1086,21 +1087,24 @@ input:checked + .slider:before {
   font-size: 15px;
 }
 
-/* PRO VICTORY SCREEN STYLES */
+/* PRO VICTORY SCREEN STYLES (CENTERED FIX) */
 .victory-card-pro {
   position: relative;
   width: 90%;
-  max-width: 360px;
+  max-width: 340px;
+  max-height: 90vh;
+  max-height: 90dvh;
+  overflow-y: auto;
   background:
     radial-gradient(circle at center, rgba(88, 28, 135, 0.4) 0%, rgba(18, 6, 36, 0.98) 100%),
     radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
   background-size: 100% 100%, 12px 12px;
   border: 3.5px solid #ffd700;
   border-radius: 32px;
-  padding: 36px 20px 24px 20px;
+  padding: 30px 16px 20px 16px;
   text-align: center;
   box-shadow: 0 0 25px rgba(255, 215, 0, 0.6), inset 0 0 15px rgba(157, 78, 221, 0.5), 0 20px 40px rgba(0, 0, 0, 0.8);
-  margin: auto;
+  margin: 0 auto;
   animation: popUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -1136,7 +1140,7 @@ input:checked + .slider:before {
 
 .victory-title-pro {
   font-family: 'Impact', 'Segoe UI Black', sans-serif;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 900;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -1147,18 +1151,18 @@ input:checked + .slider:before {
 }
 
 .victory-subtitle-pro {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: #e9d5ff;
-  margin: 8px 0 14px 0;
+  margin: 6px 0 10px 0;
   letter-spacing: 1px;
 }
 
 .victory-img-container-pro {
-  width: 190px;
-  height: 190px;
-  margin: 0 auto 14px auto;
-  border-radius: 24px;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 10px auto;
+  border-radius: 20px;
   border: 3px solid #a855f7;
   overflow: hidden;
   box-shadow: 0 0 20px rgba(168, 85, 247, 0.7), 0 8px 16px rgba(0, 0, 0, 0.6);
@@ -1173,12 +1177,12 @@ input:checked + .slider:before {
 .star-rating-pro {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .star-pro {
-  font-size: 38px;
+  font-size: 32px;
   color: #3b0764;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   transition: transform 0.2s ease;
@@ -1196,9 +1200,9 @@ input:checked + .slider:before {
   justify-content: space-around;
   background: rgba(15, 5, 29, 0.85);
   border: 1.5px solid rgba(124, 58, 237, 0.5);
-  border-radius: 18px;
-  padding: 10px 6px;
-  margin-bottom: 18px;
+  border-radius: 16px;
+  padding: 8px 4px;
+  margin-bottom: 14px;
   backdrop-filter: blur(6px);
 }
 
@@ -1211,18 +1215,18 @@ input:checked + .slider:before {
 }
 
 .stat-icon-pro {
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .stat-label-pro {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
   color: #c084fc;
   letter-spacing: 1px;
 }
 
 .stat-value-pro {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 900;
   color: #ffffff;
 }
@@ -1233,20 +1237,20 @@ input:checked + .slider:before {
 
 .stat-divider {
   width: 1px;
-  height: 32px;
+  height: 28px;
   background: rgba(124, 58, 237, 0.4);
 }
 
 .victory-buttons-pro {
   display: flex;
-  gap: 12px;
+  gap: 10px;
 }
 
 .btn-pro {
   flex: 1;
-  padding: 14px 10px;
-  border-radius: 18px;
-  font-size: 16px;
+  padding: 12px 8px;
+  border-radius: 16px;
+  font-size: 15px;
   font-weight: 900;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -1262,14 +1266,14 @@ input:checked + .slider:before {
   background: linear-gradient(180deg, #7e22ce 0%, #581c87 100%);
   border: 2px solid #c084fc;
   color: #ffffff;
-  box-shadow: 0 5px 0 #3b0764, 0 8px 15px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 0 #3b0764, 0 6px 12px rgba(0, 0, 0, 0.4);
 }
 
 .btn-next-pro {
   background: linear-gradient(180deg, #fde047 0%, #eab308 50%, #ca8a04 100%);
   border: 2px solid #ffffff;
   color: #1e0a38;
-  box-shadow: 0 5px 0 #854d0e, 0 8px 15px rgba(250, 204, 21, 0.4);
+  box-shadow: 0 4px 0 #854d0e, 0 6px 12px rgba(250, 204, 21, 0.4);
 }
 
 .btn-pro:active {
