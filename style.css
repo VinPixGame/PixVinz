@@ -201,7 +201,7 @@ body {
 }
 
 /* ==========================================
-   LEVEL SELECT MAKEOVER STYLES
+   LEVEL & COLLECTION SELECT STYLES
    ========================================== */
 
 .header-title-group {
@@ -444,6 +444,14 @@ body {
 /* ==========================================
    COLLECTION CARDS WITH BADGES
    ========================================== */
+
+#collectionsView .view-header {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 12px;
+}
 
 .collection-item {
   position: relative;
