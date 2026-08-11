@@ -20,12 +20,15 @@ jobs:
       - name: Install Cordova and Build Android APK
         run: |
           npm install -g cordova
-          cordova create myApp com.pixvinz.app PixVinzApp
+          cordova create myApp com.pixvinz.app PixVinz
           cd myApp
           cordova platform add android
           
           # Point the app to your live GitHub Pages URL for automatic online updates
           sed -i 's|<content src="index.html" />|<content src="https://vinpixgame.github.io/PixVinz/" />|g' config.xml
+          
+          # Set the visible display name of the app to PixVinz
+          sed -i 's|<name>PixVinzApp</name>|<name>PixVinz</name>|g' config.xml
           
           # Force the app to stay inside the app container instead of opening an external browser
           sed -i '/<widget /a \    <allow-navigation href="https://vinpixgame.github.io/*" />' config.xml
