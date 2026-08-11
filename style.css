@@ -1179,11 +1179,11 @@ input:checked + .slider:before {
    ========================================== */
 
 @keyframes neonBorderRun {
-  0% { border-image-source: linear-gradient(0deg, #ffd700, #9d4edd, #00f0ff, #ffd700); }
-  25% { border-image-source: linear-gradient(90deg, #ffd700, #9d4edd, #00f0ff, #ffd700); }
-  50% { border-image-source: linear-gradient(180deg, #ffd700, #9d4edd, #00f0ff, #ffd700); }
-  75% { border-image-source: linear-gradient(270deg, #ffd700, #9d4edd, #00f0ff, #ffd700); }
-  100% { border-image-source: linear-gradient(360deg, #ffd700, #9d4edd, #00f0ff, #ffd700); }
+  0% { border-image-source: linear-gradient(0deg,  #ffd700, #ffaa00, #ffea80, #ffd700); }
+  25% { border-image-source: linear-gradient(90deg, #ffd700, #ffaa00, #ffea80, #ffd700); }
+  50% { border-image-source: linear-gradient(180deg, #ffd700, #ffaa00, #ffea80, #ffd700); }
+  75% { border-image-source: linear-gradient(270deg, ##ffd700, #ffaa00, #ffea80, #ffd700; }
+  100% { border-image-source: linear-gradient(360deg, #ffd700, #ffaa00, #ffea80, #ffd700); }
 }
 
 .welcome-card {
