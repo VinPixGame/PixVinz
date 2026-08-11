@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Generates user-specific localStorage keys (e.g., 'vinz_currentLevel')
   function getUserKey(keyName) {
     const user = getCurrentUser();
     if (!user || !user.username) return keyName;
@@ -56,7 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Plays music automatically upon the user's first click after loading
   document.addEventListener('click', () => {
     const user = getCurrentUser();
     if (user && typeof AudioManager !== 'undefined' && AudioManager.musicEnabled) {
@@ -66,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // --- 1. LOADING SCREEN (4 Seconds) ---
+  // --- 1. LOADING SCREEN ---
   setTimeout(() => {
     const loggedInUser = getCurrentUser();
     if (loggedInUser) {
@@ -125,7 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
       users[username] = newUser;
       localStorage.setItem('registeredUsers', JSON.stringify(users));
 
-      // Auto-login registered account
       localStorage.setItem('loggedInUser', JSON.stringify(newUser));
       const nameElem = document.getElementById('userDisplayName');
       if (nameElem) nameElem.innerText = displayName;
@@ -148,7 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
 
-      // Default account fallback
       if (Object.keys(users).length === 0 && username === 'vinz' && pass === '1234') {
         users['vinz'] = { displayName: 'Vinz', username: 'vinz', password: '1234' };
         localStorage.setItem('registeredUsers', JSON.stringify(users));
@@ -190,21 +186,19 @@ document.addEventListener('DOMContentLoaded', () => {
   if (navCollections) {
     navCollections.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      renderCollectionFolders(); // Render Folders First
+      renderCollectionFolders();
       showView('collections');
     });
   }
 
-  // Standard back buttons handling
   document.querySelectorAll('.back-btn').forEach(btn => {
-    if (btn.id === 'collectionsBackBtn') return; // Handled separately
+    if (btn.id === 'collectionsBackBtn') return;
     btn.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       showView('home');
     });
   });
 
-  // Collections Custom Back Button (Folder vs Home navigation)
   const collectionsBackBtn = document.getElementById('collectionsBackBtn');
   if (collectionsBackBtn) {
     collectionsBackBtn.addEventListener('click', (e) => {
@@ -213,9 +207,9 @@ document.addEventListener('DOMContentLoaded', () => {
       
       if (imagesContainer && !imagesContainer.classList.contains('hidden')) {
         e.stopImmediatePropagation();
-        renderCollectionFolders(); // Return back to folder view
+        renderCollectionFolders();
       } else {
-        showView('home'); // Return back to home
+        showView('home');
       }
     });
   }
@@ -293,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- 5. RENDER FUNCTIONS ---
+  // --- 5. RENDER LEVELS (WITH BLURRED / UNBLURRED BACKGROUNDS & STACKED STATS) ---
   function renderLevels() {
     const grid = document.getElementById('levelsGrid');
     if (!grid) return;
@@ -307,22 +301,28 @@ document.addEventListener('DOMContentLoaded', () => {
     for (let i = 1; i <= 200; i++) {
       const btn = document.createElement('div');
       const isUnlocked = i <= currentLevel;
+      const isSolved = i < currentLevel;
 
       btn.className = `level-btn ${isUnlocked ? 'unlocked' : 'locked'}`;
+      btn.style.setProperty('--level-bg', `url('image/level${i}.jpeg')`);
 
       if (isUnlocked) {
+        if (!isSolved) {
+          btn.classList.add('unsolved-bg');
+        } else {
+          btn.classList.add('solved-bg');
+        }
+
         const levelCoins = parseInt(localStorage.getItem(getUserKey(`levelCoins_${i}`))) || 0;
-        const starsEarned = Math.min(3, Math.floor(levelCoins / 5)) || (i < currentLevel ? 3 : 0);
+        const starsEarned = Math.min(3, Math.floor(levelCoins / 5)) || (isSolved ? 3 : 0);
         
         let moves = localStorage.getItem(getUserKey(`levelMoves_${i}`));
         let timeStr = localStorage.getItem(getUserKey(`levelTime_${i}`));
 
-        // --- LEGACY FALLBACK FOR PREVIOUSLY CLEARED LEVELS ---
-        if (i < currentLevel) {
+        if (isSolved) {
           const gSize = i <= 10 ? 3 : i <= 30 ? 4 : i <= 60 ? 5 : i <= 100 ? 6 : i <= 150 ? 7 : 8;
-          
           if (!moves) {
-            moves = gSize * 6; // Baseline estimate based on grid size
+            moves = gSize * 6;
           }
           if (!timeStr || timeStr === '--:--') {
             const estSec = gSize * 15;
@@ -332,7 +332,6 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
 
-        // Track Overall Best Records
         if (moves) {
           const parsedMoves = parseInt(moves);
           if (parsedMoves < overallFewestMoves) {
@@ -357,6 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const displayMoves = moves ? moves : '--';
         const displayTime = timeStr ? timeStr : '--:--';
 
+        // Stacked Layout: Time on top of Moves
         btn.innerHTML = `
           <div class="level-num">${i.toString().padStart(2, '0')}</div>
           <div class="stars">${starsHTML}</div>
@@ -371,6 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
           window.location.href = `game.html?level=${i}`;
         });
       } else {
+        btn.style.backgroundColor = '#100424';
         btn.innerHTML = `
           <div class="level-num" style="opacity:0.3">${i.toString().padStart(2, '0')}</div>
           <div class="lock-icon" style="font-size:22px; opacity:0.6;">🔒</div>
@@ -381,7 +382,6 @@ document.addEventListener('DOMContentLoaded', () => {
       grid.appendChild(btn);
     }
 
-    // Update Global Best Banner
     const timeElem = document.getElementById('globalBestTime');
     if (timeElem) {
       if (overallBestTimeSeconds !== Infinity) {
@@ -399,13 +399,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // --- 6. COLLECTION FOLDERS LOGIC (1-10, 11-20, etc.) ---
+  // --- 6. COLLECTION FOLDERS LOGIC ---
   function renderCollectionFolders() {
     const folderGrid = document.getElementById('collectionsFolderGrid');
     if (!folderGrid) return;
     folderGrid.innerHTML = '';
 
-    const totalLevels = 200; // Matches max levels available
+    const totalLevels = 200;
     const levelsPerFolder = 10;
     const totalFolders = Math.ceil(totalLevels / levelsPerFolder);
 
@@ -429,7 +429,6 @@ document.addEventListener('DOMContentLoaded', () => {
       folderGrid.appendChild(folderCard);
     }
 
-    // Toggle views: show folders container, hide images container
     const folderContainer = document.getElementById('collectionsFolderContainer');
     const imagesContainer = document.getElementById('collectionsImagesContainer');
     const titleElem = document.getElementById('collectionsTitle');
