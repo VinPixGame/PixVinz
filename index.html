@@ -162,16 +162,25 @@
     <!-- COLLECTIONS PAGE VIEW -->
     <section id="collectionsView" class="view">
       <div class="view-header">
-        <button class="icon-btn back-btn">‹</button>
+        <button class="icon-btn back-btn" id="collectionsBackBtn">‹</button>
         <div class="header-title-group">
           <div class="level-title-wrapper">
             <span class="diamond-line">◇───</span>
-            <h2>COLLECTIONS</h2>
+            <h2 id="collectionsTitle">COLLECTIONS</h2>
             <span class="diamond-line">───◇</span>
           </div>
         </div>
       </div>
-      <div class="collections-grid" id="collectionsGrid"></div>
+
+      <!-- FOLDERS SELECTION GRID -->
+      <div class="collections-scroll-container" id="collectionsFolderContainer">
+        <div class="collections-grid" id="collectionsFolderGrid"></div>
+      </div>
+
+      <!-- IMAGES GRID INSIDE FOLDER -->
+      <div class="collections-scroll-container hidden" id="collectionsImagesContainer">
+        <div class="collections-grid" id="collectionsGrid"></div>
+      </div>
     </section>
   </div>
 
