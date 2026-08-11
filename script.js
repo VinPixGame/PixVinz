@@ -10,6 +10,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const mainHeader = document.getElementById('mainHeader');
 
+  function getCurrentUser() {
+    try {
+      return JSON.parse(localStorage.getItem('loggedInUser'));
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Generates user-specific localStorage keys (e.g., 'vinz_currentLevel')
+  function getUserKey(keyName) {
+    const user = getCurrentUser();
+    if (!user || !user.username) return keyName;
+    return `${user.username}_${keyName}`;
+  }
+
   function showView(targetView) {
     Object.values(views).forEach(v => {
       if (v) v.classList.remove('active');
@@ -28,18 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateCoinDisplay() {
-    const totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
+    const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
     const coinElem = document.getElementById('coinCount');
     if (coinElem) {
       coinElem.innerText = totalCoins;
-    }
-  }
-
-  function getCurrentUser() {
-    try {
-      return JSON.parse(localStorage.getItem('loggedInUser'));
-    } catch (e) {
-      return null;
     }
   }
 
@@ -165,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (playBtn) {
     playBtn.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      const currentLevel = parseInt(localStorage.getItem('currentLevel')) || 1;
+      const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
       window.location.href = `game.html?level=${currentLevel}`;
     });
   }
@@ -273,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('levelsGrid');
     if (!grid) return;
     grid.innerHTML = '';
-    const currentLevel = parseInt(localStorage.getItem('currentLevel')) || 1;
+    const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
 
     for (let i = 1; i <= 200; i++) {
       const btn = document.createElement('div');
@@ -303,7 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('collectionsGrid');
     if (!grid) return;
     grid.innerHTML = '';
-    const currentLevel = parseInt(localStorage.getItem('currentLevel')) || 1;
+    const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
 
     for (let i = 1; i < currentLevel; i++) {
       const item = document.createElement('div');
