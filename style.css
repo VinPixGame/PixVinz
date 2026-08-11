@@ -89,6 +89,13 @@ body {
   display: flex;
 }
 
+/* Perfect Centering for Login & Account Creation */
+#loginView.active,
+#registerView.active {
+  justify-content: center;
+  align-items: center;
+}
+
 #homeView {
   margin-top: 38px;
   padding-bottom: 20px;
@@ -512,17 +519,25 @@ input:checked + .slider:before {
 
 /* LOADING SCREEN */
 
+#loadingView.active {
+  justify-content: center;
+  align-items: center;
+}
+
 .loading-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 16px;
+  text-align: center;
 }
 
 #loadingLogo {
   width: 240px;
   height: auto;
+  display: block;
+  margin: 0 auto;
 }
 
 .loading-text {
@@ -530,6 +545,7 @@ input:checked + .slider:before {
   font-weight: bold;
   color: #ffd700;
   letter-spacing: 2px;
+  text-align: center;
 }
 
 /* AUTH CARDS (LOGIN & REGISTER) */
@@ -544,6 +560,7 @@ input:checked + .slider:before {
   text-align: center;
   backdrop-filter: blur(10px);
   box-shadow: 0 0 25px rgba(123, 44, 191, 0.3);
+  margin: 0 auto;
 }
 
 .auth-logo video {
@@ -668,27 +685,15 @@ input:checked + .slider:before {
 
   width: 100%;
 
-  /*
-     Increased height gives the logo its own
-     vertical area and prevents it from touching
-     or overlapping the LEVEL heading below.
-  */
   height: 150px;
 
-  /*
-     Slightly more space below the logo area
-     moves LEVEL + the rest of the game down.
-  */
   margin-bottom: 10px;
 
   padding: 0;
 }
 
 
-/* LOGO
-   Horizontally centered against the
-   ENTIRE top bar, NOT between buttons.
-*/
+/* LOGO */
 
 .game-container .logo-container {
   position: absolute;
@@ -721,11 +726,6 @@ input:checked + .slider:before {
 .game-container #logoVideo {
   display: block;
 
-  /*
-     Keep the logo width consistent while
-     constraining its vertical area so it
-     cannot run into LEVEL.
-  */
   width: 145px;
   height: 140px;
 
@@ -764,10 +764,6 @@ input:checked + .slider:before {
   width: 100%;
   text-align: center;
 
-  /*
-     Keeps the LEVEL heading clearly separated
-     from the logo.
-  */
   margin-bottom: 8px;
 }
 
@@ -776,10 +772,6 @@ input:checked + .slider:before {
   font-size: 17px;
   letter-spacing: 1px;
 
-  /*
-     Ensures the LEVEL text has its own
-     unobstructed line.
-  */
   line-height: 22px;
 
   margin-bottom: 6px;
@@ -844,10 +836,6 @@ input:checked + .slider:before {
   max-width: 380px;
   aspect-ratio: 1 / 1;
 
-  /*
-     Slightly increased top spacing moves the
-     puzzle down together with the header.
-  */
   margin: 10px auto 8px auto;
 
   display: flex;
@@ -1457,11 +1445,6 @@ input:checked + .slider:before {
 @media (max-width: 600px) {
 
   .game-container .top-bar {
-    /*
-       Same reserved logo area on mobile.
-       This keeps LEVEL completely below
-       the logo instead of underneath it.
-    */
     height: 150px;
   }
 
