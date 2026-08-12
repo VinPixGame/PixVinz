@@ -968,13 +968,6 @@ input:checked + .slider:before {
   margin-bottom: 6px;
 }
 
-.centered-level-title {
-  text-align: center;
-  margin: 12px 0 8px 0;
-  font-size: 18px;
-  letter-spacing: 1px;
-}
-
 
 
 /* Stats Bar (Timer & Moves Container) */
