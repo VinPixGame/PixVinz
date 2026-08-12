@@ -34,6 +34,10 @@ jobs:
           sed -i '/<widget /a \    <allow-navigation href="https://vinpixgame.github.io/*" />' config.xml
           sed -i '/<widget /a \    <access origin="https://vinpixgame.github.io/*" />' config.xml
           
+          # ---> ADD THESE LINES TO FIX THE WHITE SCREEN FLASH <---
+          sed -i '/<widget /a \    <preference name="BackgroundColor" value="0xFF1A0B2E" />' config.xml
+          sed -i '/<widget /a \    <preference name="SplashScreenBackgroundColor" value="#1a0b2e" />' config.xml
+          
           # Set up your custom app icon from the image folder
           if [ -f ../image/pixvinz.png ]; then
             mkdir -p res/icon/android
