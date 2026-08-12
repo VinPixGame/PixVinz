@@ -194,3 +194,12 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #a892ee;
 }
+
+
+.centered-level-title {
+  text-align: center;
+  margin: 12px 0 8px 0;
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: #ffd700;
+}
