@@ -47,8 +47,16 @@
 
     <!-- Game Actions -->
     <div class="game-actions">
-      <button class="btn btn-secondary" id="collectionsBtn">🖼️ PREVIEW</button>
+      <button class="btn btn-secondary" id="previewBtn">🖼️ PREVIEW</button>
       <button class="btn btn-primary" id="shuffleBtn">🔀 SHUFFLE</button>
+    </div>
+  </div>
+
+  <!-- Image Preview Modal (10s Popup) -->
+  <div id="imageModal" class="modal-overlay hidden">
+    <div class="modal-content modal-img-container" style="text-align: center; background: #1a0b2e; padding: 20px; border-radius: 16px; border: 2px solid #ffd700; max-width: 90%; width: 340px;">
+      <h3 id="modalLevelTitle" style="color: #ffd700; margin-bottom: 12px; font-size: 18px; letter-spacing: 1px;">LEVEL PREVIEW</h3>
+      <img id="modalPreviewImg" src="" alt="Level Preview" style="width: 100%; height: auto; max-height: 60vh; object-fit: contain; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
     </div>
   </div>
 
