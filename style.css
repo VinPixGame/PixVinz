@@ -359,7 +359,7 @@ body {
   cursor: pointer;
   animation: purpleGlow 3.5s infinite ease-in-out;
   transition: transform 0.15s ease;
-  overflow: hidden;
+  overflow: visible !important;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
@@ -388,40 +388,33 @@ body {
 .level-btn.solved-bg::before {
   content: "⭐";
   position: absolute;
-  top: -10px;
+  top: -11px;
   left: 50%;
   transform: translateX(-50%);
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   background: linear-gradient(180deg, #ffe066 0%, #ffb700 100%);
-  border: 1px solid #ffffff;
+  border: 1.5px solid #ffffff;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 8px;
-  box-shadow: 0 0 8px rgba(255, 215, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.5);
-  z-index: 10;
+  font-size: 9px;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.5);
+  z-index: 20;
 }
 
-/* Locked levels: Heavy blur and dark overlay so the image isn't clear */
+/* Locked levels: No background image, solid dark style */
 .level-btn.locked {
-  opacity: 1; /* Reset opacity so the blurred background shines through nicely instead of just fading */
-  background: rgba(16, 4, 36, 0.85);
+  background-image: none !important;
+  background: rgba(16, 4, 36, 0.95);
   border-color: rgba(90, 42, 156, 0.3);
   justify-content: center;
   gap: 6px;
 }
 
 .level-btn.locked::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(10, 3, 20, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  z-index: 1;
-  pointer-events: none;
+  display: none !important;
 }
 
 /* Ensures level numbers, stars, and stats stay on top of the background image overlay */
