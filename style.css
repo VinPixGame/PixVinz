@@ -923,8 +923,6 @@ input:checked + .slider:before {
   font-weight: bold;
 }
 
-/* ==========================================
-
   /* ==========================================
    COMPLETE GAME PAGE LAYOUT CSS
    ========================================== */
@@ -980,7 +978,7 @@ input:checked + .slider:before {
   font-size: 18px;
   letter-spacing: 1px;
   line-height: 20px;
-  margin-bottom: 0;
+  margin-bottom: 2px;
 }
 
 /* Stats Bar (Timer & Moves Container) */
@@ -1035,11 +1033,19 @@ input:checked + .slider:before {
   max-width: 380px;
   aspect-ratio: 1 / 1;
   margin: 4px auto 4px auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: relative;
 }
 
+/* Forces the actual puzzle grid/board inside to fill the wrapper completely */
+.puzzle-wrapper > div,
+.puzzle-wrapper > canvas,
+.puzzle-board,
+.puzzle-grid {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+}
 /* Game Action Buttons (Preview & Shuffle Container, Closer to Puzzle) */
 .game-actions {
   display: flex;
