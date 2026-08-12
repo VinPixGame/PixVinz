@@ -8,7 +8,7 @@
 </head>
 <body>
   <div class="app-container game-container">
-    <!-- Top Bar -->
+  <!-- Top Bar (Logo remains completely untouched here) -->
     <header class="top-bar">
       <button class="icon-btn" id="backToHome">‹</button>
       <div class="logo-container">
@@ -19,9 +19,11 @@
       <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
     </header>
 
-    <!-- Level Header & Premium Stats Badges -->
+    <!-- Level Title positioned in the middle gap -->
+    <h2 id="levelTitle" class="centered-level-title">LEVEL <span id="levelDisplay">01</span></h2>
+
+    <!-- Premium Stats Bar (Timer & Moves) -->
     <div class="game-header">
-      <h2 id="levelTitle">LEVEL <span id="levelDisplay">01</span></h2>
       <div class="premium-stats-bar">
         <div class="stat-badge">
           <span class="stat-icon">⏱️</span>
