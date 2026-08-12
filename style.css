@@ -924,9 +924,27 @@ input:checked + .slider:before {
 }
 
 /* ==========================================
-   GAME PAGE STYLES
+
+  /* ==========================================
+   COMPLETE GAME PAGE LAYOUT CSS
    ========================================== */
 
+/* Outer wrapper for the entire Game Page */
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 10px 16px 20px 16px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
+  margin: 0 auto;
+}
+
+/* Top bar / Back button styling */
 .top-bar .icon-btn#backToHome,
 .icon-btn.back-btn {
   background: radial-gradient(
@@ -949,89 +967,32 @@ input:checked + .slider:before {
   align-items: center;
 }
 
-.game-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between; /* Spreads elements out to use vertical mobile space */
-  padding: 14px 16px 24px 16px; /* Added extra bottom padding */
-  box-sizing: border-box;
-  width: 100%;
-  max-width: 430px;
-  min-height: 100vh;
-  margin: 0 auto;
-}
-
-.game-container .top-bar {
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  height: 150px;
-  margin-bottom: 10px;
-  padding: 0;
-}
-
-.game-container .logo-container {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 145px;
-  height: 140px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex: none;
-  z-index: 5;
-  pointer-events: none;
-  overflow: visible;
-}
-
-.game-container .logo-container video,
-.game-container #logoVideo {
-  display: block;
-  width: 145px;
-  height: 140px;
-  max-width: 145px;
-  max-height: 140px;
-  object-fit: contain;
-}
-
-.game-container .icon-btn#backToHome,
-.game-container .coin-badge {
-  position: relative;
-  z-index: 10;
-  flex-shrink: 0;
-}
-
-/* ==========================================
-   LEVEL HEADER & STATS
-   ========================================== */
-
+/* Level Title Header ("LEVEL 01", etc.) */
 .game-header {
   width: 100%;
   text-align: center;
-  margin-bottom: 8px;
+  margin-top: 2px;
+  margin-bottom: 2px;
 }
 
 .game-header h2 {
   color: #ffd700;
-  font-size: 20px;
+  font-size: 18px;
   letter-spacing: 1px;
-  line-height: 22px;
-  margin-bottom: 6px;
+  line-height: 20px;
+  margin-bottom: 0;
 }
 
+/* Stats Bar (Timer & Moves Container) */
 .premium-stats-bar {
   display: flex;
   justify-content: center;
-  gap: 14px;
+  gap: 12px;
   width: 100%;
+  max-width: 380px;
 }
 
-/* Increased padding and border thickness to make the container badge bigger */
+/* Individual Timer & Moves Badge Container (Bigger size) */
 .stat-badge {
   flex: 1;
   display: flex;
@@ -1040,14 +1001,13 @@ input:checked + .slider:before {
   background: rgba(35, 16, 64, 0.85);
   border: 1.5px solid rgba(157, 78, 221, 0.7);
   border-radius: 16px;
-  padding: 12px 18px; /* Made padding larger */
+  padding: 10px 16px;
   backdrop-filter: blur(8px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-/* Made the clock and shuffle icons bigger */
 .stat-icon {
-  font-size: 26px;
+  font-size: 22px;
 }
 
 .stat-info {
@@ -1056,7 +1016,6 @@ input:checked + .slider:before {
   align-items: flex-start;
 }
 
-/* Slightly enlarged the 'TIME' and 'MOVES' label text */
 .stat-label {
   font-size: 11px;
   color: #a892ee;
@@ -1064,57 +1023,24 @@ input:checked + .slider:before {
   font-weight: bold;
 }
 
-/* Made the actual timer and moves numbers much bigger and bolder */
 .stat-value {
-  font-size: 22px;
+  font-size: 22px !important;
   color: #ffffff;
   font-weight: 900;
 }
-/* ==========================================
-   PUZZLE BOARD
-   ========================================== */
 
+/* Puzzle Board Wrapper (Strict Square, Closer to Stats) */
 .puzzle-wrapper {
   width: calc(100% - 20px);
   max-width: 380px;
   aspect-ratio: 1 / 1;
-  margin: 4px auto 2px auto;
+  margin: 4px auto 4px auto;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.puzzle-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  gap: 4px;
-  width: 100%;
-  height: 100%;
-  background: #120624;
-  padding: 6px;
-  border-radius: 16px;
-  border: 2px solid #7b2cbf;
-  box-shadow: 0 0 20px rgba(123, 44, 191, 0.4);
-  box-sizing: border-box;
-}
-
-.tile {
-  background-size: 300% 300%;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: transform 0.1s ease, border-color 0.2s ease;
-  box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.2);
-}
-
-.tile.selected {
-  border: 2px solid #ffd700;
-  box-shadow: 0 0 10px #ffd700, inset 0 0 6px #ffd700;
-  transform: scale(0.96);
-}
-
-/* ACTION BUTTONS */
-
+/* Game Action Buttons (Preview & Shuffle Container, Closer to Puzzle) */
 .game-actions {
   display: flex;
   gap: 12px;
@@ -1126,9 +1052,18 @@ input:checked + .slider:before {
 
 .game-actions .btn {
   flex: 1;
-  padding: 4px;
-  font-size: 24px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
 }
+
+
 
 /* ==========================================
    VICTORY MODAL & IMAGE SIZE ADJUSTMENTS
