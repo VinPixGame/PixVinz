@@ -1031,21 +1031,23 @@ input:checked + .slider:before {
   width: 100%;
 }
 
+/* Increased padding and border thickness to make the container badge bigger */
 .stat-badge {
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(35, 16, 64, 0.7);
-  border: 1px solid rgba(157, 78, 221, 0.5);
-  border-radius: 12px;
-  padding: 6px 12px;
+  gap: 12px;
+  background: rgba(35, 16, 64, 0.85);
+  border: 1.5px solid rgba(157, 78, 221, 0.7);
+  border-radius: 16px;
+  padding: 12px 18px; /* Made padding larger */
   backdrop-filter: blur(8px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
+/* Made the clock and shuffle icons bigger */
 .stat-icon {
-  font-size: 20px;
+  font-size: 26px;
 }
 
 .stat-info {
@@ -1054,19 +1056,20 @@ input:checked + .slider:before {
   align-items: flex-start;
 }
 
+/* Slightly enlarged the 'TIME' and 'MOVES' label text */
 .stat-label {
   font-size: 11px;
   color: #a892ee;
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
   font-weight: bold;
 }
 
+/* Made the actual timer and moves numbers much bigger and bolder */
 .stat-value {
-  font-size: 16px;
+  font-size: 22px;
   color: #ffffff;
-  font-weight: 800;
+  font-weight: 900;
 }
-
 /* ==========================================
    PUZZLE BOARD
    ========================================== */
