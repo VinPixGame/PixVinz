@@ -357,7 +357,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  aspect-ratio: 1; /* <--- Forces a perfect square */
+  aspect-ratio: 1;
   width: 100%;
   cursor: pointer;
   transition: transform 0.15s ease, border-color 0.2s ease;
@@ -369,7 +369,6 @@ body {
   border-color: #c084fc;
 }
 
-/* Unsolved unlocked levels: Darkened and blurred background */
 .level-btn.unsolved-bg::after {
   content: "";
   position: absolute;
@@ -382,7 +381,6 @@ body {
   pointer-events: none;
 }
 
-/* Solved levels: Clear image view with a light tint */
 .level-btn.solved-bg::after {
   content: "";
   position: absolute;
@@ -405,7 +403,6 @@ body {
   z-index: 20;
 }
 
-/* Locked levels: No background image, solid dark style */
 .level-btn.locked {
   background-image: none !important;
   background: radial-gradient(circle at top, #240a42 0%, #100424 100%);
@@ -418,7 +415,6 @@ body {
   display: none !important;
 }
 
-/* Ensures level numbers, stars, and stats stay on top of the background image overlay */
 .level-btn > * {
   position: relative;
   z-index: 2;
@@ -449,7 +445,6 @@ body {
   filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.9));
 }
 
-/* CARD STATS PILL */
 .level-card-pill {
   width: 95%;
   background: rgba(12, 5, 28, 0.92);
@@ -1027,16 +1022,17 @@ input:checked + .slider:before {
   font-weight: 900;
 }
 
-/* Puzzle Board Wrapper (Strict Square, Closer to Stats) */
+/* Puzzle Board Wrapper (Strict Square, Fixed Display & Grid Sizing) */
 .puzzle-wrapper {
   width: calc(100% - 20px);
   max-width: 380px;
   aspect-ratio: 1 / 1;
   margin: 4px auto 4px auto;
   position: relative;
+  display: grid !important;
 }
 
-/* Forces the actual puzzle grid/board inside to fill the wrapper completely */
+/* Forces the actual puzzle grid/board inside to fill the wrapper completely without collapsing */
 .puzzle-wrapper > div,
 .puzzle-wrapper > canvas,
 .puzzle-board,
@@ -1046,6 +1042,7 @@ input:checked + .slider:before {
   max-width: 100% !important;
   max-height: 100% !important;
 }
+
 /* Game Action Buttons (Preview & Shuffle Container, Closer to Puzzle) */
 .game-actions {
   display: flex;
