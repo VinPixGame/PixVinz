@@ -968,13 +968,14 @@ input:checked + .slider:before {
   margin-bottom: 6px;
 }
 
-.game-header h2 {
-  color: #ffd700;
+.centered-level-title {
+  text-align: center;
+  margin: 12px 0 8px 0;
   font-size: 18px;
   letter-spacing: 1px;
-  line-height: 20px;
-  margin-bottom: 0;
 }
+
+
 
 /* Stats Bar (Timer & Moves Container) */
 .premium-stats-bar {
