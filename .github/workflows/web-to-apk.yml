@@ -34,9 +34,21 @@ jobs:
           sed -i '/<widget /a \    <allow-navigation href="https://vinpixgame.github.io/*" />' config.xml
           sed -i '/<widget /a \    <access origin="https://vinpixgame.github.io/*" />' config.xml
           
-          # ---> ADD THESE LINES TO FIX THE WHITE SCREEN FLASH <---
+          # Match the native splash background with your dark theme color
           sed -i '/<widget /a \    <preference name="BackgroundColor" value="0xFF1A0B2E" />' config.xml
           sed -i '/<widget /a \    <preference name="SplashScreenBackgroundColor" value="#1a0b2e" />' config.xml
+          
+          # Use your custom logo and ensure it scales correctly to match your web loading screen
+          if [ -f ../image/logo.png ]; then
+            mkdir -p res/screen/android
+            cp ../image/logo.png res/screen/android/splash.png
+            sed -i '/<widget /a \    <splash src="res/screen/android/splash.png" />' config.xml
+            sed -i '/<widget /a \    <preference name="SplashScreenDelay" value="3000" />' config.xml
+            sed -i '/<widget /a \    <preference name="FadeSplashScreen" value="true" />' config.xml
+            sed -i '/<widget /a \    <preference name="FadeSplashScreenDuration" value="500" />' config.xml
+            sed -i '/<widget /a \    <preference name="ShowSplashScreenSpinner" value="false" />' config.xml
+            sed -i '/<widget /a \    <preference name="SplashMaintainAspectRatio" value="true" />' config.xml
+          fi
           
           # Set up your custom app icon from the image folder
           if [ -f ../image/pixvinz.png ]; then
