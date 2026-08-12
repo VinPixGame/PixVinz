@@ -259,8 +259,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- PREVIEW BUTTON LOGIC (5 COINS FOR 10 SECONDS PREVIEW) ---
+  // --- PREVIEW BUTTON LOGIC (5 COINS, 10S COUNTDOWN, & CLOSE BUTTON) ---
   let previewTimer = null;
+  let countdownInterval = null;
+
+  function closePreviewModal() {
+    const modal = document.getElementById('imageModal');
+    if (modal) modal.classList.add('hidden');
+    if (previewTimer) clearTimeout(previewTimer);
+    if (countdownInterval) clearInterval(countdownInterval);
+  }
+
   const previewBtn = document.getElementById('previewBtn');
   if (previewBtn) {
     previewBtn.addEventListener('click', () => {
@@ -284,20 +293,40 @@ document.addEventListener('DOMContentLoaded', () => {
       const modal = document.getElementById('imageModal');
       const modalImg = document.getElementById('modalPreviewImg');
       const modalTitle = document.getElementById('modalLevelTitle');
+      const countdownSpan = document.getElementById('countdownSeconds');
 
       if (modalTitle) modalTitle.innerText = `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
       if (modalImg) modalImg.src = imageSrc;
+      
+      let timeLeft = 10;
+      if (countdownSpan) countdownSpan.innerText = timeLeft;
       if (modal) modal.classList.remove('hidden');
 
-      // Clear existing timer if any
-      if (previewTimer) {
-        clearTimeout(previewTimer);
-      }
+      // Clear existing timers if any
+      if (previewTimer) clearTimeout(previewTimer);
+      if (countdownInterval) clearInterval(countdownInterval);
+
+      // Start live countdown ticker every second
+      countdownInterval = setInterval(() => {
+        timeLeft--;
+        if (countdownSpan) countdownSpan.innerText = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(countdownInterval);
+        }
+      }, 1000);
 
       // Automatically close after 10 seconds
       previewTimer = setTimeout(() => {
-        if (modal) modal.classList.add('hidden');
+        closePreviewModal();
       }, 10000);
+    });
+  }
+
+  const closePreviewBtn = document.getElementById('closePreviewBtn');
+  if (closePreviewBtn) {
+    closePreviewBtn.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      closePreviewModal();
     });
   }
 
