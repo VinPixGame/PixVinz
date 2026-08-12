@@ -1022,25 +1022,27 @@ input:checked + .slider:before {
   font-weight: 900;
 }
 
-/* Puzzle Board Wrapper (Strict Square, Fixed Display & Grid Sizing) */
+/* ==========================================
+   PUZZLE BOARD WRAPPER (FIXED DISPLAY)
+   ========================================== */
 .puzzle-wrapper {
   width: calc(100% - 20px);
   max-width: 380px;
   aspect-ratio: 1 / 1;
   margin: 4px auto 4px auto;
   position: relative;
-  display: grid !important;
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
 }
 
-/* Forces the actual puzzle grid/board inside to fill the wrapper completely without collapsing */
-.puzzle-wrapper > div,
-.puzzle-wrapper > canvas,
-.puzzle-board,
-.puzzle-grid {
+/* Forces any direct child element (your puzzle grid/board) to fill the square wrapper */
+.puzzle-wrapper > * {
   width: 100% !important;
   height: 100% !important;
   max-width: 100% !important;
   max-height: 100% !important;
+  display: grid !important;
 }
 
 /* Game Action Buttons (Preview & Shuffle Container, Closer to Puzzle) */
