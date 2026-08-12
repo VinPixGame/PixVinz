@@ -975,7 +975,6 @@ input:checked + .slider:before {
   line-height: 20px;
   margin-bottom: 0;
 }
-}
 
 /* Stats Bar (Timer & Moves Container) */
 .premium-stats-bar {
