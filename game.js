@@ -259,6 +259,48 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // --- PREVIEW BUTTON LOGIC (5 COINS FOR 10 SECONDS PREVIEW) ---
+  let previewTimer = null;
+  const previewBtn = document.getElementById('previewBtn');
+  if (previewBtn) {
+    previewBtn.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+
+      const coinKey = getUserKey('totalCoins');
+      let totalCoins = parseInt(localStorage.getItem(coinKey)) || 0;
+      const previewCost = 5;
+
+      if (totalCoins < previewCost) {
+        alert("Not enough coins! You need 5 coins to preview the image.");
+        return;
+      }
+
+      // Deduct coins and update storage/UI
+      totalCoins -= previewCost;
+      localStorage.setItem(coinKey, totalCoins);
+      updateCoinDisplay();
+
+      // Open modal and show current level image
+      const modal = document.getElementById('imageModal');
+      const modalImg = document.getElementById('modalPreviewImg');
+      const modalTitle = document.getElementById('modalLevelTitle');
+
+      if (modalTitle) modalTitle.innerText = `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
+      if (modalImg) modalImg.src = imageSrc;
+      if (modal) modal.classList.remove('hidden');
+
+      // Clear existing timer if any
+      if (previewTimer) {
+        clearTimeout(previewTimer);
+      }
+
+      // Automatically close after 10 seconds
+      previewTimer = setTimeout(() => {
+        if (modal) modal.classList.add('hidden');
+      }, 10000);
+    });
+  }
+
   const nextLevelBtn = document.getElementById('nextLevelBtn');
   if (nextLevelBtn) {
     nextLevelBtn.onclick = (e) => {
