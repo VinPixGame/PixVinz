@@ -344,6 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
     victoryHomeBtn.onclick = (e) => {
       e.stopPropagation();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+     localStorage.setItem('skipLoading', 'true');
       window.location.href = 'index.html';
     };
   }
@@ -352,6 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (backToHome) {
     backToHome.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+     localStorage.setItem('skipLoading', 'true');
       window.location.href = 'index.html';
     });
   }
@@ -360,6 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (collectionsBtn) {
     collectionsBtn.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+     localStorage.setItem('skipLoading', 'true');
       window.location.href = 'index.html';
     });
   }
