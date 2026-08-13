@@ -530,7 +530,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (localStorage.getItem('skipLoading') === 'true') {
         localStorage.removeItem('skipLoading'); // Clear it for future fresh app launches
         
-        // Hide the loading screen immediately
+        // Hide the loading view immediately
         const loadingView = document.getElementById('loadingView');
         if (loadingView) {
             loadingView.classList.remove('active');
@@ -541,6 +541,13 @@ window.addEventListener('DOMContentLoaded', () => {
         const mainHeader = document.getElementById('mainHeader');
         if (mainHeader) {
             mainHeader.classList.remove('hidden');
+        }
+
+        // Instantly activate the main home screen view so everything appears together!
+        // (Change 'homeView' below to match the actual ID of your main menu container section if it's named differently)
+        const homeView = document.getElementById('homeView'); 
+        if (homeView) {
+            homeView.classList.add('active');
         }
     }
 });
