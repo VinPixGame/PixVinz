@@ -1,7 +1,11 @@
-// Function to return to the main home page safely without showing the loader
 function goHome() {
     localStorage.setItem('skipLoading', 'true');
-    window.location.href = 'index.html';
+    // If your app uses a single-page view switcher function, use it here:
+    if (typeof showView === 'function') {
+        showView('homeView');
+    } else {
+        window.location.href = 'index.html';
+    }
 }
 
 // Load saved profile data and auto-populate display name & avatar
