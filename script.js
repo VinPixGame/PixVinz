@@ -513,9 +513,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Dynamic Profile Header Avatar Loader
 window.addEventListener('DOMContentLoaded', () => {
-    const savedAvatar = localStorage.getItem('playerAvatar'); 
+    const savedAvatar = localStorage.getItem('vinpix_avatar'); // Matches profile.js
     const avatarImg = document.getElementById('profileHeaderImg');
     const fallbackIcon = document.getElementById('profileIconFallback');
 
@@ -525,5 +524,3 @@ window.addEventListener('DOMContentLoaded', () => {
         fallbackIcon.style.display = 'none';
     }
 });
-
-
