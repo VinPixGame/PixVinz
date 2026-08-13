@@ -152,3 +152,66 @@ body {
     color: #4caf50;
     height: 20px;
 }
+
+
+/* Badges Section Styling */
+.badges-section {
+    margin-top: 20px;
+}
+
+.badges-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.badge-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+}
+
+.badge-card.unlocked {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #9c27b0;
+}
+
+.badge-card.locked {
+    opacity: 0.4;
+}
+
+.badge-icon {
+    font-size: 1.8rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.badge-card.unlocked .badge-icon {
+    background: rgba(156, 39, 176, 0.2);
+}
+
+.badge-info {
+    text-align: left;
+}
+
+.badge-title {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #fff;
+    margin-bottom: 2px;
+}
+
+.badge-desc {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    color: #fff;
+}
