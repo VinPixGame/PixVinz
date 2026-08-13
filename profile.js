@@ -1,15 +1,17 @@
-// Function to return to the main home page safely
+// Function to return to the main home page safely without showing the loader
 function goHome() {
+    localStorage.setItem('skipLoading', 'true');
     window.location.href = 'index.html';
 }
-
-// Load saved profile data when the page opens
+// Load saved profile data and auto-populate sign-up display name
 document.addEventListener('DOMContentLoaded', () => {
-    const savedName = localStorage.getItem('vinpix_username');
+    // Automatically grab display name from sign-up keys if vinpix_username isn't set yet
+    const savedName = localStorage.getItem('vinpix_username') || localStorage.getItem('username') || localStorage.getItem('playerName') || '';
     const savedAvatar = localStorage.getItem('vinpix_avatar');
 
     if (savedName) {
         document.getElementById('username-input').value = savedName;
+        localStorage.setItem('vinpix_username', savedName); // Keep it synced
     }
 
     if (savedAvatar) {
@@ -25,7 +27,6 @@ avatarInput.addEventListener('change', function(event) {
         const reader = new FileReader();
         reader.onload = function(e) {
             document.getElementById('avatar-preview').src = e.target.result;
-            // Temporarily store the base64 string until saved
             window.tempAvatarData = e.target.result;
         };
         reader.readAsDataURL(file);
