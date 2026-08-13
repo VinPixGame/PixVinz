@@ -12,10 +12,18 @@
     <!-- 1. LOADING SCREEN -->
     <section id="loadingView" class="view active">
       <div class="loading-content">
-        <video id="loadingLogo" autoplay loop muted playsinline preload="auto" style="background: transparent;">
-          <source src="image/logo.webm" type="video/webm">
-        </video>
-        <div class="loading-text">Loading<span class="dots">...</span></div>
+        <div class="logo-sparkle-wrapper">
+          <img src="image/logo.png" alt="PixVinz Logo" id="loadingLogo" class="logo-img">
+          <div class="sparkle s1"></div>
+          <div class="sparkle s2"></div>
+          <div class="sparkle s3"></div>
+          <div class="sparkle s4"></div>
+        </div>
+        <!-- Realistic Moving Loading Bar -->
+        <div class="loading-bar-track">
+          <div id="loading-progress" class="loading-bar-fill"></div>
+        </div>
+        <div id="loading-percentage">0%</div>
       </div>
     </section>
 
@@ -23,9 +31,13 @@
     <section id="loginView" class="view">
       <div class="auth-card">
         <div class="auth-logo">
-          <video autoplay loop muted playsinline preload="auto" style="background: transparent;">
-            <source src="image/logo.webm" type="video/webm">
-          </video>
+          <div class="logo-sparkle-wrapper">
+            <img src="image/logo.png" alt="PixVinz Logo" class="logo-img">
+            <div class="sparkle s1"></div>
+            <div class="sparkle s2"></div>
+            <div class="sparkle s3"></div>
+            <div class="sparkle s4"></div>
+          </div>
         </div>
         <h2>LOG IN</h2>
         <form id="loginForm">
@@ -70,9 +82,13 @@
     <header class="top-bar hidden" id="mainHeader">
       <button class="icon-btn" id="menuBtn">☰</button>
       <div class="logo-container">
-        <video id="logoVideo" autoplay loop muted playsinline preload="auto" style="background: transparent;">
-          <source src="image/logo.webm" type="video/webm">
-        </video>
+        <div class="logo-sparkle-wrapper">
+          <img src="image/logo.png" alt="PixVinz Logo" id="logoVideo" class="logo-img">
+          <div class="sparkle s1"></div>
+          <div class="sparkle s2"></div>
+          <div class="sparkle s3"></div>
+          <div class="sparkle s4"></div>
+        </div>
       </div>
       <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
     </header>
@@ -233,9 +249,13 @@
     <div class="about-card">
       <button class="icon-btn close-modal-btn close-about" id="closeAboutModal">✕</button>
       <div class="about-logo">
-        <video autoplay loop muted playsinline preload="auto" style="background: transparent;">
-          <source src="image/logo.webm" type="video/webm">
-        </video>
+        <div class="logo-sparkle-wrapper">
+          <img src="image/logo.png" alt="PixVinz Logo" class="logo-img">
+          <div class="sparkle s1"></div>
+          <div class="sparkle s2"></div>
+          <div class="sparkle s3"></div>
+          <div class="sparkle s4"></div>
+        </div>
       </div>
       <h2>PixVinz</h2>
       <p class="about-dev">Developer: <strong>Kuya Vinz</strong></p>
