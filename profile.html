@@ -9,10 +9,10 @@
 </head>
 <body>
     <div class="profile-container">
-        <!-- Header with Back Button -->
-        <div class="profile-header">
-            <button class="back-btn" onclick="goHome()">← Back</button>
-            <h1>Player Profile</h1>
+        <!-- Header with Back Button (Flexbox layout to center the title perfectly) -->
+        <div class="profile-header" style="position: relative; display: flex; align-items: center; justify-content: center; width: 100%; margin-bottom: 20px;">
+            <button class="back-btn" onclick="goHome()" style="position: absolute; left: 0;">← Back</button>
+            <h1 style="margin: 0; font-size: 1.5rem; text-align: center;">Player Profile</h1>
         </div>
 
         <!-- Profile Card -->
