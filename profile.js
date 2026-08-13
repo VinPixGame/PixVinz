@@ -4,7 +4,7 @@ function goHome() {
     window.location.href = 'index.html';
 }
 
-// Load saved profile data and auto-populate player display name
+// Load saved profile data and auto-populate display name & avatar
 document.addEventListener('DOMContentLoaded', () => {
     let initialName = '';
     
@@ -18,21 +18,39 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {}
 
     if (!initialName) {
-        initialName = localStorage.getItem('vinpix_username') || '';
+        initialName = localStorage.getItem('vinpix_username') || 'Vinz';
     }
+
+    // Set text display and modal input values
+    const nameDisplay = document.getElementById('displayPlayerName');
+    if (nameDisplay) nameDisplay.innerText = initialName;
+
+    const inputElem = document.getElementById('username-input');
+    if (inputElem) inputElem.value = initialName;
 
     const savedAvatar = localStorage.getItem('vinpix_avatar');
-
-    if (initialName) {
-        const inputElem = document.getElementById('username-input');
-        if (inputElem) inputElem.value = initialName;
-    }
-
     if (savedAvatar) {
         const previewElem = document.getElementById('avatar-preview');
         if (previewElem) previewElem.src = savedAvatar;
     }
 });
+
+// Modal Elements & Triggers
+const editModal = document.getElementById('editNameModal');
+const openModalBtn = document.getElementById('openEditNameModal');
+const closeModalBtn = document.getElementById('closeEditNameModal');
+
+if (openModalBtn && editModal) {
+    openModalBtn.addEventListener('click', () => {
+        editModal.classList.remove('hidden');
+    });
+}
+
+if (closeModalBtn && editModal) {
+    closeModalBtn.addEventListener('click', () => {
+        editModal.classList.add('hidden');
+    });
+}
 
 // Handle image upload and conversion to Base64 to store locally
 const avatarInput = document.getElementById('avatar-input');
@@ -44,14 +62,14 @@ if (avatarInput) {
             reader.onload = function(e) {
                 const previewElem = document.getElementById('avatar-preview');
                 if (previewElem) previewElem.src = e.target.result;
-                window.tempAvatarData = e.target.result;
+                localStorage.setItem('vinpix_avatar', e.target.result);
             };
             reader.readAsDataURL(file);
         }
     });
 }
 
-// Save profile data into localStorage and sync with account object safely
+// Save profile name data into localStorage safely without breaking coins/levels
 const saveProfileBtn = document.getElementById('save-profile-btn');
 if (saveProfileBtn) {
     saveProfileBtn.addEventListener('click', () => {
@@ -95,18 +113,18 @@ if (saveProfileBtn) {
         // 3. Save legacy tracking key if used elsewhere
         localStorage.setItem('vinpix_username', newDisplayName);
 
-        // 4. Save avatar if chosen
-        if (window.tempAvatarData) {
-            localStorage.setItem('vinpix_avatar', window.tempAvatarData);
-        }
+        // 4. Update UI text instantly
+        const nameDisplay = document.getElementById('displayPlayerName');
+        if (nameDisplay) nameDisplay.innerText = newDisplayName;
 
         if (statusEl) {
             statusEl.style.color = '#4caf50';
-            statusEl.textContent = 'Profile saved successfully!';
+            statusEl.textContent = 'Name updated successfully!';
         }
 
         setTimeout(() => {
             if (statusEl) statusEl.textContent = '';
-        }, 2500);
+            if (editModal) editModal.classList.add('hidden');
+        }, 1200);
     });
 }
