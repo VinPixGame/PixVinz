@@ -524,3 +524,23 @@ window.addEventListener('DOMContentLoaded', () => {
         fallbackIcon.style.display = 'none';
     }
 });
+
+window.addEventListener('DOMContentLoaded', () => {
+    // Check if we are returning from the profile page
+    if (localStorage.getItem('skipLoading') === 'true') {
+        localStorage.removeItem('skipLoading'); // Clear it for future fresh app launches
+        
+        // Hide the loading screen immediately
+        const loadingView = document.getElementById('loadingView');
+        if (loadingView) {
+            loadingView.classList.remove('active');
+            loadingView.style.display = 'none';
+        }
+
+        // Show the main header right away
+        const mainHeader = document.getElementById('mainHeader');
+        if (mainHeader) {
+            mainHeader.classList.remove('hidden');
+        }
+    }
+});
