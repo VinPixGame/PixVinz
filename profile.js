@@ -46,8 +46,7 @@ avatarInput.addEventListener('change', function(event) {
         reader.readAsDataURL(file);
     }
 });
-
-// Save profile data into localStorage and sync with sign-up data
+// Save profile data into localStorage and sync with account object
 document.getElementById('save-profile-btn').addEventListener('click', () => {
     const username = document.getElementById('username-input').value.trim();
     const statusEl = document.getElementById('save-status');
@@ -58,15 +57,25 @@ document.getElementById('save-profile-btn').addEventListener('click', () => {
         return;
     }
 
-    // Save profile username locally
+    // 1. Update general profile key
     localStorage.setItem('vinpix_username', username);
 
-    // Also update sign-up user object if it exists so everything stays in sync
+    // 2. Update the loggedInUser session object
     try {
-        let userObj = JSON.parse(localStorage.getItem('loggedInUser'));
-        if (userObj) {
-            userObj.username = username;
-            localStorage.setItem('loggedInUser', JSON.stringify(userObj));
+        let userObj = JSON.parse(localStorage.getItem('loggedInUser')) || {};
+        userObj.username = username;
+        userObj.displayName = username;
+        localStorage.setItem('loggedInUser', JSON.stringify(userObj));
+    } catch (e) {}
+
+    // 3. Update the users database object if it exists (e.g. users['vinz'])
+    try {
+        const activeUserKey = localStorage.getItem('activeUserKey') || username.toLowerCase();
+        let allUsers = JSON.parse(localStorage.getItem('users')) || {};
+        if (allUsers[activeUserKey]) {
+            allUsers[activeUserKey].username = username;
+            allUsers[activeUserKey].displayName = username;
+            localStorage.setItem('users', JSON.stringify(allUsers));
         }
     } catch (e) {}
     
