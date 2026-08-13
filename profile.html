@@ -35,57 +35,39 @@
                 <button class="btn btn-secondary" id="openEditNameModal" style="padding: 6px 14px; font-size: 0.85rem; width: auto;">Edit</button>
             </div>
 
-            <!-- Badges Section -->
-            <div class="badges-section" style="margin-top: 20px;">
-                <h3 style="font-size: 1rem; margin-bottom: 10px; opacity: 0.9;">Badges</h3>
-                <div class="badges-grid" id="badgesGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
-                    <div class="badge-item unlocked" title="First Step: Completed Level 1" style="background: rgba(156,39,176,0.2); border: 1px solid #9c27b0; border-radius: 10px; padding: 10px; text-align: center; font-size: 1.5rem;">🧩</div>
-                    <div class="badge-item locked" title="Speed Demon: Beat a level fast" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px; text-align: center; font-size: 1.5rem; opacity: 0.4;">⚡</div>
-                    <div class="badge-item locked" title="Coin Collector: Earn 500 coins" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px; text-align: center; font-size: 1.5rem; opacity: 0.4;">🪙</div>
-                    <div class="badge-item locked" title="Pixel Master: Complete all levels" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px; text-align: center; font-size: 1.5rem; opacity: 0.4;">⭐</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-<!-- Badges Section -->
-<div class="badges-section" style="margin-top: 20px;">
+            <div class="badges-section">
     <h3 style="font-size: 1rem; margin-bottom: 12px; opacity: 0.9;">Badges</h3>
-    <div class="badges-grid" id="badgesGrid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+    <div class="badges-grid" id="badgesGrid">
         
-        <!-- Badge 1 -->
-        <div class="badge-card unlocked" style="background: rgba(255,255,255,0.05); border: 1px solid #9c27b0; border-radius: 12px; padding: 12px; text-align: center; display: flex; align-items: center; gap: 12px;">
-            <div style="font-size: 1.8rem; background: rgba(156,39,176,0.2); padding: 8px; border-radius: 8px;">🧩</div>
-            <div style="text-align: left;">
-                <div style="font-weight: bold; font-size: 0.9rem; color: #fff;">First Step</div>
-                <div style="font-size: 0.7rem; opacity: 0.6;">Completed Level 1</div>
+        <div class="badge-card unlocked">
+            <div class="badge-icon">🧩</div>
+            <div class="badge-info">
+                <div class="badge-title">First Step</div>
+                <div class="badge-desc">Completed Level 1</div>
             </div>
         </div>
 
-        <!-- Badge 2 -->
-        <div class="badge-card locked" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px; text-align: center; display: flex; align-items: center; gap: 12px; opacity: 0.4;">
-            <div style="font-size: 1.8rem; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px;">⚡</div>
-            <div style="text-align: left;">
-                <div style="font-weight: bold; font-size: 0.9rem; color: #fff;">Speed Demon</div>
-                <div style="font-size: 0.7rem; opacity: 0.6;">Beat a level fast</div>
+        <div class="badge-card locked">
+            <div class="badge-icon">⚡</div>
+            <div class="badge-info">
+                <div class="badge-title">Speed Demon</div>
+                <div class="badge-desc">Beat a level fast</div>
             </div>
         </div>
 
-        <!-- Badge 3 -->
-        <div class="badge-card locked" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px; text-align: center; display: flex; align-items: center; gap: 12px; opacity: 0.4;">
-            <div style="font-size: 1.8rem; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px;">🪙</div>
-            <div style="text-align: left;">
-                <div style="font-weight: bold; font-size: 0.9rem; color: #fff;">Coin Collector</div>
-                <div style="font-size: 0.7rem; opacity: 0.6;">Earn 500 coins</div>
+        <div class="badge-card locked">
+            <div class="badge-icon">🪙</div>
+            <div class="badge-info">
+                <div class="badge-title">Coin Collector</div>
+                <div class="badge-desc">Earn 500 coins</div>
             </div>
         </div>
 
-        <!-- Badge 4 -->
-        <div class="badge-card locked" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px; text-align: center; display: flex; align-items: center; gap: 12px; opacity: 0.4;">
-            <div style="font-size: 1.8rem; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px;">⭐</div>
-            <div style="text-align: left;">
-                <div style="font-weight: bold; font-size: 0.9rem; color: #fff;">Pixel Master</div>
-                <div style="font-size: 0.7rem; opacity: 0.6;">Complete all levels</div>
+        <div class="badge-card locked">
+            <div class="badge-icon">⭐</div>
+            <div class="badge-info">
+                <div class="badge-title">Pixel Master</div>
+                <div class="badge-desc">Complete all levels</div>
             </div>
         </div>
 
