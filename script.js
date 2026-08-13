@@ -512,3 +512,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// Dynamic Profile Header Avatar Loader
+window.addEventListener('DOMContentLoaded', () => {
+    const savedAvatar = localStorage.getItem('playerAvatar'); 
+    const avatarImg = document.getElementById('profileHeaderImg');
+    const fallbackIcon = document.getElementById('profileIconFallback');
+
+    if (savedAvatar && avatarImg && fallbackIcon) {
+        avatarImg.src = savedAvatar;
+        avatarImg.style.display = 'block';
+        fallbackIcon.style.display = 'none';
+    }
+});
+
+
