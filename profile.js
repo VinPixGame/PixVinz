@@ -3,15 +3,29 @@ function goHome() {
     localStorage.setItem('skipLoading', 'true');
     window.location.href = 'index.html';
 }
+
 // Load saved profile data and auto-populate sign-up display name
 document.addEventListener('DOMContentLoaded', () => {
-    // Automatically grab display name from sign-up keys if vinpix_username isn't set yet
-    const savedName = localStorage.getItem('vinpix_username') || localStorage.getItem('username') || localStorage.getItem('playerName') || '';
+    let initialName = '';
+    
+    // Try grabbing from the sign-up user object first if your app uses one
+    try {
+        const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (userObj && (userObj.username || userObj.name)) {
+            initialName = userObj.username || userObj.name;
+        }
+    } catch (e) {}
+
+    // Fallback to standalone storage keys used during sign-up or profile editing
+    if (!initialName) {
+        initialName = localStorage.getItem('vinpix_username') || localStorage.getItem('username') || localStorage.getItem('playerName') || '';
+    }
+
     const savedAvatar = localStorage.getItem('vinpix_avatar');
 
-    if (savedName) {
-        document.getElementById('username-input').value = savedName;
-        localStorage.setItem('vinpix_username', savedName); // Keep it synced
+    if (initialName) {
+        document.getElementById('username-input').value = initialName;
+        localStorage.setItem('vinpix_username', initialName); // Keep main profile key synced
     }
 
     if (savedAvatar) {
@@ -33,7 +47,7 @@ avatarInput.addEventListener('change', function(event) {
     }
 });
 
-// Save profile data into localStorage
+// Save profile data into localStorage and sync with sign-up data
 document.getElementById('save-profile-btn').addEventListener('click', () => {
     const username = document.getElementById('username-input').value.trim();
     const statusEl = document.getElementById('save-status');
@@ -44,7 +58,17 @@ document.getElementById('save-profile-btn').addEventListener('click', () => {
         return;
     }
 
+    // Save profile username locally
     localStorage.setItem('vinpix_username', username);
+
+    // Also update sign-up user object if it exists so everything stays in sync
+    try {
+        let userObj = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (userObj) {
+            userObj.username = username;
+            localStorage.setItem('loggedInUser', JSON.stringify(userObj));
+        }
+    } catch (e) {}
     
     if (window.tempAvatarData) {
         localStorage.setItem('vinpix_avatar', window.tempAvatarData);
