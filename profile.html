@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Profile - VinPixGame</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+    <div class="profile-container">
+        <!-- Header with Back Button -->
+        <div class="profile-header">
+            <button class="back-btn" onclick="goHome()">← Back</button>
+            <h1>Player Profile</h1>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="profile-card">
+            <!-- Avatar Display & Upload -->
+            <div class="avatar-section">
+                <div class="avatar-wrapper">
+                    <img id="avatar-preview" src="image/default-avatar.png" alt="Profile Avatar" onerror="this.src='https://via.placeholder.com/120/4a154b/ffffff?text=Avatar'">
+                </div>
+                <label for="avatar-input" class="upload-btn">Choose Avatar</label>
+                <input type="file" id="avatar-input" accept="image/*" style="display: none;">
+            </div>
+
+            <!-- Username Input -->
+            <div class="input-group">
+                <label for="username-input">Player Name</label>
+                <input type="text" id="username-input" placeholder="Enter your name..." maxlength="15">
+            </div>
+
+            <!-- Save Button -->
+            <button id="save-profile-btn" class="save-btn">Save Profile</button>
+            <p id="save-status" class="save-status"></p>
+        </div>
+    </div>
+
+    <script src="profile.js"></script>
+</body>
+</html>
