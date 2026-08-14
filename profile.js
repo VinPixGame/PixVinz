@@ -7,34 +7,41 @@ function goHome() {
     }
 }
 
-// Function to compute level and XP based on your custom bracket system
+// Function to compute level and cumulative XP based on your exact milestone system
 function calculateLevelAndXp(totalPuzzlesSolved) {
-    let remainingPuzzles = totalPuzzlesSolved;
+    // 1. Calculate total cumulative XP earned from all puzzles solved
+    let totalXpEarned = 0;
+    for (let i = 1; i <= totalPuzzlesSolved; i++) {
+        let lvlForPuzzle = Math.floor((i - 1) / 5) + 1;
+        let tier = Math.floor((lvlForPuzzle - 1) / 10);
+        let xpPerPuzzle = (tier + 1) * 100;
+        totalXpEarned += xpPerPuzzle;
+    }
+
+    // 2. Determine current level and cumulative milestone goal (maxXp)
     let currentLevel = 1;
-    let currentXpInLevel = 0;
-    let maxXpForCurrentLevel = 500;
-
-    for (let lvl = 1; lvl <= 100; lvl++) {
+    let cumulativeXpRequired = 500;
+    
+    let accumulated = 0;
+    for (let lvl = 1; lvl <= 200; lvl++) {
         let tier = Math.floor((lvl - 1) / 10);
-        let xpPerPuzzle = (tier + 1) * 100;    
-        let levelXpGoal = (tier + 1) * 500;    
-        let puzzlesPerLevel = 5;               
-
-        if (remainingPuzzles >= puzzlesPerLevel) {
-            remainingPuzzles -= puzzlesPerLevel;
+        let xpNeededForThisLevel = (tier + 1) * 500; // 500 for levels 1-10, 1000 for 11-20, etc.
+        
+        accumulated += xpNeededForThisLevel;
+        
+        if (totalXpEarned >= accumulated) {
             currentLevel = lvl + 1;
         } else {
             currentLevel = lvl;
-            currentXpInLevel = remainingPuzzles * xpPerPuzzle;
-            maxXpForCurrentLevel = levelXpGoal;
+            cumulativeXpRequired = accumulated;
             break;
         }
     }
 
     return {
         level: currentLevel,
-        currentXp: currentXpInLevel,
-        maxXp: maxXpForCurrentLevel
+        currentXp: totalXpEarned,
+        maxXp: cumulativeXpRequired
     };
 }
 
@@ -56,7 +63,7 @@ function updateXpProgress() {
         currentLevelVal = parseInt(localStorage.getItem('currentLevel')) || 1;
     }
 
-    // Since currentLevel represents the next level to play, completed puzzles = currentLevel - 1 (or default to your actual puzzles solved logic)
+    // Since currentLevel represents the next level to play, completed puzzles = currentLevel - 1
     const puzzlesSolved = Math.max(0, currentLevelVal - 1);
     
     const playerProgression = calculateLevelAndXp(puzzlesSolved);
@@ -167,9 +174,11 @@ if (saveProfileBtn) {
             return;
         }
 
+        // 1. Update ONLY the displayName in loggedInUser (leaving username untouched for coins/levels)
         currentUser.displayName = newDisplayName;
         localStorage.setItem('loggedInUser', JSON.stringify(currentUser));
 
+        // 2. Update the registeredUsers database using the permanent username key
         try {
             let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || {};
             if (registeredUsers[currentUser.username]) {
@@ -178,8 +187,10 @@ if (saveProfileBtn) {
             }
         } catch (e) {}
 
+        // 3. Save legacy tracking key if used elsewhere
         localStorage.setItem('vinpix_username', newDisplayName);
 
+        // 4. Update UI text instantly
         const nameDisplay = document.getElementById('displayPlayerName');
         if (nameDisplay) nameDisplay.innerText = newDisplayName;
 
