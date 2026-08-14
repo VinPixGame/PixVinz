@@ -1,3 +1,4 @@
+// game.js
 document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const currentLevel = parseInt(urlParams.get('level')) || 1;
@@ -15,14 +16,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Generates user-specific localStorage keys (e.g., 'vinz_currentLevel')
   function getUserKey(keyName) {
     const user = getCurrentUser();
     if (!user || !user.username) return keyName;
     return `${user.username}_${keyName}`;
   }
 
-  // --- FIRESTORE CLOUD SYNC HELPER ---
   async function saveUserDataToCloud() {
     const user = getCurrentUser();
     if (!user || !user.username || !window.pixvinzDb) return;
@@ -65,23 +64,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Load from cloud on start
   await loadUserDataFromCloud();
-
   updateCoinDisplay();
 
   const grid = document.getElementById('puzzleGrid');
   const movesDisplay = document.getElementById('movesDisplay');
   const timerDisplay = document.getElementById('timerDisplay');
 
-  // --- DYNAMIC GRID SIZE CALCULATION ---
   function getGridSize(level) {
-    if (level <= 10) return 3;        // Level 1-10 (3x3)
-    if (level <= 30) return 4;        // Level 11-30 (4x4)
-    if (level <= 60) return 5;        // Level 31-60 (5x5)
-    if (level <= 100) return 6;      // Level 61-100 (6x6)
-    if (level <= 150) return 7;      // Level 101-150 (7x7)
-    return 8;                         // Level 151-200 (8x8)
+    if (level <= 10) return 3;
+    if (level <= 30) return 4;
+    if (level <= 60) return 5;
+    if (level <= 100) return 6;
+    if (level <= 150) return 7;
+    return 8;
   }
 
   const gridSize = getGridSize(currentLevel);
@@ -119,12 +115,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (coinElem) coinElem.innerText = totalCoins;
   }
 
-  // --- DYNAMIC TILE CUTTING & RENDERING ---
   function renderGrid() {
     if (!grid) return;
     grid.innerHTML = '';
 
-    // Apply dynamic CSS grid template
     grid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
     grid.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
 
@@ -169,7 +163,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // --- DYNAMIC SHUFFLE ---
   function shuffleGrid() {
     const tileCount = tilesState.length;
     for (let i = 0; i < tileCount * 3; i++) {
@@ -197,13 +190,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       const levelMovesKey = getUserKey(`levelMoves_${currentLevel}`);
       const levelTimeKey = getUserKey(`levelTime_${currentLevel}`);
 
-      // --- SAVE FEWEST MOVES RECORD ---
       const prevMoves = parseInt(localStorage.getItem(levelMovesKey)) || Infinity;
       if (moves < prevMoves) {
         localStorage.setItem(levelMovesKey, moves);
       }
 
-      // --- SAVE BEST TIME RECORD ---
       const timeString = timerDisplay ? timerDisplay.innerText : "00:00";
       const prevTimeStr = localStorage.getItem(levelTimeKey);
       if (!prevTimeStr || prevTimeStr === '--:--') {
@@ -233,9 +224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         localStorage.setItem(currentLevelKey, currentLevel + 1);
       }
 
-      // Sync updated progress to Firestore cloud
       await saveUserDataToCloud();
-
       showVictoryModal(stars, newCoinsEarned);
     }
   }
@@ -253,7 +242,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const vCoins = document.getElementById('vCoins');
     if (vCoins) vCoins.innerText = `+${newCoins}`;
 
-    // --- CALCULATE AND DISPLAY XP ON VICTORY MODAL ---
     let tier = Math.floor((currentLevel - 1) / 10);
     let xpGained = (tier + 1) * 100;
 
@@ -317,7 +305,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // --- PREVIEW BUTTON LOGIC (5 COINS, 10S COUNTDOWN, & CLOSE BUTTON) ---
   let previewTimer = null;
   let countdownInterval = null;
 
@@ -342,15 +329,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      // Deduct coins and update storage/UI
       totalCoins -= previewCost;
       localStorage.setItem(coinKey, totalCoins);
       updateCoinDisplay();
       
-      // Sync deduction to cloud
       await saveUserDataToCloud();
 
-      // Open modal and show current level image
       const modal = document.getElementById('imageModal');
       const modalImg = document.getElementById('modalPreviewImg');
       const modalTitle = document.getElementById('modalLevelTitle');
@@ -363,11 +347,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (countdownSpan) countdownSpan.innerText = timeLeft;
       if (modal) modal.classList.remove('hidden');
 
-      // Clear existing timers if any
       if (previewTimer) clearTimeout(previewTimer);
       if (countdownInterval) clearInterval(countdownInterval);
 
-      // Start live countdown ticker every second
       countdownInterval = setInterval(() => {
         timeLeft--;
         if (countdownSpan) countdownSpan.innerText = timeLeft;
@@ -376,7 +358,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }, 1000);
 
-      // Automatically close after 10 seconds
       previewTimer = setTimeout(() => {
         closePreviewModal();
       }, 10000);
@@ -393,9 +374,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const nextLevelBtn = document.getElementById('nextLevelBtn');
   if (nextLevelBtn) {
-    nextLevelBtn.onclick = (e) => {
+    nextLevelBtn.onclick = async (e) => {
       e.stopPropagation();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      await saveUserDataToCloud();
       window.location.href = `game.html?level=${currentLevel + 1}`;
     };
   }
