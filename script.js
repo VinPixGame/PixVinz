@@ -137,51 +137,56 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // --- FIREBASE AUTH STATE LISTENER ---
+  // --- FIREBASE AUTH STATE LISTENER (FIXED TO REMOVE HANGING DELAYS) ---
   onAuthStateChanged(auth, async (firebaseUser) => {
+    const loadingView = document.getElementById('loadingView');
+    
     if (firebaseUser) {
-      // Fetch user profile data from Firestore database
-      const userDocRef = doc(db, "users", firebaseUser.uid);
-      const userDoc = await getDoc(userDocRef);
+      try {
+        // Fetch user profile data from Firestore database
+        const userDocRef = doc(db, "users", firebaseUser.uid);
+        const userDoc = await getDoc(userDocRef);
 
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        currentCloudUser = {
-          uid: firebaseUser.uid,
-          username: data.username,
-          displayName: data.displayName
-        };
-        
-        // Cache local state for quick retrieval
-        localStorage.setItem('loggedInUser', JSON.stringify(currentCloudUser));
-        localStorage.setItem(getUserKey('currentLevel'), data.level || 1);
-        localStorage.setItem(getUserKey('totalCoins'), data.coins || 0);
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          currentCloudUser = {
+            uid: firebaseUser.uid,
+            username: data.username,
+            displayName: data.displayName
+          };
+          
+          // Cache local state for quick retrieval
+          localStorage.setItem('loggedInUser', JSON.stringify(currentCloudUser));
+          localStorage.setItem(getUserKey('currentLevel'), data.level || 1);
+          localStorage.setItem(getUserKey('totalCoins'), data.coins || 0);
 
-        const nameElem = document.getElementById('userDisplayName');
-        if (nameElem) nameElem.innerText = currentCloudUser.displayName;
+          const nameElem = document.getElementById('userDisplayName');
+          if (nameElem) nameElem.innerText = currentCloudUser.displayName;
 
-        const loadingView = document.getElementById('loadingView');
-        if (loadingView) {
-          loadingView.classList.remove('active');
-          loadingView.style.display = 'none';
+          if (loadingView) {
+            loadingView.classList.remove('active');
+            loadingView.style.display = 'none';
+          }
+
+          showView('home');
+          playMainBGM();
+          updateHeaderAvatar();
+          return;
         }
-
-        showView('home');
-        playMainBGM();
-        updateHeaderAvatar();
+      } catch (err) {
+        console.error("Error fetching user doc:", err);
       }
-    } else {
-      currentCloudUser = null;
-      localStorage.removeItem('loggedInUser');
-      setTimeout(() => {
-        const loadingView = document.getElementById('loadingView');
-        if (loadingView) {
-          loadingView.classList.remove('active');
-          loadingView.style.display = 'none';
-        }
-        showView('login');
-      }, 3000);
+    } 
+    
+    // If not logged in or doc lookup failed, immediately dismiss loading and show login view
+    currentCloudUser = null;
+    localStorage.removeItem('loggedInUser');
+    
+    if (loadingView) {
+      loadingView.classList.remove('active');
+      loadingView.style.display = 'none';
     }
+    showView('login');
   });
 
   // --- 2. AUTHENTICATION & FORM NAVIGATION ---
@@ -220,14 +225,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Firebase Auth requires a valid email format. We map the username to a clean email handle.
       const email = `${username}@pixvinz.game`;
 
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
         const firebaseUser = userCredential.user;
 
-        // Save user profile data to Cloud Firestore
         const userPayload = {
           uid: firebaseUser.uid,
           username: username,
