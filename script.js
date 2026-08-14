@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const regForm = document.getElementById('registerForm');
   if (regForm) {
-    regForm.addEventListener('submit', (e) => {
+    regForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
 
@@ -175,7 +175,21 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      const newUser = { displayName, username, password: pass };
+      const generatedEmail = `${username}@pixvinz.game`;
+
+      // Firebase Authentication connection integration
+      if (window.pixvinzAuth) {
+        try {
+          await window.pixvinzAuth.createUserWithEmailAndPassword(window.pixvinzAuth.auth, generatedEmail, pass);
+        } catch (firebaseErr) {
+          if (firebaseErr.code === 'auth/email-already-in-use') {
+            if (errElem) errElem.innerText = "Username already taken!";
+            return;
+          }
+        }
+      }
+
+      const newUser = { displayName, username, password: pass, email: generatedEmail };
       users[username] = newUser;
       localStorage.setItem('registeredUsers', JSON.stringify(users));
 
@@ -192,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const logForm = document.getElementById('loginForm');
   if (logForm) {
-    logForm.addEventListener('submit', (e) => {
+    logForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
 
@@ -203,8 +217,19 @@ document.addEventListener('DOMContentLoaded', () => {
       let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
 
       if (Object.keys(users).length === 0 && username === 'vinz' && pass === '1234') {
-        users['vinz'] = { displayName: 'Vinz', username: 'vinz', password: '1234' };
+        users['vinz'] = { displayName: 'Vinz', username: 'vinz', password: '1234', email: 'vinz@pixvinz.game' };
         localStorage.setItem('registeredUsers', JSON.stringify(users));
+      }
+
+      const generatedEmail = users[username]?.email || `${username}@pixvinz.game`;
+
+      // Firebase Authentication login check integration
+      if (window.pixvinzAuth) {
+        try {
+          await window.pixvinzAuth.signInWithEmailAndPassword(window.pixvinzAuth.auth, generatedEmail, pass);
+        } catch (firebaseErr) {
+          // Fallback check if local record exists even if firebase remote login fails
+        }
       }
 
       if (users[username] && users[username].password === pass) {
@@ -324,7 +349,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let players = [];
 
-    // Compile actual registered users and their current states
     Object.keys(registeredUsers).forEach(username => {
       const u = registeredUsers[username];
       const uLevel = parseInt(localStorage.getItem(`${username}_currentLevel`)) || 1;
@@ -338,7 +362,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // If current user isn't in registeredUsers map yet, add them
     if (currentUser && !players.some(p => p.username === currentUser.username)) {
       const uLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
       const uCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
@@ -351,7 +374,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Add simulated global players to ensure a robust Top 20 list
     const simulatedBots = [
       { name: "PixelMaster", level: 45, coins: 1250 },
       { name: "VinzPro", level: 38, coins: 980 },
@@ -379,7 +401,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Sort players descending by Level, then Coins
     players.sort((a, b) => {
       if (b.level !== a.level) {
         return b.level - a.level;
@@ -387,7 +408,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return b.coins - a.coins;
     });
 
-    // Take Top 20
     const top20 = players.slice(0, 20);
 
     let userFoundRank = "--";
@@ -498,9 +518,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
+    logoutBtn.addEventListener('click', async () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       if (confirm("Are you sure you want to log out?")) {
+        if (window.pixvinzAuth) {
+          try {
+            await window.pixvinzAuth.signOut(window.pixvinzAuth.auth);
+          } catch (e) {}
+        }
         localStorage.removeItem('loggedInUser');
         if (settingsModal) settingsModal.classList.add('hidden');
         if (typeof AudioManager !== 'undefined') AudioManager.stopBGM();
