@@ -1,3 +1,7 @@
+// ==========================================
+// PIXVINZ - PROFILE SCRIPT (CLOUD & LOCAL SYNCED)
+// ==========================================
+
 // --- HELPER FUNCTION FOR USER-SPECIFIC KEYS ---
 function getCurrentUsername() {
     try {
@@ -24,9 +28,69 @@ function goHome() {
     }
 }
 
+// --- FIRESTORE CLOUD SYNC HELPER ---
+async function saveUserDataToCloud() {
+    const username = getCurrentUsername();
+    if (!username || !window.pixvinzDb) return;
+
+    const { db, doc, setDoc } = window.pixvinzDb;
+    try {
+        let displayName = username;
+        try {
+            const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
+            if (userObj && userObj.displayName) displayName = userObj.displayName;
+        } catch (e) {}
+
+        const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+        const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
+        const avatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
+
+        const userDocRef = doc(db, "players", username);
+        await setDoc(userDocRef, {
+            username: username,
+            displayName: displayName,
+            level: currentLevel,
+            coins: totalCoins,
+            avatar: avatar,
+            lastUpdated: new Date()
+        }, { merge: true });
+    } catch (error) {
+        console.error("Error saving profile data to cloud:", error);
+    }
+}
+
+async function loadUserDataFromCloud(username) {
+    if (!window.pixvinzDb || !username) return;
+    const { db, doc, getDoc } = window.pixvinzDb;
+    try {
+        const userDocRef = doc(db, "players", username);
+        const docSnap = await getDoc(userDocRef);
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data.displayName) {
+                try {
+                    let userObj = JSON.parse(localStorage.getItem('loggedInUser')) || {};
+                    userObj.displayName = data.displayName;
+                    localStorage.setItem('loggedInUser', JSON.stringify(userObj));
+
+                    let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+                    if (registeredUsers[username]) {
+                        registeredUsers[username].displayName = data.displayName;
+                        localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+                    }
+                } catch (e) {}
+            }
+            if (data.level) localStorage.setItem(`${username}_currentLevel`, data.level);
+            if (data.coins !== undefined) localStorage.setItem(`${username}_totalCoins`, data.coins);
+            if (data.avatar) localStorage.setItem(`${username}_vinpix_avatar`, data.avatar);
+        }
+    } catch (error) {
+        console.error("Error loading profile data from cloud:", error);
+    }
+}
+
 // Function to compute level and cumulative XP based on your exact milestone system
 function calculateLevelAndXp(totalPuzzlesSolved) {
-    // 1. Calculate total cumulative XP earned from all puzzles solved
     let totalXpEarned = 0;
     for (let i = 1; i <= totalPuzzlesSolved; i++) {
         let lvlForPuzzle = Math.floor((i - 1) / 5) + 1;
@@ -35,14 +99,13 @@ function calculateLevelAndXp(totalPuzzlesSolved) {
         totalXpEarned += xpPerPuzzle;
     }
 
-    // 2. Determine current level and cumulative milestone goal (maxXp)
     let currentLevel = 1;
     let cumulativeXpRequired = 500;
     
     let accumulated = 0;
     for (let lvl = 1; lvl <= 200; lvl++) {
         let tier = Math.floor((lvl - 1) / 10);
-        let xpNeededForThisLevel = (tier + 1) * 500; // 500 for levels 1-10, 1000 for 11-20, etc.
+        let xpNeededForThisLevel = (tier + 1) * 500;
         
         accumulated += xpNeededForThisLevel;
         
@@ -66,7 +129,6 @@ function calculateLevelAndXp(totalPuzzlesSolved) {
 function updateXpProgress() {
     const currentUsername = getCurrentUsername();
 
-    // Pull current level using your game's exact storage convention (<username>_currentLevel)
     let currentLevelVal = 1;
     if (currentUsername) {
         currentLevelVal = parseInt(localStorage.getItem(currentUsername + '_currentLevel')) || 1;
@@ -74,7 +136,6 @@ function updateXpProgress() {
         currentLevelVal = parseInt(localStorage.getItem('currentLevel')) || 1;
     }
 
-    // Since currentLevel represents the next level to play, completed puzzles = currentLevel - 1
     const puzzlesSolved = Math.max(0, currentLevelVal - 1);
     
     const playerProgression = calculateLevelAndXp(puzzlesSolved);
@@ -90,7 +151,12 @@ function updateXpProgress() {
 }
 
 // Load saved profile data and auto-populate display name & avatar
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    const username = getCurrentUsername();
+    if (username) {
+        await loadUserDataFromCloud(username);
+    }
+
     let initialName = '';
     
     try {
@@ -106,21 +172,18 @@ document.addEventListener('DOMContentLoaded', () => {
         initialName = localStorage.getItem('vinpix_username') || 'Vinz';
     }
 
-    // Set text display and modal input values
     const nameDisplay = document.getElementById('displayPlayerName');
     if (nameDisplay) nameDisplay.innerText = initialName;
 
     const inputElem = document.getElementById('username-input');
     if (inputElem) inputElem.value = initialName;
 
-    // --- LOAD USER-SPECIFIC AVATAR ---
     const savedAvatar = localStorage.getItem(getUserKey('vinpix_avatar')) || localStorage.getItem('vinpix_avatar');
     if (savedAvatar) {
         const previewElem = document.getElementById('avatar-preview');
         if (previewElem) previewElem.src = savedAvatar;
     }
 
-    // Load dynamic XP progress bar and level
     updateXpProgress();
 });
 
@@ -141,29 +204,29 @@ if (closeModalBtn && editModal) {
     });
 }
 
-// Handle image upload, conversion to Base64, and user-specific storage
+// Handle image upload, conversion to Base64, and cloud sync
 const avatarInput = document.getElementById('avatar-input');
 if (avatarInput) {
     avatarInput.addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 const previewElem = document.getElementById('avatar-preview');
                 if (previewElem) previewElem.src = e.target.result;
                 
-                // Save using the user-specific key
                 localStorage.setItem(getUserKey('vinpix_avatar'), e.target.result);
+                await saveUserDataToCloud();
             };
             reader.readAsDataURL(file);
         }
     });
 }
 
-// Save profile name data into localStorage safely without breaking coins/levels
+// Save profile name data into localStorage and sync to Firebase cloud
 const saveProfileBtn = document.getElementById('save-profile-btn');
 if (saveProfileBtn) {
-    saveProfileBtn.addEventListener('click', () => {
+    saveProfileBtn.addEventListener('click', async () => {
         const newDisplayName = document.getElementById('username-input').value.trim();
         const statusEl = document.getElementById('save-status');
 
@@ -188,11 +251,9 @@ if (saveProfileBtn) {
             return;
         }
 
-        // 1. Update ONLY the displayName in loggedInUser (leaving username untouched for coins/levels)
         currentUser.displayName = newDisplayName;
         localStorage.setItem('loggedInUser', JSON.stringify(currentUser));
 
-        // 2. Update the registeredUsers database using the permanent username key
         try {
             let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || {};
             if (registeredUsers[currentUser.username]) {
@@ -201,12 +262,17 @@ if (saveProfileBtn) {
             }
         } catch (e) {}
 
-        // 3. Save legacy tracking key if used elsewhere
         localStorage.setItem('vinpix_username', newDisplayName);
 
-        // 4. Update UI text instantly
         const nameDisplay = document.getElementById('displayPlayerName');
         if (nameDisplay) nameDisplay.innerText = newDisplayName;
+
+        if (statusEl) {
+            statusEl.style.color = '#4caf50';
+            statusEl.textContent = 'Saving to cloud...';
+        }
+
+        await saveUserDataToCloud();
 
         if (statusEl) {
             statusEl.style.color = '#4caf50';
