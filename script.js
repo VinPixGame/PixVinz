@@ -1,4 +1,4 @@
-// ==========================================
+  // ==========================================
 // PIXVINZ - MAIN CLIENT SCRIPT (CLOUD & LOCAL SYNCED)
 // ==========================================
 
@@ -219,6 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const pass = document.getElementById('regPass').value;
       const passConfirm = document.getElementById('regPassConfirm').value;
       const errElem = document.getElementById('regError');
+      const submitBtn = regForm.querySelector('button[type="submit"]');
 
       // Password Validation: At least 6 chars, contains 1 uppercase, 1 number
       const hasUpperCase = /[A-Z]/.test(pass);
@@ -241,16 +242,14 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Show loading screen with circling effect for 4 seconds during cloud connection
-      const loadingView = document.getElementById('loadingView');
-      if (loadingView) {
-        loadingView.style.display = 'flex';
-        loadingView.classList.add('active');
+      // Lock button and show "creating account..." text status on the button instead of a full loading screen
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Creating account...";
       }
 
       const generatedEmail = `${username}@pixvinz.game`;
 
-      // Firebase Authentication connection integration wrapped with minimum 4s delay
       const firebasePromise = async () => {
         if (window.pixvinzAuth) {
           try {
@@ -274,9 +273,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (firebaseErrorMsg) {
-        if (loadingView) {
-          loadingView.classList.remove('active');
-          loadingView.style.display = 'none';
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = "REGISTER";
         }
         if (errElem) errElem.innerText = firebaseErrorMsg;
         return;
@@ -293,9 +292,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (errElem) errElem.innerText = "";
       await saveUserDataToCloud();
       
-      if (loadingView) {
-        loadingView.classList.remove('active');
-        loadingView.style.display = 'none';
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "REGISTER";
       }
       showView('home');
       playMainBGM();
@@ -312,6 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const username = document.getElementById('loginUser').value.trim().toLowerCase();
       const pass = document.getElementById('loginPass').value;
       const errElem = document.getElementById('loginError');
+      const submitBtn = logForm.querySelector('button[type="submit"]');
 
       let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
 
@@ -320,18 +320,16 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('registeredUsers', JSON.stringify(users));
       }
 
-      // Show loading screen with circling effect for 4 seconds during cloud connection
-      const loadingView = document.getElementById('loadingView');
-      if (loadingView) {
-        loadingView.style.display = 'flex';
-        loadingView.classList.add('active');
+      // Lock button and show "signing in..." text status on the button instead of a full loading screen
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Signing in...";
       }
 
       const generatedEmail = users[username]?.email || `${username}@pixvinz.game`;
       let loginSuccess = false;
 
       const authLoginPromise = async () => {
-        // 1. Try Firebase Authentication first (enables cross-browser/device login)
         if (window.pixvinzAuth) {
           try {
             await window.pixvinzAuth.signInWithEmailAndPassword(window.pixvinzAuth.auth, generatedEmail, pass);
@@ -341,7 +339,6 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
 
-        // 2. Fallback to local credential check if offline or if user exists locally
         if (!loginSuccess && users[username] && users[username].password === pass) {
           loginSuccess = true;
         }
@@ -356,13 +353,12 @@ document.addEventListener('DOMContentLoaded', () => {
         await new Promise(resolve => setTimeout(resolve, remainingTime));
       }
 
-      if (loadingView) {
-        loadingView.classList.remove('active');
-        loadingView.style.display = 'none';
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "LOG IN";
       }
 
       if (loginSuccess) {
-        // Ensure local user profile object exists on this browser if logging in via Firebase for the first time
         if (!users[username]) {
           users[username] = { 
             displayName: username.charAt(0).toUpperCase() + username.slice(1), 
@@ -378,7 +374,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (nameElem) nameElem.innerText = users[username].displayName;
         if (errElem) errElem.innerText = "";
         
-        // Pull latest cloud profile data for this user onto the current browser
         await loadUserDataFromCloud(username);
 
         showView('home');
