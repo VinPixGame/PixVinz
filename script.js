@@ -1,64 +1,5 @@
 // script.js
 
-// --- Global Audio Manager ---
-const AudioManager = (() => {
-  let musicEnabled = localStorage.getItem('musicEnabled') !== 'false';
-  let sfxEnabled = localStorage.getItem('sfxEnabled') !== 'false';
-
-  let currentBGM = null;
-
-  const playMusic = (src) => {
-    if (!musicEnabled) return;
-    if (currentBGM) {
-      if (currentBGM.src.includes(src)) return; // Already playing this track
-      currentBGM.pause();
-      currentBGM.currentTime = 0;
-    }
-    currentBGM = new Audio(src);
-    currentBGM.loop = true;
-    currentBGM.volume = 0.5;
-    currentBGM.play().catch(err => console.log("Audio play blocked/error:", err));
-  };
-
-  const stopBGM = () => {
-    if (currentBGM) {
-      currentBGM.pause();
-      currentBGM.currentTime = 0;
-      currentBGM = null;
-    }
-  };
-
-  const playSFX = (src) => {
-    if (!sfxEnabled) return;
-    const sfx = new Audio(src);
-    sfx.volume = 0.7;
-    sfx.play().catch(err => console.log("SFX play blocked/error:", err));
-  };
-
-  return {
-    playMain: () => playMusic('sounds/main.mp3'),
-    playGameBGM: () => playMusic('sounds/bgmusic.mp3'),
-    playClick: () => playSFX('sounds/click.mp3'),
-    playShuffle: () => playSFX('sounds/shuffle.mp3'),
-    playSelect: () => playSFX('sounds/select.mp3'),
-    playExchange: () => playSFX('sounds/exchange.mp3'),
-    playVictory: (level) => {
-      const trackNum = ((level - 1) % 10) + 1;
-      playSFX(`sounds/victory${trackNum}.mp3`);
-    },
-    stopBGM,
-    setMusic: (enabled) => {
-      musicEnabled = enabled;
-      localStorage.setItem('musicEnabled', enabled);
-      if (!enabled) stopBGM();
-    },
-    setSFX: (enabled) => {
-      sfxEnabled = enabled;
-      localStorage.setItem('sfxEnabled', enabled);
-    }
-  };
-})();
-
 document.addEventListener('DOMContentLoaded', () => {
   // --- DOM Elements ---
   const loadingView = document.getElementById('loadingView');
@@ -139,9 +80,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (mainHeader) mainHeader.classList.remove('hidden');
     }
 
-    // Play main BGM across menu views
+    // Play main BGM across all non-game menu views
     if (viewElement === homeView || viewElement === levelsView || viewElement === collectionsView || viewElement === challengeView || viewElement === leaderboardView) {
-      AudioManager.playMain();
+      if (typeof AudioManager !== 'undefined') AudioManager.playMain();
     }
   }
 
@@ -181,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
       updateCoinDisplay();
       updateProfileHeader();
       switchView(homeView);
-      AudioManager.playMain();
+      if (typeof AudioManager !== 'undefined') AudioManager.playMain();
     } else {
       switchView(loginView);
     }
@@ -191,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (toRegister) {
     toRegister.addEventListener('click', (e) => {
       e.preventDefault();
-      AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       switchView(registerView);
     });
   }
@@ -199,14 +140,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (toLogin) {
     toLogin.addEventListener('click', (e) => {
       e.preventDefault();
-      AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       switchView(loginView);
     });
   }
 
   if (toggleLoginPass && loginPass) {
     toggleLoginPass.addEventListener('click', () => {
-      AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       loginPass.type = loginPass.type === 'password' ? 'text' : 'password';
       toggleLoginPass.textContent = loginPass.type === 'password' ? '👁️' : '🙈';
     });
@@ -214,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (toggleRegPass && regPass) {
     toggleRegPass.addEventListener('click', () => {
-      AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       regPass.type = regPass.type === 'password' ? 'text' : 'password';
       toggleRegPass.textContent = regPass.type === 'password' ? '👁️' : '🙈';
     });
@@ -222,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (toggleRegPassConfirm && regPassConfirm) {
     toggleRegPassConfirm.addEventListener('click', () => {
-      AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       regPassConfirm.type = regPassConfirm.type === 'password' ? 'text' : 'password';
       toggleRegPassConfirm.textContent = regPassConfirm.type === 'password' ? '👁️' : '🙈';
     });
@@ -237,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       if (loginError) loginError.innerText = '';
 
       const usernameInput = document.getElementById('loginUser').value.trim();
@@ -282,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (registerForm) {
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       if (regError) regError.innerText = '';
 
       const displayNameInput = document.getElementById('regDisplayName').value.trim();
@@ -339,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Navigation Buttons ---
   if (playBtn || navLevels) {
     const handleLevelsNav = () => {
-      AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       renderLevelsGrid();
       updateGlobalStats();
       switchView(levelsView);
@@ -350,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (navCollections) {
     navCollections.addEventListener('click', () => {
-      AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       renderCollectionsFolders();
       switchView(collectionsView);
     });
@@ -358,14 +299,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (navChallenge) {
     navChallenge.addEventListener('click', () => {
-      AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       switchView(challengeView);
     });
   }
 
   if (navLeaderboard) {
     navLeaderboard.addEventListener('click', () => {
-      AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       renderLeaderboard();
       switchView(leaderboardView);
     });
@@ -373,35 +314,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (navSettings) {
     navSettings.addEventListener('click', () => {
-      AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       if (settingsModal) settingsModal.classList.remove('hidden');
     });
   }
 
   if (closeSettingsModal && settingsModal) {
     closeSettingsModal.addEventListener('click', () => {
-      AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       settingsModal.classList.add('hidden');
     });
   }
 
   if (aboutBtn && aboutModal) {
     aboutBtn.addEventListener('click', () => {
-      AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       aboutModal.classList.remove('hidden');
     });
   }
 
   if (closeAboutModal && aboutModal) {
     closeAboutModal.addEventListener('click', () => {
-      AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       aboutModal.classList.add('hidden');
     });
   }
 
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
-      AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       if (window.pixvinzAuth) {
         await window.pixvinzAuth.signOut(window.pixvinzAuth.auth);
       }
@@ -409,14 +350,14 @@ document.addEventListener('DOMContentLoaded', () => {
       currentUser = null;
       if (settingsModal) settingsModal.classList.add('hidden');
       switchView(loginView);
-      AudioManager.stopBGM();
+      if (typeof AudioManager !== 'undefined') AudioManager.stopBGM();
     });
   }
 
   // Back buttons across views
   document.querySelectorAll('.back-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       switchView(homeView);
     });
   });
@@ -476,7 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
           btn.classList.add('completed');
         }
         btn.addEventListener('click', () => {
-          AudioManager.playClick();
+          if (typeof AudioManager !== 'undefined') AudioManager.playClick();
           window.location.href = `game.html?level=${i}`;
         });
       }
@@ -505,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <p>Levels ${startLvl} - ${endLvl}</p>
       `;
       card.addEventListener('click', () => {
-        AudioManager.playClick();
+        if (typeof AudioManager !== 'undefined') AudioManager.playClick();
         renderCollectionImages(startLvl, endLvl, f);
       });
       collectionsFolderGrid.appendChild(card);
@@ -534,7 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="collection-level-badge">Lvl ${l}</div>
         `;
         itemCard.addEventListener('click', () => {
-          AudioManager.playClick();
+          if (typeof AudioManager !== 'undefined') AudioManager.playClick();
           if (modalPreviewImg && modalLevelTitle && imageModal) {
             modalPreviewImg.src = `image/level${l}.jpeg`;
             modalLevelTitle.innerText = `LEVEL ${l.toString().padStart(2, '0')}`;
@@ -557,14 +498,14 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       e.stopImmediatePropagation();
-      AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       renderCollectionsFolders();
     });
   }
 
   if (closeImageModal && imageModal) {
     closeImageModal.addEventListener('click', () => {
-      AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       imageModal.classList.add('hidden');
     });
   }
@@ -625,17 +566,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (sfxToggle) {
     sfxToggle.checked = localStorage.getItem('sfxEnabled') !== 'false';
     sfxToggle.addEventListener('change', () => {
-      AudioManager.setSFX(sfxToggle.checked);
+      if (typeof AudioManager !== 'undefined') AudioManager.setSFX(sfxToggle.checked);
     });
   }
 
   if (musicToggle) {
     musicToggle.checked = localStorage.getItem('musicEnabled') !== 'false';
     musicToggle.addEventListener('change', () => {
-      AudioManager.setMusic(musicToggle.checked);
-      if (musicToggle.checked) {
-        AudioManager.playMain();
-      }
+      if (typeof AudioManager !== 'undefined') AudioManager.setMusic(musicToggle.checked);
     });
   }
 });
