@@ -1,3 +1,7 @@
+// ==========================================
+// PIXVINZ - MAIN CLIENT SCRIPT (CLOUD & LOCAL SYNCED)
+// ==========================================
+
 document.addEventListener('DOMContentLoaded', () => {
   const views = {
     loading: document.getElementById('loadingView'),
