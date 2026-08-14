@@ -8,6 +8,62 @@ function goHome() {
     }
 }
 
+// Function to compute level and XP based on your custom bracket system
+function calculateLevelAndXp(totalPuzzlesSolved) {
+    let remainingPuzzles = totalPuzzlesSolved;
+    let currentLevel = 1;
+    let currentXpInLevel = 0;
+    let maxXpForCurrentLevel = 500;
+
+    for (let lvl = 1; lvl <= 100; lvl++) {
+        let tier = Math.floor((lvl - 1) / 10);
+        let xpPerPuzzle = (tier + 1) * 100;    
+        let levelXpGoal = (tier + 1) * 500;    
+        let puzzlesPerLevel = 5;               
+
+        if (remainingPuzzles >= puzzlesPerLevel) {
+            remainingPuzzles -= puzzlesPerLevel;
+            currentLevel = lvl + 1;
+        } else {
+            currentLevel = lvl;
+            currentXpInLevel = remainingPuzzles * xpPerPuzzle;
+            maxXpForCurrentLevel = levelXpGoal;
+            break;
+        }
+    }
+
+    return {
+        level: currentLevel,
+        currentXp: currentXpInLevel,
+        maxXp: maxXpForCurrentLevel
+    };
+}
+
+// Function to update XP and Level progress on the UI
+function updateXpProgress() {
+    let currentUsername = 'Vinz';
+    try {
+        const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (userObj && userObj.username) {
+            currentUsername = userObj.username;
+        }
+    } catch (e) {}
+
+    // Pull total puzzles solved from localStorage (adjust key name if your game uses a different one)
+    const puzzlesSolved = parseInt(localStorage.getItem('puzzles_solved_' + currentUsername)) || 0; 
+    
+    const playerProgression = calculateLevelAndXp(puzzlesSolved);
+    const progressPercent = Math.min(100, (playerProgression.currentXp / playerProgression.maxXp) * 100);
+
+    const levelBadge = document.getElementById('displayLevelBadge');
+    const xpText = document.getElementById('displayXpText');
+    const xpBarFill = document.getElementById('displayXpBarFill');
+
+    if (levelBadge) levelBadge.textContent = `LEVEL ${playerProgression.level}`;
+    if (xpText) xpText.textContent = `${playerProgression.currentXp.toLocaleString()} / ${playerProgression.maxXp.toLocaleString()} XP`;
+    if (xpBarFill) xpBarFill.style.width = `${progressPercent}%`;
+}
+
 // Load saved profile data and auto-populate display name & avatar
 document.addEventListener('DOMContentLoaded', () => {
     let initialName = '';
@@ -37,6 +93,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const previewElem = document.getElementById('avatar-preview');
         if (previewElem) previewElem.src = savedAvatar;
     }
+
+    // Load dynamic XP progress bar and level
+    updateXpProgress();
 });
 
 // Modal Elements & Triggers
