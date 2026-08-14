@@ -77,6 +77,18 @@
 
     </div>
 </div>
+
+            <!-- XP Progress Bar Section -->
+            <div class="xp-section" style="margin: 25px 0 10px 0; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span id="displayLevelBadge" style="background: linear-gradient(135deg, #9c27b0, #e91e63); padding: 3px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; color: #fff;">LEVEL 1</span>
+                    <span id="displayXpText" style="font-size: 0.8rem; opacity: 0.7;">0 / 500 XP</span>
+                </div>
+                <!-- Progress Track -->
+                <div style="width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden;">
+                    <div id="displayXpBarFill" style="width: 0%; height: 100%; background: linear-gradient(90deg, #9c27b0, #00f2fe); border-radius: 4px; transition: width 0.4s ease;"></div>
+                </div>
+            </div>
     
     <!-- EDIT NAME POPUP MODAL -->
     <div id="editNameModal" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000;">
