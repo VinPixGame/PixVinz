@@ -278,24 +278,23 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('registeredUsers', JSON.stringify(users));
       }
 
-      const generatedEmail = users[username]?.email || `${username}@pixvinz.game`;
-
-      // Firebase Authentication login check integration
-      if (window.pixvinzAuth) {
-        try {
-          await window.pixvinzAuth.signInWithEmailAndPassword(window.pixvinzAuth.auth, generatedEmail, pass);
-        } catch (firebaseErr) {
-          // Fallback check if local record exists even if firebase remote login fails
-        }
-      }
-
+      // Validate local credentials first to avoid locking out players if remote auth fails
       if (users[username] && users[username].password === pass) {
+        // Attempt optional Firebase login in the background without blocking execution
+        if (window.pixvinzAuth) {
+          try {
+            const generatedEmail = users[username].email || `${username}@pixvinz.game`;
+            await window.pixvinzAuth.signInWithEmailAndPassword(window.pixvinzAuth.auth, generatedEmail, pass);
+          } catch (firebaseErr) {
+            console.warn("Firebase remote login skipped/failed, proceeding with local session:", firebaseErr);
+          }
+        }
+
         localStorage.setItem('loggedInUser', JSON.stringify(users[username]));
         const nameElem = document.getElementById('userDisplayName');
         if (nameElem) nameElem.innerText = users[username].displayName;
         if (errElem) errElem.innerText = "";
         
-        // Pull latest cloud profile data for this user
         await loadUserDataFromCloud(username);
 
         showView('home');
@@ -348,7 +347,6 @@ document.addEventListener('DOMContentLoaded', () => {
     navLeaderboard.addEventListener('click', async () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       if (window.pixvinzDb) {
-        // Fetch top players from Firestore to make leaderboard robust across sessions
         try {
           const { db, collection, getDocs } = window.pixvinzDb;
           const querySnapshot = await getDocs(collection(db, "players"));
