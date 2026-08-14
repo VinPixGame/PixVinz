@@ -35,48 +35,99 @@
                 <button class="btn btn-secondary" id="openEditNameModal" style="padding: 6px 14px; font-size: 0.85rem; width: auto;">Edit</button>
             </div>
 
+            <!-- Badges Section -->
             <div class="badges-section" style="margin-top: 20px;">
-    <h3 style="font-size: 1rem; margin-bottom: 12px; opacity: 0.9;">Badges</h3>
-    <div class="badges-grid" id="badgesGrid">
-        
-        <!-- Emerald Badge -->
-        <div class="badge-card emerald unlocked">
-            <div class="badge-gem">🧩</div>
-            <div class="badge-info">
-                <div class="badge-title">First Step</div>
-                <div class="badge-desc">Completed Level 1</div>
-            </div>
-        </div>
+                <h3 style="font-size: 1rem; margin-bottom: 12px; opacity: 0.9;">Badges</h3>
+                <div class="badges-grid" id="badgesGrid">
+                    
+                    <!-- Emerald Badge -->
+                    <div class="badge-card emerald unlocked">
+                        <div class="badge-gem">🧩</div>
+                        <div class="badge-info">
+                            <div class="badge-title">First Step</div>
+                            <div class="badge-desc">Completed Level 1</div>
+                        </div>
+                    </div>
 
-        <!-- Sapphire Badge -->
-        <div class="badge-card sapphire locked">
-            <div class="badge-gem">⚡</div>
-            <div class="badge-info">
-                <div class="badge-title">Speed Demon</div>
-                <div class="badge-desc">Beat a level fast</div>
-            </div>
-        </div>
+                    <!-- Sapphire Badge -->
+                    <div class="badge-card sapphire locked">
+                        <div class="badge-gem">⚡</div>
+                        <div class="badge-info">
+                            <div class="badge-title">Speed Demon</div>
+                            <div class="badge-desc">Beat a level fast</div>
+                        </div>
+                    </div>
 
-        <!-- Ruby Badge -->
-        <div class="badge-card ruby locked">
-            <div class="badge-gem">🪙</div>
-            <div class="badge-info">
-                <div class="badge-title">Coin Collector</div>
-                <div class="badge-desc">Earn 500 coins</div>
-            </div>
-        </div>
+                    <!-- Ruby Badge -->
+                    <div class="badge-card ruby locked">
+                        <div class="badge-gem">🪙</div>
+                        <div class="badge-info">
+                            <div class="badge-title">Coin Collector</div>
+                            <div class="badge-desc">Earn 500 coins</div>
+                        </div>
+                    </div>
 
-        <!-- Diamond Badge -->
-        <div class="badge-card diamond locked">
-            <div class="badge-gem">⭐</div>
-            <div class="badge-info">
-                <div class="badge-title">Pixel Master</div>
-                <div class="badge-desc">Complete all levels</div>
-            </div>
-        </div>
+                    <!-- Diamond Badge -->
+                    <div class="badge-card diamond locked">
+                        <div class="badge-gem">⭐</div>
+                        <div class="badge-info">
+                            <div class="badge-title">Pixel Master</div>
+                            <div class="badge-desc">Complete all levels</div>
+                        </div>
+                    </div>
 
+                </div>
+            </div>
+
+            <!-- XP Progress Bar Section -->
+            <div class="xp-section" style="margin: 25px 0 20px 0; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="background: linear-gradient(135deg, #9c27b0, #e91e63); padding: 3px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; color: #fff;">LEVEL 12</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">2,450 / 5,000 XP</span>
+                </div>
+                <!-- Progress Track -->
+                <div style="width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden;">
+                    <div style="width: 49%; height: 100%; background: linear-gradient(90deg, #9c27b0, #00f2fe); border-radius: 4px;"></div>
+                </div>
+            </div>
+
+            <!-- Player Stats Grid Section -->
+            <div class="player-stats-section" style="margin-top: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h3 style="font-size: 0.95rem; margin: 0; opacity: 0.9;">PLAYER STATS</h3>
+                    <span style="font-size: 0.75rem; color: #00f2fe; cursor: pointer;">ALL TIME ›</span>
+                </div>
+                
+                <div class="stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+                    <!-- Stat 1: Total Wins -->
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 10px 4px; text-align: center;">
+                        <div style="font-size: 1.1rem; margin-bottom: 4px;">🏆</div>
+                        <div style="font-size: 1rem; font-weight: bold; color: #fff;">86</div>
+                        <div style="font-size: 0.6rem; opacity: 0.6; text-transform: uppercase; margin-top: 2px;">Total Wins</div>
+                    </div>
+                    <!-- Stat 2: Puzzles Solved -->
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 10px 4px; text-align: center;">
+                        <div style="font-size: 1.1rem; margin-bottom: 4px;">🧩</div>
+                        <div style="font-size: 1rem; font-weight: bold; color: #fff;">245</div>
+                        <div style="font-size: 0.6rem; opacity: 0.6; text-transform: uppercase; margin-top: 2px;">Puzzles</div>
+                    </div>
+                    <!-- Stat 3: Best Streak -->
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 10px 4px; text-align: center;">
+                        <div style="font-size: 1.1rem; margin-bottom: 4px;">🔥</div>
+                        <div style="font-size: 1rem; font-weight: bold; color: #fff;">17</div>
+                        <div style="font-size: 0.6rem; opacity: 0.6; text-transform: uppercase; margin-top: 2px;">Streak</div>
+                    </div>
+                    <!-- Stat 4: Accuracy -->
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 10px 4px; text-align: center;">
+                        <div style="font-size: 1.1rem; margin-bottom: 4px;">🎯</div>
+                        <div style="font-size: 1rem; font-weight: bold; color: #fff;">98%</div>
+                        <div style="font-size: 0.6rem; opacity: 0.6; text-transform: uppercase; margin-top: 2px;">Accuracy</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
-</div>
     
     <!-- EDIT NAME POPUP MODAL -->
     <div id="editNameModal" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000;">
