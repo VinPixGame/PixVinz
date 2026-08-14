@@ -78,6 +78,13 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       if (mainHeader) mainHeader.classList.remove('hidden');
     }
+
+    // Manage BGM states according to view
+    if (typeof AudioManager !== 'undefined') {
+      if (viewElement === homeView || viewElement === levelsView || viewElement === collectionsView || viewElement === challengeView || viewElement === leaderboardView) {
+        AudioManager.playMain();
+      }
+    }
   }
 
   function getUserKey(keyName) {
@@ -116,7 +123,9 @@ document.addEventListener('DOMContentLoaded', () => {
       updateCoinDisplay();
       updateProfileHeader();
       switchView(homeView);
-      if (typeof AudioManager !== 'undefined') AudioManager.initAudioSettings();
+      if (typeof AudioManager !== 'undefined') {
+        AudioManager.playMain();
+      }
     } else {
       switchView(loginView);
     }
@@ -344,6 +353,9 @@ document.addEventListener('DOMContentLoaded', () => {
       currentUser = null;
       if (settingsModal) settingsModal.classList.add('hidden');
       switchView(loginView);
+      if (typeof AudioManager !== 'undefined') {
+        AudioManager.stopBGM();
+      }
     });
   }
 
@@ -488,7 +500,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (collectionsBackBtn) {
     collectionsBackBtn.addEventListener('click', (e) => {
       if (!collectionsFolderContainer.classList.contains('hidden')) {
-        // Let standard back handler run (go to home)
         return;
       }
       e.stopImmediatePropagation();
@@ -515,8 +526,6 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       let players = [];
       if (window.pixvinzDb) {
-        // Fetch players from Firestore if available
-        // Fallback mock simulation if collection query is basic
         players = [
           { username: currentUser?.username || 'player', displayName: currentUser?.displayName || 'You', level: parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1, coins: parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0 }
         ];
@@ -526,7 +535,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
       }
 
-      // Sort by level descending, then coins descending
       players.sort((a, b) => b.level - a.level || b.coins - a.coins);
 
       leaderboardList.innerHTML = '';
@@ -561,18 +569,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Settings Toggles ---
   if (sfxToggle) {
-    sfxToggle.checked = localStorage.getItem('vinpix_sfx') !== 'false';
+    sfxToggle.checked = localStorage.getItem('sfxEnabled') !== 'false';
     sfxToggle.addEventListener('change', () => {
-      localStorage.setItem('vinpix_sfx', sfxToggle.checked);
-      if (typeof AudioManager !== 'undefined') AudioManager.setSfxEnabled(sfxToggle.checked);
+      if (typeof AudioManager !== 'undefined') {
+        AudioManager.setSFX(sfxToggle.checked);
+      }
     });
   }
 
   if (musicToggle) {
-    musicToggle.checked = localStorage.getItem('vinpix_music') !== 'false';
+    musicToggle.checked = localStorage.getItem('musicEnabled') !== 'false';
     musicToggle.addEventListener('change', () => {
-      localStorage.setItem('vinpix_music', musicToggle.checked);
-      if (typeof AudioManager !== 'undefined') AudioManager.setMusicEnabled(musicToggle.checked);
+      if (typeof AudioManager !== 'undefined') {
+        AudioManager.setMusic(musicToggle.checked);
+      }
     });
   }
 });
