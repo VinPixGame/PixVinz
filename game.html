@@ -1,331 +1,133 @@
-// game.js
-document.addEventListener('DOMContentLoaded', () => {
-  // --- DOM Elements ---
-  const backToHome = document.getElementById('backToHome');
-  const coinCount = document.getElementById('coinCount');
-  const levelDisplay = document.getElementById('levelDisplay');
-  const timerDisplay = document.getElementById('timerDisplay');
-  const movesDisplay = document.getElementById('movesDisplay');
-  const puzzleGrid = document.getElementById('puzzleGrid');
-  const previewBtn = document.getElementById('previewBtn');
-  const shuffleBtn = document.getElementById('shuffleBtn');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>PixVinz - Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container game-container">
+  <!-- Top Bar (Logo remains completely untouched here) -->
+    <header class="top-bar">
+      <button class="icon-btn" id="backToHome">‹</button>
+      <div class="logo-container">
+        <video id="logoVideo" autoplay loop muted playsinline preload="auto" style="background: transparent;">
+          <source src="image/logo.webm" type="video/webm">
+        </video>
+      </div>
+      <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
+    </header>
 
-  // Preview Modal Elements
-  const imageModal = document.getElementById('imageModal');
-  const modalPreviewImg = document.getElementById('modalPreviewImg');
-  const modalLevelTitle = document.getElementById('modalLevelTitle');
-  const countdownSeconds = document.getElementById('countdownSeconds');
-  const closePreviewBtn = document.getElementById('closePreviewBtn');
+    <!-- Level Title positioned in the middle gap -->
+    <h2 id="levelTitle" class="centered-level-title">LEVEL <span id="levelDisplay">01</span></h2>
 
-  // Victory Modal Elements
-  const victoryModal = document.getElementById('victoryModal');
-  const victoryImg = document.getElementById('victoryImg');
-  const vTime = document.getElementById('vTime');
-  const vMoves = document.getElementById('vMoves');
-  const vCoins = document.getElementById('vCoins');
-  const vXp = document.getElementById('vXp');
-  const victoryHomeBtn = document.getElementById('victoryHomeBtn');
-  const nextLevelBtn = document.getElementById('nextLevelBtn');
-  const confettiCanvas = document.getElementById('confettiCanvas');
+    <!-- Premium Stats Bar (Timer & Moves) -->
+    <div class="game-header">
+      <div class="premium-stats-bar">
+        <div class="stat-badge">
+          <span class="stat-icon">⏱️</span>
+          <div class="stat-info">
+            <span class="stat-label">TIME</span>
+            <span class="stat-value" id="timerDisplay">00:00</span>
+          </div>
+        </div>
+        <div class="stat-badge">
+          <span class="stat-icon">🔄</span>
+          <div class="stat-info">
+            <span class="stat-label">MOVES</span>
+            <span class="stat-value" id="movesDisplay">0</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  // --- State & Variables ---
-  const urlParams = new URLSearchParams(window.location.search);
-  let currentLevel = parseInt(urlParams.get('level')) || 1;
-  const maxLevels = 200;
+    <!-- 3x3 TAP-TO-SWAP BOARD -->
+    <div class="puzzle-wrapper">
+      <div class="puzzle-grid" id="puzzleGrid"></div>
+    </div>
 
-  let currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || null;
+    <!-- Game Actions -->
+    <div class="game-actions">
+      <button class="btn btn-secondary" id="previewBtn">🖼️ PREVIEW (🪙5)</button>
+      <button class="btn btn-primary" id="shuffleBtn">🔀 SHUFFLE</button>
+    </div>
+  </div>
 
-  function getUserKey(keyName) {
-    if (!currentUser || !currentUser.username) return keyName;
-    return `${currentUser.username}_${keyName}`;
-  }
+  <!-- Image Preview Modal -->
+  <div id="imageModal" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+    <div class="modal-content" style="background: #1a0b2e; padding: 20px; border-radius: 16px; border: 2px solid #ffd700; width: 90%; max-width: 320px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.7);">
+      <h3 id="modalLevelTitle" style="color: #ffd700; margin: 0 0 10px 0; font-size: 16px; letter-spacing: 1px; width: 100%;">LEVEL PREVIEW</h3>
+      <div style="width: 100%; display: flex; justify-content: center; align-items: center; margin-bottom: 12px;">
+        <img id="modalPreviewImg" src="" alt="Level Preview" style="display: block; max-width: 100%; max-height: 40vh; width: auto; height: auto; object-fit: contain; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); margin: 0 auto;">
+      </div>
+      <div id="previewCountdown" style="color: #fff; font-size: 13px; margin-bottom: 12px; width: 100%;">Closing in <span id="countdownSeconds" style="color: #ffd700; font-weight: bold;">10</span>s</div>
+      <button id="closePreviewBtn" style="width: 100%; padding: 12px; font-weight: bold; background: #ffd700; color: #1a0b2e; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">CLOSE</button>
+    </div>
+  </div>
 
-  function getCoins() {
-    return parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
-  }
+  <!-- Victory Modal -->
+  <div id="victoryModal" class="modal-overlay hidden">
+    <canvas id="confettiCanvas"></canvas>
 
-  function setCoins(val) {
-    localStorage.setItem(getUserKey('totalCoins'), val);
-    if (coinCount) coinCount.innerText = val;
-  }
+    <div class="victory-card-pro">
+      <div class="top-crest-badge">
+        <div class="badge-shield">⭐</div>
+      </div>
 
-  let moves = 0;
-  let secondsElapsed = 0;
-  let timerInterval = null;
-  let isPlaying = false;
-  let previewTimer = null;
+      <div class="banner-ribbon">
+        <h1 class="victory-title-pro">LEVEL CLEARED!</h1>
+      </div>
+      <div class="victory-subtitle-pro">✦ Amazing work! ✦</div>
 
-  // Puzzle settings: 3x3 grid setup for tap-to-swap
-  const gridSize = 3;
-  const totalTiles = gridSize * gridSize; // 9 tiles
-  let currentTiles = []; 
-  let selectedTileIndex = null;
+      <div class="victory-img-container-pro">
+        <img id="victoryImg" src="" alt="Solved Puzzle">
+      </div>
 
-  // --- Initialization ---
-  if (coinCount) coinCount.innerText = getCoins();
-  if (levelDisplay) levelDisplay.innerText = currentLevel.toString().padStart(2, '0');
+      <div class="star-rating-pro" id="victoryStars">
+        <span class="star star-pro active">★</span>
+        <span class="star star-pro active">★</span>
+        <span class="star star-pro active">★</span>
+      </div>
 
-  setupPuzzle();
-  startTimer();
+      <div class="stats-panel-pro">
+        <div class="stat-col">
+          <span class="stat-icon-pro">⏱️</span>
+          <span class="stat-label-pro">TIME</span>
+          <span class="stat-value-pro" id="vTime">00:00</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-col">
+          <span class="stat-icon-pro">👣</span>
+          <span class="stat-label-pro">MOVES</span>
+          <span class="stat-value-pro" id="vMoves">0</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-col">
+          <span class="stat-icon-pro">🪙</span>
+          <span class="stat-label-pro">EARNED</span>
+          <span class="stat-value-pro gold-val" id="vCoins">+0</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-col">
+          <span class="stat-icon-pro">⚡️</span>
+          <span class="stat-label-pro">XP GAINED</span>
+          <span class="stat-value-pro" id="vXp">+0</span>
+        </div>
+      </div>
 
-  // --- Navigation & Back ---
-  if (backToHome) {
-    backToHome.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      window.location.href = 'index.html';
-    });
-  }
-
-  if (victoryHomeBtn) {
-    victoryHomeBtn.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      window.location.href = 'index.html';
-    });
-  }
-
-  if (nextLevelBtn) {
-    nextLevelBtn.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      if (currentLevel < maxLevels) {
-        window.location.href = `game.html?level=${currentLevel + 1}`;
-      } else {
-        window.location.href = 'index.html';
-      }
-    });
-  }
-
-  // --- Timer & Moves Logic ---
-  function startTimer() {
-    secondsElapsed = 0;
-    if (timerDisplay) timerDisplay.innerText = '00:00';
-    if (timerInterval) clearInterval(timerInterval);
-
-    timerInterval = setInterval(() => {
-      if (!isPlaying) return;
-      secondsElapsed++;
-      const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
-      const secs = (secondsElapsed % 60).toString().padStart(2, '0');
-      if (timerDisplay) timerDisplay.innerText = `${mins}:${secs}`;
-    }, 1000);
-  }
-
-  function updateMoves(val) {
-    moves = val;
-    if (movesDisplay) movesDisplay.innerText = moves;
-  }
-
-  // --- Puzzle Board Setup & Shuffling ---
-  function setupPuzzle() {
-    currentTiles = Array.from({ length: totalTiles }, (_, i) => i);
-    shuffleTiles();
-    renderBoard();
-    updateMoves(0);
-    isPlaying = true;
-  }
-
-  function shuffleTiles() {
-    do {
-      for (let i = currentTiles.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [currentTiles[i], currentTiles[j]] = [currentTiles[j], currentTiles[i]];
-      }
-    } while (isSolved());
-  }
-
-  if (shuffleBtn) {
-    shuffleBtn.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      shuffleTiles();
-      renderBoard();
-      updateMoves(0);
-      selectedTileIndex = null;
-      isPlaying = true;
-    });
-  }
-
-  function isSolved() {
-    for (let i = 0; i < totalTiles; i++) {
-      if (currentTiles[i] !== i) return false;
-    }
-    return true;
-  }
-
-  function renderBoard() {
-    if (!puzzleGrid) return;
-    puzzleGrid.innerHTML = '';
-
-    const imageUrl = `image/level${currentLevel}.jpeg`;
-
-    currentTiles.forEach((tileOrigIndex, currentIndex) => {
-      const tileDiv = document.createElement('div');
-      tileDiv.className = 'puzzle-tile';
-      if (selectedTileIndex === currentIndex) {
-        tileDiv.style.border = '3px solid #ffd700';
-        tileDiv.style.transform = 'scale(0.95)';
-        tileDiv.style.boxShadow = '0 0 15px rgba(255, 215, 0, 0.6)';
-      }
-
-      const row = Math.floor(tileOrigIndex / gridSize);
-      const col = tileOrigIndex % gridSize;
-      const xPercent = gridSize > 1 ? (col / (gridSize - 1)) * 100 : 0;
-      const yPercent = gridSize > 1 ? (row / (gridSize - 1)) * 100 : 0;
-
-      tileDiv.style.backgroundImage = `url('${imageUrl}')`;
-      tileDiv.style.backgroundSize = `${gridSize * 100}% ${gridSize * 100}%`;
-      tileDiv.style.backgroundPosition = `${xPercent}% ${yPercent}%`;
-      tileDiv.style.cursor = 'pointer';
-      tileDiv.style.borderRadius = '8px';
-      tileDiv.style.transition = 'transform 0.15s ease, border 0.15s ease';
-
-      tileDiv.addEventListener('click', () => {
-        if (!isPlaying) return;
-        if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-
-        if (selectedTileIndex === null) {
-          selectedTileIndex = currentIndex;
-          renderBoard();
-        } else if (selectedTileIndex === currentIndex) {
-          selectedTileIndex = null;
-          renderBoard();
-        } else {
-          [currentTiles[selectedTileIndex], currentTiles[currentIndex]] = [currentTiles[currentIndex], currentTiles[selectedTileIndex]];
-          selectedTileIndex = null;
-          updateMoves(moves + 1);
-          renderBoard();
-
-          if (isSolved()) {
-            handleVictory();
-          }
-        }
-      });
-
-      puzzleGrid.appendChild(tileDiv);
-    });
-  }
-
-  // --- Preview Logic ---
-  if (previewBtn) {
-    previewBtn.addEventListener('click', () => {
-      const currentCoins = getCoins();
-      if (currentCoins < 5) {
-        alert('Not enough coins for a preview! (Needs 5 🪙)');
-        return;
-      }
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      setCoins(currentCoins - 5);
-
-      if (modalPreviewImg && modalLevelTitle && imageModal) {
-        modalPreviewImg.src = `image/level${currentLevel}.jpeg`;
-        modalLevelTitle.innerText = `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
-        imageModal.classList.remove('hidden');
-
-        let secondsLeft = 10;
-        if (countdownSeconds) countdownSeconds.innerText = secondsLeft;
-
-        if (previewTimer) clearInterval(previewTimer);
-        previewTimer = setInterval(() => {
-          secondsLeft--;
-          if (countdownSeconds) countdownSeconds.innerText = secondsLeft;
-          if (secondsLeft <= 0) {
-            clearInterval(previewTimer);
-            imageModal.classList.add('hidden');
-          }
-        }, 1000);
-      }
-    });
-  }
-
-  if (closePreviewBtn && imageModal) {
-    closePreviewBtn.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      if (previewTimer) clearInterval(previewTimer);
-      imageModal.classList.add('hidden');
-    });
-  }
-
-  // --- Victory Logic ---
-  function handleVictory() {
-    isPlaying = false;
-    if (timerInterval) clearInterval(timerInterval);
-
-    if (typeof AudioManager !== 'undefined') AudioManager.playVictory();
-
-    const earnedCoins = 15;
-    const earnedXp = 50;
-    setCoins(getCoins() + earnedCoins);
-
-    const unlockedMax = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
-    if (currentLevel >= unlockedMax && currentLevel < maxLevels) {
-      localStorage.setItem(getUserKey('currentLevel'), currentLevel + 1);
-    }
-
-    localStorage.setItem(getUserKey(`levelCoins_${currentLevel}`), earnedCoins);
-    const minsStr = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
-    const secsStr = (secondsElapsed % 60).toString().padStart(2, '0');
-    localStorage.setItem(getUserKey(`levelTime_${currentLevel}`), `${minsStr}:${secsStr}`);
-    localStorage.setItem(getUserKey(`levelMoves_${currentLevel}`), moves);
-
-    if (victoryImg) victoryImg.src = `image/level${currentLevel}.jpeg`;
-    if (vTime) vTime.innerText = `${minsStr}:${secsStr}`;
-    if (vMoves) vMoves.innerText = moves;
-    if (vCoins) vCoins.innerText = `+${earnedCoins}`;
-    if (vXp) vXp.innerText = `+${earnedXp}`;
-
-    if (victoryModal) {
-      victoryModal.classList.remove('hidden');
-      startConfetti();
-    }
-
-    if (window.pixvinzDb && currentUser) {
-      const { db, doc, setDoc } = window.pixvinzDb;
-      setDoc(doc(db, "players", currentUser.username), {
-        level: Math.max(unlockedMax, currentLevel + 1),
-        coins: getCoins(),
-        lastUpdated: new Date()
-      }, { merge: true }).catch(err => console.error("Sync error:", err));
-    }
-  }
-
-  // --- Confetti Effect ---
-  function startConfetti() {
-    if (!confettiCanvas) return;
-    const ctx = confettiCanvas.getContext('2d');
-    confettiCanvas.width = window.innerWidth;
-    confettiCanvas.height = window.innerHeight;
-
-    const particles = [];
-    const colors = ['#ffd700', '#ab47bc', '#7e57c2', '#ff4081', '#00e676'];
-
-    for (let i = 0; i < 100; i++) {
-      particles.push({
-        x: Math.random() * confettiCanvas.width,
-        y: Math.random() * confettiCanvas.height - confettiCanvas.height,
-        r: Math.random() * 6 + 4,
-        dx: Math.random() * 4 - 2,
-        dy: Math.random() * 3 + 2,
-        color: colors[Math.floor(Math.random() * colors.length)]
-      });
-    }
-
-    let animationFrameId;
-    function draw() {
-      ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-      particles.forEach(p => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.fill();
-
-        p.x += p.dx;
-        p.y += p.dy;
-
-        if (p.y > confettiCanvas.height) {
-          p.y = -10;
-          p.x = Math.random() * confettiCanvas.width;
-        }
-      });
-      animationFrameId = requestAnimationFrame(draw);
-    }
-    draw();
-  }
-});
+      <div class="victory-buttons-pro">
+        <button class="btn-pro btn-home-pro" id="victoryHomeBtn">
+          <span>🏠</span> HOME
+        </button>
+        <button class="btn-pro btn-next-pro" id="nextLevelBtn">
+          NEXT ▶
+        </button>
+      </div>
+    </div>
+  </div>
+    
+  <script src="audio.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
