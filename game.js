@@ -1,418 +1,331 @@
 // game.js
-document.addEventListener('DOMContentLoaded', async () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const currentLevel = parseInt(urlParams.get('level')) || 1;
-
+document.addEventListener('DOMContentLoaded', () => {
+  // --- DOM Elements ---
+  const backToHome = document.getElementById('backToHome');
+  const coinCount = document.getElementById('coinCount');
   const levelDisplay = document.getElementById('levelDisplay');
-  if (levelDisplay) {
-    levelDisplay.innerText = currentLevel.toString().padStart(2, '0');
-  }
+  const timerDisplay = document.getElementById('timerDisplay');
+  const movesDisplay = document.getElementById('movesDisplay');
+  const puzzleGrid = document.getElementById('puzzleGrid');
+  const previewBtn = document.getElementById('previewBtn');
+  const shuffleBtn = document.getElementById('shuffleBtn');
 
-  function getCurrentUser() {
-    try {
-      return JSON.parse(localStorage.getItem('loggedInUser'));
-    } catch (e) {
-      return null;
-    }
-  }
+  // Preview Modal Elements
+  const imageModal = document.getElementById('imageModal');
+  const modalPreviewImg = document.getElementById('modalPreviewImg');
+  const modalLevelTitle = document.getElementById('modalLevelTitle');
+  const countdownSeconds = document.getElementById('countdownSeconds');
+  const closePreviewBtn = document.getElementById('closePreviewBtn');
+
+  // Victory Modal Elements
+  const victoryModal = document.getElementById('victoryModal');
+  const victoryImg = document.getElementById('victoryImg');
+  const vTime = document.getElementById('vTime');
+  const vMoves = document.getElementById('vMoves');
+  const vCoins = document.getElementById('vCoins');
+  const vXp = document.getElementById('vXp');
+  const victoryHomeBtn = document.getElementById('victoryHomeBtn');
+  const nextLevelBtn = document.getElementById('nextLevelBtn');
+  const confettiCanvas = document.getElementById('confettiCanvas');
+
+  // --- State & Variables ---
+  const urlParams = new URLSearchParams(window.location.search);
+  let currentLevel = parseInt(urlParams.get('level')) || 1;
+  const maxLevels = 200;
+
+  let currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || null;
 
   function getUserKey(keyName) {
-    const user = getCurrentUser();
-    if (!user || !user.username) return keyName;
-    return `${user.username}_${keyName}`;
+    if (!currentUser || !currentUser.username) return keyName;
+    return `${currentUser.username}_${keyName}`;
   }
 
-  async function saveUserDataToCloud() {
-    const user = getCurrentUser();
-    if (!user || !user.username || !window.pixvinzDb) return;
-
-    const { db, doc, setDoc } = window.pixvinzDb;
-    try {
-      const currentLevelVal = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
-      const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
-      const avatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
-
-      const userDocRef = doc(db, "players", user.username);
-      await setDoc(userDocRef, {
-        username: user.username,
-        displayName: user.displayName || user.username,
-        level: currentLevelVal,
-        coins: totalCoins,
-        avatar: avatar,
-        lastUpdated: new Date()
-      }, { merge: true });
-    } catch (error) {
-      console.error("Error saving game data to cloud:", error);
-    }
+  function getCoins() {
+    return parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
   }
 
-  async function loadUserDataFromCloud() {
-    const user = getCurrentUser();
-    if (!window.pixvinzDb || !user || !user.username) return;
-    const { db, doc, getDoc } = window.pixvinzDb;
-    try {
-      const userDocRef = doc(db, "players", user.username);
-      const docSnap = await getDoc(userDocRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (data.level) localStorage.setItem(getUserKey('currentLevel'), data.level);
-        if (data.coins !== undefined) localStorage.setItem(getUserKey('totalCoins'), data.coins);
-        if (data.avatar) localStorage.setItem(getUserKey('vinpix_avatar'), data.avatar);
-      }
-    } catch (error) {
-      console.error("Error loading game data from cloud:", error);
-    }
+  function setCoins(val) {
+    localStorage.setItem(getUserKey('totalCoins'), val);
+    if (coinCount) coinCount.innerText = val;
   }
-
-  await loadUserDataFromCloud();
-  updateCoinDisplay();
-
-  const grid = document.getElementById('puzzleGrid');
-  const movesDisplay = document.getElementById('movesDisplay');
-  const timerDisplay = document.getElementById('timerDisplay');
-
-  function getGridSize(level) {
-    if (level <= 10) return 3;
-    if (level <= 30) return 4;
-    if (level <= 60) return 5;
-    if (level <= 100) return 6;
-    if (level <= 150) return 7;
-    return 8;
-  }
-
-  const gridSize = getGridSize(currentLevel);
-  const totalTiles = gridSize * gridSize;
 
   let moves = 0;
-  let seconds = 0;
+  let secondsElapsed = 0;
   let timerInterval = null;
-  let tilesState = Array.from({ length: totalTiles }, (_, i) => i);
-  let selectedTilePos = null;
+  let isPlaying = false;
+  let previewTimer = null;
 
-  const imageSrc = `image/level${currentLevel}.jpeg`;
+  // Puzzle settings: 3x3 grid setup for tap-to-swap
+  const gridSize = 3;
+  const totalTiles = gridSize * gridSize; // 9 tiles
+  let currentTiles = []; 
+  let selectedTileIndex = null;
 
-  function startGameBGM() {
-    if (typeof AudioManager !== 'undefined' && AudioManager.musicEnabled) {
-      AudioManager.playGame();
-    }
+  // --- Initialization ---
+  if (coinCount) coinCount.innerText = getCoins();
+  if (levelDisplay) levelDisplay.innerText = currentLevel.toString().padStart(2, '0');
+
+  setupPuzzle();
+  startTimer();
+
+  // --- Navigation & Back ---
+  if (backToHome) {
+    backToHome.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      window.location.href = 'index.html';
+    });
   }
-  document.body.addEventListener('click', startGameBGM, { once: true });
 
+  if (victoryHomeBtn) {
+    victoryHomeBtn.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      window.location.href = 'index.html';
+    });
+  }
+
+  if (nextLevelBtn) {
+    nextLevelBtn.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      if (currentLevel < maxLevels) {
+        window.location.href = `game.html?level=${currentLevel + 1}`;
+      } else {
+        window.location.href = 'index.html';
+      }
+    });
+  }
+
+  // --- Timer & Moves Logic ---
   function startTimer() {
-    clearInterval(timerInterval);
-    seconds = 0;
+    secondsElapsed = 0;
+    if (timerDisplay) timerDisplay.innerText = '00:00';
+    if (timerInterval) clearInterval(timerInterval);
+
     timerInterval = setInterval(() => {
-      seconds++;
-      const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
-      const secs = (seconds % 60).toString().padStart(2, '0');
+      if (!isPlaying) return;
+      secondsElapsed++;
+      const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+      const secs = (secondsElapsed % 60).toString().padStart(2, '0');
       if (timerDisplay) timerDisplay.innerText = `${mins}:${secs}`;
     }, 1000);
   }
 
-  function updateCoinDisplay() {
-    const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
-    const coinElem = document.getElementById('coinCount');
-    if (coinElem) coinElem.innerText = totalCoins;
+  function updateMoves(val) {
+    moves = val;
+    if (movesDisplay) movesDisplay.innerText = moves;
   }
 
-  function renderGrid() {
-    if (!grid) return;
-    grid.innerHTML = '';
+  // --- Puzzle Board Setup & Shuffling ---
+  function setupPuzzle() {
+    currentTiles = Array.from({ length: totalTiles }, (_, i) => i);
+    shuffleTiles();
+    renderBoard();
+    updateMoves(0);
+    isPlaying = true;
+  }
 
-    grid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
-    grid.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
-
-    const percentStep = 100 / (gridSize - 1);
-
-    tilesState.forEach((tileIdx, currentPos) => {
-      const tile = document.createElement('div');
-      tile.className = 'tile';
-      
-      if (selectedTilePos === currentPos) {
-        tile.classList.add('selected');
+  function shuffleTiles() {
+    do {
+      for (let i = currentTiles.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [currentTiles[i], currentTiles[j]] = [currentTiles[j], currentTiles[i]];
       }
+    } while (isSolved());
+  }
 
-      tile.style.backgroundImage = `url('${imageSrc}')`;
-      tile.style.backgroundSize = `${gridSize * 100}% ${gridSize * 100}%`;
-
-      const row = Math.floor(tileIdx / gridSize);
-      const col = tileIdx % gridSize;
-      tile.style.backgroundPosition = `${col * percentStep}% ${row * percentStep}%`;
-
-      tile.addEventListener('click', () => handleTileClick(currentPos));
-      grid.appendChild(tile);
+  if (shuffleBtn) {
+    shuffleBtn.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      shuffleTiles();
+      renderBoard();
+      updateMoves(0);
+      selectedTileIndex = null;
+      isPlaying = true;
     });
   }
 
-  function handleTileClick(pos) {
-    if (typeof AudioManager !== 'undefined') AudioManager.playSelect();
-
-    if (selectedTilePos === null) {
-      selectedTilePos = pos;
-      renderGrid();
-    } else if (selectedTilePos === pos) {
-      selectedTilePos = null;
-      renderGrid();
-    } else {
-      [tilesState[selectedTilePos], tilesState[pos]] = [tilesState[pos], tilesState[selectedTilePos]];
-      selectedTilePos = null;
-      moves++;
-      if (movesDisplay) movesDisplay.innerText = moves;
-      renderGrid();
-      checkWin();
+  function isSolved() {
+    for (let i = 0; i < totalTiles; i++) {
+      if (currentTiles[i] !== i) return false;
     }
+    return true;
   }
 
-  function shuffleGrid() {
-    const tileCount = tilesState.length;
-    for (let i = 0; i < tileCount * 3; i++) {
-      const idx1 = Math.floor(Math.random() * tileCount);
-      const idx2 = Math.floor(Math.random() * tileCount);
-      [tilesState[idx1], tilesState[idx2]] = [tilesState[idx2], tilesState[idx1]];
-    }
-    selectedTilePos = null;
-    renderGrid();
-  }
+  function renderBoard() {
+    if (!puzzleGrid) return;
+    puzzleGrid.innerHTML = '';
 
-  async function checkWin() {
-    const isSolved = tilesState.every((val, idx) => val === idx);
-    if (isSolved) {
-      clearInterval(timerInterval);
-      if (typeof AudioManager !== 'undefined') AudioManager.playVictory(currentLevel);
+    const imageUrl = `image/level${currentLevel}.jpeg`;
 
-      let stars = 1;
-      if (moves <= gridSize * 5) stars = 3;
-      else if (moves <= gridSize * 8) stars = 2;
-
-      const levelCoinsKey = getUserKey(`levelCoins_${currentLevel}`);
-      const totalCoinsKey = getUserKey('totalCoins');
-      const currentLevelKey = getUserKey('currentLevel');
-      const levelMovesKey = getUserKey(`levelMoves_${currentLevel}`);
-      const levelTimeKey = getUserKey(`levelTime_${currentLevel}`);
-
-      const prevMoves = parseInt(localStorage.getItem(levelMovesKey)) || Infinity;
-      if (moves < prevMoves) {
-        localStorage.setItem(levelMovesKey, moves);
+    currentTiles.forEach((tileOrigIndex, currentIndex) => {
+      const tileDiv = document.createElement('div');
+      tileDiv.className = 'puzzle-tile';
+      if (selectedTileIndex === currentIndex) {
+        tileDiv.style.border = '3px solid #ffd700';
+        tileDiv.style.transform = 'scale(0.95)';
+        tileDiv.style.boxShadow = '0 0 15px rgba(255, 215, 0, 0.6)';
       }
 
-      const timeString = timerDisplay ? timerDisplay.innerText : "00:00";
-      const prevTimeStr = localStorage.getItem(levelTimeKey);
-      if (!prevTimeStr || prevTimeStr === '--:--') {
-        localStorage.setItem(levelTimeKey, timeString);
-      } else {
-        const [pMin, pSec] = prevTimeStr.split(':').map(Number);
-        if (seconds < (pMin * 60 + pSec)) {
-          localStorage.setItem(levelTimeKey, timeString);
+      const row = Math.floor(tileOrigIndex / gridSize);
+      const col = tileOrigIndex % gridSize;
+      const xPercent = gridSize > 1 ? (col / (gridSize - 1)) * 100 : 0;
+      const yPercent = gridSize > 1 ? (row / (gridSize - 1)) * 100 : 0;
+
+      tileDiv.style.backgroundImage = `url('${imageUrl}')`;
+      tileDiv.style.backgroundSize = `${gridSize * 100}% ${gridSize * 100}%`;
+      tileDiv.style.backgroundPosition = `${xPercent}% ${yPercent}%`;
+      tileDiv.style.cursor = 'pointer';
+      tileDiv.style.borderRadius = '8px';
+      tileDiv.style.transition = 'transform 0.15s ease, border 0.15s ease';
+
+      tileDiv.addEventListener('click', () => {
+        if (!isPlaying) return;
+        if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+
+        if (selectedTileIndex === null) {
+          selectedTileIndex = currentIndex;
+          renderBoard();
+        } else if (selectedTileIndex === currentIndex) {
+          selectedTileIndex = null;
+          renderBoard();
+        } else {
+          [currentTiles[selectedTileIndex], currentTiles[currentIndex]] = [currentTiles[currentIndex], currentTiles[selectedTileIndex]];
+          selectedTileIndex = null;
+          updateMoves(moves + 1);
+          renderBoard();
+
+          if (isSolved()) {
+            handleVictory();
+          }
         }
-      }
+      });
 
-      const currentLevelCoins = parseInt(localStorage.getItem(levelCoinsKey)) || 0;
-      let targetCoins = stars * 5; 
-      let newCoinsEarned = 0;
-
-      if (targetCoins > currentLevelCoins) {
-        newCoinsEarned = targetCoins - currentLevelCoins;
-        localStorage.setItem(levelCoinsKey, targetCoins);
-
-        let totalCoins = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
-        totalCoins += newCoinsEarned;
-        localStorage.setItem(totalCoinsKey, totalCoins);
-      }
-
-      let maxUnlocked = parseInt(localStorage.getItem(currentLevelKey)) || 1;
-      if (currentLevel >= maxUnlocked) {
-        localStorage.setItem(currentLevelKey, currentLevel + 1);
-      }
-
-      await saveUserDataToCloud();
-      showVictoryModal(stars, newCoinsEarned);
-    }
+      puzzleGrid.appendChild(tileDiv);
+    });
   }
 
-  function showVictoryModal(stars, newCoins) {
-    const victoryImg = document.getElementById('victoryImg');
-    if (victoryImg) victoryImg.src = imageSrc;
+  // --- Preview Logic ---
+  if (previewBtn) {
+    previewBtn.addEventListener('click', () => {
+      const currentCoins = getCoins();
+      if (currentCoins < 5) {
+        alert('Not enough coins for a preview! (Needs 5 🪙)');
+        return;
+      }
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      setCoins(currentCoins - 5);
 
-    const vTime = document.getElementById('vTime');
-    if (vTime && timerDisplay) vTime.innerText = timerDisplay.innerText;
+      if (modalPreviewImg && modalLevelTitle && imageModal) {
+        modalPreviewImg.src = `image/level${currentLevel}.jpeg`;
+        modalLevelTitle.innerText = `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
+        imageModal.classList.remove('hidden');
 
-    const vMoves = document.getElementById('vMoves');
-    if (vMoves) vMoves.innerText = moves;
+        let secondsLeft = 10;
+        if (countdownSeconds) countdownSeconds.innerText = secondsLeft;
 
-    const vCoins = document.getElementById('vCoins');
-    if (vCoins) vCoins.innerText = `+${newCoins}`;
-
-    let tier = Math.floor((currentLevel - 1) / 10);
-    let xpGained = (tier + 1) * 100;
-
-    const vXp = document.getElementById('vXp');
-    if (vXp) {
-        vXp.innerText = `+${xpGained}`;
-    }
-
-    const starNodes = document.querySelectorAll('#victoryStars .star');
-    starNodes.forEach((star, index) => {
-      if (index < stars) {
-        star.classList.add('active');
-      } else {
-        star.classList.remove('active');
+        if (previewTimer) clearInterval(previewTimer);
+        previewTimer = setInterval(() => {
+          secondsLeft--;
+          if (countdownSeconds) countdownSeconds.innerText = secondsLeft;
+          if (secondsLeft <= 0) {
+            clearInterval(previewTimer);
+            imageModal.classList.add('hidden');
+          }
+        }, 1000);
       }
     });
-
-    updateCoinDisplay();
-    const modal = document.getElementById('victoryModal');
-    if (modal) modal.classList.remove('hidden');
-    startConfetti();
   }
 
+  if (closePreviewBtn && imageModal) {
+    closePreviewBtn.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      if (previewTimer) clearInterval(previewTimer);
+      imageModal.classList.add('hidden');
+    });
+  }
+
+  // --- Victory Logic ---
+  function handleVictory() {
+    isPlaying = false;
+    if (timerInterval) clearInterval(timerInterval);
+
+    if (typeof AudioManager !== 'undefined') AudioManager.playVictory();
+
+    const earnedCoins = 15;
+    const earnedXp = 50;
+    setCoins(getCoins() + earnedCoins);
+
+    const unlockedMax = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+    if (currentLevel >= unlockedMax && currentLevel < maxLevels) {
+      localStorage.setItem(getUserKey('currentLevel'), currentLevel + 1);
+    }
+
+    localStorage.setItem(getUserKey(`levelCoins_${currentLevel}`), earnedCoins);
+    const minsStr = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+    const secsStr = (secondsElapsed % 60).toString().padStart(2, '0');
+    localStorage.setItem(getUserKey(`levelTime_${currentLevel}`), `${minsStr}:${secsStr}`);
+    localStorage.setItem(getUserKey(`levelMoves_${currentLevel}`), moves);
+
+    if (victoryImg) victoryImg.src = `image/level${currentLevel}.jpeg`;
+    if (vTime) vTime.innerText = `${minsStr}:${secsStr}`;
+    if (vMoves) vMoves.innerText = moves;
+    if (vCoins) vCoins.innerText = `+${earnedCoins}`;
+    if (vXp) vXp.innerText = `+${earnedXp}`;
+
+    if (victoryModal) {
+      victoryModal.classList.remove('hidden');
+      startConfetti();
+    }
+
+    if (window.pixvinzDb && currentUser) {
+      const { db, doc, setDoc } = window.pixvinzDb;
+      setDoc(doc(db, "players", currentUser.username), {
+        level: Math.max(unlockedMax, currentLevel + 1),
+        coins: getCoins(),
+        lastUpdated: new Date()
+      }, { merge: true }).catch(err => console.error("Sync error:", err));
+    }
+  }
+
+  // --- Confetti Effect ---
   function startConfetti() {
-    const canvas = document.getElementById('confettiCanvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    if (!confettiCanvas) return;
+    const ctx = confettiCanvas.getContext('2d');
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
 
-    const particles = Array.from({ length: 70 }, () => ({
-      x: canvas.width / 2,
-      y: canvas.height / 2,
-      vx: (Math.random() - 0.5) * 12,
-      vy: (Math.random() - 0.7) * 14,
-      size: Math.random() * 8 + 4,
-      color: ['#ffd700', '#9d4edd', '#ff007f', '#00f0ff', '#ffffff'][Math.floor(Math.random() * 5)]
-    }));
+    const particles = [];
+    const colors = ['#ffd700', '#ab47bc', '#7e57c2', '#ff4081', '#00e676'];
 
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach(p => {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.3;
-        ctx.fillStyle = p.color;
-        ctx.fillRect(p.x, p.y, p.size, p.size);
+    for (let i = 0; i < 100; i++) {
+      particles.push({
+        x: Math.random() * confettiCanvas.width,
+        y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+        r: Math.random() * 6 + 4,
+        dx: Math.random() * 4 - 2,
+        dy: Math.random() * 3 + 2,
+        color: colors[Math.floor(Math.random() * colors.length)]
       });
-      if (particles.some(p => p.y < canvas.height)) {
-        requestAnimationFrame(draw);
-      }
+    }
+
+    let animationFrameId;
+    function draw() {
+      ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+
+        p.x += p.dx;
+        p.y += p.dy;
+
+        if (p.y > confettiCanvas.height) {
+          p.y = -10;
+          p.x = Math.random() * confettiCanvas.width;
+        }
+      });
+      animationFrameId = requestAnimationFrame(draw);
     }
     draw();
   }
-
-  const shuffleBtn = document.getElementById('shuffleBtn');
-  if (shuffleBtn) {
-    shuffleBtn.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playShuffle();
-      shuffleGrid();
-    });
-  }
-
-  let previewTimer = null;
-  let countdownInterval = null;
-
-  function closePreviewModal() {
-    const modal = document.getElementById('imageModal');
-    if (modal) modal.classList.add('hidden');
-    if (previewTimer) clearTimeout(previewTimer);
-    if (countdownInterval) clearInterval(countdownInterval);
-  }
-
-  const previewBtn = document.getElementById('previewBtn');
-  if (previewBtn) {
-    previewBtn.addEventListener('click', async () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-
-      const coinKey = getUserKey('totalCoins');
-      let totalCoins = parseInt(localStorage.getItem(coinKey)) || 0;
-      const previewCost = 5;
-
-      if (totalCoins < previewCost) {
-        alert("Not enough coins! You need 5 coins to preview the image.");
-        return;
-      }
-
-      totalCoins -= previewCost;
-      localStorage.setItem(coinKey, totalCoins);
-      updateCoinDisplay();
-      
-      await saveUserDataToCloud();
-
-      const modal = document.getElementById('imageModal');
-      const modalImg = document.getElementById('modalPreviewImg');
-      const modalTitle = document.getElementById('modalLevelTitle');
-      const countdownSpan = document.getElementById('countdownSeconds');
-
-      if (modalTitle) modalTitle.innerText = `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
-      if (modalImg) modalImg.src = imageSrc;
-      
-      let timeLeft = 10;
-      if (countdownSpan) countdownSpan.innerText = timeLeft;
-      if (modal) modal.classList.remove('hidden');
-
-      if (previewTimer) clearTimeout(previewTimer);
-      if (countdownInterval) clearInterval(countdownInterval);
-
-      countdownInterval = setInterval(() => {
-        timeLeft--;
-        if (countdownSpan) countdownSpan.innerText = timeLeft;
-        if (timeLeft <= 0) {
-          clearInterval(countdownInterval);
-        }
-      }, 1000);
-
-      previewTimer = setTimeout(() => {
-        closePreviewModal();
-      }, 10000);
-    });
-  }
-
-  const closePreviewBtn = document.getElementById('closePreviewBtn');
-  if (closePreviewBtn) {
-    closePreviewBtn.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      closePreviewModal();
-    });
-  }
-
-  const nextLevelBtn = document.getElementById('nextLevelBtn');
-  if (nextLevelBtn) {
-    nextLevelBtn.onclick = async (e) => {
-      e.stopPropagation();
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      await saveUserDataToCloud();
-      window.location.href = `game.html?level=${currentLevel + 1}`;
-    };
-  }
-
-  const victoryHomeBtn = document.getElementById('victoryHomeBtn');
-  if (victoryHomeBtn) {
-    victoryHomeBtn.onclick = async (e) => {
-      e.stopPropagation();
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      await saveUserDataToCloud();
-      localStorage.setItem('skipLoading', 'true');
-      window.location.href = 'index.html';
-    };
-  }
-
-  const backToHome = document.getElementById('backToHome');
-  if (backToHome) {
-    backToHome.addEventListener('click', async () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      await saveUserDataToCloud();
-      localStorage.setItem('skipLoading', 'true');
-      window.location.href = 'index.html';
-    });
-  }
-
-  const collectionsBtn = document.getElementById('collectionsBtn');
-  if (collectionsBtn) {
-    collectionsBtn.addEventListener('click', async () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      await saveUserDataToCloud();
-      localStorage.setItem('skipLoading', 'true');
-      window.location.href = 'index.html';
-    });
-  }
-
-  shuffleGrid();
-  startTimer();
 });
