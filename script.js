@@ -220,6 +220,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const passConfirm = document.getElementById('regPassConfirm').value;
       const errElem = document.getElementById('regError');
 
+      // Password Validation: At least 6 chars, contains 1 uppercase, 1 number
+      const hasUpperCase = /[A-Z]/.test(pass);
+      const hasNumber = /[0-9]/.test(pass);
+      const isLongEnough = pass.length >= 6;
+
+      if (!isLongEnough || !hasUpperCase || !hasNumber) {
+        if (errElem) errElem.innerText = "Password must be 6+ chars with 1 uppercase & 1 number!";
+        return;
+      }
+
       if (pass !== passConfirm) {
         if (errElem) errElem.innerText = "Passwords do not match!";
         return;
@@ -231,18 +241,45 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      // Show loading screen with circling effect for 4 seconds during cloud connection
+      const loadingView = document.getElementById('loadingView');
+      if (loadingView) {
+        loadingView.style.display = 'flex';
+        loadingView.classList.add('active');
+      }
+
       const generatedEmail = `${username}@pixvinz.game`;
 
-      // Firebase Authentication connection integration
-      if (window.pixvinzAuth) {
-        try {
-          await window.pixvinzAuth.createUserWithEmailAndPassword(window.pixvinzAuth.auth, generatedEmail, pass);
-        } catch (firebaseErr) {
-          if (firebaseErr.code === 'auth/email-already-in-use') {
-            if (errElem) errElem.innerText = "Username already taken!";
-            return;
+      // Firebase Authentication connection integration wrapped with minimum 4s delay
+      const firebasePromise = async () => {
+        if (window.pixvinzAuth) {
+          try {
+            await window.pixvinzAuth.createUserWithEmailAndPassword(window.pixvinzAuth.auth, generatedEmail, pass);
+          } catch (firebaseErr) {
+            if (firebaseErr.code === 'auth/email-already-in-use') {
+              return "Username already taken!";
+            }
           }
         }
+        return null;
+      };
+
+      const startTime = Date.now();
+      const firebaseErrorMsg = await firebasePromise();
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, 4000 - elapsedTime);
+
+      if (remainingTime > 0) {
+        await new Promise(resolve => setTimeout(resolve, remainingTime));
+      }
+
+      if (firebaseErrorMsg) {
+        if (loadingView) {
+          loadingView.classList.remove('active');
+          loadingView.style.display = 'none';
+        }
+        if (errElem) errElem.innerText = firebaseErrorMsg;
+        return;
       }
 
       const newUser = { displayName, username, password: pass, email: generatedEmail };
@@ -255,6 +292,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (errElem) errElem.innerText = "";
       await saveUserDataToCloud();
+      
+      if (loadingView) {
+        loadingView.classList.remove('active');
+        loadingView.style.display = 'none';
+      }
       showView('home');
       playMainBGM();
       updateHeaderAvatar();
@@ -278,22 +320,45 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('registeredUsers', JSON.stringify(users));
       }
 
+      // Show loading screen with circling effect for 4 seconds during cloud connection
+      const loadingView = document.getElementById('loadingView');
+      if (loadingView) {
+        loadingView.style.display = 'flex';
+        loadingView.classList.add('active');
+      }
+
       const generatedEmail = users[username]?.email || `${username}@pixvinz.game`;
       let loginSuccess = false;
 
-      // 1. Try Firebase Authentication first (enables cross-browser/device login)
-      if (window.pixvinzAuth) {
-        try {
-          await window.pixvinzAuth.signInWithEmailAndPassword(window.pixvinzAuth.auth, generatedEmail, pass);
-          loginSuccess = true;
-        } catch (firebaseErr) {
-          console.warn("Firebase sign-in failed, falling back to local check:", firebaseErr.code);
+      const authLoginPromise = async () => {
+        // 1. Try Firebase Authentication first (enables cross-browser/device login)
+        if (window.pixvinzAuth) {
+          try {
+            await window.pixvinzAuth.signInWithEmailAndPassword(window.pixvinzAuth.auth, generatedEmail, pass);
+            loginSuccess = true;
+          } catch (firebaseErr) {
+            console.warn("Firebase sign-in failed, falling back to local check:", firebaseErr.code);
+          }
         }
+
+        // 2. Fallback to local credential check if offline or if user exists locally
+        if (!loginSuccess && users[username] && users[username].password === pass) {
+          loginSuccess = true;
+        }
+      };
+
+      const startTime = Date.now();
+      await authLoginPromise();
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, 4000 - elapsedTime);
+
+      if (remainingTime > 0) {
+        await new Promise(resolve => setTimeout(resolve, remainingTime));
       }
 
-      // 2. Fallback to local credential check if offline or if user exists locally
-      if (!loginSuccess && users[username] && users[username].password === pass) {
-        loginSuccess = true;
+      if (loadingView) {
+        loadingView.classList.remove('active');
+        loadingView.style.display = 'none';
       }
 
       if (loginSuccess) {
@@ -324,6 +389,29 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // --- SHOW / HIDE PASSWORD TOGGLE ---
+  function setupPasswordToggle(toggleId, inputId) {
+    const toggleBtn = document.getElementById(toggleId);
+    const passwordInput = document.getElementById(inputId);
+
+    if (toggleBtn && passwordInput) {
+      toggleBtn.addEventListener('click', () => {
+        if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+        if (passwordInput.type === 'password') {
+          passwordInput.type = 'text';
+          toggleBtn.innerText = '👁️‍🗨️';
+        } else {
+          passwordInput.type = 'password';
+          toggleBtn.innerText = '👁️';
+        }
+      });
+    }
+  }
+
+  setupPasswordToggle('toggleLoginPass', 'loginPass');
+  setupPasswordToggle('toggleRegPass', 'regPass');
+  setupPasswordToggle('toggleRegPassConfirm', 'regPassConfirm');
 
   // --- 3. HOME PAGE BUTTONS ---
   const playBtn = document.getElementById('playBtn');
