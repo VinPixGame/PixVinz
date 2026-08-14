@@ -61,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (mainHeader) mainHeader.classList.add('hidden');
     }
 
-    // Play main BGM across menu views
     if (['home', 'levels', 'collections', 'challenge', 'leaderboardView'].includes(targetView)) {
       if (typeof AudioManager !== 'undefined') AudioManager.playMain();
     }
@@ -351,11 +350,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- 4. SETTINGS, ABOUT & LOGOUT ---
   const settingsModal = document.getElementById('settingsModal');
   const aboutModal = document.getElementById('aboutModal');
-  const sfxToggle = document.getElementById('sfxToggle');
   const musicToggle = document.getElementById('musicToggle');
 
   if (typeof AudioManager !== 'undefined') {
-    if (sfxToggle) sfxToggle.checked = AudioManager.sfxEnabled;
     if (musicToggle) musicToggle.checked = AudioManager.musicEnabled;
   }
 
@@ -372,15 +369,6 @@ document.addEventListener('DOMContentLoaded', () => {
     closeSettingsModal.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       if (settingsModal) settingsModal.classList.add('hidden');
-    });
-  }
-
-  if (sfxToggle) {
-    sfxToggle.addEventListener('change', (e) => {
-      if (typeof AudioManager !== 'undefined') {
-        AudioManager.setSFX(e.target.checked);
-        if (e.target.checked) AudioManager.playClick();
-      }
     });
   }
 
@@ -535,7 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // --- 6. COLLECTION FOLDERS LOGIC (Preserving your exact CSS classes) ---
+  // --- 6. COLLECTION FOLDERS LOGIC ---
   function renderCollectionFolders() {
     const folderGrid = document.getElementById('collectionsFolderGrid');
     if (!folderGrid) return;
