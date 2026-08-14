@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const currentLevel = parseInt(urlParams.get('level')) || 1;
 
@@ -21,6 +21,52 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!user || !user.username) return keyName;
     return `${user.username}_${keyName}`;
   }
+
+  // --- FIRESTORE CLOUD SYNC HELPER ---
+  async function saveUserDataToCloud() {
+    const user = getCurrentUser();
+    if (!user || !user.username || !window.pixvinzDb) return;
+
+    const { db, doc, setDoc } = window.pixvinzDb;
+    try {
+      const currentLevelVal = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+      const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
+      const avatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
+
+      const userDocRef = doc(db, "players", user.username);
+      await setDoc(userDocRef, {
+        username: user.username,
+        displayName: user.displayName || user.username,
+        level: currentLevelVal,
+        coins: totalCoins,
+        avatar: avatar,
+        lastUpdated: new Date()
+      }, { merge: true });
+    } catch (error) {
+      console.error("Error saving game data to cloud:", error);
+    }
+  }
+
+  async function loadUserDataFromCloud() {
+    const user = getCurrentUser();
+    if (!window.pixvinzDb || !user || !user.username) return;
+    const { db, doc, getDoc } = window.pixvinzDb;
+    try {
+      const userDocRef = doc(db, "players", user.username);
+      const docSnap = await getDoc(userDocRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.level) localStorage.setItem(getUserKey('currentLevel'), data.level);
+        if (data.coins !== undefined) localStorage.setItem(getUserKey('totalCoins'), data.coins);
+        if (data.avatar) localStorage.setItem(getUserKey('vinpix_avatar'), data.avatar);
+      }
+    } catch (error) {
+      console.error("Error loading game data from cloud:", error);
+    }
+  }
+
+  // Load from cloud on start
+  await loadUserDataFromCloud();
 
   updateCoinDisplay();
 
@@ -135,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderGrid();
   }
 
-  function checkWin() {
+  async function checkWin() {
     const isSolved = tilesState.every((val, idx) => val === idx);
     if (isSolved) {
       clearInterval(timerInterval);
@@ -186,6 +232,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (currentLevel >= maxUnlocked) {
         localStorage.setItem(currentLevelKey, currentLevel + 1);
       }
+
+      // Sync updated progress to Firestore cloud
+      await saveUserDataToCloud();
 
       showVictoryModal(stars, newCoinsEarned);
     }
@@ -281,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const previewBtn = document.getElementById('previewBtn');
   if (previewBtn) {
-    previewBtn.addEventListener('click', () => {
+    previewBtn.addEventListener('click', async () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
 
       const coinKey = getUserKey('totalCoins');
@@ -297,6 +346,9 @@ document.addEventListener('DOMContentLoaded', () => {
       totalCoins -= previewCost;
       localStorage.setItem(coinKey, totalCoins);
       updateCoinDisplay();
+      
+      // Sync deduction to cloud
+      await saveUserDataToCloud();
 
       // Open modal and show current level image
       const modal = document.getElementById('imageModal');
@@ -350,28 +402,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const victoryHomeBtn = document.getElementById('victoryHomeBtn');
   if (victoryHomeBtn) {
-    victoryHomeBtn.onclick = (e) => {
+    victoryHomeBtn.onclick = async (e) => {
       e.stopPropagation();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-     localStorage.setItem('skipLoading', 'true');
+      await saveUserDataToCloud();
+      localStorage.setItem('skipLoading', 'true');
       window.location.href = 'index.html';
     };
   }
 
   const backToHome = document.getElementById('backToHome');
   if (backToHome) {
-    backToHome.addEventListener('click', () => {
+    backToHome.addEventListener('click', async () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-     localStorage.setItem('skipLoading', 'true');
+      await saveUserDataToCloud();
+      localStorage.setItem('skipLoading', 'true');
       window.location.href = 'index.html';
     });
   }
 
   const collectionsBtn = document.getElementById('collectionsBtn');
   if (collectionsBtn) {
-    collectionsBtn.addEventListener('click', () => {
+    collectionsBtn.addEventListener('click', async () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-     localStorage.setItem('skipLoading', 'true');
+      await saveUserDataToCloud();
+      localStorage.setItem('skipLoading', 'true');
       window.location.href = 'index.html';
     });
   }
