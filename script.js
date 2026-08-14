@@ -1,8 +1,19 @@
-// ==========================================
-// PIXVINZ - MAIN CLIENT SCRIPT (CLOUD & LOCAL SYNCED)
-// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+  // If Firebase is already loaded (or when the custom event fires)
+  if (window.pixvinzAuth && window.pixvinzDb) {
+    initializeAppLogic();
+  } else {
+    window.addEventListener('firebase-ready', () => {
+      initializeAppLogic();
+    });
+  }
+});
 
-document.addEventListener('DOMContentLoaded', () => {
+function initializeAppLogic() {
+  // ==========================================
+  // PIXVINZ - MAIN CLIENT SCRIPT (CLOUD & LOCAL SYNCED)
+  // ==========================================
+
   const views = {
     loading: document.getElementById('loadingView'),
     login: document.getElementById('loginView'),
@@ -910,13 +921,12 @@ document.addEventListener('DOMContentLoaded', () => {
       folderCard.className = 'collection-folder-btn';
       folderCard.innerHTML = `
         <div class="collection-folder-icon">📁</div>
-        <div class="collection-folder-title">LEVELS ${start} - ${end}</div>
-        <div class="collection-folder-sub">Tap to view</div>
+        <div class="collection-folder-title">Levels ${start} - ${end}</div>
       `;
-      
+
       folderCard.addEventListener('click', () => {
         if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-        openCollectionFolder(start, end);
+        renderCollectionImages(start, end);
       });
 
       folderGrid.appendChild(folderCard);
@@ -924,85 +934,79 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const folderContainer = document.getElementById('collectionsFolderContainer');
     const imagesContainer = document.getElementById('collectionsImagesContainer');
-    const titleElem = document.getElementById('collectionsTitle');
-
     if (folderContainer) folderContainer.classList.remove('hidden');
     if (imagesContainer) imagesContainer.classList.add('hidden');
-    if (titleElem) titleElem.innerText = 'COLLECTIONS';
   }
 
-  function openCollectionFolder(start, end) {
+  function renderCollectionImages(start, end) {
     const folderContainer = document.getElementById('collectionsFolderContainer');
     const imagesContainer = document.getElementById('collectionsImagesContainer');
-    const titleElem = document.getElementById('collectionsTitle');
+    const imageGrid = document.getElementById('collectionsImageGrid');
+    const folderTitle = document.getElementById('collectionsFolderTitle');
 
     if (folderContainer) folderContainer.classList.add('hidden');
     if (imagesContainer) imagesContainer.classList.remove('hidden');
-    if (titleElem) titleElem.innerText = `LVL ${start}-${end}`;
+    if (folderTitle) folderTitle.innerText = `Levels ${start} - ${end} Collection`;
+    if (!imageGrid) return;
 
-    renderFilteredCollections(start, end);
-  }
+    imageGrid.innerHTML = '';
 
-  function renderFilteredCollections(start, end) {
-    const grid = document.getElementById('collectionsGrid');
-    if (!grid) return;
-    grid.innerHTML = '';
     const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
 
     for (let i = start; i <= end; i++) {
-      const isUnlocked = i < currentLevel;
-      const item = document.createElement('div');
-      item.className = 'collection-item';
+      const isUnlocked = i <= currentLevel;
+      const imgCard = document.createElement('div');
+      imgCard.className = `collection-img-card ${isUnlocked ? '' : 'locked'}`;
 
       if (isUnlocked) {
-        item.innerHTML = `
-          <img src="image/level${i}.jpeg" alt="Level ${i}">
-          <div class="collection-badge">LEVEL ${i.toString().padStart(2, '0')}</div>
+        imgCard.innerHTML = `
+          <div class="collection-img-wrapper" style="background-image: url('image/level${i}.jpeg')"></div>
+          <div class="collection-img-label">Level ${i}</div>
         `;
-
-        item.addEventListener('click', () => {
+        imgCard.addEventListener('click', () => {
           if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-          openImageModal(i);
+          openImageModal(`image/level${i}.jpeg`, `Level ${i} Artwork`);
         });
       } else {
-        item.style.opacity = '0.4';
-        item.innerHTML = `
-          <div style="display:flex; align-items:center; justify-content:center; height:100%; font-size:24px;">🔒</div>
-          <div class="collection-badge">LEVEL ${i.toString().padStart(2, '0')}</div>
+        imgCard.innerHTML = `
+          <div class="collection-img-wrapper locked-bg" style="display:flex; align-items:center; justify-content:center; background:#100424;">
+            <span style="font-size:24px;">🔒</span>
+          </div>
+          <div class="collection-img-label">Level ${i}</div>
         `;
       }
-      grid.appendChild(item);
+
+      imageGrid.appendChild(imgCard);
     }
   }
 
-  function openImageModal(levelNum) {
-    const modal = document.getElementById('imageModal');
-    const modalImg = document.getElementById('modalPreviewImg');
-    const modalTitle = document.getElementById('modalLevelTitle');
+  function openImageModal(imgSrc, imgTitle) {
+    let modal = document.getElementById('fullscreenImageModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'fullscreenImageModal';
+      modal.className = 'modal-overlay';
+      modal.innerHTML = `
+        <div class="modal-content" style="background: #1a0633; padding: 20px; border-radius: 12px; text-align: center; max-width: 90%; max-height: 90%;">
+          <h3 id="fsModalTitle" style="color: #ffd700; margin-bottom: 15px;"></h3>
+          <div style="max-height: 60vh; overflow: hidden; display: flex; justify-content: center; align-items: center;">
+            <img id="fsModalImg" src="" alt="Artwork" style="max-width: 100%; max-height: 55vh; border-radius: 8px; border: 2px solid #b388ff;" />
+          </div>
+          <button id="closeFsModal" class="primary-btn" style="margin-top: 20px; padding: 10px 25px;">Close</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
 
-    if (modal && modalImg && modalTitle) {
-      modalImg.src = `image/level${levelNum}.jpeg`;
-      modalTitle.innerText = `LEVEL ${levelNum.toString().padStart(2, '0')}`;
-      modal.classList.remove('hidden');
-    }
-  }
-
-  const closeImageModal = document.getElementById('closeImageModal');
-  if (closeImageModal) {
-    closeImageModal.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      const modal = document.getElementById('imageModal');
-      if (modal) modal.classList.add('hidden');
-    });
-  }
-
-  const imageModal = document.getElementById('imageModal');
-  if (imageModal) {
-    imageModal.addEventListener('click', (e) => {
-      if (e.target === imageModal) {
+      modal.querySelector('#closeFsModal').addEventListener('click', () => {
         if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-        imageModal.classList.add('hidden');
-      }
-    });
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+      });
+    }
+
+    modal.querySelector('#fsModalTitle').innerText = imgTitle;
+    modal.querySelector('#fsModalImg').src = imgSrc;
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
   }
-});
+}
