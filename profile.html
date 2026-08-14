@@ -1,219 +1,114 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    // --- AUTHENTICATION & USER HELPERS ---
-    function getCurrentUser() {
-        try {
-            return JSON.parse(localStorage.getItem('loggedInUser'));
-        } catch (e) {
-            return null;
-        }
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Profile - VinPixGame</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+    <div class="profile-container">
+        <!-- Header with Back Button -->
+        <div class="profile-header" style="position: relative; display: flex; align-items: center; justify-content: center; width: 100%; margin-bottom: 20px;">
+            <button class="back-btn" onclick="goHome()" style="position: absolute; left: 0;">← Back</button>
+            <h1 style="margin: 0; font-size: 1.5rem; text-align: center;">Player Profile</h1>
+        </div>
 
-    const user = getCurrentUser();
-    if (!user || !user.username) {
-        window.location.href = 'index.html';
-        return;
-    }
+        <!-- Profile Card -->
+        <div class="profile-card">
+            <!-- Avatar Display & Upload -->
+            <div class="avatar-section">
+                <div class="avatar-wrapper">
+                    <img id="avatar-preview" src="image/default-avatar.png" alt="Profile Avatar" onerror="this.src='https://via.placeholder.com/120/4a154b/ffffff?text=Avatar'">
+                </div>
+                <label for="avatar-input" class="upload-btn">Choose Avatar</label>
+                <input type="file" id="avatar-input" accept="image/*" style="display: none;">
+            </div>
 
-    function getUserKey(keyName) {
-        return `${user.username}_${keyName}`;
-    }
+            <!-- Player Name Display Row with Small Edit Button -->
+            <div class="profile-info-row" style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0; background: rgba(255,255,255,0.05); padding: 12px 16px; border-radius: 12px;">
+                <div class="info-label-group">
+                    <span style="font-size: 0.85rem; opacity: 0.7; display: block;">Player Name</span>
+                    <h3 id="displayPlayerName" style="margin: 2px 0 0 0; font-size: 1.2rem;">Ulala</h3>
+                </div>
+                <button class="btn btn-secondary" id="openEditNameModal" style="padding: 6px 14px; font-size: 0.85rem; width: auto;">Edit</button>
+            </div>
 
-    // --- DOM ELEMENTS ---
-    const avatarPreview = document.getElementById('avatar-preview');
-    const avatarInput = document.getElementById('avatar-input');
-    const displayPlayerName = document.getElementById('displayPlayerName');
-    const openEditNameModal = document.getElementById('openEditNameModal');
-    const editNameModal = document.getElementById('editNameModal');
-    const closeEditNameModal = document.getElementById('closeEditNameModal');
-    const usernameInput = document.getElementById('username-input');
-    const saveProfileBtn = document.getElementById('save-profile-btn');
-    const saveStatus = document.getElementById('save-status');
+            <div class="badges-section" style="margin-top: 20px;">
+    <h3 style="font-size: 1rem; margin-bottom: 12px; opacity: 0.9;">Badges</h3>
+    <div class="badges-grid" id="badgesGrid">
+        
+        <!-- Emerald Badge -->
+        <div class="badge-card emerald unlocked">
+            <div class="badge-gem">🧩</div>
+            <div class="badge-info">
+                <div class="badge-title">First Step</div>
+                <div class="badge-desc">Completed Level 1</div>
+            </div>
+        </div>
 
-    const displayLevelBadge = document.getElementById('displayLevelBadge');
-    const displayXpText = document.getElementById('displayXpText');
-    const displayXpBarFill = document.getElementById('displayXpBarFill');
+        <!-- Sapphire Badge -->
+        <div class="badge-card sapphire locked">
+            <div class="badge-gem">⚡</div>
+            <div class="badge-info">
+                <div class="badge-title">Speed Demon</div>
+                <div class="badge-desc">Beat a level fast</div>
+            </div>
+        </div>
 
-    // --- 1. FETCH & SYNC DATA FROM FIRESTORE ---
-    if (window.pixvinzDb) {
-        const { db, doc, getDoc } = window.pixvinzDb;
-        try {
-            const userDocRef = doc(db, "players", user.username);
-            const docSnap = await getDoc(userDocRef);
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                if (data.displayName) {
-                    user.displayName = data.displayName;
-                    localStorage.setItem('loggedInUser', JSON.stringify(user));
-                }
-                if (data.avatar) {
-                    localStorage.setItem(getUserKey('vinpix_avatar'), data.avatar);
-                }
-                if (data.level !== undefined) {
-                    localStorage.setItem(getUserKey('currentLevel'), data.level);
-                }
-                if (data.coins !== undefined) {
-                    localStorage.setItem(getUserKey('totalCoins'), data.coins);
-                }
-            }
-        } catch (error) {
-            console.error("Error fetching profile from cloud:", error);
-        }
-    }
+        <!-- Ruby Badge -->
+        <div class="badge-card ruby locked">
+            <div class="badge-gem">🪙</div>
+            <div class="badge-info">
+                <div class="badge-title">Coin Collector</div>
+                <div class="badge-desc">Earn 500 coins</div>
+            </div>
+        </div>
 
-    // --- 2. POPULATE INITIAL PROFILE UI ---
-    const currentName = user.displayName || user.username;
-    if (displayPlayerName) displayPlayerName.innerText = currentName;
-    if (usernameInput) usernameInput.value = currentName;
+        <!-- Diamond Badge -->
+        <div class="badge-card diamond locked">
+            <div class="badge-gem">⭐</div>
+            <div class="badge-info">
+                <div class="badge-title">Pixel Master</div>
+                <div class="badge-desc">Complete all levels</div>
+            </div>
+        </div>
 
-    // Load Avatar
-    function loadAvatarUI() {
-        const savedAvatar = localStorage.getItem(getUserKey('vinpix_avatar')) || 
-                            localStorage.getItem('vinpix_avatar');
-        if (savedAvatar && avatarPreview) {
-            avatarPreview.src = savedAvatar;
-        }
-    }
-    loadAvatarUI();
+    </div>
+</div>
 
-    // Load Level & XP Progress
-    const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
-    if (displayLevelBadge) displayLevelBadge.innerText = `LEVEL ${currentLevel}`;
+            <!-- XP Progress Bar Section -->
+            <div class="xp-section" style="margin: 25px 0 10px 0; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span id="displayLevelBadge" style="background: linear-gradient(135deg, #9c27b0, #e91e63); padding: 3px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; color: #fff;">LEVEL 1</span>
+                    <span id="displayXpText" style="font-size: 0.8rem; opacity: 0.7;">0 / 500 XP</span>
+                </div>
+                <!-- Progress Track -->
+                <div style="width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden;">
+                    <div id="displayXpBarFill" style="width: 0%; height: 100%; background: linear-gradient(90deg, #9c27b0, #00f2fe); border-radius: 4px; transition: width 0.4s ease;"></div>
+                </div>
+            </div>
     
-    // XP Calculation simulation based on level/coins
-    const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
-    const currentXp = (currentLevel - 1) * 100 + (totalCoins % 100);
-    const maxXp = currentLevel * 100;
-    const xpPercentage = Math.min(100, Math.max(0, (currentXp / maxXp) * 100));
+    <!-- EDIT NAME POPUP MODAL -->
+    <div id="editNameModal" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+        <div class="settings-card" style="background: #2a1147; padding: 25px; border-radius: 16px; width: 90%; max-width: 350px; border: 2px solid #9c27b0; position: relative;">
+            <div class="settings-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0; font-size: 1.1rem;">EDIT PLAYER NAME</h3>
+                <button class="icon-btn close-modal-btn" id="closeEditNameModal" style="background: transparent; border: none; color: #fff; font-size: 1.2rem; cursor: pointer;">✕</button>
+            </div>
+            
+            <div class="input-group" style="margin-bottom: 15px;">
+                <input type="text" id="username-input" placeholder="Enter new name..." maxlength="15" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #9c27b0; background: rgba(0,0,0,0.2); color: #fff;">
+            </div>
+            <p id="save-status" class="save-status" style="margin: 5px 0 15px 0; font-size: 0.9rem; text-align: center;"></p>
 
-    if (displayXpText) displayXpText.innerText = `${currentXp} / ${maxXp} XP`;
-    if (displayXpBarFill) displayXpBarFill.style.width = `${xpPercentage}%`;
+            <div class="settings-actions">
+                <button id="save-profile-btn" class="btn btn-primary" style="width: 100%;">Save Name</button>
+            </div>
+        </div>
+    </div>
 
-    // --- 3. HANDLE AVATAR FILE UPLOAD & CLOUD SYNC ---
-    if (avatarInput) {
-        avatarInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = async function(uploadEvent) {
-                const base64String = uploadEvent.target.result;
-                localStorage.setItem(getUserKey('vinpix_avatar'), base64String);
-                loadAvatarUI();
-
-                // Save to Firestore Cloud immediately
-                if (window.pixvinzDb) {
-                    const { db, doc, setDoc } = window.pixvinzDb;
-                    try {
-                        await setDoc(doc(db, "players", user.username), {
-                            username: user.username,
-                            displayName: user.displayName || user.username,
-                            level: currentLevel,
-                            coins: totalCoins,
-                            avatar: base64String,
-                            lastUpdated: new Date()
-                        }, { merge: true });
-                    } catch (err) {
-                        console.error("Failed to sync avatar to cloud:", err);
-                    }
-                }
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-
-    // --- 4. EDIT NAME MODAL CONTROLS ---
-    if (openEditNameModal && editNameModal) {
-        openEditNameModal.addEventListener('click', () => {
-            editNameModal.classList.remove('hidden');
-            if (usernameInput) usernameInput.value = user.displayName || user.username;
-            if (saveStatus) saveStatus.innerText = '';
-        });
-    }
-
-    if (closeEditNameModal && editNameModal) {
-        closeEditNameModal.addEventListener('click', () => {
-            editNameModal.classList.add('hidden');
-        });
-    }
-
-    if (editNameModal) {
-        editNameModal.addEventListener('click', (e) => {
-            if (e.target === editNameModal) {
-                editNameModal.classList.add('hidden');
-            }
-        });
-    }
-
-    // --- 5. SAVE PROFILE NAME & CLOUD SYNC ---
-    if (saveProfileBtn) {
-        saveProfileBtn.addEventListener('click', async () => {
-            const newName = usernameInput.value.trim();
-            if (!newName) {
-                if (saveStatus) {
-                    saveStatus.style.color = '#ff5252';
-                    saveStatus.innerText = "Name cannot be empty!";
-                }
-                return;
-            }
-
-            // Update LocalStorage User
-            user.displayName = newName;
-            localStorage.setItem('loggedInUser', JSON.stringify(user));
-
-            // Update registeredUsers registry
-            let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || {};
-            if (registeredUsers[user.username]) {
-                registeredUsers[user.username].displayName = newName;
-                localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
-            }
-
-            if (displayPlayerName) displayPlayerName.innerText = newName;
-
-            if (saveStatus) {
-                saveStatus.style.color = '#4caf50';
-                saveStatus.innerText = "Saving to cloud...";
-            }
-
-            // Sync updates to Firestore Cloud
-            if (window.pixvinzDb) {
-                const { db, doc, setDoc } = window.pixvinzDb;
-                try {
-                    const savedAvatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
-                    await setDoc(doc(db, "players", user.username), {
-                        username: user.username,
-                        displayName: newName,
-                        level: currentLevel,
-                        coins: totalCoins,
-                        avatar: savedAvatar,
-                        lastUpdated: new Date()
-                    }, { merge: true });
-
-                    if (saveStatus) {
-                        saveStatus.innerText = "Successfully saved!";
-                        setTimeout(() => {
-                            editNameModal.classList.add('hidden');
-                        }, 1000);
-                    }
-                } catch (error) {
-                    console.error("Error saving profile to cloud:", error);
-                    if (saveStatus) {
-                        saveStatus.style.color = '#ff5252';
-                        saveStatus.innerText = "Saved locally, cloud sync failed.";
-                    }
-                }
-            } else {
-                if (saveStatus) {
-                    saveStatus.innerText = "Successfully saved!";
-                    setTimeout(() => {
-                        editNameModal.classList.add('hidden');
-                    }, 1000);
-                }
-            }
-        });
-    }
-});
-
-// Global back function referenced in profile.html
-function goHome() {
-    window.location.href = 'index.html';
-}
+    <script src="profile.js"></script>
+</body>
+</html>
