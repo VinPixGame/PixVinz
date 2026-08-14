@@ -24,21 +24,43 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${user.username}_${keyName}`;
   }
 
-  // --- AVATAR SYNC HELPER ---
+  // --- ROBUST AVATAR SYNC HELPER ---
   function updateHeaderAvatar() {
-    const savedAvatar = localStorage.getItem(getUserKey('vinpix_avatar'));
+    // Checks user-specific key first, then falls back to global key
+    const savedAvatar = localStorage.getItem(getUserKey('vinpix_avatar')) || 
+                        localStorage.getItem('vinpix_avatar') ||
+                        localStorage.getItem('avatar'); // extra fallback
+
     const avatarImg = document.getElementById('profileHeaderImg');
     const fallbackIcon = document.getElementById('profileIconFallback');
 
-    if (savedAvatar && avatarImg && fallbackIcon) {
-      avatarImg.src = savedAvatar;
-      avatarImg.style.display = 'block';
-      fallbackIcon.style.display = 'none';
-    } else if (avatarImg && fallbackIcon) {
-      avatarImg.style.display = 'none';
-      fallbackIcon.style.display = 'block';
+    if (savedAvatar) {
+      if (avatarImg) {
+        avatarImg.src = savedAvatar;
+        avatarImg.style.display = 'block';
+      }
+      if (fallbackIcon) {
+        fallbackIcon.style.display = 'none';
+      }
+    } else {
+      if (avatarImg) {
+        avatarImg.style.display = 'none';
+      }
+      if (fallbackIcon) {
+        fallbackIcon.style.display = 'block';
+      }
     }
   }
+
+  // Expose globally so your profile modal/page can trigger it instantly
+  window.updateHeaderAvatar = updateHeaderAvatar;
+
+  // Listen for storage changes across tabs/modals
+  window.addEventListener('storage', (e) => {
+    if (e.key && e.key.includes('vinpix_avatar')) {
+      updateHeaderAvatar();
+    }
+  });
 
   function showView(targetView) {
     Object.values(views).forEach(v => {
@@ -96,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     showView('home');
     playMainBGM();
+    updateHeaderAvatar();
   } else {
     setTimeout(() => {
       const loggedInUser = getCurrentUser();
@@ -104,6 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
         showView('home');
         playMainBGM();
+        updateHeaderAvatar();
       } else {
         showView('login');
       }
@@ -163,6 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (errElem) errElem.innerText = "";
       showView('home');
       playMainBGM();
+      updateHeaderAvatar();
     });
   }
 
@@ -190,6 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (errElem) errElem.innerText = "";
         showView('home');
         playMainBGM();
+        updateHeaderAvatar();
       } else {
         if (errElem) errElem.innerText = "Invalid username or password!";
       }
@@ -263,6 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
     navSettings.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       if (settingsModal) settingsModal.classList.remove('hidden');
+      updateHeaderAvatar(); // Refresh avatar when opening settings/profile modal
     });
   }
 
@@ -493,6 +520,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const item = document.createElement('div');
       item.className = 'collection-item';
 
+      v = isUnlocked; // placeholder check
       if (isUnlocked) {
         item.innerHTML = `
           <img src="image/level${i}.jpeg" alt="Level ${i}">
@@ -543,4 +571,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Initial check on load
+  updateHeaderAvatar();
 });
