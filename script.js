@@ -251,6 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (errElem) errElem.innerText = "";
       } catch (error) {
+        console.error("Registration error:", error);
         if (errElem) errElem.innerText = error.message.replace("Firebase: ", "");
       }
     });
@@ -273,6 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
         await signInWithEmailAndPassword(auth, email, pass);
         if (errElem) errElem.innerText = "";
       } catch (error) {
+        console.error("Login error:", error);
         if (errElem) errElem.innerText = "Invalid username or password!";
       }
     });
