@@ -33,8 +33,9 @@
           <div class="input-group">
             <input type="text" id="loginUser" placeholder="Username" required>
           </div>
-          <div class="input-group">
-            <input type="password" id="loginPass" placeholder="Password" required>
+          <div class="input-group" style="position: relative;">
+            <input type="password" id="loginPass" placeholder="Password" required style="padding-right: 40px;">
+            <span id="toggleLoginPass" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 1.1rem; user-select: none;">👁️</span>
           </div>
           <p id="loginError" class="auth-error"></p>
           <button type="submit" class="btn btn-primary">LOG IN</button>
@@ -54,11 +55,13 @@
           <div class="input-group">
             <input type="text" id="regUser" placeholder="Username" required>
           </div>
-          <div class="input-group">
-            <input type="password" id="regPass" placeholder="Password" required>
+          <div class="input-group" style="position: relative;">
+            <input type="password" id="regPass" placeholder="Password (6+ chars, 1 uppercase, 1 number)" required style="padding-right: 40px;">
+            <span id="toggleRegPass" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 1.1rem; user-select: none;">👁️</span>
           </div>
-          <div class="input-group">
-            <input type="password" id="regPassConfirm" placeholder="Repeat Password" required>
+          <div class="input-group" style="position: relative;">
+            <input type="password" id="regPassConfirm" placeholder="Repeat Password" required style="padding-right: 40px;">
+            <span id="toggleRegPassConfirm" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 1.1rem; user-select: none;">👁️</span>
           </div>
           <p id="regError" class="auth-error"></p>
           <button type="submit" class="btn btn-primary">REGISTER</button>
