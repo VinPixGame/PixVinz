@@ -8,53 +8,6 @@ function goHome() {
     }
 }
 
-// Function to load dynamic stats and XP from localStorage
-function loadPlayerStats() {
-    let currentUsername = 'Vinz';
-    try {
-        const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
-        if (userObj && userObj.username) {
-            currentUsername = userObj.username;
-        }
-    } catch (e) {}
-
-    // Fetch or initialize user stats object tied to this username
-    const statsKey = 'user_stats_' + currentUsername;
-    const userData = JSON.parse(localStorage.getItem(statsKey)) || {
-        totalWins: 86,
-        puzzlesSolved: 245,
-        bestStreak: 17,
-        accuracy: 98,
-        totalXp: 2450
-    };
-
-    // Level and XP Calculation logic
-    const maxXp = 5000;
-    const currentLevel = Math.floor(userData.totalXp / maxXp) + 1;
-    const currentXpInLevel = userData.totalXp % maxXp;
-    const progressPercent = Math.min(100, (currentXpInLevel / maxXp) * 100);
-
-    // Update DOM Stats Grid Elements if they exist
-    const winsEl = document.getElementById('stat-wins');
-    const puzzlesEl = document.getElementById('stat-puzzles');
-    const streakEl = document.getElementById('stat-streak');
-    const accuracyEl = document.getElementById('stat-accuracy');
-
-    if (winsEl) winsEl.textContent = userData.totalWins;
-    if (puzzlesEl) puzzlesEl.textContent = userData.puzzlesSolved;
-    if (streakEl) streakEl.textContent = userData.bestStreak;
-    if (accuracyEl) accuracyEl.textContent = userData.accuracy + '%';
-
-    // Update XP Bar and Level indicator dynamically if elements match
-    const levelBadgeEl = document.getElementById('displayLevelBadge');
-    const xpTextEl = document.getElementById('displayXpText');
-    const xpBarFillEl = document.getElementById('displayXpBarFill');
-
-    if (levelBadgeEl) levelBadgeEl.textContent = `LEVEL ${currentLevel}`;
-    if (xpTextEl) xpTextEl.textContent = `${currentXpInLevel.toLocaleString()} / ${maxXp.toLocaleString()} XP`;
-    if (xpBarFillEl) xpBarFillEl.style.width = `${progressPercent}%`;
-}
-
 // Load saved profile data and auto-populate display name & avatar
 document.addEventListener('DOMContentLoaded', () => {
     let initialName = '';
@@ -84,9 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const previewElem = document.getElementById('avatar-preview');
         if (previewElem) previewElem.src = savedAvatar;
     }
-
-    // Load dynamic player stats and progression metrics
-    loadPlayerStats();
 });
 
 // Modal Elements & Triggers
