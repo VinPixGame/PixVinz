@@ -30,12 +30,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- DYNAMIC GRID SIZE CALCULATION ---
   function getGridSize(level) {
-    if (level <= 10) return 3;       // Level 1-10 (3x3)
-    if (level <= 30) return 4;       // Level 11-30 (4x4)
-    if (level <= 60) return 5;       // Level 31-60 (5x5)
+    if (level <= 10) return 3;        // Level 1-10 (3x3)
+    if (level <= 30) return 4;        // Level 11-30 (4x4)
+    if (level <= 60) return 5;        // Level 31-60 (5x5)
     if (level <= 100) return 6;      // Level 61-100 (6x6)
     if (level <= 150) return 7;      // Level 101-150 (7x7)
-    return 8;                        // Level 151-200 (8x8)
+    return 8;                         // Level 151-200 (8x8)
   }
 
   const gridSize = getGridSize(currentLevel);
