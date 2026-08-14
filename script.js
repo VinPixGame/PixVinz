@@ -5,7 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
     register: document.getElementById('registerView'),
     home: document.getElementById('homeView'),
     levels: document.getElementById('levelsView'),
-    collections: document.getElementById('collectionsView')
+    collections: document.getElementById('collectionsView'),
+    challenge: document.getElementById('challengeView'),
+    leaderboard: document.getElementById('leaderboardView')
   };
 
   const mainHeader = document.getElementById('mainHeader');
@@ -26,10 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- ROBUST AVATAR SYNC HELPER ---
   function updateHeaderAvatar() {
-    // Checks user-specific key first, then falls back to global key
     const savedAvatar = localStorage.getItem(getUserKey('vinpix_avatar')) || 
                         localStorage.getItem('vinpix_avatar') ||
-                        localStorage.getItem('avatar'); // extra fallback
+                        localStorage.getItem('avatar');
 
     const avatarImg = document.getElementById('profileHeaderImg');
     const fallbackIcon = document.getElementById('profileIconFallback');
@@ -52,10 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Expose globally so your profile modal/page can trigger it instantly
   window.updateHeaderAvatar = updateHeaderAvatar;
 
-  // Listen for storage changes across tabs/modals
   window.addEventListener('storage', (e) => {
     if (e.key && e.key.includes('vinpix_avatar')) {
       updateHeaderAvatar();
@@ -71,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
       views[targetView].classList.add('active');
     }
 
-    if (['home', 'levels', 'collections'].includes(targetView)) {
+    if (['home', 'levels', 'collections', 'challenge', 'leaderboard'].includes(targetView)) {
       if (mainHeader) mainHeader.classList.remove('hidden');
       updateCoinDisplay();
       updateHeaderAvatar();
@@ -250,6 +249,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const navChallenge = document.getElementById('navChallenge');
+  if (navChallenge) {
+    navChallenge.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      showView('challenge');
+    });
+  }
+
+  const navLeaderboard = document.getElementById('navLeaderboard');
+  if (navLeaderboard) {
+    navLeaderboard.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      renderLeaderboard();
+      showView('leaderboard');
+    });
+  }
+
   document.querySelectorAll('.back-btn').forEach(btn => {
     if (btn.id === 'collectionsBackBtn') return;
     btn.addEventListener('click', () => {
@@ -273,7 +289,153 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- 4. SETTINGS, ABOUT & LOGOUT ---
+  // --- 4. CHALLENGE 1V1 MATCHMAKING LOGIC ---
+  const startMatchmakingBtn = document.getElementById('startMatchmakingBtn');
+  const matchmakingStatus = document.getElementById('matchmakingStatus');
+  if (startMatchmakingBtn) {
+    startMatchmakingBtn.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      startMatchmakingBtn.disabled = true;
+      startMatchmakingBtn.style.opacity = '0.5';
+      if (matchmakingStatus) matchmakingStatus.innerText = "Searching for an opponent...";
+
+      setTimeout(() => {
+        if (matchmakingStatus) matchmakingStatus.innerText = "Opponent found! Initializing Arena...";
+        setTimeout(() => {
+          startMatchmakingBtn.disabled = false;
+          startMatchmakingBtn.style.opacity = '1';
+          if (matchmakingStatus) matchmakingStatus.innerText = "";
+          const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+          window.location.href = `game.html?level=${currentLevel}&mode=challenge`;
+        }, 1200);
+      }, 1800);
+    });
+  }
+
+  // --- 5. LEADERBOARD RANKING LOGIC ---
+  function renderLeaderboard() {
+    const listContainer = document.getElementById('leaderboardList');
+    const userRankDisplay = document.getElementById('userRankDisplay');
+    if (!listContainer) return;
+    listContainer.innerHTML = '';
+
+    const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+    const currentUser = getCurrentUser();
+    
+    let players = [];
+
+    // Compile actual registered users and their current states
+    Object.keys(registeredUsers).forEach(username => {
+      const u = registeredUsers[username];
+      const uLevel = parseInt(localStorage.getItem(`${username}_currentLevel`)) || 1;
+      const uCoins = parseInt(localStorage.getItem(`${username}_totalCoins`)) || 0;
+      players.push({
+        name: u.displayName || u.username,
+        username: u.username,
+        level: uLevel,
+        coins: uCoins,
+        isCurrent: currentUser && currentUser.username === u.username
+      });
+    });
+
+    // If current user isn't in registeredUsers map yet, add them
+    if (currentUser && !players.some(p => p.username === currentUser.username)) {
+      const uLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+      const uCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
+      players.push({
+        name: currentUser.displayName || currentUser.username,
+        username: currentUser.username,
+        level: uLevel,
+        coins: uCoins,
+        isCurrent: true
+      });
+    }
+
+    // Add simulated global players to ensure a robust Top 20 list
+    const simulatedBots = [
+      { name: "PixelMaster", level: 45, coins: 1250 },
+      { name: "VinzPro", level: 38, coins: 980 },
+      { name: "ColorQueen", level: 32, coins: 810 },
+      { name: "GridRunner", level: 28, coins: 700 },
+      { name: "PuzzleKing", level: 25, coins: 620 },
+      { name: "ShadowArt", level: 22, coins: 540 },
+      { name: "NeonVibe", level: 19, coins: 450 },
+      { name: "ZenSolver", level: 16, coins: 380 },
+      { name: "AeroPixel", level: 14, coins: 310 },
+      { name: "RetroGamer", level: 12, coins: 250 },
+      { name: "AlphaVinz", level: 10, coins: 200 },
+      { name: "BlockBuster", level: 8, coins: 160 },
+      { name: "SwiftMatch", level: 7, coins: 130 },
+      { name: "ColorBlitz", level: 5, coins: 90 },
+      { name: "TileWizard", level: 4, coins: 70 },
+      { name: "MosaicHero", level: 3, coins: 50 },
+      { name: "SketchBoy", level: 2, coins: 30 },
+      { name: "BeginnerPix", level: 1, coins: 10 }
+    ];
+
+    simulatedBots.forEach(bot => {
+      if (!players.some(p => p.name.toLowerCase() === bot.name.toLowerCase())) {
+        players.push({ ...bot, isCurrent: false });
+      }
+    });
+
+    // Sort players descending by Level, then Coins
+    players.sort((a, b) => {
+      if (b.level !== a.level) {
+        return b.level - a.level;
+      }
+      return b.coins - a.coins;
+    });
+
+    // Take Top 20
+    const top20 = players.slice(0, 20);
+
+    let userFoundRank = "--";
+
+    top20.forEach((player, index) => {
+      const rank = index + 1;
+      if (player.isCurrent) {
+        userFoundRank = `#${rank}`;
+      }
+
+      const row = document.createElement('div');
+      row.className = `overall-best-card ${player.isCurrent ? 'current-user-row' : ''}`;
+      row.style.margin = '0';
+      row.style.padding = '12px 16px';
+      row.style.display = 'flex';
+      row.style.alignItems = 'center';
+      row.style.justifyContent = 'space-between';
+      if (player.isCurrent) {
+        row.style.border = '2px solid #ffd700';
+        row.style.backgroundColor = 'rgba(156, 39, 176, 0.25)';
+      }
+
+      let rankMedal = `<strong>#${rank}</strong>`;
+      if (rank === 1) rankMedal = '🥇';
+      else if (rank === 2) rankMedal = '🥈';
+      else if (rank === 3) rankMedal = '🥉';
+
+      row.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="font-size: 1.1rem; width: 32px; text-align: center; color: #ffd700;">${rankMedal}</div>
+          <div>
+            <div style="font-weight: bold; color: #fff; font-size: 0.95rem;">${player.name} ${player.isCurrent ? '(You)' : ''}</div>
+            <div style="font-size: 0.75rem; color: #b388ff;">Level ${player.level}</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+          <div style="font-size: 0.85rem; color: #ffd700;">🪙 ${player.coins}</div>
+        </div>
+      `;
+      listContainer.appendChild(row);
+    });
+
+    if (userRankDisplay) {
+      userRankDisplay.innerText = userFoundRank;
+    }
+  }
+
+  // --- 6. SETTINGS, ABOUT & LOGOUT ---
   const settingsModal = document.getElementById('settingsModal');
   const aboutModal = document.getElementById('aboutModal');
   const sfxToggle = document.getElementById('sfxToggle');
@@ -289,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
     navSettings.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       if (settingsModal) settingsModal.classList.remove('hidden');
-      updateHeaderAvatar(); // Refresh avatar when opening settings/profile modal
+      updateHeaderAvatar();
     });
   }
 
@@ -347,7 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- 5. RENDER LEVELS ---
+  // --- 7. RENDER LEVELS ---
   function renderLevels() {
     const grid = document.getElementById('levelsGrid');
     if (!grid) return;
@@ -458,7 +620,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // --- 6. COLLECTION FOLDERS LOGIC ---
+  // --- 8. COLLECTION FOLDERS LOGIC ---
   function renderCollectionFolders() {
     const folderGrid = document.getElementById('collectionsFolderGrid');
     if (!folderGrid) return;
@@ -520,7 +682,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const item = document.createElement('div');
       item.className = 'collection-item';
 
-      v = isUnlocked; // placeholder check
       if (isUnlocked) {
         item.innerHTML = `
           <img src="image/level${i}.jpeg" alt="Level ${i}">
@@ -572,6 +733,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Initial check on load
   updateHeaderAvatar();
 });
