@@ -1,3 +1,20 @@
+// --- HELPER FUNCTION FOR USER-SPECIFIC KEYS ---
+function getCurrentUsername() {
+    try {
+        const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (userObj && userObj.username) {
+            return userObj.username;
+        }
+    } catch (e) {}
+    return '';
+}
+
+function getUserKey(keyName) {
+    const username = getCurrentUsername();
+    if (!username) return keyName;
+    return `${username}_${keyName}`;
+}
+
 function goHome() {
     localStorage.setItem('skipLoading', 'true');
     if (typeof showView === 'function') {
@@ -47,13 +64,7 @@ function calculateLevelAndXp(totalPuzzlesSolved) {
 
 // Function to update XP and Level progress on the UI
 function updateXpProgress() {
-    let currentUsername = '';
-    try {
-        const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
-        if (userObj && userObj.username) {
-            currentUsername = userObj.username;
-        }
-    } catch (e) {}
+    const currentUsername = getCurrentUsername();
 
     // Pull current level using your game's exact storage convention (<username>_currentLevel)
     let currentLevelVal = 1;
@@ -102,7 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputElem = document.getElementById('username-input');
     if (inputElem) inputElem.value = initialName;
 
-    const savedAvatar = localStorage.getItem('vinpix_avatar');
+    // --- LOAD USER-SPECIFIC AVATAR ---
+    const savedAvatar = localStorage.getItem(getUserKey('vinpix_avatar')) || localStorage.getItem('vinpix_avatar');
     if (savedAvatar) {
         const previewElem = document.getElementById('avatar-preview');
         if (previewElem) previewElem.src = savedAvatar;
@@ -129,7 +141,7 @@ if (closeModalBtn && editModal) {
     });
 }
 
-// Handle image upload and conversion to Base64 to store locally
+// Handle image upload, conversion to Base64, and user-specific storage
 const avatarInput = document.getElementById('avatar-input');
 if (avatarInput) {
     avatarInput.addEventListener('change', function(event) {
@@ -139,7 +151,9 @@ if (avatarInput) {
             reader.onload = function(e) {
                 const previewElem = document.getElementById('avatar-preview');
                 if (previewElem) previewElem.src = e.target.result;
-                localStorage.setItem('vinpix_avatar', e.target.result);
+                
+                // Save using the user-specific key
+                localStorage.setItem(getUserKey('vinpix_avatar'), e.target.result);
             };
             reader.readAsDataURL(file);
         }
