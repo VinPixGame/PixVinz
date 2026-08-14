@@ -278,16 +278,34 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('registeredUsers', JSON.stringify(users));
       }
 
-      // Validate local credentials first to avoid locking out players if remote auth fails
-      if (users[username] && users[username].password === pass) {
-        // Attempt optional Firebase login in the background without blocking execution
-        if (window.pixvinzAuth) {
-          try {
-            const generatedEmail = users[username].email || `${username}@pixvinz.game`;
-            await window.pixvinzAuth.signInWithEmailAndPassword(window.pixvinzAuth.auth, generatedEmail, pass);
-          } catch (firebaseErr) {
-            console.warn("Firebase remote login skipped/failed, proceeding with local session:", firebaseErr);
-          }
+      const generatedEmail = users[username]?.email || `${username}@pixvinz.game`;
+      let loginSuccess = false;
+
+      // 1. Try Firebase Authentication first (enables cross-browser/device login)
+      if (window.pixvinzAuth) {
+        try {
+          await window.pixvinzAuth.signInWithEmailAndPassword(window.pixvinzAuth.auth, generatedEmail, pass);
+          loginSuccess = true;
+        } catch (firebaseErr) {
+          console.warn("Firebase sign-in failed, falling back to local check:", firebaseErr.code);
+        }
+      }
+
+      // 2. Fallback to local credential check if offline or if user exists locally
+      if (!loginSuccess && users[username] && users[username].password === pass) {
+        loginSuccess = true;
+      }
+
+      if (loginSuccess) {
+        // Ensure local user profile object exists on this browser if logging in via Firebase for the first time
+        if (!users[username]) {
+          users[username] = { 
+            displayName: username.charAt(0).toUpperCase() + username.slice(1), 
+            username: username, 
+            password: pass, 
+            email: generatedEmail 
+          };
+          localStorage.setItem('registeredUsers', JSON.stringify(users));
         }
 
         localStorage.setItem('loggedInUser', JSON.stringify(users[username]));
@@ -295,6 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (nameElem) nameElem.innerText = users[username].displayName;
         if (errElem) errElem.innerText = "";
         
+        // Pull latest cloud profile data for this user onto the current browser
         await loadUserDataFromCloud(username);
 
         showView('home');
