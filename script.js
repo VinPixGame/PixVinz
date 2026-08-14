@@ -1,46 +1,3 @@
-window.onerror = function(msg, url, line) {
-  alert("Error: " + msg + "\nLine: " + line);
-};
-
-// Import Firebase SDK modules from CDN (matching your index.html setup)
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-import { 
-  getAuth, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signOut, 
-  onAuthStateChanged 
-} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import { 
-  getFirestore, 
-  doc, 
-  setDoc, 
-  getDoc, 
-  collection, 
-  getDocs, 
-  query, 
-  orderBy, 
-  limit 
-} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-
-// Initialize Firebase App Configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
-  authDomain: "pixvinz2026.firebaseapp.com",
-  projectId: "pixvinz2026",
-  storageBucket: "pixvinz2026.firebasestorage.app",
-  messagingSenderId: "45609077809",
-  appId: "1:45609077809:web:575611e46acda9f64c5910",
-  measurementId: "G-W7FSERE8ZJ"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-// Global state tracker for current authenticated Firestore user data
-let currentCloudUser = null;
-
 document.addEventListener('DOMContentLoaded', () => {
   const views = {
     loading: document.getElementById('loadingView'),
@@ -56,7 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const mainHeader = document.getElementById('mainHeader');
 
   function getCurrentUser() {
-    return currentCloudUser;
+    try {
+      return JSON.parse(localStorage.getItem('loggedInUser'));
+    } catch (e) {
+      return null;
+    }
   }
 
   function getUserKey(keyName) {
@@ -141,54 +102,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // --- FIREBASE AUTH STATE LISTENER ---
-  onAuthStateChanged(auth, async (firebaseUser) => {
+  // --- 1. LOADING SCREEN & SKIP CHECK ---
+  if (localStorage.getItem('skipLoading') === 'true') {
+    localStorage.removeItem('skipLoading');
     const loadingView = document.getElementById('loadingView');
-    
-    if (firebaseUser) {
-      try {
-        const userDocRef = doc(db, "users", firebaseUser.uid);
-        const userDoc = await getDoc(userDocRef);
-
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          currentCloudUser = {
-            uid: firebaseUser.uid,
-            username: data.username,
-            displayName: data.displayName
-          };
-          
-          localStorage.setItem('loggedInUser', JSON.stringify(currentCloudUser));
-          localStorage.setItem(getUserKey('currentLevel'), data.level || 1);
-          localStorage.setItem(getUserKey('totalCoins'), data.coins || 0);
-
-          const nameElem = document.getElementById('userDisplayName');
-          if (nameElem) nameElem.innerText = currentCloudUser.displayName;
-
-          if (loadingView) {
-            loadingView.classList.remove('active');
-            loadingView.style.display = 'none';
-          }
-
-          showView('home');
-          playMainBGM();
-          updateHeaderAvatar();
-          return;
-        }
-      } catch (err) {
-        console.error("Error fetching user doc:", err);
-      }
-    } 
-    
-    currentCloudUser = null;
-    localStorage.removeItem('loggedInUser');
-    
     if (loadingView) {
       loadingView.classList.remove('active');
       loadingView.style.display = 'none';
     }
-    showView('login');
-  });
+    const loggedInUser = getCurrentUser();
+    if (loggedInUser) {
+      const nameElem = document.getElementById('userDisplayName');
+      if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
+    }
+    showView('home');
+    playMainBGM();
+    updateHeaderAvatar();
+  } else {
+    setTimeout(() => {
+      const loggedInUser = getCurrentUser();
+      if (loggedInUser) {
+        const nameElem = document.getElementById('userDisplayName');
+        if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
+        showView('home');
+        playMainBGM();
+        updateHeaderAvatar();
+      } else {
+        showView('login');
+      }
+    }, 4000);
+  }
 
   // --- 2. AUTHENTICATION & FORM NAVIGATION ---
   const toRegBtn = document.getElementById('toRegister');
@@ -211,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const regForm = document.getElementById('registerForm');
   if (regForm) {
-    regForm.addEventListener('submit', async (e) => {
+    regForm.addEventListener('submit', (e) => {
       e.preventDefault();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
 
@@ -226,40 +169,30 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Automatically map username to an internal secure email format
-      const email = `${username}@pixvinz.game`;
-
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-        const firebaseUser = userCredential.user;
-
-        const userPayload = {
-          uid: firebaseUser.uid,
-          username: username,
-          displayName: displayName,
-          level: 1,
-          coins: 0
-        };
-
-        await setDoc(doc(db, "users", firebaseUser.uid), userPayload);
-        await setDoc(doc(db, "leaderboard", firebaseUser.uid), {
-          name: displayName,
-          username: username,
-          level: 1,
-          coins: 0
-        });
-
-        if (errElem) errElem.innerText = "";
-      } catch (error) {
-        console.error("Registration error:", error);
-        if (errElem) errElem.innerText = error.message.replace("Firebase: ", "");
+      let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+      if (users[username]) {
+        if (errElem) errElem.innerText = "Username already taken!";
+        return;
       }
+
+      const newUser = { displayName, username, password: pass };
+      users[username] = newUser;
+      localStorage.setItem('registeredUsers', JSON.stringify(users));
+
+      localStorage.setItem('loggedInUser', JSON.stringify(newUser));
+      const nameElem = document.getElementById('userDisplayName');
+      if (nameElem) nameElem.innerText = displayName;
+
+      if (errElem) errElem.innerText = "";
+      showView('home');
+      playMainBGM();
+      updateHeaderAvatar();
     });
   }
 
   const logForm = document.getElementById('loginForm');
   if (logForm) {
-    logForm.addEventListener('submit', async (e) => {
+    logForm.addEventListener('submit', (e) => {
       e.preventDefault();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
 
@@ -267,14 +200,22 @@ document.addEventListener('DOMContentLoaded', () => {
       const pass = document.getElementById('loginPass').value;
       const errElem = document.getElementById('loginError');
 
-      // Map username back to internal email format for Firebase sign-in
-      const email = `${username}@pixvinz.game`;
+      let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
 
-      try {
-        await signInWithEmailAndPassword(auth, email, pass);
+      if (Object.keys(users).length === 0 && username === 'vinz' && pass === '1234') {
+        users['vinz'] = { displayName: 'Vinz', username: 'vinz', password: '1234' };
+        localStorage.setItem('registeredUsers', JSON.stringify(users));
+      }
+
+      if (users[username] && users[username].password === pass) {
+        localStorage.setItem('loggedInUser', JSON.stringify(users[username]));
+        const nameElem = document.getElementById('userDisplayName');
+        if (nameElem) nameElem.innerText = users[username].displayName;
         if (errElem) errElem.innerText = "";
-      } catch (error) {
-        console.error("Login error:", error);
+        showView('home');
+        playMainBGM();
+        updateHeaderAvatar();
+      } else {
         if (errElem) errElem.innerText = "Invalid username or password!";
       }
     });
@@ -318,9 +259,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const navLeaderboard = document.getElementById('navLeaderboard');
   if (navLeaderboard) {
-    navLeaderboard.addEventListener('click', async () => {
+    navLeaderboard.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      await renderLeaderboard();
+      renderLeaderboard();
       showView('leaderboard');
     });
   }
@@ -371,36 +312,87 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- 5. CLOUD LEADERBOARD RANKING LOGIC ---
-  async function renderLeaderboard() {
+  // --- 5. LEADERBOARD RANKING LOGIC ---
+  function renderLeaderboard() {
     const listContainer = document.getElementById('leaderboardList');
     const userRankDisplay = document.getElementById('userRankDisplay');
     if (!listContainer) return;
-    listContainer.innerHTML = '<div style="text-align:center; color:#b388ff; padding: 20px;">Loading Leaderboard...</div>';
+    listContainer.innerHTML = '';
 
+    const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+    const currentUser = getCurrentUser();
+    
     let players = [];
-    try {
-      const q = query(collection(db, "leaderboard"), orderBy("level", "desc"), orderBy("coins", "desc"), limit(20));
-      const querySnapshot = await getDocs(q);
-      
-      querySnapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        players.push({
-          name: data.name || data.username,
-          username: data.username,
-          level: data.level || 1,
-          coins: data.coins || 0,
-          isCurrent: currentCloudUser && currentCloudUser.username === data.username
-        });
+
+    // Compile actual registered users and their current states
+    Object.keys(registeredUsers).forEach(username => {
+      const u = registeredUsers[username];
+      const uLevel = parseInt(localStorage.getItem(`${username}_currentLevel`)) || 1;
+      const uCoins = parseInt(localStorage.getItem(`${username}_totalCoins`)) || 0;
+      players.push({
+        name: u.displayName || u.username,
+        username: u.username,
+        level: uLevel,
+        coins: uCoins,
+        isCurrent: currentUser && currentUser.username === u.username
       });
-    } catch (e) {
-      console.error("Error fetching leaderboard: ", e);
+    });
+
+    // If current user isn't in registeredUsers map yet, add them
+    if (currentUser && !players.some(p => p.username === currentUser.username)) {
+      const uLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+      const uCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
+      players.push({
+        name: currentUser.displayName || currentUser.username,
+        username: currentUser.username,
+        level: uLevel,
+        coins: uCoins,
+        isCurrent: true
+      });
     }
 
-    listContainer.innerHTML = '';
+    // Add simulated global players to ensure a robust Top 20 list
+    const simulatedBots = [
+      { name: "PixelMaster", level: 45, coins: 1250 },
+      { name: "VinzPro", level: 38, coins: 980 },
+      { name: "ColorQueen", level: 32, coins: 810 },
+      { name: "GridRunner", level: 28, coins: 700 },
+      { name: "PuzzleKing", level: 25, coins: 620 },
+      { name: "ShadowArt", level: 22, coins: 540 },
+      { name: "NeonVibe", level: 19, coins: 450 },
+      { name: "ZenSolver", level: 16, coins: 380 },
+      { name: "AeroPixel", level: 14, coins: 310 },
+      { name: "RetroGamer", level: 12, coins: 250 },
+      { name: "AlphaVinz", level: 10, coins: 200 },
+      { name: "BlockBuster", level: 8, coins: 160 },
+      { name: "SwiftMatch", level: 7, coins: 130 },
+      { name: "ColorBlitz", level: 5, coins: 90 },
+      { name: "TileWizard", level: 4, coins: 70 },
+      { name: "MosaicHero", level: 3, coins: 50 },
+      { name: "SketchBoy", level: 2, coins: 30 },
+      { name: "BeginnerPix", level: 1, coins: 10 }
+    ];
+
+    simulatedBots.forEach(bot => {
+      if (!players.some(p => p.name.toLowerCase() === bot.name.toLowerCase())) {
+        players.push({ ...bot, isCurrent: false });
+      }
+    });
+
+    // Sort players descending by Level, then Coins
+    players.sort((a, b) => {
+      if (b.level !== a.level) {
+        return b.level - a.level;
+      }
+      return b.coins - a.coins;
+    });
+
+    // Take Top 20
+    const top20 = players.slice(0, 20);
+
     let userFoundRank = "--";
 
-    players.forEach((player, index) => {
+    top20.forEach((player, index) => {
       const rank = index + 1;
       if (player.isCurrent) {
         userFoundRank = `#${rank}`;
@@ -506,17 +498,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
+    logoutBtn.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       if (confirm("Are you sure you want to log out?")) {
-        try {
-          await signOut(auth);
-          if (settingsModal) settingsModal.classList.add('hidden');
-          if (typeof AudioManager !== 'undefined') AudioManager.stopBGM();
-          showView('login');
-        } catch (error) {
-          console.error("Sign out error: ", error);
-        }
+        localStorage.removeItem('loggedInUser');
+        if (settingsModal) settingsModal.classList.add('hidden');
+        if (typeof AudioManager !== 'undefined') AudioManager.stopBGM();
+        showView('login');
       }
     });
   }
