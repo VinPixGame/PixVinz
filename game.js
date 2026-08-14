@@ -1,34 +1,3 @@
-// Import Firebase SDK modules from CDN (matching your index.html / script.js setup)
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-import { 
-  getAuth, 
-  onAuthStateChanged 
-} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-import { 
-  getFirestore, 
-  doc, 
-  setDoc, 
-  getDoc 
-} from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-
-// Initialize Firebase App Configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
-  authDomain: "pixvinz2026.firebaseapp.com",
-  projectId: "pixvinz2026",
-  storageBucket: "pixvinz2026.firebasestorage.app",
-  messagingSenderId: "45609077809",
-  appId: "1:45609077809:web:575611e46acda9f64c5910",
-  measurementId: "G-W7FSERE8ZJ"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-// Global state tracker for current authenticated Firestore user data
-let currentCloudUser = null;
-
 document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const currentLevel = parseInt(urlParams.get('level')) || 1;
@@ -39,42 +8,21 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function getCurrentUser() {
-    return currentCloudUser;
+    try {
+      return JSON.parse(localStorage.getItem('loggedInUser'));
+    } catch (e) {
+      return null;
+    }
   }
 
-  // Generates user-specific localStorage keys (fallback/caching layer)
+  // Generates user-specific localStorage keys (e.g., 'vinz_currentLevel')
   function getUserKey(keyName) {
     const user = getCurrentUser();
     if (!user || !user.username) return keyName;
     return `${user.username}_${keyName}`;
   }
 
-  // --- FIREBASE AUTH STATE LISTENER FOR GAMEPLAY ---
-  onAuthStateChanged(auth, async (firebaseUser) => {
-    if (firebaseUser) {
-      const userDocRef = doc(db, "users", firebaseUser.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        currentCloudUser = {
-          uid: firebaseUser.uid,
-          username: data.username,
-          displayName: data.displayName
-        };
-        
-        // Cache local state for quick retrieval
-        localStorage.setItem('loggedInUser', JSON.stringify(currentCloudUser));
-        localStorage.setItem(getUserKey('totalCoins'), data.coins || 0);
-        localStorage.setItem(getUserKey('currentLevel'), data.level || 1);
-        
-        updateCoinDisplay();
-      }
-    } else {
-      currentCloudUser = null;
-      // Fallback to local storage if offline or not logged in via firebase
-    }
-  });
+  updateCoinDisplay();
 
   const grid = document.getElementById('puzzleGrid');
   const movesDisplay = document.getElementById('movesDisplay');
@@ -187,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderGrid();
   }
 
-  async function checkWin() {
+  function checkWin() {
     const isSolved = tilesState.every((val, idx) => val === idx);
     if (isSolved) {
       clearInterval(timerInterval);
@@ -235,31 +183,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       let maxUnlocked = parseInt(localStorage.getItem(currentLevelKey)) || 1;
-      let nextLevelToUnlock = maxUnlocked;
       if (currentLevel >= maxUnlocked) {
-        nextLevelToUnlock = currentLevel + 1;
-        localStorage.setItem(currentLevelKey, nextLevelToUnlock);
-      }
-
-      // --- SYNC PROGRESS TO CLOUD FIRESTORE ---
-      if (currentCloudUser) {
-        try {
-          const totalCoinsVal = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
-          const userDocRef = doc(db, "users", currentCloudUser.uid);
-          const leaderboardDocRef = doc(db, "leaderboard", currentCloudUser.uid);
-
-          await setDoc(userDocRef, {
-            level: nextLevelToUnlock,
-            coins: totalCoinsVal
-          }, { merge: true });
-
-          await setDoc(leaderboardDocRef, {
-            level: nextLevelToUnlock,
-            coins: totalCoinsVal
-          }, { merge: true });
-        } catch (e) {
-          console.error("Error syncing victory state to Firestore: ", e);
-        }
+        localStorage.setItem(currentLevelKey, currentLevel + 1);
       }
 
       showVictoryModal(stars, newCoinsEarned);
@@ -356,7 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const previewBtn = document.getElementById('previewBtn');
   if (previewBtn) {
-    previewBtn.addEventListener('click', async () => {
+    previewBtn.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
 
       const coinKey = getUserKey('totalCoins');
@@ -372,19 +297,6 @@ document.addEventListener('DOMContentLoaded', () => {
       totalCoins -= previewCost;
       localStorage.setItem(coinKey, totalCoins);
       updateCoinDisplay();
-
-      // Sync updated coins to Firestore
-      if (currentCloudUser) {
-        try {
-          const userDocRef = doc(db, "users", currentCloudUser.uid);
-          const leaderboardDocRef = doc(db, "leaderboard", currentCloudUser.uid);
-
-          await setDoc(userDocRef, { coins: totalCoins }, { merge: true });
-          await setDoc(leaderboardDocRef, { coins: totalCoins }, { merge: true });
-        } catch (e) {
-          console.error("Error syncing coin deduction to Firestore: ", e);
-        }
-      }
 
       // Open modal and show current level image
       const modal = document.getElementById('imageModal');
@@ -441,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
     victoryHomeBtn.onclick = (e) => {
       e.stopPropagation();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      localStorage.setItem('skipLoading', 'true');
+     localStorage.setItem('skipLoading', 'true');
       window.location.href = 'index.html';
     };
   }
@@ -450,7 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (backToHome) {
     backToHome.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      localStorage.setItem('skipLoading', 'true');
+     localStorage.setItem('skipLoading', 'true');
       window.location.href = 'index.html';
     });
   }
@@ -459,7 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (collectionsBtn) {
     collectionsBtn.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      localStorage.setItem('skipLoading', 'true');
+     localStorage.setItem('skipLoading', 'true');
       window.location.href = 'index.html';
     });
   }
