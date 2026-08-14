@@ -1,4 +1,4 @@
-  // ==========================================
+// ==========================================
 // PIXVINZ - MAIN CLIENT SCRIPT (CLOUD & LOCAL SYNCED)
 // ==========================================
 
@@ -151,6 +151,75 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // --- LEGACY PASSWORD UPDATE MODAL LOGIC ---
+  const passwordUpdateModal = document.getElementById('passwordUpdateModal');
+  const updatePasswordForm = document.getElementById('updatePasswordForm');
+  const newSecurePasswordInput = document.getElementById('newSecurePassword');
+  const pwUpdateError = document.getElementById('pwUpdateError');
+
+  function checkLegacyPasswordStatus() {
+    const user = getCurrentUser();
+    if (!user) return;
+
+    const pass = user.password || "";
+    const hasUpperCase = /[A-Z]/.test(pass);
+    const hasNumber = /[0-9]/.test(pass);
+    const isLongEnough = pass.length >= 6;
+
+    if (user.isLegacy || !isLongEnough || !hasUpperCase || !hasNumber) {
+      if (passwordUpdateModal) {
+        passwordUpdateModal.classList.remove('hidden');
+        passwordUpdateModal.style.display = 'flex';
+      }
+    }
+  }
+
+  if (updatePasswordForm) {
+    updatePasswordForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+
+      const newPass = newSecurePasswordInput.value;
+      const hasUpperCase = /[A-Z]/.test(newPass);
+      const hasNumber = /[0-9]/.test(newPass);
+      const isLongEnough = newPass.length >= 6;
+
+      if (!isLongEnough || !hasUpperCase || !hasNumber) {
+        if (pwUpdateError) pwUpdateError.innerText = "Password must be 6+ chars with 1 uppercase & 1 number!";
+        return;
+      }
+
+      const user = getCurrentUser();
+      if (!user) return;
+
+      let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+      if (users[user.username]) {
+        users[user.username].password = newPass;
+        delete users[user.username].isLegacy;
+        localStorage.setItem('registeredUsers', JSON.stringify(users));
+      }
+
+      user.password = newPass;
+      delete user.isLegacy;
+      localStorage.setItem('loggedInUser', JSON.stringify(user));
+
+      if (window.pixvinzAuth && window.pixvinzAuth.auth.currentUser) {
+        try {
+          const { updatePassword } = await import("https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js");
+          await updatePassword(window.pixvinzAuth.auth.currentUser, newPass);
+        } catch (err) {
+          console.warn("Firebase password update note:", err);
+        }
+      }
+
+      if (pwUpdateError) pwUpdateError.innerText = "";
+      if (passwordUpdateModal) {
+        passwordUpdateModal.classList.add('hidden');
+        passwordUpdateModal.style.display = 'none';
+      }
+    });
+  }
+
   // --- 1. LOADING SCREEN & SKIP CHECK ---
   if (localStorage.getItem('skipLoading') === 'true') {
     localStorage.removeItem('skipLoading');
@@ -167,6 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showView('home');
         playMainBGM();
         updateHeaderAvatar();
+        checkLegacyPasswordStatus();
       });
     } else {
       showView('home');
@@ -183,6 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showView('home');
         playMainBGM();
         updateHeaderAvatar();
+        checkLegacyPasswordStatus();
       } else {
         showView('login');
       }
@@ -221,7 +292,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const errElem = document.getElementById('regError');
       const submitBtn = regForm.querySelector('button[type="submit"]');
 
-      // Password Validation: At least 6 chars, contains 1 uppercase, 1 number
       const hasUpperCase = /[A-Z]/.test(pass);
       const hasNumber = /[0-9]/.test(pass);
       const isLongEnough = pass.length >= 6;
@@ -242,7 +312,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Lock button and show "creating account..." text status on the button instead of a full loading screen
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerText = "Creating account...";
@@ -299,6 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showView('home');
       playMainBGM();
       updateHeaderAvatar();
+      checkLegacyPasswordStatus();
     });
   }
 
@@ -320,7 +390,6 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('registeredUsers', JSON.stringify(users));
       }
 
-      // Lock button and show "signing in..." text status on the button instead of a full loading screen
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerText = "Signing in...";
@@ -379,6 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showView('home');
         playMainBGM();
         updateHeaderAvatar();
+        checkLegacyPasswordStatus();
       } else {
         if (errElem) errElem.innerText = "Invalid username or password!";
       }
@@ -901,7 +971,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="collection-badge">LEVEL ${i.toString().padStart(2, '0')}</div>
         `;
       }
-
       grid.appendChild(item);
     }
   }
@@ -911,29 +980,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalImg = document.getElementById('modalPreviewImg');
     const modalTitle = document.getElementById('modalLevelTitle');
 
-    if (modalTitle) modalTitle.innerText = `LEVEL ${levelNum.toString().padStart(2, '0')}`;
-    if (modalImg) modalImg.src = `image/level${levelNum}.jpeg`;
-
-    if (modal) modal.classList.remove('hidden');
+    if (modal && modalImg && modalTitle) {
+      modalImg.src = `image/level${levelNum}.jpeg`;
+      modalTitle.innerText = `LEVEL ${levelNum.toString().padStart(2, '0')}`;
+      modal.classList.remove('hidden');
+    }
   }
 
-  function closeImageModal() {
-    if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-    const modal = document.getElementById('imageModal');
-    if (modal) modal.classList.add('hidden');
-  }
-
-  const closeImgModalBtn = document.getElementById('closeImageModal');
-  if (closeImgModalBtn) closeImgModalBtn.addEventListener('click', closeImageModal);
-
-  const imgModal = document.getElementById('imageModal');
-  if (imgModal) {
-    imgModal.addEventListener('click', (e) => {
-      if (e.target.id === 'imageModal' || e.target.id === 'modalPreviewImg') {
-        closeImageModal();
-      }
+  const closeImageModal = document.getElementById('closeImageModal');
+  if (closeImageModal) {
+    closeImageModal.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      const modal = document.getElementById('imageModal');
+      if (modal) modal.classList.add('hidden');
     });
   }
 
-  updateHeaderAvatar();
+  const imageModal = document.getElementById('imageModal');
+  if (imageModal) {
+    imageModal.addEventListener('click', (e) => {
+      if (e.target === imageModal) {
+        if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+        imageModal.classList.add('hidden');
+      }
+    });
+  }
 });
