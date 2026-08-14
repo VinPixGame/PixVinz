@@ -26,6 +26,48 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${user.username}_${keyName}`;
   }
 
+  // --- FIRESTORE CLOUD SYNC HELPERS ---
+  async function saveUserDataToCloud() {
+    const user = getCurrentUser();
+    if (!user || !window.pixvinzDb) return;
+
+    const { db, doc, setDoc } = window.pixvinzDb;
+    try {
+      const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+      const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
+      const avatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
+
+      const userDocRef = doc(db, "players", user.username);
+      await setDoc(userDocRef, {
+        username: user.username,
+        displayName: user.displayName || user.username,
+        level: currentLevel,
+        coins: totalCoins,
+        avatar: avatar,
+        lastUpdated: new Date()
+      }, { merge: true });
+    } catch (error) {
+      console.error("Error saving user data to cloud:", error);
+    }
+  }
+
+  async function loadUserDataFromCloud(username) {
+    if (!window.pixvinzDb) return;
+    const { db, doc, getDoc } = window.pixvinzDb;
+    try {
+      const userDocRef = doc(db, "players", username);
+      const docSnap = await getDoc(userDocRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.level) localStorage.setItem(`${username}_currentLevel`, data.level);
+        if (data.coins !== undefined) localStorage.setItem(`${username}_totalCoins`, data.coins);
+        if (data.avatar) localStorage.setItem(`${username}_vinpix_avatar`, data.avatar);
+      }
+    } catch (error) {
+      console.error("Error loading user data from cloud:", error);
+    }
+  }
+
   // --- ROBUST AVATAR SYNC HELPER ---
   function updateHeaderAvatar() {
     const savedAvatar = localStorage.getItem(getUserKey('vinpix_avatar')) || 
@@ -51,6 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
         fallbackIcon.style.display = 'block';
       }
     }
+  
+    saveUserDataToCloud();
   }
 
   window.updateHeaderAvatar = updateHeaderAvatar;
@@ -85,6 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (coinElem) {
       coinElem.innerText = totalCoins;
     }
+    saveUserDataToCloud();
   }
 
   function playMainBGM() {
@@ -114,16 +159,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loggedInUser) {
       const nameElem = document.getElementById('userDisplayName');
       if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
+      loadUserDataFromCloud(loggedInUser.username).then(() => {
+        showView('home');
+        playMainBGM();
+        updateHeaderAvatar();
+      });
+    } else {
+      showView('home');
+      playMainBGM();
+      updateHeaderAvatar();
     }
-    showView('home');
-    playMainBGM();
-    updateHeaderAvatar();
   } else {
-    setTimeout(() => {
+    setTimeout(async () => {
       const loggedInUser = getCurrentUser();
       if (loggedInUser) {
         const nameElem = document.getElementById('userDisplayName');
         if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
+        await loadUserDataFromCloud(loggedInUser.username);
         showView('home');
         playMainBGM();
         updateHeaderAvatar();
@@ -198,6 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (nameElem) nameElem.innerText = displayName;
 
       if (errElem) errElem.innerText = "";
+      await saveUserDataToCloud();
       showView('home');
       playMainBGM();
       updateHeaderAvatar();
@@ -237,6 +290,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const nameElem = document.getElementById('userDisplayName');
         if (nameElem) nameElem.innerText = users[username].displayName;
         if (errElem) errElem.innerText = "";
+        
+        // Pull latest cloud profile data for this user
+        await loadUserDataFromCloud(username);
+
         showView('home');
         playMainBGM();
         updateHeaderAvatar();
@@ -284,8 +341,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const navLeaderboard = document.getElementById('navLeaderboard');
   if (navLeaderboard) {
-    navLeaderboard.addEventListener('click', () => {
+    navLeaderboard.addEventListener('click', async () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      if (window.pixvinzDb) {
+        // Fetch top players from Firestore to make leaderboard robust across sessions
+        try {
+          const { db, collection, getDocs } = window.pixvinzDb;
+          const querySnapshot = await getDocs(collection(db, "players"));
+          querySnapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            if (data.username) {
+              if (data.level) localStorage.setItem(`${data.username}_currentLevel`, data.level);
+              if (data.coins !== undefined) localStorage.setItem(`${data.username}_totalCoins`, data.coins);
+            }
+          });
+        } catch (e) {
+          console.error("Could not fetch Firestore leaderboard:", e);
+        }
+      }
       renderLeaderboard();
       showView('leaderboard');
     });
