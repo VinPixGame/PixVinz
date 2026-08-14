@@ -442,8 +442,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const card = document.createElement('div');
       card.className = 'folder-card';
       card.innerHTML = `
-        <h4>Collection ${f}</h4>
-        <p>Levels ${startLvl} - ${endLvl}</p>
+        <div style="font-size: 2.2rem; margin-bottom: 5px;">📁</div>
+        <div>Levels ${startLvl} -<br>${endLvl}</div>
       `;
       card.addEventListener('click', () => {
         if (typeof AudioManager !== 'undefined') AudioManager.playClick();
@@ -452,7 +452,6 @@ document.addEventListener('DOMContentLoaded', () => {
       collectionsFolderGrid.appendChild(card);
     }
   }
-
   function renderCollectionImages(start, end, folderNum) {
     if (!collectionsGrid || !collectionsFolderContainer || !collectionsImagesContainer) return;
     collectionsFolderContainer.classList.add('hidden');
