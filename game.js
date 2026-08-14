@@ -204,6 +204,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const vCoins = document.getElementById('vCoins');
     if (vCoins) vCoins.innerText = `+${newCoins}`;
 
+    // --- CALCULATE AND DISPLAY XP ON VICTORY MODAL ---
+    let tier = Math.floor((currentLevel - 1) / 10);
+    let xpGained = (tier + 1) * 100;
+
+    const vXp = document.getElementById('vXp');
+    if (vXp) {
+        vXp.innerText = `+${xpGained}`;
+    }
+
     const starNodes = document.querySelectorAll('#victoryStars .star');
     starNodes.forEach((star, index) => {
       if (index < stars) {
