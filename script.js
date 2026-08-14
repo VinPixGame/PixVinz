@@ -141,13 +141,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // --- FIREBASE AUTH STATE LISTENER (FIXED TO REMOVE HANGING DELAYS) ---
+  // --- FIREBASE AUTH STATE LISTENER ---
   onAuthStateChanged(auth, async (firebaseUser) => {
     const loadingView = document.getElementById('loadingView');
     
     if (firebaseUser) {
       try {
-        // Fetch user profile data from Firestore database
         const userDocRef = doc(db, "users", firebaseUser.uid);
         const userDoc = await getDoc(userDocRef);
 
@@ -159,7 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
             displayName: data.displayName
           };
           
-          // Cache local state for quick retrieval
           localStorage.setItem('loggedInUser', JSON.stringify(currentCloudUser));
           localStorage.setItem(getUserKey('currentLevel'), data.level || 1);
           localStorage.setItem(getUserKey('totalCoins'), data.coins || 0);
@@ -182,7 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } 
     
-    // If not logged in or doc lookup failed, immediately dismiss loading and show login view
     currentCloudUser = null;
     localStorage.removeItem('loggedInUser');
     
@@ -229,6 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      // Automatically map username to an internal secure email format
       const email = `${username}@pixvinz.game`;
 
       try {
@@ -268,6 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const pass = document.getElementById('loginPass').value;
       const errElem = document.getElementById('loginError');
 
+      // Map username back to internal email format for Firebase sign-in
       const email = `${username}@pixvinz.game`;
 
       try {
