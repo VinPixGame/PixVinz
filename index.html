@@ -339,7 +339,7 @@
     </div>
   </div>
 
-  <!-- Firebase Integration CDN Script -->
+  <!-- Firebase Integration CDN Script with Ready Dispatcher -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
@@ -374,6 +374,9 @@
       setDoc,
       getDoc
     };
+
+    // Notify script.js that Firebase is fully initialized and ready
+    window.dispatchEvent(new Event('firebase-ready'));
   </script>
 
   <script src="audio.js"></script>
