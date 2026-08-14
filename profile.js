@@ -1,6 +1,5 @@
 function goHome() {
     localStorage.setItem('skipLoading', 'true');
-    // If your app uses a single-page view switcher function, use it here:
     if (typeof showView === 'function') {
         showView('homeView');
     } else {
@@ -41,7 +40,7 @@ function calculateLevelAndXp(totalPuzzlesSolved) {
 
 // Function to update XP and Level progress on the UI
 function updateXpProgress() {
-    let currentUsername = 'Vinz';
+    let currentUsername = '';
     try {
         const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
         if (userObj && userObj.username) {
@@ -49,8 +48,16 @@ function updateXpProgress() {
         }
     } catch (e) {}
 
-    // Pull total puzzles solved from localStorage (adjust key name if your game uses a different one)
-    const puzzlesSolved = parseInt(localStorage.getItem('puzzles_solved_' + currentUsername)) || 0; 
+    // Pull current level using your game's exact storage convention (<username>_currentLevel)
+    let currentLevelVal = 1;
+    if (currentUsername) {
+        currentLevelVal = parseInt(localStorage.getItem(currentUsername + '_currentLevel')) || 1;
+    } else {
+        currentLevelVal = parseInt(localStorage.getItem('currentLevel')) || 1;
+    }
+
+    // Since currentLevel represents the next level to play, completed puzzles = currentLevel - 1 (or default to your actual puzzles solved logic)
+    const puzzlesSolved = Math.max(0, currentLevelVal - 1);
     
     const playerProgression = calculateLevelAndXp(puzzlesSolved);
     const progressPercent = Math.min(100, (playerProgression.currentXp / playerProgression.maxXp) * 100);
@@ -160,11 +167,9 @@ if (saveProfileBtn) {
             return;
         }
 
-        // 1. Update ONLY the displayName in loggedInUser (leaving username untouched for coins/levels)
         currentUser.displayName = newDisplayName;
         localStorage.setItem('loggedInUser', JSON.stringify(currentUser));
 
-        // 2. Update the registeredUsers database using the permanent username key
         try {
             let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || {};
             if (registeredUsers[currentUser.username]) {
@@ -173,10 +178,8 @@ if (saveProfileBtn) {
             }
         } catch (e) {}
 
-        // 3. Save legacy tracking key if used elsewhere
         localStorage.setItem('vinpix_username', newDisplayName);
 
-        // 4. Update UI text instantly
         const nameDisplay = document.getElementById('displayPlayerName');
         if (nameDisplay) nameDisplay.innerText = newDisplayName;
 
