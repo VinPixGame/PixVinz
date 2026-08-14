@@ -1,3 +1,5 @@
+// audio.js
+
 const AudioManager = {
   bgmMain: null,
   bgmGame: null,
@@ -13,6 +15,10 @@ const AudioManager = {
       if (AudioCtx) {
         this.ctx = new AudioCtx();
       }
+    }
+    // Resume audio context on first user interaction to bypass browser blocks
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
     }
   },
 
@@ -43,7 +49,7 @@ const AudioManager = {
       this.bgmMain = new Audio('sounds/main.mp3');
       this.bgmMain.loop = true;
     }
-    this.bgmMain.play().catch(e => console.log('BGM Play blocked or missing: sounds/main.mp3'));
+    this.bgmMain.play().catch(e => console.log('BGM Main play waiting for user interaction.'));
   },
 
   playGame() {
@@ -53,7 +59,7 @@ const AudioManager = {
       this.bgmGame = new Audio('sounds/bgmusic.mp3');
       this.bgmGame.loop = true;
     }
-    this.bgmGame.play().catch(e => console.log('BGM Play blocked or missing: sounds/bgmusic.mp3'));
+    this.bgmGame.play().catch(e => console.log('BGM Game play waiting for user interaction.'));
   },
 
   playSelect() {
@@ -123,3 +129,8 @@ const AudioManager = {
     this.victoryAudio.play().catch(err => console.log("Victory audio missing or blocked:", err));
   }
 };
+
+// Global listener to unlock audio context on the first user click/tap anywhere
+document.addEventListener('click', () => {
+  AudioManager.init();
+}, { once: true });
