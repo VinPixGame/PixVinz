@@ -1,3 +1,7 @@
+window.onerror = function(msg, url, line) {
+  alert("Error: " + msg + "\nLine: " + line);
+};
+
 // Import Firebase SDK modules from CDN (matching your index.html setup)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { 
