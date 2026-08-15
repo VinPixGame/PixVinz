@@ -103,7 +103,7 @@ function checkExistingSession() {
     // Simulate loading screen delay
     setTimeout(() => {
         if (savedUser) {
-            loginUserSession(savedUser, false);
+            loginUserSession(savedUser, true); // Fixed: changed false to true so it transitions correctly to homeView
         } else {
             switchView('loginView');
         }
@@ -173,7 +173,10 @@ function loginUserSession(username, transition = true) {
     const profile = usersDb[username] || { displayName: username };
 
     // Update UI headers & welcome text
-    document.getElementById('userDisplayName').textContent = profile.displayName;
+    const displayNameEl = document.getElementById('userDisplayName');
+    if (displayNameEl) {
+        displayNameEl.textContent = profile.displayName;
+    }
     
     loadUserGameData();
     updateHeaderUI();
@@ -215,12 +218,18 @@ function saveUserGameData() {
 }
 
 function updateHeaderUI() {
-    document.getElementById('coinCount').textContent = userGameData.coins;
+    const coinCountEl = document.getElementById('coinCount');
+    if (coinCountEl) coinCountEl.textContent = userGameData.coins;
     
     // Global Best Stats display
-    document.getElementById('globalBestTime').textContent = userGameData.bestTime ? formatTime(userGameData.bestTime) : '--:--';
-    document.getElementById('globalFewestMoves').textContent = userGameData.fewestMoves ?? '--';
-    document.getElementById('userRankDisplay').textContent = `#${userGameData.rank || 42}`;
+    const bestTimeEl = document.getElementById('globalBestTime');
+    if (bestTimeEl) bestTimeEl.textContent = userGameData.bestTime ? formatTime(userGameData.bestTime) : '--:--';
+    
+    const fewestMovesEl = document.getElementById('globalFewestMoves');
+    if (fewestMovesEl) fewestMovesEl.textContent = userGameData.fewestMoves ?? '--';
+    
+    const userRankDisplayEl = document.getElementById('userRankDisplay');
+    if (userRankDisplayEl) userRankDisplayEl.textContent = `#${userGameData.rank || 42}`;
 }
 
 function formatTime(totalSeconds) {
@@ -232,6 +241,7 @@ function formatTime(totalSeconds) {
 // --- LEVELS VIEW RENDERING ---
 function renderLevelsGrid() {
     const grid = document.getElementById('levelsGrid');
+    if (!grid) return;
     grid.innerHTML = '';
 
     // Generate 20 sample levels
@@ -275,6 +285,7 @@ function openCollectionsFolders() {
     document.getElementById('collectionsImagesContainer').classList.add('hidden');
 
     const folderGrid = document.getElementById('collectionsFolderGrid');
+    if (!folderGrid) return;
     folderGrid.innerHTML = '';
 
     const folders = [
@@ -305,6 +316,7 @@ function openCollectionImages(folderId, folderName) {
     document.getElementById('collectionsImagesContainer').classList.remove('hidden');
 
     const grid = document.getElementById('collectionsGrid');
+    if (!grid) return;
     grid.innerHTML = '';
 
     // Sample images inside folder
@@ -328,6 +340,7 @@ function openCollectionImages(folderId, folderName) {
 // --- LEADERBOARD VIEW ---
 function renderLeaderboard() {
     const list = document.getElementById('leaderboardList');
+    if (!list) return;
     list.innerHTML = '';
 
     const mockLeaders = [
@@ -357,14 +370,14 @@ function startMatchmaking() {
     const statusEl = document.getElementById('matchmakingStatus');
     const btn = document.getElementById('startMatchmakingBtn');
     
-    btn.disabled = true;
-    statusEl.textContent = 'Searching for an opponent...';
+    if (btn) btn.disabled = true;
+    if (statusEl) statusEl.textContent = 'Searching for an opponent...';
 
     setTimeout(() => {
-        statusEl.textContent = 'Opponent found! Starting match...';
+        if (statusEl) statusEl.textContent = 'Opponent found! Starting match...';
         setTimeout(() => {
-            statusEl.textContent = '';
-            btn.disabled = false;
+            if (statusEl) statusEl.textContent = '';
+            if (btn) btn.disabled = false;
             alert('Match battle started! (1v1 real-time gameplay view placeholder)');
         }, 1200);
     }, 2000);
@@ -372,37 +385,48 @@ function startMatchmaking() {
 
 // --- MODALS & SETTINGS ---
 function openSettingsModal() {
-    document.getElementById('settingsModal').classList.remove('hidden');
+    const modal = document.getElementById('settingsModal');
+    if (modal) modal.classList.remove('hidden');
 }
 
 function closeSettingsModal() {
-    document.getElementById('settingsModal').classList.add('hidden');
+    const modal = document.getElementById('settingsModal');
+    if (modal) modal.classList.add('hidden');
 }
 
 function openAboutModal() {
-    document.getElementById('aboutModal').classList.remove('hidden');
+    const modal = document.getElementById('aboutModal');
+    if (modal) modal.classList.remove('hidden');
 }
 
 function closeAboutModal() {
-    document.getElementById('aboutModal').classList.add('hidden');
+    const modal = document.getElementById('aboutModal');
+    if (modal) modal.classList.add('hidden');
 }
 
 function openImageModal(title, imgSrc) {
-    document.getElementById('modalLevelTitle').textContent = title;
-    document.getElementById('modalPreviewImg').src = imgSrc;
-    document.getElementById('imageModal').classList.remove('hidden');
+    const titleEl = document.getElementById('modalLevelTitle');
+    const imgEl = document.getElementById('modalPreviewImg');
+    const modalEl = document.getElementById('imageModal');
+    
+    if (titleEl) titleEl.textContent = title;
+    if (imgEl) imgEl.src = imgSrc;
+    if (modalEl) modalEl.classList.remove('hidden');
 }
 
 function closeImageModal() {
-    document.getElementById('imageModal').classList.add('hidden');
+    const modal = document.getElementById('imageModal');
+    if (modal) modal.classList.add('hidden');
 }
 
 function loadSettings() {
     const saved = localStorage.getItem(STORAGE_KEYS.SETTINGS);
     if (saved) {
         appSettings = JSON.parse(saved);
-        document.getElementById('sfxToggle').checked = appSettings.sfx;
-        document.getElementById('musicToggle').checked = appSettings.music;
+        const sfxToggle = document.getElementById('sfxToggle');
+        const musicToggle = document.getElementById('musicToggle');
+        if (sfxToggle) sfxToggle.checked = appSettings.sfx;
+        if (musicToggle) musicToggle.checked = appSettings.music;
     }
 }
 
