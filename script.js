@@ -24,22 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${user.username}_${keyName}`;
   }
 
-  // --- AVATAR SYNC HELPER ---
-  function updateHeaderAvatar() {
-    const savedAvatar = localStorage.getItem(getUserKey('vinpix_avatar'));
-    const avatarImg = document.getElementById('profileHeaderImg');
-    const fallbackIcon = document.getElementById('profileIconFallback');
-
-    if (savedAvatar && avatarImg && fallbackIcon) {
-      avatarImg.src = savedAvatar;
-      avatarImg.style.display = 'block';
-      fallbackIcon.style.display = 'none';
-    } else if (avatarImg && fallbackIcon) {
-      avatarImg.style.display = 'none';
-      fallbackIcon.style.display = 'block';
-    }
-  }
-
   function showView(targetView) {
     Object.values(views).forEach(v => {
       if (v) v.classList.remove('active');
@@ -52,7 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (['home', 'levels', 'collections'].includes(targetView)) {
       if (mainHeader) mainHeader.classList.remove('hidden');
       updateCoinDisplay();
-      updateHeaderAvatar();
     } else {
       if (mainHeader) mainHeader.classList.add('hidden');
     }
@@ -81,34 +64,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // --- 1. LOADING SCREEN & SKIP CHECK ---
-  if (localStorage.getItem('skipLoading') === 'true') {
-    localStorage.removeItem('skipLoading');
-    const loadingView = document.getElementById('loadingView');
-    if (loadingView) {
-      loadingView.classList.remove('active');
-      loadingView.style.display = 'none';
-    }
+  // --- 1. LOADING SCREEN ---
+  setTimeout(() => {
     const loggedInUser = getCurrentUser();
     if (loggedInUser) {
       const nameElem = document.getElementById('userDisplayName');
       if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
+      showView('home');
+      playMainBGM();
+    } else {
+      showView('login');
     }
-    showView('home');
-    playMainBGM();
-  } else {
-    setTimeout(() => {
-      const loggedInUser = getCurrentUser();
-      if (loggedInUser) {
-        const nameElem = document.getElementById('userDisplayName');
-        if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
-        showView('home');
-        playMainBGM();
-      } else {
-        showView('login');
-      }
-    }, 4000);
-  }
+  }, 4000);
 
   // --- 2. AUTHENTICATION & FORM NAVIGATION ---
   const toRegBtn = document.getElementById('toRegister');
@@ -320,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- 5. RENDER LEVELS ---
+  // --- 5. RENDER LEVELS (WITH BLURRED / UNBLURRED BACKGROUNDS & STACKED STATS) ---
   function renderLevels() {
     const grid = document.getElementById('levelsGrid');
     if (!grid) return;
@@ -389,6 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const displayMoves = moves ? moves : '--';
         const displayTime = timeStr ? timeStr : '--:--';
 
+        // Stacked Layout: Time on top of Moves
         btn.innerHTML = `
           <div class="level-num">${i.toString().padStart(2, '0')}</div>
           <div class="stars">${starsHTML}</div>
@@ -544,3 +512,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// Dynamic Profile Header Avatar Loader
+window.addEventListener('DOMContentLoaded', () => {
+    const savedAvatar = localStorage.getItem('playerAvatar'); 
+    const avatarImg = document.getElementById('profileHeaderImg');
+    const fallbackIcon = document.getElementById('profileIconFallback');
+
+    if (savedAvatar && avatarImg && fallbackIcon) {
+        avatarImg.src = savedAvatar;
+        avatarImg.style.display = 'block';
+        fallbackIcon.style.display = 'none';
+    }
+});
+
