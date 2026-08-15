@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (shuffleBtn) {
     shuffleBtn.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      if (typeof AudioManager !== 'undefined') AudioManager.playShuffle();
       shuffleTiles();
       renderBoard();
       updateMoves(0);
@@ -192,28 +192,32 @@ document.addEventListener('DOMContentLoaded', () => {
       tileDiv.style.borderRadius = '8px';
       tileDiv.style.transition = 'transform 0.15s ease, border 0.15s ease';
 
-      tileDiv.addEventListener('click', () => {
+    tileDiv.addEventListener('click', () => {
         if (!isPlaying) return;
-        if (typeof AudioManager !== 'undefined') AudioManager.playClick();
 
         if (selectedTileIndex === null) {
           selectedTileIndex = currentIndex;
+          if (typeof AudioManager !== 'undefined') AudioManager.playSelect(); // Play select sound when picking first tile
           renderBoard();
         } else if (selectedTileIndex === currentIndex) {
           selectedTileIndex = null;
+          if (typeof AudioManager !== 'undefined') AudioManager.playClick();
           renderBoard();
         } else {
+          // Swap the tiles
           [currentTiles[selectedTileIndex], currentTiles[currentIndex]] = [currentTiles[currentIndex], currentTiles[selectedTileIndex]];
           selectedTileIndex = null;
           updateMoves(moves + 1);
+          
+          if (typeof AudioManager !== 'undefined') AudioManager.playExchange(); // Play exchange sound on swap!
+          
           renderBoard();
 
           if (isSolved()) {
             handleVictory();
           }
         }
-      });
-
+      }); 
       puzzleGrid.appendChild(tileDiv);
     });
   }
@@ -263,12 +267,13 @@ document.addEventListener('DOMContentLoaded', () => {
     isPlaying = false;
     if (timerInterval) clearInterval(timerInterval);
 
-    if (typeof AudioManager !== 'undefined') AudioManager.playVictory();
+    // Pass currentLevel here so it plays the correct victory track
+    if (typeof AudioManager !== 'undefined') AudioManager.playVictory(currentLevel);
 
     const earnedCoins = 15;
     const earnedXp = 50;
     setCoins(getCoins() + earnedCoins);
-
+  
     const unlockedMax = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
     if (currentLevel >= unlockedMax && currentLevel < maxLevels) {
       localStorage.setItem(getUserKey('currentLevel'), currentLevel + 1);
