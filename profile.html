@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Profile - VinPixGame</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+    <div class="profile-container">
+        <!-- Header with Back Button -->
+        <div class="profile-header" style="position: relative; display: flex; align-items: center; justify-content: center; width: 100%; margin-bottom: 20px;">
+            <button class="back-btn" onclick="goHome()" style="position: absolute; left: 0;">← Back</button>
+            <h1 style="margin: 0; font-size: 1.5rem; text-align: center;">Player Profile</h1>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="profile-card">
+            <!-- Avatar Display & Upload -->
+            <div class="avatar-section">
+                <div class="avatar-wrapper">
+                    <img id="avatar-preview" src="image/default-avatar.png" alt="Profile Avatar" onerror="this.src='https://via.placeholder.com/120/4a154b/ffffff?text=Avatar'">
+                </div>
+                <label for="avatar-input" class="upload-btn">Choose Avatar</label>
+                <input type="file" id="avatar-input" accept="image/*" style="display: none;">
+            </div>
+
+            <!-- Player Name Display Row with Small Edit Button -->
+            <div class="profile-info-row" style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0; background: rgba(255,255,255,0.05); padding: 12px 16px; border-radius: 12px;">
+                <div class="info-label-group">
+                    <span style="font-size: 0.85rem; opacity: 0.7; display: block;">Player Name</span>
+                    <h3 id="displayPlayerName" style="margin: 2px 0 0 0; font-size: 1.2rem;">Ulala</h3>
+                </div>
+                <button class="btn btn-secondary" id="openEditNameModal" style="padding: 6px 14px; font-size: 0.85rem; width: auto;">Edit</button>
+            </div>
+
+            <div class="badges-section" style="margin-top: 20px;">
+    <h3 style="font-size: 1rem; margin-bottom: 12px; opacity: 0.9;">Badges</h3>
+    <div class="badges-grid" id="badgesGrid">
+        
+        <!-- Emerald Badge -->
+        <div class="badge-card emerald unlocked">
+            <div class="badge-gem">🧩</div>
+            <div class="badge-info">
+                <div class="badge-title">First Step</div>
+                <div class="badge-desc">Completed Level 1</div>
+            </div>
+        </div>
+
+        <!-- Sapphire Badge -->
+        <div class="badge-card sapphire locked">
+            <div class="badge-gem">⚡</div>
+            <div class="badge-info">
+                <div class="badge-title">Speed Demon</div>
+                <div class="badge-desc">Beat a level fast</div>
+            </div>
+        </div>
+
+        <!-- Ruby Badge -->
+        <div class="badge-card ruby locked">
+            <div class="badge-gem">🪙</div>
+            <div class="badge-info">
+                <div class="badge-title">Coin Collector</div>
+                <div class="badge-desc">Earn 500 coins</div>
+            </div>
+        </div>
+
+        <!-- Diamond Badge -->
+        <div class="badge-card diamond locked">
+            <div class="badge-gem">⭐</div>
+            <div class="badge-info">
+                <div class="badge-title">Pixel Master</div>
+                <div class="badge-desc">Complete all levels</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+            <!-- XP Progress Bar Section -->
+            <div class="xp-section" style="margin: 25px 0 10px 0; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span id="displayLevelBadge" style="background: linear-gradient(135deg, #9c27b0, #e91e63); padding: 3px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; color: #fff;">LEVEL 1</span>
+                    <span id="displayXpText" style="font-size: 0.8rem; opacity: 0.7;">0 / 500 XP</span>
+                </div>
+                <!-- Progress Track -->
+                <div style="width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden;">
+                    <div id="displayXpBarFill" style="width: 0%; height: 100%; background: linear-gradient(90deg, #9c27b0, #00f2fe); border-radius: 4px; transition: width 0.4s ease;"></div>
+                </div>
+            </div>
+    
+    <!-- EDIT NAME POPUP MODAL -->
+    <div id="editNameModal" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+        <div class="settings-card" style="background: #2a1147; padding: 25px; border-radius: 16px; width: 90%; max-width: 350px; border: 2px solid #9c27b0; position: relative;">
+            <div class="settings-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0; font-size: 1.1rem;">EDIT PLAYER NAME</h3>
+                <button class="icon-btn close-modal-btn" id="closeEditNameModal" style="background: transparent; border: none; color: #fff; font-size: 1.2rem; cursor: pointer;">✕</button>
+            </div>
+            
+            <div class="input-group" style="margin-bottom: 15px;">
+                <input type="text" id="username-input" placeholder="Enter new name..." maxlength="15" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #9c27b0; background: rgba(0,0,0,0.2); color: #fff;">
+            </div>
+            <p id="save-status" class="save-status" style="margin: 5px 0 15px 0; font-size: 0.9rem; text-align: center;"></p>
+
+            <div class="settings-actions">
+                <button id="save-profile-btn" class="btn btn-primary" style="width: 100%;">Save Name</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="profile.js"></script>
+</body>
+</html>
