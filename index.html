@@ -9,16 +9,18 @@
 <body>
     <div id="app-container">
 
-        <!-- 1. LOADING SCREEN -->
-        <div id="screen-loading" class="screen active">
+        <!-- 1. LOADING SCREEN (Standalone initial window) -->
+        <div id="screen-loading" class="screen">
             <div class="loading-content">
                 <div class="logo-container">
                     <video src="image/logo.webm" autoplay muted loop playsinline class="game-logo-large"></video>
                 </div>
                 <div class="loading-bar-container">
                     <p>LOADING...</p>
-                    <div class="progress-bar"><div class="progress-fill" style="width: 75%;"></div></div>
-                    <span class="loading-percentage">75%</span>
+                    <div class="progress-bar">
+                        <div id="loading-progress-fill" class="progress-fill" style="width: 0%;"></div>
+                    </div>
+                    <span id="loading-percentage-text" class="loading-percentage">0%</span>
                 </div>
             </div>
         </div>
@@ -314,21 +316,21 @@
             <div class="settings-row"><span>ℹ️ Credits</span> <span>></span></div>
         </div>
 
-        <!-- BOTTOM NAVIGATION BAR -->
-        <nav class="bottom-nav">
-            <button class="nav-item active" onclick="switchScreen('home')">
+        <!-- BOTTOM NAVIGATION BAR (Hidden during loading via CSS or script logic) -->
+        <nav id="bottom-nav-bar" class="bottom-nav" style="display: none;">
+            <button id="nav-home" class="nav-item active" onclick="switchScreen('home')">
                 🏠<span>HOME</span>
             </button>
-            <button class="nav-item" onclick="switchScreen('levels')">
+            <button id="nav-levels" class="nav-item" onclick="switchScreen('levels')">
                 🎮<span>LEVELS</span>
             </button>
-            <button class="nav-item" onclick="switchScreen('collections')">
+            <button id="nav-collections" class="nav-item" onclick="switchScreen('collections')">
                 🖼️<span>COLLECTIONS</span>
             </button>
-            <button class="nav-item" onclick="switchScreen('profile')">
+            <button id="nav-profile" class="nav-item" onclick="switchScreen('profile')">
                 👤<span>PROFILE</span>
             </button>
-            <button class="nav-item" onclick="switchScreen('settings')">
+            <button id="nav-settings" class="nav-item" onclick="switchScreen('settings')">
                 ⚙️<span>SETTINGS</span>
             </button>
         </nav>
