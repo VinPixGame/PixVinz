@@ -32,28 +32,40 @@ const AudioManager = {
   },
 
   stopBGM() {
-    if (this.bgmMain) { this.bgmMain.pause(); }
-    if (this.bgmGame) { this.bgmGame.pause(); }
+    if (this.bgmMain) { this.bgmMain.pause(); this.bgmMain.currentTime = 0; }
+    if (this.bgmGame) { this.bgmGame.pause(); this.bgmGame.currentTime = 0; }
   },
 
+  // Homepage and any menu pages
   playMain() {
     if (!this.musicEnabled) return;
-    this.stopBGM();
+    if (this.bgmGame) {
+      this.bgmGame.pause();
+      this.bgmGame.currentTime = 0;
+    }
     if (!this.bgmMain) {
       this.bgmMain = new Audio('sounds/main.mp3');
       this.bgmMain.loop = true;
     }
-    this.bgmMain.play().catch(e => console.log('BGM Play blocked or missing: sounds/main.mp3'));
+    if (this.bgmMain.paused) {
+      this.bgmMain.play().catch(e => console.log('BGM Main play blocked or missing: sounds/main.mp3'));
+    }
   },
 
+  // Game page only when playing the puzzle
   playGame() {
     if (!this.musicEnabled) return;
-    this.stopBGM();
+    if (this.bgmMain) {
+      this.bgmMain.pause();
+      this.bgmMain.currentTime = 0;
+    }
     if (!this.bgmGame) {
       this.bgmGame = new Audio('sounds/bgmusic.mp3');
       this.bgmGame.loop = true;
     }
-    this.bgmGame.play().catch(e => console.log('BGM Play blocked or missing: sounds/bgmusic.mp3'));
+    if (this.bgmGame.paused) {
+      this.bgmGame.play().catch(e => console.log('BGM Game play blocked or missing: sounds/bgmusic.mp3'));
+    }
   },
 
   playSelect() {
