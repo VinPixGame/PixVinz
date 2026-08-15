@@ -10,9 +10,11 @@
     <div id="app-container">
 
         <!-- 1. LOADING SCREEN -->
-        <div id="screen-loading" class="screen">
+        <div id="screen-loading" class="screen active">
             <div class="loading-content">
-                <img src="logo.png" alt="PixVinz Logo" class="game-logo-large">
+                <div class="logo-container">
+                    <video src="image/logo.webm" autoplay muted loop playsinline class="game-logo-large"></video>
+                </div>
                 <div class="loading-bar-container">
                     <p>LOADING...</p>
                     <div class="progress-bar"><div class="progress-fill" style="width: 75%;"></div></div>
@@ -22,10 +24,10 @@
         </div>
 
         <!-- 2. HOME PAGE -->
-        <div id="screen-home" class="screen active">
+        <div id="screen-home" class="screen">
             <div class="top-user-bar">
                 <div class="user-pill">
-                    <img src="avatar.png" alt="Avatar" class="mini-avatar">
+                    <img src="image/avatar.png" alt="Avatar" class="mini-avatar" onerror="this.src='https://via.placeholder.com/40'">
                     <div class="user-info-text">
                         <span class="username">Ulala</span>
                         <span class="user-level">Level 12</span>
@@ -35,10 +37,10 @@
             </div>
 
             <div class="home-logo-container">
-                <img src="logo.png" alt="PixVinz Logo" class="game-logo-medium">
+                <video src="image/logo.webm" autoplay muted loop playsinline class="game-logo-medium"></video>
             </div>
 
-            <button class="btn-play-gold" onclick="alert('Starting game...')">
+            <button class="btn-play-gold" onclick="switchScreen('levels')">
                 ▶ PLAY<br><span class="btn-sub">Continue your journey</span>
             </button>
 
@@ -198,7 +200,7 @@
                 <h2>PLAYER PROFILE</h2>
             </div>
             <div class="profile-hero">
-                <img src="avatar.png" alt="Avatar" class="large-avatar">
+                <img src="image/avatar.png" alt="Avatar" class="large-avatar" onerror="this.src='https://via.placeholder.com/80'">
                 <button class="btn-outline-small">CHANGE AVATAR</button>
                 <div class="username-row">
                     <h3>Ulala</h3>
