@@ -5,7 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
     register: document.getElementById('registerView'),
     home: document.getElementById('homeView'),
     levels: document.getElementById('levelsView'),
-    collections: document.getElementById('collectionsView')
+    collections: document.getElementById('collectionsView'),
+    challenge: document.getElementById('challengeView'),
+    leaderboardView: document.getElementById('leaderboardView')
   };
 
   const mainHeader = document.getElementById('mainHeader');
@@ -71,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
       views[targetView].classList.add('active');
     }
 
-    if (['home', 'levels', 'collections'].includes(targetView)) {
+    if (['home', 'levels', 'collections', 'challenge', 'leaderboardView'].includes(targetView)) {
       if (mainHeader) mainHeader.classList.remove('hidden');
       updateCoinDisplay();
       updateHeaderAvatar();
@@ -134,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 4000);
   }
 
-  // --- 2. AUTHENTICATION & FORM NAVIGATION ---
+  // --- 2. AUTHENTICATION & FORM NAVIGATION (FIREBASE + LOCAL STORAGE) ---
   const toRegBtn = document.getElementById('toRegister');
   if (toRegBtn) {
     toRegBtn.addEventListener('click', (e) => {
@@ -153,9 +155,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function getEmailFromUsername(username) {
+    const clean = username.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+    return `${clean}@pixvinz.app`;
+  }
+
   const regForm = document.getElementById('registerForm');
   if (regForm) {
-    regForm.addEventListener('submit', (e) => {
+    regForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
 
@@ -170,30 +177,53 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
-      if (users[username]) {
-        if (errElem) errElem.innerText = "Username already taken!";
+      if (!window.pixvinzAuth) {
+        if (errElem) errElem.innerText = 'Firebase initializing... please try again in a second.';
         return;
       }
 
-      const newUser = { displayName, username, password: pass };
-      users[username] = newUser;
-      localStorage.setItem('registeredUsers', JSON.stringify(users));
+      const { auth, createUserWithEmailAndPassword } = window.pixvinzAuth;
+      const email = getEmailFromUsername(username);
 
-      localStorage.setItem('loggedInUser', JSON.stringify(newUser));
-      const nameElem = document.getElementById('userDisplayName');
-      if (nameElem) nameElem.innerText = displayName;
+      try {
+        await createUserWithEmailAndPassword(auth, email, pass);
+        const newUser = { displayName, username, password: pass };
+        
+        let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+        users[username] = newUser;
+        localStorage.setItem('registeredUsers', JSON.stringify(users));
+        localStorage.setItem('loggedInUser', JSON.stringify(newUser));
 
-      if (errElem) errElem.innerText = "";
-      showView('home');
-      playMainBGM();
-      updateHeaderAvatar();
+        if (window.pixvinzDb) {
+          const { db, doc, setDoc } = window.pixvinzDb;
+          await setDoc(doc(db, "players", username), {
+            username: username,
+            displayName: displayName,
+            level: 1,
+            coins: 0,
+            avatar: '',
+            lastUpdated: new Date()
+          }, { merge: true });
+        }
+
+        const nameElem = document.getElementById('userDisplayName');
+        if (nameElem) nameElem.innerText = displayName;
+
+        if (errElem) errElem.innerText = "";
+        updateCoinDisplay();
+        updateHeaderAvatar();
+        showView('home');
+        playMainBGM();
+      } catch (err) {
+        console.error("Registration error:", err);
+        if (errElem) errElem.innerText = err.message || 'Registration failed. Username may be taken.';
+      }
     });
   }
 
   const logForm = document.getElementById('loginForm');
   if (logForm) {
-    logForm.addEventListener('submit', (e) => {
+    logForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
 
@@ -201,22 +231,48 @@ document.addEventListener('DOMContentLoaded', () => {
       const pass = document.getElementById('loginPass').value;
       const errElem = document.getElementById('loginError');
 
-      let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
-
-      if (Object.keys(users).length === 0 && username === 'vinz' && pass === '1234') {
-        users['vinz'] = { displayName: 'Vinz', username: 'vinz', password: '1234' };
-        localStorage.setItem('registeredUsers', JSON.stringify(users));
+      if (!window.pixvinzAuth) {
+        if (errElem) errElem.innerText = 'Firebase initializing... please try again in a second.';
+        return;
       }
 
-      if (users[username] && users[username].password === pass) {
-        localStorage.setItem('loggedInUser', JSON.stringify(users[username]));
+      const { auth, signInWithEmailAndPassword } = window.pixvinzAuth;
+      const email = getEmailFromUsername(username);
+
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        let currentUser = { username: username, displayName: username, password: pass };
+
+        if (window.pixvinzDb) {
+          const { db, doc, getDoc } = window.pixvinzDb;
+          const userDoc = await getDoc(doc(db, "players", username));
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            if (data.level) localStorage.setItem(getUserKey('currentLevel'), data.level);
+            if (data.coins !== undefined) localStorage.setItem(getUserKey('totalCoins'), data.coins);
+            if (data.avatar) {
+              localStorage.setItem(getUserKey('vinpix_avatar'), data.avatar);
+              localStorage.setItem('vinpix_avatar', data.avatar);
+            }
+            if (data.displayName) currentUser.displayName = data.displayName;
+          }
+        }
+
+        let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+        users[username] = currentUser;
+        localStorage.setItem('registeredUsers', JSON.stringify(users));
+        localStorage.setItem('loggedInUser', JSON.stringify(currentUser));
+
         const nameElem = document.getElementById('userDisplayName');
-        if (nameElem) nameElem.innerText = users[username].displayName;
+        if (nameElem) nameElem.innerText = currentUser.displayName;
         if (errElem) errElem.innerText = "";
+
+        updateCoinDisplay();
+        updateHeaderAvatar();
         showView('home');
         playMainBGM();
-        updateHeaderAvatar();
-      } else {
+      } catch (err) {
+        console.error("Login error:", err);
         if (errElem) errElem.innerText = "Invalid username or password!";
       }
     });
@@ -247,6 +303,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       renderCollectionFolders();
       showView('collections');
+    });
+  }
+
+  const navLeaderboard = document.getElementById('navLeaderboard');
+  if (navLeaderboard) {
+    navLeaderboard.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      renderLeaderboard();
+      showView('leaderboardView');
     });
   }
 
@@ -336,9 +401,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
+    logoutBtn.addEventListener('click', async () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       if (confirm("Are you sure you want to log out?")) {
+        if (window.pixvinzAuth) {
+          await window.pixvinzAuth.signOut(window.pixvinzAuth.auth);
+        }
         localStorage.removeItem('loggedInUser');
         if (settingsModal) settingsModal.classList.add('hidden');
         if (typeof AudioManager !== 'undefined') AudioManager.stopBGM();
@@ -520,7 +588,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const item = document.createElement('div');
       item.className = 'collection-item';
 
-      v = isUnlocked; // placeholder check
+      let v = isUnlocked; // placeholder check
       if (isUnlocked) {
         item.innerHTML = `
           <img src="image/level${i}.jpeg" alt="Level ${i}">
@@ -570,6 +638,74 @@ document.addEventListener('DOMContentLoaded', () => {
         closeImageModal();
       }
     });
+  }
+
+  // --- 7. GLOBAL LEADERBOARD SYNC ---
+  async function renderLeaderboard() {
+    const leaderboardList = document.getElementById('leaderboardList');
+    const userRankDisplay = document.getElementById('userRankDisplay');
+    if (!leaderboardList) return;
+
+    leaderboardList.innerHTML = '<div style="text-align: center; color: #d1c4e9; padding: 20px;">Loading rankings...</div>';
+
+    try {
+      let players = [];
+
+      if (window.pixvinzDb) {
+        const { db, collection, getDocs } = window.pixvinzDb;
+        const querySnapshot = await getDocs(collection(db, "players"));
+        querySnapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          players.push({
+            username: data.username,
+            displayName: data.displayName || data.username,
+            level: data.level || 1,
+            coins: data.coins || 0
+          });
+        });
+      }
+
+      if (players.length === 0) {
+        const currentUser = getCurrentUser();
+        players.push({
+          username: currentUser?.username || 'vinz',
+          displayName: currentUser?.displayName || 'Vinz',
+          level: parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1,
+          coins: parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0
+        });
+      }
+
+      players.sort((a, b) => b.level - a.level || b.coins - a.coins);
+
+      leaderboardList.innerHTML = '';
+      const currentUser = getCurrentUser();
+      let userRank = '-';
+
+      players.forEach((p, idx) => {
+        const rank = idx + 1;
+        if (currentUser && p.username === currentUser.username) {
+          userRank = `#${rank}`;
+        }
+        const row = document.createElement('div');
+        row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: #2a1147; padding: 12px 16px; border-radius: 12px; border: 1px solid #4a148c;';
+        row.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-weight: bold; color: ${rank === 1 ? '#ffd700' : rank === 2 ? '#c0c0c0' : rank === 3 ? '#cd7f32' : '#d1c4e9'}; width: 25px;">#${rank}</span>
+            <span style="color: #fff; font-weight: 500;">${p.displayName || p.username}</span>
+          </div>
+          <div style="display: flex; gap: 15px; font-size: 0.9rem; color: #d1c4e9;">
+            <span>Lvl ${p.level}</span>
+            <span>🪙 ${p.coins}</span>
+          </div>
+        `;
+        leaderboardList.appendChild(row);
+      });
+
+      if (userRankDisplay) userRankDisplay.innerText = userRank;
+    } catch (err) {
+      console.error("Leaderboard error:", err);
+      leaderboardList.innerHTML = '<div style="text-align: center; color: #ff5252; padding: 20px;">Failed to load leaderboard.</div>';
+    }
   }
 
   // Initial check on load
