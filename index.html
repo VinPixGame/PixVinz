@@ -1,240 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>PixVinz</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixVinz - Piece Together The Fun</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app-container">
-
-    <!-- 1. LOADING SCREEN -->
-    <section id="loadingView" class="view active">
-      <div class="loading-content">
-        <video id="loadingLogo" autoplay loop muted playsinline>
-          <source src="image/logo.webm" type="video/webm">
-        </video>
-        <div class="loading-text">Loading<span class="dots">...</span></div>
-      </div>
-    </section>
-
-    <!-- 2. LOGIN PAGE -->
-    <section id="loginView" class="view">
-      <div class="auth-card">
-        <div class="auth-logo">
-          <video autoplay loop muted playsinline>
-            <source src="image/logo.webm" type="video/webm">
-          </video>
-        </div>
-        <h2>LOG IN</h2>
-        <form id="loginForm">
-          <div class="input-group">
-            <input type="text" id="loginUser" placeholder="Username" required>
-          </div>
-          <div class="input-group">
-            <input type="password" id="loginPass" placeholder="Password" required>
-          </div>
-          <p id="loginError" class="auth-error"></p>
-          <button type="submit" class="btn btn-primary">LOG IN</button>
-        </form>
-        <p class="auth-switch">Don't have an account? <a href="#" id="toRegister">Create Account</a></p>
-      </div>
-    </section>
-
-    <!-- 3. REGISTER PAGE -->
-    <section id="registerView" class="view">
-      <div class="auth-card">
-        <h2>CREATE ACCOUNT</h2>
-        <form id="registerForm">
-          <div class="input-group">
-            <input type="text" id="regDisplayName" placeholder="Display Name (e.g. Vinz)" required>
-          </div>
-          <div class="input-group">
-            <input type="text" id="regUser" placeholder="Username" required>
-          </div>
-          <div class="input-group">
-            <input type="password" id="regPass" placeholder="Password" required>
-          </div>
-          <div class="input-group">
-            <input type="password" id="regPassConfirm" placeholder="Repeat Password" required>
-          </div>
-          <p id="regError" class="auth-error"></p>
-          <button type="submit" class="btn btn-primary">REGISTER</button>
-        </form>
-        <p class="auth-switch">Already have an account? <a href="#" id="toLogin">Log In</a></p>
-      </div>
-    </section>
-
-    <!-- Top Header Bar -->
-    <header class="top-bar hidden" id="mainHeader">
-      <button class="icon-btn" id="menuBtn">☰</button>
-      <div class="logo-container">
-        <video id="logoVideo" autoplay loop muted playsinline>
-          <source src="image/logo.webm" type="video/webm">
-        </video>
-      </div>
-      <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
-    </header>
-
-    <!-- HOME PAGE VIEW -->
-    <section id="homeView" class="view">
-      <div class="card welcome-card">
-        <p class="sub-title">WELCOME</p>
-        <h2 class="user-name" id="userDisplayName">Vinz</h2>
-        <button class="btn btn-primary" id="playBtn">▶ PLAY</button>
-      </div>
-
-      <div class="card menu-card" id="navLevels">
-        <div class="card-icon">🎮</div>
-        <div class="card-text">
-          <h3>LEVELS</h3>
-          <p>Play and unlock new puzzles</p>
-        </div>
-        <span class="arrow">›</span>
-      </div>
-
-      <div class="card menu-card" id="navCollections">
-        <div class="card-icon">✨</div>
-        <div class="card-text">
-          <h3>COLLECTIONS</h3>
-          <p>View your solved puzzles</p>
-        </div>
-        <span class="arrow">›</span>
-      </div>
-
-      <div class="card menu-card" id="navSettings">
-        <div class="card-icon">⚙️</div>
-        <div class="card-text">
-          <h3>SETTINGS</h3>
-          <p>Sound, account and more</p>
-        </div>
-        <span class="arrow">›</span>
-      </div>
-    </section>
-
-    <!-- LEVELS PAGE VIEW -->
-    <section id="levelsView" class="view">
-      <div class="view-header">
-        <button class="icon-btn back-btn">‹</button>
-        <div class="header-title-group">
-          <div class="level-title-wrapper">
-            <span class="diamond-line">◇───</span>
-            <h2>LEVELS</h2>
-            <span class="diamond-line">───◇</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- OVERALL BEST RECORD CARD -->
-      <div class="overall-best-card">
-        <div class="best-stat-item">
-          <div class="stat-circle-icon">⏱️</div>
-          <div class="stat-text-group">
-            <span class="stat-title">BEST TIME</span>
-            <div class="stat-val-row">
-              <span id="globalBestTime">--:--</span>
-              <span class="stat-unit">MIN</span>
-            </div>
-          </div>
-        </div>
+    <div id="app-container">
+        <!-- SCREENS WILL SWITCH HERE -->
         
-        <div class="best-stat-divider"></div>
-
-        <div class="best-stat-item">
-          <div class="stat-circle-icon">🔀</div>
-          <div class="stat-text-group">
-            <span class="stat-title">FEWEST MOVES</span>
-            <div class="stat-val-row">
-              <span id="globalFewestMoves">--</span>
-              <span class="stat-unit">MOVES</span>
+        <!-- 1. HOME SCREEN -->
+        <div id="screen-home" class="screen active">
+            <div class="header-logo-container">
+                <img src="your-logo-path.png" alt="PixVinz Logo" class="game-logo">
             </div>
-          </div>
+            <div class="user-top-bar">
+                <div class="user-avatar-level">
+                    <img src="avatar.png" alt="Avatar">
+                    <span>Level 12</span>
+                </div>
+                <div class="coin-badge">
+                    <span>🪙 160</span>
+                </div>
+            </div>
+            
+            <div class="hero-play-section">
+                <button class="btn-play-gold">▶ PLAY</button>
+                <p class="play-subtext">Continue your journey</p>
+            </div>
+
+            <!-- Daily Challenge Card -->
+            <div class="card daily-challenge-card">
+                <div class="challenge-info">
+                    <h3>⚡ DAILY CHALLENGE</h3>
+                    <p>Complete today's puzzle</p>
+                </div>
+                <button class="btn-purple">PLAY NOW</button>
+            </div>
         </div>
-      </div>
 
-      <!-- LEVEL GRID CONTAINER -->
-      <div class="levels-scroll-container">
-        <div class="levels-grid" id="levelsGrid"></div>
-      </div>
-    </section>
-
-    <!-- COLLECTIONS PAGE VIEW -->
-    <section id="collectionsView" class="view">
-      <div class="view-header">
-        <button class="icon-btn back-btn">‹</button>
-        <div class="header-title-group">
-          <div class="level-title-wrapper">
-            <span class="diamond-line">◇───</span>
-            <h2>COLLECTIONS</h2>
-            <span class="diamond-line">───◇</span>
-          </div>
+        <!-- 2. OTHER SCREENS (Levels, Collections, Profile, Settings) -->
+        <div id="screen-levels" class="screen">
+            <h2>Levels Page</h2>
         </div>
-      </div>
-      <div class="collections-grid" id="collectionsGrid"></div>
-    </section>
-  </div>
+        <div id="screen-collections" class="screen">
+            <h2>Collections Page</h2>
+        </div>
+        <div id="screen-profile" class="screen">
+            <h2>Profile Page</h2>
+        </div>
+        <div id="screen-settings" class="screen">
+            <h2>Settings Page</h2>
+        </div>
 
-  <!-- ENLARGED IMAGE POPUP MODAL -->
-  <div id="imageModal" class="modal-overlay hidden">
-    <div class="image-modal-card">
-      <div class="image-modal-header">
-        <span id="modalLevelTitle">LEVEL 01</span>
-        <button class="icon-btn close-modal-btn" id="closeImageModal">✕</button>
-      </div>
-      <div class="modal-img-container">
-        <img id="modalPreviewImg" src="" alt="Enlarged Preview">
-      </div>
+        <!-- BOTTOM NAVIGATION BAR -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="switchScreen('home')">
+                🏠<span>Home</span>
+            </button>
+            <button class="nav-item" onclick="switchScreen('levels')">
+                🎮<span>Levels</span>
+            </button>
+            <button class="nav-item" onclick="switchScreen('collections')">
+                🖼️<span>Collections</span>
+            </button>
+            <button class="nav-item" onclick="switchScreen('profile')">
+                👤<span>Profile</span>
+            </button>
+            <button class="nav-item" onclick="switchScreen('settings')">
+                ⚙️<span>Settings</span>
+            </button>
+        </nav>
     </div>
-  </div>
 
-  <!-- SETTINGS MODAL -->
-  <div id="settingsModal" class="modal-overlay hidden">
-    <div class="settings-card">
-      <div class="settings-header">
-        <h3>SETTINGS</h3>
-        <button class="icon-btn close-modal-btn" id="closeSettingsModal">✕</button>
-      </div>
-      
-      <div class="setting-item">
-        <span>Sound Effects</span>
-        <label class="switch">
-          <input type="checkbox" id="sfxToggle" checked>
-          <span class="slider round"></span>
-        </label>
-      </div>
-
-      <div class="setting-item">
-        <span>Music</span>
-        <label class="switch">
-          <input type="checkbox" id="musicToggle" checked>
-          <span class="slider round"></span>
-        </label>
-      </div>
-
-      <div class="settings-actions">
-        <button class="btn btn-secondary" id="aboutBtn">ℹ️ ABOUT</button>
-        <button class="btn btn-danger" id="logoutBtn">🚪 LOG OUT</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ABOUT MODAL -->
-  <div id="aboutModal" class="modal-overlay hidden">
-    <div class="about-card">
-      <button class="icon-btn close-modal-btn close-about" id="closeAboutModal">✕</button>
-      <div class="about-logo">
-        <video autoplay loop muted playsinline>
-          <source src="image/logo.webm" type="video/webm">
-        </video>
-      </div>
-      <h2>PixVinz</h2>
-      <p class="about-dev">Developer: <strong>Kuya Vinz</strong></p>
-      <p class="about-year">© 2026</p>
-    </div>
-  </div>
-
-  <script src="audio.js"></script>
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
