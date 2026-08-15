@@ -1,454 +1,553 @@
-/**
- * PixVinz - Main Application Script
- * Handles Authentication, Navigation, State, Levels, Collections, 
- * Leaderboard, Settings, and Matchmaking.
- */
-
-// --- STATE & LOCAL STORAGE MANAGEMENT ---
-const STORAGE_KEYS = {
-    USER: 'pixvinz_current_user',
-    USERS_DB: 'pixvinz_users_db',
-    GAME_DATA: 'pixvinz_game_data_', // Appended with username
-    SETTINGS: 'pixvinz_settings'
-};
-
-let currentUser = null;
-let userGameData = {
-    coins: 100,
-    bestTime: null, // in seconds
-    fewestMoves: null,
-    levels: {}, // levelId: { solved: boolean, time: seconds, moves: count }
-    collections: {}, // folderId: { imageId: boolean }
-    rank: 42
-};
-
-let appSettings = {
-    sfx: true,
-    music: true
-};
-
-// --- INITIALIZATION & EVENT LISTENERS ---
 document.addEventListener('DOMContentLoaded', () => {
-    loadSettings();
-    checkExistingSession();
-    initEventListeners();
-});
+  const views = {
+    loading: document.getElementById('loadingView'),
+    login: document.getElementById('loginView'),
+    register: document.getElementById('registerView'),
+    home: document.getElementById('homeView'),
+    levels: document.getElementById('levelsView'),
+    collections: document.getElementById('collectionsView')
+  };
 
-function initEventListeners() {
-    // Auth Forms
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-    const toRegister = document.getElementById('toRegister');
-    const toLogin = document.getElementById('toLogin');
+  const mainHeader = document.getElementById('mainHeader');
 
-    if (loginForm) loginForm.addEventListener('submit', handleLogin);
-    if (registerForm) registerForm.addEventListener('submit', handleRegister);
-    if (toRegister) toRegister.addEventListener('click', (e) => { e.preventDefault(); switchView('registerView'); });
-    if (toLogin) toLogin.addEventListener('click', (e) => { e.preventDefault(); switchView('loginView'); });
+  function getCurrentUser() {
+    try {
+      return JSON.parse(localStorage.getItem('loggedInUser'));
+    } catch (e) {
+      return null;
+    }
+  }
 
-    // Main Navigation Cards & Buttons
-    const playBtn = document.getElementById('playBtn');
-    const navChallenge = document.getElementById('navChallenge');
-    const navLevels = document.getElementById('navLevels');
-    const navCollections = document.getElementById('navCollections');
-    const navLeaderboard = document.getElementById('navLeaderboard');
-    const navSettings = document.getElementById('navSettings');
-    const navProfile = document.getElementById('navProfile');
+  function getUserKey(keyName) {
+    const user = getCurrentUser();
+    if (!user || !user.username) return keyName;
+    return `${user.username}_${keyName}`;
+  }
 
-    if (playBtn) playBtn.addEventListener('click', () => switchView('levelsView'));
-    if (navChallenge) navChallenge.addEventListener('click', () => switchView('challengeView'));
-    if (navLevels) navLevels.addEventListener('click', () => switchView('levelsView'));
-    if (navCollections) navCollections.addEventListener('click', () => openCollectionsFolders());
-    if (navLeaderboard) navLeaderboard.addEventListener('click', () => { switchView('leaderboardView'); renderLeaderboard(); });
-    if (navSettings) navSettings.addEventListener('click', openSettingsModal);
-    if (navProfile) navProfile.addEventListener('click', () => { switchView('profileView'); updateHeaderUI(); });
-
-    // Back Buttons across views
-    document.querySelectorAll('.back-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const collectionsImgContainer = document.getElementById('collectionsImagesContainer');
-            if (collectionsImgContainer && !collectionsImgContainer.classList.contains('hidden') && btn.id === 'collectionsBackBtn') {
-                openCollectionsFolders();
-                return;
-            }
-            switchView('homeView');
-        });
+  function showView(targetView) {
+    Object.values(views).forEach(v => {
+      if (v) v.classList.remove('active');
     });
 
-    // Modals Controls
-    const closeSettingsModalBtn = document.getElementById('closeSettingsModal');
-    const closeImageModalBtn = document.getElementById('closeImageModal');
-    const closeAboutModalBtn = document.getElementById('closeAboutModal');
-    const aboutBtn = document.getElementById('aboutBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-
-    if (closeSettingsModalBtn) closeSettingsModalBtn.addEventListener('click', closeSettingsModal);
-    if (closeImageModalBtn) closeImageModalBtn.addEventListener('click', closeImageModal);
-    if (closeAboutModalBtn) closeAboutModalBtn.addEventListener('click', closeAboutModal);
-    if (aboutBtn) aboutBtn.addEventListener('click', () => { closeSettingsModal(); openAboutModal(); });
-    if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
-
-    // Settings Toggles
-    const sfxToggle = document.getElementById('sfxToggle');
-    const musicToggle = document.getElementById('musicToggle');
-
-    if (sfxToggle) sfxToggle.addEventListener('change', (e) => {
-        appSettings.sfx = e.target.checked;
-        saveSettings();
-    });
-    if (musicToggle) musicToggle.addEventListener('change', (e) => {
-        appSettings.music = e.target.checked;
-        saveSettings();
-    });
-
-    // Challenge Matchmaking
-    const startMatchmakingBtn = document.getElementById('startMatchmakingBtn');
-    if (startMatchmakingBtn) startMatchmakingBtn.addEventListener('click', startMatchmaking);
-}
-
-// --- VIEW ROUTER ---
-function switchView(viewId) {
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    const target = document.getElementById(viewId);
-    if (target) {
-        target.classList.add('active');
+    if (views[targetView]) {
+      views[targetView].classList.add('active');
     }
 
-    const mainHeader = document.getElementById('mainHeader');
-    if (mainHeader) {
-        if (['homeView', 'levelsView', 'collectionsView', 'challengeView', 'leaderboardView', 'profileView'].includes(viewId)) {
-            mainHeader.classList.remove('hidden');
-        } else {
-            mainHeader.classList.add('hidden');
-        }
-    }
-}
-
-// --- AUTHENTICATION ---
-function checkExistingSession() {
-    const savedUser = localStorage.getItem(STORAGE_KEYS.USER);
-    setTimeout(() => {
-        if (savedUser) {
-            loginUserSession(savedUser, true);
-        } else {
-            switchView('loginView');
-        }
-    }, 1000);
-}
-
-function handleLogin(e) {
-    e.preventDefault();
-    const user = document.getElementById('loginUser').value.trim();
-    const pass = document.getElementById('loginPass').value;
-    const errorEl = document.getElementById('loginError');
-
-    const usersDb = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB) || '{}');
-
-    if (Object.keys(usersDb).length === 0) {
-        usersDb['admin'] = { pass: 'password', displayName: 'Vinz' };
-        localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDb));
-    }
-
-    if (!usersDb[user] || usersDb[user].pass !== pass) {
-        if (errorEl) errorEl.textContent = 'Invalid username or password. Try admin / password';
-        return;
-    }
-
-    if (errorEl) errorEl.textContent = '';
-    loginUserSession(user, true);
-}
-
-function handleRegister(e) {
-    e.preventDefault();
-    const displayName = document.getElementById('regDisplayName').value.trim();
-    const user = document.getElementById('regUser').value.trim();
-    const pass = document.getElementById('regPass').value;
-    const passConfirm = document.getElementById('regPassConfirm').value;
-    const errorEl = document.getElementById('regError');
-
-    if (pass !== passConfirm) {
-        if (errorEl) errorEl.textContent = 'Passwords do not match.';
-        return;
-    }
-
-    const usersDb = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB) || '{}');
-    if (usersDb[user]) {
-        if (errorEl) errorEl.textContent = 'Username already taken.';
-        return;
-    }
-
-    usersDb[user] = { pass, displayName };
-    localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDb));
-
-    if (errorEl) errorEl.textContent = '';
-    alert('Account created successfully! Please log in.');
-    switchView('loginView');
-}
-
-function loginUserSession(username, transition = true) {
-    currentUser = username;
-    localStorage.setItem(STORAGE_KEYS.USER, username);
-
-    const usersDb = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB) || '{}');
-    const profile = usersDb[username] || { displayName: username };
-
-    const displayNameEl = document.getElementById('userDisplayName');
-    const profileUsernameDisplay = document.getElementById('profileUsernameDisplay');
-    if (displayNameEl) displayNameEl.textContent = profile.displayName;
-    if (profileUsernameDisplay) profileUsernameDisplay.textContent = profile.displayName;
-    
-    loadUserGameData();
-    updateHeaderUI();
-    renderLevelsGrid();
-
-    if (transition) {
-        switchView('homeView');
-    }
-}
-
-function handleLogout() {
-    localStorage.removeItem(STORAGE_KEYS.USER);
-    currentUser = null;
-    closeSettingsModal();
-    switchView('loginView');
-}
-
-// --- GAME DATA & UI SYNC ---
-function loadUserGameData() {
-    const data = localStorage.getItem(STORAGE_KEYS.GAME_DATA + currentUser);
-    if (data) {
-        userGameData = JSON.parse(data);
+    if (['home', 'levels', 'collections'].includes(targetView)) {
+      if (mainHeader) mainHeader.classList.remove('hidden');
+      updateCoinDisplay();
     } else {
-        userGameData = {
-            coins: 150,
-            bestTime: 45,
-            fewestMoves: 12,
-            levels: { 1: { solved: true, time: 45, moves: 12 } },
-            collections: { 'animals': { 'img1': true } }
-        };
-        saveUserGameData();
+      if (mainHeader) mainHeader.classList.add('hidden');
     }
-}
+  }
 
-function saveUserGameData() {
-    if (!currentUser) return;
-    localStorage.setItem(STORAGE_KEYS.GAME_DATA + currentUser, JSON.stringify(userGameData));
-}
+  function updateCoinDisplay() {
+    const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
+    const coinElem = document.getElementById('coinCount');
+    if (coinElem) {
+      coinElem.innerText = totalCoins;
+    }
+  }
 
-function updateHeaderUI() {
-    const coinCountEl = document.getElementById('coinCount');
-    const bestTimeEl = document.getElementById('globalBestTime');
-    const fewestMovesEl = document.getElementById('globalFewestMoves');
-    const userRankDisplayEl = document.getElementById('userRankDisplay');
+  function playMainBGM() {
+    if (typeof AudioManager !== 'undefined' && AudioManager.musicEnabled) {
+      AudioManager.playMain();
+    }
+  }
 
-    if (coinCountEl) coinCountEl.textContent = userGameData.coins;
-    if (bestTimeEl) bestTimeEl.textContent = userGameData.bestTime ? formatTime(userGameData.bestTime) : '--:--';
-    if (fewestMovesEl) fewestMovesEl.textContent = userGameData.fewestMoves ?? '--';
-    if (userRankDisplayEl) userRankDisplayEl.textContent = `#${userGameData.rank || 42}`;
-}
+  document.addEventListener('click', () => {
+    const user = getCurrentUser();
+    if (user && typeof AudioManager !== 'undefined' && AudioManager.musicEnabled) {
+      if (!AudioManager.bgmMain || AudioManager.bgmMain.paused) {
+        playMainBGM();
+      }
+    }
+  });
 
-function formatTime(totalSeconds) {
-    const mins = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
-    const secs = (totalSeconds % 60).toString().padStart(2, '0');
-    return `${mins}:${secs}`;
-}
+  // --- 1. LOADING SCREEN ---
+  setTimeout(() => {
+    const loggedInUser = getCurrentUser();
+    if (loggedInUser) {
+      const nameElem = document.getElementById('userDisplayName');
+      if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
+      showView('home');
+      playMainBGM();
+    } else {
+      showView('login');
+    }
+  }, 4000);
 
-// --- LEVELS VIEW RENDERING ---
-function renderLevelsGrid() {
+  // --- 2. AUTHENTICATION & FORM NAVIGATION ---
+  const toRegBtn = document.getElementById('toRegister');
+  if (toRegBtn) {
+    toRegBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      showView('register');
+    });
+  }
+
+  const toLogBtn = document.getElementById('toLogin');
+  if (toLogBtn) {
+    toLogBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      showView('login');
+    });
+  }
+
+  const regForm = document.getElementById('registerForm');
+  if (regForm) {
+    regForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+
+      const displayName = document.getElementById('regDisplayName').value.trim();
+      const username = document.getElementById('regUser').value.trim().toLowerCase();
+      const pass = document.getElementById('regPass').value;
+      const passConfirm = document.getElementById('regPassConfirm').value;
+      const errElem = document.getElementById('regError');
+
+      if (pass !== passConfirm) {
+        if (errElem) errElem.innerText = "Passwords do not match!";
+        return;
+      }
+
+      let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+      if (users[username]) {
+        if (errElem) errElem.innerText = "Username already taken!";
+        return;
+      }
+
+      const newUser = { displayName, username, password: pass };
+      users[username] = newUser;
+      localStorage.setItem('registeredUsers', JSON.stringify(users));
+
+      localStorage.setItem('loggedInUser', JSON.stringify(newUser));
+      const nameElem = document.getElementById('userDisplayName');
+      if (nameElem) nameElem.innerText = displayName;
+
+      if (errElem) errElem.innerText = "";
+      showView('home');
+      playMainBGM();
+    });
+  }
+
+  const logForm = document.getElementById('loginForm');
+  if (logForm) {
+    logForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+
+      const username = document.getElementById('loginUser').value.trim().toLowerCase();
+      const pass = document.getElementById('loginPass').value;
+      const errElem = document.getElementById('loginError');
+
+      let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+
+      if (Object.keys(users).length === 0 && username === 'vinz' && pass === '1234') {
+        users['vinz'] = { displayName: 'Vinz', username: 'vinz', password: '1234' };
+        localStorage.setItem('registeredUsers', JSON.stringify(users));
+      }
+
+      if (users[username] && users[username].password === pass) {
+        localStorage.setItem('loggedInUser', JSON.stringify(users[username]));
+        const nameElem = document.getElementById('userDisplayName');
+        if (nameElem) nameElem.innerText = users[username].displayName;
+        if (errElem) errElem.innerText = "";
+        showView('home');
+        playMainBGM();
+      } else {
+        if (errElem) errElem.innerText = "Invalid username or password!";
+      }
+    });
+  }
+
+  // --- 3. HOME PAGE BUTTONS ---
+  const playBtn = document.getElementById('playBtn');
+  if (playBtn) {
+    playBtn.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+      window.location.href = `game.html?level=${currentLevel}`;
+    });
+  }
+
+  const navLevels = document.getElementById('navLevels');
+  if (navLevels) {
+    navLevels.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      renderLevels();
+      showView('levels');
+    });
+  }
+
+  const navCollections = document.getElementById('navCollections');
+  if (navCollections) {
+    navCollections.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      renderCollectionFolders();
+      showView('collections');
+    });
+  }
+
+  document.querySelectorAll('.back-btn').forEach(btn => {
+    if (btn.id === 'collectionsBackBtn') return;
+    btn.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      showView('home');
+    });
+  });
+
+  const collectionsBackBtn = document.getElementById('collectionsBackBtn');
+  if (collectionsBackBtn) {
+    collectionsBackBtn.addEventListener('click', (e) => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      const imagesContainer = document.getElementById('collectionsImagesContainer');
+      
+      if (imagesContainer && !imagesContainer.classList.contains('hidden')) {
+        e.stopImmediatePropagation();
+        renderCollectionFolders();
+      } else {
+        showView('home');
+      }
+    });
+  }
+
+  // --- 4. SETTINGS, ABOUT & LOGOUT ---
+  const settingsModal = document.getElementById('settingsModal');
+  const aboutModal = document.getElementById('aboutModal');
+  const sfxToggle = document.getElementById('sfxToggle');
+  const musicToggle = document.getElementById('musicToggle');
+
+  if (typeof AudioManager !== 'undefined') {
+    if (sfxToggle) sfxToggle.checked = AudioManager.sfxEnabled;
+    if (musicToggle) musicToggle.checked = AudioManager.musicEnabled;
+  }
+
+  const navSettings = document.getElementById('navSettings');
+  if (navSettings) {
+    navSettings.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      if (settingsModal) settingsModal.classList.remove('hidden');
+    });
+  }
+
+  const closeSettingsModal = document.getElementById('closeSettingsModal');
+  if (closeSettingsModal) {
+    closeSettingsModal.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      if (settingsModal) settingsModal.classList.add('hidden');
+    });
+  }
+
+  if (sfxToggle) {
+    sfxToggle.addEventListener('change', (e) => {
+      if (typeof AudioManager !== 'undefined') {
+        AudioManager.setSFX(e.target.checked);
+        if (e.target.checked) AudioManager.playClick();
+      }
+    });
+  }
+
+  if (musicToggle) {
+    musicToggle.addEventListener('change', (e) => {
+      if (typeof AudioManager !== 'undefined') {
+        AudioManager.setMusic(e.target.checked);
+      }
+    });
+  }
+
+  const aboutBtn = document.getElementById('aboutBtn');
+  if (aboutBtn) {
+    aboutBtn.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      if (aboutModal) aboutModal.classList.remove('hidden');
+    });
+  }
+
+  const closeAboutModal = document.getElementById('closeAboutModal');
+  if (closeAboutModal) {
+    closeAboutModal.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      if (aboutModal) aboutModal.classList.add('hidden');
+    });
+  }
+
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      if (confirm("Are you sure you want to log out?")) {
+        localStorage.removeItem('loggedInUser');
+        if (settingsModal) settingsModal.classList.add('hidden');
+        if (typeof AudioManager !== 'undefined') AudioManager.stopBGM();
+        showView('login');
+      }
+    });
+  }
+
+  // --- 5. RENDER LEVELS (WITH BLURRED / UNBLURRED BACKGROUNDS & STACKED STATS) ---
+  function renderLevels() {
     const grid = document.getElementById('levelsGrid');
     if (!grid) return;
     grid.innerHTML = '';
 
-    for (let i = 1; i <= 20; i++) {
-        const isUnlocked = i === 1 || userGameData.levels[i - 1]?.solved || userGameData.levels[i]?.solved;
-        const isSolved = userGameData.levels[i]?.solved;
+    const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
 
-        const card = document.createElement('div');
-        card.className = `level-card ${isUnlocked ? '' : 'locked'} ${isSolved ? 'solved' : ''}`;
-        card.innerHTML = `
-            <div class="level-number">${i < 10 ? '0' + i : i}</div>
-            <div class="level-status">${isSolved ? '⭐ Done' : (isUnlocked ? 'Play' : '🔒')}</div>
+    let overallBestTimeSeconds = Infinity;
+    let overallFewestMoves = Infinity;
+
+    for (let i = 1; i <= 200; i++) {
+      const btn = document.createElement('div');
+      const isUnlocked = i <= currentLevel;
+      const isSolved = i < currentLevel;
+
+      btn.className = `level-btn ${isUnlocked ? 'unlocked' : 'locked'}`;
+      btn.style.setProperty('--level-bg', `url('image/level${i}.jpeg')`);
+
+      if (isUnlocked) {
+        if (!isSolved) {
+          btn.classList.add('unsolved-bg');
+        } else {
+          btn.classList.add('solved-bg');
+        }
+
+        const levelCoins = parseInt(localStorage.getItem(getUserKey(`levelCoins_${i}`))) || 0;
+        const starsEarned = Math.min(3, Math.floor(levelCoins / 5)) || (isSolved ? 3 : 0);
+        
+        let moves = localStorage.getItem(getUserKey(`levelMoves_${i}`));
+        let timeStr = localStorage.getItem(getUserKey(`levelTime_${i}`));
+
+        if (isSolved) {
+          const gSize = i <= 10 ? 3 : i <= 30 ? 4 : i <= 60 ? 5 : i <= 100 ? 6 : i <= 150 ? 7 : 8;
+          if (!moves) {
+            moves = gSize * 6;
+          }
+          if (!timeStr || timeStr === '--:--') {
+            const estSec = gSize * 15;
+            const m = Math.floor(estSec / 60).toString().padStart(2, '0');
+            const s = (estSec % 60).toString().padStart(2, '0');
+            timeStr = `${m}:${s}`;
+          }
+        }
+
+        if (moves) {
+          const parsedMoves = parseInt(moves);
+          if (parsedMoves < overallFewestMoves) {
+            overallFewestMoves = parsedMoves;
+          }
+        }
+        if (timeStr && timeStr !== '--:--') {
+          const parts = timeStr.split(':');
+          if (parts.length === 2) {
+            const totalSec = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+            if (totalSec < overallBestTimeSeconds) {
+              overallBestTimeSeconds = totalSec;
+            }
+          }
+        }
+
+        let starsHTML = '';
+        for (let s = 1; s <= 3; s++) {
+          starsHTML += `<span class="star-icon-small ${s <= starsEarned ? 'earned' : ''}">★</span>`;
+        }
+
+        const displayMoves = moves ? moves : '--';
+        const displayTime = timeStr ? timeStr : '--:--';
+
+        // Stacked Layout: Time on top of Moves
+        btn.innerHTML = `
+          <div class="level-num">${i.toString().padStart(2, '0')}</div>
+          <div class="stars">${starsHTML}</div>
+          <div class="level-card-pill">
+            <div class="pill-stat">⏱️ ${displayTime}</div>
+            <div class="pill-stat">🔀 ${displayMoves} <span class="unit">MOVES</span></div>
+          </div>
         `;
 
-        if (isUnlocked) {
-            card.addEventListener('click', () => {
-                alert(`Starting Level ${i}! (Puzzle gameplay module placeholder)`);
-                simulateLevelComplete(i);
-            });
-        }
-        grid.appendChild(card);
+        btn.addEventListener('click', () => {
+          if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+          window.location.href = `game.html?level=${i}`;
+        });
+      } else {
+        btn.style.backgroundColor = '#100424';
+        btn.innerHTML = `
+          <div class="level-num" style="opacity:0.3">${i.toString().padStart(2, '0')}</div>
+          <div class="lock-icon" style="font-size:22px; opacity:0.6;">🔒</div>
+          <div class="locked-text">LOCKED</div>
+        `;
+      }
+
+      grid.appendChild(btn);
     }
-}
 
-function simulateLevelComplete(levelNum) {
-    userGameData.levels[levelNum] = { solved: true, time: 30, moves: 10 };
-    userGameData.coins += 50;
-    userGameData.bestTime = userGameData.bestTime ? Math.min(userGameData.bestTime, 30) : 30;
-    userGameData.fewestMoves = userGameData.fewestMoves ? Math.min(userGameData.fewestMoves, 10) : 10;
-    saveUserGameData();
-    updateHeaderUI();
-    renderLevelsGrid();
-}
+    const timeElem = document.getElementById('globalBestTime');
+    if (timeElem) {
+      if (overallBestTimeSeconds !== Infinity) {
+        const m = Math.floor(overallBestTimeSeconds / 60).toString().padStart(2, '0');
+        const s = (overallBestTimeSeconds % 60).toString().padStart(2, '0');
+        timeElem.innerText = `${m}:${s}`;
+      } else {
+        timeElem.innerText = '--:--';
+      }
+    }
 
-// --- COLLECTIONS VIEW ---
-function openCollectionsFolders() {
-    switchView('collectionsView');
-    const titleEl = document.getElementById('collectionsTitle');
-    const folderContainer = document.getElementById('collectionsFolderContainer');
-    const imagesContainer = document.getElementById('collectionsImagesContainer');
+    const movesElem = document.getElementById('globalFewestMoves');
+    if (movesElem) {
+      movesElem.innerText = overallFewestMoves !== Infinity ? overallFewestMoves : '--';
+    }
+  }
 
-    if (titleEl) titleEl.textContent = 'COLLECTIONS';
-    if (folderContainer) folderContainer.classList.remove('hidden');
-    if (imagesContainer) imagesContainer.classList.add('hidden');
-
+  // --- 6. COLLECTION FOLDERS LOGIC ---
+  function renderCollectionFolders() {
     const folderGrid = document.getElementById('collectionsFolderGrid');
     if (!folderGrid) return;
     folderGrid.innerHTML = '';
 
-    const folders = [
-        { id: 'animals', name: 'Animals', icon: '🦁', count: '1/5' },
-        { id: 'landscapes', name: 'Landscapes', icon: '🌄', count: '0/5' },
-        { id: 'anime', name: 'Anime Art', icon: '🎨', count: '0/5' }
-    ];
+    const totalLevels = 200;
+    const levelsPerFolder = 10;
+    const totalFolders = Math.ceil(totalLevels / levelsPerFolder);
 
-    folders.forEach(folder => {
-        const el = document.createElement('div');
-        el.className = 'card menu-card';
-        el.innerHTML = `
-            <div class="card-icon">${folder.icon}</div>
-            <div class="card-text">
-                <h3>${folder.name}</h3>
-                <p>Unlocked: ${folder.count}</p>
-            </div>
-            <span class="arrow">›</span>
-        `;
-        el.addEventListener('click', () => openCollectionImages(folder.id, folder.name));
-        folderGrid.appendChild(el);
-    });
-}
+    for (let i = 0; i < totalFolders; i++) {
+      const start = i * levelsPerFolder + 1;
+      const end = Math.min((i + 1) * levelsPerFolder, totalLevels);
 
-function openCollectionImages(folderId, folderName) {
-    const titleEl = document.getElementById('collectionsTitle');
+      const folderCard = document.createElement('div');
+      folderCard.className = 'collection-folder-btn';
+      folderCard.innerHTML = `
+        <div class="collection-folder-icon">📁</div>
+        <div class="collection-folder-title">LEVELS ${start} - ${end}</div>
+        <div class="collection-folder-sub">Tap to view</div>
+      `;
+      
+      folderCard.addEventListener('click', () => {
+        if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+        openCollectionFolder(start, end);
+      });
+
+      folderGrid.appendChild(folderCard);
+    }
+
     const folderContainer = document.getElementById('collectionsFolderContainer');
     const imagesContainer = document.getElementById('collectionsImagesContainer');
+    const titleElem = document.getElementById('collectionsTitle');
 
-    if (titleEl) titleEl.textContent = folderName.toUpperCase();
+    if (folderContainer) folderContainer.classList.remove('hidden');
+    if (imagesContainer) imagesContainer.classList.add('hidden');
+    if (titleElem) titleElem.innerText = 'COLLECTIONS';
+  }
+
+  function openCollectionFolder(start, end) {
+    const folderContainer = document.getElementById('collectionsFolderContainer');
+    const imagesContainer = document.getElementById('collectionsImagesContainer');
+    const titleElem = document.getElementById('collectionsTitle');
+
     if (folderContainer) folderContainer.classList.add('hidden');
     if (imagesContainer) imagesContainer.classList.remove('hidden');
+    if (titleElem) titleElem.innerText = `LVL ${start}-${end}`;
 
+    renderFilteredCollections(start, end);
+  }
+
+  function renderFilteredCollections(start, end) {
     const grid = document.getElementById('collectionsGrid');
     if (!grid) return;
     grid.innerHTML = '';
+    const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
 
-    for (let i = 1; i <= 6; i++) {
-        const isUnlocked = (folderId === 'animals' && i === 1);
-        const item = document.createElement('div');
-        item.className = `collection-item ${isUnlocked ? '' : 'locked'}`;
-        item.style.cssText = "background: #2a1147; border-radius: 12px; height: 120px; display: flex; align-items: center; justify-content: center; font-size: 2rem; position: relative; border: 2px solid #9c27b0; cursor: pointer;";
-        item.innerHTML = isUnlocked ? '🖼️' : '🔒';
+    for (let i = start; i <= end; i++) {
+      const isUnlocked = i < currentLevel;
+      const item = document.createElement('div');
+      item.className = 'collection-item';
 
-        if (isUnlocked) {
-            item.addEventListener('click', () => {
-                openImageModal(`Sample ${folderName} ${i}`, 'https://via.placeholder.com/400');
-            });
-        }
-        grid.appendChild(item);
-    }
-}
-
-// --- LEADERBOARD VIEW ---
-function renderLeaderboard() {
-    const list = document.getElementById('leaderboardList');
-    if (!list) return;
-    list.innerHTML = '';
-
-    const mockLeaders = [
-        { rank: 1, name: 'ShadowVinz', score: 1420 },
-        { rank: 2, name: 'PixelQueen', score: 1350 },
-        { rank: 3, name: 'SpeedSolver', score: 1280 },
-        { rank: 4, name: 'MasterV', score: 1150 },
-        { rank: 5, name: 'PuzzleKing', score: 990 }
-    ];
-
-    mockLeaders.forEach(leader => {
-        const row = document.createElement('div');
-        row.style.cssText = "display: flex; align-items: center; justify-content: space-between; background: rgba(42, 17, 71, 0.6); padding: 12px 16px; border-radius: 10px; border: 1px solid #7b1fa2;";
-        row.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="font-weight: bold; color: ${leader.rank === 1 ? '#ffd700' : leader.rank === 2 ? '#c0c0c0' : leader.rank === 3 ? '#cd7f32' : '#b388ff'}">#${leader.rank}</span>
-                <span style="color: #fff; font-weight: 500;">${leader.name}</span>
-            </div>
-            <span style="color: #ffd700; font-weight: bold;">⭐ ${leader.score} pts</span>
+      if (isUnlocked) {
+        item.innerHTML = `
+          <img src="image/level${i}.jpeg" alt="Level ${i}">
+          <div class="collection-badge">LEVEL ${i.toString().padStart(2, '0')}</div>
         `;
-        list.appendChild(row);
-    });
-}
 
-// --- MATCHMAKING 1V1 ---
-function startMatchmaking() {
-    const statusEl = document.getElementById('matchmakingStatus');
-    const btn = document.getElementById('startMatchmakingBtn');
-    
-    if (btn) btn.disabled = true;
-    if (statusEl) statusEl.textContent = 'Searching for an opponent...';
+        item.addEventListener('click', () => {
+          if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+          openImageModal(i);
+        });
+      } else {
+        item.style.opacity = '0.4';
+        item.innerHTML = `
+          <div style="display:flex; align-items:center; justify-content:center; height:100%; font-size:24px;">🔒</div>
+          <div class="collection-badge">LEVEL ${i.toString().padStart(2, '0')}</div>
+        `;
+      }
 
-    setTimeout(() => {
-        if (statusEl) statusEl.textContent = 'Opponent found! Starting match...';
-        setTimeout(() => {
-            if (statusEl) statusEl.textContent = '';
-            if (btn) btn.disabled = false;
-            alert('Match battle started! (1v1 real-time gameplay view placeholder)');
-        }, 1200);
-    }, 2000);
-}
+      grid.appendChild(item);
+    }
+  }
 
-// --- MODALS & SETTINGS ---
-function openSettingsModal() {
-    const modal = document.getElementById('settingsModal');
+  function openImageModal(levelNum) {
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalPreviewImg');
+    const modalTitle = document.getElementById('modalLevelTitle');
+
+    if (modalTitle) modalTitle.innerText = `LEVEL ${levelNum.toString().padStart(2, '0')}`;
+    if (modalImg) modalImg.src = `image/level${levelNum}.jpeg`;
+
     if (modal) modal.classList.remove('hidden');
-}
+  }
 
-function closeSettingsModal() {
-    const modal = document.getElementById('settingsModal');
-    if (modal) modal.classList.add('hidden');
-}
-
-function openAboutModal() {
-    const modal = document.getElementById('aboutModal');
-    if (modal) modal.classList.remove('hidden');
-}
-
-function closeAboutModal() {
-    const modal = document.getElementById('aboutModal');
-    if (modal) modal.classList.add('hidden');
-}
-
-function openImageModal(title, imgSrc) {
-    const titleEl = document.getElementById('modalLevelTitle');
-    const imgEl = document.getElementById('modalPreviewImg');
-    const modalEl = document.getElementById('imageModal');
-    
-    if (titleEl) titleEl.textContent = title;
-    if (imgEl) imgEl.src = imgSrc;
-    if (modalEl) modalEl.classList.remove('hidden');
-}
-
-function closeImageModal() {
+  function closeImageModal() {
+    if (typeof AudioManager !== 'undefined') AudioManager.playClick();
     const modal = document.getElementById('imageModal');
     if (modal) modal.classList.add('hidden');
-}
+  }
 
-function loadSettings() {
-    const saved = localStorage.getItem(STORAGE_KEYS.SETTINGS);
-    if (saved) {
-        appSettings = JSON.parse(saved);
-        const sfxToggle = document.getElementById('sfxToggle');
-        const musicToggle = document.getElementById('musicToggle');
-        if (sfxToggle) sfxToggle.checked = appSettings.sfx;
-        if (musicToggle) musicToggle.checked = appSettings.music;
+  const closeImgModalBtn = document.getElementById('closeImageModal');
+  if (closeImgModalBtn) closeImgModalBtn.addEventListener('click', closeImageModal);
+
+  const imgModal = document.getElementById('imageModal');
+  if (imgModal) {
+    imgModal.addEventListener('click', (e) => {
+      if (e.target.id === 'imageModal' || e.target.id === 'modalPreviewImg') {
+        closeImageModal();
+      }
+    });
+  }
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+    const savedAvatar = localStorage.getItem('vinpix_avatar'); // Matches profile.js
+    const avatarImg = document.getElementById('profileHeaderImg');
+    const fallbackIcon = document.getElementById('profileIconFallback');
+
+    if (savedAvatar && avatarImg && fallbackIcon) {
+        avatarImg.src = savedAvatar;
+        avatarImg.style.display = 'block';
+        fallbackIcon.style.display = 'none';
     }
-}
+});
 
-function saveSettings() {
-    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(appSettings));
-}
+window.addEventListener('DOMContentLoaded', () => {
+    // Check if we are returning from the profile page
+    if (localStorage.getItem('skipLoading') === 'true') {
+        localStorage.removeItem('skipLoading'); // Clear it for future fresh app launches
+        
+        // Hide the loading view immediately
+        const loadingView = document.getElementById('loadingView');
+        if (loadingView) {
+            loadingView.classList.remove('active');
+            loadingView.style.display = 'none';
+        }
+
+        // Show the main header right away
+        const mainHeader = document.getElementById('mainHeader');
+        if (mainHeader) {
+            mainHeader.classList.remove('hidden');
+        }
+
+        // Instantly activate the main home screen view so everything appears together!
+        // (Change 'homeView' below to match the actual ID of your main menu container section if it's named differently)
+        const homeView = document.getElementById('homeView'); 
+        if (homeView) {
+            homeView.classList.add('active');
+        }
+    }
+});
