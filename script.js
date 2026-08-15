@@ -1,5 +1,3 @@
-// script.js
-
 document.addEventListener('DOMContentLoaded', () => {
   const views = {
     loading: document.getElementById('loadingView'),
@@ -7,9 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     register: document.getElementById('registerView'),
     home: document.getElementById('homeView'),
     levels: document.getElementById('levelsView'),
-    collections: document.getElementById('collectionsView'),
-    challenge: document.getElementById('challengeView'),
-    leaderboardView: document.getElementById('leaderboardView')
+    collections: document.getElementById('collectionsView')
   };
 
   const mainHeader = document.getElementById('mainHeader');
@@ -28,21 +24,43 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${user.username}_${keyName}`;
   }
 
-  // --- AVATAR SYNC HELPER ---
+  // --- ROBUST AVATAR SYNC HELPER ---
   function updateHeaderAvatar() {
-    const savedAvatar = localStorage.getItem(getUserKey('vinpix_avatar'));
+    // Checks user-specific key first, then falls back to global key
+    const savedAvatar = localStorage.getItem(getUserKey('vinpix_avatar')) || 
+                        localStorage.getItem('vinpix_avatar') ||
+                        localStorage.getItem('avatar'); // extra fallback
+
     const avatarImg = document.getElementById('profileHeaderImg');
     const fallbackIcon = document.getElementById('profileIconFallback');
 
-    if (savedAvatar && avatarImg && fallbackIcon) {
-      avatarImg.src = savedAvatar;
-      avatarImg.style.display = 'block';
-      fallbackIcon.style.display = 'none';
-    } else if (avatarImg && fallbackIcon) {
-      avatarImg.style.display = 'none';
-      fallbackIcon.style.display = 'block';
+    if (savedAvatar) {
+      if (avatarImg) {
+        avatarImg.src = savedAvatar;
+        avatarImg.style.display = 'block';
+      }
+      if (fallbackIcon) {
+        fallbackIcon.style.display = 'none';
+      }
+    } else {
+      if (avatarImg) {
+        avatarImg.style.display = 'none';
+      }
+      if (fallbackIcon) {
+        fallbackIcon.style.display = 'block';
+      }
     }
   }
+
+  // Expose globally so your profile modal/page can trigger it instantly
+  window.updateHeaderAvatar = updateHeaderAvatar;
+
+  // Listen for storage changes across tabs/modals
+  window.addEventListener('storage', (e) => {
+    if (e.key && e.key.includes('vinpix_avatar')) {
+      updateHeaderAvatar();
+    }
+  });
 
   function showView(targetView) {
     Object.values(views).forEach(v => {
@@ -53,16 +71,12 @@ document.addEventListener('DOMContentLoaded', () => {
       views[targetView].classList.add('active');
     }
 
-    if (['home', 'levels', 'collections', 'challenge', 'leaderboardView'].includes(targetView)) {
+    if (['home', 'levels', 'collections'].includes(targetView)) {
       if (mainHeader) mainHeader.classList.remove('hidden');
       updateCoinDisplay();
       updateHeaderAvatar();
     } else {
       if (mainHeader) mainHeader.classList.add('hidden');
-    }
-
-    if (['home', 'levels', 'collections', 'challenge', 'leaderboardView'].includes(targetView)) {
-      if (typeof AudioManager !== 'undefined') AudioManager.playMain();
     }
   }
 
@@ -104,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     showView('home');
     playMainBGM();
+    updateHeaderAvatar();
   } else {
     setTimeout(() => {
       const loggedInUser = getCurrentUser();
@@ -112,13 +127,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
         showView('home');
         playMainBGM();
+        updateHeaderAvatar();
       } else {
         showView('login');
       }
     }, 4000);
   }
 
-  // --- 2. AUTHENTICATION & FORM NAVIGATION (FIREBASE + LEGACY) ---
+  // --- 2. AUTHENTICATION & FORM NAVIGATION ---
   const toRegBtn = document.getElementById('toRegister');
   if (toRegBtn) {
     toRegBtn.addEventListener('click', (e) => {
@@ -137,45 +153,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Password visibility toggles
-  const toggleLoginPass = document.getElementById('toggleLoginPass');
-  const loginPassInput = document.getElementById('loginPass');
-  if (toggleLoginPass && loginPassInput) {
-    toggleLoginPass.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      loginPassInput.type = loginPassInput.type === 'password' ? 'text' : 'password';
-      toggleLoginPass.textContent = loginPassInput.type === 'password' ? '👁️' : '🙈';
-    });
-  }
-
-  const toggleRegPass = document.getElementById('toggleRegPass');
-  const regPassInput = document.getElementById('regPass');
-  if (toggleRegPass && regPassInput) {
-    toggleRegPass.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      regPassInput.type = regPassInput.type === 'password' ? 'text' : 'password';
-      toggleRegPass.textContent = regPassInput.type === 'password' ? '👁️' : '🙈';
-    });
-  }
-
-  const toggleRegPassConfirm = document.getElementById('toggleRegPassConfirm');
-  const regPassConfirmInput = document.getElementById('regPassConfirm');
-  if (toggleRegPassConfirm && regPassConfirmInput) {
-    toggleRegPassConfirm.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      regPassConfirmInput.type = regPassConfirmInput.type === 'password' ? 'text' : 'password';
-      toggleRegPassConfirm.textContent = regPassConfirmInput.type === 'password' ? '👁️' : '🙈';
-    });
-  }
-
-  function getEmailFromUsername(username) {
-    const clean = username.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-    return `${clean}@pixvinz.app`;
-  }
-
   const regForm = document.getElementById('registerForm');
   if (regForm) {
-    regForm.addEventListener('submit', async (e) => {
+    regForm.addEventListener('submit', (e) => {
       e.preventDefault();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
 
@@ -190,55 +170,30 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      const passRegex = /^(?=.*[A-Z])(?=.*\d).{6,}$/;
-      if (!passRegex.test(pass)) {
-        if (errElem) errElem.innerText = 'Password must be 6+ chars, have 1 uppercase & 1 number.';
+      let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+      if (users[username]) {
+        if (errElem) errElem.innerText = "Username already taken!";
         return;
       }
 
-      if (!window.pixvinzAuth) {
-        if (errElem) errElem.innerText = 'Firebase initializing... please try again in a second.';
-        return;
-      }
+      const newUser = { displayName, username, password: pass };
+      users[username] = newUser;
+      localStorage.setItem('registeredUsers', JSON.stringify(users));
 
-      const { auth, createUserWithEmailAndPassword } = window.pixvinzAuth;
-      const email = getEmailFromUsername(username);
+      localStorage.setItem('loggedInUser', JSON.stringify(newUser));
+      const nameElem = document.getElementById('userDisplayName');
+      if (nameElem) nameElem.innerText = displayName;
 
-      try {
-        await createUserWithEmailAndPassword(auth, email, pass);
-        const newUser = { displayName, username };
-        localStorage.setItem('loggedInUser', JSON.stringify(newUser));
-
-        if (window.pixvinzDb) {
-          const { db, doc, setDoc } = window.pixvinzDb;
-          await setDoc(doc(db, "players", username), {
-            username: username,
-            displayName: displayName,
-            level: 1,
-            coins: 0,
-            avatar: '',
-            lastUpdated: new Date()
-          }, { merge: true });
-        }
-
-        const nameElem = document.getElementById('userDisplayName');
-        if (nameElem) nameElem.innerText = displayName;
-
-        if (errElem) errElem.innerText = "";
-        updateCoinDisplay();
-        updateHeaderAvatar();
-        showView('home');
-        playMainBGM();
-      } catch (err) {
-        console.error("Registration error:", err);
-        if (errElem) errElem.innerText = err.message || 'Registration failed. Username may be taken.';
-      }
+      if (errElem) errElem.innerText = "";
+      showView('home');
+      playMainBGM();
+      updateHeaderAvatar();
     });
   }
 
   const logForm = document.getElementById('loginForm');
   if (logForm) {
-    logForm.addEventListener('submit', async (e) => {
+    logForm.addEventListener('submit', (e) => {
       e.preventDefault();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
 
@@ -246,42 +201,22 @@ document.addEventListener('DOMContentLoaded', () => {
       const pass = document.getElementById('loginPass').value;
       const errElem = document.getElementById('loginError');
 
-      if (!window.pixvinzAuth) {
-        if (errElem) errElem.innerText = 'Firebase initializing... please try again in a second.';
-        return;
+      let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+
+      if (Object.keys(users).length === 0 && username === 'vinz' && pass === '1234') {
+        users['vinz'] = { displayName: 'Vinz', username: 'vinz', password: '1234' };
+        localStorage.setItem('registeredUsers', JSON.stringify(users));
       }
 
-      const { auth, signInWithEmailAndPassword } = window.pixvinzAuth;
-      const email = getEmailFromUsername(username);
-
-      try {
-        await signInWithEmailAndPassword(auth, email, pass);
-        let currentUser = { username: username, displayName: username };
-        localStorage.setItem('loggedInUser', JSON.stringify(currentUser));
-
-        if (window.pixvinzDb) {
-          const { db, doc, getDoc } = window.pixvinzDb;
-          const userDoc = await getDoc(doc(db, "players", username));
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            if (data.level) localStorage.setItem(getUserKey('currentLevel'), data.level);
-            if (data.coins !== undefined) localStorage.setItem(getUserKey('totalCoins'), data.coins);
-            if (data.avatar) localStorage.setItem(getUserKey('vinpix_avatar'), data.avatar);
-            if (data.displayName) currentUser.displayName = data.displayName;
-            localStorage.setItem('loggedInUser', JSON.stringify(currentUser));
-          }
-        }
-
+      if (users[username] && users[username].password === pass) {
+        localStorage.setItem('loggedInUser', JSON.stringify(users[username]));
         const nameElem = document.getElementById('userDisplayName');
-        if (nameElem) nameElem.innerText = currentUser.displayName;
+        if (nameElem) nameElem.innerText = users[username].displayName;
         if (errElem) errElem.innerText = "";
-
-        updateCoinDisplay();
-        updateHeaderAvatar();
         showView('home');
         playMainBGM();
-      } catch (err) {
-        console.error("Login error:", err);
+        updateHeaderAvatar();
+      } else {
         if (errElem) errElem.innerText = "Invalid username or password!";
       }
     });
@@ -315,15 +250,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const navLeaderboard = document.getElementById('navLeaderboard');
-  if (navLeaderboard) {
-    navLeaderboard.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      renderLeaderboard();
-      showView('leaderboardView');
-    });
-  }
-
   document.querySelectorAll('.back-btn').forEach(btn => {
     if (btn.id === 'collectionsBackBtn') return;
     btn.addEventListener('click', () => {
@@ -350,9 +276,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- 4. SETTINGS, ABOUT & LOGOUT ---
   const settingsModal = document.getElementById('settingsModal');
   const aboutModal = document.getElementById('aboutModal');
+  const sfxToggle = document.getElementById('sfxToggle');
   const musicToggle = document.getElementById('musicToggle');
 
   if (typeof AudioManager !== 'undefined') {
+    if (sfxToggle) sfxToggle.checked = AudioManager.sfxEnabled;
     if (musicToggle) musicToggle.checked = AudioManager.musicEnabled;
   }
 
@@ -361,6 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
     navSettings.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       if (settingsModal) settingsModal.classList.remove('hidden');
+      updateHeaderAvatar(); // Refresh avatar when opening settings/profile modal
     });
   }
 
@@ -369,6 +298,15 @@ document.addEventListener('DOMContentLoaded', () => {
     closeSettingsModal.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       if (settingsModal) settingsModal.classList.add('hidden');
+    });
+  }
+
+  if (sfxToggle) {
+    sfxToggle.addEventListener('change', (e) => {
+      if (typeof AudioManager !== 'undefined') {
+        AudioManager.setSFX(e.target.checked);
+        if (e.target.checked) AudioManager.playClick();
+      }
     });
   }
 
@@ -398,12 +336,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
+    logoutBtn.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       if (confirm("Are you sure you want to log out?")) {
-        if (window.pixvinzAuth) {
-          await window.pixvinzAuth.signOut(window.pixvinzAuth.auth);
-        }
         localStorage.removeItem('loggedInUser');
         if (settingsModal) settingsModal.classList.add('hidden');
         if (typeof AudioManager !== 'undefined') AudioManager.stopBGM();
@@ -585,6 +520,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const item = document.createElement('div');
       item.className = 'collection-item';
 
+      v = isUnlocked; // placeholder check
       if (isUnlocked) {
         item.innerHTML = `
           <img src="image/level${i}.jpeg" alt="Level ${i}">
@@ -636,54 +572,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- 7. LEADERBOARD ---
-  async function renderLeaderboard() {
-    const leaderboardList = document.getElementById('leaderboardList');
-    const userRankDisplay = document.getElementById('userRankDisplay');
-    if (!leaderboardList) return;
-
-    leaderboardList.innerHTML = '<div style="text-align: center; color: #d1c4e9; padding: 20px;">Loading rankings...</div>';
-
-    try {
-      const currentUser = getCurrentUser();
-      const players = [
-        { 
-          username: currentUser?.username || 'player', 
-          displayName: currentUser?.displayName || 'You', 
-          level: parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1, 
-          coins: parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0 
-        }
-      ];
-
-      players.sort((a, b) => b.level - a.level || b.coins - a.coins);
-
-      leaderboardList.innerHTML = '';
-      let userRank = '-';
-
-      players.forEach((p, idx) => {
-        const rank = idx + 1;
-        if (currentUser && p.username === currentUser.username) {
-          userRank = `#${rank}`;
-        }
-        const row = document.createElement('div');
-        row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: #2a1147; padding: 12px 16px; border-radius: 12px; border: 1px solid #4a148c;';
-        row.innerHTML = `
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <span style="font-weight: bold; color: ${rank === 1 ? '#ffd700' : rank === 2 ? '#c0c0c0' : rank === 3 ? '#cd7f32' : '#d1c4e9'}; width: 25px;">#${rank}</span>
-            <span style="color: #fff; font-weight: 500;">${p.displayName || p.username}</span>
-          </div>
-          <div style="display: flex; gap: 15px; font-size: 0.9rem; color: #d1c4e9;">
-            <span>Lvl ${p.level}</span>
-            <span>🪙 ${p.coins}</span>
-          </div>
-        `;
-        leaderboardList.appendChild(row);
-      });
-
-      if (userRankDisplay) userRankDisplay.innerText = userRank;
-    } catch (err) {
-      console.error("Leaderboard error:", err);
-      leaderboardList.innerHTML = '<div style="text-align: center; color: #ff5252; padding: 20px;">Failed to load leaderboard.</div>';
-    }
-  }
+  // Initial check on load
+  updateHeaderAvatar();
 });
