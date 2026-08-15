@@ -22,6 +22,19 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${user.username}_${keyName}`;
   }
 
+  // --- FIRESTORE SYNC HELPERS ---
+  async function syncUserDataToFirestore(updates) {
+    const user = getCurrentUser();
+    if (!user || !user.username || !window.pixvinzDb) return;
+    try {
+      const { db, doc, setDoc } = window.pixvinzDb;
+      const userRef = doc(db, "users", user.username);
+      await setDoc(userRef, updates, { merge: true });
+    } catch (err) {
+      console.error("Error syncing to Firestore:", err);
+    }
+  }
+
   updateCoinDisplay();
 
   const grid = document.getElementById('puzzleGrid');
@@ -35,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (level <= 60) return 5;        // Level 31-60 (5x5)
     if (level <= 100) return 6;      // Level 61-100 (6x6)
     if (level <= 150) return 7;      // Level 101-150 (7x7)
-    return 8;                         // Level 151-200 (8x8)
+    return 8;                        // Level 151-200 (8x8)
   }
 
   const gridSize = getGridSize(currentLevel);
@@ -153,39 +166,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // --- SAVE FEWEST MOVES RECORD ---
       const prevMoves = parseInt(localStorage.getItem(levelMovesKey)) || Infinity;
+      let savedMoves = prevMoves;
       if (moves < prevMoves) {
         localStorage.setItem(levelMovesKey, moves);
+        savedMoves = moves;
       }
 
       // --- SAVE BEST TIME RECORD ---
       const timeString = timerDisplay ? timerDisplay.innerText : "00:00";
       const prevTimeStr = localStorage.getItem(levelTimeKey);
+      let savedTimeString = prevTimeStr;
       if (!prevTimeStr || prevTimeStr === '--:--') {
         localStorage.setItem(levelTimeKey, timeString);
+        savedTimeString = timeString;
       } else {
         const [pMin, pSec] = prevTimeStr.split(':').map(Number);
         if (seconds < (pMin * 60 + pSec)) {
           localStorage.setItem(levelTimeKey, timeString);
+          savedTimeString = timeString;
         }
       }
 
       const currentLevelCoins = parseInt(localStorage.getItem(levelCoinsKey)) || 0;
       let targetCoins = stars * 5; 
       let newCoinsEarned = 0;
+      let totalCoins = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
 
       if (targetCoins > currentLevelCoins) {
         newCoinsEarned = targetCoins - currentLevelCoins;
         localStorage.setItem(levelCoinsKey, targetCoins);
 
-        let totalCoins = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
         totalCoins += newCoinsEarned;
         localStorage.setItem(totalCoinsKey, totalCoins);
       }
 
       let maxUnlocked = parseInt(localStorage.getItem(currentLevelKey)) || 1;
+      let nextLevelToUnlock = maxUnlocked;
       if (currentLevel >= maxUnlocked) {
-        localStorage.setItem(currentLevelKey, currentLevel + 1);
+        nextLevelToUnlock = currentLevel + 1;
+        localStorage.setItem(currentLevelKey, nextLevelToUnlock);
       }
+
+      // Sync progress updates to Firestore
+      syncUserDataToFirestore({
+        totalCoins: totalCoins,
+        currentLevel: nextLevelToUnlock,
+        [`levelCoins_${currentLevel}`]: Math.max(targetCoins, currentLevelCoins),
+        [`levelMoves_${currentLevel}`]: savedMoves,
+        [`levelTime_${currentLevel}`]: savedTimeString
+      });
 
       showVictoryModal(stars, newCoinsEarned);
     }
@@ -297,6 +326,9 @@ document.addEventListener('DOMContentLoaded', () => {
       totalCoins -= previewCost;
       localStorage.setItem(coinKey, totalCoins);
       updateCoinDisplay();
+
+      // Sync coin deduction to Firestore
+      syncUserDataToFirestore({ totalCoins: totalCoins });
 
       // Open modal and show current level image
       const modal = document.getElementById('imageModal');
