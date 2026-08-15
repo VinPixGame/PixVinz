@@ -62,7 +62,10 @@ function handleLogoVideo(action = 'play') {
 
 // Screen Switcher
 function switchScreen(screenName) {
-    playSound('click');
+    if (screenName !== 'loading') {
+        playSound('click');
+    }
+    
     document.querySelectorAll('.screen').forEach(screen => {
         screen.classList.remove('active');
     });
@@ -70,6 +73,12 @@ function switchScreen(screenName) {
     const target = document.getElementById(`screen-${screenName}`);
     if (target) {
         target.classList.add('active');
+    }
+
+    // Toggle Bottom Navigation visibility (hide on loading screen, show everywhere else)
+    const navBar = document.getElementById('bottom-nav-bar');
+    if (navBar) {
+        navBar.style.display = (screenName === 'loading') ? 'none' : 'flex';
     }
 
     // Highlight bottom nav items
@@ -82,7 +91,7 @@ function switchScreen(screenName) {
         activeNav.classList.add('active');
     }
 
-    // Example: If switching to home, replay the logo animation if desired
+    // If switching to home, replay the logo animation if desired
     if (screenName === 'home') {
         handleLogoVideo('play');
     }
@@ -143,11 +152,39 @@ function updateUIValues() {
     document.querySelectorAll('.user-level-text').forEach(el => el.innerText = `Level ${gameState.currentLevel}`);
 }
 
-// Initialize on load
+// Initialize on load with a 5-second natural loading screen sequence
 window.onload = () => {
     updateUIValues();
     renderLevels();
-    handleLogoVideo('play'); // Play logo.webm on initial page load
+
+    // 1. Show Loading Screen Window first
+    switchScreen('loading');
+    handleLogoVideo('play');
+
+    let currentProgress = 0;
+    const totalDuration = 5000; // Exactly 5 seconds
+    const intervalTime = 50;    // Update step frequency
+    const increment = (intervalTime / totalDuration) * 100;
+
+    const progressFill = document.getElementById('loading-progress-fill');
+    const percentageText = document.getElementById('loading-percentage-text');
+
+    const loadingInterval = setInterval(() => {
+        currentProgress += increment;
+
+        if (currentProgress >= 100) {
+            currentProgress = 100;
+            clearInterval(loadingInterval);
+
+            // 2. Automatically transition to Home Page window after 5 seconds
+            switchScreen('home');
+        }
+
+        // Update progress visuals naturally
+        if (progressFill) progressFill.style.width = `${currentProgress}%`;
+        if (percentageText) percentageText.innerText = `${Math.floor(currentProgress)}%`;
+
+    }, intervalTime);
     
     // Wire settings toggles
     const musicToggle = document.getElementById('setting-music');
