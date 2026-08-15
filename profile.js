@@ -89,7 +89,7 @@ async function loadUserDataFromCloud(username) {
     }
 }
 
-// Function to compute level and cumulative XP based on your exact milestone system
+// Function to compute level and cumulative XP based on exact milestone system
 function calculateLevelAndXp(totalPuzzlesSolved) {
     let totalXpEarned = 0;
     for (let i = 1; i <= totalPuzzlesSolved; i++) {
@@ -227,8 +227,9 @@ if (avatarInput) {
 const saveProfileBtn = document.getElementById('save-profile-btn');
 if (saveProfileBtn) {
     saveProfileBtn.addEventListener('click', async () => {
-        const newDisplayName = document.getElementById('username-input').value.trim();
+        const nameInputEl = document.getElementById('username-input');
         const statusEl = document.getElementById('save-status');
+        const newDisplayName = nameInputEl ? nameInputEl.value.trim() : '';
 
         if (!newDisplayName) {
             if (statusEl) {
