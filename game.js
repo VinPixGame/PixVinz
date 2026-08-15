@@ -2,26 +2,19 @@
 document.addEventListener('DOMContentLoaded', () => {
   // --- START GAME BACKGROUND MUSIC ---
   if (typeof AudioManager !== 'undefined') {
-    if (typeof AudioManager.playGameBGM === 'function') {
-      AudioManager.playGameBGM();
-    } else if (AudioManager.bgmGame) {
-      if (AudioManager.bgmMain) AudioManager.bgmMain.pause();
-      AudioManager.bgmGame.loop = true;
-      AudioManager.bgmGame.play().catch(e => console.log("Audio autoplay blocked:", e));
+    if (typeof AudioManager.playGame === 'function') {
+      AudioManager.playGame();
     }
   }
 
   // Fallback click listener to satisfy browser autoplay policies if blocked
   document.addEventListener('click', () => {
     if (typeof AudioManager !== 'undefined' && AudioManager.musicEnabled) {
-      if (typeof AudioManager.playGameBGM === 'function') {
-        AudioManager.playGameBGM();
-      } else if (AudioManager.bgmGame && AudioManager.bgmGame.paused) {
-        AudioManager.bgmGame.play().catch(e => console.log(e));
+      if (typeof AudioManager.playGame === 'function') {
+        AudioManager.playGame();
       }
     }
   }, { once: true });
-
   // --- DOM Elements ---
   const backToHome = document.getElementById('backToHome');
   const coinCount = document.getElementById('coinCount');
