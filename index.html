@@ -3,340 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PixVinz - Piece Together The Fun</title>
+    <title>PixVinz</title>
     <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div id="app-container">
-
-        <!-- 1. LOADING SCREEN (Standalone initial window) -->
-        <div id="screen-loading" class="screen">
-            <div class="loading-content">
-                <div class="logo-container">
-                    <video src="image/logo.webm" autoplay muted loop playsinline class="game-logo-large"></video>
-                </div>
-                <div class="loading-bar-container">
-                    <p>LOADING...</p>
-                    <div class="progress-bar">
-                        <div id="loading-progress-fill" class="progress-fill" style="width: 0%;"></div>
-                    </div>
-                    <span id="loading-percentage-text" class="loading-percentage">0%</span>
-                </div>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="screen active">
+        <div class="loading-content">
+            <h1 class="game-title">PixVinz</h1>
+            <div class="loader-bar-container">
+                <div id="loading-progress-fill" class="loader-fill"></div>
             </div>
+            <p id="loading-percentage-text">Loading... 0%</p>
         </div>
-
-        <!-- 2. HOME PAGE -->
-        <div id="screen-home" class="screen">
-            <div class="top-user-bar">
-                <div class="user-pill">
-                    <img src="image/avatar.png" alt="Avatar" class="mini-avatar" onerror="this.src='https://via.placeholder.com/40'">
-                    <div class="user-info-text">
-                        <span class="username">Ulala</span>
-                        <span class="user-level">Level 12</span>
-                    </div>
-                </div>
-                <div class="coin-badge">🪙 160</div>
-            </div>
-
-            <div class="home-logo-container">
-                <video src="image/logo.webm" autoplay muted loop playsinline class="game-logo-medium"></video>
-            </div>
-
-            <button class="btn-play-gold" onclick="switchScreen('levels')">
-                ▶ PLAY<br><span class="btn-sub">Continue your journey</span>
-            </button>
-
-            <div class="card daily-challenge-banner">
-                <div class="challenge-left">
-                    <h3>⚡ DAILY CHALLENGE</h3>
-                    <p>Complete today's puzzle</p>
-                    <span class="timer">⏱️ 07:45:32</span>
-                </div>
-                <button class="btn-purple-small" onclick="switchScreen('dailychallenge')">PLAY NOW</button>
-            </div>
-
-            <div class="section-title">GAME MODES</div>
-            <div class="game-modes-grid">
-                <div class="mode-card" onclick="switchScreen('levels')">
-                    <span>🧩</span>
-                    <h4>LEVELS</h4>
-                    <p>Play & Unlock</p>
-                </div>
-                <div class="mode-card">
-                    <span>⚔️</span>
-                    <h4>AERUS ARENA</h4>
-                    <p>1v1 Fighting</p>
-                </div>
-                <div class="mode-card">
-                    <span>🏆</span>
-                    <h4>CHALLENGES</h4>
-                    <p>Win Rewards</p>
-                </div>
-                <div class="mode-card locked">
-                    <span>🔒</span>
-                    <h4>COMING SOON</h4>
-                    <p>Multiplayer</p>
-                </div>
-            </div>
-
-            <div class="section-title">DAILY REWARDS</div>
-            <div class="daily-rewards-row">
-                <div class="reward-box claimed">
-                    <span>Day 1</span>
-                    <div class="coin-icon">🪙 50</div>
-                    <span class="claim-tag">CLAIM</span>
-                </div>
-                <div class="reward-box">
-                    <span>Day 2</span>
-                    <div class="coin-icon">🪙 100</div>
-                </div>
-                <div class="reward-box">
-                    <span>Day 3</span>
-                    <div class="coin-icon">🪙 150</div>
-                </div>
-                <div class="reward-box">
-                    <span>Day 4</span>
-                    <div class="coin-icon">🪙 200</div>
-                </div>
-            </div>
-
-            <div class="aerus-realm-card">
-                <div class="realm-text">
-                    <span class="realm-subtitle">AERUS</span>
-                    <h3>REALM OF CHAMPIONS</h3>
-                    <p>Enter the arena. Choose your champion.</p>
-                </div>
-                <button class="btn-gray-disabled">COMING SOON</button>
-            </div>
-        </div>
-
-        <!-- 3. LEVELS PAGE -->
-        <div id="screen-levels" class="screen">
-            <div class="header-bar">
-                <button class="icon-btn" onclick="switchScreen('home')">←</button>
-                <h2>LEVELS</h2>
-                <div class="coin-badge-small">🪙 160</div>
-            </div>
-            <div class="tabs-row">
-                <button class="tab-btn active">CAMPAIGN</button>
-                <button class="tab-btn">EVENT</button>
-            </div>
-
-            <div class="chapter-card">
-                <div class="chapter-info">
-                    <h3>CHAPTER 2</h3>
-                    <p>Mystic Forest</p>
-                    <div class="progress-bar"><div class="progress-fill" style="width: 60%;"></div></div>
-                </div>
-                <span class="chapter-score">36/60</span>
-            </div>
-
-            <div class="levels-grid">
-                <div class="level-node completed">1 ⭐⭐⭐</div>
-                <div class="level-node completed">2 ⭐⭐⭐</div>
-                <div class="level-node completed">3 ⭐⭐⭐</div>
-                <div class="level-node completed">4 ⭐⭐⭐</div>
-                <div class="level-node completed">5 ⭐⭐⭐</div>
-                <div class="level-node completed">6 ⭐⭐⭐</div>
-                <div class="level-node completed">7 ⭐⭐⭐</div>
-                <div class="level-node completed">8 ⭐⭐⭐</div>
-                <div class="level-node completed">9 ⭐⭐⭐</div>
-                <div class="level-node completed">10 ⭐⭐⭐</div>
-                <div class="level-node completed">11 ⭐⭐⭐</div>
-                <div class="level-node current">12 ⭐⭐⭐</div>
-                <div class="level-node locked">13 🔒</div>
-                <div class="level-node locked">14 🔒</div>
-                <div class="level-node locked">15 🔒</div>
-                <div class="level-node locked">16 🔒</div>
-            </div>
-        </div>
-
-        <!-- 4. COLLECTIONS PAGE -->
-        <div id="screen-collections" class="screen">
-            <div class="header-bar">
-                <button class="icon-btn" onclick="switchScreen('home')">←</button>
-                <h2>COLLECTIONS</h2>
-                <div class="coin-badge-small">🪙 160</div>
-            </div>
-            <div class="tabs-row">
-                <button class="tab-btn active">PUZZLES</button>
-                <button class="tab-btn">THEMES</button>
-            </div>
-            <div class="filter-row">
-                <span class="filter-chip active">ALL</span>
-                <span class="filter-chip">EASY</span>
-                <span class="filter-chip">MEDIUM</span>
-                <span class="filter-chip">HARD</span>
-                <span class="filter-chip">SPECIAL</span>
-            </div>
-
-            <div class="puzzles-grid">
-                <div class="puzzle-card">
-                    <div class="puzzle-img placeholder-sunset"></div>
-                    <div class="puzzle-footer">
-                        <span>Sunset Lake</span>
-                        <small>3 / 50</small>
-                    </div>
-                </div>
-                <div class="puzzle-card">
-                    <div class="puzzle-img placeholder-galaxy"></div>
-                    <div class="puzzle-footer">
-                        <span>Galaxy</span>
-                        <small>3 / 50</small>
-                    </div>
-                </div>
-                <div class="puzzle-card">
-                    <div class="puzzle-img placeholder-crystal"></div>
-                    <div class="puzzle-footer">
-                        <span>Crystal Cave</span>
-                        <small>3 / 50</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 5. PROFILE PAGE -->
-        <div id="screen-profile" class="screen">
-            <div class="header-bar">
-                <button class="icon-btn" onclick="switchScreen('home')">←</button>
-                <h2>PLAYER PROFILE</h2>
-            </div>
-            <div class="profile-hero">
-                <img src="image/avatar.png" alt="Avatar" class="large-avatar" onerror="this.src='https://via.placeholder.com/80'">
-                <button class="btn-outline-small">CHANGE AVATAR</button>
-                <div class="username-row">
-                    <h3>Ulala</h3>
-                    <button class="btn-edit">EDIT</button>
-                </div>
-                <div class="xp-container">
-                    <span class="level-badge">12</span>
-                    <div class="progress-bar"><div class="progress-fill" style="width: 49%;"></div></div>
-                    <small>2,450 / 5,000 XP</small>
-                </div>
-            </div>
-
-            <div class="section-title">BADGES <span class="right-link">VIEW ALL ></span></div>
-            <div class="badges-row">
-                <div class="badge-item">🥇<span>First Step</span></div>
-                <div class="badge-item">⚡<span>Speed Demon</span></div>
-                <div class="badge-item">🪙<span>Coin Collector</span></div>
-            </div>
-
-            <div class="section-title">PLAYER STATS <span class="right-link">ALL TIME ></span></div>
-            <div class="stats-grid">
-                <div class="stat-box"><span>🏆</span><h3>86</h3><small>TOTAL WINS</small></div>
-                <div class="stat-box"><span>🧩</span><h3>245</h3><small>PUZZLES SOLVED</small></div>
-                <div class="stat-box"><span>🔥</span><h3>17</h3><small>BEST STREAK</small></div>
-                <div class="stat-box"><span>🎯</span><h3>98%</h3><small>ACCURACY</small></div>
-            </div>
-        </div>
-
-        <!-- 6. DAILY CHALLENGE PAGE -->
-        <div id="screen-dailychallenge" class="screen">
-            <div class="header-bar">
-                <button class="icon-btn" onclick="switchScreen('home')">←</button>
-                <h2>DAILY CHALLENGE</h2>
-            </div>
-            <div class="center-content">
-                <p class="sub-timer">New challenge in: ⏱️ 07:45:32</p>
-                <div class="glowing-orb">⚡</div>
-                <h3>Complete today's puzzle!</h3>
-                <p class="subtext">Win awesome rewards</p>
-
-                <div class="reward-preview-card">
-                    <h4>REWARD</h4>
-                    <div class="rewards-inline">
-                        <div>🪙 50<br><small>COINS</small></div>
-                        <div>⭐ 100<br><small>XP</small></div>
-                    </div>
-                </div>
-
-                <button class="btn-play-gold">PLAY NOW</button>
-            </div>
-        </div>
-
-        <!-- 7. ACHIEVEMENTS PAGE -->
-        <div id="screen-achievements" class="screen">
-            <div class="header-bar">
-                <button class="icon-btn" onclick="switchScreen('home')">←</button>
-                <h2>ACHIEVEMENTS</h2>
-            </div>
-            <div class="tabs-row">
-                <button class="tab-btn active">ALL</button>
-                <button class="tab-btn">PROGRESS</button>
-                <button class="tab-btn">COMPLETED</button>
-            </div>
-
-            <div class="achievement-list">
-                <div class="achievement-card">
-                    <span class="ach-icon">⭐</span>
-                    <div class="ach-details">
-                        <h4>Puzzle Starter</h4>
-                        <p>Complete 10 puzzles</p>
-                        <div class="progress-bar"><div class="progress-fill" style="width: 100%;"></div></div>
-                        <small>10 / 10</small>
-                    </div>
-                </div>
-                <div class="achievement-card">
-                    <span class="ach-icon">🪙</span>
-                    <div class="ach-details">
-                        <h4>Coin Collector</h4>
-                        <p>Collect 1,000 coins</p>
-                        <div class="progress-bar"><div class="progress-fill" style="width: 40%;"></div></div>
-                        <small>400 / 1000</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 8. SETTINGS PAGE -->
-        <div id="screen-settings" class="screen">
-            <div class="header-bar">
-                <button class="icon-btn" onclick="switchScreen('home')">←</button>
-                <h2>SETTINGS</h2>
-            </div>
-            
-            <div class="settings-section-title">ACCOUNT</div>
-            <div class="settings-row"><span>🔗 Linked Account</span> <span>Google ></span></div>
-            <div class="settings-row"><span>✏️ Change Name</span> <span>Ulala ></span></div>
-            <div class="settings-row danger"><span>🚪 Log Out</span></div>
-
-            <div class="settings-section-title">PREFERENCES</div>
-            <div class="settings-row"><span>🎵 Music</span> <input type="checkbox" checked></div>
-            <div class="settings-row"><span>🔊 Sound Effects</span> <input type="checkbox" checked></div>
-            <div class="settings-row"><span>📳 Vibration</span> <input type="checkbox" checked></div>
-            <div class="settings-row"><span>🌙 Dark Mode</span> <input type="checkbox" checked></div>
-
-            <div class="settings-section-title">LANGUAGE</div>
-            <div class="settings-row"><span>🌐 English</span> <span>></span></div>
-
-            <div class="settings-section-title">MORE</div>
-            <div class="settings-row"><span>🛡️ Privacy Policy</span> <span>></span></div>
-            <div class="settings-row"><span>📄 Terms of Service</span> <span>></span></div>
-            <div class="settings-row"><span>ℹ️ Credits</span> <span>></span></div>
-        </div>
-
-        <!-- BOTTOM NAVIGATION BAR (Hidden during loading via CSS or script logic) -->
-        <nav id="bottom-nav-bar" class="bottom-nav" style="display: none;">
-            <button id="nav-home" class="nav-item active" onclick="switchScreen('home')">
-                🏠<span>HOME</span>
-            </button>
-            <button id="nav-levels" class="nav-item" onclick="switchScreen('levels')">
-                🎮<span>LEVELS</span>
-            </button>
-            <button id="nav-collections" class="nav-item" onclick="switchScreen('collections')">
-                🖼️<span>COLLECTIONS</span>
-            </button>
-            <button id="nav-profile" class="nav-item" onclick="switchScreen('profile')">
-                👤<span>PROFILE</span>
-            </button>
-            <button id="nav-settings" class="nav-item" onclick="switchScreen('settings')">
-                ⚙️<span>SETTINGS</span>
-            </button>
-        </nav>
-
     </div>
 
+    <!-- Main Menu Screen -->
+    <div id="menu-screen" class="screen">
+        <div class="menu-container">
+            <h1 class="game-title">PixVinz</h1>
+            <p class="game-subtitle">Match, Solve, and Conquer!</p>
+            <div class="menu-buttons">
+                <button id="play-btn" class="primary-btn"><i class="fa-solid fa-play"></i> Play Game</button>
+                <button id="levels-btn" class="secondary-btn"><i class="fa-solid fa-list"></i> Level Select</button>
+                <button id="settings-btn" class="secondary-btn"><i class="fa-solid fa-gear"></i> Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Level Select Screen -->
+    <div id="levels-screen" class="screen">
+        <header class="screen-header">
+            <button class="back-btn" data-target="menu-screen"><i class="fa-solid fa-arrow-left"></i></button>
+            <h2>Select Level</h2>
+            <div class="user-stats">
+                <span><i class="fa-solid fa-coins text-gold"></i> <span id="coin-count">0</span></span>
+            </div>
+        </header>
+        <div class="levels-grid-container">
+            <div id="levels-grid" class="levels-grid">
+                <!-- Dynamically populated level nodes -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen">
+        <header class="game-header">
+            <button class="back-btn" data-target="levels-screen"><i class="fa-solid fa-house"></i></button>
+            <div class="level-indicator">Level <span id="current-level-num">1</span></div>
+            <div class="game-stats">
+                <span><i class="fa-solid fa-fire text-orange"></i> <span id="streak-count">0</span></span>
+            </div>
+        </header>
+        <main class="game-board-container">
+            <div id="puzzle-board" class="puzzle-board">
+                <!-- Dynamic puzzle elements will go here -->
+                <p class="game-placeholder-text">Puzzle Board Active</p>
+            </div>
+        </main>
+        <footer class="game-footer">
+            <button id="hint-btn" class="action-btn"><i class="fa-solid fa-lightbulb"></i> Hint</button>
+            <button id="restart-btn" class="action-btn"><i class="fa-solid fa-rotate-right"></i> Restart</button>
+        </footer>
+    </div>
+
+    <!-- Settings Screen -->
+    <div id="settings-screen" class="screen">
+        <header class="screen-header">
+            <button class="back-btn" data-target="menu-screen"><i class="fa-solid fa-arrow-left"></i></button>
+            <h2>Settings</h2>
+        </header>
+        <div class="settings-content">
+            <div class="setting-item">
+                <span>Background Music</span>
+                <label class="switch">
+                    <input type="checkbox" id="music-toggle" checked>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <span>Sound Effects</span>
+                <label class="switch">
+                    <input type="checkbox" id="sfx-toggle" checked>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <span>Reset Game Progress</span>
+                <button id="reset-data-btn" class="danger-btn">Reset Data</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script File -->
     <script src="script.js"></script>
 </body>
 </html>
