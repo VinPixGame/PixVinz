@@ -47,6 +47,19 @@ function toggleBgMusic(enable) {
     }
 }
 
+// Logo Webm Video Controller
+function handleLogoVideo(action = 'play') {
+    const logoVideo = document.getElementById('logo-video');
+    if (!logoVideo) return;
+
+    if (action === 'play') {
+        logoVideo.currentTime = 0;
+        logoVideo.play().catch(e => console.log("Logo video autoplay blocked:", e));
+    } else if (action === 'pause') {
+        logoVideo.pause();
+    }
+}
+
 // Screen Switcher
 function switchScreen(screenName) {
     playSound('click');
@@ -67,6 +80,11 @@ function switchScreen(screenName) {
     const activeNav = document.getElementById(`nav-${screenName}`);
     if (activeNav) {
         activeNav.classList.add('active');
+    }
+
+    // Example: If switching to home, replay the logo animation if desired
+    if (screenName === 'home') {
+        handleLogoVideo('play');
     }
 
     window.scrollTo(0, 0);
@@ -129,6 +147,7 @@ function updateUIValues() {
 window.onload = () => {
     updateUIValues();
     renderLevels();
+    handleLogoVideo('play'); // Play logo.webm on initial page load
     
     // Wire settings toggles
     const musicToggle = document.getElementById('setting-music');
