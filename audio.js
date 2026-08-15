@@ -67,60 +67,35 @@ const AudioManager = {
       this.bgmGame.play().catch(e => console.log('BGM Game play blocked or missing: sounds/bgmusic.mp3'));
     }
   },
-
-  playSelect() {
+playSelect() {
     if (!this.sfxEnabled) return;
-    this.init();
-    if (!this.ctx) return;
     try {
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(440, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.1);
-      gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.1);
+      const sound = new Audio('sounds/select.mp3');
+      sound.play().catch(e => console.log("Select audio blocked or missing:", e));
     } catch(e) {}
   },
 
   playShuffle() {
     if (!this.sfxEnabled) return;
-    this.init();
-    if (!this.ctx) return;
     try {
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(300, this.ctx.currentTime);
-      osc.frequency.linearRampToValueAtTime(150, this.ctx.currentTime + 0.15);
-      gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.15);
+      const sound = new Audio('sounds/shuffle.mp3');
+      sound.play().catch(e => console.log("Shuffle audio blocked or missing:", e));
     } catch(e) {}
   },
 
   playClick() {
     if (!this.sfxEnabled) return;
-    this.init();
-    if (!this.ctx) return;
     try {
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(600, this.ctx.currentTime);
-      gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.05);
+      const sound = new Audio('sounds/click.mp3');
+      sound.play().catch(e => console.log("Click audio blocked or missing:", e));
+    } catch(e) {}
+  },
+
+  playExchange() {
+    if (!this.sfxEnabled) return;
+    try {
+      const sound = new Audio('sounds/exchange.mp3');
+      sound.play().catch(e => console.log("Exchange audio blocked or missing:", e));
     } catch(e) {}
   },
 
@@ -130,8 +105,8 @@ const AudioManager = {
       this.victoryAudio.pause();
       this.victoryAudio.currentTime = 0;
     }
-    const soundIndex = ((levelNum - 1) % 10) + 1;
+    const safeLevel = parseInt(levelNum) || 1;
+    const soundIndex = ((safeLevel - 1) % 10) + 1;
     this.victoryAudio = new Audio(`sounds/victory${soundIndex}.mp3`);
     this.victoryAudio.play().catch(err => console.log("Victory audio missing or blocked:", err));
   }
-};
