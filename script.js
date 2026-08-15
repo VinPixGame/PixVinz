@@ -26,6 +26,29 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${user.username}_${keyName}`;
   }
 
+  // --- SYNC PLAYER PROGRESS TO FIRESTORE HELPER ---
+  async function syncPlayerProgress() {
+    const user = getCurrentUser();
+    if (user && window.pixvinzDb) {
+      const { db, doc, setDoc } = window.pixvinzDb;
+      const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+      const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
+
+      try {
+        await setDoc(doc(db, "players", user.username), {
+          username: user.username,
+          displayName: user.displayName || user.username,
+          level: currentLevel,
+          coins: totalCoins,
+          lastUpdated: new Date()
+        }, { merge: true });
+      } catch (e) {
+        console.error("Failed to sync progress:", e);
+      }
+    }
+  }
+  window.syncPlayerProgress = syncPlayerProgress;
+
   // --- ROBUST AVATAR SYNC HELPER ---
   function updateHeaderAvatar() {
     // Checks user-specific key first, then falls back to global key
@@ -244,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let currentUser = { username: username, displayName: username, password: pass };
 
         if (window.pixvinzDb) {
-          const { db, doc, getDoc } = window.pixvinzDb;
+          const { db, doc, getDoc, setDoc } = window.pixvinzDb;
           const userDoc = await getDoc(doc(db, "players", username));
           if (userDoc.exists()) {
             const data = userDoc.data();
@@ -255,6 +278,15 @@ document.addEventListener('DOMContentLoaded', () => {
               localStorage.setItem('vinpix_avatar', data.avatar);
             }
             if (data.displayName) currentUser.displayName = data.displayName;
+          } else {
+            // Ensure a doc is created if missing from Firestore
+            await setDoc(doc(db, "players", username), {
+              username: username,
+              displayName: username,
+              level: parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1,
+              coins: parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0,
+              lastUpdated: new Date()
+            }, { merge: true });
           }
         }
 
