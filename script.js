@@ -1,4 +1,31 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const savedAvatar = localStorage.getItem('vinpix_avatar') || localStorage.getItem('Cardo_vinpix_avatar');
+    if (savedAvatar) {
+        // Target the profile icon container on your homepage (adjust selector if needed, e.g. .profile-icon)
+        const profileIcon = document.querySelector('.profile-icon, #profileIconBtn, header .fa-user');
+        if (profileIcon) {
+            if (profileIcon.tagName === 'IMG') {
+                profileIcon.src = savedAvatar;
+            } else {
+                profileIcon.style.backgroundImage = `url(${savedAvatar})`;
+                profileIcon.style.backgroundSize = 'cover';
+                profileIcon.style.backgroundPosition = 'center';
+                if (!profileIcon.querySelector('img')) {
+                    let img = document.createElement('img');
+                    img.src = savedAvatar;
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.borderRadius = '50%';
+                    img.style.objectFit = 'cover';
+                    profileIcon.innerHTML = '';
+                    profileIcon.appendChild(img);
+                }
+            }
+        }
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
   const views = {
     loading: document.getElementById('loadingView'),
     login: document.getElementById('loginView'),
