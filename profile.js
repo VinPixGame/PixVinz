@@ -2,7 +2,6 @@
 // PIXVINZ - PROFILE SCRIPT (CLOUD & LOCAL SYNCED)
 // ==========================================
 
-// --- HELPER FUNCTION FOR USER-SPECIFIC KEYS ---
 function getCurrentUsername() {
     try {
         const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
@@ -89,7 +88,7 @@ async function loadUserDataFromCloud(username) {
     }
 }
 
-// Function to compute level and cumulative XP based on exact milestone system
+// Function to compute level and cumulative XP
 function calculateLevelAndXp(totalPuzzlesSolved) {
     let totalXpEarned = 0;
     for (let i = 1; i <= totalPuzzlesSolved; i++) {
@@ -101,12 +100,11 @@ function calculateLevelAndXp(totalPuzzlesSolved) {
 
     let currentLevel = 1;
     let cumulativeXpRequired = 500;
-    
     let accumulated = 0;
+    
     for (let lvl = 1; lvl <= 200; lvl++) {
         let tier = Math.floor((lvl - 1) / 10);
         let xpNeededForThisLevel = (tier + 1) * 500;
-        
         accumulated += xpNeededForThisLevel;
         
         if (totalXpEarned >= accumulated) {
@@ -125,19 +123,13 @@ function calculateLevelAndXp(totalPuzzlesSolved) {
     };
 }
 
-// Function to update XP and Level progress on the UI
 function updateXpProgress() {
     const currentUsername = getCurrentUsername();
-
-    let currentLevelVal = 1;
-    if (currentUsername) {
-        currentLevelVal = parseInt(localStorage.getItem(currentUsername + '_currentLevel')) || 1;
-    } else {
-        currentLevelVal = parseInt(localStorage.getItem('currentLevel')) || 1;
-    }
+    let currentLevelVal = currentUsername ? 
+        (parseInt(localStorage.getItem(currentUsername + '_currentLevel')) || 1) : 
+        (parseInt(localStorage.getItem('currentLevel')) || 1);
 
     const puzzlesSolved = Math.max(0, currentLevelVal - 1);
-    
     const playerProgression = calculateLevelAndXp(puzzlesSolved);
     const progressPercent = Math.min(100, (playerProgression.currentXp / playerProgression.maxXp) * 100);
 
@@ -150,7 +142,20 @@ function updateXpProgress() {
     if (xpBarFill) xpBarFill.style.width = `${progressPercent}%`;
 }
 
-// Load saved profile data and auto-populate display name & avatar
+// Helper to sync avatar across Homepage & Profile elements
+function applyAvatarToUI(avatarData) {
+    if (!avatarData) return;
+    const previewElem = document.getElementById('avatar-preview');
+    if (previewElem) previewElem.src = avatarData;
+
+    // Also update any homepage profile avatar icons if they share these classes/IDs
+    const homeIcons = document.querySelectorAll('.home-avatar-icon, #homeAvatarPreview, .user-avatar-display');
+    homeIcons.forEach(icon => {
+        icon.src = avatarData;
+    });
+}
+
+// Load saved profile data on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', async () => {
     const username = getCurrentUsername();
     if (username) {
@@ -158,7 +163,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     let initialName = '';
-    
     try {
         const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
         if (userObj && userObj.displayName) {
@@ -180,8 +184,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const savedAvatar = localStorage.getItem(getUserKey('vinpix_avatar')) || localStorage.getItem('vinpix_avatar');
     if (savedAvatar) {
-        const previewElem = document.getElementById('avatar-preview');
-        if (previewElem) previewElem.src = savedAvatar;
+        applyAvatarToUI(savedAvatar);
     }
 
     updateXpProgress();
@@ -193,30 +196,39 @@ const openModalBtn = document.getElementById('openEditNameModal');
 const closeModalBtn = document.getElementById('closeEditNameModal');
 
 if (openModalBtn && editModal) {
-    openModalBtn.addEventListener('click', () => {
-        editModal.classList.remove('hidden');
-    });
+    openModalBtn.addEventListener('click', () => editModal.classList.remove('hidden'));
 }
-
 if (closeModalBtn && editModal) {
-    closeModalBtn.addEventListener('click', () => {
-        editModal.classList.add('hidden');
-    });
+    closeModalBtn.addEventListener('click', () => editModal.classList.add('hidden'));
 }
 
-// Handle image upload, conversion to Base64, and cloud sync
+// Handle image upload with loading state, storage, and cloud synchronization
 const avatarInput = document.getElementById('avatar-input');
+const avatarLoader = document.getElementById('avatarLoader');
+
 if (avatarInput) {
     avatarInput.addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file) {
+            // Show loading overlay on avatar
+            if (avatarLoader) avatarLoader.style.display = 'flex';
+
             const reader = new FileReader();
             reader.onload = async function(e) {
-                const previewElem = document.getElementById('avatar-preview');
-                if (previewElem) previewElem.src = e.target.result;
+                const base64Image = e.target.result;
                 
-                localStorage.setItem(getUserKey('vinpix_avatar'), e.target.result);
+                // Update UI instantly
+                applyAvatarToUI(base64Image);
+
+                // Save locally with user-specific key & global fallback
+                localStorage.setItem(getUserKey('vinpix_avatar'), base64Image);
+                localStorage.setItem('vinpix_avatar', base64Image);
+
+                // Sync to Cloud Firestore
                 await saveUserDataToCloud();
+
+                // Hide loader once upload & save sequence completes
+                if (avatarLoader) avatarLoader.style.display = 'none';
             };
             reader.readAsDataURL(file);
         }
