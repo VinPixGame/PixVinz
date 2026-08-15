@@ -5,6 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>PixVinz - Game</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- Firebase App & Firestore SDKs Integration -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
+      authDomain: "pixvinz2026.firebaseapp.com",
+      projectId: "pixvinz2026",
+      storageBucket: "pixvinz2026.firebasestorage.app",
+      messagingSenderId: "45609077809",
+      appId: "1:45609077809:web:575611e46acda9f64c5910",
+      measurementId: "G-W7FSERE8ZJ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Expose Firestore tools globally for game.js sync
+    window.pixvinzDb = { db, doc, setDoc, getDoc };
+  </script>
 </head>
 <body>
   <div class="app-container game-container">
