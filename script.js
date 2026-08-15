@@ -36,25 +36,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initEventListeners() {
     // Auth Forms
-    document.getElementById('loginForm').addEventListener('submit', handleLogin);
-    document.getElementById('registerForm').addEventListener('submit', handleRegister);
-    document.getElementById('toRegister').addEventListener('click', (e) => { e.preventDefault(); switchView('registerView'); });
-    document.getElementById('toLogin').addEventListener('click', (e) => { e.preventDefault(); switchView('loginView'); });
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const toRegister = document.getElementById('toRegister');
+    const toLogin = document.getElementById('toLogin');
+
+    if (loginForm) loginForm.addEventListener('submit', handleLogin);
+    if (registerForm) registerForm.addEventListener('submit', handleRegister);
+    if (toRegister) toRegister.addEventListener('click', (e) => { e.preventDefault(); switchView('registerView'); });
+    if (toLogin) toLogin.addEventListener('click', (e) => { e.preventDefault(); switchView('loginView'); });
 
     // Main Navigation Cards & Buttons
-    document.getElementById('playBtn').addEventListener('click', () => switchView('levelsView'));
-    document.getElementById('navChallenge').addEventListener('click', () => switchView('challengeView'));
-    document.getElementById('navLevels').addEventListener('click', () => switchView('levelsView'));
-    document.getElementById('navCollections').addEventListener('click', () => openCollectionsFolders());
-    document.getElementById('navLeaderboard').addEventListener('click', () => { switchView('leaderboardView'); renderLeaderboard(); });
-    document.getElementById('navSettings').addEventListener('click', openSettingsModal);
+    const playBtn = document.getElementById('playBtn');
+    const navChallenge = document.getElementById('navChallenge');
+    const navLevels = document.getElementById('navLevels');
+    const navCollections = document.getElementById('navCollections');
+    const navLeaderboard = document.getElementById('navLeaderboard');
+    const navSettings = document.getElementById('navSettings');
+    const navProfile = document.getElementById('navProfile');
+
+    if (playBtn) playBtn.addEventListener('click', () => switchView('levelsView'));
+    if (navChallenge) navChallenge.addEventListener('click', () => switchView('challengeView'));
+    if (navLevels) navLevels.addEventListener('click', () => switchView('levelsView'));
+    if (navCollections) navCollections.addEventListener('click', () => openCollectionsFolders());
+    if (navLeaderboard) navLeaderboard.addEventListener('click', () => { switchView('leaderboardView'); renderLeaderboard(); });
+    if (navSettings) navSettings.addEventListener('click', openSettingsModal);
+    if (navProfile) navProfile.addEventListener('click', () => { switchView('profileView'); updateHeaderUI(); });
 
     // Back Buttons across views
     document.querySelectorAll('.back-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            // Special handling for collections view nested folders/images
             const collectionsImgContainer = document.getElementById('collectionsImagesContainer');
-            if (!collectionsImgContainer.classList.contains('hidden') && btn.id === 'collectionsBackBtn') {
+            if (collectionsImgContainer && !collectionsImgContainer.classList.contains('hidden') && btn.id === 'collectionsBackBtn') {
                 openCollectionsFolders();
                 return;
             }
@@ -63,47 +76,60 @@ function initEventListeners() {
     });
 
     // Modals Controls
-    document.getElementById('closeSettingsModal').addEventListener('click', closeSettingsModal);
-    document.getElementById('closeImageModal').addEventListener('click', closeImageModal);
-    document.getElementById('closeAboutModal').addEventListener('click', closeAboutModal);
-    document.getElementById('aboutBtn').addEventListener('click', () => { closeSettingsModal(); openAboutModal(); });
-    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+    const closeSettingsModalBtn = document.getElementById('closeSettingsModal');
+    const closeImageModalBtn = document.getElementById('closeImageModal');
+    const closeAboutModalBtn = document.getElementById('closeAboutModal');
+    const aboutBtn = document.getElementById('aboutBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if (closeSettingsModalBtn) closeSettingsModalBtn.addEventListener('click', closeSettingsModal);
+    if (closeImageModalBtn) closeImageModalBtn.addEventListener('click', closeImageModal);
+    if (closeAboutModalBtn) closeAboutModalBtn.addEventListener('click', closeAboutModal);
+    if (aboutBtn) aboutBtn.addEventListener('click', () => { closeSettingsModal(); openAboutModal(); });
+    if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
 
     // Settings Toggles
-    document.getElementById('sfxToggle').addEventListener('change', (e) => {
+    const sfxToggle = document.getElementById('sfxToggle');
+    const musicToggle = document.getElementById('musicToggle');
+
+    if (sfxToggle) sfxToggle.addEventListener('change', (e) => {
         appSettings.sfx = e.target.checked;
         saveSettings();
     });
-    document.getElementById('musicToggle').addEventListener('change', (e) => {
+    if (musicToggle) musicToggle.addEventListener('change', (e) => {
         appSettings.music = e.target.checked;
         saveSettings();
     });
 
     // Challenge Matchmaking
-    document.getElementById('startMatchmakingBtn').addEventListener('click', startMatchmaking);
+    const startMatchmakingBtn = document.getElementById('startMatchmakingBtn');
+    if (startMatchmakingBtn) startMatchmakingBtn.addEventListener('click', startMatchmaking);
 }
 
 // --- VIEW ROUTER ---
 function switchView(viewId) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     const target = document.getElementById(viewId);
-    if (target) target.classList.add('active');
+    if (target) {
+        target.classList.add('active');
+    }
 
     const mainHeader = document.getElementById('mainHeader');
-    if (['homeView', 'levelsView', 'collectionsView', 'challengeView', 'leaderboardView'].includes(viewId)) {
-        mainHeader.classList.remove('hidden');
-    } else {
-        mainHeader.classList.add('hidden');
+    if (mainHeader) {
+        if (['homeView', 'levelsView', 'collectionsView', 'challengeView', 'leaderboardView', 'profileView'].includes(viewId)) {
+            mainHeader.classList.remove('hidden');
+        } else {
+            mainHeader.classList.add('hidden');
+        }
     }
 }
 
 // --- AUTHENTICATION ---
 function checkExistingSession() {
     const savedUser = localStorage.getItem(STORAGE_KEYS.USER);
-    // Simulate loading screen delay
     setTimeout(() => {
         if (savedUser) {
-            loginUserSession(savedUser, true); // Fixed: changed false to true so it transitions correctly to homeView
+            loginUserSession(savedUser, true);
         } else {
             switchView('loginView');
         }
@@ -111,35 +137,29 @@ function checkExistingSession() {
 }
 
 function handleLogin(e) {
-    e.preventDefault(); // Crucial: prevents default form submission reload
+    e.preventDefault();
     const user = document.getElementById('loginUser').value.trim();
     const pass = document.getElementById('loginPass').value;
     const errorEl = document.getElementById('loginError');
 
     const usersDb = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB) || '{}');
 
-    // DEV HELPER: If no users exist yet, automatically create a default account so you can test immediately
     if (Object.keys(usersDb).length === 0) {
         usersDb['admin'] = { pass: 'password', displayName: 'Vinz' };
         localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDb));
     }
 
-    if (!usersDb[user]) {
-        errorEl.textContent = 'Username does not exist. Try user: admin, pass: password';
+    if (!usersDb[user] || usersDb[user].pass !== pass) {
+        if (errorEl) errorEl.textContent = 'Invalid username or password. Try admin / password';
         return;
     }
 
-    if (usersDb[user].pass !== pass) {
-        errorEl.textContent = 'Incorrect password.';
-        return;
-    }
-
-    errorEl.textContent = '';
+    if (errorEl) errorEl.textContent = '';
     loginUserSession(user, true);
 }
 
 function handleRegister(e) {
-    e.preventDefault(); // Crucial: prevents default form submission reload
+    e.preventDefault();
     const displayName = document.getElementById('regDisplayName').value.trim();
     const user = document.getElementById('regUser').value.trim();
     const pass = document.getElementById('regPass').value;
@@ -147,20 +167,20 @@ function handleRegister(e) {
     const errorEl = document.getElementById('regError');
 
     if (pass !== passConfirm) {
-        errorEl.textContent = 'Passwords do not match.';
+        if (errorEl) errorEl.textContent = 'Passwords do not match.';
         return;
     }
 
     const usersDb = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB) || '{}');
     if (usersDb[user]) {
-        errorEl.textContent = 'Username already taken.';
+        if (errorEl) errorEl.textContent = 'Username already taken.';
         return;
     }
 
     usersDb[user] = { pass, displayName };
     localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDb));
 
-    errorEl.textContent = '';
+    if (errorEl) errorEl.textContent = '';
     alert('Account created successfully! Please log in.');
     switchView('loginView');
 }
@@ -172,11 +192,10 @@ function loginUserSession(username, transition = true) {
     const usersDb = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB) || '{}');
     const profile = usersDb[username] || { displayName: username };
 
-    // Update UI headers & welcome text
     const displayNameEl = document.getElementById('userDisplayName');
-    if (displayNameEl) {
-        displayNameEl.textContent = profile.displayName;
-    }
+    const profileUsernameDisplay = document.getElementById('profileUsernameDisplay');
+    if (displayNameEl) displayNameEl.textContent = profile.displayName;
+    if (profileUsernameDisplay) profileUsernameDisplay.textContent = profile.displayName;
     
     loadUserGameData();
     updateHeaderUI();
@@ -200,10 +219,9 @@ function loadUserGameData() {
     if (data) {
         userGameData = JSON.parse(data);
     } else {
-        // Initialize default mock data for new user
         userGameData = {
             coins: 150,
-            bestTime: 45, // seconds
+            bestTime: 45,
             fewestMoves: 12,
             levels: { 1: { solved: true, time: 45, moves: 12 } },
             collections: { 'animals': { 'img1': true } }
@@ -219,16 +237,13 @@ function saveUserGameData() {
 
 function updateHeaderUI() {
     const coinCountEl = document.getElementById('coinCount');
-    if (coinCountEl) coinCountEl.textContent = userGameData.coins;
-    
-    // Global Best Stats display
     const bestTimeEl = document.getElementById('globalBestTime');
-    if (bestTimeEl) bestTimeEl.textContent = userGameData.bestTime ? formatTime(userGameData.bestTime) : '--:--';
-    
     const fewestMovesEl = document.getElementById('globalFewestMoves');
-    if (fewestMovesEl) fewestMovesEl.textContent = userGameData.fewestMoves ?? '--';
-    
     const userRankDisplayEl = document.getElementById('userRankDisplay');
+
+    if (coinCountEl) coinCountEl.textContent = userGameData.coins;
+    if (bestTimeEl) bestTimeEl.textContent = userGameData.bestTime ? formatTime(userGameData.bestTime) : '--:--';
+    if (fewestMovesEl) fewestMovesEl.textContent = userGameData.fewestMoves ?? '--';
     if (userRankDisplayEl) userRankDisplayEl.textContent = `#${userGameData.rank || 42}`;
 }
 
@@ -244,7 +259,6 @@ function renderLevelsGrid() {
     if (!grid) return;
     grid.innerHTML = '';
 
-    // Generate 20 sample levels
     for (let i = 1; i <= 20; i++) {
         const isUnlocked = i === 1 || userGameData.levels[i - 1]?.solved || userGameData.levels[i]?.solved;
         const isSolved = userGameData.levels[i]?.solved;
@@ -259,7 +273,6 @@ function renderLevelsGrid() {
         if (isUnlocked) {
             card.addEventListener('click', () => {
                 alert(`Starting Level ${i}! (Puzzle gameplay module placeholder)`);
-                // Simulate solving level for demonstration
                 simulateLevelComplete(i);
             });
         }
@@ -280,9 +293,13 @@ function simulateLevelComplete(levelNum) {
 // --- COLLECTIONS VIEW ---
 function openCollectionsFolders() {
     switchView('collectionsView');
-    document.getElementById('collectionsTitle').textContent = 'COLLECTIONS';
-    document.getElementById('collectionsFolderContainer').classList.remove('hidden');
-    document.getElementById('collectionsImagesContainer').classList.add('hidden');
+    const titleEl = document.getElementById('collectionsTitle');
+    const folderContainer = document.getElementById('collectionsFolderContainer');
+    const imagesContainer = document.getElementById('collectionsImagesContainer');
+
+    if (titleEl) titleEl.textContent = 'COLLECTIONS';
+    if (folderContainer) folderContainer.classList.remove('hidden');
+    if (imagesContainer) imagesContainer.classList.add('hidden');
 
     const folderGrid = document.getElementById('collectionsFolderGrid');
     if (!folderGrid) return;
@@ -311,21 +328,23 @@ function openCollectionsFolders() {
 }
 
 function openCollectionImages(folderId, folderName) {
-    document.getElementById('collectionsTitle').textContent = folderName.toUpperCase();
-    document.getElementById('collectionsFolderContainer').classList.add('hidden');
-    document.getElementById('collectionsImagesContainer').classList.remove('hidden');
+    const titleEl = document.getElementById('collectionsTitle');
+    const folderContainer = document.getElementById('collectionsFolderContainer');
+    const imagesContainer = document.getElementById('collectionsImagesContainer');
+
+    if (titleEl) titleEl.textContent = folderName.toUpperCase();
+    if (folderContainer) folderContainer.classList.add('hidden');
+    if (imagesContainer) imagesContainer.classList.remove('hidden');
 
     const grid = document.getElementById('collectionsGrid');
     if (!grid) return;
     grid.innerHTML = '';
 
-    // Sample images inside folder
     for (let i = 1; i <= 6; i++) {
         const isUnlocked = (folderId === 'animals' && i === 1);
         const item = document.createElement('div');
         item.className = `collection-item ${isUnlocked ? '' : 'locked'}`;
         item.style.cssText = "background: #2a1147; border-radius: 12px; height: 120px; display: flex; align-items: center; justify-content: center; font-size: 2rem; position: relative; border: 2px solid #9c27b0; cursor: pointer;";
-        
         item.innerHTML = isUnlocked ? '🖼️' : '🔒';
 
         if (isUnlocked) {
