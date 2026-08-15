@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>PixVinz</title>
-  
+  <a href="profile.html" class="profile-link-btn">👤 Profile</a>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -67,12 +67,9 @@
       </div>
     </section>
 
-<!-- Top Header Bar -->
+    <!-- Top Header Bar -->
     <header class="top-bar hidden" id="mainHeader">
-      <button class="icon-btn" id="profileHeaderBtn" onclick="window.location.href='profile.html'" style="background-color: #2a1147; border: 2px solid #9c27b0; overflow: hidden; padding: 0;">
-        <span id="profileIconFallback">👤</span>
-        <img id="profileHeaderImg" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; display: none;">
-      </button>
+      <button class="icon-btn" id="menuBtn">☰</button>
       <div class="logo-container">
         <video id="logoVideo" autoplay loop muted playsinline preload="auto" style="background: transparent;">
           <source src="image/logo.webm" type="video/webm">
@@ -80,20 +77,15 @@
       </div>
       <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
     </header>
+
     <!-- HOME PAGE VIEW -->
     <section id="homeView" class="view">
-     
       <div class="card welcome-card">
         <p class="sub-title">WELCOME</p>
         <h2 class="user-name" id="userDisplayName">Vinz</h2>
         <button class="btn btn-primary" id="playBtn">▶ PLAY</button>
       </div>
-  <!-- Challenge 1v1 Disabled Button -->
-<button class="menu-btn disabled-btn" disabled style="opacity: 0.6; cursor: not-allowed; display: flex; justify-content: center; align-items: center; gap: 10px;">
-    Challenge 1v1 
-    <span style="font-size: 0.75rem; background: rgba(255, 255, 255, 0.15); padding: 2px 8px; border-radius: 10px; color: #ffd700;">Coming Soon</span>
-</button>
-
+<a href="challenge.html" class="challenge-menu-btn">Challenge 1v1</a>
       <div class="card menu-card" id="navLevels">
         <div class="card-icon">🎮</div>
         <div class="card-text">
@@ -251,9 +243,6 @@
       <p class="about-year">© 2026</p>
     </div>
   </div>
-
-
-
 
   <script src="audio.js"></script>
   <script src="script.js"></script>
