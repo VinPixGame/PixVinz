@@ -97,7 +97,7 @@ function switchView(viewId) {
     }
 }
 
-// --- AUTHENTICATION ---
+/// --- AUTHENTICATION ---
 function checkExistingSession() {
     const savedUser = localStorage.getItem(STORAGE_KEYS.USER);
     // Simulate loading screen delay
@@ -107,7 +107,62 @@ function checkExistingSession() {
         } else {
             switchView('loginView');
         }
-    }, 1500);
+    }, 1000);
+}
+
+function handleLogin(e) {
+    e.preventDefault(); // Crucial: prevents default form submission reload
+    const user = document.getElementById('loginUser').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    const errorEl = document.getElementById('loginError');
+
+    const usersDb = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB) || '{}');
+
+    // DEV HELPER: If no users exist yet, automatically create a default account so you can test immediately
+    if (Object.keys(usersDb).length === 0) {
+        usersDb['admin'] = { pass: 'password', displayName: 'Vinz' };
+        localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDb));
+    }
+
+    if (!usersDb[user]) {
+        errorEl.textContent = 'Username does not exist. Try user: admin, pass: password';
+        return;
+    }
+
+    if (usersDb[user].pass !== pass) {
+        errorEl.textContent = 'Incorrect password.';
+        return;
+    }
+
+    errorEl.textContent = '';
+    loginUserSession(user, true);
+}
+
+function handleRegister(e) {
+    e.preventDefault(); // Crucial: prevents default form submission reload
+    const displayName = document.getElementById('regDisplayName').value.trim();
+    const user = document.getElementById('regUser').value.trim();
+    const pass = document.getElementById('regPass').value;
+    const passConfirm = document.getElementById('regPassConfirm').value;
+    const errorEl = document.getElementById('regError');
+
+    if (pass !== passConfirm) {
+        errorEl.textContent = 'Passwords do not match.';
+        return;
+    }
+
+    const usersDb = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS_DB) || '{}');
+    if (usersDb[user]) {
+        errorEl.textContent = 'Username already taken.';
+        return;
+    }
+
+    usersDb[user] = { pass, displayName };
+    localStorage.setItem(STORAGE_KEYS.USERS_DB, JSON.stringify(usersDb));
+
+    errorEl.textContent = '';
+    alert('Account created successfully! Please log in.');
+    switchView('loginView');
 }
 
 function handleLogin(e) {
