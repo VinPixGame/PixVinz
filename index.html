@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>PixVinz</title>
-  <a href="profile.html" class="profile-link-btn">👤 Profile</a>
+  
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -69,7 +69,10 @@
 
     <!-- Top Header Bar -->
     <header class="top-bar hidden" id="mainHeader">
-      <button class="icon-btn" id="menuBtn">☰</button>
+      <button class="icon-btn" id="profileHeaderBtn" onclick="window.location.href='profile.html'" style="background-color: #2a1147; border: 2px solid #9c27b0; overflow: hidden; padding: 0;">
+        <span id="profileIconFallback">👤</span>
+        <img id="profileHeaderImg" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+      </button>
       <div class="logo-container">
         <video id="logoVideo" autoplay loop muted playsinline preload="auto" style="background: transparent;">
           <source src="image/logo.webm" type="video/webm">
@@ -85,7 +88,17 @@
         <h2 class="user-name" id="userDisplayName">Vinz</h2>
         <button class="btn btn-primary" id="playBtn">▶ PLAY</button>
       </div>
-<a href="challenge.html" class="challenge-menu-btn">Challenge 1v1</a>
+
+      <!-- Challenge 1v1 Active Menu Card -->
+      <div class="card menu-card" id="navChallenge">
+        <div class="card-icon">⚔️</div>
+        <div class="card-text">
+          <h3>CHALLENGE 1V1</h3>
+          <p>Battle head-to-head in real time</p>
+        </div>
+        <span class="arrow">›</span>
+      </div>
+
       <div class="card menu-card" id="navLevels">
         <div class="card-icon">🎮</div>
         <div class="card-text">
@@ -100,6 +113,16 @@
         <div class="card-text">
           <h3>COLLECTIONS</h3>
           <p>View your solved puzzles</p>
+        </div>
+        <span class="arrow">›</span>
+      </div>
+
+      <!-- Leaderboard Menu Card -->
+      <div class="card menu-card" id="navLeaderboard">
+        <div class="card-icon">🏆</div>
+        <div class="card-text">
+          <h3>LEADERBOARD</h3>
+          <p>Top 20 worldwide rankings</p>
         </div>
         <span class="arrow">›</span>
       </div>
@@ -183,6 +206,56 @@
         <div class="collections-grid" id="collectionsGrid"></div>
       </div>
     </section>
+
+    <!-- CHALLENGE 1V1 PAGE VIEW -->
+    <section id="challengeView" class="view">
+      <div class="view-header">
+        <button class="icon-btn back-btn">‹</button>
+        <div class="header-title-group">
+          <div class="level-title-wrapper">
+            <span class="diamond-line">◇───</span>
+            <h2>CHALLENGE 1V1</h2>
+            <span class="diamond-line">───◇</span>
+          </div>
+        </div>
+      </div>
+      <div class="card welcome-card" style="margin: 30px auto; max-width: 400px; text-align: center;">
+        <div style="font-size: 52px; margin-bottom: 15px;">⚔️</div>
+        <h3 style="color: #ffd700; margin-bottom: 10px;">ARENA BATTLE</h3>
+        <p style="color: #d1c4e9; font-size: 0.95rem; margin-bottom: 25px;">Match against another player in real-time puzzle solving speed and earn bonus coins!</p>
+        <button class="btn btn-primary" id="startMatchmakingBtn">FIND OPPONENT</button>
+      </div>
+      <div id="matchmakingStatus" style="text-align: center; color: #b388ff; font-weight: bold; margin-top: 15px;"></div>
+    </section>
+
+    <!-- LEADERBOARD PAGE VIEW -->
+    <section id="leaderboardView" class="view">
+      <div class="view-header">
+        <button class="icon-btn back-btn">‹</button>
+        <div class="header-title-group">
+          <div class="level-title-wrapper">
+            <span class="diamond-line">◇───</span>
+            <h2>LEADERBOARD</h2>
+            <span class="diamond-line">───◇</span>
+          </div>
+        </div>
+      </div>
+      <!-- Current User Rank Summary Card -->
+      <div class="overall-best-card" style="margin: 15px auto;">
+        <div class="best-stat-item" style="justify-content: center; text-align: center;">
+          <div class="stat-text-group">
+            <span class="stat-title">YOUR GLOBAL RANK</span>
+            <div class="stat-val-row" style="justify-content: center;">
+              <span id="userRankDisplay" style="color: #ffd700;">#--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Leaderboard List Container -->
+      <div class="levels-scroll-container">
+        <div id="leaderboardList" style="display: flex; flex-direction: column; gap: 8px; padding: 5px 0 20px 0;"></div>
+      </div>
+    </section>
   </div>
 
   <!-- ENLARGED IMAGE POPUP MODAL -->
@@ -239,7 +312,7 @@
         </video>
       </div>
       <h2>PixVinz</h2>
-      <p class="about-dev">Developer: <strong>Kuya Vinz</strong></p>
+      <p class="about-dev">Developer: **Kuya Vinz**</p>
       <p class="about-year">© 2026</p>
     </div>
   </div>
