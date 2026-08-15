@@ -1,20 +1,11 @@
+// audio.js
 const AudioManager = {
   bgmMain: null,
   bgmGame: null,
   victoryAudio: null,
-  ctx: null,
   
   musicEnabled: localStorage.getItem('musicEnabled') !== 'false',
   sfxEnabled: localStorage.getItem('sfxEnabled') !== 'false',
-
-  init() {
-    if (!this.ctx) {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (AudioCtx) {
-        this.ctx = new AudioCtx();
-      }
-    }
-  },
 
   setMusic(enabled) {
     this.musicEnabled = enabled;
@@ -32,11 +23,17 @@ const AudioManager = {
   },
 
   stopBGM() {
-    if (this.bgmMain) { this.bgmMain.pause(); this.bgmMain.currentTime = 0; }
-    if (this.bgmGame) { this.bgmGame.pause(); this.bgmGame.currentTime = 0; }
+    if (this.bgmMain) { 
+      this.bgmMain.pause(); 
+      this.bgmMain.currentTime = 0; 
+    }
+    if (this.bgmGame) { 
+      this.bgmGame.pause(); 
+      this.bgmGame.currentTime = 0; 
+    }
   },
 
-  // Homepage and any menu pages
+  // Homepage and menu background music
   playMain() {
     if (!this.musicEnabled) return;
     if (this.bgmGame) {
@@ -48,11 +45,11 @@ const AudioManager = {
       this.bgmMain.loop = true;
     }
     if (this.bgmMain.paused) {
-      this.bgmMain.play().catch(e => console.log('BGM Main play blocked or missing: sounds/main.mp3'));
+      this.bgmMain.play().catch(e => console.log('BGM Main play blocked or missing: sounds/main.mp3', e));
     }
   },
 
-  // Game page only when playing the puzzle
+  // Puzzle gameplay background music
   playGame() {
     if (!this.musicEnabled) return;
     if (this.bgmMain) {
@@ -64,14 +61,16 @@ const AudioManager = {
       this.bgmGame.loop = true;
     }
     if (this.bgmGame.paused) {
-      this.bgmGame.play().catch(e => console.log('BGM Game play blocked or missing: sounds/bgmusic.mp3'));
+      this.bgmGame.play().catch(e => console.log('BGM Game play blocked or missing: sounds/bgmusic.mp3', e));
     }
   },
-playSelect() {
+
+  // Sound Effects (MP3 files from 'sounds' folder)
+  playSelect() {
     if (!this.sfxEnabled) return;
     try {
       const sound = new Audio('sounds/select.mp3');
-      sound.play().catch(e => console.log("Select audio blocked or missing:", e));
+      sound.play().catch(e => console.log("Select audio error:", e));
     } catch(e) {}
   },
 
@@ -79,7 +78,7 @@ playSelect() {
     if (!this.sfxEnabled) return;
     try {
       const sound = new Audio('sounds/shuffle.mp3');
-      sound.play().catch(e => console.log("Shuffle audio blocked or missing:", e));
+      sound.play().catch(e => console.log("Shuffle audio error:", e));
     } catch(e) {}
   },
 
@@ -87,7 +86,7 @@ playSelect() {
     if (!this.sfxEnabled) return;
     try {
       const sound = new Audio('sounds/click.mp3');
-      sound.play().catch(e => console.log("Click audio blocked or missing:", e));
+      sound.play().catch(e => console.log("Click audio error:", e));
     } catch(e) {}
   },
 
@@ -95,7 +94,7 @@ playSelect() {
     if (!this.sfxEnabled) return;
     try {
       const sound = new Audio('sounds/exchange.mp3');
-      sound.play().catch(e => console.log("Exchange audio blocked or missing:", e));
+      sound.play().catch(e => console.log("Exchange audio error:", e));
     } catch(e) {}
   },
 
@@ -108,5 +107,6 @@ playSelect() {
     const safeLevel = parseInt(levelNum) || 1;
     const soundIndex = ((safeLevel - 1) % 10) + 1;
     this.victoryAudio = new Audio(`sounds/victory${soundIndex}.mp3`);
-    this.victoryAudio.play().catch(err => console.log("Victory audio missing or blocked:", err));
+    this.victoryAudio.play().catch(err => console.log("Victory audio error:", err));
   }
+};
