@@ -812,10 +812,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
- async function loadLeaderboardData() {
+async function loadLeaderboardData() {
     const listContainer = document.getElementById('leaderboardList');
     if (!listContainer) return;
     
+    const parentView = listContainer.closest('.leaderboard-view') || listContainer.parentElement;
+    if (parentView) {
+        parentView.style.maxWidth = '96%';
+        parentView.style.width = '100%';
+        parentView.style.margin = '0 auto';
+        parentView.style.padding = '0 8px';
+    }
+    
+    listContainer.style.width = '100%';
     listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #aaa;">Loading leaderboard...</div>';
 
     let players = [];
@@ -841,6 +850,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     name: data.displayName || data.username || 'Anonymous',
                     coins: data.coins || 0,
                     xp: data.xp || 0,
+                    level: data.level || 1, // Fallback to Level 1 if not defined
                     avatar: data.avatar || ''
                 });
             });
@@ -860,10 +870,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.querySelectorAll('*').forEach(el => {
-        if (el.textContent.trim() === '#--' || el.textContent.trim() === 'YOUR GLOBAL RANK\n#--') {
-            const targetSpan = el.querySelector('span') || el;
-            if (targetSpan) {
-                targetSpan.textContent = userRank !== '--' ? userRank : '#--';
+        if (el.textContent.trim().includes('YOUR GLOBAL RANK')) {
+            el.style.width = '94%';
+            el.style.maxWidth = '420px';
+            el.style.marginLeft = 'auto';
+            el.style.marginRight = 'auto';
+            el.style.display = 'flex';
+            el.style.flexDirection = 'column';
+            el.style.alignItems = 'center';
+            el.style.justifyContent = 'center';
+            el.style.textAlign = 'center';
+            el.style.borderRadius = '24px';
+            
+            const innerSpan = el.querySelector('span');
+            if (innerSpan) {
+                innerSpan.textContent = userRank !== '--' ? userRank : '#--';
+                innerSpan.style.display = 'block';
+                innerSpan.style.textAlign = 'center';
+                innerSpan.style.width = '100%';
             }
         }
     });
@@ -879,41 +903,41 @@ document.addEventListener('DOMContentLoaded', () => {
         const rank = index + 1;
         let rankBadgeHTML = '';
         let specialStyle = '';
-        let frameStyle = 'border: 2px solid rgba(255,255,255,0.2);'; // default frame
+        let frameStyle = 'border: 2px solid rgba(255,255,255,0.2);';
+        let avatarSize = '48px';
 
-        // Custom gaming badge & premium frame styles for top 3, numbers for 4+
         if (rank === 1) {
-            // Gold / Orange shield with ribbon vibe & Gold Frame
             specialStyle = 'background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(255, 215, 0, 0.6);';
-            frameStyle = 'border: 3px solid #ffd700; box-shadow: 0 0 10px rgba(255,215,0,0.8);';
+            frameStyle = 'border: 3px solid #ffd700; box-shadow: 0 0 12px rgba(255,215,0,0.8);';
+            avatarSize = '52px';
             rankBadgeHTML = `
-                <div style="min-width: 42px; height: 42px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #ffaa00, #ff5500); border-radius: 8px; border: 2px solid #fff; box-shadow: 0 0 8px rgba(255,170,0,0.8); font-weight: 900; font-size: 14px; color: #fff;">
+                <div style="min-width: 44px; height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #ffaa00, #ff5500); border-radius: 10px; border: 2px solid #fff; box-shadow: 0 0 8px rgba(255,170,0,0.8); font-weight: 900; font-size: 14px; color: #fff;">
                     <span>#1</span>
                     <div style="width: 24px; height: 6px; background: #cc3300; clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%); margin-top: 2px;"></div>
                 </div>
             `;
         } else if (rank === 2) {
-            // Silver / Blue shield with ribbon vibe & Silver Frame
             specialStyle = 'background: linear-gradient(135deg, rgba(192, 192, 192, 0.2), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(192, 192, 192, 0.6);';
-            frameStyle = 'border: 3px solid #00e5ff; box-shadow: 0 0 10px rgba(0,229,255,0.8);';
+            frameStyle = 'border: 3px solid #00e5ff; box-shadow: 0 0 12px rgba(0,229,255,0.8);';
+            avatarSize = '50px';
             rankBadgeHTML = `
-                <div style="min-width: 42px; height: 42px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #00d2ff, #3a7bd5); border-radius: 8px; border: 2px solid #fff; box-shadow: 0 0 8px rgba(0,210,255,0.8); font-weight: 900; font-size: 14px; color: #fff;">
+                <div style="min-width: 44px; height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #00d2ff, #3a7bd5); border-radius: 10px; border: 2px solid #fff; box-shadow: 0 0 8px rgba(0,210,255,0.8); font-weight: 900; font-size: 14px; color: #fff;">
                     <span>#2</span>
                     <div style="width: 24px; height: 6px; background: #0055aa; clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%); margin-top: 2px;"></div>
                 </div>
             `;
         } else if (rank === 3) {
-            // Bronze / Purple-Bronze shield with ribbon vibe & Bronze Frame
             specialStyle = 'background: linear-gradient(135deg, rgba(205, 127, 50, 0.2), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(205, 127, 50, 0.6);';
-            frameStyle = 'border: 3px solid #ff9933; box-shadow: 0 0 10px rgba(205,127,50,0.8);';
+            frameStyle = 'border: 3px solid #ff9933; box-shadow: 0 0 12px rgba(205,127,50,0.8);';
+            avatarSize = '50px';
             rankBadgeHTML = `
-                <div style="min-width: 42px; height: 42px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #cd7f32, #8b4513); border-radius: 8px; border: 2px solid #fff; box-shadow: 0 0 8px rgba(205,127,50,0.8); font-weight: 900; font-size: 14px; color: #fff;">
+                <div style="min-width: 44px; height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #cd7f32, #8b4513); border-radius: 10px; border: 2px solid #fff; box-shadow: 0 0 8px rgba(205,127,50,0.8); font-weight: 900; font-size: 14px; color: #fff;">
                     <span>#3</span>
                     <div style="width: 24px; height: 6px; background: #5c2c16; clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%); margin-top: 2px;"></div>
                 </div>
             `;
         } else {
-            rankBadgeHTML = `<span style="min-width: 42px; text-align: center; font-weight: bold; font-size: 15px; color: #aaa;">#${rank}</span>`;
+            rankBadgeHTML = `<span style="min-width: 44px; text-align: center; font-weight: bold; font-size: 15px; color: #aaa;">#${rank}</span>`;
         }
 
         const avatarSrc = player.avatar ? player.avatar : 'image/avatar.png';
@@ -925,30 +949,35 @@ document.addEventListener('DOMContentLoaded', () => {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 14px;
-            margin-bottom: 8px;
-            border-radius: 12px;
-            background: rgba(30, 30, 30, 0.7);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            border-radius: 22px;
+            background: rgba(30, 30, 30, 0.75);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+            width: 100%;
+            box-sizing: border-box;
             ${specialStyle}
         `;
 
         row.innerHTML = `
             <div style="display: flex; align-items: center; min-width: 0; flex: 1; overflow: hidden;">
                 ${rankBadgeHTML}
-                <img src="${avatarSrc}" alt="${player.name}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin: 0 12px; flex-shrink: 0; ${frameStyle}">
-                <span style="font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">${player.name}</span>
+                <img src="${avatarSrc}" alt="${player.name}" style="width: ${avatarSize}; height: ${avatarSize}; border-radius: 50%; object-fit: cover; margin: 0 14px; flex-shrink: 0; ${frameStyle}">
+                <span style="font-weight: 600; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">${player.name}</span>
             </div>
-            <div style="display: flex; flex-direction: column; align-items: flex-end; margin-left: 15px; flex-shrink: 0; gap: 3px;">
-                <div style="font-size: 14px; font-weight: bold; color: #ffd700; text-shadow: 0 0 5px rgba(255,215,0,0.4);">
+            <div style="display: flex; flex-direction: column; align-items: flex-end; margin-left: 15px; flex-shrink: 0; gap: 4px;">
+                <div style="font-size: 14px; font-weight: bold; color: #ffd700; text-shadow: 0 0 6px rgba(255,215,0,0.5);">
                     🪙 ${player.coins.toLocaleString()}
                 </div>
-                <div style="font-size: 13px; font-weight: bold;">
-                    <span style="color: #00e5ff; text-shadow: 0 0 5px rgba(0,229,255,0.6); margin-right: 4px;">XP</span>
-                    <span style="color: #ff75a0; text-shadow: 0 0 6px rgba(255,117,160,0.6);">⚡️${player.xp.toLocaleString()}</span>
+                <div style="font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 6px;">
+                    <span style="background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 6px; font-size: 11px; color: #ffeb3b; border: 1px solid rgba(255,235,59,0.3);">LVL ${player.level}</span>
+                    <div>
+                        <span style="color: #00e5ff; text-shadow: 0 0 6px rgba(0,229,255,0.7); margin-right: 2px;">XP</span>
+                        <span style="color: #ff75a0; text-shadow: 0 0 6px rgba(255,117,160,0.7);">⚡️${player.xp.toLocaleString()}</span>
+                    </div>
                 </div>
             </div>
         `;
         listContainer.appendChild(row);
     });
-}   
+}
