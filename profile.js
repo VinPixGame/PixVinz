@@ -60,7 +60,11 @@ async function saveUserDataToCloud() {
 
 // Function to sync avatar to Profile Preview AND Homepage Icon
 function applyAvatarToUI(avatarData) {
-    if (!avatarData) return;
+    const avatarLoader = document.getElementById('avatarLoader');
+    if (!avatarData) {
+        if (avatarLoader) avatarLoader.style.display = 'none';
+        return;
+    }
     
     // 1. Update Profile page preview
     const previewElem = document.getElementById('avatar-preview');
@@ -78,11 +82,9 @@ function applyAvatarToUI(avatarData) {
         if (homeAvatarBtn.tagName === 'IMG') {
             homeAvatarBtn.src = avatarData;
         } else {
-            // If it's a styled button/icon placeholder, replace background with user image
             homeAvatarBtn.style.backgroundImage = `url(${avatarData})`;
             homeAvatarBtn.style.backgroundSize = 'cover';
             homeAvatarBtn.style.backgroundPosition = 'center';
-            // Clear inner text/icon if any so the photo shows clearly
             if (!homeAvatarBtn.querySelector('img')) {
                 let innerImg = homeAvatarBtn.querySelector('img') || document.createElement('img');
                 innerImg.src = avatarData;
@@ -97,6 +99,9 @@ function applyAvatarToUI(avatarData) {
             }
         }
     }
+
+    // Ensure loader is hidden after applying UI
+    if (avatarLoader) avatarLoader.style.display = 'none';
 }
 
 // Compute Level & XP
@@ -109,7 +114,7 @@ function calculateLevelAndXp(totalPuzzlesSolved) {
         totalXpEarned += xpPerPuzzle;
     }
 
-    let currentLevel = 3; // Default based on your UI screenshot showing Level 3
+    let currentLevel = 3; 
     let cumulativeXpRequired = 1500;
     let accumulated = 0;
     
@@ -129,7 +134,7 @@ function calculateLevelAndXp(totalPuzzlesSolved) {
 
     return {
         level: currentLevel,
-        currentXp: totalXpEarned > 0 ? totalXpEarned : 1100, // matches 1,100 / 1,500 XP from screenshot
+        currentXp: totalXpEarned > 0 ? totalXpEarned : 1100, 
         maxXp: cumulativeXpRequired > 0 ? cumulativeXpRequired : 1500
     };
 }
@@ -153,6 +158,9 @@ function updateXpProgress() {
 
 // Initialize on Load
 document.addEventListener('DOMContentLoaded', () => {
+    const avatarLoader = document.getElementById('avatarLoader');
+    if (avatarLoader) avatarLoader.style.display = 'none'; // Ensure loader is hidden on load
+
     const username = getCurrentUsername();
     
     let initialName = 'Cardo';
@@ -192,7 +200,7 @@ if (closeModalBtn && editModal) {
     closeModalBtn.addEventListener('click', () => editModal.classList.add('hidden'));
 }
 
-// Handle Image Gallery Upload with Guaranteed Loading & Sync Completion
+// Handle Image Gallery Upload with Resizing, Guaranteed Loading & Sync Completion
 const avatarInput = document.getElementById('avatar-input');
 const avatarLoader = document.getElementById('avatarLoader');
 
@@ -200,36 +208,55 @@ if (avatarInput) {
     avatarInput.addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file) {
-            // 1. Show loader immediately
             if (avatarLoader) avatarLoader.style.display = 'flex';
 
             const reader = new FileReader();
             
-            reader.onload = async function(e) {
-                const base64Image = e.target.result;
-                
-                // 2. Apply avatar across Profile & Homepage icons instantly
-                applyAvatarToUI(base64Image);
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = async function() {
+                    // Compress image to max 300x300 pixels to prevent exceeding Firestore/LocalStorage limits
+                    const canvas = document.createElement('canvas');
+                    const MAX_SIZE = 300;
+                    let width = img.width;
+                    let height = img.height;
 
-                // 3. Save to localStorage with dual keys for absolute persistence
-                localStorage.setItem(getUserKey('vinpix_avatar'), base64Image);
-                localStorage.setItem('vinpix_avatar', base64Image);
+                    if (width > height) {
+                        if (width > MAX_SIZE) {
+                            height *= MAX_SIZE / width;
+                            width = MAX_SIZE;
+                        }
+                    } else {
+                        if (height > MAX_SIZE) {
+                            width *= MAX_SIZE / height;
+                            height = MAX_SIZE;
+                        }
+                    }
 
-                // 4. Try background cloud sync (wrapped safely so it never blocks or hangs)
-                try {
-                    await saveUserDataToCloud();
-                } catch (err) {
-                    console.log("Cloud upload deferred.");
-                }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
 
-                // 5. Hide loader guaranteed after short smooth delay
-                setTimeout(() => {
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+
+                    applyAvatarToUI(compressedBase64);
+
+                    localStorage.setItem(getUserKey('vinpix_avatar'), compressedBase64);
+                    localStorage.setItem('vinpix_avatar', compressedBase64);
+
+                    try {
+                        await saveUserDataToCloud();
+                    } catch (err) {
+                        console.log("Cloud upload deferred.");
+                    }
+
                     if (avatarLoader) avatarLoader.style.display = 'none';
-                }, 400);
+                };
             };
 
             reader.onerror = function() {
-                // Hide loader if file reading fails
                 if (avatarLoader) avatarLoader.style.display = 'none';
                 alert("Failed to read the image file. Please try another picture.");
             };
