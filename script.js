@@ -790,7 +790,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-// --- LEADERBOARD LOGIC (Safe DOM Binding & Firestore Dynamic Sync) ---
+
+
+// --- LEADERBOARD LOGIC (Safe DOM Binding, Avatars & Real Players Only) ---
 document.addEventListener('DOMContentLoaded', () => {
     const navLeaderboard = document.getElementById('navLeaderboard');
     if (navLeaderboard) {
@@ -815,7 +817,7 @@ async function loadLeaderboardData() {
     try {
         if (window.pixvinzDb) {
             const { db, collection, query, orderBy, limit, getDocs } = window.pixvinzDb;
-            // Query top 20 players sorted by coins/score descending
+            // Query top 20 players sorted by coins descending
             const q = query(collection(db, 'players'), orderBy('coins', 'desc'), limit(20));
             const querySnapshot = await getDocs(q);
             
@@ -823,27 +825,22 @@ async function loadLeaderboardData() {
                 const data = docSnap.data();
                 players.push({
                     name: data.displayName || data.username || 'Anonymous',
-                    score: data.coins || 0
+                    score: data.coins || 0,
+                    avatar: data.avatar || '' // Fetch player avatar or fallback if empty
                 });
             });
         }
     } catch (err) {
-        console.warn("Could not fetch live leaderboard from Firestore, falling back to mock data:", err);
-    }
-
-    // Fallback mock dataset if Firestore list is empty or offline
-    if (players.length === 0) {
-        players = [
-            { name: "CyberKing", score: 9850 },
-            { name: "PuzzleMaster", score: 9100 },
-            { name: "NeonQueen", score: 8750 },
-            { name: "Diday", score: 7920 },
-            { name: "PixelVortex", score: 7400 },
-            { name: "VinzGlitch", score: 6890 }
-        ];
+        console.warn("Could not fetch live leaderboard from Firestore:", err);
     }
 
     listContainer.innerHTML = '';
+
+    // If no real players are found or database is unreachable
+    if (players.length === 0) {
+        listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #fff;">No players found on the leaderboard yet.</div>';
+        return;
+    }
 
     players.forEach((player, index) => {
         const rank = index + 1;
@@ -852,11 +849,15 @@ async function loadLeaderboardData() {
         else if (rank === 2) rankClass = 'top-2';
         else if (rank === 3) rankClass = 'top-3';
 
+        // Use player's custom avatar if available, otherwise fallback to default image
+        const avatarSrc = player.avatar ? player.avatar : 'image/avatar.png';
+
         const row = document.createElement('div');
         row.className = `rank-row ${rankClass}`;
         row.innerHTML = `
             <div class="rank-info">
                 <span class="rank-number">#${rank}</span>
+                <img src="${avatarSrc}" alt="${player.name}" class="rank-avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-left: 8px; margin-right: 8px;">
                 <span class="rank-name">${player.name}</span>
             </div>
             <span class="rank-score">${player.score} XP</span>
@@ -864,3 +865,5 @@ async function loadLeaderboardData() {
         listContainer.appendChild(row);
     });
 }
+
+
