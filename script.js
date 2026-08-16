@@ -870,17 +870,6 @@ async function loadLeaderboardData() {
         }
     });
 
-    // Fix centering for "YOUR GLOBAL RANK" element
-    document.querySelectorAll('*').forEach(el => {
-        if (el.textContent && el.textContent.includes('YOUR GLOBAL RANK')) {
-            el.style.display = 'flex';
-            el.style.flexDirection = 'column';
-            el.style.alignItems = 'center';
-            el.style.justifyContent = 'center';
-            el.style.textAlign = 'center';
-        }
-    });
-
     if (players.length === 0) {
         listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #aaa;">No players found on the leaderboard yet.</div>';
         return;
@@ -958,13 +947,12 @@ async function loadLeaderboardData() {
                     <span style="text-align: right; min-width: 70px;">${player.coins.toLocaleString()}</span>
                 </div>
                 <div style="display: flex; align-items: center; font-size: 14px; font-weight: bold;">
-                    <span style="color: #00e5ff; text-shadow: 0 0 5px rgba(0,229,255,0.6); margin-right: 4px;">XP</span>
                     <span style="width: 24px; text-align: center; display: inline-block;">⚡️</span>
-                    <span style="color: #ff75a0; text-shadow: 0 0 6px rgba(255,117,160,0.6); text-align: right; min-width: 60px;">${player.xp.toLocaleString()}</span>
+                    <span style="color: #ff75a0; text-shadow: 0 0 6px rgba(255,117,160,0.6); text-align: right; min-width: 45px;">${player.xp.toLocaleString()}</span>
+                    <span style="color: #00e5ff; text-shadow: 0 0 5px rgba(0,229,255,0.6); margin-left: 4px;">XP</span>
                 </div>
             </div>
         `;
         listContainer.appendChild(row);
     });
 }
-            
