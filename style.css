@@ -1626,28 +1626,39 @@ video {
 }
 
 
-.overall-best-card {
-    margin: 15px auto !important;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    width: fit-content;
-    min-width: 220px;
-    margin-left: auto !important;
-    margin-right: auto !important;
+#globalRankCard::before {
+  content: "🏆";
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  clip-path: polygon(
+    50% 0%, 
+    61% 35%, 
+    98% 35%, 
+    68% 57%, 
+    79% 91%, 
+    50% 70%, 
+    21% 91%, 
+    32% 57%, 
+    2% 35%, 
+    39% 35%
+  );
+  filter: drop-shadow(0 0 8px #ffcc00) drop-shadow(0 0 16px #ff9900);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  z-index: 10;
 }
 
-.overall-best-card .stat-text-group,
-.overall-best-card .stat-val-row {
-    width: 100%;
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+#globalRankCard {
+    position: relative; /* Ensures the absolute trophy positions correctly inside just this card */
 }
-
 
 .confetti-bg {
     position: absolute;
