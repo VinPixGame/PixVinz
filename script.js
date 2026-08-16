@@ -6,14 +6,28 @@ document.addEventListener('DOMContentLoaded', () => {
         video.play().catch(() => {});
     });
 
-    // --- AVATAR LOADER FIX (Targets your header profile elements) ---
-    const savedAvatar = localStorage.getItem('vinpix_avatar') || localStorage.getItem('Cardo_vinpix_avatar') || localStorage.getItem('playerAvatar');
-    if (savedAvatar) {
-        const avatarImg = document.getElementById('profileHeaderImg');
-        const fallbackIcon = document.getElementById('profileIconFallback');
+// --- AVATAR LOADER FIX (Account-Specific + Default Fallback) ---
+    let currentUsername = '';
+    try {
+        const user = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (user && user.username) currentUsername = user.username;
+    } catch (e) {}
 
-        if (avatarImg && fallbackIcon) {
-            avatarImg.src = savedAvatar;
+    const avatarImg = document.getElementById('profileHeaderImg');
+    const fallbackIcon = document.getElementById('profileIconFallback');
+
+    if (avatarImg && fallbackIcon) {
+        // Check if this specific logged-in user has a custom saved avatar
+        const userCustomAvatar = currentUsername ? localStorage.getItem(`${currentUsername}_vinpix_avatar`) : null;
+        
+        if (userCustomAvatar) {
+            // Use their unique custom uploaded avatar
+            avatarImg.src = userCustomAvatar;
+            avatarImg.style.display = 'block';
+            fallbackIcon.style.display = 'none';
+        } else {
+            // Default fallback image for new accounts or users without custom avatars
+            avatarImg.src = 'image/avatar.png';
             avatarImg.style.display = 'block';
             fallbackIcon.style.display = 'none';
         }
