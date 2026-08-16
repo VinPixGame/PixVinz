@@ -861,17 +861,13 @@ async function loadLeaderboardData() {
         }
     }
 
-    document.querySelectorAll('*').forEach(el => {
-        if (el.textContent.trim() === '#--' || el.textContent.trim() === 'YOUR GLOBAL RANK\n#--') {
-            const targetSpan = el.querySelector('span') || el;
-            if (targetSpan) {
-                targetSpan.textContent = userRank !== '--' ? userRank : '#--';
-                targetSpan.style.textAlign = 'center';
-                targetSpan.style.display = 'block';
-                targetSpan.style.width = '100%';
-            }
-        }
-    });
+    const rankDisplay = document.getElementById('userRankDisplay');
+    if (rankDisplay) {
+        rankDisplay.textContent = userRank !== '--' ? userRank : '#--';
+        rankDisplay.style.textAlign = 'center';
+        rankDisplay.style.display = 'block';
+        rankDisplay.style.width = '100%';
+    }
 
     if (players.length === 0) {
         listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #aaa;">No players found on the leaderboard yet.</div>';
