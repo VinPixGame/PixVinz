@@ -320,15 +320,12 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        // Register the user in Firebase Auth using an automatic dummy email format
-        const dummyEmail = `${username}@pixvinz.game`;
+        // Register the user in Firebase Auth using a valid email format
+        const dummyEmail = `${username}@pixvinz.com`;
         let authUid = '';
-        try {
-          const userCredential = await createUserWithEmailAndPassword(auth, dummyEmail, pass);
-          authUid = userCredential.user.uid;
-        } catch (authErr) {
-          console.warn("Firebase Auth notice:", authErr.message);
-        }
+        
+        const userCredential = await createUserWithEmailAndPassword(auth, dummyEmail, pass);
+        authUid = userCredential.user.uid;
 
         const newUserData = {
           username: username,
