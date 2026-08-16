@@ -811,14 +811,13 @@ async function loadLeaderboardData() {
     const listContainer = document.getElementById('leaderboardList');
     if (!listContainer) return;
     
-    listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #fff;">Loading leaderboard...</div>';
+    listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #aaa;">Loading leaderboard...</div>';
 
     let players = [];
 
     try {
         if (window.pixvinzDb) {
             const { db, collection, query, orderBy, limit, getDocs } = window.pixvinzDb;
-            // Query top 20 players sorted by coins descending
             const q = query(collection(db, 'players'), orderBy('coins', 'desc'), limit(20));
             const querySnapshot = await getDocs(q);
             
@@ -839,45 +838,57 @@ async function loadLeaderboardData() {
     listContainer.innerHTML = '';
 
     if (players.length === 0) {
-        listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #fff;">No players found on the leaderboard yet.</div>';
+        listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #aaa;">No players found on the leaderboard yet.</div>';
         return;
     }
 
     players.forEach((player, index) => {
         const rank = index + 1;
-        let rankClass = '';
         let rankDisplay = `#${rank}`;
+        let specialStyle = '';
 
         if (rank === 1) {
-            rankClass = 'top-1';
             rankDisplay = '🥇';
+            specialStyle = 'background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(20, 20, 20, 0.9)); border: 1px solid rgba(255, 215, 0, 0.5);';
         } else if (rank === 2) {
-            rankClass = 'top-2';
             rankDisplay = '🥈';
+            specialStyle = 'background: linear-gradient(135deg, rgba(192, 192, 192, 0.2), rgba(20, 20, 20, 0.9)); border: 1px solid rgba(192, 192, 192, 0.5);';
         } else if (rank === 3) {
-            rankClass = 'top-3';
             rankDisplay = '🥉';
+            specialStyle = 'background: linear-gradient(135deg, rgba(205, 127, 50, 0.2), rgba(20, 20, 20, 0.9)); border: 1px solid rgba(205, 127, 50, 0.5);';
         }
 
         const avatarSrc = player.avatar ? player.avatar : 'image/avatar.png';
 
         const row = document.createElement('div');
-        row.className = `rank-row ${rankClass}`;
+        row.className = `rank-row`;
         
-        // Inline layout safety to prevent text overlap & squeezing
-        row.style.display = 'flex';
-        row.style.justifyContent = 'space-between';
-        row.style.alignItems = 'center';
+        row.style.cssText = `
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            background: rgba(30, 30, 30, 0.7);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            ${specialStyle}
+        `;
 
         row.innerHTML = `
-            <div class="rank-info" style="display: flex; align-items: center; min-width: 0; flex: 1; overflow: hidden;">
-                <span class="rank-number" style="min-width: 30px; text-align: center; font-size: ${rank <= 3 ? '18px' : 'inherit'};">${rankDisplay}</span>
-                <img src="${avatarSrc}" alt="${player.name}" class="rank-avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin: 0 10px; flex-shrink: 0;">
-                <span class="rank-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${player.name}</span>
+            <div style="display: flex; align-items: center; min-width: 0; flex: 1; overflow: hidden;">
+                <span style="min-width: 35px; text-align: center; font-weight: bold; font-size: ${rank <= 3 ? '20px' : '15px'}; color: #fff;">${rankDisplay}</span>
+                <img src="${avatarSrc}" alt="${player.name}" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; margin: 0 12px; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.2);">
+                <span style="font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">${player.name}</span>
             </div>
-            <div class="rank-scores" style="display: flex; gap: 12px; margin-left: 15px; flex-shrink: 0; white-space: nowrap;">
-                <span class="rank-coins">🪙${player.coins.toLocaleString()}</span>
-                <span class="rank-xp">⚡️${player.xp.toLocaleString()}</span>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; margin-left: 15px; flex-shrink: 0; gap: 3px;">
+                <div style="font-size: 14px; font-weight: bold; color: #ffd700; text-shadow: 0 0 5px rgba(255,215,0,0.4);">
+                    🪙 ${player.coins.toLocaleString()}
+                </div>
+                <div style="font-size: 13px; font-weight: bold;">
+                    <span style="color: #00e5ff; text-shadow: 0 0 5px rgba(0,229,255,0.6); margin-right: 4px;">XP</span>
+                    <span style="color: #ff75a0; text-shadow: 0 0 6px rgba(255,117,160,0.6);">⚡️${player.xp.toLocaleString()}</span>
+                </div>
             </div>
         `;
         listContainer.appendChild(row);
