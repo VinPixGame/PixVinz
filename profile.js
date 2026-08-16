@@ -58,7 +58,7 @@ async function saveUserDataToCloud() {
     }
 }
 
-// Function to sync avatar to Profile Preview AND Homepage Icon
+// Function to sync avatar to Profile Preview AND Homepage Header Icon
 function applyAvatarToUI(avatarData) {
     const avatarLoader = document.getElementById('avatarLoader');
     if (!avatarData) {
@@ -70,35 +70,22 @@ function applyAvatarToUI(avatarData) {
     const previewElem = document.getElementById('avatar-preview');
     if (previewElem) previewElem.src = avatarData;
 
-    // 2. Update Homepage Profile Icon (handles images, buttons, and custom wrappers)
+    // 2. Update Homepage Header Avatar Image & hide fallback emoji
+    const headerImg = document.getElementById('profileHeaderImg');
+    const headerFallback = document.getElementById('profileIconFallback');
+    if (headerImg) {
+        headerImg.src = avatarData;
+        headerImg.style.display = 'block';
+    }
+    if (headerFallback) {
+        headerFallback.style.display = 'none';
+    }
+
+    // 3. General homepage avatar updates (if any other wrappers exist)
     const homeIconImgs = document.querySelectorAll('#homeAvatarPreview, .home-avatar-icon, .user-avatar-display');
     homeIconImgs.forEach(img => {
         img.src = avatarData;
     });
-
-    // If the homepage profile icon is a container or SVG/div instead of an <img>, convert it or set background
-    const homeAvatarBtn = document.querySelector('.profile-icon, #profileIconBtn, header .fa-user, .fa-circle-user');
-    if (homeAvatarBtn) {
-        if (homeAvatarBtn.tagName === 'IMG') {
-            homeAvatarBtn.src = avatarData;
-        } else {
-            homeAvatarBtn.style.backgroundImage = `url(${avatarData})`;
-            homeAvatarBtn.style.backgroundSize = 'cover';
-            homeAvatarBtn.style.backgroundPosition = 'center';
-            if (!homeAvatarBtn.querySelector('img')) {
-                let innerImg = homeAvatarBtn.querySelector('img') || document.createElement('img');
-                innerImg.src = avatarData;
-                innerImg.style.width = '100%';
-                innerImg.style.height = '100%';
-                innerImg.style.borderRadius = '50%';
-                innerImg.style.objectFit = 'cover';
-                if (!homeAvatarBtn.contains(innerImg)) {
-                    homeAvatarBtn.innerHTML = '';
-                    homeAvatarBtn.appendChild(innerImg);
-                }
-            }
-        }
-    }
 
     // Ensure loader is hidden after applying UI
     if (avatarLoader) avatarLoader.style.display = 'none';
