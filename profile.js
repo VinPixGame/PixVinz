@@ -20,16 +20,14 @@ function getUserKey(keyName) {
 function goHome() {
     localStorage.setItem('skipLoading', 'true');
     
-    // If showView function exists in scope, use it directly for homeView
     if (typeof showView === 'function') {
-        showView('homeView');
+        showView('home');
     } else {
-        // Fallback if profile.html is a standalone page: check if homeView exists or redirect with hash
         const homeViewElement = document.getElementById('homeView') || window.parent.document.getElementById('homeView');
         if (homeViewElement && typeof window.parent.showView === 'function') {
-            window.parent.showView('homeView');
+            window.parent.showView('home');
         } else {
-            window.location.href = 'index.html#homeView';
+            window.location.href = 'index.html';
         }
     }
 }
@@ -66,7 +64,6 @@ async function saveUserDataToCloud() {
     }
 }
 
-// Function to sync avatar to Profile Preview AND Homepage Header Icon
 function applyAvatarToUI(avatarData) {
     const avatarLoader = document.getElementById('avatarLoader');
     if (!avatarData) {
@@ -74,11 +71,9 @@ function applyAvatarToUI(avatarData) {
         return;
     }
     
-    // 1. Update Profile page preview
     const previewElem = document.getElementById('avatar-preview');
     if (previewElem) previewElem.src = avatarData;
 
-    // 2. Update Homepage Header Avatar Image & hide fallback emoji
     const headerImg = document.getElementById('profileHeaderImg');
     const headerFallback = document.getElementById('profileIconFallback');
     if (headerImg) {
@@ -89,17 +84,14 @@ function applyAvatarToUI(avatarData) {
         headerFallback.style.display = 'none';
     }
 
-    // 3. General homepage avatar updates (if any other wrappers exist)
     const homeIconImgs = document.querySelectorAll('#homeAvatarPreview, .home-avatar-icon, .user-avatar-display');
     homeIconImgs.forEach(img => {
         img.src = avatarData;
     });
 
-    // Ensure loader is hidden after applying UI
     if (avatarLoader) avatarLoader.style.display = 'none';
 }
 
-// Compute Level & XP
 function calculateLevelAndXp(totalPuzzlesSolved) {
     let totalXpEarned = 0;
     for (let i = 1; i <= totalPuzzlesSolved; i++) {
@@ -151,13 +143,10 @@ function updateXpProgress() {
     if (xpBarFill) xpBarFill.style.width = `${progressPercent}%`;
 }
 
-// Initialize on Load
 document.addEventListener('DOMContentLoaded', () => {
     const avatarLoader = document.getElementById('avatarLoader');
-    if (avatarLoader) avatarLoader.style.display = 'none'; // Ensure loader is hidden on load
+    if (avatarLoader) avatarLoader.style.display = 'none';
 
-    const username = getCurrentUsername();
-    
     let initialName = 'Cardo';
     try {
         const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
@@ -174,7 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputElem = document.getElementById('username-input');
     if (inputElem) inputElem.value = initialName;
 
-    // Load saved avatar from localStorage or fallback to default new-user avatar
     const savedAvatar = localStorage.getItem(getUserKey('vinpix_avatar')) || localStorage.getItem('vinpix_avatar');
     if (savedAvatar) {
         applyAvatarToUI(savedAvatar);
@@ -185,7 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateXpProgress();
 });
 
-// Modal Elements & Triggers
 const editModal = document.getElementById('editNameModal');
 const openModalBtn = document.getElementById('openEditNameModal');
 const closeModalBtn = document.getElementById('closeEditNameModal');
@@ -197,7 +184,6 @@ if (closeModalBtn && editModal) {
     closeModalBtn.addEventListener('click', () => editModal.classList.add('hidden'));
 }
 
-// Handle Image Gallery Upload with Resizing, Guaranteed Loading & Sync Completion
 const avatarInput = document.getElementById('avatar-input');
 const avatarLoader = document.getElementById('avatarLoader');
 
@@ -213,7 +199,6 @@ if (avatarInput) {
                 const img = new Image();
                 img.src = e.target.result;
                 img.onload = async function() {
-                    // Compress image to max 300x300 pixels to prevent exceeding Firestore/LocalStorage limits
                     const canvas = document.createElement('canvas');
                     const MAX_SIZE = 300;
                     let width = img.width;
@@ -263,7 +248,6 @@ if (avatarInput) {
     });
 }
 
-// Save Name functionality
 const saveProfileBtn = document.getElementById('save-profile-btn');
 if (saveProfileBtn) {
     saveProfileBtn.addEventListener('click', async () => {
