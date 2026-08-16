@@ -446,3 +446,23 @@
     min-height: 20px;
     font-weight: 600;
 }
+
+
+/* Hide global top header when profileView is active */
+#profileView.active ~ #mainHeader,
+body:has(#profileView.active) #mainHeader {
+    display: none !important;
+}
+
+/* Ensure profileView takes up the full screen independently */
+#profileView {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 999;
+    background: #11041f; /* Matches your app's dark background */
+    overflow-y: auto;
+    padding-top: 20px;
+}
