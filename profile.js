@@ -50,6 +50,11 @@ async function saveUserDataToCloud() {
         const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 150;
         const avatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
 
+        // Calculate current XP dynamically using your progression function
+        const puzzlesSolved = Math.max(0, currentLevel - 1);
+        const playerProgression = calculateLevelAndXp(puzzlesSolved);
+        const currentXpVal = playerProgression.currentXp;
+
         const userDocRef = doc(db, "players", username);
         await setDoc(userDocRef, {
             username: username,
@@ -57,7 +62,7 @@ async function saveUserDataToCloud() {
             level: currentLevel,
             coins: totalCoins,
             avatar: avatar,
-            xp: totalXp
+            xp: currentXpVal,
             lastUpdated: new Date()
         }, { merge: true });
     } catch (error) {
@@ -148,18 +153,15 @@ function updateXpProgress() {
 function checkAndUnlockBadges() {
     const prefix = getCurrentUsername() + '_';
 
-    // 1. Gather player stats
     const currentLevel = parseInt(localStorage.getItem(prefix + 'currentLevel')) || 1;
     const currentCoins = parseInt(localStorage.getItem(prefix + 'totalCoins')) || 0;
     
-    // Lifetime max coins tracked so spending coins doesn't relock the Coin Collector badge
     let maxCoinsEarned = parseInt(localStorage.getItem(prefix + 'maxCoinsEarned')) || currentCoins;
     if (currentCoins > maxCoinsEarned) {
         maxCoinsEarned = currentCoins;
         localStorage.setItem(prefix + 'maxCoinsEarned', maxCoinsEarned);
     }
 
-    // 2. Check Speed Thunder condition: finish any level from 20 to 30 within 1 minute (60 seconds)
     let beatSpeedThunder = false;
     for (let i = 20; i <= 30; i++) {
         const timeStr = localStorage.getItem(prefix + `levelTime_${i}`);
@@ -175,19 +177,17 @@ function checkAndUnlockBadges() {
         }
     }
 
-    // 3. Define badge criteria mapping
     const badges = {
-        badgeFirstStep: currentLevel > 1,                      // Finished level 1
-        badgeSpeedThunder: beatSpeedThunder,                 // Level 20-30 finished within 1 min
-        badgeCoinCollector: maxCoinsEarned >= 500,             // Reached 500 coins once (lifetime)
-        badgePixVinzElite: currentLevel >= 50,                 // Reach level 50
-        badgePixVinzMaster: currentLevel >= 75,                // Reach level 75
-        badgePixVinzGrandMaster: currentLevel >= 100,          // Reach level 100
-        badgePixVinzMythic: currentLevel >= 150,               // Reach level 150
-        badgePixVinzMythicalGlory: currentLevel >= 200         // Reach level 200
+        badgeFirstStep: currentLevel > 1,
+        badgeSpeedThunder: beatSpeedThunder,
+        badgeCoinCollector: maxCoinsEarned >= 500,
+        badgePixVinzElite: currentLevel >= 50,
+        badgePixVinzMaster: currentLevel >= 75,
+        badgePixVinzGrandMaster: currentLevel >= 100,
+        badgePixVinzMythic: currentLevel >= 150,
+        badgePixVinzMythicalGlory: currentLevel >= 200
     };
 
-    // 4. Apply UI classes dynamically
     for (const [badgeId, isUnlocked] of Object.entries(badges)) {
         const badgeElement = document.getElementById(badgeId);
         if (badgeElement) {
@@ -230,7 +230,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     updateXpProgress();
-    checkAndUnlockBadges(); // Run badge check on page load
+    checkAndUnlockBadges();
+    
+    // Automatically push accurate computed XP to cloud on profile page open
+    saveUserDataToCloud();
 });
 
 const editModal = document.getElementById('editNameModal');
