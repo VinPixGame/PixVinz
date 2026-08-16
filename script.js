@@ -2,6 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
@@ -16,6 +17,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 // Expose Firestore database tools globally so UI scripts can use them
 window.pixvinzDb = { db, doc, getDoc, setDoc };
@@ -318,6 +320,16 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
+        // Register the user in Firebase Auth using an automatic dummy email format
+        const dummyEmail = `${username}@pixvinz.game`;
+        let authUid = '';
+        try {
+          const userCredential = await createUserWithEmailAndPassword(auth, dummyEmail, pass);
+          authUid = userCredential.user.uid;
+        } catch (authErr) {
+          console.warn("Firebase Auth notice:", authErr.message);
+        }
+
         const newUserData = {
           username: username,
           displayName: displayName,
@@ -325,6 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
           coins: 0,
           avatar: '',
           password: pass,
+          authUid: authUid,
           createdAt: new Date()
         };
 
