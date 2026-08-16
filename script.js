@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, 4000);
 
-  // --- 2. AUTHENTICATION & FORM NAVIGATION ---
+  // --- 2. AUTHENTICATION & FORM NAVIGATION (WITH STRICT VALIDATION & FIRESTORE UNIQUE CHECK) ---
   const toRegBtn = document.getElementById('toRegister');
   if (toRegBtn) {
     toRegBtn.addEventListener('click', (e) => {
@@ -123,9 +123,94 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Helper validation functions
+  function validateUsernameFormat(username) {
+    // Exactly 6 characters, numbers only (0-9), lowercase
+    const regex = /^[0-9]{6}$/;
+    return regex.test(username);
+  }
+
+  function validatePasswordFormat(password) {
+    // 6-12 characters, at least one Uppercase, one lowercase, and one number
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,12}$/;
+    return regex.test(password);
+  }
+
+  // Real-time Username availability & format check indicator
+  const regUserField = document.getElementById('regUser');
+  let usernameIndicator = document.getElementById('regUserIndicator');
+  if (regUserField && !usernameIndicator) {
+    usernameIndicator = document.createElement('span');
+    usernameIndicator.id = 'regUserIndicator';
+    usernameIndicator.style.marginLeft = '8px';
+    regUserField.parentNode.appendChild(usernameIndicator);
+  }
+
+  if (regUserField) {
+    regUserField.addEventListener('input', async () => {
+      const val = regUserField.value.trim().toLowerCase();
+      regUserField.value = val; // enforce lowercase visually
+
+      if (!validateUsernameFormat(val)) {
+        usernameIndicator.innerText = '❌ (Must be exactly 6 numbers)';
+        usernameIndicator.style.color = '#ff4d4d';
+        return;
+      }
+
+      // Check Firestore in real-time
+      try {
+        if (window.pixvinzDb) {
+          const { db, doc, getDoc } = window.pixvinzDb;
+          const userDocRef = doc(db, 'players', val);
+          const snap = await getDoc(userDocRef);
+          if (snap.exists()) {
+            usernameIndicator.innerText = '❌ Username already taken!';
+            usernameIndicator.style.color = '#ff4d4d';
+          } else {
+            usernameIndicator.innerText = '✔ Available';
+            usernameIndicator.style.color = '#2ecc71';
+          }
+        } else {
+          // Fallback to localStorage check if offline/no db object
+          let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+          if (users[val]) {
+            usernameIndicator.innerText = '❌ Username already taken!';
+            usernameIndicator.style.color = '#ff4d4d';
+          } else {
+            usernameIndicator.innerText = '✔ Available';
+            usernameIndicator.style.color = '#2ecc71';
+          }
+        }
+      } catch (err) {
+        usernameIndicator.innerText = '✔ Available';
+        usernameIndicator.style.color = '#2ecc71';
+      }
+    });
+  }
+
+  // Optional Show/Hide Password toggles setup helper
+  function setupPasswordToggle(passwordInputId, toggleBtnId) {
+    const passInput = document.getElementById(passwordInputId);
+    const toggleBtn = document.getElementById(toggleBtnId);
+    if (passInput && toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        if (passInput.type === 'password') {
+          passInput.type = 'text';
+          toggleBtn.innerText = 'Hide';
+        } else {
+          passInput.type = 'password';
+          toggleBtn.innerText = 'Show';
+        }
+      });
+    }
+  }
+  setupPasswordToggle('regPass', 'toggleRegPass');
+  setupPasswordToggle('loginPass', 'toggleLoginPass');
+
+  // Register Form Submission
   const regForm = document.getElementById('registerForm');
   if (regForm) {
-    regForm.addEventListener('submit', (e) => {
+    regForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
 
@@ -135,34 +220,74 @@ document.addEventListener('DOMContentLoaded', () => {
       const passConfirm = document.getElementById('regPassConfirm').value;
       const errElem = document.getElementById('regError');
 
+      // Validate strict username rules
+      if (!validateUsernameFormat(username)) {
+        if (errElem) errElem.innerText = "Username must be exactly 6 characters and contain numbers only!";
+        return;
+      }
+
+      // Validate strict password rules
+      if (!validatePasswordFormat(pass)) {
+        if (errElem) errElem.innerText = "Password must be 6-12 characters and include at least one Uppercase letter, one lowercase letter, and one number!";
+        return;
+      }
+
       if (pass !== passConfirm) {
         if (errElem) errElem.innerText = "Passwords do not match!";
         return;
       }
 
-      let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
-      if (users[username]) {
-        if (errElem) errElem.innerText = "Username already taken!";
-        return;
+      try {
+        if (window.pixvinzDb) {
+          const { db, doc, getDoc, setDoc } = window.pixvinzDb;
+          const userDocRef = doc(db, 'players', username);
+          const userSnapshot = await getDoc(userDocRef);
+
+          if (userSnapshot.exists()) {
+            if (errElem) errElem.innerText = "Username is already taken or registered!";
+            return;
+          }
+
+          // Create document in Firestore with brand new account status
+          await setDoc(userDocRef, {
+            username: username,
+            displayName: displayName,
+            level: 1,
+            coins: 0,
+            avatar: '',
+            password: pass,
+            createdAt: new Date()
+          });
+        }
+
+        // Also update local registry backup
+        let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+        if (users[username]) {
+          if (errElem) errElem.innerText = "Username already taken!";
+          return;
+        }
+
+        const newUser = { displayName, username, password: pass };
+        users[username] = newUser;
+        localStorage.setItem('registeredUsers', JSON.stringify(users));
+
+        localStorage.setItem('loggedInUser', JSON.stringify(newUser));
+        const nameElem = document.getElementById('userDisplayName');
+        if (nameElem) nameElem.innerText = displayName;
+
+        if (errElem) errElem.innerText = "";
+        showView('home');
+        playMainBGM();
+      } catch (err) {
+        if (errElem) errElem.innerText = "Registration error: " + err.message;
       }
-
-      const newUser = { displayName, username, password: pass };
-      users[username] = newUser;
-      localStorage.setItem('registeredUsers', JSON.stringify(users));
-
-      localStorage.setItem('loggedInUser', JSON.stringify(newUser));
-      const nameElem = document.getElementById('userDisplayName');
-      if (nameElem) nameElem.innerText = displayName;
-
-      if (errElem) errElem.innerText = "";
-      showView('home');
-      playMainBGM();
     });
   }
 
+  // Login Form Submission
   const logForm = document.getElementById('loginForm');
   if (logForm) {
-    logForm.addEventListener('submit', (e) => {
+    logForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
 
@@ -170,22 +295,39 @@ document.addEventListener('DOMContentLoaded', () => {
       const pass = document.getElementById('loginPass').value;
       const errElem = document.getElementById('loginError');
 
-      let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+      try {
+        let userData = null;
+        if (window.pixvinzDb) {
+          const { db, doc, getDoc } = window.pixvinzDb;
+          const userDocRef = doc(db, 'players', username);
+          const snap = await getDoc(userDocRef);
+          if (snap.exists()) {
+            userData = snap.data();
+          }
+        }
 
-      if (Object.keys(users).length === 0 && username === 'vinz' && pass === '1234') {
-        users['vinz'] = { displayName: 'Vinz', username: 'vinz', password: '1234' };
-        localStorage.setItem('registeredUsers', JSON.stringify(users));
-      }
+        // Fallback to local storage if not found in Firestore
+        if (!userData) {
+          let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+          if (Object.keys(users).length === 0 && username === 'vinz' && pass === '1234') {
+            users['vinz'] = { displayName: 'Vinz', username: 'vinz', password: '1234' };
+            localStorage.setItem('registeredUsers', JSON.stringify(users));
+          }
+          userData = users[username];
+        }
 
-      if (users[username] && users[username].password === pass) {
-        localStorage.setItem('loggedInUser', JSON.stringify(users[username]));
-        const nameElem = document.getElementById('userDisplayName');
-        if (nameElem) nameElem.innerText = users[username].displayName;
-        if (errElem) errElem.innerText = "";
-        showView('home');
-        playMainBGM();
-      } else {
-        if (errElem) errElem.innerText = "Invalid username or password!";
+        if (userData && userData.password === pass) {
+          localStorage.setItem('loggedInUser', JSON.stringify(userData));
+          const nameElem = document.getElementById('userDisplayName');
+          if (nameElem) nameElem.innerText = userData.displayName;
+          if (errElem) errElem.innerText = "";
+          showView('home');
+          playMainBGM();
+        } else {
+          if (errElem) errElem.innerText = "Invalid username or password!";
+        }
+      } catch (err) {
+        if (errElem) errElem.innerText = "Login error occurred.";
       }
     });
   }
@@ -552,4 +694,3 @@ window.addEventListener('DOMContentLoaded', () => {
         fallbackIcon.style.display = 'none';
     }
 });
-
