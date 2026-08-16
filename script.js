@@ -332,6 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
           displayName: displayName,
           level: 1,
           coins: 0,
+          xp: 0,
           avatar: '',
           password: pass,
           authUid: authUid,
