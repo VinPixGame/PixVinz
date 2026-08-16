@@ -225,14 +225,8 @@ document.addEventListener('DOMContentLoaded', () => {
             usernameIndicator.style.color = '#2ecc71';
           }
         } else {
-          let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
-          if (users[val]) {
-            usernameIndicator.innerText = '❌ Username already taken!';
-            usernameIndicator.style.color = '#ff4d4d';
-          } else {
-            usernameIndicator.innerText = '✔ Available';
-            usernameIndicator.style.color = '#2ecc71';
-          }
+          usernameIndicator.innerText = '⚠️ Database offline';
+          usernameIndicator.style.color = '#f39c12';
         }
       } catch (err) {
         usernameIndicator.innerText = '✔ Available';
@@ -287,38 +281,33 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       try {
-        if (window.pixvinzDb) {
-          const { db, doc, getDoc, setDoc } = window.pixvinzDb;
-          const userDocRef = doc(db, 'players', username);
-          const userSnapshot = await getDoc(userDocRef);
-
-          if (userSnapshot.exists()) {
-            if (errElem) errElem.innerText = "Username is already taken or registered!";
-            return;
-          }
-
-          await setDoc(userDocRef, {
-            username: username,
-            displayName: displayName,
-            level: 1,
-            coins: 0,
-            avatar: '',
-            password: pass,
-            createdAt: new Date()
-          });
-        }
-
-        let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
-        if (users[username]) {
-          if (errElem) errElem.innerText = "Username already taken!";
+        if (!window.pixvinzDb) {
+          if (errElem) errElem.innerText = "Database connection not available.";
           return;
         }
 
-        const newUser = { displayName, username, password: pass };
-        users[username] = newUser;
-        localStorage.setItem('registeredUsers', JSON.stringify(users));
+        const { db, doc, getDoc, setDoc } = window.pixvinzDb;
+        const userDocRef = doc(db, 'players', username);
+        const userSnapshot = await getDoc(userDocRef);
 
-        localStorage.setItem('loggedInUser', JSON.stringify(newUser));
+        if (userSnapshot.exists()) {
+          if (errElem) errElem.innerText = "Username is already taken or registered!";
+          return;
+        }
+
+        const newUserData = {
+          username: username,
+          displayName: displayName,
+          level: 1,
+          coins: 0,
+          avatar: '',
+          password: pass,
+          createdAt: new Date()
+        };
+
+        await setDoc(userDocRef, newUserData);
+
+        localStorage.setItem('loggedInUser', JSON.stringify(newUserData));
         const nameElem = document.getElementById('userDisplayName');
         if (nameElem) nameElem.innerText = displayName;
 
@@ -350,11 +339,9 @@ document.addEventListener('DOMContentLoaded', () => {
           if (snap.exists()) {
             userData = snap.data();
           }
-        }
-
-        if (!userData) {
-          let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
-          userData = users[username];
+        } else {
+          if (errElem) errElem.innerText = "Database connection not available.";
+          return;
         }
 
         if (userData && userData.password === pass) {
