@@ -110,9 +110,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   });
 
-  // --- 1. LOADING SCREEN ---
+// --- 1. LOADING SCREEN ---
   const skipLoading = localStorage.getItem('skipLoading') === 'true';
-  if (skipLoading) {
+  const percentageElem = document.getElementById('loadingPercentage');
+  const barFillElem = document.getElementById('loadingBarFill');
+
+  function finishLoading() {
       localStorage.removeItem('skipLoading');
       const loggedInUser = getCurrentUser();
       if (loggedInUser) {
@@ -123,18 +126,27 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
           showView('login');
       }
+  }
+
+  if (skipLoading) {
+      finishLoading();
   } else {
-      setTimeout(() => {
-          const loggedInUser = getCurrentUser();
-          if (loggedInUser) {
-              const nameElem = document.getElementById('userDisplayName');
-              if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
-              showView('home');
-              playMainBGM();
-          } else {
-              showView('login');
+      let currentPercent = 1;
+      const totalDuration = 10000; // 10 seconds in milliseconds
+      const intervalTime = 100; // Update every 100ms
+      const increment = 100 / (totalDuration / intervalTime);
+
+      const loadingInterval = setInterval(() => {
+          currentPercent += increment;
+          if (currentPercent >= 100) {
+              currentPercent = 100;
+              clearInterval(loadingInterval);
+              finishLoading();
           }
-      }, 4000);
+          
+          if (percentageElem) percentageElem.innerText = `${Math.floor(currentPercent)}%`;
+          if (barFillElem) barFillElem.style.width = `${currentPercent}%`;
+      }, intervalTime);
   }
 
   // --- 2. AUTHENTICATION & FORM NAVIGATION ---
