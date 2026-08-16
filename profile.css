@@ -15,11 +15,10 @@
     width: 100%;
 }
 
-/* When the hidden class is removed, change display to flex */
-#profileView:not(.hidden) {
+/* Automatically shows when script.js adds the 'active' class */
+#profileView.active {
     display: flex !important;
 }
-
 #profileView .profile-container {
     width: 100%;
     max-width: 440px;
