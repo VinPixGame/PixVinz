@@ -1,4 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Force load/preload all logo videos across the document upon opening
+    const logoVideos = document.querySelectorAll('video#logoVideo, video#loadingLogo, .auth-logo video, .about-logo video');
+    logoVideos.forEach(video => {
+        video.load();
+        video.play().catch(() => {});
+    });
+
     const savedAvatar = localStorage.getItem('vinpix_avatar') || localStorage.getItem('Cardo_vinpix_avatar');
     if (savedAvatar) {
         // Target the profile icon container on your homepage (adjust selector if needed, e.g. .profile-icon)
@@ -123,10 +130,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Helper validation functions
+  // Helper validation functions (Updated username rule: min 6 chars, lowercase & number)
   function validateUsernameFormat(username) {
-    // Exactly 6 characters, numbers only (0-9), lowercase
-    const regex = /^[0-9]{6}$/;
+    const regex = /^(?=.*[0-9])(?=.*[a-z])[a-z0-9]{6,}$/;
     return regex.test(username);
   }
 
@@ -152,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
       regUserField.value = val; // enforce lowercase visually
 
       if (!validateUsernameFormat(val)) {
-        usernameIndicator.innerText = '❌ (Must be exactly 6 numbers)';
+        usernameIndicator.innerText = '❌ (Min 6 chars, lowercase & number)';
         usernameIndicator.style.color = '#ff4d4d';
         return;
       }
@@ -222,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Validate strict username rules
       if (!validateUsernameFormat(username)) {
-        if (errElem) errElem.innerText = "Username must be exactly 6 characters and contain numbers only!";
+        if (errElem) errElem.innerText = "Username must be at least 6 characters and contain lowercase letters and numbers!";
         return;
       }
 
@@ -309,10 +315,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Fallback to local storage if not found in Firestore
         if (!userData) {
           let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
-          if (Object.keys(users).length === 0 && username === 'vinz' && pass === '1234') {
-            users['vinz'] = { displayName: 'Vinz', username: 'vinz', password: '1234' };
-            localStorage.setItem('registeredUsers', JSON.stringify(users));
-          }
           userData = users[username];
         }
 
