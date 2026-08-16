@@ -793,7 +793,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-   async function loadLeaderboardData() {
+// --- LEADERBOARD LOGIC (Safe DOM Binding, Avatars & Real Players Only) ---
+document.addEventListener('DOMContentLoaded', () => {
+    const navLeaderboard = document.getElementById('navLeaderboard');
+    if (navLeaderboard) {
+        navLeaderboard.addEventListener('click', () => {
+            if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+            document.querySelectorAll('[id$="View"]').forEach(view => view.classList.remove('active'));
+            const leaderboardView = document.getElementById('leaderboardView');
+            if (leaderboardView) leaderboardView.classList.add('active');
+            loadLeaderboardData();
+        });
+    }
+});
+
+
+
+
+
+
+
+async function loadLeaderboardData() {
     const listContainer = document.getElementById('leaderboardList');
     if (!listContainer) return;
     
@@ -801,7 +821,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let players = [];
     let currentUsername = '';
-
     try {
         const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
         if (userObj && userObj.username) currentUsername = userObj.username;
@@ -813,9 +832,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
         if (window.pixvinzDb) {
             const { db, collection, query, orderBy, limit, getDocs } = window.pixvinzDb;
-            
-            // Fetch up to 1,000 players so we can accurately rank anyone in the top 1,000
-            const q = query(collection(db, 'players'), orderBy('coins', 'desc'), limit(1000));
+            const q = query(collection(db, 'players'), orderBy('coins', 'desc'), limit(100));
             const querySnapshot = await getDocs(q);
             
             querySnapshot.forEach((docSnap) => {
@@ -836,8 +853,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     listContainer.innerHTML = '';
 
-    // Determine user's rank (Top 1,000 get their number, 1,001+ or not found get "Unranked")
-    let userRank = 'Unranked';
+    let userRank = '--';
     if (currentUsername) {
         const foundIndex = players.findIndex(p => p.username.toLowerCase() === currentUsername.toLowerCase() || p.name.toLowerCase() === currentUsername.toLowerCase());
         if (foundIndex !== -1) {
@@ -845,13 +861,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Update global rank text elements across the UI
     document.querySelectorAll('*').forEach(el => {
-        const text = el.textContent.trim();
-        if (text === '#--' || text === 'YOUR GLOBAL RANK\n#--' || text.startsWith('#') || text === 'Unranked') {
-            const targetSpan = el.querySelector('span') || (el.children.length === 0 ? el : null);
-            if (targetSpan && (targetSpan.textContent.includes('#') || targetSpan.textContent.includes('Unranked') || targetSpan.textContent.includes('--'))) {
-                targetSpan.textContent = userRank;
+        if (el.textContent.trim() === '#--' || el.textContent.trim() === 'YOUR GLOBAL RANK\n#--') {
+            const targetSpan = el.querySelector('span') || el;
+            if (targetSpan) {
+                targetSpan.textContent = userRank !== '--' ? userRank : '#--';
             }
         }
     });
@@ -861,7 +875,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Still restrict the visible leaderboard list to only the top 20
     const topPlayers = players.slice(0, 20);
 
     topPlayers.forEach((player, index) => {
@@ -942,4 +955,4 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         listContainer.appendChild(row);
     });
-}         
+}
