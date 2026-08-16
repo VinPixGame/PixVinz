@@ -366,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btn.id === 'collectionsBackBtn') return;
     btn.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      showView('home');
+      history.back();
     });
   });
 
@@ -380,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopImmediatePropagation();
         renderCollectionFolders();
       } else {
-        showView('home');
+        history.back();
       }
     });
   }
