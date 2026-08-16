@@ -812,7 +812,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
- async function loadLeaderboardData() {
+async function loadLeaderboardData() {
     const listContainer = document.getElementById('leaderboardList');
     if (!listContainer) return;
     
@@ -869,6 +869,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Fix centering for "YOUR GLOBAL RANK" element
+    document.querySelectorAll('*').forEach(el => {
+        if (el.textContent && el.textContent.includes('YOUR GLOBAL RANK')) {
+            el.style.display = 'flex';
+            el.style.flexDirection = 'column';
+            el.style.alignItems = 'center';
+            el.style.justifyContent = 'center';
+            el.style.textAlign = 'center';
+        }
+    });
+
     if (players.length === 0) {
         listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #aaa;">No players found on the leaderboard yet.</div>';
         return;
@@ -884,11 +895,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Custom gaming badge & premium frame styles for top 3, numbers for 4+
         if (rank === 1) {
-            // Gold / Orange shield with ribbon vibe & Gold Frame
+            // Gold / Orange shield with ribbon vibe & Gold Frame (Circular shadow/glow matching avatar)
             specialStyle = 'background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(255, 215, 0, 0.6);';
-            frameStyle = 'border: 3px solid #ffd700; box-shadow: 0 0 10px rgba(255,215,0,0.8);';
+            frameStyle = 'border: 3px solid #ffd700;';
             rankBadgeHTML = `
-                <div style="min-width: 42px; height: 42px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #ffaa00, #ff5500); border-radius: 8px; border: 2px solid #fff; box-shadow: 0 0 8px rgba(255,170,0,0.8); font-weight: 900; font-size: 14px; color: #fff;">
+                <div style="min-width: 42px; height: 42px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #ffaa00, #ff5500); border-radius: 8px; border: 2px solid #fff; font-weight: 900; font-size: 14px; color: #fff;">
                     <span>#1</span>
                     <div style="width: 24px; height: 6px; background: #cc3300; clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%); margin-top: 2px;"></div>
                 </div>
@@ -896,9 +907,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (rank === 2) {
             // Silver / Blue shield with ribbon vibe & Silver Frame
             specialStyle = 'background: linear-gradient(135deg, rgba(192, 192, 192, 0.2), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(192, 192, 192, 0.6);';
-            frameStyle = 'border: 3px solid #00e5ff; box-shadow: 0 0 10px rgba(0,229,255,0.8);';
+            frameStyle = 'border: 3px solid #00e5ff;';
             rankBadgeHTML = `
-                <div style="min-width: 42px; height: 42px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #00d2ff, #3a7bd5); border-radius: 8px; border: 2px solid #fff; box-shadow: 0 0 8px rgba(0,210,255,0.8); font-weight: 900; font-size: 14px; color: #fff;">
+                <div style="min-width: 42px; height: 42px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #00d2ff, #3a7bd5); border-radius: 8px; border: 2px solid #fff; font-weight: 900; font-size: 14px; color: #fff;">
                     <span>#2</span>
                     <div style="width: 24px; height: 6px; background: #0055aa; clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%); margin-top: 2px;"></div>
                 </div>
@@ -906,9 +917,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (rank === 3) {
             // Bronze / Purple-Bronze shield with ribbon vibe & Bronze Frame
             specialStyle = 'background: linear-gradient(135deg, rgba(205, 127, 50, 0.2), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(205, 127, 50, 0.6);';
-            frameStyle = 'border: 3px solid #ff9933; box-shadow: 0 0 10px rgba(205,127,50,0.8);';
+            frameStyle = 'border: 3px solid #ff9933;';
             rankBadgeHTML = `
-                <div style="min-width: 42px; height: 42px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #cd7f32, #8b4513); border-radius: 8px; border: 2px solid #fff; box-shadow: 0 0 8px rgba(205,127,50,0.8); font-weight: 900; font-size: 14px; color: #fff;">
+                <div style="min-width: 42px; height: 42px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #cd7f32, #8b4513); border-radius: 8px; border: 2px solid #fff; font-weight: 900; font-size: 14px; color: #fff;">
                     <span>#3</span>
                     <div style="width: 24px; height: 6px; background: #5c2c16; clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%); margin-top: 2px;"></div>
                 </div>
@@ -930,7 +941,6 @@ document.addEventListener('DOMContentLoaded', () => {
             margin-bottom: 8px;
             border-radius: 12px;
             background: rgba(30, 30, 30, 0.7);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
             ${specialStyle}
         `;
 
@@ -956,4 +966,7 @@ document.addEventListener('DOMContentLoaded', () => {
         listContainer.appendChild(row);
     });
 }
+
+
+
         
