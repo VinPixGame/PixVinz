@@ -1621,3 +1621,26 @@ video {
     font-weight: 700;
     color: #00f2fe;
 }
+
+
+.overall-best-card {
+    margin: 15px auto !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: fit-content;
+    min-width: 220px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.overall-best-card .stat-text-group,
+.overall-best-card .stat-val-row {
+    width: 100%;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
