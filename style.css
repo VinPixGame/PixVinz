@@ -267,30 +267,33 @@ body {
 }
 
 .overall-best-card::before {
-  content: "⭐";
+  content: "🏆";
   position: absolute;
-  top: -14px;
+  top: -18px;
   left: 50%;
   transform: translateX(-50%);
-  width: 28px;
-  height: 28px;
-  background: linear-gradient(180deg, #ffe066 0%, #ffb700 100%);
-  border: 1.5px solid #ffffff;
-  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  clip-path: polygon(
+    50% 0%, 
+    61% 35%, 
+    98% 35%, 
+    68% 57%, 
+    79% 91%, 
+    50% 70%, 
+    21% 91%, 
+    32% 57%, 
+    2% 35%, 
+    39% 35%
+  );
+  filter: drop-shadow(0 0 8px #ffcc00) drop-shadow(0 0 16px #ff9900);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.8), 0 2px 6px rgba(0, 0, 0, 0.5);
+  font-size: 18px;
   z-index: 10;
-}
-
-.best-stat-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-  justify-content: center;
 }
 
 .stat-circle-icon {
