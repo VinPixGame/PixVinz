@@ -351,9 +351,31 @@ body {
   padding: 4px 2px 20px 2px;
 }
 
+/* ==========================================
+    FIXED #collectionsView & COLLECTIONS STYLES
+   ========================================== */
+
+#collectionsView.view.active {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: calc(100vh - 32px);
+  overflow: hidden;
+}
+
+#collectionsView .view-header {
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
 .collections-scroll-container {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
   padding: 4px 2px 20px 2px;
 }
 
@@ -506,14 +528,6 @@ body {
 /* ==========================================
     COLLECTION CARDS WITH BADGES
    ========================================== */
-
-#collectionsView .view-header {
-  display: grid;
-  grid-template-columns: 44px 1fr 44px;
-  align-items: center;
-  width: 100%;
-  margin-bottom: 12px;
-}
 
 .collection-item {
   position: relative;
@@ -990,8 +1004,6 @@ input:checked + .slider:before {
   margin-bottom: 6px;
 }
 
-
-
 /* Stats Bar (Timer & Moves Container) */
 .premium-stats-bar {
   display: flex;
@@ -1037,6 +1049,7 @@ input:checked + .slider:before {
   color: #ffffff;
   font-weight: 900;
 }
+
 /* ==========================================
     PUZZLE BOARD
    ========================================== */
@@ -1102,8 +1115,6 @@ input:checked + .slider:before {
   gap: 8px;
   cursor: pointer;
 }
-
-
 
 /* ==========================================
     VICTORY MODAL & IMAGE SIZE ADJUSTMENTS
@@ -1440,7 +1451,6 @@ video {
   background: transparent !important;
 }
 
-
 .profile-link-btn {
     position: absolute;
     top: 20px;
@@ -1459,7 +1469,7 @@ video {
     width: 80%;
     max-width: 250px;
     margin: 15px auto;
-    background-color: #ab47bc; /* Lighter purple */
+    background-color: #ab47bc;
     color: #ffffff;
     border: 2px solid #ce93d8;
     padding: 14px;
@@ -1475,9 +1485,6 @@ video {
 .challenge-menu-btn:active {
     transform: scale(0.98);
 }
-
-
-
 
 #leaderboardView {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
