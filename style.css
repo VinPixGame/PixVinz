@@ -1626,7 +1626,11 @@ video {
 }
 
 
-#globalRankCard::before {
+#leaderboardView .overall-best-card {
+    position: relative;
+}
+
+#leaderboardView .overall-best-card::before {
   content: "🏆";
   position: absolute;
   top: -18px;
@@ -1654,10 +1658,6 @@ video {
   justify-content: center;
   font-size: 18px;
   z-index: 10;
-}
-
-#globalRankCard {
-    position: relative; /* Ensures the absolute trophy positions correctly inside just this card */
 }
 
 .confetti-bg {
