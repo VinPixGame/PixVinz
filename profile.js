@@ -20,11 +20,17 @@ function getUserKey(keyName) {
 function goHome() {
     localStorage.setItem('skipLoading', 'true');
     
+    // If showView function exists in scope, use it directly for homeView
     if (typeof showView === 'function') {
         showView('homeView');
     } else {
-        // Redirect back to your main page with the homeView hash/target
-        window.location.href = 'index.html#homeView';
+        // Fallback if profile.html is a standalone page: check if homeView exists or redirect with hash
+        const homeViewElement = document.getElementById('homeView') || window.parent.document.getElementById('homeView');
+        if (homeViewElement && typeof window.parent.showView === 'function') {
+            window.parent.showView('homeView');
+        } else {
+            window.location.href = 'index.html#homeView';
+        }
     }
 }
 
