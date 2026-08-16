@@ -6,28 +6,16 @@ document.addEventListener('DOMContentLoaded', () => {
         video.play().catch(() => {});
     });
 
-    const savedAvatar = localStorage.getItem('vinpix_avatar') || localStorage.getItem('Cardo_vinpix_avatar');
+    // --- AVATAR LOADER FIX (Targets your header profile elements) ---
+    const savedAvatar = localStorage.getItem('vinpix_avatar') || localStorage.getItem('Cardo_vinpix_avatar') || localStorage.getItem('playerAvatar');
     if (savedAvatar) {
-        // Target the profile icon container on your homepage (adjust selector if needed, e.g. .profile-icon)
-        const profileIcon = document.querySelector('.profile-icon, #profileIconBtn, header .fa-user');
-        if (profileIcon) {
-            if (profileIcon.tagName === 'IMG') {
-                profileIcon.src = savedAvatar;
-            } else {
-                profileIcon.style.backgroundImage = `url(${savedAvatar})`;
-                profileIcon.style.backgroundSize = 'cover';
-                profileIcon.style.backgroundPosition = 'center';
-                if (!profileIcon.querySelector('img')) {
-                    let img = document.createElement('img');
-                    img.src = savedAvatar;
-                    img.style.width = '100%';
-                    img.style.height = '100%';
-                    img.style.borderRadius = '50%';
-                    img.style.objectFit = 'cover';
-                    profileIcon.innerHTML = '';
-                    profileIcon.appendChild(img);
-                }
-            }
+        const avatarImg = document.getElementById('profileHeaderImg');
+        const fallbackIcon = document.getElementById('profileIconFallback');
+
+        if (avatarImg && fallbackIcon) {
+            avatarImg.src = savedAvatar;
+            avatarImg.style.display = 'block';
+            fallbackIcon.style.display = 'none';
         }
     }
 });
@@ -689,7 +677,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Dynamic Profile Header Avatar Loader
 window.addEventListener('DOMContentLoaded', () => {
-    const savedAvatar = localStorage.getItem('playerAvatar'); 
+    const savedAvatar = localStorage.getItem('vinpix_avatar') || localStorage.getItem('Cardo_vinpix_avatar') || localStorage.getItem('playerAvatar'); 
     const avatarImg = document.getElementById('profileHeaderImg');
     const fallbackIcon = document.getElementById('profileIconFallback');
 
