@@ -818,13 +818,17 @@ async function loadLeaderboardData() {
     
     const parentView = listContainer.closest('.leaderboard-view') || listContainer.parentElement;
     if (parentView) {
-        parentView.style.maxWidth = '96%';
+        parentView.style.maxWidth = '100%';
         parentView.style.width = '100%';
         parentView.style.margin = '0 auto';
-        parentView.style.padding = '0 8px';
+        parentView.style.padding = '0 6px';
+        parentView.style.boxSizing = 'border-box';
+        parentView.style.overflowX = 'hidden';
     }
     
     listContainer.style.width = '100%';
+    listContainer.style.boxSizing = 'border-box';
+    listContainer.style.overflowX = 'hidden';
     listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #aaa;">Loading leaderboard...</div>';
 
     let players = [];
@@ -851,7 +855,8 @@ async function loadLeaderboardData() {
                     coins: data.coins || 0,
                     xp: data.xp || 0,
                     level: data.level || 1, // Fallback to Level 1 if not defined
-                    avatar: data.avatar || ''
+                    avatar: data.avatar || '',
+                    badges: data.badges || []
                 });
             });
         }
@@ -901,43 +906,41 @@ async function loadLeaderboardData() {
 
     topPlayers.forEach((player, index) => {
         const rank = index + 1;
+        player.rank = rank;
         let rankBadgeHTML = '';
         let specialStyle = '';
         let frameStyle = 'border: 2px solid rgba(255,255,255,0.2);';
-        let avatarSize = '48px';
+        let avatarSize = '42px';
 
         if (rank === 1) {
             specialStyle = 'background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(255, 215, 0, 0.6);';
-            frameStyle = 'border: 3px solid #ffd700; box-shadow: 0 0 12px rgba(255,215,0,0.8);';
-            avatarSize = '52px';
+            frameStyle = 'border: 3px solid #ffd700; box-shadow: 0 0 10px rgba(255,215,0,0.8);';
+            avatarSize = '46px';
             rankBadgeHTML = `
-                <div style="min-width: 44px; height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #ffaa00, #ff5500); border-radius: 10px; border: 2px solid #fff; box-shadow: 0 0 8px rgba(255,170,0,0.8); font-weight: 900; font-size: 14px; color: #fff;">
+                <div style="min-width: 36px; height: 36px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #ffaa00, #ff5500); border-radius: 8px; border: 2px solid #fff; box-shadow: 0 0 6px rgba(255,170,0,0.8); font-weight: 900; font-size: 12px; color: #fff; margin-right: 8px; flex-shrink: 0;">
                     <span>#1</span>
-                    <div style="width: 24px; height: 6px; background: #cc3300; clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%); margin-top: 2px;"></div>
                 </div>
             `;
         } else if (rank === 2) {
             specialStyle = 'background: linear-gradient(135deg, rgba(192, 192, 192, 0.2), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(192, 192, 192, 0.6);';
-            frameStyle = 'border: 3px solid #00e5ff; box-shadow: 0 0 12px rgba(0,229,255,0.8);';
-            avatarSize = '50px';
+            frameStyle = 'border: 3px solid #00e5ff; box-shadow: 0 0 10px rgba(0,229,255,0.8);';
+            avatarSize = '44px';
             rankBadgeHTML = `
-                <div style="min-width: 44px; height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #00d2ff, #3a7bd5); border-radius: 10px; border: 2px solid #fff; box-shadow: 0 0 8px rgba(0,210,255,0.8); font-weight: 900; font-size: 14px; color: #fff;">
+                <div style="min-width: 36px; height: 36px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #00d2ff, #3a7bd5); border-radius: 8px; border: 2px solid #fff; box-shadow: 0 0 6px rgba(0,210,255,0.8); font-weight: 900; font-size: 12px; color: #fff; margin-right: 8px; flex-shrink: 0;">
                     <span>#2</span>
-                    <div style="width: 24px; height: 6px; background: #0055aa; clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%); margin-top: 2px;"></div>
                 </div>
             `;
         } else if (rank === 3) {
             specialStyle = 'background: linear-gradient(135deg, rgba(205, 127, 50, 0.2), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(205, 127, 50, 0.6);';
-            frameStyle = 'border: 3px solid #ff9933; box-shadow: 0 0 12px rgba(205,127,50,0.8);';
-            avatarSize = '50px';
+            frameStyle = 'border: 3px solid #ff9933; box-shadow: 0 0 10px rgba(205,127,50,0.8);';
+            avatarSize = '44px';
             rankBadgeHTML = `
-                <div style="min-width: 44px; height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #cd7f32, #8b4513); border-radius: 10px; border: 2px solid #fff; box-shadow: 0 0 8px rgba(205,127,50,0.8); font-weight: 900; font-size: 14px; color: #fff;">
+                <div style="min-width: 36px; height: 36px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #cd7f32, #8b4513); border-radius: 8px; border: 2px solid #fff; box-shadow: 0 0 6px rgba(205,127,50,0.8); font-weight: 900; font-size: 12px; color: #fff; margin-right: 8px; flex-shrink: 0;">
                     <span>#3</span>
-                    <div style="width: 24px; height: 6px; background: #5c2c16; clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%); margin-top: 2px;"></div>
                 </div>
             `;
         } else {
-            rankBadgeHTML = `<span style="min-width: 44px; text-align: center; font-weight: bold; font-size: 15px; color: #aaa;">#${rank}</span>`;
+            rankBadgeHTML = `<span style="min-width: 36px; text-align: center; font-weight: bold; font-size: 13px; color: #aaa; margin-right: 8px; flex-shrink: 0;">#${rank}</span>`;
         }
 
         const avatarSrc = player.avatar ? player.avatar : 'image/avatar.png';
@@ -949,32 +952,38 @@ async function loadLeaderboardData() {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 14px 16px;
-            margin-bottom: 10px;
-            border-radius: 22px;
+            padding: 10px 10px;
+            margin-bottom: 8px;
+            border-radius: 16px;
             background: rgba(30, 30, 30, 0.75);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             width: 100%;
             box-sizing: border-box;
+            cursor: pointer;
+            overflow: hidden;
             ${specialStyle}
         `;
 
+        if (typeof window.openPlayerProfile === 'function') {
+            row.onclick = () => window.openPlayerProfile(player);
+        }
+
         row.innerHTML = `
-            <div style="display: flex; align-items: center; min-width: 0; flex: 1; overflow: hidden;">
+            <div style="display: flex; align-items: center; min-width: 0; flex: 1; overflow: hidden; margin-right: 6px;">
                 ${rankBadgeHTML}
-                <img src="${avatarSrc}" alt="${player.name}" style="width: ${avatarSize}; height: ${avatarSize}; border-radius: 50%; object-fit: cover; margin: 0 14px; flex-shrink: 0; ${frameStyle}">
-                <span style="font-weight: 600; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">${player.name}</span>
+                <img src="${avatarSrc}" alt="${player.name}" style="width: ${avatarSize}; height: ${avatarSize}; border-radius: 50%; object-fit: cover; margin-right: 8px; flex-shrink: 0; ${frameStyle}">
+                <div style="display: flex; flex-direction: column; min-width: 0; flex: 1; overflow: hidden;">
+                    <span style="font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; display: block; width: 100%;">${player.name}</span>
+                    <span style="background: rgba(255,255,255,0.1); padding: 1px 5px; border-radius: 4px; font-size: 9px; color: #ffeb3b; border: 1px solid rgba(255,235,59,0.3); width: fit-content; margin-top: 2px;">LVL ${player.level}</span>
+                </div>
             </div>
-            <div style="display: flex; flex-direction: column; align-items: flex-end; margin-left: 15px; flex-shrink: 0; gap: 4px;">
-                <div style="font-size: 14px; font-weight: bold; color: #ffd700; text-shadow: 0 0 6px rgba(255,215,0,0.5);">
+            <div style="display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; gap: 2px;">
+                <div style="font-size: 12px; font-weight: bold; color: #ffd700; text-shadow: 0 0 4px rgba(255,215,0,0.5); white-space: nowrap;">
                     🪙 ${player.coins.toLocaleString()}
                 </div>
-                <div style="font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 6px;">
-                    <span style="background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 6px; font-size: 11px; color: #ffeb3b; border: 1px solid rgba(255,235,59,0.3);">LVL ${player.level}</span>
-                    <div>
-                        <span style="color: #00e5ff; text-shadow: 0 0 6px rgba(0,229,255,0.7); margin-right: 2px;">XP</span>
-                        <span style="color: #ff75a0; text-shadow: 0 0 6px rgba(255,117,160,0.7);">⚡️${player.xp.toLocaleString()}</span>
-                    </div>
+                <div style="font-size: 11px; font-weight: bold; white-space: nowrap;">
+                    <span style="color: #00e5ff; margin-right: 1px;">XP</span>
+                    <span style="color: #ff75a0;">⚡️${player.xp.toLocaleString()}</span>
                 </div>
             </div>
         `;
