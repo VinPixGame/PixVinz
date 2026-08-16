@@ -39,7 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
     register: document.getElementById('registerView'),
     home: document.getElementById('homeView'),
     levels: document.getElementById('levelsView'),
-    collections: document.getElementById('collectionsView')
+    collections: document.getElementById('collectionsView'),
+    challenge: document.getElementById('challengeView'),
+    leaderboard: document.getElementById('leaderboardView'),
+    profileView: document.getElementById('profileView')
   };
 
   const mainHeader = document.getElementById('mainHeader');
@@ -67,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
       views[targetView].classList.add('active');
     }
 
-    if (['home', 'levels', 'collections'].includes(targetView)) {
+    if (['home', 'levels', 'collections', 'profileView'].includes(targetView)) {
       if (mainHeader) mainHeader.classList.remove('hidden');
       updateCoinDisplay();
     } else {
