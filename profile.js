@@ -143,6 +143,64 @@ function updateXpProgress() {
     if (xpBarFill) xpBarFill.style.width = `${progressPercent}%`;
 }
 
+// --- DYNAMIC BADGE CHECKER (CUSTOM RULES) ---
+function checkAndUnlockBadges() {
+    const prefix = getCurrentUsername() + '_';
+
+    // 1. Gather player stats
+    const currentLevel = parseInt(localStorage.getItem(prefix + 'currentLevel')) || 1;
+    const currentCoins = parseInt(localStorage.getItem(prefix + 'totalCoins')) || 0;
+    
+    // Lifetime max coins tracked so spending coins doesn't relock the Coin Collector badge
+    let maxCoinsEarned = parseInt(localStorage.getItem(prefix + 'maxCoinsEarned')) || currentCoins;
+    if (currentCoins > maxCoinsEarned) {
+        maxCoinsEarned = currentCoins;
+        localStorage.setItem(prefix + 'maxCoinsEarned', maxCoinsEarned);
+    }
+
+    // 2. Check Speed Thunder condition: finish any level from 20 to 30 within 1 minute (60 seconds)
+    let beatSpeedThunder = false;
+    for (let i = 20; i <= 30; i++) {
+        const timeStr = localStorage.getItem(prefix + `levelTime_${i}`);
+        if (timeStr && timeStr !== '--:--') {
+            const parts = timeStr.split(':');
+            if (parts.length === 2) {
+                const totalSec = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+                if (totalSec <= 60) {
+                    beatSpeedThunder = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    // 3. Define badge criteria mapping
+    const badges = {
+        badgeFirstStep: currentLevel > 1,                      // Finished level 1
+        badgeSpeedThunder: beatSpeedThunder,                 // Level 20-30 finished within 1 min
+        badgeCoinCollector: maxCoinsEarned >= 500,             // Reached 500 coins once (lifetime)
+        badgePixVinzElite: currentLevel >= 50,                 // Reach level 50
+        badgePixVinzMaster: currentLevel >= 75,                // Reach level 75
+        badgePixVinzGrandMaster: currentLevel >= 100,          // Reach level 100
+        badgePixVinzMythic: currentLevel >= 150,               // Reach level 150
+        badgePixVinzMythicalGlory: currentLevel >= 200         // Reach level 200
+    };
+
+    // 4. Apply UI classes dynamically
+    for (const [badgeId, isUnlocked] of Object.entries(badges)) {
+        const badgeElement = document.getElementById(badgeId);
+        if (badgeElement) {
+            if (isUnlocked) {
+                badgeElement.classList.remove('locked');
+                badgeElement.classList.add('unlocked');
+            } else {
+                badgeElement.classList.remove('unlocked');
+                badgeElement.classList.add('locked');
+            }
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const avatarLoader = document.getElementById('avatarLoader');
     if (avatarLoader) avatarLoader.style.display = 'none';
@@ -163,7 +221,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputElem = document.getElementById('username-input');
     if (inputElem) inputElem.value = initialName;
 
-    // Fixed: Look only for the user-specific avatar key. If none exists, fallback to image/avatar.png
     const savedAvatar = localStorage.getItem(getUserKey('vinpix_avatar'));
     if (savedAvatar) {
         applyAvatarToUI(savedAvatar);
@@ -172,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     updateXpProgress();
+    checkAndUnlockBadges(); // Run badge check on page load
 });
 
 const editModal = document.getElementById('editNameModal');
@@ -226,7 +284,6 @@ if (avatarInput) {
 
                     applyAvatarToUI(compressedBase64);
 
-                    // Fixed: Save ONLY to the user-specific key (removed global vinpix_avatar write)
                     localStorage.setItem(getUserKey('vinpix_avatar'), compressedBase64);
 
                     try {
