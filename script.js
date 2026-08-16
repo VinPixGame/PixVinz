@@ -825,8 +825,9 @@ async function loadLeaderboardData() {
                 const data = docSnap.data();
                 players.push({
                     name: data.displayName || data.username || 'Anonymous',
-                    score: data.coins || 0,
-                    avatar: data.avatar || '' // Fetch player avatar or fallback if empty
+                    coins: data.coins || 0,
+                    xp: data.xp || 0,
+                    avatar: data.avatar || ''
                 });
             });
         }
@@ -836,7 +837,6 @@ async function loadLeaderboardData() {
 
     listContainer.innerHTML = '';
 
-    // If no real players are found or database is unreachable
     if (players.length === 0) {
         listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #fff;">No players found on the leaderboard yet.</div>';
         return;
@@ -845,25 +845,40 @@ async function loadLeaderboardData() {
     players.forEach((player, index) => {
         const rank = index + 1;
         let rankClass = '';
-        if (rank === 1) rankClass = 'top-1';
-        else if (rank === 2) rankClass = 'top-2';
-        else if (rank === 3) rankClass = 'top-3';
+        let rankDisplay = `#${rank}`;
 
-        // Use player's custom avatar if available, otherwise fallback to default image
+        if (rank === 1) {
+            rankClass = 'top-1';
+            rankDisplay = '🥇';
+        } else if (rank === 2) {
+            rankClass = 'top-2';
+            rankDisplay = '🥈';
+        } else if (rank === 3) {
+            rankClass = 'top-3';
+            rankDisplay = '🥉';
+        }
+
         const avatarSrc = player.avatar ? player.avatar : 'image/avatar.png';
 
         const row = document.createElement('div');
         row.className = `rank-row ${rankClass}`;
+        
+        // Inline layout safety to prevent text overlap & squeezing
+        row.style.display = 'flex';
+        row.style.justifyContent = 'space-between';
+        row.style.alignItems = 'center';
+
         row.innerHTML = `
-            <div class="rank-info">
-                <span class="rank-number">#${rank}</span>
-                <img src="${avatarSrc}" alt="${player.name}" class="rank-avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-left: 8px; margin-right: 8px;">
-                <span class="rank-name">${player.name}</span>
+            <div class="rank-info" style="display: flex; align-items: center; min-width: 0; flex: 1; overflow: hidden;">
+                <span class="rank-number" style="min-width: 30px; text-align: center; font-size: ${rank <= 3 ? '18px' : 'inherit'};">${rankDisplay}</span>
+                <img src="${avatarSrc}" alt="${player.name}" class="rank-avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin: 0 10px; flex-shrink: 0;">
+                <span class="rank-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${player.name}</span>
             </div>
-            <span class="rank-score">${player.score} XP</span>
+            <div class="rank-scores" style="display: flex; gap: 12px; margin-left: 15px; flex-shrink: 0; white-space: nowrap;">
+                <span class="rank-coins">🪙${player.coins.toLocaleString()}</span>
+                <span class="rank-xp">⚡️${player.xp.toLocaleString()}</span>
+            </div>
         `;
         listContainer.appendChild(row);
     });
 }
-
-
