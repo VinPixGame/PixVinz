@@ -807,23 +807,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-async function loadLeaderboardData() {
+
+
+
+
+
+ async function loadLeaderboardData() {
     const listContainer = document.getElementById('leaderboardList');
     if (!listContainer) return;
     
     listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #aaa;">Loading leaderboard...</div>';
 
     let players = [];
+    let currentUsername = '';
+    try {
+        const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (userObj && userObj.username) currentUsername = userObj.username;
+    } catch (e) {}
+    if (!currentUsername) {
+        currentUsername = localStorage.getItem('vinpix_username') || '';
+    }
 
     try {
         if (window.pixvinzDb) {
             const { db, collection, query, orderBy, limit, getDocs } = window.pixvinzDb;
-            const q = query(collection(db, 'players'), orderBy('coins', 'desc'), limit(20));
+            const q = query(collection(db, 'players'), orderBy('coins', 'desc'), limit(50));
             const querySnapshot = await getDocs(q);
             
             querySnapshot.forEach((docSnap) => {
                 const data = docSnap.data();
                 players.push({
+                    username: docSnap.id,
                     name: data.displayName || data.username || 'Anonymous',
                     coins: data.coins || 0,
                     xp: data.xp || 0,
@@ -837,25 +851,69 @@ async function loadLeaderboardData() {
 
     listContainer.innerHTML = '';
 
+    let userRank = '--';
+    if (currentUsername) {
+        const foundIndex = players.findIndex(p => p.username.toLowerCase() === currentUsername.toLowerCase() || p.name.toLowerCase() === currentUsername.toLowerCase());
+        if (foundIndex !== -1) {
+            userRank = `#${foundIndex + 1}`;
+        }
+    }
+
+    document.querySelectorAll('*').forEach(el => {
+        if (el.textContent.trim() === '#--' || el.textContent.trim() === 'YOUR GLOBAL RANK\n#--') {
+            const targetSpan = el.querySelector('span') || el;
+            if (targetSpan) {
+                targetSpan.textContent = userRank !== '--' ? userRank : '#--';
+            }
+        }
+    });
+
     if (players.length === 0) {
         listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #aaa;">No players found on the leaderboard yet.</div>';
         return;
     }
 
-    players.forEach((player, index) => {
-        const rank = index + 1;
-        let rankDisplay = `#${rank}`;
-        let specialStyle = '';
+    const topPlayers = players.slice(0, 20);
 
+    topPlayers.forEach((player, index) => {
+        const rank = index + 1;
+        let rankBadgeHTML = '';
+        let specialStyle = '';
+        let frameStyle = 'border: 2px solid rgba(255,255,255,0.2);'; // default frame
+
+        // Custom gaming badge & premium frame styles for top 3, numbers for 4+
         if (rank === 1) {
-            rankDisplay = '🥇';
-            specialStyle = 'background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(20, 20, 20, 0.9)); border: 1px solid rgba(255, 215, 0, 0.5);';
+            // Gold / Orange shield with ribbon vibe & Gold Frame
+            specialStyle = 'background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(255, 215, 0, 0.6);';
+            frameStyle = 'border: 3px solid #ffd700; box-shadow: 0 0 10px rgba(255,215,0,0.8);';
+            rankBadgeHTML = `
+                <div style="min-width: 42px; height: 42px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #ffaa00, #ff5500); border-radius: 8px; border: 2px solid #fff; box-shadow: 0 0 8px rgba(255,170,0,0.8); font-weight: 900; font-size: 14px; color: #fff;">
+                    <span>#1</span>
+                    <div style="width: 24px; height: 6px; background: #cc3300; clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%); margin-top: 2px;"></div>
+                </div>
+            `;
         } else if (rank === 2) {
-            rankDisplay = '🥈';
-            specialStyle = 'background: linear-gradient(135deg, rgba(192, 192, 192, 0.2), rgba(20, 20, 20, 0.9)); border: 1px solid rgba(192, 192, 192, 0.5);';
+            // Silver / Blue shield with ribbon vibe & Silver Frame
+            specialStyle = 'background: linear-gradient(135deg, rgba(192, 192, 192, 0.2), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(192, 192, 192, 0.6);';
+            frameStyle = 'border: 3px solid #00e5ff; box-shadow: 0 0 10px rgba(0,229,255,0.8);';
+            rankBadgeHTML = `
+                <div style="min-width: 42px; height: 42px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #00d2ff, #3a7bd5); border-radius: 8px; border: 2px solid #fff; box-shadow: 0 0 8px rgba(0,210,255,0.8); font-weight: 900; font-size: 14px; color: #fff;">
+                    <span>#2</span>
+                    <div style="width: 24px; height: 6px; background: #0055aa; clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%); margin-top: 2px;"></div>
+                </div>
+            `;
         } else if (rank === 3) {
-            rankDisplay = '🥉';
-            specialStyle = 'background: linear-gradient(135deg, rgba(205, 127, 50, 0.2), rgba(20, 20, 20, 0.9)); border: 1px solid rgba(205, 127, 50, 0.5);';
+            // Bronze / Purple-Bronze shield with ribbon vibe & Bronze Frame
+            specialStyle = 'background: linear-gradient(135deg, rgba(205, 127, 50, 0.2), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(205, 127, 50, 0.6);';
+            frameStyle = 'border: 3px solid #ff9933; box-shadow: 0 0 10px rgba(205,127,50,0.8);';
+            rankBadgeHTML = `
+                <div style="min-width: 42px; height: 42px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #cd7f32, #8b4513); border-radius: 8px; border: 2px solid #fff; box-shadow: 0 0 8px rgba(205,127,50,0.8); font-weight: 900; font-size: 14px; color: #fff;">
+                    <span>#3</span>
+                    <div style="width: 24px; height: 6px; background: #5c2c16; clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%); margin-top: 2px;"></div>
+                </div>
+            `;
+        } else {
+            rankBadgeHTML = `<span style="min-width: 42px; text-align: center; font-weight: bold; font-size: 15px; color: #aaa;">#${rank}</span>`;
         }
 
         const avatarSrc = player.avatar ? player.avatar : 'image/avatar.png';
@@ -877,8 +935,8 @@ async function loadLeaderboardData() {
 
         row.innerHTML = `
             <div style="display: flex; align-items: center; min-width: 0; flex: 1; overflow: hidden;">
-                <span style="min-width: 35px; text-align: center; font-weight: bold; font-size: ${rank <= 3 ? '20px' : '15px'}; color: #fff;">${rankDisplay}</span>
-                <img src="${avatarSrc}" alt="${player.name}" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; margin: 0 12px; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.2);">
+                ${rankBadgeHTML}
+                <img src="${avatarSrc}" alt="${player.name}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin: 0 12px; flex-shrink: 0; ${frameStyle}">
                 <span style="font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">${player.name}</span>
             </div>
             <div style="display: flex; flex-direction: column; align-items: flex-end; margin-left: 15px; flex-shrink: 0; gap: 3px;">
@@ -893,4 +951,4 @@ async function loadLeaderboardData() {
         `;
         listContainer.appendChild(row);
     });
-}
+}   
