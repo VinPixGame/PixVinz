@@ -126,15 +126,24 @@
         <span class="arrow">›</span>
       </div>
 
-      <!-- Leaderboard Menu Card -->
-      <div class="card menu-card" id="navLeaderboard">
-        <div class="card-icon">🏆</div>
-        <div class="card-text">
-          <h3>LEADERBOARD</h3>
-          <p>Top 20 worldwide rankings</p>
-        </div>
-        <span class="arrow">›</span>
+      <!-- ========================================== -->
+<!-- PIXVINZ - LEADERBOARD VIEW                 -->
+<!-- ========================================== -->
+<div id="leaderboardView" style="display: none;">
+  <button class="back-btn" onclick="goHome()">← Back</button>
+  <div class="leaderboard-container">
+    <div class="leaderboard-header">
+      <h1>Worldwide Rankings</h1>
+      <p>Top 20 PixVinz Players</p>
+    </div>
+
+    <div class="leaderboard-card">
+      <div class="leaderboard-list" id="leaderboardList">
+        <!-- Dynamic list items will be injected here via JavaScript -->
       </div>
+    </div>
+  </div>
+</div>
 
       <div class="card menu-card" id="navSettings">
         <div class="card-icon">⚙️</div>
