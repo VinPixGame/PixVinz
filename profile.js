@@ -60,9 +60,9 @@ async function saveUserDataToCloud() {
             username: username,
             displayName: displayName,
             level: currentLevel,
+            xp: currentXpVal,
             coins: totalCoins,
             avatar: avatar,
-            xp: currentXpVal,
             lastUpdated: new Date()
         }, { merge: true });
     } catch (error) {
@@ -166,7 +166,7 @@ async function loadProfileGlobalRank() {
         if (window.pixvinzDb) {
             const { db, collection, query, orderBy, limit, getDocs } = window.pixvinzDb;
             
-            const q = query(collection(db, 'players'), orderBy('coins', 'desc'), limit(1000));
+            const q = query(collection(db, 'players'), orderBy('xp', 'desc'), limit(100));
             const querySnapshot = await getDocs(q);
             
             let foundRank = null;
