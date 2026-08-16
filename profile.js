@@ -19,10 +19,12 @@ function getUserKey(keyName) {
 
 function goHome() {
     localStorage.setItem('skipLoading', 'true');
+    
     if (typeof showView === 'function') {
         showView('homeView');
     } else {
-        window.location.href = 'index.html';
+        // Redirect back to your main page with the homeView hash/target
+        window.location.href = 'index.html#homeView';
     }
 }
 
