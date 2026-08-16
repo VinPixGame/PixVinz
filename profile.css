@@ -2,17 +2,22 @@
    PIXVINZ - SCOPED PREMIUM PROFILE STYLESHEET
    ========================================== */
 
-#profileView:not(.hidden) {
+#profileView {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     color: #ffffff;
     min-height: 100vh;
-    display: flex;
+    display: none; /* <-- Hidden by default */
     justify-content: center;
     align-items: center;
     overflow-x: hidden;
     position: relative;
     box-sizing: border-box;
     width: 100%;
+}
+
+/* When the hidden class is removed, change display to flex */
+#profileView:not(.hidden) {
+    display: flex !important;
 }
 
 #profileView .profile-container {
