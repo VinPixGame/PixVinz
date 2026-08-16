@@ -737,3 +737,53 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+
+
+// --- AUTO-SYNC FIRESTORE DATA ON PAGE LOAD ---
+async function syncUserWithFirestore() {
+  const loggedInUser = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('loggedInUser'));
+    } catch (e) {
+      return null;
+    }
+  })();
+
+  if (!loggedInUser || !loggedInUser.username || !window.pixvinzDb) return;
+
+  try {
+    const { db, doc, getDoc } = window.pixvinzDb;
+    const userDocRef = doc(db, 'players', loggedInUser.username);
+    const snap = await getDoc(userDocRef);
+
+    if (snap.exists()) {
+      const freshData = snap.data();
+      
+      // Update the local storage session object
+      localStorage.setItem('loggedInUser', JSON.stringify(freshData));
+
+      // Update user-specific keys (like coins and level)
+      const prefix = `${loggedInUser.username}_`;
+      if (freshData.coins !== undefined) {
+        localStorage.setItem(prefix + 'totalCoins', freshData.coins);
+      }
+      if (freshData.level !== undefined) {
+        localStorage.setItem(prefix + 'currentLevel', freshData.level);
+      }
+
+      // Refresh coin display on the header if visible
+      const coinElem = document.getElementById('coinCount');
+      if (coinElem && freshData.coins !== undefined) {
+        coinElem.innerText = freshData.coins;
+      }
+    }
+  } catch (err) {
+    console.warn("Could not sync with Firestore:", err);
+  }
+}
+
+// Call this right when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+  syncUserWithFirestore();
+});
