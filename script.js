@@ -66,6 +66,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Make showView globally accessible for profile.js and other scripts
+  window.showView = showView;
+
   function updateCoinDisplay() {
     const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
     const coinElem = document.getElementById('coinCount');
@@ -89,20 +92,52 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // --- 1. LOADING SCREEN ---
-  setTimeout(() => {
-    const loggedInUser = getCurrentUser();
-    if (loggedInUser) {
-      const nameElem = document.getElementById('userDisplayName');
-      if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
-      showView('home');
-      playMainBGM();
-    } else {
-      showView('login');
-    }
-  }, 4000);
+  // --- PROFILE HEADER ICON NAVIGATION ---
+  const profileHeaderImg = document.getElementById('profileHeaderImg');
+  const profileIconFallback = document.getElementById('profileIconFallback');
 
-  // --- 2. AUTHENTICATION & FORM NAVIGATION (WITH STRICT VALIDATION & FIRESTORE UNIQUE CHECK) ---
+  [profileHeaderImg, profileIconFallback].forEach(element => {
+      if (element) {
+          const profileTrigger = element.closest('.profile-header-btn') || element.parentElement;
+          if (profileTrigger && !profileTrigger.dataset.hasProfileListener) {
+              profileTrigger.dataset.hasProfileListener = 'true';
+              profileTrigger.addEventListener('click', (e) => {
+                  e.preventDefault();
+                  if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+                  showView('profileView');
+              });
+          }
+      }
+  });
+
+  // --- 1. LOADING SCREEN ---
+  const skipLoading = localStorage.getItem('skipLoading') === 'true';
+  if (skipLoading) {
+      localStorage.removeItem('skipLoading');
+      const loggedInUser = getCurrentUser();
+      if (loggedInUser) {
+          const nameElem = document.getElementById('userDisplayName');
+          if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
+          showView('home');
+          playMainBGM();
+      } else {
+          showView('login');
+      }
+  } else {
+      setTimeout(() => {
+          const loggedInUser = getCurrentUser();
+          if (loggedInUser) {
+              const nameElem = document.getElementById('userDisplayName');
+              if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
+              showView('home');
+              playMainBGM();
+          } else {
+              showView('login');
+          }
+      }, 4000);
+  }
+
+  // --- 2. AUTHENTICATION & FORM NAVIGATION ---
   const toRegBtn = document.getElementById('toRegister');
   if (toRegBtn) {
     toRegBtn.addEventListener('click', (e) => {
@@ -121,19 +156,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Helper validation functions (Updated username rule: min 6 chars, lowercase & number)
   function validateUsernameFormat(username) {
     const regex = /^(?=.*[0-9])(?=.*[a-z])[a-z0-9]{6,}$/;
     return regex.test(username);
   }
 
   function validatePasswordFormat(password) {
-    // 6-12 characters, at least one Uppercase, one lowercase, and one number
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,12}$/;
     return regex.test(password);
   }
 
-  // Real-time Username availability & format check indicator
   const regUserField = document.getElementById('regUser');
   let usernameIndicator = document.getElementById('regUserIndicator');
   if (regUserField && !usernameIndicator) {
@@ -146,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (regUserField) {
     regUserField.addEventListener('input', async () => {
       const val = regUserField.value.trim().toLowerCase();
-      regUserField.value = val; // enforce lowercase visually
+      regUserField.value = val;
 
       if (!validateUsernameFormat(val)) {
         usernameIndicator.innerText = '❌ (Min 6 chars, lowercase & number)';
@@ -154,7 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Check Firestore in real-time
       try {
         if (window.pixvinzDb) {
           const { db, doc, getDoc } = window.pixvinzDb;
@@ -168,7 +199,6 @@ document.addEventListener('DOMContentLoaded', () => {
             usernameIndicator.style.color = '#2ecc71';
           }
         } else {
-          // Fallback to localStorage check if offline/no db object
           let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
           if (users[val]) {
             usernameIndicator.innerText = '❌ Username already taken!';
@@ -185,7 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Optional Show/Hide Password toggles setup helper
   function setupPasswordToggle(passwordInputId, toggleBtnId) {
     const passInput = document.getElementById(passwordInputId);
     const toggleBtn = document.getElementById(toggleBtnId);
@@ -204,7 +233,6 @@ document.addEventListener('DOMContentLoaded', () => {
   setupPasswordToggle('regPass', 'toggleRegPass');
   setupPasswordToggle('loginPass', 'toggleLoginPass');
 
-  // Register Form Submission
   const regForm = document.getElementById('registerForm');
   if (regForm) {
     regForm.addEventListener('submit', async (e) => {
@@ -217,13 +245,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const passConfirm = document.getElementById('regPassConfirm').value;
       const errElem = document.getElementById('regError');
 
-      // Validate strict username rules
       if (!validateUsernameFormat(username)) {
         if (errElem) errElem.innerText = "Username must be at least 6 characters and contain lowercase letters and numbers!";
         return;
       }
 
-      // Validate strict password rules
       if (!validatePasswordFormat(pass)) {
         if (errElem) errElem.innerText = "Password must be 6-12 characters and include at least one Uppercase letter, one lowercase letter, and one number!";
         return;
@@ -245,7 +271,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
           }
 
-          // Create document in Firestore with brand new account status
           await setDoc(userDocRef, {
             username: username,
             displayName: displayName,
@@ -257,7 +282,6 @@ document.addEventListener('DOMContentLoaded', () => {
           });
         }
 
-        // Also update local registry backup
         let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
         if (users[username]) {
           if (errElem) errElem.innerText = "Username already taken!";
@@ -281,7 +305,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Login Form Submission
   const logForm = document.getElementById('loginForm');
   if (logForm) {
     logForm.addEventListener('submit', async (e) => {
@@ -303,7 +326,6 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
 
-        // Fallback to local storage if not found in Firestore
         if (!userData) {
           let users = JSON.parse(localStorage.getItem('registeredUsers')) || {};
           userData = users[username];
@@ -325,7 +347,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- 3. HOME PAGE BUTTONS ---
   const playBtn = document.getElementById('playBtn');
   if (playBtn) {
     playBtn.addEventListener('click', () => {
@@ -376,7 +397,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- 4. SETTINGS, ABOUT & LOGOUT ---
   const settingsModal = document.getElementById('settingsModal');
   const aboutModal = document.getElementById('aboutModal');
   const sfxToggle = document.getElementById('sfxToggle');
@@ -449,7 +469,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- 5. RENDER LEVELS (WITH BLURRED / UNBLURRED BACKGROUNDS & STACKED STATS) ---
   function renderLevels() {
     const grid = document.getElementById('levelsGrid');
     if (!grid) return;
@@ -518,7 +537,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const displayMoves = moves ? moves : '--';
         const displayTime = timeStr ? timeStr : '--:--';
 
-        // Stacked Layout: Time on top of Moves
         btn.innerHTML = `
           <div class="level-num">${i.toString().padStart(2, '0')}</div>
           <div class="stars">${starsHTML}</div>
@@ -561,7 +579,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // --- 6. COLLECTION FOLDERS LOGIC ---
   function renderCollectionFolders() {
     const folderGrid = document.getElementById('collectionsFolderGrid');
     if (!folderGrid) return;
@@ -673,17 +690,4 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-});
-
-// Dynamic Profile Header Avatar Loader
-window.addEventListener('DOMContentLoaded', () => {
-    const savedAvatar = localStorage.getItem('vinpix_avatar') || localStorage.getItem('Cardo_vinpix_avatar') || localStorage.getItem('playerAvatar'); 
-    const avatarImg = document.getElementById('profileHeaderImg');
-    const fallbackIcon = document.getElementById('profileIconFallback');
-
-    if (savedAvatar && avatarImg && fallbackIcon) {
-        avatarImg.src = savedAvatar;
-        avatarImg.style.display = 'block';
-        fallbackIcon.style.display = 'none';
-    }
 });
