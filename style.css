@@ -1453,3 +1453,125 @@ video {
 .challenge-menu-btn:active {
     transform: scale(0.98);
 }
+
+
+
+
+#leaderboardView {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #ffffff;
+    min-height: 100vh;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+#leaderboardView.active {
+    display: flex !important;
+}
+
+#leaderboardView .leaderboard-container {
+    width: 100%;
+    max-width: 440px;
+    padding: 20px;
+    box-sizing: border-box;
+    margin: 0 auto;
+}
+
+#leaderboardView .leaderboard-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+#leaderboardView .leaderboard-header h1 {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    background: linear-gradient(135deg, #ffffff, #e0b0ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+#leaderboardView .leaderboard-header p {
+    margin: 4px 0 0 0;
+    font-size: 0.85rem;
+    opacity: 0.7;
+}
+
+/* Glassmorphism Card */
+#leaderboardView .leaderboard-card {
+    background: linear-gradient(145deg, rgba(42, 17, 71, 0.75), rgba(20, 8, 36, 0.85));
+    border: 1px solid rgba(156, 39, 176, 0.4);
+    border-radius: 24px;
+    padding: 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+}
+
+#leaderboardView .leaderboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+/* Individual Player Row */
+.rank-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-radius: 14px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    transition: all 0.2s ease;
+}
+
+.rank-row.top-1 {
+    border-color: rgba(255, 215, 0, 0.6);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(0, 0, 0, 0.3));
+}
+
+.rank-row.top-2 {
+    border-color: rgba(192, 192, 192, 0.6);
+    background: linear-gradient(135deg, rgba(192, 192, 192, 0.15), rgba(0, 0, 0, 0.3));
+}
+
+.rank-row.top-3 {
+    border-color: rgba(205, 127, 50, 0.6);
+    background: linear-gradient(135deg, rgba(205, 127, 50, 0.15), rgba(0, 0, 0, 0.3));
+}
+
+.rank-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.rank-number {
+    font-size: 0.95rem;
+    font-weight: 800;
+    min-width: 24px;
+    text-align: center;
+    opacity: 0.8;
+}
+
+.rank-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.rank-score {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #00f2fe;
+}
+
