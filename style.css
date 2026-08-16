@@ -1486,14 +1486,18 @@ video {
     transform: scale(0.98);
 }
 
+/* ==========================================
+    FIXED #leaderboardView STYLING
+   ========================================== */
+
 #leaderboardView {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     color: #ffffff;
-    min-height: 100vh;
+    height: 100%;
+    max-height: calc(100vh - 32px);
     display: none;
-    justify-content: center;
-    align-items: center;
-    overflow-x: hidden;
+    flex-direction: column;
+    overflow: hidden;
     position: relative;
     box-sizing: border-box;
     width: 100%;
@@ -1506,14 +1510,19 @@ video {
 #leaderboardView .leaderboard-container {
     width: 100%;
     max-width: 440px;
-    padding: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0 4px 16px 4px;
     box-sizing: border-box;
     margin: 0 auto;
+    overflow: hidden;
 }
 
 #leaderboardView .leaderboard-header {
     text-align: center;
-    margin-bottom: 24px;
+    margin-bottom: 14px;
+    flex-shrink: 0;
 }
 
 #leaderboardView .leaderboard-header h1 {
@@ -1532,22 +1541,30 @@ video {
     opacity: 0.7;
 }
 
-/* Glassmorphism Card */
+/* Glassmorphism Card Wrapper */
 #leaderboardView .leaderboard-card {
     background: linear-gradient(145deg, rgba(42, 17, 71, 0.75), rgba(20, 8, 36, 0.85));
     border: 1px solid rgba(156, 39, 176, 0.4);
     border-radius: 24px;
-    padding: 20px;
+    padding: 16px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(12px);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
 }
 
+/* Scrollable Player List Only */
 #leaderboardView .leaderboard-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    max-height: 60vh;
+    flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
     padding-right: 4px;
 }
 
@@ -1561,6 +1578,7 @@ video {
     background: rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.04);
     transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
 .rank-row.top-1 {
