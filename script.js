@@ -955,3 +955,40 @@ async function loadLeaderboardData() {
         listContainer.appendChild(row);
     });
 }
+
+
+
+
+// --- CONFETTI BACKGROUND EFFECT (Independent) ---
+function initLeaderboardConfetti() {
+    let container = document.getElementById('leaderboardConfetti');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'leaderboardConfetti';
+        container.className = 'confetti-bg';
+        const lbView = document.getElementById('leaderboardView');
+        if (lbView) lbView.prepend(container);
+    }
+    
+    if (container.children.length === 0) {
+        const colors = ['#ffd700', '#ff75a0', '#00e5ff', '#9b59b6', '#2ecc71'];
+        for (let i = 0; i < 22; i++) {
+            const piece = document.createElement('div');
+            piece.className = 'confetti-piece';
+            piece.style.left = `${Math.random() * 100}%`;
+            piece.style.width = `${Math.random() * 6 + 5}px`;
+            piece.style.height = piece.style.width;
+            piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+            piece.style.animationDuration = `${Math.random() * 6 + 4}s`;
+            piece.style.animationDelay = `${Math.random() * 5}s`;
+            piece.style.boxShadow = `0 0 6px ${piece.style.backgroundColor}`;
+            container.appendChild(piece);
+        }
+    }
+}
+
+// Automatically runs when the page loads without touching your leaderboard function
+document.addEventListener('DOMContentLoaded', () => {
+    initLeaderboardConfetti();
+});
