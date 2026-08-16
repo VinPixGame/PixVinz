@@ -787,3 +787,53 @@ async function syncUserWithFirestore() {
 document.addEventListener('DOMContentLoaded', () => {
   syncUserWithFirestore();
 });
+
+
+
+
+
+// 1. Make the Leaderboard menu card clickable
+document.getElementById('navLeaderboard').addEventListener('click', () => {
+    // Hide other views if you use a view switcher, or toggle classes:
+    document.querySelectorAll('[id$="View"]').forEach(view => view.classList.remove('active'));
+    document.getElementById('leaderboardView').classList.add('active');
+    loadLeaderboardData();
+});
+
+// 2. Load mock or live leaderboard data (Top 20)
+function loadLeaderboardData() {
+    const listContainer = document.getElementById('leaderboardList');
+    listContainer.innerHTML = '';
+
+    // Sample mock data for top players (you can replace this with your game storage/backend later)
+    const players = [
+        { name: "CyberKing", score: 9850 },
+        { name: "PuzzleMaster", score: 9100 },
+        { name: "NeonQueen", score: 8750 },
+        { name: "Diday", score: 7920 }, // Example user score
+        { name: "PixelVortex", score: 7400 },
+        { name: "VinzGlitch", score: 6890 }
+    ];
+
+    players.forEach((player, index) => {
+        const rank = index + 1;
+        let rankClass = '';
+        if (rank === 1) rankClass = 'top-1';
+        else if (rank === 2) rankClass = 'top-2';
+        else if (rank === 3) rankClass = 'top-3';
+
+        const row = document.createElement('div');
+        row.className = `rank-row ${rankClass}`;
+        row.innerHTML = `
+            <div class="rank-info">
+                <span class="rank-number">#${rank}</span>
+                <span class="rank-name">${player.name}</span>
+            </div>
+            <span class="rank-score">${player.score} XP</span>
+        `;
+        listContainer.appendChild(row);
+    });
+}
+
+
+
