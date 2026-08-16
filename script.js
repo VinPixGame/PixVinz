@@ -331,8 +331,8 @@ document.addEventListener('DOMContentLoaded', () => {
           username: username,
           displayName: displayName,
           level: 1,
-          coins: 0,
           xp: 0,
+          coins: 0,
           avatar: '',
           password: pass,
           authUid: authUid,
@@ -832,7 +832,7 @@ async function loadLeaderboardData() {
     try {
         if (window.pixvinzDb) {
             const { db, collection, query, orderBy, limit, getDocs } = window.pixvinzDb;
-            const q = query(collection(db, 'players'), orderBy('coins', 'desc'), limit(100));
+            const q = query(collection(db, 'players'), orderBy('xp', 'desc'), limit(100));
             const querySnapshot = await getDocs(q);
             
             querySnapshot.forEach((docSnap) => {
