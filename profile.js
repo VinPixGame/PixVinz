@@ -163,7 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputElem = document.getElementById('username-input');
     if (inputElem) inputElem.value = initialName;
 
-    const savedAvatar = localStorage.getItem(getUserKey('vinpix_avatar')) || localStorage.getItem('vinpix_avatar');
+    // Fixed: Look only for the user-specific avatar key. If none exists, fallback to image/avatar.png
+    const savedAvatar = localStorage.getItem(getUserKey('vinpix_avatar'));
     if (savedAvatar) {
         applyAvatarToUI(savedAvatar);
     } else {
@@ -225,8 +226,8 @@ if (avatarInput) {
 
                     applyAvatarToUI(compressedBase64);
 
+                    // Fixed: Save ONLY to the user-specific key (removed global vinpix_avatar write)
                     localStorage.setItem(getUserKey('vinpix_avatar'), compressedBase64);
-                    localStorage.setItem('vinpix_avatar', compressedBase64);
 
                     try {
                         await saveUserDataToCloud();
