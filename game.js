@@ -1,4 +1,24 @@
-document.addEventListener('DOMContentLoaded', () => {
+// --- FIREBASE INITIALIZATION FOR STANDALONE GAME.JS ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
+  authDomain: "pixvinz2026.firebaseapp.com",
+  projectId: "pixvinz2026",
+  storageBucket: "pixvinz2026.firebasestorage.app",
+  messagingSenderId: "45609077809",
+  appId: "1:45609077809:web:575611e46acda9f64c5910",
+  measurementId: "G-W7FSERE8ZJ"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Expose globally so your sync helpers work perfectly
+window.pixvinzDb = { db, doc, getDoc, setDoc, updateDoc };
+
+document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const currentLevel = parseInt(urlParams.get('level')) || 1;
 
@@ -21,6 +41,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!user || !user.username) return keyName;
     return `${user.username}_${keyName}`;
   }
+
+  // --- FETCH CLOUD DATA ON LOAD TO KEEP LOCALSTORAGE SYNCED ---
+  async function fetchUserDataFromFirestore() {
+    const user = getCurrentUser();
+    if (!user || !user.username) return;
+    try {
+      const userRef = doc(db, "users", user.username);
+      const docSnap = await getDoc(userRef);
+      if (docSnap.exists()) {
+        const cloudData = docSnap.data();
+        // Update local storage with cloud values if present
+        if (cloudData.totalCoins !== undefined) localStorage.setItem(getUserKey('totalCoins'), cloudData.totalCoins);
+        if (cloudData.currentLevel !== undefined) localStorage.setItem(getUserKey('currentLevel'), cloudData.currentLevel);
+      }
+    } catch (err) {
+      console.error("Error fetching from Firestore:", err);
+    }
+  }
+
+  await fetchUserDataFromFirestore();
 
   // --- FIRESTORE SYNC HELPERS ---
   async function syncUserDataToFirestore(updates) {
@@ -385,7 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
     victoryHomeBtn.onclick = (e) => {
       e.stopPropagation();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-     localStorage.setItem('skipLoading', 'true');
+      localStorage.setItem('skipLoading', 'true');
       window.location.href = 'index.html';
     };
   }
@@ -394,7 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (backToHome) {
     backToHome.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-     localStorage.setItem('skipLoading', 'true');
+      localStorage.setItem('skipLoading', 'true');
       window.location.href = 'index.html';
     });
   }
@@ -403,7 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (collectionsBtn) {
     collectionsBtn.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-     localStorage.setItem('skipLoading', 'true');
+      localStorage.setItem('skipLoading', 'true');
       window.location.href = 'index.html';
     });
   }
