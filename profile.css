@@ -19,6 +19,7 @@
 #profileView.active {
     display: flex !important;
 }
+
 #profileView .profile-container {
     width: 100%;
     max-width: 440px;
@@ -27,24 +28,15 @@
     margin: 0 auto;
 }
 
-/* Header Styling */
+/* Header Styling (Cleaned up, no title text) */
 #profileView .profile-header {
     position: relative;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     width: 100%;
     margin-bottom: 24px;
-}
-
-#profileView .profile-header h1 {
-    margin: 0;
-    font-size: 1.6rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    background: linear-gradient(135deg, #ffffff, #e0b0ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    min-height: 40px;
 }
 
 /* Premium Glassmorphism Card */
@@ -57,7 +49,7 @@
     backdrop-filter: blur(12px);
 }
 
-/* Back Button - Fixed position for both desktop & mobile views */
+/* Back Button - Fixed position on top left */
 #profileView .back-btn {
     position: fixed;
     top: 20px;
@@ -83,6 +75,27 @@
     background: rgba(156, 39, 176, 0.3);
     border-color: #9c27b0;
     transform: translateY(-1px);
+}
+
+/* Coins Badge - Fixed position on top right */
+#profileView .coins-badge,
+#profileView .coins-counter {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: rgba(255, 215, 0, 0.12);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    backdrop-filter: blur(8px);
+    color: #ffd700;
+    padding: 8px 14px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* Avatar Section & Loading Overlay */
