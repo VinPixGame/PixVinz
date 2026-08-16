@@ -30,7 +30,7 @@ body {
 }
 
 /* ==========================================
-   GENERAL TOP BAR (CENTER ALIGNED)
+    GENERAL TOP BAR (CENTER ALIGNED)
    ========================================== */
 
 .top-bar {
@@ -203,8 +203,23 @@ body {
 
 
 /* ==========================================
-   LEVEL & COLLECTION SELECT STYLES
+    LEVEL & COLLECTION SELECT STYLES
    ========================================== */
+
+/* FIXED #levelsView Layout Container */
+#levelsView.view.active {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: calc(100vh - 32px);
+  overflow: hidden;
+}
+
+/* Ensure header and stats card do not shrink */
+#levelsView .view-header,
+#levelsView .overall-best-card {
+  flex-shrink: 0;
+}
 
 .header-title-group {
   grid-column: 2;
@@ -328,7 +343,14 @@ body {
 }
 
 /* SCROLL CONTAINER & GRID */
-.levels-scroll-container,
+.levels-scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  padding: 4px 2px 20px 2px;
+}
+
 .collections-scroll-container {
   flex: 1;
   overflow-y: auto;
@@ -482,7 +504,7 @@ body {
 
 
 /* ==========================================
-   COLLECTION CARDS WITH BADGES
+    COLLECTION CARDS WITH BADGES
    ========================================== */
 
 #collectionsView .view-header {
@@ -530,7 +552,7 @@ body {
 }
 
 /* ==========================================
-   COLLECTION FOLDERS STYLING
+    COLLECTION FOLDERS STYLING
    ========================================== */
 
 .collection-folder-btn {
@@ -576,7 +598,7 @@ body {
 }
 
 /* ==========================================
-   ENLARGED PREVIEW MODAL
+    ENLARGED PREVIEW MODAL
    ========================================== */
 
 .modal-overlay {
@@ -658,7 +680,7 @@ body {
 }
 
 /* ==========================================
-   SETTINGS & ABOUT MODAL STYLES
+    SETTINGS & ABOUT MODAL STYLES
    ========================================== */
 
 .settings-card,
@@ -919,7 +941,7 @@ input:checked + .slider:before {
 }
 
   /* ==========================================
-   COMPLETE GAME PAGE LAYOUT CSS
+    COMPLETE GAME PAGE LAYOUT CSS
    ========================================== */
 
 /* Outer wrapper for the entire Game Page */
@@ -1016,7 +1038,7 @@ input:checked + .slider:before {
   font-weight: 900;
 }
 /* ==========================================
-   PUZZLE BOARD
+    PUZZLE BOARD
    ========================================== */
 
 .puzzle-wrapper {
@@ -1084,7 +1106,7 @@ input:checked + .slider:before {
 
 
 /* ==========================================
-   VICTORY MODAL & IMAGE SIZE ADJUSTMENTS
+    VICTORY MODAL & IMAGE SIZE ADJUSTMENTS
    ========================================== */
 
 .victory-card {
@@ -1156,7 +1178,7 @@ input:checked + .slider:before {
 }
 
 /* ==========================================
-   ANIMATED RUNNING NEON BORDERS
+    ANIMATED RUNNING NEON BORDERS
    ========================================== */
 
 @keyframes neonBorderRun {
@@ -1191,7 +1213,7 @@ input:checked + .slider:before {
 }
 
 /* ==========================================
-   EXACT PRO VICTORY SCREEN STYLES (CENTERED FIX)
+    EXACT PRO VICTORY SCREEN STYLES (CENTERED FIX)
    ========================================== */
 
 .victory-card-pro {
@@ -1574,4 +1596,3 @@ video {
     font-weight: 700;
     color: #00f2fe;
 }
-
