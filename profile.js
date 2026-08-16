@@ -149,6 +149,55 @@ function updateXpProgress() {
     if (xpBarFill) xpBarFill.style.width = `${progressPercent}%`;
 }
 
+// --- LOAD & DISPLAY GLOBAL RANK ON PROFILE ---
+async function loadProfileGlobalRank() {
+    const rankValueEl = document.querySelector('.global-rank-indicator .rank-value') || document.getElementById('displayGlobalRank');
+    if (!rankValueEl) return;
+
+    rankValueEl.textContent = '...';
+
+    const currentUsername = getCurrentUsername();
+    if (!currentUsername) {
+        rankValueEl.textContent = 'Unranked';
+        return;
+    }
+
+    try {
+        if (window.pixvinzDb) {
+            const { db, collection, query, orderBy, limit, getDocs } = window.pixvinzDb;
+            
+            const q = query(collection(db, 'players'), orderBy('coins', 'desc'), limit(1000));
+            const querySnapshot = await getDocs(q);
+            
+            let foundRank = null;
+            let currentIndex = 1;
+
+            querySnapshot.forEach((docSnap) => {
+                const uName = docSnap.id;
+                const data = docSnap.data();
+                
+                if (uName.toLowerCase() === currentUsername.toLowerCase() || 
+                    (data.username && data.username.toLowerCase() === currentUsername.toLowerCase()) ||
+                    (data.displayName && data.displayName.toLowerCase() === currentUsername.toLowerCase())) {
+                    foundRank = currentIndex;
+                }
+                currentIndex++;
+            });
+
+            if (foundRank !== null) {
+                rankValueEl.textContent = `#${foundRank}`;
+            } else {
+                rankValueEl.textContent = 'Unranked';
+            }
+        } else {
+            rankValueEl.textContent = 'Unranked';
+        }
+    } catch (err) {
+        console.warn("Could not fetch global rank for profile:", err);
+        rankValueEl.textContent = 'Unranked';
+    }
+}
+
 // --- DYNAMIC BADGE CHECKER (CUSTOM RULES) ---
 function checkAndUnlockBadges() {
     const prefix = getCurrentUsername() + '_';
@@ -231,6 +280,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateXpProgress();
     checkAndUnlockBadges();
+    
+    // Fetch and display global rank on profile open
+    loadProfileGlobalRank();
     
     // Automatically push accurate computed XP to cloud on profile page open
     saveUserDataToCloud();
