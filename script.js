@@ -1,7 +1,7 @@
 // --- FIREBASE INITIALIZATION & DATABASE BRIDGE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -20,7 +20,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // Expose Firestore database tools globally so UI scripts can use them
-window.pixvinzDb = { db, doc, getDoc, setDoc };
+window.pixvinzDb = { db, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs };
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -790,30 +790,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-
-
-// 1. Make the Leaderboard menu card clickable
-document.getElementById('navLeaderboard').addEventListener('click', () => {
-    // Hide other views if you use a view switcher, or toggle classes:
-    document.querySelectorAll('[id$="View"]').forEach(view => view.classList.remove('active'));
-    document.getElementById('leaderboardView').classList.add('active');
-    loadLeaderboardData();
+// --- LEADERBOARD LOGIC (Safe DOM Binding & Firestore Dynamic Sync) ---
+document.addEventListener('DOMContentLoaded', () => {
+    const navLeaderboard = document.getElementById('navLeaderboard');
+    if (navLeaderboard) {
+        navLeaderboard.addEventListener('click', () => {
+            if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+            document.querySelectorAll('[id$="View"]').forEach(view => view.classList.remove('active'));
+            const leaderboardView = document.getElementById('leaderboardView');
+            if (leaderboardView) leaderboardView.classList.add('active');
+            loadLeaderboardData();
+        });
+    }
 });
 
-// 2. Load mock or live leaderboard data (Top 20)
-function loadLeaderboardData() {
+async function loadLeaderboardData() {
     const listContainer = document.getElementById('leaderboardList');
-    listContainer.innerHTML = '';
+    if (!listContainer) return;
+    
+    listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #fff;">Loading leaderboard...</div>';
 
-    // Sample mock data for top players (you can replace this with your game storage/backend later)
-    const players = [
-        { name: "CyberKing", score: 9850 },
-        { name: "PuzzleMaster", score: 9100 },
-        { name: "NeonQueen", score: 8750 },
-        { name: "Diday", score: 7920 }, // Example user score
-        { name: "PixelVortex", score: 7400 },
-        { name: "VinzGlitch", score: 6890 }
-    ];
+    let players = [];
+
+    try {
+        if (window.pixvinzDb) {
+            const { db, collection, query, orderBy, limit, getDocs } = window.pixvinzDb;
+            // Query top 20 players sorted by coins/score descending
+            const q = query(collection(db, 'players'), orderBy('coins', 'desc'), limit(20));
+            const querySnapshot = await getDocs(q);
+            
+            querySnapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                players.push({
+                    name: data.displayName || data.username || 'Anonymous',
+                    score: data.coins || 0
+                });
+            });
+        }
+    } catch (err) {
+        console.warn("Could not fetch live leaderboard from Firestore, falling back to mock data:", err);
+    }
+
+    // Fallback mock dataset if Firestore list is empty or offline
+    if (players.length === 0) {
+        players = [
+            { name: "CyberKing", score: 9850 },
+            { name: "PuzzleMaster", score: 9100 },
+            { name: "NeonQueen", score: 8750 },
+            { name: "Diday", score: 7920 },
+            { name: "PixelVortex", score: 7400 },
+            { name: "VinzGlitch", score: 6890 }
+        ];
+    }
+
+    listContainer.innerHTML = '';
 
     players.forEach((player, index) => {
         const rank = index + 1;
@@ -834,6 +864,3 @@ function loadLeaderboardData() {
         listContainer.appendChild(row);
     });
 }
-
-
-
