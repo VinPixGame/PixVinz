@@ -469,3 +469,38 @@ body:has(#profileView.active) #mainHeader {
     overflow-y: auto;
     padding-top: 20px;
 }
+
+
+
+
+/* Badges Section Header Layout */
+.badges-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.badges-section-header h3 {
+  font-size: 1.15rem;
+  color: #ffd700;
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.global-rank-indicator {
+  font-size: 0.9rem;
+  color: #d1c4e9;
+  font-weight: 600;
+  background: rgba(156, 39, 176, 0.2);
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(156, 39, 176, 0.4);
+}
+
+.global-rank-indicator .rank-value {
+  color: #00f2fe;
+  font-weight: bold;
+}
