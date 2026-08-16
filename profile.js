@@ -179,10 +179,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputElem = document.getElementById('username-input');
     if (inputElem) inputElem.value = initialName;
 
-    // Load saved avatar from localStorage (checking user-specific key first, then global)
+    // Load saved avatar from localStorage or fallback to default new-user avatar
     const savedAvatar = localStorage.getItem(getUserKey('vinpix_avatar')) || localStorage.getItem('vinpix_avatar');
     if (savedAvatar) {
         applyAvatarToUI(savedAvatar);
+    } else {
+        applyAvatarToUI('image/avatar.png');
     }
 
     updateXpProgress();
