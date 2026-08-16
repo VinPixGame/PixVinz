@@ -57,6 +57,7 @@ async function saveUserDataToCloud() {
             level: currentLevel,
             coins: totalCoins,
             avatar: avatar,
+            xp: totalXp
             lastUpdated: new Date()
         }, { merge: true });
     } catch (error) {
