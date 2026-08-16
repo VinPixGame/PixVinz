@@ -11,13 +11,18 @@
 <body>
   <div class="app-container">
 
-    <!-- 1. LOADING SCREEN -->
+<!-- 1. LOADING SCREEN -->
     <section id="loadingView" class="view active">
       <div class="loading-content">
         <video id="loadingLogo" autoplay loop muted playsinline preload="auto" style="background: transparent;">
           <source src="image/logo.webm" type="video/webm">
         </video>
-        <div class="loading-text">Loading<span class="dots">...</span></div>
+        <div class="loading-container" style="width: 80%; max-width: 280px; margin-top: 20px; text-align: center;">
+          <div id="loadingPercentage" style="color: #ffd700; font-weight: bold; font-size: 1.1rem; margin-bottom: 8px; font-family: 'Segoe UI', sans-serif;">1%</div>
+          <div class="loading-track" style="width: 100%; height: 10px; background: rgba(42, 17, 71, 0.8); border-radius: 10px; overflow: hidden; border: 1px solid rgba(156, 39, 176, 0.4); box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);">
+            <div id="loadingBarFill" style="width: 1%; height: 100%; background: linear-gradient(90deg, #9c27b0, #00f2fe); border-radius: 10px; box-shadow: 0 0 10px #00f2fe; transition: width 0.1s linear;"></div>
+          </div>
+        </div>
       </div>
     </section>
 
