@@ -2,7 +2,11 @@
    PIXVINZ - SCOPED PREMIUM PROFILE STYLESHEET
    ========================================== */
 
-#profileView {
+/* ==========================================
+   PIXVINZ - SCOPED PREMIUM PROFILE STYLESHEET
+   ========================================== */
+
+#profileView:not(.hidden) {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     color: #ffffff;
     min-height: 100vh;
