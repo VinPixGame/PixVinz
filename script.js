@@ -866,6 +866,9 @@ async function loadLeaderboardData() {
             const targetSpan = el.querySelector('span') || el;
             if (targetSpan) {
                 targetSpan.textContent = userRank !== '--' ? userRank : '#--';
+                targetSpan.style.textAlign = 'center';
+                targetSpan.style.display = 'block';
+                targetSpan.style.width = '100%';
             }
         }
     });
