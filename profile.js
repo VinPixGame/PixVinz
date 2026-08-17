@@ -198,16 +198,19 @@ async function loadProfileGlobalRank() {
     }
 }
 
-// --- DYNAMIC BADGE CHECKER (CUSTOM RULES) ---
+// --- UNIFIED DYNAMIC BADGE CHECKER & 2-COLUMN RENDERER ---
 function checkAndUnlockBadges() {
+    const badgesContainer = document.getElementById('badgesGrid');
+    if (!badgesContainer) return;
+
     const prefix = getCurrentUsername() + '_';
 
-    const currentLevel = parseInt(localStorage.getItem(prefix + 'currentLevel')) || 1;
-    const currentCoins = parseInt(localStorage.getItem(prefix + 'totalCoins')) || 0;
+    const playerLevel = parseInt(localStorage.getItem(prefix + 'currentLevel')) || 1;
+    const playerCoins = parseInt(localStorage.getItem(prefix + 'totalCoins')) || 0;
     
-    let maxCoinsEarned = parseInt(localStorage.getItem(prefix + 'maxCoinsEarned')) || currentCoins;
-    if (currentCoins > maxCoinsEarned) {
-        maxCoinsEarned = currentCoins;
+    let maxCoinsEarned = parseInt(localStorage.getItem(prefix + 'maxCoinsEarned')) || playerCoins;
+    if (playerCoins > maxCoinsEarned) {
+        maxCoinsEarned = playerCoins;
         localStorage.setItem(prefix + 'maxCoinsEarned', maxCoinsEarned);
     }
 
@@ -226,29 +229,145 @@ function checkAndUnlockBadges() {
         }
     }
 
-    const badges = {
-        badgeFirstStep: currentLevel > 1,
-        badgeSpeedThunder: beatSpeedThunder,
-        badgeCoinCollector: maxCoinsEarned >= 500,
-        badgePixVinzElite: currentLevel >= 50,
-        badgePixVinzMaster: currentLevel >= 75,
-        badgePixVinzGrandMaster: currentLevel >= 100,
-        badgePixVinzMythic: currentLevel >= 150,
-        badgePixVinzMythicalGlory: currentLevel >= 200
-    };
+    // Shared unified badge definitions matching leaderboard profile modal exactly
+    const allBadges = [
+        { 
+            title: 'Novice Genesis', 
+            desc: 'Completed Level 1', 
+            icon: '🧩', 
+            unlocked: playerLevel >= 1, 
+            glowColor: '#00ffcc', 
+            shape: 'circle',
+            gradient: 'linear-gradient(135deg, #00ffcc, #00b386)'
+        },
+        { 
+            title: 'Thunderbolt', 
+            desc: 'Speed run (20-30) < 1m', 
+            icon: '⚡', 
+            unlocked: beatSpeedThunder, 
+            glowColor: '#00e5ff', 
+            shape: 'hexagon',
+            gradient: 'linear-gradient(135deg, #00e5ff, #0077ff)'
+        },
+        { 
+            title: 'Aurelian Vault', 
+            desc: 'Reached 500 coins', 
+            icon: '🪙', 
+            unlocked: maxCoinsEarned >= 500, 
+            glowColor: '#ffd700', 
+            shape: 'octagon',
+            gradient: 'linear-gradient(135deg, #ffd700, #ff8800)'
+        },
+        { 
+            title: 'Celestial Elite', 
+            desc: 'Reached Level 50', 
+            icon: '⭐', 
+            unlocked: playerLevel >= 50, 
+            glowColor: '#ff00aa', 
+            shape: 'star',
+            gradient: 'linear-gradient(135deg, #ff00aa, #aa00ff)'
+        },
+        { 
+            title: 'Grand Sovereign', 
+            desc: 'Reached Level 75', 
+            icon: '🏆', 
+            unlocked: playerLevel >= 75, 
+            glowColor: '#b000ff', 
+            shape: 'shield',
+            gradient: 'linear-gradient(135deg, #b000ff, #5500ff)'
+        },
+        { 
+            title: 'Imperial Crown', 
+            desc: 'Reached Level 100', 
+            icon: '👑', 
+            unlocked: playerLevel >= 100, 
+            glowColor: '#ff2255', 
+            shape: 'diamond',
+            gradient: 'linear-gradient(135deg, #ff2255, #aa0022)'
+        },
+        { 
+            title: 'Infernal Apex', 
+            desc: 'Reached Level 150', 
+            icon: '🔥', 
+            unlocked: playerLevel >= 150, 
+            glowColor: '#ff5500', 
+            shape: 'hexagon',
+            gradient: 'linear-gradient(135deg, #ff5500, #cc0000)'
+        },
+        { 
+            title: 'Mythical Deity', 
+            desc: 'Reached Level 200', 
+            icon: '💎', 
+            unlocked: playerLevel >= 200, 
+            glowColor: '#00ffff', 
+            shape: 'octagon',
+            gradient: 'linear-gradient(135deg, #00ffff, #0088ff)'
+        }
+    ];
 
-    for (const [badgeId, isUnlocked] of Object.entries(badges)) {
-        const badgeElement = document.getElementById(badgeId);
-        if (badgeElement) {
-            if (isUnlocked) {
-                badgeElement.classList.remove('locked');
-                badgeElement.classList.add('unlocked');
-            } else {
-                badgeElement.classList.remove('unlocked');
-                badgeElement.classList.add('locked');
-            }
+    // Clip-path helper for unique geometric shapes
+    function getClipPath(shape) {
+        switch(shape) {
+            case 'hexagon': return 'polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0% 50%)';
+            case 'octagon': return 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)';
+            case 'diamond': return 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)';
+            case 'shield': return 'polygon(50% 0%, 100% 20%, 100% 80%, 50% 100%, 0% 80%, 0% 20%)';
+            case 'star': return 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
+            default: return 'circle(50% at 50% 50%)';
         }
     }
+
+    // Force 2-column grid styling dynamically to match leaderboard modal
+    badgesContainer.style.display = 'grid';
+    badgesContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
+    badgesContainer.style.gap = '8px';
+    badgesContainer.style.textAlign = 'left';
+    badgesContainer.innerHTML = '';
+
+    allBadges.forEach(badge => {
+        const isUnlocked = badge.unlocked;
+        
+        const cardStyle = isUnlocked ? `
+            background: linear-gradient(135deg, rgba(22, 16, 48, 0.9), rgba(12, 9, 28, 0.95));
+            border: 1px solid ${badge.glowColor}66;
+            box-shadow: 0 0 12px ${badge.glowColor}25, inset 0 0 8px ${badge.glowColor}15;
+            opacity: 1;
+        ` : `
+            background: rgba(15, 15, 20, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            opacity: 0.35;
+        `;
+
+        const iconStyle = isUnlocked ? `
+            background: ${badge.gradient};
+            box-shadow: 0 0 10px ${badge.glowColor};
+            clip-path: ${getClipPath(badge.shape)};
+        ` : `
+            background: #2a2a35;
+            clip-path: ${getClipPath(badge.shape)};
+        `;
+
+        const badgeElement = document.createElement('div');
+        badgeElement.style.cssText = `
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 10px 6px;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            ${cardStyle}
+        `;
+
+        badgeElement.innerHTML = `
+            <div style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 6px; ${iconStyle}">
+                <span style="${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.4;'}">${badge.icon}</span>
+            </div>
+            <span style="font-weight: 700; font-size: 12px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.3px; line-height: 1.2; margin-bottom: 2px;">${badge.title}</span>
+            <span style="font-size: 9px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1.1;">${badge.desc}</span>
+        `;
+        badgesContainer.appendChild(badgeElement);
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -405,8 +524,3 @@ if (saveProfileBtn) {
         }, 1000);
     });
 }
-
-
-
-
-
