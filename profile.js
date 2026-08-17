@@ -405,3 +405,39 @@ if (saveProfileBtn) {
         }, 1000);
     });
 }
+
+
+
+
+
+function openPlayerProfile(player, rank) {
+    const modal = document.getElementById('playerProfileModal');
+    if (!modal) return;
+    
+    document.getElementById('profileModalAvatar').src = player.avatar ? player.avatar : 'image/avatar.png';
+    document.getElementById('profileModalName').textContent = player.name;
+    document.getElementById('profileModalRank').textContent = `#${rank}`;
+    document.getElementById('profileModalXp').textContent = `${player.xp.toLocaleString()} XP`;
+    
+    const badgesContainer = document.getElementById('profileModalBadges');
+    badgesContainer.innerHTML = `
+        <div style="background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 6px;">LEVEL ${player.level}</div>
+        ${rank <= 3 ? `<div style="background: linear-gradient(135deg, #ff5500, #cc3300); color: #fff; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 6px;">TOP ${rank} 🏆</div>` : ''}
+    `;
+    
+    modal.style.display = 'flex';
+}
+
+function closePlayerProfile() {
+    const modal = document.getElementById('playerProfileModal');
+    if (!modal) return;
+    modal.style.display = 'none';
+}
+
+// Allow clicking outside the modal box to close it as well
+window.addEventListener('click', (event) => {
+    const modal = document.getElementById('playerProfileModal');
+    if (event.target === modal) {
+        closePlayerProfile();
+    }
+});
