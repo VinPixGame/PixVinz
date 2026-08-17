@@ -980,20 +980,21 @@ function openPlayerProfile(player, rank) {
     modal.style.display = 'flex';
 }
 
-function closePlayerProfile() {
+// Make sure the close function is globally available
+window.closePlayerProfile = function() {
     const modal = document.getElementById('playerProfileModal');
-    if (!modal) return;
-    modal.style.display = 'none';
-}
+    if (modal) {
+        modal.style.display = 'none';
+    }
+};
 
+// Ensure background click also works globally
 window.addEventListener('click', (event) => {
     const modal = document.getElementById('playerProfileModal');
     if (event.target === modal) {
-        closePlayerProfile();
+        window.closePlayerProfile();
     }
 });
-
-
 
 
 // --- CONFETTI BACKGROUND EFFECT (Independent) ---
