@@ -963,7 +963,6 @@ async function loadLeaderboardData() {
 
 
 
-
 window.openPlayerProfile = function(player, rank) {
     const modal = document.getElementById('playerProfileModal');
     if (!modal) return;
@@ -976,96 +975,68 @@ window.openPlayerProfile = function(player, rank) {
     const playerLevel = player.level || 1;
     const playerCoins = player.coins || 0;
     
-    // Each badge has a distinct shape, unique glow color, and elegant title
+    // Custom image badge data with unique glow colors
     const allBadges = [
         { 
             title: 'Novice Genesis', 
             desc: 'Completed Level 1', 
-            icon: '🧩', 
+            icon: 'image/badge1.png', 
             unlocked: playerLevel >= 1, 
-            glowColor: '#00ffcc', 
-            shape: 'circle',
-            gradient: 'linear-gradient(135deg, #00ffcc, #00b386)'
+            glowColor: '#00ffcc' 
         },
         { 
             title: 'Thunderbolt', 
             desc: 'Speed run (20-30) < 1m', 
-            icon: '⚡', 
+            icon: 'image/badge2.png', 
             unlocked: player.speedThunder === true || player.speedThunderUnlocked === true, 
-            glowColor: '#00e5ff', 
-            shape: 'hexagon',
-            gradient: 'linear-gradient(135deg, #00e5ff, #0077ff)'
+            glowColor: '#00e5ff' 
         },
         { 
             title: 'Aurelian Vault', 
             desc: 'Reached 500 coins', 
-            icon: '🪙', 
+            icon: 'image/badge3.png', 
             unlocked: playerCoins >= 500, 
-            glowColor: '#ffd700', 
-            shape: 'octagon',
-            gradient: 'linear-gradient(135deg, #ffd700, #ff8800)'
+            glowColor: '#ffd700' 
         },
         { 
             title: 'Celestial Elite', 
             desc: 'Reached Level 50', 
-            icon: '⭐', 
+            icon: 'image/badge4.png', 
             unlocked: playerLevel >= 50, 
-            glowColor: '#ff00aa', 
-            shape: 'star',
-            gradient: 'linear-gradient(135deg, #ff00aa, #aa00ff)'
+            glowColor: '#ff00aa' 
         },
         { 
             title: 'Grand Sovereign', 
             desc: 'Reached Level 75', 
-            icon: '🏆', 
+            icon: 'image/badge5.png', 
             unlocked: playerLevel >= 75, 
-            glowColor: '#b000ff', 
-            shape: 'shield',
-            gradient: 'linear-gradient(135deg, #b000ff, #5500ff)'
+            glowColor: '#b000ff' 
         },
         { 
             title: 'Imperial Crown', 
             desc: 'Reached Level 100', 
-            icon: '👑', 
+            icon: 'image/badge6.png', 
             unlocked: playerLevel >= 100, 
-            glowColor: '#ff2255', 
-            shape: 'diamond',
-            gradient: 'linear-gradient(135deg, #ff2255, #aa0022)'
+            glowColor: '#ff2255' 
         },
         { 
             title: 'Infernal Apex', 
             desc: 'Reached Level 150', 
-            icon: '🔥', 
+            icon: 'image/badge7.png', 
             unlocked: playerLevel >= 150, 
-            glowColor: '#ff5500', 
-            shape: 'hexagon',
-            gradient: 'linear-gradient(135deg, #ff5500, #cc0000)'
+            glowColor: '#ff5500' 
         },
         { 
             title: 'Mythical Deity', 
             desc: 'Reached Level 200', 
-            icon: '💎', 
+            icon: 'image/badge8.png', 
             unlocked: playerLevel >= 200, 
-            glowColor: '#00ffff', 
-            shape: 'octagon',
-            gradient: 'linear-gradient(135deg, #00ffff, #0088ff)'
+            glowColor: '#00ffff' 
         }
     ];
 
     const badgesContainer = document.getElementById('profileModalBadges');
     badgesContainer.innerHTML = '';
-
-    // Helper to return CSS clip-path based on requested shape
-    function getClipPath(shape) {
-        switch(shape) {
-            case 'hexagon': return 'polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0% 50%)';
-            case 'octagon': return 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)';
-            case 'diamond': return 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)';
-            case 'shield': return 'polygon(50% 0%, 100% 20%, 100% 80%, 50% 100%, 0% 80%, 0% 20%)';
-            case 'star': return 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
-            default: return 'circle(50% at 50% 50%)'; // circle
-        }
-    }
 
     allBadges.forEach(badge => {
         const isUnlocked = badge.unlocked;
@@ -1082,12 +1053,10 @@ window.openPlayerProfile = function(player, rank) {
         `;
 
         const iconStyle = isUnlocked ? `
-            background: ${badge.gradient};
             box-shadow: 0 0 10px ${badge.glowColor};
-            clip-path: ${getClipPath(badge.shape)};
+            border-radius: 8px;
         ` : `
-            background: #2a2a35;
-            clip-path: ${getClipPath(badge.shape)};
+            border-radius: 8px;
         `;
 
         const badgeElement = document.createElement('div');
@@ -1103,8 +1072,8 @@ window.openPlayerProfile = function(player, rank) {
         `;
 
         badgeElement.innerHTML = `
-            <div style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 6px; ${iconStyle}">
-                <span style="${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.4;'}">${badge.icon}</span>
+            <div style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; ${iconStyle}">
+                <img src="${badge.icon}" alt="${badge.title}" style="width: 100%; height: 100%; object-fit: contain; ${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.4;'}">
             </div>
             <span style="font-weight: 700; font-size: 12px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.3px; line-height: 1.2; margin-bottom: 2px;">${badge.title}</span>
             <span style="font-size: 9px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1.1;">${badge.desc}</span>
@@ -1127,8 +1096,7 @@ window.addEventListener('click', (event) => {
     if (event.target === modal) {
         window.closePlayerProfile();
     }
-});        
-
+});
 
 
 
