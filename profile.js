@@ -234,7 +234,7 @@ function checkAndUnlockBadges() {
         { 
             title: 'Novice Genesis', 
             desc: 'Completed Level 1', 
-            icon: '🧩', 
+            icon: 'image/badge1.png', 
             unlocked: playerLevel >= 1, 
             glowColor: '#00ffcc', 
             shape: 'circle',
@@ -243,7 +243,7 @@ function checkAndUnlockBadges() {
         { 
             title: 'Thunderbolt', 
             desc: 'Speed run (20-30) < 1m', 
-            icon: '⚡', 
+            icon: 'image/badge2.png', 
             unlocked: beatSpeedThunder, 
             glowColor: '#00e5ff', 
             shape: 'hexagon',
@@ -252,7 +252,7 @@ function checkAndUnlockBadges() {
         { 
             title: 'Aurelian Vault', 
             desc: 'Reached 500 coins', 
-            icon: '🪙', 
+            icon: 'image/badge3.png', 
             unlocked: maxCoinsEarned >= 500, 
             glowColor: '#ffd700', 
             shape: 'octagon',
@@ -261,7 +261,7 @@ function checkAndUnlockBadges() {
         { 
             title: 'Celestial Elite', 
             desc: 'Reached Level 50', 
-            icon: '⭐', 
+            icon: 'image/badge4.png', 
             unlocked: playerLevel >= 50, 
             glowColor: '#ff00aa', 
             shape: 'star',
@@ -270,7 +270,7 @@ function checkAndUnlockBadges() {
         { 
             title: 'Grand Sovereign', 
             desc: 'Reached Level 75', 
-            icon: '🏆', 
+            icon: 'image/badge5.png', 
             unlocked: playerLevel >= 75, 
             glowColor: '#b000ff', 
             shape: 'shield',
@@ -279,7 +279,7 @@ function checkAndUnlockBadges() {
         { 
             title: 'Imperial Crown', 
             desc: 'Reached Level 100', 
-            icon: '👑', 
+            icon: 'image/badge6.png', 
             unlocked: playerLevel >= 100, 
             glowColor: '#ff2255', 
             shape: 'diamond',
@@ -288,7 +288,7 @@ function checkAndUnlockBadges() {
         { 
             title: 'Infernal Apex', 
             desc: 'Reached Level 150', 
-            icon: '🔥', 
+            icon: 'image/badge7.png', 
             unlocked: playerLevel >= 150, 
             glowColor: '#ff5500', 
             shape: 'hexagon',
@@ -297,7 +297,7 @@ function checkAndUnlockBadges() {
         { 
             title: 'Mythical Deity', 
             desc: 'Reached Level 200', 
-            icon: '💎', 
+            icon: 'image/badge8.png', 
             unlocked: playerLevel >= 200, 
             glowColor: '#00ffff', 
             shape: 'octagon',
@@ -360,8 +360,8 @@ function checkAndUnlockBadges() {
         `;
 
         badgeElement.innerHTML = `
-            <div style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 6px; ${iconStyle}">
-                <span style="${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.4;'}">${badge.icon}</span>
+            <div style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; overflow: hidden; ${iconStyle}">
+                <img src="${badge.icon}" alt="${badge.title}" style="width: 100%; height: 100%; object-fit: contain; ${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.4;'}">
             </div>
             <span style="font-weight: 700; font-size: 12px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.3px; line-height: 1.2; margin-bottom: 2px;">${badge.title}</span>
             <span style="font-size: 9px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1.1;">${badge.desc}</span>
