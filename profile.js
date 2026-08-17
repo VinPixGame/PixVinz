@@ -50,7 +50,7 @@ async function saveUserDataToCloud() {
         const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 150;
         const avatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
 
-        // Calculate current XP dynamically using your progression function
+        // Calculate current XP dynamically using progression function
         const puzzlesSolved = Math.max(0, currentLevel - 1);
         const playerProgression = calculateLevelAndXp(puzzlesSolved);
         const currentXpVal = playerProgression.currentXp;
@@ -151,7 +151,7 @@ function updateXpProgress() {
 
 // --- LOAD & DISPLAY GLOBAL RANK ON PROFILE ---
 async function loadProfileGlobalRank() {
-    const rankValueEl = document.querySelector('.global-rank-indicator .rank-value') || document.getElementById('displayGlobalRank');
+    const rankValueEl = document.querySelector('.global-rank-indicator .rank-value') || document.getElementById('profileGlobalRank');
     if (!rankValueEl) return;
 
     rankValueEl.textContent = '...';
@@ -316,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const avatarLoader = document.getElementById('avatarLoader');
     if (avatarLoader) avatarLoader.style.display = 'none';
 
-    let initialName = 'nameDisplay';
+    let initialName = getCurrentUsername() || 'Cardo';
     try {
         const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
         if (userObj && userObj.displayName) {
