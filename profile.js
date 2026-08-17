@@ -77,19 +77,20 @@ function applyAvatarToUI(avatarData) {
         return;
     }
     
-    // Fix: Explicitly update the main profile screen image element
-    const profileImg = document.getElementById('profileHeaderImg');
-    if (profileImg) {
-        profileImg.src = avatarData;
-        profileImg.style.display = 'block';
+    // Target both possible element IDs to guarantee it displays
+    const previewElem = document.getElementById('avatar-preview');
+    if (previewElem) previewElem.src = avatarData;
+
+    const headerImg = document.getElementById('profileHeaderImg');
+    const headerFallback = document.getElementById('profileIconFallback');
+    if (headerImg) {
+        headerImg.src = avatarData;
+        headerImg.style.display = 'block';
+    }
+    if (headerFallback) {
+        headerFallback.style.display = 'none';
     }
 
-    const profileFallback = document.getElementById('profileIconFallback');
-    if (profileFallback) {
-        profileFallback.style.display = 'none';
-    }
-
-    // Update other preview slots across the app
     const homeIconImgs = document.querySelectorAll('#homeAvatarPreview, .home-avatar-icon, .user-avatar-display');
     homeIconImgs.forEach(img => {
         img.src = avatarData;
@@ -97,6 +98,7 @@ function applyAvatarToUI(avatarData) {
 
     if (avatarLoader) avatarLoader.style.display = 'none';
 }
+
 
 function calculateLevelAndXp(totalPuzzlesSolved) {
     let totalXpEarned = 0;
