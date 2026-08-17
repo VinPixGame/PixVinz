@@ -79,21 +79,24 @@
     <!-- Top Header Bar -->
 <header class="top-bar hidden" id="mainHeader" style="display: flex; align-items: center; justify-content: space-between; width: 100%; box-sizing: border-box; padding: 10px 16px;">
   
-  <!-- Profile Icon (Moved Up) -->
-  <button class="icon-btn" id="profileHeaderBtn" onclick="showView('profileView')" style="background-color: #2a1147; border: 2px solid #9c27b0; overflow: hidden; padding: 0; position: relative; top: -10px;">
+  <!-- Top Header Bar -->
+<header class="top-bar hidden" id="mainHeader" style="position: relative; display: flex; align-items: center; justify-content: space-between; width: 100%; box-sizing: border-box; padding: 10px 16px;">
+  
+  <!-- Profile Icon (Left) -->
+  <button class="icon-btn" id="profileHeaderBtn" onclick="showView('profileView')" style="background-color: #2a1147; border: 2px solid #9c27b0; overflow: hidden; padding: 0; position: relative; top: -10px; z-index: 2;">
     <span id="profileIconFallback">👤</span>
     <img id="profileHeaderImg" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; display: none;">
   </button>
   
-  <!-- Logo (Kept strictly in its place) -->
-  <div class="logo-container">
+  <!-- Logo (Permanently locked to absolute center) -->
+  <div class="logo-container" style="position: absolute; left: 50%; transform: translateX(-50%); pointer-events: none; z-index: 1;">
     <video id="logoVideo" autoplay loop muted playsinline preload="auto" style="background: transparent;">
       <source src="image/logo.webm" type="video/webm">
     </video>
   </div>
   
-  <!-- Coin Badge (Moved Up) -->
-  <div class="coin-badge" style="position: relative; top: -10px;">🪙 <span id="coinCount">0</span></div>
+  <!-- Coin Badge (Right, moved up) -->
+  <div class="coin-badge" style="position: relative; top: -10px; z-index: 2;">🪙 <span id="coinCount">0</span></div>
 
 </header>
     <!-- HOME PAGE VIEW -->
