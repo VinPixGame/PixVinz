@@ -1,47 +1,7 @@
 // ==========================================
-// PIXVINZ - COMPLETE PROFILE SCRIPT (MODULE)
+// PIXVINZ - PROFILE SCRIPT (ROBUST & SYNCED)
 // ==========================================
 
-// --- 1. FIREBASE INITIALIZATION & DATABASE BRIDGE ---
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
-import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
-    authDomain: "pixvinz2026.firebaseapp.com",
-    projectId: "pixvinz2026",
-    storageBucket: "pixvinz2026.firebasestorage.app",
-    messagingSenderId: "45609077809",
-    appId: "1:45609077809:web:575611e46acda9f64c5910",
-    measurementId: "G-W7FSERE8ZJ"
-};
-
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-// Expose to global window bridge so helper functions can access it safely
-window.pixvinzDb = {
-    db,
-    auth,
-    doc,
-    getDoc,
-    setDoc,
-    collection,
-    query,
-    orderBy,
-    limit,
-    getDocs,
-    createUserWithEmailAndPassword
-};
-
-console.log("Firebase initialized and bridged to window.pixvinzDb successfully.");
-
-
-// --- 2. CORE UTILITIES & HELPERS ---
 function getCurrentUsername() {
     try {
         const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
@@ -60,33 +20,19 @@ function getUserKey(keyName) {
 function goHome() {
     localStorage.setItem('skipLoading', 'true');
     
-    // Try global showView first
-    if (typeof window.showView === 'function') {
-        window.showView('homeView');
+    if (typeof showView === 'function') {
+        showView('home');
     } else {
-        // Robust fallback: hide all views and show homeView directly
-        document.querySelectorAll('.view').forEach(v => {
-            v.classList.add('hidden');
-            v.classList.remove('active');
-        });
-        
-        const homeView = document.getElementById('homeView');
-        if (homeView) {
-            homeView.classList.remove('hidden');
-            homeView.classList.add('active');
-        }
-
-        // Ensure header is visible on home view
-        const mainHeader = document.getElementById('mainHeader');
-        if (mainHeader) {
-            mainHeader.classList.remove('hidden');
+        const homeViewElement = document.getElementById('homeView') || window.parent.document.getElementById('homeView');
+        if (homeViewElement && typeof window.parent.showView === 'function') {
+            window.parent.showView('home');
+        } else {
+            window.location.href = 'index.html';
         }
     }
 }
-window.goHome = goHome;
 
-
-// --- 3. SAFE CLOUD SYNC ---
+// --- SAFE CLOUD SYNC ---
 async function saveUserDataToCloud() {
     try {
         if (!window.pixvinzDb || !window.pixvinzDb.db) return;
@@ -104,6 +50,7 @@ async function saveUserDataToCloud() {
         const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 150;
         const avatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
 
+        // Calculate current XP dynamically using your progression function
         const puzzlesSolved = Math.max(0, currentLevel - 1);
         const playerProgression = calculateLevelAndXp(puzzlesSolved);
         const currentXpVal = playerProgression.currentXp;
@@ -123,8 +70,6 @@ async function saveUserDataToCloud() {
     }
 }
 
-
-// --- 4. AVATAR & PROGRESSION UI ---
 function applyAvatarToUI(avatarData) {
     const avatarLoader = document.getElementById('avatarLoader');
     if (!avatarData) {
@@ -204,10 +149,9 @@ function updateXpProgress() {
     if (xpBarFill) xpBarFill.style.width = `${progressPercent}%`;
 }
 
-
-// --- 5. GLOBAL RANK & BADGES ---
+// --- LOAD & DISPLAY GLOBAL RANK ON PROFILE ---
 async function loadProfileGlobalRank() {
-    const rankValueEl = document.querySelector('.global-rank-indicator .rank-value') || document.getElementById('profileGlobalRank');
+    const rankValueEl = document.querySelector('.global-rank-indicator .rank-value') || document.getElementById('displayGlobalRank');
     if (!rankValueEl) return;
 
     rankValueEl.textContent = '...';
@@ -219,7 +163,7 @@ async function loadProfileGlobalRank() {
     }
 
     try {
-        if (window.pixvinzDb && window.pixvinzDb.db) {
+        if (window.pixvinzDb) {
             const { db, collection, query, orderBy, limit, getDocs } = window.pixvinzDb;
             
             const q = query(collection(db, 'players'), orderBy('xp', 'desc'), limit(100));
@@ -254,8 +198,9 @@ async function loadProfileGlobalRank() {
     }
 }
 
+// --- UNIFIED DYNAMIC BADGE CHECKER & 2-COLUMN RENDERER (NO SHAPES/GRADIENTS) ---
 function checkAndUnlockBadges() {
-    const badgesContainer = document.getElementById('profileViewBadges');
+    const badgesContainer = document.getElementById('badgesGrid');
     if (!badgesContainer) return;
 
     const prefix = getCurrentUsername() + '_';
@@ -284,26 +229,86 @@ function checkAndUnlockBadges() {
         }
     }
 
+    // Clean badge definitions using custom image assets directly
     const allBadges = [
-        { title: 'Novice Genesis', desc: 'Completed Level 1', icon: 'image/badge1.png', unlocked: playerLevel >= 1 },
-        { title: 'Thunderbolt', desc: 'Speed run (20-30) < 1m', icon: 'image/badge2.png', unlocked: beatSpeedThunder },
-        { title: 'Aurelian Vault', desc: 'Reached 500 coins', icon: 'image/badge3.png', unlocked: maxCoinsEarned >= 500 },
-        { title: 'Celestial Elite', desc: 'Reached Level 50', icon: 'image/badge4.png', unlocked: playerLevel >= 50 },
-        { title: 'Grand Sovereign', desc: 'Reached Level 75', icon: 'image/badge5.png', unlocked: playerLevel >= 75 },
-        { title: 'Imperial Crown', desc: 'Reached Level 100', icon: 'image/badge6.png', unlocked: playerLevel >= 100 },
-        { title: 'Infernal Apex', desc: 'Reached Level 150', icon: 'image/badge7.png', unlocked: playerLevel >= 150 },
-        { title: 'Mythical Deity', desc: 'Reached Level 200', icon: 'image/badge8.png', unlocked: playerLevel >= 200 }
+        { 
+            title: 'Novice Genesis', 
+            desc: 'Completed Level 1', 
+            icon: 'image/badge1.png', 
+            unlocked: playerLevel >= 1, 
+            glowColor: '#00ffcc'
+        },
+        { 
+            title: 'Thunderbolt', 
+            desc: 'Speed run (20-30) < 1m', 
+            icon: 'image/badge2.png', 
+            unlocked: beatSpeedThunder, 
+            glowColor: '#00e5ff'
+        },
+        { 
+            title: 'Aurelian Vault', 
+            desc: 'Reached 500 coins', 
+            icon: 'image/badge3.png', 
+            unlocked: maxCoinsEarned >= 500, 
+            glowColor: '#ffd700'
+        },
+        { 
+            title: 'Celestial Elite', 
+            desc: 'Reached Level 50', 
+            icon: 'image/badge4.png', 
+            unlocked: playerLevel >= 50, 
+            glowColor: '#ff00aa'
+        },
+        { 
+            title: 'Grand Sovereign', 
+            desc: 'Reached Level 75', 
+            icon: 'image/badge5.png', 
+            unlocked: playerLevel >= 75, 
+            glowColor: '#b000ff'
+        },
+        { 
+            title: 'Imperial Crown', 
+            desc: 'Reached Level 100', 
+            icon: 'image/badge6.png', 
+            unlocked: playerLevel >= 100, 
+            glowColor: '#ff2255'
+        },
+        { 
+            title: 'Infernal Apex', 
+            desc: 'Reached Level 150', 
+            icon: 'image/badge7.png', 
+            unlocked: playerLevel >= 150, 
+            glowColor: '#ff5500'
+        },
+        { 
+            title: 'Mythical Deity', 
+            desc: 'Reached Level 200', 
+            icon: 'image/badge8.png', 
+            unlocked: playerLevel >= 200, 
+            glowColor: '#00ffff'
+        }
     ];
 
-    badgesContainer.innerHTML = '';
+    // Force 2-column grid styling dynamically
     badgesContainer.style.display = 'grid';
-    badgesContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
-    badgesContainer.style.gap = '16px';
-    badgesContainer.style.alignItems = 'center';
-    badgesContainer.style.justifyItems = 'center';
+    badgesContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
+    badgesContainer.style.gap = '8px';
+    badgesContainer.style.textAlign = 'left';
+    badgesContainer.innerHTML = '';
 
     allBadges.forEach(badge => {
         const isUnlocked = badge.unlocked;
+        
+        const cardStyle = isUnlocked ? `
+            background: linear-gradient(135deg, rgba(22, 16, 48, 0.9), rgba(12, 9, 28, 0.95));
+            border: 1px solid ${badge.glowColor}66;
+            box-shadow: 0 0 12px ${badge.glowColor}25, inset 0 0 8px ${badge.glowColor}15;
+            opacity: 1;
+        ` : `
+            background: rgba(15, 15, 20, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            opacity: 0.35;
+        `;
 
         const badgeElement = document.createElement('div');
         badgeElement.style.cssText = `
@@ -311,49 +316,28 @@ function checkAndUnlockBadges() {
             flex-direction: column;
             align-items: center;
             text-align: center;
-            background: transparent;
-            border: none;
-            box-shadow: none;
-            padding: 0;
-            opacity: ${isUnlocked ? '1' : '0.35'};
+            padding: 10px 6px;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            ${cardStyle}
         `;
 
         badgeElement.innerHTML = `
-            <img src="${badge.icon}" alt="${badge.title}" style="width: 64px; height: 64px; object-fit: contain; margin-bottom: 6px; background: transparent; border: none; box-shadow: none; ${isUnlocked ? '' : 'filter: grayscale(100%);'}">
-            <span style="font-weight: 700; font-size: 11px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.3px; line-height: 1.2; margin-bottom: 2px;">${badge.title}</span>
-            <span style="font-size: 8px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1.1;">${badge.desc}</span>
+            <div style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px;">
+                <img src="${badge.icon}" alt="${badge.title}" style="width: 100%; height: 100%; object-fit: contain; ${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.4;'}">
+            </div>
+            <span style="font-weight: 700; font-size: 12px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.3px; line-height: 1.2; margin-bottom: 2px;">${badge.title}</span>
+            <span style="font-size: 9px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1.1;">${badge.desc}</span>
         `;
         badgesContainer.appendChild(badgeElement);
     });
 }
 
-
-// --- 6. EVENT LISTENERS & INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Robust Profile Header Button Click Handler (inside DOMContentLoaded)
-    const profileHeaderBtn = document.getElementById('profileHeaderBtn');
-    if (profileHeaderBtn) {
-        profileHeaderBtn.addEventListener('click', () => {
-            if (typeof window.showView === 'function') {
-                window.showView('profileView');
-            } else {
-                document.querySelectorAll('.view').forEach(v => {
-                    v.classList.add('hidden');
-                    v.classList.remove('active');
-                });
-                const profileView = document.getElementById('profileView');
-                if (profileView) {
-                    profileView.classList.remove('hidden');
-                    profileView.classList.add('active');
-                }
-            }
-        });
-    }
-
     const avatarLoader = document.getElementById('avatarLoader');
     if (avatarLoader) avatarLoader.style.display = 'none';
 
-    let initialName = getCurrentUsername() || 'Cardo';
+    let initialName = 'Cardo';
     try {
         const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
         if (userObj && userObj.displayName) {
@@ -378,7 +362,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateXpProgress();
     checkAndUnlockBadges();
+    
+    // Fetch and display global rank on profile open
     loadProfileGlobalRank();
+    
+    // Automatically push accurate computed XP to cloud on profile page open
     saveUserDataToCloud();
 });
 
@@ -433,6 +421,7 @@ if (avatarInput) {
                     const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
 
                     applyAvatarToUI(compressedBase64);
+
                     localStorage.setItem(getUserKey('vinpix_avatar'), compressedBase64);
 
                     try {
