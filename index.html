@@ -350,83 +350,13 @@
   <div class="badges-section-header">
     <h3>Badges</h3>
     <div class="global-rank-indicator">
-      <span class="rank-label">Global Rank</span> : <span class="rank-value">#1</span>
+      <span class="rank-label">Global Rank</span> : <span class="rank-value" id="profileGlobalRank">#--</span>
     </div>
   </div>
-  <div class="badges-grid" id="badgesGrid">
-    
-    <!-- 1. First Step -->
-    <div id="badgeFirstStep" class="badge-card emerald locked">
-      <div class="badge-gem">🧩</div>
-      <div class="badge-info">
-        <div class="badge-title">First Step</div>
-        <div class="badge-desc">Completed Level 1</div>
-      </div>
-    </div>
-
-    <!-- 2. Speed Thunder -->
-    <div id="badgeSpeedThunder" class="badge-card sapphire locked">
-      <div class="badge-gem">⚡</div>
-      <div class="badge-info">
-        <div class="badge-title">Speed Thunder</div>
-        <div class="badge-desc">Beat any level (20-30) within 1 min</div>
-      </div>
-    </div>
-
-    <!-- 3. Coin Collector -->
-    <div id="badgeCoinCollector" class="badge-card ruby locked">
-      <div class="badge-gem">🪙</div>
-      <div class="badge-info">
-        <div class="badge-title">Coin Collector</div>
-        <div class="badge-desc">Reach a total of 500 coins</div>
-      </div>
-    </div>
-
-    <!-- 4. PixVinz Elite -->
-    <div id="badgePixVinzElite" class="badge-card diamond locked">
-      <div class="badge-gem">⭐</div>
-      <div class="badge-info">
-        <div class="badge-title">PixVinz Elite</div>
-        <div class="badge-desc">Reach level 50</div>
-      </div>
-    </div>
-
-    <!-- 5. PixVinz Master -->
-    <div id="badgePixVinzMaster" class="badge-card diamond locked">
-      <div class="badge-gem">🏆</div>
-      <div class="badge-info">
-        <div class="badge-title">PixVinz Master</div>
-        <div class="badge-desc">Reach level 75</div>
-      </div>
-    </div>
-
-    <!-- 6. PixVinz Grand Master -->
-    <div id="badgePixVinzGrandMaster" class="badge-card diamond locked">
-      <div class="badge-gem">👑</div>
-      <div class="badge-info">
-        <div class="badge-title">PixVinz Grand Master</div>
-        <div class="badge-desc">Reach level 100</div>
-      </div>
-    </div>
-
-    <!-- 7. PixVinz Mythic -->
-    <div id="badgePixVinzMythic" class="badge-card diamond locked">
-      <div class="badge-gem">🔥</div>
-      <div class="badge-info">
-        <div class="badge-title">PixVinz Mythic</div>
-        <div class="badge-desc">Reach level 150</div>
-      </div>
-    </div>
-
-    <!-- 8. PixVinz Mythical Glory -->
-    <div id="badgePixVinzMythicalGlory" class="badge-card diamond locked">
-      <div class="badge-gem">💎</div>
-      <div class="badge-info">
-        <div class="badge-title">PixVinz Mythical Glory</div>
-        <div class="badge-desc">Reach level 200</div>
-      </div>
-    </div>
-
+  
+  <!-- Dynamic 2-Column Badge Grid -->
+  <div class="badges-grid" id="badgesGrid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; text-align: left;">
+    <!-- Badges will be dynamically injected here by JS -->
   </div>
 </div>
 
