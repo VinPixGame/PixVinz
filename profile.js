@@ -208,6 +208,12 @@ function checkAndUnlockBadges() {
     const playerLevel = parseInt(localStorage.getItem(prefix + 'currentLevel')) || 1;
     const playerCoins = parseInt(localStorage.getItem(prefix + 'totalCoins')) || 0;
     
+    // Update profile stats cards elements cleanly
+    const coinsEl = document.getElementById('profileDisplayCoins');
+    const levelEl = document.getElementById('profileDisplayLevel');
+    if (coinsEl) coinsEl.textContent = playerCoins.toLocaleString();
+    if (levelEl) levelEl.textContent = `Level ${playerLevel}`;
+
     let maxCoinsEarned = parseInt(localStorage.getItem(prefix + 'maxCoinsEarned')) || playerCoins;
     if (playerCoins > maxCoinsEarned) {
         maxCoinsEarned = playerCoins;
@@ -229,7 +235,6 @@ function checkAndUnlockBadges() {
         }
     }
 
-    // Shared unified badge definitions matching leaderboard profile modal exactly
     const allBadges = [
         { 
             title: 'Novice Genesis', 
@@ -305,7 +310,6 @@ function checkAndUnlockBadges() {
         }
     ];
 
-    // Clip-path helper for unique geometric shapes
     function getClipPath(shape) {
         switch(shape) {
             case 'hexagon': return 'polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0% 50%)';
@@ -317,7 +321,6 @@ function checkAndUnlockBadges() {
         }
     }
 
-    // Force 2-column grid styling dynamically to match leaderboard modal
     badgesContainer.style.display = 'grid';
     badgesContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
     badgesContainer.style.gap = '8px';
@@ -400,10 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateXpProgress();
     checkAndUnlockBadges();
     
-    // Fetch and display global rank on profile open
     loadProfileGlobalRank();
-    
-    // Automatically push accurate computed XP to cloud on profile page open
     saveUserDataToCloud();
 });
 
