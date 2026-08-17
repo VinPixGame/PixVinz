@@ -320,6 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
+        // Register the user in Firebase Auth using a valid email format
         const dummyEmail = `${username}@pixvinz.com`;
         let authUid = '';
         
@@ -760,8 +761,10 @@ async function syncUserWithFirestore() {
     if (snap.exists()) {
       const freshData = snap.data();
       
+      // Update the local storage session object
       localStorage.setItem('loggedInUser', JSON.stringify(freshData));
 
+      // Update user-specific keys (like coins and level)
       const prefix = `${loggedInUser.username}_`;
       if (freshData.coins !== undefined) {
         localStorage.setItem(prefix + 'totalCoins', freshData.coins);
@@ -770,6 +773,7 @@ async function syncUserWithFirestore() {
         localStorage.setItem(prefix + 'currentLevel', freshData.level);
       }
 
+      // Refresh coin display on the header if visible
       const coinElem = document.getElementById('coinCount');
       if (coinElem && freshData.coins !== undefined) {
         coinElem.innerText = freshData.coins;
@@ -780,6 +784,7 @@ async function syncUserWithFirestore() {
   }
 }
 
+// Call this right when the page loads
 document.addEventListener('DOMContentLoaded', () => {
   syncUserWithFirestore();
 });
@@ -880,53 +885,284 @@ async function loadLeaderboardData() {
                 </div>
             `;
         } else if (rank === 2) {
-            specialStyle = 'background: linear-gradient(135deg, rgba(192, 192, 192, 0.25), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(192, 192, 192, 0.6);';
-            frameStyle = 'border: 3px solid #c0c0c0;';
+            specialStyle = 'background: linear-gradient(135deg, rgba(192, 192, 192, 0.2), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(192, 192, 192, 0.6);';
+            frameStyle = 'border: 3px solid #00e5ff;';
             rankBadgeHTML = `
-                <div style="min-width: 48px; height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #e0e0e0, #888888); border-radius: 8px; border: 2px solid #fff; font-weight: 900; font-size: 15px; color: #fff;">
+                <div style="min-width: 48px; height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #00d2ff, #3a7bd5); border-radius: 8px; border: 2px solid #fff; font-weight: 900; font-size: 15px; color: #fff;">
                     <span>#2</span>
+                    <div style="width: 26px; height: 6px; background: #0055aa; clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%); margin-top: 2px;"></div>
                 </div>
             `;
         } else if (rank === 3) {
-            specialStyle = 'background: linear-gradient(135deg, rgba(205, 127, 50, 0.25), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(205, 127, 50, 0.6);';
-            frameStyle = 'border: 3px solid #cd7f32;';
+            specialStyle = 'background: linear-gradient(135deg, rgba(205, 127, 50, 0.2), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(205, 127, 50, 0.6);';
+            frameStyle = 'border: 3px solid #ff9933;';
             rankBadgeHTML = `
-                <div style="min-width: 48px; height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #e6955a, #a0522d); border-radius: 8px; border: 2px solid #fff; font-weight: 900; font-size: 15px; color: #fff;">
+                <div style="min-width: 48px; height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #cd7f32, #8b4513); border-radius: 8px; border: 2px solid #fff; font-weight: 900; font-size: 15px; color: #fff;">
                     <span>#3</span>
+                    <div style="width: 26px; height: 6px; background: #5c2c16; clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%); margin-top: 2px;"></div>
                 </div>
             `;
         } else {
-            rankBadgeHTML = `
-                <div style="min-width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.08); border-radius: 8px; font-weight: 700; font-size: 15px; color: #aaa;">
-                    #${rank}
-                </div>
-            `;
+            rankBadgeHTML = `<span style="min-width: 48px; text-align: center; font-weight: bold; font-size: 16px; color: #aaa;">#${rank}</span>`;
         }
 
         const avatarSrc = player.avatar ? player.avatar : 'image/avatar.png';
-        const isMe = currentUsername && player.username.toLowerCase() === currentUsername.toLowerCase();
 
-        const itemElem = document.createElement('div');
-        itemElem.className = 'leaderboard-item';
-        itemElem.style.cssText = `display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; margin-bottom: 8px; border-radius: 12px; background: rgba(20, 20, 20, 0.8); ${specialStyle} ${isMe ? 'outline: 2px solid #4facfe;' : ''}`;
+        const row = document.createElement('div');
+        row.className = `rank-row`;
+        
+        row.style.cssText = `
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 18px;
+            margin-bottom: 10px;
+            margin-left: 10px;
+            margin-right: 10px;
+            border-radius: 14px;
+            background: rgba(30, 30, 30, 0.7);
+            ${specialStyle}
+        `;
 
-        itemElem.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 14px;">
+        row.innerHTML = `
+            <div style="display: flex; align-items: center; min-width: 0; flex: 1; overflow: hidden;">
                 ${rankBadgeHTML}
-                <div style="width: 44px; height: 44px; border-radius: 50%; overflow: hidden; background: #222; ${frameStyle}">
-                    <img src="${avatarSrc}" alt="${player.name}" style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
-                <div>
-                    <div style="font-weight: 700; font-size: 15px; color: #fff; display: flex; align-items: center; gap: 6px;">
-                        ${player.name} ${isMe ? '<span style="font-size: 11px; background: #4facfe; color: #fff; padding: 2px 6px; border-radius: 4px;">YOU</span>' : ''}
-                    </div>
-                    <div style="font-size: 12px; color: #aaa;">Level ${player.level} • 🪙 ${player.coins}</div>
+                <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; margin: 0 14px; flex-shrink: 0; cursor: pointer; ${frameStyle}">
+                <div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
+                    <span style="font-weight: 600; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">${player.name}</span>
+                    <div style="font-size: 12px; font-weight: bold; background: linear-gradient(90deg, #ffd700, #ffaa00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; border-bottom: 1px solid #ffd700; display: inline-block; padding-bottom: 1px; margin-top: 3px; width: fit-content;">LEVEL ${player.level}</div>
                 </div>
             </div>
-            <div style="text-align: right;">
-                <div style="font-weight: 800; font-size: 15px; color: #ffd700;">${player.xp} XP</div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; margin-left: 15px; flex-shrink: 0; gap: 4px;">
+                <div style="display: flex; align-items: center; font-size: 15px; font-weight: bold; color: #ffd700; text-shadow: 0 0 5px rgba(255,215,0,0.4);">
+                    <span style="width: 24px; text-align: center; display: inline-block;">🪙</span>
+                    <span style="text-align: right; min-width: 70px;">${player.coins.toLocaleString()}</span>
+                </div>
+                <div style="display: flex; align-items: center; font-size: 14px; font-weight: bold;">
+                    <span style="width: 24px; text-align: center; display: inline-block;">⚡️</span>
+                    <span style="color: #ff75a0; text-shadow: 0 0 6px rgba(255,117,160,0.6); text-align: right; min-width: 45px;">${player.xp.toLocaleString()}</span>
+                    <span style="color: #00e5ff; text-shadow: 0 0 5px rgba(0,229,255,0.6); margin-left: 4px;">XP</span>
+                </div>
             </div>
         `;
-        listContainer.appendChild(itemElem);
+
+        // Attach click listener to the avatar image
+        const avatarImg = row.querySelector('.leaderboard-avatar-img');
+        if (avatarImg) {
+            avatarImg.addEventListener('click', () => {
+                if (typeof AudioManager !== 'undefined' && typeof AudioManager.playClick === 'function') {
+                    AudioManager.playClick();
+                }
+                openPlayerProfile(player, rank);
+            });
+        }
+
+        listContainer.appendChild(row);
     });
 }
+
+
+
+
+window.openPlayerProfile = function(player, rank) {
+    const modal = document.getElementById('playerProfileModal');
+    if (!modal) return;
+    
+    document.getElementById('profileModalAvatar').src = player.avatar ? player.avatar : 'image/avatar.png';
+    document.getElementById('profileModalName').textContent = player.name;
+    document.getElementById('profileModalRank').textContent = `#${rank} 🏆`;
+    document.getElementById('profileModalXp').textContent = `${player.xp.toLocaleString()} XP 🔹`;
+    
+    const playerLevel = player.level || 1;
+    const playerCoins = player.coins || 0;
+    
+    // Each badge has a distinct shape, unique glow color, and elegant title
+    const allBadges = [
+        { 
+            title: 'Novice Genesis', 
+            desc: 'Completed Level 1', 
+            icon: '🧩', 
+            unlocked: playerLevel >= 1, 
+            glowColor: '#00ffcc', 
+            shape: 'circle',
+            gradient: 'linear-gradient(135deg, #00ffcc, #00b386)'
+        },
+        { 
+            title: 'Thunderbolt', 
+            desc: 'Speed run (20-30) < 1m', 
+            icon: '⚡', 
+            unlocked: player.speedThunder === true || player.speedThunderUnlocked === true, 
+            glowColor: '#00e5ff', 
+            shape: 'hexagon',
+            gradient: 'linear-gradient(135deg, #00e5ff, #0077ff)'
+        },
+        { 
+            title: 'Aurelian Vault', 
+            desc: 'Reached 500 coins', 
+            icon: '🪙', 
+            unlocked: playerCoins >= 500, 
+            glowColor: '#ffd700', 
+            shape: 'octagon',
+            gradient: 'linear-gradient(135deg, #ffd700, #ff8800)'
+        },
+        { 
+            title: 'Celestial Elite', 
+            desc: 'Reached Level 50', 
+            icon: '⭐', 
+            unlocked: playerLevel >= 50, 
+            glowColor: '#ff00aa', 
+            shape: 'star',
+            gradient: 'linear-gradient(135deg, #ff00aa, #aa00ff)'
+        },
+        { 
+            title: 'Grand Sovereign', 
+            desc: 'Reached Level 75', 
+            icon: '🏆', 
+            unlocked: playerLevel >= 75, 
+            glowColor: '#b000ff', 
+            shape: 'shield',
+            gradient: 'linear-gradient(135deg, #b000ff, #5500ff)'
+        },
+        { 
+            title: 'Imperial Crown', 
+            desc: 'Reached Level 100', 
+            icon: '👑', 
+            unlocked: playerLevel >= 100, 
+            glowColor: '#ff2255', 
+            shape: 'diamond',
+            gradient: 'linear-gradient(135deg, #ff2255, #aa0022)'
+        },
+        { 
+            title: 'Infernal Apex', 
+            desc: 'Reached Level 150', 
+            icon: '🔥', 
+            unlocked: playerLevel >= 150, 
+            glowColor: '#ff5500', 
+            shape: 'hexagon',
+            gradient: 'linear-gradient(135deg, #ff5500, #cc0000)'
+        },
+        { 
+            title: 'Mythical Deity', 
+            desc: 'Reached Level 200', 
+            icon: '💎', 
+            unlocked: playerLevel >= 200, 
+            glowColor: '#00ffff', 
+            shape: 'octagon',
+            gradient: 'linear-gradient(135deg, #00ffff, #0088ff)'
+        }
+    ];
+
+    const badgesContainer = document.getElementById('profileModalBadges');
+    badgesContainer.innerHTML = '';
+
+    // Helper to return CSS clip-path based on requested shape
+    function getClipPath(shape) {
+        switch(shape) {
+            case 'hexagon': return 'polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0% 50%)';
+            case 'octagon': return 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)';
+            case 'diamond': return 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)';
+            case 'shield': return 'polygon(50% 0%, 100% 20%, 100% 80%, 50% 100%, 0% 80%, 0% 20%)';
+            case 'star': return 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
+            default: return 'circle(50% at 50% 50%)'; // circle
+        }
+    }
+
+    allBadges.forEach(badge => {
+        const isUnlocked = badge.unlocked;
+        
+        const cardStyle = isUnlocked ? `
+            background: linear-gradient(135deg, rgba(22, 16, 48, 0.9), rgba(12, 9, 28, 0.95));
+            border: 1px solid ${badge.glowColor}66;
+            box-shadow: 0 0 12px ${badge.glowColor}25, inset 0 0 8px ${badge.glowColor}15;
+            opacity: 1;
+        ` : `
+            background: rgba(15, 15, 20, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            opacity: 0.35;
+        `;
+
+        const iconStyle = isUnlocked ? `
+            background: ${badge.gradient};
+            box-shadow: 0 0 10px ${badge.glowColor};
+            clip-path: ${getClipPath(badge.shape)};
+        ` : `
+            background: #2a2a35;
+            clip-path: ${getClipPath(badge.shape)};
+        `;
+
+        const badgeElement = document.createElement('div');
+        badgeElement.style.cssText = `
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 10px 6px;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            ${cardStyle}
+        `;
+
+        badgeElement.innerHTML = `
+            <div style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 6px; ${iconStyle}">
+                <span style="${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.4;'}">${badge.icon}</span>
+            </div>
+            <span style="font-weight: 700; font-size: 12px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.3px; line-height: 1.2; margin-bottom: 2px;">${badge.title}</span>
+            <span style="font-size: 9px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1.1;">${badge.desc}</span>
+        `;
+        badgesContainer.appendChild(badgeElement);
+    });
+    
+    modal.style.display = 'flex';
+};
+
+window.closePlayerProfile = function() {
+    const modal = document.getElementById('playerProfileModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+};
+
+window.addEventListener('click', (event) => {
+    const modal = document.getElementById('playerProfileModal');
+    if (event.target === modal) {
+        window.closePlayerProfile();
+    }
+});        
+
+
+
+
+
+// --- CONFETTI BACKGROUND EFFECT (Independent) ---
+function initLeaderboardConfetti() {
+    let container = document.getElementById('leaderboardConfetti');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'leaderboardConfetti';
+        container.className = 'confetti-bg';
+        const lbView = document.getElementById('leaderboardView');
+        if (lbView) lbView.prepend(container);
+    }
+    
+    if (container.children.length === 0) {
+        const colors = ['#ffd700', '#ff75a0', '#00e5ff', '#9b59b6', '#2ecc71'];
+        for (let i = 0; i < 22; i++) {
+            const piece = document.createElement('div');
+            piece.className = 'confetti-piece';
+            piece.style.left = `${Math.random() * 100}%`;
+            piece.style.width = `${Math.random() * 6 + 5}px`;
+            piece.style.height = piece.style.width;
+            piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+            piece.style.animationDuration = `${Math.random() * 6 + 4}s`;
+            piece.style.animationDelay = `${Math.random() * 5}s`;
+            piece.style.boxShadow = `0 0 6px ${piece.style.backgroundColor}`;
+            container.appendChild(piece);
+        }
+    }
+}
+
+// Automatically runs when the page loads without touching your leaderboard function
+document.addEventListener('DOMContentLoaded', () => {
+    initLeaderboardConfetti();
+});
