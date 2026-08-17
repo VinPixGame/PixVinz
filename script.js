@@ -963,20 +963,19 @@ async function loadLeaderboardData() {
 
 
 
-// Profile Modal Handler Functions
+
 window.openPlayerProfile = function(player, rank) {
     const modal = document.getElementById('playerProfileModal');
     if (!modal) return;
     
     document.getElementById('profileModalAvatar').src = player.avatar ? player.avatar : 'image/avatar.png';
     document.getElementById('profileModalName').textContent = player.name;
-    document.getElementById('profileModalRank').textContent = `#${rank}`;
-    document.getElementById('profileModalXp').textContent = `${player.xp.toLocaleString()} XP`;
+    document.getElementById('profileModalRank').textContent = `#${rank} 🏆`;
+    document.getElementById('profileModalXp').textContent = `${player.xp.toLocaleString()} XP 🔹`;
     
     const playerLevel = player.level || 1;
     const playerCoins = player.coins || 0;
     
-    // All badges defined with their specific Firestore-backed requirements
     const allBadges = [
         { 
             title: 'First Step', 
@@ -984,15 +983,15 @@ window.openPlayerProfile = function(player, rank) {
             icon: '🧩', 
             unlocked: playerLevel >= 1, 
             glowColor: '#00ffcc', 
-            borderColor: '#00ffcc55' 
+            borderColor: 'rgba(0, 255, 204, 0.4)' 
         },
         { 
             title: 'Speed Thunder', 
             desc: 'Beat any level (20-30) within 1 min', 
             icon: '⚡', 
-            unlocked: player.speedThunder === true || player.speedThunderUnlocked === true, // Stored in Firestore when achieved
-            glowColor: '#ffea00', 
-            borderColor: '#ffea0055' 
+            unlocked: player.speedThunder === true || player.speedThunderUnlocked === true, 
+            glowColor: '#00e5ff', 
+            borderColor: 'rgba(0, 229, 255, 0.4)' 
         },
         { 
             title: 'Coin Collector', 
@@ -1000,15 +999,15 @@ window.openPlayerProfile = function(player, rank) {
             icon: '🪙', 
             unlocked: playerCoins >= 500, 
             glowColor: '#ffd700', 
-            borderColor: '#ffd70055' 
+            borderColor: 'rgba(255, 215, 0, 0.4)' 
         },
         { 
             title: 'PixVinz Elite', 
             desc: 'Reach level 50', 
             icon: '⭐', 
             unlocked: playerLevel >= 50, 
-            glowColor: '#00e5ff', 
-            borderColor: '#00e5ff55' 
+            glowColor: '#ffd700', 
+            borderColor: 'rgba(255, 215, 0, 0.4)' 
         },
         { 
             title: 'PixVinz Master', 
@@ -1016,7 +1015,7 @@ window.openPlayerProfile = function(player, rank) {
             icon: '🏆', 
             unlocked: playerLevel >= 75, 
             glowColor: '#b000ff', 
-            borderColor: '#b000ff55' 
+            borderColor: 'rgba(176, 0, 255, 0.4)' 
         },
         { 
             title: 'PixVinz Grand Master', 
@@ -1024,7 +1023,7 @@ window.openPlayerProfile = function(player, rank) {
             icon: '👑', 
             unlocked: playerLevel >= 100, 
             glowColor: '#ff0055', 
-            borderColor: '#ff005555' 
+            borderColor: 'rgba(255, 0, 85, 0.4)' 
         },
         { 
             title: 'PixVinz Mythic', 
@@ -1032,7 +1031,7 @@ window.openPlayerProfile = function(player, rank) {
             icon: '🔥', 
             unlocked: playerLevel >= 150, 
             glowColor: '#ff5500', 
-            borderColor: '#ff550055' 
+            borderColor: 'rgba(255, 85, 0, 0.4)' 
         },
         { 
             title: 'PixVinz Mythical Glory', 
@@ -1040,7 +1039,7 @@ window.openPlayerProfile = function(player, rank) {
             icon: '💎', 
             unlocked: playerLevel >= 200, 
             glowColor: '#00ffff', 
-            borderColor: '#00ffff55' 
+            borderColor: 'rgba(0, 255, 255, 0.4)' 
         }
     ];
 
@@ -1050,43 +1049,47 @@ window.openPlayerProfile = function(player, rank) {
     allBadges.forEach(badge => {
         const isUnlocked = badge.unlocked;
         
-        // Premium card styling with neon glow if unlocked, dimmed if locked
+        // Card styling matching the reference image
         const cardStyle = isUnlocked ? `
-            background: linear-gradient(135deg, rgba(30, 20, 60, 0.9), rgba(15, 12, 36, 0.95));
+            background: linear-gradient(135deg, rgba(20, 15, 45, 0.85), rgba(10, 8, 25, 0.95));
             border: 1px solid ${badge.borderColor};
-            box-shadow: 0 0 15px ${badge.glowColor}33, inset 0 0 10px ${badge.glowColor}11;
+            box-shadow: 0 0 12px ${badge.glowColor}25;
             opacity: 1;
         ` : `
-            background: rgba(20, 20, 20, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(15, 15, 15, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.04);
             opacity: 0.35;
         `;
 
-        const iconStyle = isUnlocked ? `
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid ${badge.borderColor};
-            box-shadow: 0 0 10px ${badge.glowColor}66;
+        // Golden medal icon style with wings effect
+        const badgeIconStyle = isUnlocked ? `
+            background: linear-gradient(135deg, #ffe552, #cca100);
+            border: 2px solid #fff;
+            box-shadow: 0 0 12px rgba(255, 215, 0, 0.7);
         ` : `
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: linear-gradient(135deg, #444, #222);
+            border: 2px solid rgba(255,255,255,0.1);
         `;
 
         const badgeElement = document.createElement('div');
         badgeElement.style.cssText = `
             display: flex;
             align-items: center;
-            padding: 10px 12px;
-            border-radius: 12px;
-            margin-bottom: 8px;
+            padding: 10px 14px;
+            border-radius: 14px;
             transition: all 0.3s ease;
             ${cardStyle}
         `;
 
         badgeElement.innerHTML = `
-            <div style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-right: 12px; flex-shrink: 0; ${iconStyle}">
-                ${badge.icon}
+            <div style="position: relative; display: flex; align-items: center; justify-content: center; margin-right: 14px; flex-shrink: 0;">
+                <span style="font-size: 14px; position: absolute; left: -14px; filter: drop-shadow(0 0 4px #ffd700); ${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.3;'}">🦅</span>
+                <div style="width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; ${badgeIconStyle}">
+                    ${badge.icon}
+                </div>
+                <span style="font-size: 14px; position: absolute; right: -14px; transform: scaleX(-1); filter: drop-shadow(0 0 4px #ffd700); ${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.3;'}">🦅</span>
             </div>
-            <div style="display: flex; flex-direction: column; overflow: hidden;">
+            <div style="display: flex; flex-direction: column; overflow: hidden; text-align: left;">
                 <span style="font-weight: 700; font-size: 14px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.5px;">${badge.title}</span>
                 <span style="font-size: 11px; color: ${isUnlocked ? '#bbb' : '#444'}; margin-top: 2px;">${badge.desc}</span>
             </div>
@@ -1110,7 +1113,6 @@ window.addEventListener('click', (event) => {
         window.closePlayerProfile();
     }
 });
-
 
 
 
