@@ -1713,3 +1713,22 @@ video {
     z-index: 2;
 }
 
+
+
+
+/* Style and size for your custom badge images */
+.badge-card img, 
+.badge-img {
+    width: 38px;
+    height: 38px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto 6px auto;
+}
+
+/* Optional styling for locked vs unlocked state */
+.badge-card.locked img,
+.badge-card.locked .badge-img {
+    opacity: 0.35;
+    filter: grayscale(100%);
+}
