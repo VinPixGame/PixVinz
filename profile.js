@@ -233,35 +233,17 @@ function checkAndUnlockBadges() {
     
 
 
-    // Force 2-column grid styling dynamically to match leaderboard modal
-    badgesContainer.style.display = 'grid';
-    badgesContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
-    badgesContainer.style.gap = '8px';
-    badgesContainer.style.textAlign = 'left';
+const badgesContainer = document.getElementById('profileModalBadges');
+if (badgesContainer) {
     badgesContainer.innerHTML = '';
+    badgesContainer.style.display = 'grid';
+    badgesContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    badgesContainer.style.gap = '16px';
+    badgesContainer.style.alignItems = 'center';
+    badgesContainer.style.justifyItems = 'center';
 
     allBadges.forEach(badge => {
         const isUnlocked = badge.unlocked;
-        
-        const cardStyle = isUnlocked ? `
-            background: linear-gradient(135deg, rgba(22, 16, 48, 0.9), rgba(12, 9, 28, 0.95));
-            border: 1px solid ${badge.glowColor}66;
-            box-shadow: 0 0 12px ${badge.glowColor}25, inset 0 0 8px ${badge.glowColor}15;
-            opacity: 1;
-        ` : `
-            background: rgba(15, 15, 20, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            opacity: 0.35;
-        `;
-
-        const iconStyle = isUnlocked ? `
-            background: ${badge.gradient};
-            box-shadow: 0 0 10px ${badge.glowColor};
-            clip-path: ${getClipPath(badge.shape)};
-        ` : `
-            background: #2a2a35;
-            clip-path: ${getClipPath(badge.shape)};
-        `;
 
         const badgeElement = document.createElement('div');
         badgeElement.style.cssText = `
@@ -269,18 +251,17 @@ function checkAndUnlockBadges() {
             flex-direction: column;
             align-items: center;
             text-align: center;
-            padding: 10px 6px;
-            border-radius: 14px;
-            transition: all 0.3s ease;
-            ${cardStyle}
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            opacity: ${isUnlocked ? '1' : '0.35'};
         `;
 
         badgeElement.innerHTML = `
-            <div style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 6px; ${iconStyle}">
-                <span style="${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.4;'}">${badge.icon}</span>
-            </div>
-            <span style="font-weight: 700; font-size: 12px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.3px; line-height: 1.2; margin-bottom: 2px;">${badge.title}</span>
-            <span style="font-size: 9px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1.1;">${badge.desc}</span>
+            <img src="${badge.icon}" alt="${badge.title}" style="width: 64px; height: 64px; object-fit: contain; margin-bottom: 6px; background: transparent; border: none; box-shadow: none; ${isUnlocked ? '' : 'filter: grayscale(100%);'}">
+            <span style="font-weight: 700; font-size: 11px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.3px; line-height: 1.2; margin-bottom: 2px;">${badge.title}</span>
+            <span style="font-size: 8px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1.1;">${badge.desc}</span>
         `;
         badgesContainer.appendChild(badgeElement);
     });
