@@ -962,8 +962,6 @@ async function loadLeaderboardData() {
 }
 
 
-
-
 window.openPlayerProfile = function(player, rank) {
     const modal = document.getElementById('playerProfileModal');
     if (!modal) return;
@@ -1113,6 +1111,8 @@ window.addEventListener('click', (event) => {
         window.closePlayerProfile();
     }
 });
+
+
 
 
 
