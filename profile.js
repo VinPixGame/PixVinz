@@ -200,7 +200,7 @@ async function loadProfileGlobalRank() {
 
 // --- UNIFIED DYNAMIC BADGE CHECKER & 3-COLUMN CONTAINERLESS RENDERER ---
 function checkAndUnlockBadges() {
-    const badgesContainer = document.getElementById('badgesGrid');
+    const badgesContainer = document.getElementById('profileModalBadges');
     if (!badgesContainer) return;
 
     const prefix = getCurrentUsername() + '_';
