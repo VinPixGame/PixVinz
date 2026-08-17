@@ -267,10 +267,9 @@
     </section>
 
     
-
 <!-- Player Profile Modal -->
 <div id="playerProfileModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.88); z-index: 1000; justify-content: center; align-items: center; padding: 15px;">
-    <div style="background: linear-gradient(135deg, #130f2b, #090618); border: 2px solid #ffd700; border-radius: 26px; padding: 24px 20px; width: 92%; max-width: 380px; max-height: 88vh; overflow-y: auto; text-align: center; position: relative; box-shadow: 0 0 35px rgba(255,215,0,0.5), inset 0 0 20px rgba(255,215,0,0.15);">
+    <div style="background: linear-gradient(135deg, #130f2b, #090618); border: 2px solid #ffd700; border-radius: 26px; padding: 22px 18px; width: 94%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: center; position: relative; box-shadow: 0 0 35px rgba(255,215,0,0.5), inset 0 0 20px rgba(255,215,0,0.15);">
         
         <!-- Top Golden Ornament -->
         <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 30px; height: 12px; background: linear-gradient(135deg, #ffd700, #ffaa00); clip-path: polygon(50% 0%, 100% 100%, 0% 100%); box-shadow: 0 0 10px #ffd700;"></div>
@@ -278,58 +277,34 @@
         <!-- Exit / Close Button -->
         <button onclick="closePlayerProfile()" style="position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,215,0,0.3); color: #fff; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">✕</button>
         
-        <!-- Crown & Avatar Wrapper with SVG Wings -->
-        <div style="position: relative; width: 85px; height: 85px; margin: 15px auto 10px auto; display: flex; align-items: center; justify-content: center;">
-            <!-- Crown -->
-            <div style="position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: 26px; z-index: 3; filter: drop-shadow(0 0 8px #ffd700);">👑</div>
-            
-            <!-- Left Wing -->
-            <svg width="32" height="22" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; left: -28px; top: 50%; transform: translateY(-50%); filter: drop-shadow(0 0 6px rgba(255,215,0,0.8));">
-                <path d="M2 10C6 4 14 2 26 1C22 7 18 12 14 19C10 16 6 13 2 10Z" fill="url(#goldHeaderGradient)"/>
-                <path d="M6 14C9 9 15 7 24 6C20 11 15 15 11 19C9 17 7 15 6 14Z" fill="#ffea80"/>
-            </svg>
-
-            <!-- Avatar Image -->
-            <img id="profileModalAvatar" src="" alt="Avatar" style="width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid #ffd700; box-shadow: 0 0 18px rgba(255,215,0,0.7); position: relative; z-index: 2;">
-            
-            <!-- Right Wing (Flipped) -->
-            <svg width="32" height="22" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; right: -28px; top: 50%; transform: translateY(-50%) scaleX(-1); filter: drop-shadow(0 0 6px rgba(255,215,0,0.8));">
-                <path d="M2 10C6 4 14 2 26 1C22 7 18 12 14 19C10 16 6 13 2 10Z" fill="url(#goldHeaderGradient)"/>
-                <path d="M6 14C9 9 15 7 24 6C20 11 15 15 11 19C9 17 7 15 6 14Z" fill="#ffea80"/>
-            </svg>
+        <!-- Crown & Avatar Wrapper -->
+        <div style="position: relative; width: 80px; height: 80px; margin: 12px auto 8px auto; display: flex; align-items: center; justify-content: center;">
+            <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 24px; z-index: 3; filter: drop-shadow(0 0 8px #ffd700);">👑</div>
+            <img id="profileModalAvatar" src="" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #ffd700; box-shadow: 0 0 18px rgba(255,215,0,0.7); position: relative; z-index: 2;">
         </div>
-
-        <!-- Global SVG Gradient Definition for Header Wings -->
-        <svg style="width:0;height:0;position:absolute;" aria-hidden="true">
-            <linearGradient id="goldHeaderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#fff2a1" />
-                <stop offset="50%" stop-color="#ffd700" />
-                <stop offset="100%" stop-color="#cca100" />
-            </linearGradient>
-        </svg>
         
         <!-- Display Name -->
-        <h3 id="profileModalName" style="color: #fff; margin: 8px 0 16px 0; font-size: 22px; font-weight: 800; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Player Name</h3>
+        <h3 id="profileModalName" style="color: #fff; margin: 6px 0 14px 0; font-size: 20px; font-weight: 800; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Player Name</h3>
         
         <!-- Stats Container -->
-        <div style="background: rgba(255, 255, 255, 0.03); border-radius: 14px; padding: 12px 16px; margin-bottom: 18px; text-align: left; display: flex; flex-direction: column; gap: 8px; border: 1px solid rgba(255, 215, 0, 0.2); box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
-            <div style="display: flex; justify-content: space-between; align-items: center; color: #ccc; font-size: 14px;">
+        <div style="background: rgba(255, 255, 255, 0.03); border-radius: 14px; padding: 10px 14px; margin-bottom: 16px; text-align: left; display: flex; flex-direction: column; gap: 6px; border: 1px solid rgba(255, 215, 0, 0.2); box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center; color: #ccc; font-size: 13px;">
                 <span>Global Rank:</span>
                 <span id="profileModalRank" style="color: #ffd700; font-weight: 800; text-shadow: 0 0 8px rgba(255,215,0,0.5);">#-- 🏆</span>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; color: #ccc; font-size: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; color: #ccc; font-size: 13px;">
                 <span>Total XP:</span>
                 <span id="profileModalXp" style="color: #00e5ff; font-weight: 800; text-shadow: 0 0 8px rgba(0,229,255,0.5);">0 XP 🔹</span>
             </div>
         </div>
 
         <!-- Badges Header -->
-        <div style="text-align: center; margin-bottom: 12px;">
-            <span style="font-size: 12px; color: #ffd700; font-weight: 800; letter-spacing: 2px; text-shadow: 0 0 8px rgba(255,215,0,0.4);">≡ BADGES ≡</span>
+        <div style="text-align: center; margin-bottom: 10px;">
+            <span style="font-size: 11px; color: #ffd700; font-weight: 800; letter-spacing: 2px; text-shadow: 0 0 8px rgba(255,215,0,0.4);">≡ BADGES ≡</span>
         </div>
 
-        <!-- Badges Container -->
-        <div id="profileModalBadges" style="text-align: left; display: flex; flex-direction: column; gap: 8px;">
+        <!-- Badges 2-Column Grid Container -->
+        <div id="profileModalBadges" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; text-align: left;">
         </div>
 
         <!-- Bottom Golden Ornament -->
