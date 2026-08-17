@@ -22,6 +22,20 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const db = getFirestore(app);
 const auth = getAuth(app);
+const profileHeaderBtn = document.getElementById('profileHeaderBtn');
+if (profileHeaderBtn) {
+    profileHeaderBtn.addEventListener('click', () => {
+        if (typeof showView === 'function') {
+            showView('profileView');
+        } else {
+            // Fallback view switcher
+            document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+            const pView = document.getElementById('profileView');
+            if (pView) pView.classList.remove('hidden');
+        }
+    });
+}
+
 
 // Expose to global window bridge so helper functions can access it safely
 window.pixvinzDb = {
@@ -60,14 +74,26 @@ function getUserKey(keyName) {
 function goHome() {
     localStorage.setItem('skipLoading', 'true');
     
+    // Try global showView first
     if (typeof showView === 'function') {
-        showView('home');
+        showView('homeView');
     } else {
-        const homeViewElement = document.getElementById('homeView') || window.parent.document.getElementById('homeView');
-        if (homeViewElement && typeof window.parent.showView === 'function') {
-            window.parent.showView('home');
-        } else {
-            window.location.href = 'index.html';
+        // Robust fallback: hide all views and show homeView directly
+        document.querySelectorAll('.view').forEach(v => {
+            v.classList.add('hidden');
+            v.classList.remove('active');
+        });
+        
+        const homeView = document.getElementById('homeView');
+        if (homeView) {
+            homeView.classList.remove('hidden');
+            homeView.classList.add('active');
+        }
+
+        // Ensure header is visible on home view
+        const mainHeader = document.getElementById('mainHeader');
+        if (mainHeader) {
+            mainHeader.classList.remove('hidden');
         }
     }
 }
@@ -243,7 +269,7 @@ async function loadProfileGlobalRank() {
 }
 
 function checkAndUnlockBadges() {
-    const badgesContainer = document.getElementById('profileModalBadges');
+    const badgesContainer = document.getElementById('profileViewBadges');
     if (!badgesContainer) return;
 
     const prefix = getCurrentUsername() + '_';
