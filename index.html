@@ -266,6 +266,42 @@
       </div>
     </section>
 
+<!-- Player Profile Modal -->
+<div id="playerProfileModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: linear-gradient(135deg, #1a153b, #0f0c24); border: 2px solid #ffd700; border-radius: 20px; padding: 25px; width: 85%; max-width: 320px; text-align: center; position: relative; box-shadow: 0 0 25px rgba(255,215,0,0.4);">
+        
+        <!-- Exit / Back Button -->
+        <button onclick="closePlayerProfile()" style="position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.1); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; font-weight: bold; cursor: pointer; font-size: 14px;">✕</button>
+        
+        <!-- Player Avatar -->
+        <img id="profileModalAvatar" src="" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #ffd700; margin-bottom: 12px; box-shadow: 0 0 10px rgba(255,215,0,0.5);">
+        
+        <!-- Display Name -->
+        <h3 id="profileModalName" style="color: #fff; margin: 5px 0 15px 0; font-size: 20px;">Player Name</h3>
+        
+        <!-- Stats Container -->
+        <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 12px; margin-bottom: 15px; text-align: left; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; color: #ccc; font-size: 14px;">
+                <span>Global Rank:</span>
+                <span id="profileModalRank" style="color: #ffd700; font-weight: bold;">#--</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; color: #ccc; font-size: 14px;">
+                <span>Total XP:</span>
+                <span id="profileModalXp" style="color: #00e5ff; font-weight: bold;">0 XP</span>
+            </div>
+        </div>
+
+        <!-- Badges Section -->
+        <div style="text-align: left;">
+            <span style="font-size: 12px; color: #aaa; font-weight: bold; display: block; margin-bottom: 6px; letter-spacing: 1px;">BADGES</span>
+            <div id="profileModalBadges" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <!-- Injected dynamically -->
+            </div>
+        </div>
+
+    </div>
+</div>
+    
     <!-- PROFILE PAGE VIEW -->
     <section id="profileView" class="view hidden">
       <div class="profile-container">
