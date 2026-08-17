@@ -198,7 +198,7 @@ async function loadProfileGlobalRank() {
     }
 }
 
-// --- UNIFIED DYNAMIC BADGE CHECKER & 2-COLUMN RENDERER ---
+// --- UNIFIED DYNAMIC BADGE CHECKER & 2-COLUMN RENDERER (NO SHAPES/GRADIENTS) ---
 function checkAndUnlockBadges() {
     const badgesContainer = document.getElementById('badgesGrid');
     if (!badgesContainer) return;
@@ -229,95 +229,67 @@ function checkAndUnlockBadges() {
         }
     }
 
-    // Shared unified badge definitions matching leaderboard profile modal exactly
+    // Clean badge definitions using custom image assets directly
     const allBadges = [
         { 
             title: 'Novice Genesis', 
             desc: 'Completed Level 1', 
             icon: 'image/badge1.png', 
             unlocked: playerLevel >= 1, 
-            glowColor: '#00ffcc', 
-            shape: 'circle',
-            gradient: 'linear-gradient(135deg, #00ffcc, #00b386)'
+            glowColor: '#00ffcc'
         },
         { 
             title: 'Thunderbolt', 
             desc: 'Speed run (20-30) < 1m', 
             icon: 'image/badge2.png', 
             unlocked: beatSpeedThunder, 
-            glowColor: '#00e5ff', 
-            shape: 'hexagon',
-            gradient: 'linear-gradient(135deg, #00e5ff, #0077ff)'
+            glowColor: '#00e5ff'
         },
         { 
             title: 'Aurelian Vault', 
             desc: 'Reached 500 coins', 
             icon: 'image/badge3.png', 
             unlocked: maxCoinsEarned >= 500, 
-            glowColor: '#ffd700', 
-            shape: 'octagon',
-            gradient: 'linear-gradient(135deg, #ffd700, #ff8800)'
+            glowColor: '#ffd700'
         },
         { 
             title: 'Celestial Elite', 
             desc: 'Reached Level 50', 
             icon: 'image/badge4.png', 
             unlocked: playerLevel >= 50, 
-            glowColor: '#ff00aa', 
-            shape: 'star',
-            gradient: 'linear-gradient(135deg, #ff00aa, #aa00ff)'
+            glowColor: '#ff00aa'
         },
         { 
             title: 'Grand Sovereign', 
             desc: 'Reached Level 75', 
             icon: 'image/badge5.png', 
             unlocked: playerLevel >= 75, 
-            glowColor: '#b000ff', 
-            shape: 'shield',
-            gradient: 'linear-gradient(135deg, #b000ff, #5500ff)'
+            glowColor: '#b000ff'
         },
         { 
             title: 'Imperial Crown', 
             desc: 'Reached Level 100', 
             icon: 'image/badge6.png', 
             unlocked: playerLevel >= 100, 
-            glowColor: '#ff2255', 
-            shape: 'diamond',
-            gradient: 'linear-gradient(135deg, #ff2255, #aa0022)'
+            glowColor: '#ff2255'
         },
         { 
             title: 'Infernal Apex', 
             desc: 'Reached Level 150', 
             icon: 'image/badge7.png', 
             unlocked: playerLevel >= 150, 
-            glowColor: '#ff5500', 
-            shape: 'hexagon',
-            gradient: 'linear-gradient(135deg, #ff5500, #cc0000)'
+            glowColor: '#ff5500'
         },
         { 
             title: 'Mythical Deity', 
             desc: 'Reached Level 200', 
             icon: 'image/badge8.png', 
             unlocked: playerLevel >= 200, 
-            glowColor: '#00ffff', 
-            shape: 'octagon',
-            gradient: 'linear-gradient(135deg, #00ffff, #0088ff)'
+            glowColor: '#00ffff'
         }
     ];
 
-    // Clip-path helper for unique geometric shapes
-    function getClipPath(shape) {
-        switch(shape) {
-            case 'hexagon': return 'polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0% 50%)';
-            case 'octagon': return 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)';
-            case 'diamond': return 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)';
-            case 'shield': return 'polygon(50% 0%, 100% 20%, 100% 80%, 50% 100%, 0% 80%, 0% 20%)';
-            case 'star': return 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
-            default: return 'circle(50% at 50% 50%)';
-        }
-    }
-
-    // Force 2-column grid styling dynamically to match leaderboard modal
+    // Force 2-column grid styling dynamically
     badgesContainer.style.display = 'grid';
     badgesContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
     badgesContainer.style.gap = '8px';
@@ -338,15 +310,6 @@ function checkAndUnlockBadges() {
             opacity: 0.35;
         `;
 
-        const iconStyle = isUnlocked ? `
-            background: ${badge.gradient};
-            box-shadow: 0 0 10px ${badge.glowColor};
-            clip-path: ${getClipPath(badge.shape)};
-        ` : `
-            background: #2a2a35;
-            clip-path: ${getClipPath(badge.shape)};
-        `;
-
         const badgeElement = document.createElement('div');
         badgeElement.style.cssText = `
             display: flex;
@@ -360,7 +323,7 @@ function checkAndUnlockBadges() {
         `;
 
         badgeElement.innerHTML = `
-            <div style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; overflow: hidden; ${iconStyle}">
+            <div style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px;">
                 <img src="${badge.icon}" alt="${badge.title}" style="width: 100%; height: 100%; object-fit: contain; ${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.4;'}">
             </div>
             <span style="font-weight: 700; font-size: 12px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.3px; line-height: 1.2; margin-bottom: 2px;">${badge.title}</span>
