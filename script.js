@@ -982,82 +982,71 @@ window.openPlayerProfile = function(player, rank) {
             desc: 'Completed Level 1', 
             icon: 'image/badge1.png', 
             unlocked: playerLevel >= 1, 
-            glowColor: '#00ffcc' 
+        
         },
         { 
             title: 'Thunderbolt', 
             desc: 'Speed run (20-30) < 1m', 
             icon: 'image/badge2.png', 
             unlocked: player.speedThunder === true || player.speedThunderUnlocked === true, 
-            glowColor: '#00e5ff' 
+            
         },
         { 
             title: 'Aurelian Vault', 
             desc: 'Reached 500 coins', 
             icon: 'image/badge3.png', 
             unlocked: playerCoins >= 500, 
-            glowColor: '#ffd700' 
+            
         },
         { 
             title: 'Celestial Elite', 
             desc: 'Reached Level 50', 
             icon: 'image/badge4.png', 
             unlocked: playerLevel >= 50, 
-            glowColor: '#ff00aa' 
+            
         },
         { 
             title: 'Grand Sovereign', 
             desc: 'Reached Level 75', 
             icon: 'image/badge5.png', 
             unlocked: playerLevel >= 75, 
-            glowColor: '#b000ff' 
+             
         },
         { 
             title: 'Imperial Crown', 
             desc: 'Reached Level 100', 
             icon: 'image/badge6.png', 
             unlocked: playerLevel >= 100, 
-            glowColor: '#ff2255' 
+             
         },
         { 
             title: 'Infernal Apex', 
             desc: 'Reached Level 150', 
             icon: 'image/badge7.png', 
             unlocked: playerLevel >= 150, 
-            glowColor: '#ff5500' 
+            
         },
         { 
             title: 'Mythical Deity', 
             desc: 'Reached Level 200', 
             icon: 'image/badge8.png', 
             unlocked: playerLevel >= 200, 
-            glowColor: '#00ffff' 
+            
         }
     ];
 
     const badgesContainer = document.getElementById('profileModalBadges');
     badgesContainer.innerHTML = '';
+    
+    // Set grid to 3 columns per row
+    badgesContainer.style.display = 'grid';
+    badgesContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    badgesContainer.style.gap = '12px';
+    badgesContainer.style.alignItems = 'center';
+    badgesContainer.style.justifyItems = 'center';
 
     allBadges.forEach(badge => {
         const isUnlocked = badge.unlocked;
-        
-        const cardStyle = isUnlocked ? `
-            background: linear-gradient(135deg, rgba(22, 16, 48, 0.9), rgba(12, 9, 28, 0.95));
-            border: 1px solid ${badge.glowColor}66;
-            box-shadow: 0 0 12px ${badge.glowColor}25, inset 0 0 8px ${badge.glowColor}15;
-            opacity: 1;
-        ` : `
-            background: rgba(15, 15, 20, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            opacity: 0.35;
-        `;
-
-        const iconStyle = isUnlocked ? `
-            box-shadow: 0 0 10px ${badge.glowColor};
-            border-radius: 8px;
-        ` : `
-            border-radius: 8px;
-        `;
 
         const badgeElement = document.createElement('div');
         badgeElement.style.cssText = `
@@ -1065,24 +1054,25 @@ window.openPlayerProfile = function(player, rank) {
             flex-direction: column;
             align-items: center;
             text-align: center;
-            padding: 10px 6px;
-            border-radius: 14px;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 4px;
+            opacity: ${isUnlocked ? '1' : '0.35'};
             transition: all 0.3s ease;
-            ${cardStyle}
         `;
 
         badgeElement.innerHTML = `
-            <div style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; ${iconStyle}">
-                <img src="${badge.icon}" alt="${badge.title}" style="width: 100%; height: 100%; object-fit: contain; ${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.4;'}">
-            </div>
-            <span style="font-weight: 700; font-size: 12px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.3px; line-height: 1.2; margin-bottom: 2px;">${badge.title}</span>
-            <span style="font-size: 9px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1.1;">${badge.desc}</span>
+            <img src="${badge.icon}" alt="${badge.title}" style="width: 64px; height: 64px; object-fit: contain; margin-bottom: 6px; background: transparent; border: none; box-shadow: none; ${isUnlocked ? '' : 'filter: grayscale(100%);'}">
+            <span style="font-weight: 700; font-size: 11px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.3px; line-height: 1.2; margin-bottom: 2px;">${badge.title}</span>
+            <span style="font-size: 8px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1.1;">${badge.desc}</span>
         `;
         badgesContainer.appendChild(badgeElement);
     });
     
     modal.style.display = 'flex';
 };
+    
 
 window.closePlayerProfile = function() {
     const modal = document.getElementById('playerProfileModal');
