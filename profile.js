@@ -198,7 +198,7 @@ async function loadProfileGlobalRank() {
     }
 }
 
-// --- UNIFIED DYNAMIC BADGE CHECKER & 2-COLUMN RENDERER ---
+// --- UNIFIED DYNAMIC BADGE CHECKER & 3-COLUMN CONTAINERLESS RENDERER ---
 function checkAndUnlockBadges() {
     const badgesContainer = document.getElementById('badgesGrid');
     if (!badgesContainer) return;
@@ -229,12 +229,57 @@ function checkAndUnlockBadges() {
         }
     }
 
+    const allBadges = [
+        { 
+            title: 'Novice Genesis', 
+            desc: 'Completed Level 1', 
+            icon: 'image/badge1.png', 
+            unlocked: playerLevel >= 1 
+        },
+        { 
+            title: 'Thunderbolt', 
+            desc: 'Speed run (20-30) < 1m', 
+            icon: 'image/badge2.png', 
+            unlocked: beatSpeedThunder 
+        },
+        { 
+            title: 'Aurelian Vault', 
+            desc: 'Reached 500 coins', 
+            icon: 'image/badge3.png', 
+            unlocked: maxCoinsEarned >= 500 
+        },
+        { 
+            title: 'Celestial Elite', 
+            desc: 'Reached Level 50', 
+            icon: 'image/badge4.png', 
+            unlocked: playerLevel >= 50 
+        },
+        { 
+            title: 'Grand Sovereign', 
+            desc: 'Reached Level 75', 
+            icon: 'image/badge5.png', 
+            unlocked: playerLevel >= 75 
+        },
+        { 
+            title: 'Imperial Crown', 
+            desc: 'Reached Level 100', 
+            icon: 'image/badge6.png', 
+            unlocked: playerLevel >= 100 
+        },
+        { 
+            title: 'Infernal Apex', 
+            desc: 'Reached Level 150', 
+            icon: 'image/badge7.png', 
+            unlocked: playerLevel >= 150 
+        },
+        { 
+            title: 'Mythical Deity', 
+            desc: 'Reached Level 200', 
+            icon: 'image/badge8.png', 
+            unlocked: playerLevel >= 200 
+        }
+    ];
 
-    
-
-
-const badgesContainer = document.getElementById('profileModalBadges');
-if (badgesContainer) {
     badgesContainer.innerHTML = '';
     badgesContainer.style.display = 'grid';
     badgesContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
