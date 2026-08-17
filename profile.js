@@ -22,20 +22,6 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const db = getFirestore(app);
 const auth = getAuth(app);
-const profileHeaderBtn = document.getElementById('profileHeaderBtn');
-if (profileHeaderBtn) {
-    profileHeaderBtn.addEventListener('click', () => {
-        if (typeof showView === 'function') {
-            showView('profileView');
-        } else {
-            // Fallback view switcher
-            document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-            const pView = document.getElementById('profileView');
-            if (pView) pView.classList.remove('hidden');
-        }
-    });
-}
-
 
 // Expose to global window bridge so helper functions can access it safely
 window.pixvinzDb = {
@@ -75,8 +61,8 @@ function goHome() {
     localStorage.setItem('skipLoading', 'true');
     
     // Try global showView first
-    if (typeof showView === 'function') {
-        showView('homeView');
+    if (typeof window.showView === 'function') {
+        window.showView('homeView');
     } else {
         // Robust fallback: hide all views and show homeView directly
         document.querySelectorAll('.view').forEach(v => {
@@ -344,6 +330,26 @@ function checkAndUnlockBadges() {
 
 // --- 6. EVENT LISTENERS & INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
+    // Robust Profile Header Button Click Handler (inside DOMContentLoaded)
+    const profileHeaderBtn = document.getElementById('profileHeaderBtn');
+    if (profileHeaderBtn) {
+        profileHeaderBtn.addEventListener('click', () => {
+            if (typeof window.showView === 'function') {
+                window.showView('profileView');
+            } else {
+                document.querySelectorAll('.view').forEach(v => {
+                    v.classList.add('hidden');
+                    v.classList.remove('active');
+                });
+                const profileView = document.getElementById('profileView');
+                if (profileView) {
+                    profileView.classList.remove('hidden');
+                    profileView.classList.add('active');
+                }
+            }
+        });
+    }
+
     const avatarLoader = document.getElementById('avatarLoader');
     if (avatarLoader) avatarLoader.style.display = 'none';
 
