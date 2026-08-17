@@ -322,28 +322,32 @@
           <h1>Player Profile</h1>
         </div>
 
-        <!-- Profile Card -->
-        <div class="profile-card">
-          <!-- Avatar Display & Upload with Loading State -->
-          <div class="avatar-section">
-            <div class="avatar-wrapper" id="avatarWrapper">
-              <img id="avatar-preview" src="image/avatar.png" alt="Profile Avatar" onerror="this.src='https://via.placeholder.com/120/4a154b/ffffff?text=Avatar'">
-              <div class="avatar-loader" id="avatarLoader" style="display: none;">
-                <div class="spinner"></div>
-              </div>
-            </div>
-            <label for="avatar-input" class="upload-btn">Choose Avatar</label>
-            <input type="file" id="avatar-input" accept="image/*" style="display: none;">
-          </div>
-
-          <!-- Player Name Display Row with Small Edit Button -->
-          <div class="profile-info-row">
-            <div class="info-label-group">
-              <span class="info-subtitle">Player Name</span>
-              <h3 id="displayPlayerName">Ulala</h3>
-            </div>
-            <button class="btn btn-secondary" id="openEditNameModal">Edit</button>
-          </div>
+        <!-- Player Name Card -->
+<div class="player-info-card" style="margin-bottom: 15px;">
+  <div class="player-name-label">PLAYER NAME</div>
+  <div class="player-name-row" style="display: flex; justify-content: space-between; align-items: center;">
+    <span id="displayPlayerName" style="font-size: 18px; font-weight: bold;">Mako</span>
+    <button id="openEditNameModal" class="edit-btn">Edit</button>
+  </div>
+  
+  <!-- Elegant Coins & Level Stats Row -->
+  <div class="player-stats-row" style="display: flex; gap: 10px; margin-top: 12px;">
+    <div style="flex: 1; background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(255, 136, 0, 0.03)); border: 1px solid rgba(255, 215, 0, 0.25); padding: 8px 12px; border-radius: 12px; display: flex; align-items: center; gap: 8px; box-shadow: inset 0 0 8px rgba(255, 215, 0, 0.05);">
+      <span style="font-size: 16px;">🪙</span>
+      <div style="display: flex; flex-direction: column;">
+        <span style="font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Coins</span>
+        <span id="profileDisplayCoins" style="font-size: 13px; font-weight: 700; color: #ffd700;">0</span>
+      </div>
+    </div>
+    
+    <div style="flex: 1; background: linear-gradient(135deg, rgba(0, 255, 204, 0.08), rgba(0, 119, 255, 0.03)); border: 1px solid rgba(0, 255, 204, 0.25); padding: 8px 12px; border-radius: 12px; display: flex; align-items: center; gap: 8px; box-shadow: inset 0 0 8px rgba(0, 255, 204, 0.05);">
+      <div style="display: flex; flex-direction: column;">
+        <span style="font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Level</span>
+        <span id="profileDisplayLevel" style="font-size: 13px; font-weight: 700; color: #00ffcc;">Level 1</span>
+      </div>
+    </div>
+  </div>
+</div>
 
           <!-- Badges Section -->
 <div class="badges-section">
