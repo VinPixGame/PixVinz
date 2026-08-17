@@ -198,7 +198,7 @@ async function loadProfileGlobalRank() {
     }
 }
 
-// --- UNIFIED DYNAMIC BADGE CHECKER & 3-COLUMN RENDERER (NO SHAPES/GRADIENTS) ---
+// --- UNIFIED DYNAMIC BADGE CHECKER & 2-COLUMN RENDERER (NO SHAPES/GRADIENTS) ---
 function checkAndUnlockBadges() {
     const badgesContainer = document.getElementById('badgesGrid');
     if (!badgesContainer) return;
@@ -289,10 +289,10 @@ function checkAndUnlockBadges() {
         }
     ];
 
-    // Compressed 3-column container setup
+    // Force 2-column grid styling dynamically
     badgesContainer.style.display = 'grid';
-    badgesContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
-    badgesContainer.style.gap = '6px'; // Tighter gap between cards
+    badgesContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
+    badgesContainer.style.gap = '8px';
     badgesContainer.style.textAlign = 'left';
     badgesContainer.innerHTML = '';
 
@@ -316,21 +316,22 @@ function checkAndUnlockBadges() {
             flex-direction: column;
             align-items: center;
             text-align: center;
-            padding: 8px 4px; /* Compact padding for tighter cards */
-            border-radius: 12px;
+            padding: 10px 6px;
+            border-radius: 14px;
             transition: all 0.3s ease;
             ${cardStyle}
         `;
 
         badgeElement.innerHTML = `
-            <div style="width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px;">
+            <div style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px;">
                 <img src="${badge.icon}" alt="${badge.title}" style="width: 100%; height: 100%; object-fit: contain; ${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.4;'}">
             </div>
-            <span style="font-weight: 700; font-size: 11px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.3px; line-height: 1.1; margin-bottom: 1px;">${badge.title}</span>
-            <span style="font-size: 8px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1;">${badge.desc}</span>
+            <span style="font-weight: 700; font-size: 12px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.3px; line-height: 1.2; margin-bottom: 2px;">${badge.title}</span>
+            <span style="font-size: 9px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1.1;">${badge.desc}</span>
         `;
         badgesContainer.appendChild(badgeElement);
     });
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     const avatarLoader = document.getElementById('avatarLoader');
