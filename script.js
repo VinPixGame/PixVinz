@@ -792,7 +792,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-
 // --- LEADERBOARD LOGIC (Safe DOM Binding, Avatars & Real Players Only) ---
 document.addEventListener('DOMContentLoaded', () => {
     const navLeaderboard = document.getElementById('navLeaderboard');
@@ -806,12 +805,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
-
-
-
-
-
 
 async function loadLeaderboardData() {
     const listContainer = document.getElementById('leaderboardList');
@@ -934,7 +927,7 @@ async function loadLeaderboardData() {
         row.innerHTML = `
             <div style="display: flex; align-items: center; min-width: 0; flex: 1; overflow: hidden;">
                 ${rankBadgeHTML}
-                <img src="${avatarSrc}" alt="${player.name}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; margin: 0 14px; flex-shrink: 0; ${frameStyle}">
+                <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; margin: 0 14px; flex-shrink: 0; cursor: pointer; ${frameStyle}">
                 <div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
                     <span style="font-weight: 600; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">${player.name}</span>
                     <div style="font-size: 12px; font-weight: bold; background: linear-gradient(90deg, #ffd700, #ffaa00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; border-bottom: 1px solid #ffd700; display: inline-block; padding-bottom: 1px; margin-top: 3px; width: fit-content;">LEVEL ${player.level}</div>
@@ -952,9 +945,53 @@ async function loadLeaderboardData() {
                 </div>
             </div>
         `;
+
+        // Attach click listener to the avatar image
+        const avatarImg = row.querySelector('.leaderboard-avatar-img');
+        if (avatarImg) {
+            avatarImg.addEventListener('click', () => {
+                if (typeof AudioManager !== 'undefined' && typeof AudioManager.playClick === 'function') {
+                    AudioManager.playClick();
+                }
+                openPlayerProfile(player, rank);
+            });
+        }
+
         listContainer.appendChild(row);
     });
 }
+
+// Profile Modal Handler Functions
+function openPlayerProfile(player, rank) {
+    const modal = document.getElementById('playerProfileModal');
+    if (!modal) return;
+    
+    document.getElementById('profileModalAvatar').src = player.avatar ? player.avatar : 'image/avatar.png';
+    document.getElementById('profileModalName').textContent = player.name;
+    document.getElementById('profileModalRank').textContent = `#${rank}`;
+    document.getElementById('profileModalXp').textContent = `${player.xp.toLocaleString()} XP`;
+    
+    const badgesContainer = document.getElementById('profileModalBadges');
+    badgesContainer.innerHTML = `
+        <div style="background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 6px;">LEVEL ${player.level}</div>
+        ${rank <= 3 ? `<div style="background: linear-gradient(135deg, #ff5500, #cc3300); color: #fff; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 6px;">TOP ${rank} 🏆</div>` : ''}
+    `;
+    
+    modal.style.display = 'flex';
+}
+
+function closePlayerProfile() {
+    const modal = document.getElementById('playerProfileModal');
+    if (!modal) return;
+    modal.style.display = 'none';
+}
+
+window.addEventListener('click', (event) => {
+    const modal = document.getElementById('playerProfileModal');
+    if (event.target === modal) {
+        closePlayerProfile();
+    }
+});
 
 
 
