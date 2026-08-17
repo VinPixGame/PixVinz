@@ -504,3 +504,25 @@ body:has(#profileView.active) #mainHeader {
   color: #00f2fe;
   font-weight: bold;
 }
+
+
+/* Ensure the profile page has proper top spacing and fits all screen sizes safely */
+.profile-container, #profileView {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 480px; /* Keeps it looking great on tablets and larger screens too */
+    margin: 0 auto;
+    padding: 40px 16px 30px 16px; /* Adds space at the top for the Back button and header */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    min-height: 100vh;
+}
+
+/* Make sure the top header row (Back button & Player Profile title) handles smaller widths nicely */
+.profile-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    width: 100%;
+}
