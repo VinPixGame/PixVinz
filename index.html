@@ -304,10 +304,13 @@
             <span style="font-size: 11px; color: #ffd700; font-weight: 800; letter-spacing: 2px; text-shadow: 0 0 8px rgba(255,215,0,0.4);">≡ BADGES ≡</span>
         </div>
 
-        <!-- Dynamic 3-Column Badge Grid -->
-  <div class="badges-grid" id="profileModalBadges" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center; align-items: center; justify-items: center;">
-    <!-- Badges will be dynamically injected here by JS -->
-  </div>
+        <!-- Badges 2-Column Grid Container -->
+        <div id="profileModalBadges" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; text-align: left;">
+        </div>
+
+        <!-- Bottom Golden Ornament -->
+        <div style="position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 30px; height: 12px; background: linear-gradient(135deg, #ffaa00, #ffd700); clip-path: polygon(0% 0%, 100% 0%, 50% 100%); box-shadow: 0 0 10px #ffd700;"></div>
+    </div>
 </div>
     
     <!-- PROFILE PAGE VIEW -->
@@ -352,7 +355,7 @@
   </div>
   
   <!-- Dynamic 2-Column Badge Grid -->
-  <div class="badges-grid" id="profileViewBadges" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; text-align: left;">
+  <div class="badges-grid" id="badgesGrid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; text-align: left;">
     <!-- Badges will be dynamically injected here by JS -->
   </div>
 </div>
