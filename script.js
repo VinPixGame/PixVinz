@@ -961,8 +961,10 @@ async function loadLeaderboardData() {
     });
 }
 
+
+
 // Profile Modal Handler Functions
-function openPlayerProfile(player, rank) {
+window.openPlayerProfile = function(player, rank) {
     const modal = document.getElementById('playerProfileModal');
     if (!modal) return;
     
@@ -971,16 +973,130 @@ function openPlayerProfile(player, rank) {
     document.getElementById('profileModalRank').textContent = `#${rank}`;
     document.getElementById('profileModalXp').textContent = `${player.xp.toLocaleString()} XP`;
     
+    const playerLevel = player.level || 1;
+    const playerCoins = player.coins || 0;
+    
+    // All badges defined with their specific Firestore-backed requirements
+    const allBadges = [
+        { 
+            title: 'First Step', 
+            desc: 'Completed Level 1', 
+            icon: '🧩', 
+            unlocked: playerLevel >= 1, 
+            glowColor: '#00ffcc', 
+            borderColor: '#00ffcc55' 
+        },
+        { 
+            title: 'Speed Thunder', 
+            desc: 'Beat any level (20-30) within 1 min', 
+            icon: '⚡', 
+            unlocked: player.speedThunder === true || player.speedThunderUnlocked === true, // Stored in Firestore when achieved
+            glowColor: '#ffea00', 
+            borderColor: '#ffea0055' 
+        },
+        { 
+            title: 'Coin Collector', 
+            desc: 'Reach a total of 500 coins', 
+            icon: '🪙', 
+            unlocked: playerCoins >= 500, 
+            glowColor: '#ffd700', 
+            borderColor: '#ffd70055' 
+        },
+        { 
+            title: 'PixVinz Elite', 
+            desc: 'Reach level 50', 
+            icon: '⭐', 
+            unlocked: playerLevel >= 50, 
+            glowColor: '#00e5ff', 
+            borderColor: '#00e5ff55' 
+        },
+        { 
+            title: 'PixVinz Master', 
+            desc: 'Reach level 75', 
+            icon: '🏆', 
+            unlocked: playerLevel >= 75, 
+            glowColor: '#b000ff', 
+            borderColor: '#b000ff55' 
+        },
+        { 
+            title: 'PixVinz Grand Master', 
+            desc: 'Reach level 100', 
+            icon: '👑', 
+            unlocked: playerLevel >= 100, 
+            glowColor: '#ff0055', 
+            borderColor: '#ff005555' 
+        },
+        { 
+            title: 'PixVinz Mythic', 
+            desc: 'Reach level 150', 
+            icon: '🔥', 
+            unlocked: playerLevel >= 150, 
+            glowColor: '#ff5500', 
+            borderColor: '#ff550055' 
+        },
+        { 
+            title: 'PixVinz Mythical Glory', 
+            desc: 'Reach level 200', 
+            icon: '💎', 
+            unlocked: playerLevel >= 200, 
+            glowColor: '#00ffff', 
+            borderColor: '#00ffff55' 
+        }
+    ];
+
     const badgesContainer = document.getElementById('profileModalBadges');
-    badgesContainer.innerHTML = `
-        <div style="background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 6px;">LEVEL ${player.level}</div>
-        ${rank <= 3 ? `<div style="background: linear-gradient(135deg, #ff5500, #cc3300); color: #fff; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 6px;">TOP ${rank} 🏆</div>` : ''}
-    `;
+    badgesContainer.innerHTML = '';
+
+    allBadges.forEach(badge => {
+        const isUnlocked = badge.unlocked;
+        
+        // Premium card styling with neon glow if unlocked, dimmed if locked
+        const cardStyle = isUnlocked ? `
+            background: linear-gradient(135deg, rgba(30, 20, 60, 0.9), rgba(15, 12, 36, 0.95));
+            border: 1px solid ${badge.borderColor};
+            box-shadow: 0 0 15px ${badge.glowColor}33, inset 0 0 10px ${badge.glowColor}11;
+            opacity: 1;
+        ` : `
+            background: rgba(20, 20, 20, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            opacity: 0.35;
+        `;
+
+        const iconStyle = isUnlocked ? `
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid ${badge.borderColor};
+            box-shadow: 0 0 10px ${badge.glowColor}66;
+        ` : `
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        `;
+
+        const badgeElement = document.createElement('div');
+        badgeElement.style.cssText = `
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            ${cardStyle}
+        `;
+
+        badgeElement.innerHTML = `
+            <div style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-right: 12px; flex-shrink: 0; ${iconStyle}">
+                ${badge.icon}
+            </div>
+            <div style="display: flex; flex-direction: column; overflow: hidden;">
+                <span style="font-weight: 700; font-size: 14px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.5px;">${badge.title}</span>
+                <span style="font-size: 11px; color: ${isUnlocked ? '#bbb' : '#444'}; margin-top: 2px;">${badge.desc}</span>
+            </div>
+        `;
+        badgesContainer.appendChild(badgeElement);
+    });
     
     modal.style.display = 'flex';
-}
+};
 
-// Make sure the close function is globally available
 window.closePlayerProfile = function() {
     const modal = document.getElementById('playerProfileModal');
     if (modal) {
@@ -988,13 +1104,14 @@ window.closePlayerProfile = function() {
     }
 };
 
-// Ensure background click also works globally
 window.addEventListener('click', (event) => {
     const modal = document.getElementById('playerProfileModal');
     if (event.target === modal) {
         window.closePlayerProfile();
     }
 });
+
+
 
 
 // --- CONFETTI BACKGROUND EFFECT (Independent) ---
