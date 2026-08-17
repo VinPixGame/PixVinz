@@ -975,13 +975,12 @@ window.openPlayerProfile = function(player, rank) {
     
     const playerLevel = player.level || 1;
     const playerCoins = player.coins || 0;
-    
-    // Each badge has a distinct shape, unique glow color, and elegant title
+// Each badge has a distinct shape, unique glow color, and elegant title
     const allBadges = [
         { 
             title: 'Novice Genesis', 
             desc: 'Completed Level 1', 
-            icon: '🧩', 
+            icon: 'image/badge1.png', 
             unlocked: playerLevel >= 1, 
             glowColor: '#00ffcc', 
             shape: 'circle',
@@ -990,7 +989,7 @@ window.openPlayerProfile = function(player, rank) {
         { 
             title: 'Thunderbolt', 
             desc: 'Speed run (20-30) < 1m', 
-            icon: '⚡', 
+            icon: 'image/badge2.png', 
             unlocked: player.speedThunder === true || player.speedThunderUnlocked === true, 
             glowColor: '#00e5ff', 
             shape: 'hexagon',
@@ -999,7 +998,7 @@ window.openPlayerProfile = function(player, rank) {
         { 
             title: 'Aurelian Vault', 
             desc: 'Reached 500 coins', 
-            icon: '🪙', 
+            icon: 'image/badge3.png', 
             unlocked: playerCoins >= 500, 
             glowColor: '#ffd700', 
             shape: 'octagon',
@@ -1008,7 +1007,7 @@ window.openPlayerProfile = function(player, rank) {
         { 
             title: 'Celestial Elite', 
             desc: 'Reached Level 50', 
-            icon: '⭐', 
+            icon: 'image/badge4.png', 
             unlocked: playerLevel >= 50, 
             glowColor: '#ff00aa', 
             shape: 'star',
@@ -1017,7 +1016,7 @@ window.openPlayerProfile = function(player, rank) {
         { 
             title: 'Grand Sovereign', 
             desc: 'Reached Level 75', 
-            icon: '🏆', 
+            icon: 'image/badge5.png', 
             unlocked: playerLevel >= 75, 
             glowColor: '#b000ff', 
             shape: 'shield',
@@ -1026,7 +1025,7 @@ window.openPlayerProfile = function(player, rank) {
         { 
             title: 'Imperial Crown', 
             desc: 'Reached Level 100', 
-            icon: '👑', 
+            icon: 'image/badge6.png', 
             unlocked: playerLevel >= 100, 
             glowColor: '#ff2255', 
             shape: 'diamond',
@@ -1035,7 +1034,7 @@ window.openPlayerProfile = function(player, rank) {
         { 
             title: 'Infernal Apex', 
             desc: 'Reached Level 150', 
-            icon: '🔥', 
+            icon: 'image/badge7.png', 
             unlocked: playerLevel >= 150, 
             glowColor: '#ff5500', 
             shape: 'hexagon',
@@ -1044,7 +1043,7 @@ window.openPlayerProfile = function(player, rank) {
         { 
             title: 'Mythical Deity', 
             desc: 'Reached Level 200', 
-            icon: '💎', 
+            icon: 'image/badge8.png', 
             unlocked: playerLevel >= 200, 
             glowColor: '#00ffff', 
             shape: 'octagon',
