@@ -334,7 +334,7 @@ function checkAndUnlockBadges() {
         `;
         badgesContainer.appendChild(badgeElement);
     });
-} // <-- Fixed: Closed checkAndUnlockBadges properly
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     const avatarLoader = document.getElementById('avatarLoader');
