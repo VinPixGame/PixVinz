@@ -19,10 +19,9 @@ const analytics = getAnalytics(app);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Expose Firestore database tools globally
 window.pixvinzDb = { db, doc, getDoc, setDoc, updateDoc, collection, query, orderBy, limit, getDocs };
 
-// --- SAFE CLOUD-FIRST PROFILE SYNC & HYDRATION ---
+// --- SAFE CLOUD PROFILE SYNC ---
 async function fetchCloudProfileData() {
   try {
     let user = null;
@@ -49,148 +48,13 @@ async function fetchCloudProfileData() {
     }
     return user;
   } catch (err) {
-    console.warn("Could not fetch profile data from cloud, falling back safely:", err);
+    console.warn("Cloud sync fallback:", err);
     try {
       return JSON.parse(localStorage.getItem('loggedInUser'));
     } catch (e) {
       return null;
     }
   }
-}
-
-// --- CHOOSE AVATAR UPLOAD HANDLER (CLOUD-FIRST) ---
-function setupAvatarUploader(currentUsername) {
-  const chooseAvatarBtn = document.querySelector('.choose-avatar-btn') || document.getElementById('chooseAvatarBtn') || Array.from(document.querySelectorAll('button')).find(el => el.textContent.includes('Choose Avatar'));
-  
-  if (!chooseAvatarBtn) return;
-
-  let fileInput = document.getElementById('hiddenAvatarInput');
-  if (!fileInput) {
-    fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.id = 'hiddenAvatarInput';
-    fileInput.accept = 'image/*';
-    fileInput.style.display = 'none';
-    document.body.appendChild(fileInput);
-  }
-
-  let statusMsg = document.getElementById('avatarStatusMsg');
-  if (!statusMsg) {
-    statusMsg = document.createElement('div');
-    statusMsg.id = 'avatarStatusMsg';
-    statusMsg.style.cssText = 'font-size: 11px; margin-top: 6px; text-align: center; font-weight: 600; transition: opacity 0.3s ease;';
-    chooseAvatarBtn.parentNode.insertBefore(statusMsg, chooseAvatarBtn.nextSibling);
-  }
-
-  chooseAvatarBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-    fileInput.click();
-  });
-
-  fileInput.addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async function(uploadEvent) {
-      const base64Image = uploadEvent.target.result;
-      
-      try {
-        if (window.pixvinzDb && currentUsername) {
-          const userDocRef = doc(db, 'players', currentUsername);
-          await updateDoc(userDocRef, { avatar: base64Image });
-        }
-      } catch (err) {
-        console.warn("Error updating avatar in Firestore:", err);
-      }
-      
-      if (currentUsername) {
-        localStorage.setItem(`${currentUsername}_vinpix_avatar`, base64Image);
-      }
-      
-      try {
-        const userObj = JSON.parse(localStorage.getItem('loggedInUser')) || {};
-        userObj.avatar = base64Image;
-        localStorage.setItem('loggedInUser', JSON.stringify(userObj));
-      } catch (err) {}
-
-      const avatarImg = document.getElementById('profileHeaderImg');
-      const fallbackIcon = document.getElementById('profileIconFallback');
-      if (avatarImg) {
-        avatarImg.src = base64Image;
-        avatarImg.style.display = 'block';
-      }
-      if (fallbackIcon) {
-        fallbackIcon.style.display = 'none';
-      }
-
-      statusMsg.innerText = '✔ Avatar uploaded successfully!';
-      statusMsg.style.color = '#2ecc71';
-      statusMsg.style.opacity = '1';
-
-      setTimeout(() => {
-        statusMsg.style.opacity = '0';
-      }, 4000);
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-// --- EDIT PLAYER NAME HANDLER (CLOUD-FIRST) ---
-function setupNameEditor(currentUsername) {
-  const editBtn = Array.from(document.querySelectorAll('button')).find(el => el.textContent.trim() === 'Edit');
-  if (!editBtn) return;
-
-  editBtn.addEventListener('click', async () => {
-    if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-    
-    let nameDisplayElem = document.querySelector('#profileView .player-name') || document.getElementById('userDisplayName');
-    if (!nameDisplayElem) return;
-
-    if (editBtn.innerText === 'Edit') {
-      const currentName = nameDisplayElem.innerText;
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.value = currentName;
-      input.maxLength = 20;
-      input.style.cssText = 'background: rgba(0,0,0,0.5); border: 1px solid #ffd700; color: #fff; padding: 4px 8px; border-radius: 6px; font-size: 14px; text-align: center; width: 140px;';
-      
-      nameDisplayElem.replaceWith(input);
-      input.focus();
-      editBtn.innerText = 'Save';
-
-      const saveAction = async () => {
-        const newName = input.value.trim() || currentName;
-        const newSpan = document.createElement('span');
-        newSpan.id = 'userDisplayName';
-        newSpan.className = nameDisplayElem.className;
-        newSpan.innerText = newName;
-        input.replaceWith(newSpan);
-        editBtn.innerText = 'Edit';
-
-        try {
-          if (window.pixvinzDb && currentUsername) {
-            const userDocRef = doc(db, 'players', currentUsername);
-            await updateDoc(userDocRef, { displayName: newName });
-          }
-        } catch (err) {
-          console.warn("Could not save display name to cloud:", err);
-        }
-
-        try {
-          const userObj = JSON.parse(localStorage.getItem('loggedInUser')) || {};
-          userObj.displayName = newName;
-          localStorage.setItem('loggedInUser', JSON.stringify(userObj));
-        } catch (err) {}
-      };
-
-      input.addEventListener('blur', saveAction);
-      input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') saveAction();
-      });
-    }
-  });
 }
 
 // --- MAIN APP BOOTSTRAP ---
@@ -232,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
       views[targetView].classList.add('active');
     }
 
-    if (['home', 'levels', 'collections', 'profileView'].includes(targetView)) {
+    if (['homeView', 'levelsView', 'collectionsView', 'profileView'].includes(targetView)) {
       if (mainHeader) mainHeader.classList.remove('hidden');
       updateCoinDisplay();
     } else {
@@ -241,11 +105,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (targetView === 'profileView') {
       updateProfileStats();
-      renderProfileBadges();
     }
   }
 
   window.showView = showView;
+  window.goHome = function() {
+    if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+    showView('homeView');
+  };
 
   function updateCoinDisplay() {
     const user = getCurrentUser();
@@ -271,74 +138,62 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  const profileHeaderImg = document.getElementById('profileHeaderImg');
-  const profileIconFallback = document.getElementById('profileIconFallback');
-
-  [profileHeaderImg, profileIconFallback].forEach(element => {
-    if (element) {
-      const profileTrigger = element.closest('.profile-header-btn') || element.parentElement;
-      if (profileTrigger && !profileTrigger.dataset.hasProfileListener) {
-        profileTrigger.dataset.hasProfileListener = 'true';
-        profileTrigger.addEventListener('click', async (e) => {
-          e.preventDefault();
-          if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-          await fetchCloudProfileData();
-          showView('profileView');
-        });
-      }
-    }
-  });
-
-  const skipLoading = localStorage.getItem('skipLoading') === 'true';
   const percentageElem = document.getElementById('loadingPercentage');
   const barFillElem = document.getElementById('loadingBarFill');
 
   async function finishLoading() {
-      localStorage.removeItem('skipLoading');
       const loggedInUser = getCurrentUser();
       if (loggedInUser) {
           await fetchCloudProfileData();
           const freshUser = getCurrentUser();
+          
           const nameElem = document.getElementById('userDisplayName');
           if (nameElem) nameElem.innerText = freshUser?.displayName || loggedInUser.displayName || 'Vinz';
           
-          let currentUsername = loggedInUser.username || '';
-          setupAvatarUploader(currentUsername);
-          setupNameEditor(currentUsername);
+          const profileNameElem = document.getElementById('displayPlayerName');
+          if (profileNameElem) profileNameElem.innerText = freshUser?.displayName || loggedInUser.displayName || 'Ulala';
 
-          showView('home');
+          const avatarImg = document.getElementById('profileHeaderImg');
+          const fallbackIcon = document.getElementById('profileIconFallback');
+          const previewImg = document.getElementById('avatar-preview');
+          const userAvatar = freshUser?.avatar || loggedInUser.avatar;
+
+          if (userAvatar) {
+            if (avatarImg) { avatarImg.src = userAvatar; avatarImg.style.display = 'block'; }
+            if (fallbackIcon) { fallbackIcon.style.display = 'none'; }
+            if (previewImg) { previewImg.src = userAvatar; }
+          }
+
+          showView('homeView');
           playMainBGM();
       } else {
-          showView('login');
+          showView('loginView');
       }
   }
 
-  if (skipLoading) {
-      finishLoading();
-  } else {
-      let currentPercent = 1;
-      const totalDuration = 3000; // Optimized loading speed
-      const intervalTime = 50;
-      const increment = 100 / (totalDuration / intervalTime);
+  let currentPercent = 1;
+  const totalDuration = 2000;
+  const intervalTime = 40;
+  const increment = 100 / (totalDuration / intervalTime);
 
-      const loadingInterval = setInterval(() => {
-          currentPercent += increment;
-          if (currentPercent >= 100) {
-              currentPercent = 100;
-              clearInterval(loadingInterval);
-              finishLoading();
-          }
-          if (percentageElem) percentageElem.innerText = `${Math.floor(currentPercent)}%`;
-          if (barFillElem) barFillElem.style.width = `${currentPercent}%`;
-      }, intervalTime);
-  }
+  const loadingInterval = setInterval(() => {
+      currentPercent += increment;
+      if (currentPercent >= 100) {
+          currentPercent = 100;
+          clearInterval(loadingInterval);
+          finishLoading();
+      }
+      if (percentageElem) percentageElem.innerText = `${Math.floor(currentPercent)}%`;
+      if (barFillElem) barFillElem.style.width = `${currentPercent}%`;
+  }, intervalTime);
 
+  // Switch Links
   const toRegBtn = document.getElementById('toRegister');
   if (toRegBtn) {
     toRegBtn.addEventListener('click', (e) => {
       e.preventDefault();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      showView('register');
+      showView('registerView');
     });
   }
 
@@ -347,60 +202,11 @@ document.addEventListener('DOMContentLoaded', () => {
     toLogBtn.addEventListener('click', (e) => {
       e.preventDefault();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      showView('login');
+      showView('loginView');
     });
   }
 
-  function validateUsernameFormat(username) {
-    const regex = /^(?=.*[0-9])(?=.*[a-z])[a-z0-9]{6,}$/;
-    return regex.test(username);
-  }
-
-  function validatePasswordFormat(password) {
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,12}$/;
-    return regex.test(password);
-  }
-
-  const regUserField = document.getElementById('regUser');
-  let usernameIndicator = document.getElementById('regUserIndicator');
-  if (regUserField && !usernameIndicator) {
-    usernameIndicator = document.createElement('span');
-    usernameIndicator.id = 'regUserIndicator';
-    usernameIndicator.style.marginLeft = '8px';
-    regUserField.parentNode.appendChild(usernameIndicator);
-  }
-
-  if (regUserField) {
-    regUserField.addEventListener('input', async () => {
-      const val = regUserField.value.trim().toLowerCase();
-      regUserField.value = val;
-
-      if (!validateUsernameFormat(val)) {
-        usernameIndicator.innerText = '❌ (Min 6 chars, lowercase & number)';
-        usernameIndicator.style.color = '#ff4d4d';
-        return;
-      }
-
-      try {
-        if (window.pixvinzDb) {
-          const { db, doc, getDoc } = window.pixvinzDb;
-          const userDocRef = doc(db, 'players', val);
-          const snap = await getDoc(userDocRef);
-          if (snap.exists()) {
-            usernameIndicator.innerText = '❌ Username already taken!';
-            usernameIndicator.style.color = '#ff4d4d';
-          } else {
-            usernameIndicator.innerText = '✔ Available';
-            usernameIndicator.style.color = '#2ecc71';
-          }
-        }
-      } catch (err) {
-        usernameIndicator.innerText = '✔ Available';
-        usernameIndicator.style.color = '#2ecc71';
-      }
-    });
-  }
-
+  // Password toggles
   function setupPasswordToggle(passwordInputId, toggleBtnId) {
     const passInput = document.getElementById(passwordInputId);
     const toggleBtn = document.getElementById(toggleBtnId);
@@ -419,6 +225,42 @@ document.addEventListener('DOMContentLoaded', () => {
   setupPasswordToggle('regPass', 'toggleRegPass');
   setupPasswordToggle('loginPass', 'toggleLoginPass');
 
+  // Username validation indicator
+  const regUserField = document.getElementById('regUser');
+  const usernameIndicator = document.getElementById('regUserIndicator');
+  if (regUserField && usernameIndicator) {
+    regUserField.addEventListener('input', async () => {
+      const val = regUserField.value.trim().toLowerCase();
+      regUserField.value = val;
+
+      const regex = /^(?=.*[0-9])(?=.*[a-z])[a-z0-9]{6,}$/;
+      if (!regex.test(val)) {
+        usernameIndicator.innerText = '❌ Min 6 chars, letters & numbers';
+        usernameIndicator.style.color = '#ff4d4d';
+        return;
+      }
+
+      try {
+        if (window.pixvinzDb) {
+          const { db, doc, getDoc } = window.pixvinzDb;
+          const userDocRef = doc(db, 'players', val);
+          const snap = await getDoc(userDocRef);
+          if (snap.exists()) {
+            usernameIndicator.innerText = '❌ Taken';
+            usernameIndicator.style.color = '#ff4d4d';
+          } else {
+            usernameIndicator.innerText = '✔ Available';
+            usernameIndicator.style.color = '#2ecc71';
+          }
+        }
+      } catch (err) {
+        usernameIndicator.innerText = '✔ Available';
+        usernameIndicator.style.color = '#2ecc71';
+      }
+    });
+  }
+
+  // Register Form
   const regForm = document.getElementById('registerForm');
   if (regForm) {
     regForm.addEventListener('submit', async (e) => {
@@ -431,13 +273,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const passConfirm = document.getElementById('regPassConfirm').value;
       const errElem = document.getElementById('regError');
 
-      if (!validateUsernameFormat(username)) {
-        if (errElem) errElem.innerText = "Username must be at least 6 characters and contain lowercase letters and numbers!";
+      const userRegex = /^(?=.*[0-9])(?=.*[a-z])[a-z0-9]{6,}$/;
+      if (!userRegex.test(username)) {
+        if (errElem) errElem.innerText = "Username must be at least 6 characters with lowercase letters and numbers!";
         return;
       }
 
-      if (!validatePasswordFormat(pass)) {
-        if (errElem) errElem.innerText = "Password must be 6-12 characters and include at least one Uppercase letter, one lowercase letter, and one number!";
+      const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,12}$/;
+      if (!passRegex.test(pass)) {
+        if (errElem) errElem.innerText = "Password must be 6-12 chars with uppercase, lowercase, and number!";
         return;
       }
 
@@ -447,17 +291,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       try {
-        if (!window.pixvinzDb) {
-          if (errElem) errElem.innerText = "Database connection not available.";
-          return;
-        }
-
         const { db, doc, getDoc, setDoc } = window.pixvinzDb;
         const userDocRef = doc(db, 'players', username);
         const userSnapshot = await getDoc(userDocRef);
 
         if (userSnapshot.exists()) {
-          if (errElem) errElem.innerText = "Username is already taken or registered!";
+          if (errElem) errElem.innerText = "Username is already taken!";
           return;
         }
 
@@ -479,14 +318,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         await setDoc(userDocRef, newUserData);
         localStorage.setItem('loggedInUser', JSON.stringify(newUserData));
+
         const nameElem = document.getElementById('userDisplayName');
         if (nameElem) nameElem.innerText = displayName;
 
-        setupAvatarUploader(username);
-        setupNameEditor(username);
-
         if (errElem) errElem.innerText = "";
-        showView('home');
+        showView('homeView');
         playMainBGM();
       } catch (err) {
         if (errElem) errElem.innerText = "Registration error: " + err.message;
@@ -494,6 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Login Form
   const logForm = document.getElementById('loginForm');
   if (logForm) {
     logForm.addEventListener('submit', async (e) => {
@@ -519,14 +357,12 @@ document.addEventListener('DOMContentLoaded', () => {
           localStorage.setItem('loggedInUser', JSON.stringify(userData));
           await fetchCloudProfileData();
           const freshUser = getCurrentUser();
+
           const nameElem = document.getElementById('userDisplayName');
           if (nameElem) nameElem.innerText = freshUser?.displayName || userData.displayName;
 
-          setupAvatarUploader(username);
-          setupNameEditor(username);
-
           if (errElem) errElem.innerText = "";
-          showView('home');
+          showView('homeView');
           playMainBGM();
         } else {
           if (errElem) errElem.innerText = "Invalid username or password!";
@@ -537,12 +373,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Menu Navigation bindings
   const playBtn = document.getElementById('playBtn');
   if (playBtn) {
     playBtn.addEventListener('click', async () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       const cloudData = await fetchCloudProfileData();
-      const currentLevel = cloudData?.level ?? parseInt(localStorage.getItem(getUserKey('currentLevel'))) ?? parseInt(getCurrentUser()?.level) ?? 1;
+      const currentLevel = cloudData?.level ?? parseInt(localStorage.getItem(getUserKey('currentLevel'))) ?? 1;
       window.location.href = `game.html?level=${currentLevel}`;
     });
   }
@@ -553,7 +390,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       await fetchCloudProfileData();
       renderLevels();
-      showView('levels');
+      showView('levelsView');
     });
   }
 
@@ -563,15 +400,42 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       await fetchCloudProfileData();
       renderCollectionFolders();
-      showView('collections');
+      showView('collectionsView');
     });
   }
 
+  const navLeaderboard = document.getElementById('navLeaderboard');
+  if (navLeaderboard) {
+    navLeaderboard.addEventListener('click', async () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      showView('leaderboardView');
+      await loadLeaderboardData();
+    });
+  }
+
+  const navChallenge = document.getElementById('navChallenge');
+  if (navChallenge) {
+    navChallenge.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      showView('challengeView');
+    });
+  }
+
+  const navSettings = document.getElementById('navSettings');
+  if (navSettings) {
+    navSettings.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      const settingsModal = document.getElementById('settingsModal');
+      if (settingsModal) settingsModal.classList.remove('hidden');
+    });
+  }
+
+  // Back buttons across views
   document.querySelectorAll('.back-btn').forEach(btn => {
     if (btn.id === 'collectionsBackBtn') return;
     btn.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      showView('home');
+      showView('homeView');
     });
   });
 
@@ -584,35 +448,25 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopImmediatePropagation();
         renderCollectionFolders();
       } else {
-        showView('home');
+        showView('homeView');
       }
     });
   }
 
-  const settingsModal = document.getElementById('settingsModal');
-  const aboutModal = document.getElementById('aboutModal');
-  const sfxToggle = document.getElementById('sfxToggle');
-  const musicToggle = document.getElementById('musicToggle');
-
-  if (typeof AudioManager !== 'undefined') {
-    if (sfxToggle) sfxToggle.checked = AudioManager.sfxEnabled;
-    if (musicToggle) musicToggle.checked = AudioManager.musicEnabled;
-  }
-
-  const navSettings = document.getElementById('navSettings');
-  if (navSettings) {
-    navSettings.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      if (settingsModal) settingsModal.classList.remove('hidden');
-    });
-  }
-
+  // Settings modals & audio
   const closeSettingsModal = document.getElementById('closeSettingsModal');
   if (closeSettingsModal) {
     closeSettingsModal.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      if (settingsModal) settingsModal.classList.add('hidden');
+      document.getElementById('settingsModal')?.classList.add('hidden');
     });
+  }
+
+  const sfxToggle = document.getElementById('sfxToggle');
+  const musicToggle = document.getElementById('musicToggle');
+  if (typeof AudioManager !== 'undefined') {
+    if (sfxToggle) sfxToggle.checked = AudioManager.sfxEnabled;
+    if (musicToggle) musicToggle.checked = AudioManager.musicEnabled;
   }
 
   if (sfxToggle) {
@@ -636,7 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (aboutBtn) {
     aboutBtn.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      if (aboutModal) aboutModal.classList.remove('hidden');
+      document.getElementById('aboutModal')?.classList.remove('hidden');
     });
   }
 
@@ -644,7 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (closeAboutModal) {
     closeAboutModal.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      if (aboutModal) aboutModal.classList.add('hidden');
+      document.getElementById('aboutModal')?.classList.add('hidden');
     });
   }
 
@@ -654,13 +508,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       if (confirm("Are you sure you want to log out?")) {
         localStorage.removeItem('loggedInUser');
-        if (settingsModal) settingsModal.classList.add('hidden');
+        document.getElementById('settingsModal')?.classList.add('hidden');
         if (typeof AudioManager !== 'undefined') AudioManager.stopBGM();
-        showView('login');
+        showView('loginView');
       }
     });
   }
 
+  // Render Levels Grid
   function renderLevels() {
     const grid = document.getElementById('levelsGrid');
     if (!grid) return;
@@ -761,6 +616,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Render Collection Folders
   function renderCollectionFolders() {
     const folderGrid = document.getElementById('collectionsFolderGrid');
     if (!folderGrid) return;
@@ -789,22 +645,16 @@ document.addEventListener('DOMContentLoaded', () => {
       folderGrid.appendChild(folderCard);
     }
 
-    const folderContainer = document.getElementById('collectionsFolderContainer');
-    const imagesContainer = document.getElementById('collectionsImagesContainer');
+    document.getElementById('collectionsFolderContainer')?.classList.remove('hidden');
+    document.getElementById('collectionsImagesContainer')?.classList.add('hidden');
     const titleElem = document.getElementById('collectionsTitle');
-
-    if (folderContainer) folderContainer.classList.remove('hidden');
-    if (imagesContainer) imagesContainer.classList.add('hidden');
     if (titleElem) titleElem.innerText = 'COLLECTIONS';
   }
 
   function openCollectionFolder(start, end) {
-    const folderContainer = document.getElementById('collectionsFolderContainer');
-    const imagesContainer = document.getElementById('collectionsImagesContainer');
+    document.getElementById('collectionsFolderContainer')?.classList.add('hidden');
+    document.getElementById('collectionsImagesContainer')?.classList.remove('hidden');
     const titleElem = document.getElementById('collectionsTitle');
-
-    if (folderContainer) folderContainer.classList.add('hidden');
-    if (imagesContainer) imagesContainer.classList.remove('hidden');
     if (titleElem) titleElem.innerText = `LVL ${start}-${end}`;
 
     renderFilteredCollections(start, end);
@@ -854,30 +704,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function closeImageModal() {
     if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-    const modal = document.getElementById('imageModal');
-    if (modal) modal.classList.add('hidden');
+    document.getElementById('imageModal')?.classList.add('hidden');
   }
 
-  const closeImgModalBtn = document.getElementById('closeImageModal');
-  if (closeImgModalBtn) closeImgModalBtn.addEventListener('click', closeImageModal);
-
-  const imgModal = document.getElementById('imageModal');
-  if (imgModal) {
-    imgModal.addEventListener('click', (e) => {
-      if (e.target.id === 'imageModal' || e.target.id === 'modalPreviewImg') {
-        closeImageModal();
-      }
-    });
-  }
+  document.getElementById('closeImageModal')?.addEventListener('click', closeImageModal);
+  document.getElementById('imageModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'imageModal' || e.target.id === 'modalPreviewImg') {
+      closeImageModal();
+    }
+  });
 });
 
-// --- DYNAMIC PROFILE STATS & CLOUD-SYNCED LEVEL/XP/COINS ---
+// --- DYNAMIC PROFILE STATS & CLOUD SYNC ---
 async function updateProfileStats() {
   await fetchCloudProfileData();
 
   let currentLevel = 1;
   let totalCoins = 0;
   let currentXp = 0;
+  let displayName = 'Ulala';
 
   try {
     const loggedUser = JSON.parse(localStorage.getItem('loggedInUser'));
@@ -885,19 +730,7 @@ async function updateProfileStats() {
       if (loggedUser.level !== undefined) currentLevel = parseInt(loggedUser.level);
       if (loggedUser.coins !== undefined) totalCoins = parseInt(loggedUser.coins);
       if (loggedUser.xp !== undefined) currentXp = parseInt(loggedUser.xp);
-      if (loggedUser.displayName) {
-        const nameElem = document.getElementById('userDisplayName') || document.querySelector('.player-name');
-        if (nameElem) nameElem.innerText = loggedUser.displayName;
-      }
-      if (loggedUser.avatar) {
-        const avatarImg = document.getElementById('profileHeaderImg');
-        const fallbackIcon = document.getElementById('profileIconFallback');
-        if (avatarImg) {
-          avatarImg.src = loggedUser.avatar;
-          avatarImg.style.display = 'block';
-        }
-        if (fallbackIcon) fallbackIcon.style.display = 'none';
-      }
+      if (loggedUser.displayName) displayName = loggedUser.displayName;
     }
   } catch (e) {}
 
@@ -908,60 +741,32 @@ async function updateProfileStats() {
   const coinHeaderElem = document.getElementById('coinCount');
   if (coinHeaderElem) coinHeaderElem.innerText = totalCoins;
 
-  const coinBoxes = document.querySelectorAll('#profileView span, #profileView div');
-  coinBoxes.forEach(box => {
-    if (box.textContent.trim().match(/^\d+$/) && box.previousElementSibling && box.previousElementSibling.textContent.includes('🪙')) {
-      box.innerText = totalCoins;
-    }
-  });
+  const profileCoinsElem = document.getElementById('profileCoins');
+  if (profileCoinsElem) profileCoinsElem.innerText = totalCoins;
 
-  document.querySelectorAll('#profileView').forEach(view => {
-    const textNodes = document.createTreeWalker(view, NodeFilter.SHOW_TEXT, null, false);
-    let node;
-    while (node = textNodes.nextNode()) {
-      if (node.nodeValue.includes('Level:')) {
-        node.nodeValue = `Level: ${currentLevel}`;
-      }
-      if (node.nodeValue.includes('LEVEL 1') || node.nodeValue.includes('LEVEL ')) {
-        node.nodeValue = `LEVEL ${currentLevel}`;
-      }
-    }
-  });
+  const profileLevelElem = document.getElementById('profileLevel');
+  if (profileLevelElem) profileLevelElem.innerText = currentLevel;
 
-  const levelBadges = document.querySelectorAll('#profileView .level-badge, #profileView div');
-  levelBadges.forEach(el => {
-    if (el.innerText && el.innerText.startsWith('LEVEL')) {
-      el.innerText = `LEVEL ${currentLevel}`;
-    }
-  });
+  const displayPlayerName = document.getElementById('displayPlayerName');
+  if (displayPlayerName) displayPlayerName.innerText = displayName;
 
-  const xpTextElem = Array.from(document.querySelectorAll('span, div')).find(el => el.textContent.includes('/ 500 XP') || el.textContent.includes('XP'));
-  if (xpTextElem) {
-    const xpTarget = currentLevel * 500;
-    xpTextElem.innerText = `${currentXp} / ${xpTarget} XP`;
+  const xpLevelNum = document.querySelector('#displayLevelBadge .xp-level-num');
+  if (xpLevelNum) xpLevelNum.innerText = currentLevel;
+
+  const xpTarget = currentLevel * 500;
+  const displayXpText = document.getElementById('displayXpText');
+  if (displayXpText) displayXpText.innerText = `${currentXp} / ${xpTarget} XP`;
+
+  const xpBarFill = document.getElementById('displayXpBarFill');
+  if (xpBarFill) {
+    const percentage = Math.min(100, ((currentXp % 500) / 500) * 100);
+    xpBarFill.style.width = `${percentage}%`;
   }
 
-  const progressBar = document.querySelector('#profileView .progress-bar-fill, #profileView div[style*="width"]');
-  if (progressBar) {
-    const percentage = Math.min(100, (currentXp % 500) / 5 * 1);
-    progressBar.style.width = `${percentage}%`;
-  }
+  renderProfileBadges(currentLevel, totalCoins);
 }
 
-// --- LEADERBOARD LOGIC ---
-document.addEventListener('DOMContentLoaded', () => {
-  const navLeaderboard = document.getElementById('navLeaderboard');
-  if (navLeaderboard) {
-    navLeaderboard.addEventListener('click', async () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      document.querySelectorAll('[id$="View"]').forEach(view => view.classList.remove('active'));
-      const leaderboardView = document.getElementById('leaderboardView');
-      if (leaderboardView) leaderboardView.classList.add('active');
-      await loadLeaderboardData();
-    });
-  }
-});
-
+// --- LEADERBOARD DATA LOADER ---
 async function loadLeaderboardData() {
   const listContainer = document.getElementById('leaderboardList');
   if (!listContainer) return;
@@ -994,50 +799,52 @@ async function loadLeaderboardData() {
       });
     }
   } catch (err) {
-    console.warn("Could not fetch live leaderboard from Firestore:", err);
+    console.warn("Could not fetch live leaderboard:", err);
   }
 
   listContainer.innerHTML = '';
 
   let userRank = '--';
   if (currentUsername) {
-    const foundIndex = players.findIndex(p => p.username.toLowerCase() === currentUsername.toLowerCase() || p.name.toLowerCase() === currentUsername.toLowerCase());
+    const foundIndex = players.findIndex(p => p.username.toLowerCase() === currentUsername.toLowerCase());
     if (foundIndex !== -1) {
       userRank = `#${foundIndex + 1}`;
     }
   }
 
   const rankDisplay = document.getElementById('userRankDisplay');
-  if (rankDisplay) {
-    rankDisplay.textContent = userRank !== '--' ? userRank : '#--';
-    rankDisplay.style.textAlign = 'center';
-    rankDisplay.style.display = 'block';
-    rankDisplay.style.width = '100%';
-  }
+  if (rankDisplay) rankDisplay.textContent = userRank;
+
+  const profileRankDisplay = document.getElementById('profileGlobalRank');
+  if (profileRankDisplay) profileRankDisplay.textContent = userRank;
 
   if (players.length === 0) {
-    listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #aaa;">No players found on the leaderboard yet.</div>';
+    listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: #aaa;">No players found on the leaderboard yet.</div>';
     return;
   }
+
+  players.forEach((player, index) => {
+    const item = document.createElement('div');
+    item.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: rgba(42, 17, 71, 0.6); padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(156, 39, 176, 0.3);';
+    item.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-weight: bold; color: #ffd700; width: 24px;">#${index + 1}</span>
+        <span style="color: #fff; font-weight: 600;">${player.name}</span>
+      </div>
+      <div style="display: flex; gap: 15px; color: #b388ff; font-size: 0.9rem;">
+        <span>LVL ${player.level}</span>
+        <span>🪙 ${player.coins}</span>
+      </div>
+    `;
+    listContainer.appendChild(item);
+  });
 }
 
-// --- PROFILE BADGES RENDERING LOGIC ---
-async function renderProfileBadges() {
-    await fetchCloudProfileData();
-
-    let playerLevel = 1;
-    let playerCoins = 0;
-    try {
-        const loggedUser = JSON.parse(localStorage.getItem('loggedInUser'));
-        if (loggedUser) {
-            if (loggedUser.level !== undefined) playerLevel = parseInt(loggedUser.level);
-            if (loggedUser.coins !== undefined) playerCoins = parseInt(loggedUser.coins);
-        }
-    } catch (e) {}
-
+// --- PROFILE BADGES RENDERING ---
+function renderProfileBadges(playerLevel, playerCoins) {
     const allBadges = [
         { title: 'Novice Genesis', desc: 'Completed Level 1', icon: 'image/badge1.png', unlocked: playerLevel >= 1 },
-        { title: 'Thunderbolt', desc: 'Speed run (20-30) < 1m', icon: 'image/badge2.png', unlocked: window.player?.speedThunder === true },
+        { title: 'Thunderbolt', desc: 'Speed run < 1m', icon: 'image/badge2.png', unlocked: false },
         { title: 'Aurelian Vault', desc: 'Reached 500 coins', icon: 'image/badge3.png', unlocked: playerCoins >= 500 },
         { title: 'Celestial Elite', desc: 'Reached Level 50', icon: 'image/badge4.png', unlocked: playerLevel >= 50 },
         { title: 'Grand Sovereign', desc: 'Reached Level 75', icon: 'image/badge5.png', unlocked: playerLevel >= 75 },
@@ -1050,29 +857,17 @@ async function renderProfileBadges() {
     if (!badgesContainer) return;
 
     badgesContainer.innerHTML = '';
-    badgesContainer.style.gap = '16px 12px';
-
     allBadges.forEach(badge => {
         const isUnlocked = badge.unlocked;
-
         const badgeElement = document.createElement('div');
         badgeElement.className = 'badge-item';
-        badgeElement.style.cssText = `
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            padding: 4px;
-            width: 100%;
-            box-sizing: border-box;
-        `;
-
+        badgeElement.style.cssText = 'display: flex; flex-direction: column; align-items: center; text-align: center; padding: 4px;';
         badgeElement.innerHTML = `
-            <div style="width: 84px; height: 82px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; filter: ${isUnlocked ? 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.5))' : 'none'};">
+            <div style="width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; filter: ${isUnlocked ? 'drop-shadow(0 0 6px rgba(255, 215, 0, 0.5))' : 'none'};">
                 <img src="${badge.icon}" alt="${badge.title}" style="width: 100%; height: 100%; object-fit: contain; ${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.35;'}">
             </div>
-            <span class="badge-title" style="font-weight: 700; font-size: 10px; color: ${isUnlocked ? '#fff' : '#777'}; line-height: 1.2; margin-bottom: 2px; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${badge.title}</span>
-            <span class="badge-desc" style="font-size: 8px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1.1; width: 100%; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;">${badge.desc}</span>
+            <span style="font-weight: 700; font-size: 9px; color: ${isUnlocked ? '#fff' : '#777'};">${badge.title}</span>
+            <span style="font-size: 7px; color: ${isUnlocked ? '#bbb' : '#444'};">${badge.desc}</span>
         `;
         badgesContainer.appendChild(badgeElement);
     });
