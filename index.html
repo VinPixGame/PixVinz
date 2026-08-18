@@ -329,15 +329,14 @@
         <!-- Header with Back Button -->
         <div class="profile-header" style="margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
           <button class="back-btn" onclick="goHome()"><span>←</span> Back</button>
-          <h1 style="font-size: 1.1rem; margin: 0; color: #fff;">Player Profile</h1>
           <div style="width: 50px;"></div> <!-- Spacer to balance header -->
         </div>
-
+      </div>
         <!-- Profile Card -->
         <div class="profile-card" style="background: transparent; border: none; padding: 0; box-shadow: none;">
           <!-- Avatar Display & Upload with Loading State -->
           <div class="avatar-section" style="margin-bottom: 4px; text-align: center;">
-            <div class="avatar-wrapper" id="avatarWrapper" style="width: 70px; height: 70px; margin: 0 auto 8px auto;">
+            <div class="avatar-wrapper" id="avatarWrapper" style="width: 160px; height: 160px; margin: 0 auto 8px auto;">
               <img id="avatar-preview" src="image/avatar.png" alt="Profile Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.src='https://via.placeholder.com/120/4a154b/ffffff?text=Avatar'">
               <div class="avatar-loader" id="avatarLoader" style="display: none;">
                 <div class="spinner"></div>
