@@ -312,109 +312,100 @@
         <div style="position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 30px; height: 12px; background: linear-gradient(135deg, #ffaa00, #ffd700); clip-path: polygon(0% 0%, 100% 0%, 50% 100%); box-shadow: 0 0 10px #ffd700;"></div>
     </div>
 </div>
+
     
-<!-- PROFILE PAGE VIEW -->
-    <section id="profileView" class="view hidden" style="display: flex; align-items: center; justify-content: center; padding: 10px; box-sizing: border-box;">
-      <div class="profile-container" style="
-          background: linear-gradient(135deg, rgba(22, 16, 48, 0.98), rgba(12, 9, 28, 0.99));
-          border: 2px solid #ffd700;
-          box-shadow: 0 0 20px rgba(255, 215, 0, 0.4), inset 0 0 15px rgba(255, 215, 0, 0.15);
-          border-radius: 20px;
-          padding: 12px 14px;
-          width: 100%;
-          max-width: 420px;
-          box-sizing: border-box;
-          position: relative;
-      ">
-        <!-- Header with Back Button -->
-        <div class="profile-header" style="margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
-          <button class="back-btn" onclick="goHome()"><span>←</span> Back</button>
-          <div style="width: 50px;"></div> <!-- Spacer to balance header -->
+    <!-- PROFILE PAGE VIEW -->
+<section id="profileView" class="view hidden">
+  <div class="profile-container">
+    <!-- Header with Back Button -->
+    <div class="profile-header">
+      <button class="back-btn" onclick="goHome()"><span>←</span> Back</button>
+      <div class="header-spacer"></div>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="profile-card">
+      <!-- Avatar Display & Upload with Loading State -->
+      <div class="avatar-section">
+        <div class="avatar-wrapper" id="avatarWrapper">
+          <img id="avatar-preview" src="image/avatar.png" alt="Profile Avatar" onerror="this.src='https://via.placeholder.com/120/4a154b/ffffff?text=Avatar'">
+          <div class="avatar-loader" id="avatarLoader">
+            <div class="spinner"></div>
+          </div>
         </div>
+        <label for="avatar-input" class="upload-btn">Choose Avatar</label>
+        <input type="file" id="avatar-input" accept="image/*">
       </div>
-        <!-- Profile Card -->
-        <div class="profile-card" style="background: transparent; border: none; padding: 0; box-shadow: none;">
-          <!-- Avatar Display & Upload with Loading State -->
-          <div class="avatar-section" style="margin-bottom: 4px; text-align: center;">
-            <div class="avatar-wrapper" id="avatarWrapper" style="width: 120px; height: 120px; margin: 0 auto 8px auto;">
-              <img id="avatar-preview" src="image/avatar.png" alt="Profile Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.src='https://via.placeholder.com/120/4a154b/ffffff?text=Avatar'">
-              <div class="avatar-loader" id="avatarLoader" style="display: none;">
-                <div class="spinner"></div>
-              </div>
-            </div>
-            <label for="avatar-input" class="upload-btn" style="padding: 2px 8px; font-size: 0.7rem; display: inline-block; cursor: pointer;">Choose Avatar</label>
-            <input type="file" id="avatar-input" accept="image/*" style="display: none;">
-          </div>
 
-          <!-- Player Name Display Row with Small Edit Button -->
-          <div class="profile-info-row" style="display: flex; align-items: center; justify-content: space-between; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 6px 10px; margin-bottom: 6px;">
-            <div class="info-label-group">
-              <span class="info-subtitle" style="font-size: 0.6rem; color: #aaa;">Player Name</span>
-              <h3 id="displayPlayerName" style="font-size: 0.9rem; margin: 0; color: #fff;">Ulala</h3>
-            </div>
-            <button class="btn btn-secondary" id="openEditNameModal" style="padding: 3px 10px; font-size: 0.75rem;">Edit</button>
-          </div>
+      <!-- Player Name Display Row with Small Edit Button -->
+      <div class="profile-info-row">
+        <div class="info-label-group">
+          <span class="info-subtitle">Player Name</span>
+          <h3 id="displayPlayerName">Ulala</h3>
+        </div>
+        <button class="btn btn-secondary" id="openEditNameModal">Edit</button>
+      </div>
 
-          <!-- Coins and Level Display -->
-          <div class="profile-stats-badge-row" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 8px; padding: 6px 10px; margin-bottom: 6px; font-size: 0.85rem;">
-            <span style="color: #ffd700;">🪙<span id="profileCoins">0</span></span>
-            <span>
-              <span style="color: #8c8c8c; font-weight: 600;">Level:</span> 
-              <span id="profileLevel" style="background: linear-gradient(135deg, #fff2b2 0%, #d4af37 50%, #996515 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">1</span>
-            </span>
-          </div>
+      <!-- Coins and Level Display -->
+      <div class="profile-stats-badge-row">
+        <span class="coins-display">🪙<span id="profileCoins">0</span></span>
+        <span class="level-display-container">
+          <span class="level-label">Level:</span> 
+          <span id="profileLevel">1</span>
+        </span>
+      </div>
 
-          <!-- Badges Section -->
-          <div class="badges-section" style="margin-bottom: 6px;">
-            <div class="badges-section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <h3 style="font-size: 0.8rem; margin: 0; color: #ffd700; letter-spacing: 0.5px;">BADGES</h3>
-              <div class="global-rank-indicator" style="font-size: 0.7rem; color: #ccc;">
-                <span class="rank-label">Global Rank</span> : <span class="rank-value" id="profileGlobalRank" style="color: #00e5ff;">#--</span>
-              </div>
-            </div>
-            
-            <!-- Dynamic 3-Column Badge Grid -->
-            <div class="badges-grid" id="badgesGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; text-align: center;">
-              <!-- Badges will be dynamically injected here by JS -->
-            </div>
+      <!-- Badges Section -->
+      <div class="badges-section">
+        <div class="badges-section-header">
+          <h3>BADGES</h3>
+          <div class="global-rank-indicator">
+            <span class="rank-label">Global Rank</span> : <span class="rank-value" id="profileGlobalRank">#--</span>
           </div>
-
-          <!-- XP Progress Bar Section -->
-          <div class="xp-section" style="margin-top: 2px;">
-            <div class="xp-header-row" style="display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 2px;">
-              <span id="displayLevelBadge">
-                <span style="color: #8c8c8c; font-weight: 600;">LEVEL</span> 
-                <span style="background: linear-gradient(135deg, #fff2b2 0%, #d4af37 50%, #996515 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">1</span>
-              </span>
-              <span id="displayXpText" style="color: #ccc;">0 / 500 XP</span>
-            </div>
-            <!-- Progress Track -->
-            <div class="xp-track" style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-              <div id="displayXpBarFill" class="xp-fill" style="height: 100%; background: linear-gradient(90deg, #ff007f, #00ffff); width: 0%;"></div>
-            </div>
-          </div>
+        </div>
+        
+        <!-- Dynamic 3-Column Badge Grid -->
+        <div class="badges-grid" id="badgesGrid">
+          <!-- Badges will be dynamically injected here by JS -->
         </div>
       </div>
 
-      <!-- EDIT NAME POPUP MODAL -->
-      <div id="editNameModal" class="modal-overlay hidden">
-        <div class="settings-card">
-          <div class="settings-header">
-            <h3>EDIT PLAYER NAME</h3>
-            <button class="icon-btn close-modal-btn" id="closeEditNameModal">✕</button>
-          </div>
-          
-          <div class="input-group">
-            <input type="text" id="username-input" placeholder="Enter new name..." maxlength="15">
-          </div>
-          <p id="save-status" class="save-status"></p>
-
-          <div class="settings-actions">
-            <button id="save-profile-btn" class="btn btn-primary">Save Name</button>
-          </div>
+      <!-- XP Progress Bar Section -->
+      <div class="xp-section">
+        <div class="xp-header-row">
+          <span id="displayLevelBadge">
+            <span class="xp-level-sub">LEVEL</span> 
+            <span class="xp-level-num">1</span>
+          </span>
+          <span id="displayXpText">0 / 500 XP</span>
+        </div>
+        <!-- Progress Track -->
+        <div class="xp-track">
+          <div id="displayXpBarFill" class="xp-fill"></div>
         </div>
       </div>
-    </section>
+    </div>
+  </div>
+
+  <!-- EDIT NAME POPUP MODAL -->
+  <div id="editNameModal" class="modal-overlay hidden">
+    <div class="settings-card">
+      <div class="settings-header">
+        <h3>EDIT PLAYER NAME</h3>
+        <button class="icon-btn close-modal-btn" id="closeEditNameModal">✕</button>
+      </div>
+      
+      <div class="input-group">
+        <input type="text" id="username-input" placeholder="Enter new name..." maxlength="15">
+      </div>
+      <p id="save-status" class="save-status"></p>
+
+      <div class="settings-actions">
+        <button id="save-profile-btn" class="btn btn-primary">Save Name</button>
+      </div>
+    </div>
+  </div>
+</section>
 
   <!-- ENLARGED IMAGE POPUP MODAL -->
   <div id="imageModal" class="modal-overlay hidden">
