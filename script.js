@@ -22,25 +22,23 @@ const auth = getAuth(app);
 // Expose Firestore database tools globally
 window.pixvinzDb = { db, doc, getDoc, setDoc, updateDoc, collection, query, orderBy, limit, getDocs };
 
-// --- CLOUD-FIRST PROFILE SYNC & HYDRATION ---
+// --- SAFE CLOUD-FIRST PROFILE SYNC & HYDRATION ---
 async function fetchCloudProfileData() {
-  let user = null;
   try {
-    user = JSON.parse(localStorage.getItem('loggedInUser'));
-  } catch (e) {}
+    let user = null;
+    try {
+      user = JSON.parse(localStorage.getItem('loggedInUser'));
+    } catch (e) {}
 
-  if (!user || !user.username) return null;
+    if (!user || !user.username) return null;
 
-  try {
     const userDocRef = doc(db, 'players', user.username);
     const snap = await getDoc(userDocRef);
     if (snap.exists()) {
       const cloudData = snap.data();
-      // Merge cloud data back into local loggedInUser storage as secondary cache
       const mergedUser = { ...user, ...cloudData };
       localStorage.setItem('loggedInUser', JSON.stringify(mergedUser));
       
-      // Also cache individual user stats locally for fallback/offline use
       const prefix = user.username;
       if (cloudData.level !== undefined) localStorage.setItem(`${prefix}_currentLevel`, cloudData.level);
       if (cloudData.coins !== undefined) localStorage.setItem(`${prefix}_totalCoins`, cloudData.coins);
@@ -49,56 +47,16 @@ async function fetchCloudProfileData() {
 
       return cloudData;
     }
+    return user;
   } catch (err) {
-    console.warn("Could not fetch profile data from cloud, falling back to local storage:", err);
-  }
-  return user;
-}
-
-document.addEventListener('DOMContentLoaded', async () => {
-  const logoVideos = document.querySelectorAll('video#logoVideo, video#loadingLogo, .auth-logo video, .about-logo video');
-  logoVideos.forEach(video => {
-    video.load();
-    video.play().catch(() => {});
-  });
-
-  // Pull fresh data from Firestore first
-  await fetchCloudProfileData();
-
-  let currentUsername = '';
-  let currentUserData = null;
-  try {
-    currentUserData = JSON.parse(localStorage.getItem('loggedInUser'));
-    if (currentUserData && currentUserData.username) currentUsername = currentUserData.username;
-  } catch (e) {}
-
-  // Apply Name
-  const nameElem = document.getElementById('userDisplayName') || document.querySelector('.player-name');
-  if (nameElem && currentUserData && currentUserData.displayName) {
-    nameElem.innerText = currentUserData.displayName;
-  }
-
-  // --- AVATAR LOADER FROM CLOUD / LOCAL ---
-  const avatarImg = document.getElementById('profileHeaderImg');
-  const fallbackIcon = document.getElementById('profileIconFallback');
-
-  if (avatarImg && fallbackIcon) {
-    const activeAvatar = currentUserData?.avatar || (currentUsername ? localStorage.getItem(`${currentUsername}_vinpix_avatar`) : null);
-    if (activeAvatar) {
-      avatarImg.src = activeAvatar;
-      avatarImg.style.display = 'block';
-      fallbackIcon.style.display = 'none';
-    } else {
-      avatarImg.src = 'image/avatar.png';
-      avatarImg.style.display = 'block';
-      fallbackIcon.style.display = 'none';
+    console.warn("Could not fetch profile data from cloud, falling back safely:", err);
+    try {
+      return JSON.parse(localStorage.getItem('loggedInUser'));
+    } catch (e) {
+      return null;
     }
   }
-
-  setupAvatarUploader(currentUsername);
-  setupNameEditor(currentUsername);
-  updateProfileStats();
-});
+}
 
 // --- CHOOSE AVATAR UPLOAD HANDLER (CLOUD-FIRST) ---
 function setupAvatarUploader(currentUsername) {
@@ -138,7 +96,6 @@ function setupAvatarUploader(currentUsername) {
     reader.onload = async function(uploadEvent) {
       const base64Image = uploadEvent.target.result;
       
-      // 1. Save to Cloud Firestore first
       try {
         if (window.pixvinzDb && currentUsername) {
           const userDocRef = doc(db, 'players', currentUsername);
@@ -148,7 +105,6 @@ function setupAvatarUploader(currentUsername) {
         console.warn("Error updating avatar in Firestore:", err);
       }
       
-      // 2. Save locally as secondary cache
       if (currentUsername) {
         localStorage.setItem(`${currentUsername}_vinpix_avatar`, base64Image);
       }
@@ -159,7 +115,6 @@ function setupAvatarUploader(currentUsername) {
         localStorage.setItem('loggedInUser', JSON.stringify(userObj));
       } catch (err) {}
 
-      // Update UI elements instantly
       const avatarImg = document.getElementById('profileHeaderImg');
       const fallbackIcon = document.getElementById('profileIconFallback');
       if (avatarImg) {
@@ -170,7 +125,6 @@ function setupAvatarUploader(currentUsername) {
         fallbackIcon.style.display = 'none';
       }
 
-      // Show green success indication
       statusMsg.innerText = '✔ Avatar uploaded successfully!';
       statusMsg.style.color = '#2ecc71';
       statusMsg.style.opacity = '1';
@@ -215,7 +169,6 @@ function setupNameEditor(currentUsername) {
         input.replaceWith(newSpan);
         editBtn.innerText = 'Edit';
 
-        // 1. Save to Cloud Firestore first
         try {
           if (window.pixvinzDb && currentUsername) {
             const userDocRef = doc(db, 'players', currentUsername);
@@ -225,7 +178,6 @@ function setupNameEditor(currentUsername) {
           console.warn("Could not save display name to cloud:", err);
         }
 
-        // 2. Save locally as secondary cache
         try {
           const userObj = JSON.parse(localStorage.getItem('loggedInUser')) || {};
           userObj.displayName = newName;
@@ -241,6 +193,7 @@ function setupNameEditor(currentUsername) {
   });
 }
 
+// --- MAIN APP BOOTSTRAP ---
 document.addEventListener('DOMContentLoaded', () => {
   const views = {
     loading: document.getElementById('loadingView'),
@@ -348,6 +301,11 @@ document.addEventListener('DOMContentLoaded', () => {
           const freshUser = getCurrentUser();
           const nameElem = document.getElementById('userDisplayName');
           if (nameElem) nameElem.innerText = freshUser?.displayName || loggedInUser.displayName || 'Vinz';
+          
+          let currentUsername = loggedInUser.username || '';
+          setupAvatarUploader(currentUsername);
+          setupNameEditor(currentUsername);
+
           showView('home');
           playMainBGM();
       } else {
@@ -359,8 +317,8 @@ document.addEventListener('DOMContentLoaded', () => {
       finishLoading();
   } else {
       let currentPercent = 1;
-      const totalDuration = 10000;
-      const intervalTime = 100;
+      const totalDuration = 3000; // Optimized loading speed
+      const intervalTime = 50;
       const increment = 100 / (totalDuration / intervalTime);
 
       const loadingInterval = setInterval(() => {
@@ -524,6 +482,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const nameElem = document.getElementById('userDisplayName');
         if (nameElem) nameElem.innerText = displayName;
 
+        setupAvatarUploader(username);
+        setupNameEditor(username);
+
         if (errElem) errElem.innerText = "";
         showView('home');
         playMainBGM();
@@ -560,6 +521,10 @@ document.addEventListener('DOMContentLoaded', () => {
           const freshUser = getCurrentUser();
           const nameElem = document.getElementById('userDisplayName');
           if (nameElem) nameElem.innerText = freshUser?.displayName || userData.displayName;
+
+          setupAvatarUploader(username);
+          setupNameEditor(username);
+
           if (errElem) errElem.innerText = "";
           showView('home');
           playMainBGM();
@@ -940,7 +905,6 @@ async function updateProfileStats() {
     currentXp = (currentLevel - 1) * 500;
   }
 
-  // Update coin counts
   const coinHeaderElem = document.getElementById('coinCount');
   if (coinHeaderElem) coinHeaderElem.innerText = totalCoins;
 
@@ -951,7 +915,6 @@ async function updateProfileStats() {
     }
   });
 
-  // Update level text on profile
   document.querySelectorAll('#profileView').forEach(view => {
     const textNodes = document.createTreeWalker(view, NodeFilter.SHOW_TEXT, null, false);
     let node;
@@ -984,11 +947,6 @@ async function updateProfileStats() {
     progressBar.style.width = `${percentage}%`;
   }
 }
-
-document.addEventListener('DOMContentLoaded', async () => {
-  await fetchCloudProfileData();
-  updateProfileStats();
-});
 
 // --- LEADERBOARD LOGIC ---
 document.addEventListener('DOMContentLoaded', () => {
