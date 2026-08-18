@@ -11,34 +11,31 @@
     width: 100vw;
     height: 100vh;
     z-index: 999;
-    background: #11041f; /* Matches app's dark theme background */
+    background: #11041f;
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     box-sizing: border-box;
     display: none;
     justify-content: center;
-    align-items: center; /* Perfectly centers the profile container on screen */
-    padding: 20px 14px;
+    align-items: center;
+    padding: 50px 20px; /* ~5cm top/bottom, ~2cm left/right */
 }
 
-/* Automatically shows when script.js adds the 'active' class */
 #profileView.active {
     display: flex !important;
 }
 
-/* Hide global top header when profileView is active */
 #profileView.active ~ #mainHeader,
 body:has(#profileView.active) #mainHeader {
     display: none !important;
 }
 
-/* Enclosing the ENTIRE profile page inside the gold glowing border */
 #profileView .profile-container {
     width: 100%;
     max-width: 420px;
     margin: auto;
-    padding: 18px 16px;
+    padding: 20px 16px;
     box-sizing: border-box;
     height: auto;
     min-height: unset;
@@ -48,7 +45,7 @@ body:has(#profileView.active) #mainHeader {
     border-radius: 20px;
 }
 
-/* Clean Header Wrapper: centers text and aligns back button on the left */
+/* Header with Back button moved down */
 #profileView .profile-header,
 #profileView .profile-top-bar {
     position: relative;
@@ -56,11 +53,11 @@ body:has(#profileView.active) #mainHeader {
     align-items: center;
     justify-content: space-between;
     width: 100%;
+    margin-top: 10px; /* Pushes the back button down from the top gold border */
     margin-bottom: 14px;
     min-height: 40px;
 }
 
-/* Back Button - Positioned nicely on the left inside the header flow */
 #profileView .profile-header .back-btn {
     position: relative;
     background: rgba(255, 255, 255, 0.08);
@@ -89,23 +86,23 @@ body:has(#profileView.active) #mainHeader {
     width: 50px;
 }
 
-/* Avatar Section & Loading Overlay */
+/* Avatar Section */
 #profileView .avatar-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }
 
 #profileView .avatar-wrapper {
     position: relative;
-    width: 120px;
-    height: 120px;
+    width: 110px;
+    height: 110px;
     border-radius: 50%;
     overflow: hidden;
     border: 3px solid #9c27b0;
-    box-shadow: 0 0 25px rgba(156, 39, 176, 0.7), inset 0 0 15px rgba(0, 0, 0, 0.5);
-    margin-bottom: 10px;
+    box-shadow: 0 0 22px rgba(156, 39, 176, 0.7), inset 0 0 12px rgba(0, 0, 0, 0.5);
+    margin-bottom: 8px;
     background: #11041f;
 }
 
@@ -113,62 +110,23 @@ body:has(#profileView.active) #mainHeader {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease;
 }
 
-#profileView .avatar-wrapper:hover img {
-    transform: scale(1.05);
-}
-
-/* Loader Overlay during gallery selection/upload */
-#profileView .avatar-loader,
-#editNameModal .avatar-loader {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(18, 4, 33, 0.75);
-    backdrop-filter: blur(4px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
-}
-
-#profileView .spinner,
-#editNameModal .spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid rgba(255, 255, 255, 0.2);
-    border-top: 3px solid #00f2fe;
-    border-radius: 50%;
-    animation: profileSpin 0.8s linear infinite;
-}
-
-@keyframes profileSpin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Choose Avatar Button - Made larger to match avatar proportions */
 #profileView .upload-btn {
     background: linear-gradient(135deg, #9c27b0, #e91e63);
     color: #ffffff;
-    padding: 10px 24px;
-    border-radius: 22px;
-    font-size: 0.95rem;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
     cursor: pointer;
     font-weight: 700;
     box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
     transition: all 0.2s ease;
     border: none;
-    letter-spacing: 0.5px;
 }
 
 #profileView .upload-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(156, 39, 176, 0.6);
     opacity: 0.95;
 }
 
@@ -177,7 +135,7 @@ body:has(#profileView.active) #mainHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 12px 0;
+    margin: 10px 0;
     background: rgba(255, 255, 255, 0.03);
     padding: 10px 14px;
     border-radius: 12px;
@@ -189,7 +147,6 @@ body:has(#profileView.active) #mainHeader {
     opacity: 0.6;
     display: block;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
 #profileView .profile-info-row h3 {
@@ -198,7 +155,7 @@ body:has(#profileView.active) #mainHeader {
     font-weight: 600;
 }
 
-/* Coins and Level Stats Row */
+/* Coins & Level Stats Row */
 #profileView .profile-stats-badge-row {
     display: flex;
     justify-content: space-between;
@@ -207,7 +164,7 @@ body:has(#profileView.active) #mainHeader {
     border: 1px solid rgba(255, 215, 0, 0.2);
     border-radius: 12px;
     padding: 10px 14px;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     font-size: 0.9rem;
 }
 
@@ -224,26 +181,24 @@ body:has(#profileView.active) #mainHeader {
     font-weight: 800;
 }
 
-/* Badges Section Header Layout */
+/* Badges Section */
 #profileView .badges-section {
-    margin-top: 14px;
+    margin-top: 10px;
 }
 
 #profileView .badges-section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     padding: 0 2px;
 }
 
-#profileView .badges-section-header h3,
-#profileView .badges-section > h3 {
-    font-size: 0.95rem;
+#profileView .badges-section-header h3 {
+    font-size: 0.9rem;
     color: #ffd700;
     margin: 0;
     letter-spacing: 0.5px;
-    text-transform: uppercase;
 }
 
 #profileView .global-rank-indicator {
@@ -261,57 +216,38 @@ body:has(#profileView.active) #mainHeader {
     font-weight: bold;
 }
 
-/* Tighter vertical/horizontal spacing for badges without card containers */
+/* Tighter badge vertical spacing & optimized size */
 #profileView .badges-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    gap: 4px 6px; /* tighter vertical gap */
     text-align: center;
 }
 
-/* Badge Item Styling with transparent PNG outline glow (no box container background) */
-#profileView .badge-item,
-#profileView .badge-card {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
+#profileView .badge-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 4px;
-}
-
-/* Applies glow strictly to the PNG image contour/lining, ignoring transparent edges */
-#profileView .badge-item img,
-#profileView .badge-card img,
-#profileView .badge-gem {
-    filter: drop-shadow(0 0 8px rgba(156, 39, 176, 0.7));
-    transition: transform 0.2s ease;
-}
-
-#profileView .badge-item.locked img,
-#profileView .badge-card.locked img {
-    filter: grayscale(90%) drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
-    opacity: 0.35;
+    padding: 2px;
 }
 
 #profileView .badge-title {
-    font-size: 0.75rem;
+    font-size: 9px;
     font-weight: 700;
     color: #fff;
-    margin-top: 4px;
+    margin-top: 2px;
 }
 
 #profileView .badge-desc {
-    font-size: 0.65rem;
+    font-size: 7.5px;
     opacity: 0.65;
 }
 
-/* XP Progress Bar Section */
+/* XP Progress Bar */
 #profileView .xp-section {
-    margin: 14px 0 2px 0;
+    margin: 12px 0 2px 0;
     background: rgba(255, 255, 255, 0.02);
-    padding: 12px 14px;
+    padding: 10px 14px;
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -320,7 +256,7 @@ body:has(#profileView.active) #mainHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     font-size: 0.75rem;
 }
 
@@ -330,9 +266,7 @@ body:has(#profileView.active) #mainHeader {
     border-radius: 6px;
     font-size: 0.7rem;
     font-weight: 800;
-    letter-spacing: 0.5px;
     color: #fff;
-    box-shadow: 0 2px 8px rgba(156, 39, 176, 0.4);
 }
 
 #profileView #displayXpText {
@@ -343,11 +277,10 @@ body:has(#profileView.active) #mainHeader {
 
 #profileView .xp-track {
     width: 100%;
-    height: 8px;
+    height: 7px;
     background: rgba(0, 0, 0, 0.4);
     border-radius: 4px;
     overflow: hidden;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 #profileView .xp-fill {
@@ -356,54 +289,19 @@ body:has(#profileView.active) #mainHeader {
     background: linear-gradient(90deg, #9c27b0, #00f2fe);
     border-radius: 4px;
     transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
 }
 
-/* Profile Specific Buttons */
-#profileView .btn {
-    border: none;
-    border-radius: 10px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-#profileView .btn-secondary,
-#editNameModal .btn-secondary {
+/* Profile Buttons & Modals */
+#profileView .btn-secondary {
     background: rgba(156, 39, 176, 0.15);
     border: 1px solid rgba(156, 39, 176, 0.6);
     color: #fff;
     padding: 5px 12px;
     font-size: 0.8rem;
-    width: auto;
-}
-
-#profileView .btn-secondary:hover,
-#editNameModal .btn-secondary:hover {
-    background: rgba(156, 39, 176, 0.35);
-}
-
-#profileView .btn-primary,
-#editNameModal .btn-primary {
-    background: linear-gradient(135deg, #9c27b0, #e91e63);
-    color: #fff;
-    padding: 12px;
-    font-size: 0.95rem;
-    width: 100%;
-    box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
-    border: none;
     border-radius: 10px;
-    font-weight: bold;
     cursor: pointer;
 }
 
-#profileView .btn-primary:hover,
-#editNameModal .btn-primary:hover {
-    opacity: 0.95;
-    transform: translateY(-1px);
-}
-
-/* Modal Overlay & Card (Scoped strictly to profile edit modal) */
 #editNameModal.modal-overlay {
     position: fixed;
     top: 0;
@@ -416,8 +314,6 @@ body:has(#profileView.active) #mainHeader {
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    opacity: 1;
-    transition: opacity 0.3s ease;
 }
 
 #editNameModal.modal-overlay.hidden {
@@ -431,9 +327,6 @@ body:has(#profileView.active) #mainHeader {
     width: 90%;
     max-width: 340px;
     border: 2px solid #9c27b0;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
-    position: relative;
-    box-sizing: border-box;
     color: #ffffff;
 }
 
@@ -444,28 +337,12 @@ body:has(#profileView.active) #mainHeader {
     margin-bottom: 16px;
 }
 
-#editNameModal .settings-header h3 {
-    margin: 0;
-    font-size: 1rem;
-    letter-spacing: 0.5px;
-}
-
 #editNameModal .icon-btn {
     background: transparent;
     border: none;
     color: #fff;
     font-size: 1.2rem;
     cursor: pointer;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
-}
-
-#editNameModal .icon-btn:hover {
-    opacity: 1;
-}
-
-#editNameModal .input-group {
-    margin-bottom: 14px;
 }
 
 #editNameModal .input-group input {
@@ -475,20 +352,19 @@ body:has(#profileView.active) #mainHeader {
     border: 1px solid #9c27b0;
     background: rgba(0, 0, 0, 0.3);
     color: #fff;
-    font-size: 0.95rem;
-    box-sizing: border-box;
     outline: none;
+    box-sizing: border-box;
 }
 
-#editNameModal .input-group input:focus {
-    border-color: #00f2fe;
-    box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
-}
-
-#editNameModal .save-status {
-    margin: 4px 0 12px 0;
-    font-size: 0.85rem;
-    text-align: center;
-    min-height: 18px;
-    font-weight: 600;
+#editNameModal .btn-primary {
+    background: linear-gradient(135deg, #9c27b0, #e91e63);
+    color: #fff;
+    padding: 12px;
+    font-size: 0.95rem;
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
 }
