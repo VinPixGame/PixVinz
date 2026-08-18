@@ -303,7 +303,6 @@ function checkAndUnlockBadges() {
         }
     ];
 
-    
     badgesContainer.style.display = 'grid';
     badgesContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
     badgesContainer.style.gap = '6px 6px';
@@ -335,9 +334,8 @@ function checkAndUnlockBadges() {
         `;
         badgesContainer.appendChild(badgeElement);
     });
+} // <-- Fixed: Closed checkAndUnlockBadges properly
 
-
-    
 document.addEventListener('DOMContentLoaded', () => {
     const avatarLoader = document.getElementById('avatarLoader');
     if (avatarLoader) avatarLoader.style.display = 'none';
