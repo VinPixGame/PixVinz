@@ -312,36 +312,37 @@ function checkAndUnlockBadges() {
     badgesContainer.style.width = '100%';
     badgesContainer.innerHTML = '';
 
+ // Inside checkAndUnlockBadges() -> badgeElement innerHTML adjustment:
     allBadges.forEach(badge => {
         const isUnlocked = badge.unlocked;
 
         const badgeElement = document.createElement('div');
+        badgeElement.className = 'badge-item';
         badgeElement.style.cssText = `
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            padding: 4px;
+            padding: 2px;
             width: 100%;
             box-sizing: border-box;
         `;
 
         badgeElement.innerHTML = `
-            <div style="width: 82px; height: 80px; display: flex; align-items: center; justify-content: center; margin-bottom: 2px; filter: ${isUnlocked ? `drop-shadow(0 0 6px ${badge.glowColor}55)` : 'none'};">
+            <div style="width: 72px; height: 70px; display: flex; align-items: center; justify-content: center; margin-bottom: 2px; filter: ${isUnlocked ? `drop-shadow(0 0 5px ${badge.glowColor}66)` : 'none'};">
                 <img src="${badge.icon}" alt="${badge.title}" style="width: 100%; height: 100%; object-fit: contain; ${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.35;'}">
             </div>
-            <span style="font-weight: 700; font-size: 10px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.2px; line-height: 1.1; margin-bottom: 1px; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${badge.title}</span>
-            <span style="font-size: 8px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1; width: 100%; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;">${badge.desc}</span>
+            <span class="badge-title" style="font-weight: 700; font-size: 9px; color: ${isUnlocked ? '#fff' : '#777'}; line-height: 1.1; margin-bottom: 1px; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${badge.title}</span>
+            <span class="badge-desc" style="font-size: 7.5px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1; width: 100%; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;">${badge.desc}</span>
         `;
         badgesContainer.appendChild(badgeElement);
     });
-}
 
 document.addEventListener('DOMContentLoaded', () => {
     const avatarLoader = document.getElementById('avatarLoader');
     if (avatarLoader) avatarLoader.style.display = 'none';
 
-    let initialName = 'Cardo';
+    let initialName = 'Moteng';
     try {
         const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
         if (userObj && userObj.displayName) {
@@ -436,6 +437,15 @@ if (avatarInput) {
                     }
 
                     if (avatarLoader) avatarLoader.style.display = 'none';
+
+                    // Show green "Avatar Updated!" status text temporarily
+                    const avatarStatus = document.getElementById('avatar-status');
+                    if (avatarStatus) {
+                        avatarStatus.style.display = 'block';
+                        setTimeout(() => {
+                            avatarStatus.style.display = 'none';
+                        }, 2500);
+                    }
                 };
             };
 
