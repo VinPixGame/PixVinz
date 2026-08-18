@@ -1,40 +1,39 @@
 /* ==========================================================
-   PIXVINZ - SCOPED PREMIUM PROFILE STYLESHEET
+   PIXVINZ - PROFILE STYLESHEET (SYNCHRONIZED)
    ========================================================== */
 
-/* Profile View Container */
+/* 1. View Container & Visibility */
 #profileView {
+  display: none;
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
   background-color: #0d0f18;
-  z-index: 1000;
-  display: flex;
+  z-index: 9999;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   overflow-y: auto;
   padding: 20px;
   box-sizing: border-box;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
+  color: #ffffff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 #profileView.active {
-  opacity: 1;
-  pointer-events: auto;
+  display: flex !important;
 }
 
 /* Hide global layout elements when profile view is active */
 body.profile-active header,
-body.profile-active .main-nav {
+body.profile-active .main-nav,
+body.profile-active #homeView {
   display: none !important;
 }
 
-/* Profile Card Container */
+/* 2. Profile Card Layout */
 .profile-container {
   width: 100%;
   max-width: 600px;
@@ -45,16 +44,15 @@ body.profile-active .main-nav {
   padding: 24px;
   margin-top: 20px;
   box-sizing: border-box;
-  color: #ffffff;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Back Button & Header Actions */
+/* 3. Navigation / Back Button */
 .profile-nav-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  width: 100%;
 }
 
 .profile-back-btn {
@@ -73,7 +71,7 @@ body.profile-active .main-nav {
   color: #0d0f18;
 }
 
-/* Header & Avatar Section */
+/* 4. Header & Avatar Section */
 .profile-header {
   display: flex;
   flex-direction: column;
@@ -83,6 +81,7 @@ body.profile-active .main-nav {
   padding-bottom: 20px;
   margin-bottom: 20px;
   position: relative;
+  width: 100%;
 }
 
 .profile-avatar-container {
@@ -92,13 +91,25 @@ body.profile-active .main-nav {
   margin-bottom: 12px;
 }
 
-.profile-avatar {
+#avatar-preview,
+#profileHeaderImg {
   width: 100%;
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid #9c27b0;
   box-shadow: 0 0 15px rgba(156, 39, 176, 0.4);
+}
+
+#profileIconFallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: #1f2533;
+  border-radius: 50%;
+  border: 3px solid #9c27b0;
 }
 
 /* Coin Badge & Stats */
@@ -115,7 +126,7 @@ body.profile-active .main-nav {
   box-shadow: 0 2px 5px rgba(0,0,0,0.3);
 }
 
-.profile-name {
+#displayPlayerName {
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0 0 4px 0;
@@ -128,7 +139,7 @@ body.profile-active .main-nav {
   margin: 0;
 }
 
-/* XP Progress Bar Section */
+/* 5. XP Progress Bar Section */
 .profile-xp-section {
   width: 100%;
   margin-bottom: 20px;
@@ -158,8 +169,9 @@ body.profile-active .main-nav {
   transition: width 0.4s ease;
 }
 
-/* Badges Grid */
+/* 6. Badges Section */
 .profile-badges-section {
+  width: 100%;
   margin-bottom: 20px;
 }
 
@@ -171,50 +183,34 @@ body.profile-active .main-nav {
   padding-left: 8px;
 }
 
-.badges-grid {
+#badgesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px 8px;
+  text-align: center;
+  width: 100%;
 }
 
-.badge-item {
-  width: 60px;
-  height: 60px;
-  background: #1f2533;
-  border: 1px solid #2a2f3d;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  position: relative;
-}
-
-.badge-item.locked {
-  opacity: 0.4;
-  filter: grayscale(1);
-}
-
-/* Modal Overlay (Name Change / Edit) */
-.profile-modal {
-  position: absolute;
+/* 7. Modal Overlay (Name Change / Edit) */
+#editNameModal {
+  position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   background: rgba(13, 15, 24, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1010;
-  opacity: 0;
-  pointer-events: none;
+  z-index: 10010;
+  opacity: 1;
   transition: opacity 0.2s ease;
 }
 
-.profile-modal.active {
-  opacity: 1;
-  pointer-events: auto;
+#editNameModal.hidden {
+  display: none !important;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .profile-modal-content {
@@ -225,9 +221,10 @@ body.profile-active .main-nav {
   width: 90%;
   max-width: 320px;
   text-align: center;
+  box-sizing: border-box;
 }
 
-.profile-modal-content input {
+#username-input {
   width: 100%;
   padding: 10px;
   background: #0d0f18;
@@ -242,16 +239,50 @@ body.profile-active .main-nav {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
+  margin-top: 10px;
 }
 
-.profile-modal-buttons button {
+.profile-modal-buttons button,
+#save-profile-btn,
+#closeEditNameModal {
   padding: 6px 14px;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
 }
 
-/* Spinner for loading state */
+#save-profile-btn {
+  background: #ffd700;
+  border: none;
+  color: #0d0f18;
+}
+
+#closeEditNameModal {
+  background: transparent;
+  border: 1px solid #a0aec0;
+  color: #a0aec0;
+}
+
+#save-status {
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+/* 8. Avatar Loader Spinner */
+#avatarLoader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(13, 15, 24, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  z-index: 5;
+}
+
 .profile-spinner {
   width: 30px;
   height: 30px;
@@ -259,7 +290,6 @@ body.profile-active .main-nav {
   border-top-color: #ffd700;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-  margin: 20px auto;
 }
 
 @keyframes spin {
