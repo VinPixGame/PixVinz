@@ -1,6 +1,6 @@
-/* ==========================================================
-   PIXVINZ - SCOPED PREMIUM PROFILE STYLESHEET (FINAL)
-   ========================================================== */
+/* ==========================================
+   PIXVINZ - SCOPED PREMIUM PROFILE STYLESHEET
+   ========================================== */
 
 #profileView {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -19,8 +19,7 @@
     display: none;
     justify-content: center;
     align-items: flex-start;
-    /* Adjusted top and bottom spacing while leaving left/right uncompressed */
-    padding: 40px 14px 50px 14px;
+    padding: 30px 14px 40px 14px;
 }
 
 /* Automatically shows when script.js adds the 'active' class */
@@ -38,16 +37,10 @@ body:has(#profileView.active) #mainHeader {
     width: 100%;
     max-width: 440px;
     margin: 0 auto;
-    padding: 20px 16px;
+    padding: 0;
     box-sizing: border-box;
     height: auto;
     min-height: unset;
-    
-    /* Added glowing gold border and shadow to the profile container */
-    background: linear-gradient(135deg, rgba(22, 16, 48, 0.98), rgba(12, 9, 28, 0.99));
-    border: 2px solid #ffd700;
-    box-shadow: 0 0 25px rgba(255, 215, 0, 0.45), inset 0 0 15px rgba(255, 215, 0, 0.15);
-    border-radius: 20px;
 }
 
 /* Clean Header Wrapper: centers text and aligns back button on the left */
