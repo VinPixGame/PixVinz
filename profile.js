@@ -307,7 +307,7 @@ function checkAndUnlockBadges() {
     // Force exact 3-column layout with optimal spacing and no background containers
     badgesContainer.style.display = 'grid';
     badgesContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
-    badgesContainer.style.gap = '16px 8px';
+    badgesContainer.style.gap = '14px 6px';
     badgesContainer.style.textAlign = 'center';
     badgesContainer.style.width = '100%';
     badgesContainer.innerHTML = '';
@@ -327,7 +327,7 @@ function checkAndUnlockBadges() {
         `;
 
         badgeElement.innerHTML = `
-            <div style="width: 70px; height: 72px; display: flex; align-items: center; justify-content: center; margin-bottom: 2px; filter: ${isUnlocked ? `drop-shadow(0 0 6px ${badge.glowColor}55)` : 'none'};">
+            <div style="width: 82px; height: 80px; display: flex; align-items: center; justify-content: center; margin-bottom: 2px; filter: ${isUnlocked ? `drop-shadow(0 0 6px ${badge.glowColor}55)` : 'none'};">
                 <img src="${badge.icon}" alt="${badge.title}" style="width: 100%; height: 100%; object-fit: contain; ${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.35;'}">
             </div>
             <span style="font-weight: 700; font-size: 10px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.2px; line-height: 1.1; margin-bottom: 1px; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${badge.title}</span>
