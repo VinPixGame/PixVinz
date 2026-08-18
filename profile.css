@@ -5,14 +5,21 @@
 #profileView {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     color: #ffffff;
-    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 999;
+    background: #11041f; /* Matches app's dark theme background */
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
     display: none;
     justify-content: center;
-    align-items: center;
-    overflow-x: hidden;
-    position: relative;
-    box-sizing: border-box;
-    width: 100%;
+    align-items: flex-start;
+    padding: 30px 14px 40px 14px;
 }
 
 /* Automatically shows when script.js adds the 'active' class */
@@ -20,22 +27,31 @@
     display: flex !important;
 }
 
+/* Hide global top header when profileView is active */
+#profileView.active ~ #mainHeader,
+body:has(#profileView.active) #mainHeader {
+    display: none !important;
+}
+
 #profileView .profile-container {
     width: 100%;
     max-width: 440px;
-    padding: 20px;
-    box-sizing: border-box;
     margin: 0 auto;
+    padding: 0;
+    box-sizing: border-box;
+    height: auto;
+    min-height: unset;
 }
 
 /* Clean Header Wrapper: centers text and aligns back button on the left */
-#profileView .profile-header {
+#profileView .profile-header,
+#profileView .profile-top-bar {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center; /* Centers the <h1> */
     width: 100%;
-    margin-bottom: 16px; /* Small, neat gap between header and profile card */
+    margin-bottom: 20px;
     min-height: 44px;
 }
 
@@ -77,10 +93,7 @@
     border-color: #9c27b0;
 }
 
-
-
-
-/* Coins Badge - Fixed position on top right (Matches global top bar coin style) */
+/* Coins Badge - Fixed position on top right */
 #profileView .coin-badge,
 #profileView .coins-badge,
 #profileView .coins-counter {
@@ -209,17 +222,42 @@
     font-weight: 600;
 }
 
-/* Badges Section */
+/* Badges Section Header Layout */
 #profileView .badges-section {
     margin-top: 24px;
 }
 
-#profileView .badges-section h3 {
-    font-size: 0.95rem;
+#profileView .badges-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 12px;
-    opacity: 0.85;
-    text-transform: uppercase;
+    padding: 0 4px;
+}
+
+#profileView .badges-section-header h3,
+#profileView .badges-section > h3 {
+    font-size: 1.15rem;
+    color: #ffd700;
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
     letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+#profileView .global-rank-indicator {
+    font-size: 0.9rem;
+    color: #d1c4e9;
+    font-weight: 600;
+    background: rgba(156, 39, 176, 0.2);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(156, 39, 176, 0.4);
+}
+
+#profileView .global-rank-indicator .rank-value {
+    color: #00f2fe;
+    font-weight: bold;
 }
 
 #profileView .badges-grid {
@@ -448,81 +486,4 @@
     text-align: center;
     min-height: 20px;
     font-weight: 600;
-}
-
-
-/* Hide global top header when profileView is active */
-#profileView.active ~ #mainHeader,
-body:has(#profileView.active) #mainHeader {
-    display: none !important;
-}
-
-/* Ensure profileView takes up the full screen independently */
-#profileView {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 999;
-    background: #11041f; /* Matches your app's dark background */
-    overflow-y: auto;
-    padding-top: 20px;
-}
-
-
-
-
-/* Badges Section Header Layout */
-.badges-section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  padding: 0 4px;
-}
-
-.badges-section-header h3 {
-  font-size: 1.15rem;
-  color: #ffd700;
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  letter-spacing: 0.5px;
-}
-
-.global-rank-indicator {
-  font-size: 0.9rem;
-  color: #d1c4e9;
-  font-weight: 600;
-  background: rgba(156, 39, 176, 0.2);
-  padding: 4px 10px;
-  border-radius: 20px;
-  border: 1px solid rgba(156, 39, 176, 0.4);
-}
-
-.global-rank-indicator .rank-value {
-  color: #00f2fe;
-  font-weight: bold;
-}
-
-
-/* Ensure the profile page has proper top spacing and fits all screen sizes safely */
-.profile-container, #profileView {
-    box-sizing: border-box;
-    width: 100%;
-    max-width: 480px; /* Keeps it looking great on tablets and larger screens too */
-    margin: 0 auto;
-    padding: 40px 16px 30px 16px; /* Adds space at the top for the Back button and header */
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    min-height: 100vh;
-}
-
-/* Make sure the top header row (Back button & Player Profile title) handles smaller widths nicely */
-.profile-top-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    width: 100%;
 }
