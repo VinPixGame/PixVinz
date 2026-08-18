@@ -9,7 +9,7 @@ function getCurrentUsername() {
             return userObj.username;
         }
     } catch (e) {}
-    return localStorage.getItem('vinpix_username') || 'Cardo';
+    return localStorage.getItem('vinpix_username') || '';
 }
 
 function getUserKey(keyName) {
@@ -50,7 +50,6 @@ async function saveUserDataToCloud() {
         const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 150;
         const avatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
 
-        // Calculate current XP dynamically using your progression function
         const puzzlesSolved = Math.max(0, currentLevel - 1);
         const playerProgression = calculateLevelAndXp(puzzlesSolved);
         const currentXpVal = playerProgression.currentXp;
@@ -134,7 +133,7 @@ function calculateLevelAndXp(totalPuzzlesSolved) {
 
 // --- UPDATE COINS AND LEVEL UI STATS ---
 function updateProfileStats() {
-    const prefix = getCurrentUsername() + '_';
+    const prefix = getCurrentUsername() ? getCurrentUsername() + '_' : '';
     const totalCoins = parseInt(localStorage.getItem(prefix + 'totalCoins')) || 0;
     const currentLevelVal = parseInt(localStorage.getItem(prefix + 'currentLevel')) || 1;
 
@@ -147,30 +146,29 @@ function updateProfileStats() {
 
 function updateXpProgress() {
     const currentUsername = getCurrentUsername();
-    let currentLevelVal = parseInt(localStorage.getItem(currentUsername + '_currentLevel')) || 3;
+    let currentLevelVal = parseInt(localStorage.getItem(currentUsername ? currentUsername + '_currentLevel' : 'currentLevel')) || 3;
 
     const puzzlesSolved = Math.max(0, currentLevelVal - 1);
     const playerProgression = calculateLevelAndXp(puzzlesSolved);
     const progressPercent = Math.min(100, (playerProgression.currentXp / playerProgression.maxXp) * 100);
 
-    const levelBadge = document.getElementById('displayLevelBadge');
+    const levelNumEl = document.querySelector('#displayLevelBadge .xp-level-num');
     const xpText = document.getElementById('displayXpText');
     const xpBarFill = document.getElementById('displayXpBarFill');
 
-    if (levelBadge) levelBadge.textContent = `LEVEL ${playerProgression.level}`;
+    if (levelNumEl) levelNumEl.textContent = playerProgression.level;
     if (xpText) xpText.textContent = `${playerProgression.currentXp.toLocaleString()} / ${playerProgression.maxXp.toLocaleString()} XP`;
     if (xpBarFill) xpBarFill.style.width = `${progressPercent}%`;
 
-    // Keep profile coins & level UI fresh
     updateProfileStats();
 }
 
 // --- LOAD & DISPLAY GLOBAL RANK ON PROFILE ---
 async function loadProfileGlobalRank() {
-    const rankValueEl = document.querySelector('.global-rank-indicator .rank-value') || document.getElementById('displayGlobalRank');
+    const rankValueEl = document.getElementById('profileGlobalRank') || document.querySelector('.global-rank-indicator .rank-value') || document.getElementById('displayGlobalRank');
     if (!rankValueEl) return;
 
-    rankValueEl.textContent = '...';
+    rankValueEl.textContent = '#--';
 
     const currentUsername = getCurrentUsername();
     if (!currentUsername) {
@@ -214,12 +212,13 @@ async function loadProfileGlobalRank() {
     }
 }
 
-// --- UNIFIED DYNAMIC BADGE CHECKER & 3-COLUMN RENDERER (NO CONTAINERS) ---
+// --- UNIFIED DYNAMIC BADGE CHECKER & 3-COLUMN RENDERER ---
 function checkAndUnlockBadges() {
     const badgesContainer = document.getElementById('badgesGrid');
     if (!badgesContainer) return;
 
-    const prefix = getCurrentUsername() + '_';
+    const currentUsername = getCurrentUsername();
+    const prefix = currentUsername ? currentUsername + '_' : '';
 
     const playerLevel = parseInt(localStorage.getItem(prefix + 'currentLevel')) || 1;
     const playerCoins = parseInt(localStorage.getItem(prefix + 'totalCoins')) || 0;
@@ -304,7 +303,6 @@ function checkAndUnlockBadges() {
         }
     ];
 
-    // Force exact 3-column layout with optimal spacing and no background containers
     badgesContainer.style.display = 'grid';
     badgesContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
     badgesContainer.style.gap = '14px 6px';
@@ -312,7 +310,6 @@ function checkAndUnlockBadges() {
     badgesContainer.style.width = '100%';
     badgesContainer.innerHTML = '';
 
- // Inside checkAndUnlockBadges() -> badgeElement innerHTML adjustment:
     allBadges.forEach(badge => {
         const isUnlocked = badge.unlocked;
 
@@ -337,12 +334,13 @@ function checkAndUnlockBadges() {
         `;
         badgesContainer.appendChild(badgeElement);
     });
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     const avatarLoader = document.getElementById('avatarLoader');
     if (avatarLoader) avatarLoader.style.display = 'none';
 
-    let initialName = 'Moteng';
+    let initialName = '';
     try {
         const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
         if (userObj && userObj.displayName) {
@@ -351,6 +349,10 @@ document.addEventListener('DOMContentLoaded', () => {
             initialName = userObj.username;
         }
     } catch (e) {}
+
+    if (!initialName) {
+        initialName = localStorage.getItem('vinpix_username') || '';
+    }
 
     const nameDisplay = document.getElementById('displayPlayerName');
     if (nameDisplay) nameDisplay.innerText = initialName;
@@ -368,14 +370,11 @@ document.addEventListener('DOMContentLoaded', () => {
     updateXpProgress();
     updateProfileStats();
     checkAndUnlockBadges();
-    
-    // Fetch and display global rank on profile open
     loadProfileGlobalRank();
-    
-    // Automatically push accurate computed XP to cloud on profile page open
     saveUserDataToCloud();
 });
 
+// --- EDIT NAME MODAL HANDLERS ---
 const editModal = document.getElementById('editNameModal');
 const openModalBtn = document.getElementById('openEditNameModal');
 const closeModalBtn = document.getElementById('closeEditNameModal');
@@ -387,6 +386,7 @@ if (closeModalBtn && editModal) {
     closeModalBtn.addEventListener('click', () => editModal.classList.add('hidden'));
 }
 
+// --- AVATAR UPLOAD & COMPRESSION ---
 const avatarInput = document.getElementById('avatar-input');
 const avatarLoader = document.getElementById('avatarLoader');
 
@@ -427,7 +427,6 @@ if (avatarInput) {
                     const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
 
                     applyAvatarToUI(compressedBase64);
-
                     localStorage.setItem(getUserKey('vinpix_avatar'), compressedBase64);
 
                     try {
@@ -438,7 +437,6 @@ if (avatarInput) {
 
                     if (avatarLoader) avatarLoader.style.display = 'none';
 
-                    // Show green "Avatar Updated!" status text temporarily
                     const avatarStatus = document.getElementById('avatar-status');
                     if (avatarStatus) {
                         avatarStatus.style.display = 'block';
@@ -459,6 +457,7 @@ if (avatarInput) {
     });
 }
 
+// --- SAVE PROFILE NAME HANDLER ---
 const saveProfileBtn = document.getElementById('save-profile-btn');
 if (saveProfileBtn) {
     saveProfileBtn.addEventListener('click', async () => {
@@ -479,7 +478,7 @@ if (saveProfileBtn) {
             currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
         } catch (e) {}
 
-        currentUser.username = currentUser.username || 'Cardo';
+        currentUser.username = currentUser.username || newDisplayName;
         currentUser.displayName = newDisplayName;
         localStorage.setItem('loggedInUser', JSON.stringify(currentUser));
         localStorage.setItem('vinpix_username', newDisplayName);
