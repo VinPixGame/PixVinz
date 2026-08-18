@@ -1,7 +1,7 @@
 // --- FIREBASE INITIALIZATION & DATABASE BRIDGE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
-import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -19,45 +19,227 @@ const analytics = getAnalytics(app);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Expose Firestore database tools globally so UI scripts can use them
-window.pixvinzDb = { db, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs };
+// Expose Firestore database tools globally
+window.pixvinzDb = { db, doc, getDoc, setDoc, updateDoc, collection, query, orderBy, limit, getDocs };
 
+// --- CLOUD-FIRST PROFILE SYNC & HYDRATION ---
+async function fetchCloudProfileData() {
+  let user = null;
+  try {
+    user = JSON.parse(localStorage.getItem('loggedInUser'));
+  } catch (e) {}
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Force load/preload all logo videos across the document upon opening
-    const logoVideos = document.querySelectorAll('video#logoVideo, video#loadingLogo, .auth-logo video, .about-logo video');
-    logoVideos.forEach(video => {
-        video.load();
-        video.play().catch(() => {});
-    });
+  if (!user || !user.username) return null;
 
-// --- AVATAR LOADER FIX (Account-Specific + Default Fallback) ---
-    let currentUsername = '';
-    try {
-        const user = JSON.parse(localStorage.getItem('loggedInUser'));
-        if (user && user.username) currentUsername = user.username;
-    } catch (e) {}
+  try {
+    const userDocRef = doc(db, 'players', user.username);
+    const snap = await getDoc(userDocRef);
+    if (snap.exists()) {
+      const cloudData = snap.data();
+      // Merge cloud data back into local loggedInUser storage as secondary cache
+      const mergedUser = { ...user, ...cloudData };
+      localStorage.setItem('loggedInUser', JSON.stringify(mergedUser));
+      
+      // Also cache individual user stats locally for fallback/offline use
+      const prefix = user.username;
+      if (cloudData.level !== undefined) localStorage.setItem(`${prefix}_currentLevel`, cloudData.level);
+      if (cloudData.coins !== undefined) localStorage.setItem(`${prefix}_totalCoins`, cloudData.coins);
+      if (cloudData.xp !== undefined) localStorage.setItem(`${prefix}_xp`, cloudData.xp);
+      if (cloudData.avatar) localStorage.setItem(`${prefix}_vinpix_avatar`, cloudData.avatar);
 
-    const avatarImg = document.getElementById('profileHeaderImg');
-    const fallbackIcon = document.getElementById('profileIconFallback');
-
-    if (avatarImg && fallbackIcon) {
-        // Check if this specific logged-in user has a custom saved avatar
-        const userCustomAvatar = currentUsername ? localStorage.getItem(`${currentUsername}_vinpix_avatar`) : null;
-        
-        if (userCustomAvatar) {
-            // Use their unique custom uploaded avatar
-            avatarImg.src = userCustomAvatar;
-            avatarImg.style.display = 'block';
-            fallbackIcon.style.display = 'none';
-        } else {
-            // Default fallback image for new accounts or users without custom avatars
-            avatarImg.src = 'image/avatar.png';
-            avatarImg.style.display = 'block';
-            fallbackIcon.style.display = 'none';
-        }
+      return cloudData;
     }
+  } catch (err) {
+    console.warn("Could not fetch profile data from cloud, falling back to local storage:", err);
+  }
+  return user;
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const logoVideos = document.querySelectorAll('video#logoVideo, video#loadingLogo, .auth-logo video, .about-logo video');
+  logoVideos.forEach(video => {
+    video.load();
+    video.play().catch(() => {});
+  });
+
+  // Pull fresh data from Firestore first
+  await fetchCloudProfileData();
+
+  let currentUsername = '';
+  let currentUserData = null;
+  try {
+    currentUserData = JSON.parse(localStorage.getItem('loggedInUser'));
+    if (currentUserData && currentUserData.username) currentUsername = currentUserData.username;
+  } catch (e) {}
+
+  // Apply Name
+  const nameElem = document.getElementById('userDisplayName') || document.querySelector('.player-name');
+  if (nameElem && currentUserData && currentUserData.displayName) {
+    nameElem.innerText = currentUserData.displayName;
+  }
+
+  // --- AVATAR LOADER FROM CLOUD / LOCAL ---
+  const avatarImg = document.getElementById('profileHeaderImg');
+  const fallbackIcon = document.getElementById('profileIconFallback');
+
+  if (avatarImg && fallbackIcon) {
+    const activeAvatar = currentUserData?.avatar || (currentUsername ? localStorage.getItem(`${currentUsername}_vinpix_avatar`) : null);
+    if (activeAvatar) {
+      avatarImg.src = activeAvatar;
+      avatarImg.style.display = 'block';
+      fallbackIcon.style.display = 'none';
+    } else {
+      avatarImg.src = 'image/avatar.png';
+      avatarImg.style.display = 'block';
+      fallbackIcon.style.display = 'none';
+    }
+  }
+
+  setupAvatarUploader(currentUsername);
+  setupNameEditor(currentUsername);
+  updateProfileStats();
 });
+
+// --- CHOOSE AVATAR UPLOAD HANDLER (CLOUD-FIRST) ---
+function setupAvatarUploader(currentUsername) {
+  const chooseAvatarBtn = document.querySelector('.choose-avatar-btn') || document.getElementById('chooseAvatarBtn') || Array.from(document.querySelectorAll('button')).find(el => el.textContent.includes('Choose Avatar'));
+  
+  if (!chooseAvatarBtn) return;
+
+  let fileInput = document.getElementById('hiddenAvatarInput');
+  if (!fileInput) {
+    fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.id = 'hiddenAvatarInput';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
+  }
+
+  let statusMsg = document.getElementById('avatarStatusMsg');
+  if (!statusMsg) {
+    statusMsg = document.createElement('div');
+    statusMsg.id = 'avatarStatusMsg';
+    statusMsg.style.cssText = 'font-size: 11px; margin-top: 6px; text-align: center; font-weight: 600; transition: opacity 0.3s ease;';
+    chooseAvatarBtn.parentNode.insertBefore(statusMsg, chooseAvatarBtn.nextSibling);
+  }
+
+  chooseAvatarBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async function(uploadEvent) {
+      const base64Image = uploadEvent.target.result;
+      
+      // 1. Save to Cloud Firestore first
+      try {
+        if (window.pixvinzDb && currentUsername) {
+          const userDocRef = doc(db, 'players', currentUsername);
+          await updateDoc(userDocRef, { avatar: base64Image });
+        }
+      } catch (err) {
+        console.warn("Error updating avatar in Firestore:", err);
+      }
+      
+      // 2. Save locally as secondary cache
+      if (currentUsername) {
+        localStorage.setItem(`${currentUsername}_vinpix_avatar`, base64Image);
+      }
+      
+      try {
+        const userObj = JSON.parse(localStorage.getItem('loggedInUser')) || {};
+        userObj.avatar = base64Image;
+        localStorage.setItem('loggedInUser', JSON.stringify(userObj));
+      } catch (err) {}
+
+      // Update UI elements instantly
+      const avatarImg = document.getElementById('profileHeaderImg');
+      const fallbackIcon = document.getElementById('profileIconFallback');
+      if (avatarImg) {
+        avatarImg.src = base64Image;
+        avatarImg.style.display = 'block';
+      }
+      if (fallbackIcon) {
+        fallbackIcon.style.display = 'none';
+      }
+
+      // Show green success indication
+      statusMsg.innerText = '✔ Avatar uploaded successfully!';
+      statusMsg.style.color = '#2ecc71';
+      statusMsg.style.opacity = '1';
+
+      setTimeout(() => {
+        statusMsg.style.opacity = '0';
+      }, 4000);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// --- EDIT PLAYER NAME HANDLER (CLOUD-FIRST) ---
+function setupNameEditor(currentUsername) {
+  const editBtn = Array.from(document.querySelectorAll('button')).find(el => el.textContent.trim() === 'Edit');
+  if (!editBtn) return;
+
+  editBtn.addEventListener('click', async () => {
+    if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+    
+    let nameDisplayElem = document.querySelector('#profileView .player-name') || document.getElementById('userDisplayName');
+    if (!nameDisplayElem) return;
+
+    if (editBtn.innerText === 'Edit') {
+      const currentName = nameDisplayElem.innerText;
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = currentName;
+      input.maxLength = 20;
+      input.style.cssText = 'background: rgba(0,0,0,0.5); border: 1px solid #ffd700; color: #fff; padding: 4px 8px; border-radius: 6px; font-size: 14px; text-align: center; width: 140px;';
+      
+      nameDisplayElem.replaceWith(input);
+      input.focus();
+      editBtn.innerText = 'Save';
+
+      const saveAction = async () => {
+        const newName = input.value.trim() || currentName;
+        const newSpan = document.createElement('span');
+        newSpan.id = 'userDisplayName';
+        newSpan.className = nameDisplayElem.className;
+        newSpan.innerText = newName;
+        input.replaceWith(newSpan);
+        editBtn.innerText = 'Edit';
+
+        // 1. Save to Cloud Firestore first
+        try {
+          if (window.pixvinzDb && currentUsername) {
+            const userDocRef = doc(db, 'players', currentUsername);
+            await updateDoc(userDocRef, { displayName: newName });
+          }
+        } catch (err) {
+          console.warn("Could not save display name to cloud:", err);
+        }
+
+        // 2. Save locally as secondary cache
+        try {
+          const userObj = JSON.parse(localStorage.getItem('loggedInUser')) || {};
+          userObj.displayName = newName;
+          localStorage.setItem('loggedInUser', JSON.stringify(userObj));
+        } catch (err) {}
+      };
+
+      input.addEventListener('blur', saveAction);
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') saveAction();
+      });
+    }
+  });
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   const views = {
@@ -104,17 +286,17 @@ document.addEventListener('DOMContentLoaded', () => {
       if (mainHeader) mainHeader.classList.add('hidden');
     }
 
-    // If profile view is opened, trigger badge and profile stats rendering
     if (targetView === 'profileView') {
-        renderProfileBadges();
+      updateProfileStats();
+      renderProfileBadges();
     }
   }
 
-  // Make showView globally accessible for profile.js and other scripts
   window.showView = showView;
 
   function updateCoinDisplay() {
-    const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
+    const user = getCurrentUser();
+    const totalCoins = user?.coins ?? parseInt(localStorage.getItem(getUserKey('totalCoins'))) ?? 0;
     const coinElem = document.getElementById('coinCount');
     if (coinElem) {
       coinElem.innerText = totalCoins;
@@ -136,35 +318,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // --- PROFILE HEADER ICON NAVIGATION ---
   const profileHeaderImg = document.getElementById('profileHeaderImg');
   const profileIconFallback = document.getElementById('profileIconFallback');
 
   [profileHeaderImg, profileIconFallback].forEach(element => {
-      if (element) {
-          const profileTrigger = element.closest('.profile-header-btn') || element.parentElement;
-          if (profileTrigger && !profileTrigger.dataset.hasProfileListener) {
-              profileTrigger.dataset.hasProfileListener = 'true';
-              profileTrigger.addEventListener('click', (e) => {
-                  e.preventDefault();
-                  if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-                  showView('profileView');
-              });
-          }
+    if (element) {
+      const profileTrigger = element.closest('.profile-header-btn') || element.parentElement;
+      if (profileTrigger && !profileTrigger.dataset.hasProfileListener) {
+        profileTrigger.dataset.hasProfileListener = 'true';
+        profileTrigger.addEventListener('click', async (e) => {
+          e.preventDefault();
+          if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+          await fetchCloudProfileData();
+          showView('profileView');
+        });
       }
+    }
   });
 
-// --- 1. LOADING SCREEN ---
   const skipLoading = localStorage.getItem('skipLoading') === 'true';
   const percentageElem = document.getElementById('loadingPercentage');
   const barFillElem = document.getElementById('loadingBarFill');
 
-  function finishLoading() {
+  async function finishLoading() {
       localStorage.removeItem('skipLoading');
       const loggedInUser = getCurrentUser();
       if (loggedInUser) {
+          await fetchCloudProfileData();
+          const freshUser = getCurrentUser();
           const nameElem = document.getElementById('userDisplayName');
-          if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
+          if (nameElem) nameElem.innerText = freshUser?.displayName || loggedInUser.displayName || 'Vinz';
           showView('home');
           playMainBGM();
       } else {
@@ -176,8 +359,8 @@ document.addEventListener('DOMContentLoaded', () => {
       finishLoading();
   } else {
       let currentPercent = 1;
-      const totalDuration = 10000; // 10 seconds in milliseconds
-      const intervalTime = 100; // Update every 100ms
+      const totalDuration = 10000;
+      const intervalTime = 100;
       const increment = 100 / (totalDuration / intervalTime);
 
       const loadingInterval = setInterval(() => {
@@ -187,13 +370,11 @@ document.addEventListener('DOMContentLoaded', () => {
               clearInterval(loadingInterval);
               finishLoading();
           }
-          
           if (percentageElem) percentageElem.innerText = `${Math.floor(currentPercent)}%`;
           if (barFillElem) barFillElem.style.width = `${currentPercent}%`;
       }, intervalTime);
   }
 
-  // --- 2. AUTHENTICATION & FORM NAVIGATION ---
   const toRegBtn = document.getElementById('toRegister');
   if (toRegBtn) {
     toRegBtn.addEventListener('click', (e) => {
@@ -254,9 +435,6 @@ document.addEventListener('DOMContentLoaded', () => {
             usernameIndicator.innerText = '✔ Available';
             usernameIndicator.style.color = '#2ecc71';
           }
-        } else {
-          usernameIndicator.innerText = '⚠️ Database offline';
-          usernameIndicator.style.color = '#f39c12';
         }
       } catch (err) {
         usernameIndicator.innerText = '✔ Available';
@@ -325,12 +503,9 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        // Register the user in Firebase Auth using a valid email format
         const dummyEmail = `${username}@pixvinz.com`;
-        let authUid = '';
-        
         const userCredential = await createUserWithEmailAndPassword(auth, dummyEmail, pass);
-        authUid = userCredential.user.uid;
+        const authUid = userCredential.user.uid;
 
         const newUserData = {
           username: username,
@@ -345,7 +520,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         await setDoc(userDocRef, newUserData);
-
         localStorage.setItem('loggedInUser', JSON.stringify(newUserData));
         const nameElem = document.getElementById('userDisplayName');
         if (nameElem) nameElem.innerText = displayName;
@@ -378,15 +552,14 @@ document.addEventListener('DOMContentLoaded', () => {
           if (snap.exists()) {
             userData = snap.data();
           }
-        } else {
-          if (errElem) errElem.innerText = "Database connection not available.";
-          return;
         }
 
         if (userData && userData.password === pass) {
           localStorage.setItem('loggedInUser', JSON.stringify(userData));
+          await fetchCloudProfileData();
+          const freshUser = getCurrentUser();
           const nameElem = document.getElementById('userDisplayName');
-          if (nameElem) nameElem.innerText = userData.displayName;
+          if (nameElem) nameElem.innerText = freshUser?.displayName || userData.displayName;
           if (errElem) errElem.innerText = "";
           showView('home');
           playMainBGM();
@@ -401,17 +574,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const playBtn = document.getElementById('playBtn');
   if (playBtn) {
-    playBtn.addEventListener('click', () => {
+    playBtn.addEventListener('click', async () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+      const cloudData = await fetchCloudProfileData();
+      const currentLevel = cloudData?.level ?? parseInt(localStorage.getItem(getUserKey('currentLevel'))) ?? parseInt(getCurrentUser()?.level) ?? 1;
       window.location.href = `game.html?level=${currentLevel}`;
     });
   }
 
   const navLevels = document.getElementById('navLevels');
   if (navLevels) {
-    navLevels.addEventListener('click', () => {
+    navLevels.addEventListener('click', async () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      await fetchCloudProfileData();
       renderLevels();
       showView('levels');
     });
@@ -419,8 +594,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const navCollections = document.getElementById('navCollections');
   if (navCollections) {
-    navCollections.addEventListener('click', () => {
+    navCollections.addEventListener('click', async () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      await fetchCloudProfileData();
       renderCollectionFolders();
       showView('collections');
     });
@@ -439,7 +615,6 @@ document.addEventListener('DOMContentLoaded', () => {
     collectionsBackBtn.addEventListener('click', (e) => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       const imagesContainer = document.getElementById('collectionsImagesContainer');
-      
       if (imagesContainer && !imagesContainer.classList.contains('hidden')) {
         e.stopImmediatePropagation();
         renderCollectionFolders();
@@ -526,8 +701,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!grid) return;
     grid.innerHTML = '';
 
-    const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
-
+    const user = getCurrentUser();
+    const currentLevel = user?.level ?? parseInt(localStorage.getItem(getUserKey('currentLevel'))) ?? 1;
     let overallBestTimeSeconds = Infinity;
     let overallFewestMoves = Infinity;
 
@@ -554,9 +729,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (isSolved) {
           const gSize = i <= 10 ? 3 : i <= 30 ? 4 : i <= 60 ? 5 : i <= 100 ? 6 : i <= 150 ? 7 : 8;
-          if (!moves) {
-            moves = gSize * 6;
-          }
+          if (!moves) moves = gSize * 6;
           if (!timeStr || timeStr === '--:--') {
             const estSec = gSize * 15;
             const m = Math.floor(estSec / 60).toString().padStart(2, '0');
@@ -567,17 +740,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (moves) {
           const parsedMoves = parseInt(moves);
-          if (parsedMoves < overallFewestMoves) {
-            overallFewestMoves = parsedMoves;
-          }
+          if (parsedMoves < overallFewestMoves) overallFewestMoves = parsedMoves;
         }
         if (timeStr && timeStr !== '--:--') {
           const parts = timeStr.split(':');
           if (parts.length === 2) {
             const totalSec = parseInt(parts[0]) * 60 + parseInt(parts[1]);
-            if (totalSec < overallBestTimeSeconds) {
-              overallBestTimeSeconds = totalSec;
-            }
+            if (totalSec < overallBestTimeSeconds) overallBestTimeSeconds = totalSec;
           }
         }
 
@@ -586,15 +755,12 @@ document.addEventListener('DOMContentLoaded', () => {
           starsHTML += `<span class="star-icon-small ${s <= starsEarned ? 'earned' : ''}">★</span>`;
         }
 
-        const displayMoves = moves ? moves : '--';
-        const displayTime = timeStr ? timeStr : '--:--';
-
         btn.innerHTML = `
           <div class="level-num">${i.toString().padStart(2, '0')}</div>
           <div class="stars">${starsHTML}</div>
           <div class="level-card-pill">
-            <div class="pill-stat">⏱️ ${displayTime}</div>
-            <div class="pill-stat">🔀 ${displayMoves} <span class="unit">MOVES</span></div>
+            <div class="pill-stat">⏱️ ${timeStr || '--:--'}</div>
+            <div class="pill-stat">🔀 ${moves || '--'} <span class="unit">MOVES</span></div>
           </div>
         `;
 
@@ -608,9 +774,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="level-num" style="opacity:0.3">${i.toString().padStart(2, '0')}</div>
           <div class="lock-icon" style="font-size:22px; opacity:0.6;">🔒</div>
           <div class="locked-text">LOCKED</div>
-      `;
+        `;
       }
-
       grid.appendChild(btn);
     }
 
@@ -656,7 +821,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof AudioManager !== 'undefined') AudioManager.playClick();
         openCollectionFolder(start, end);
       });
-
       folderGrid.appendChild(folderCard);
     }
 
@@ -685,7 +849,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('collectionsGrid');
     if (!grid) return;
     grid.innerHTML = '';
-    const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+    const user = getCurrentUser();
+    const currentLevel = user?.level ?? parseInt(localStorage.getItem(getUserKey('currentLevel'))) ?? 1;
 
     for (let i = start; i <= end; i++) {
       const isUnlocked = i < currentLevel;
@@ -697,11 +862,10 @@ document.addEventListener('DOMContentLoaded', () => {
           <img src="image/level${i}.jpeg" alt="Level ${i}">
           <div class="collection-badge">LEVEL ${i.toString().padStart(2, '0')}</div>
         `;
-
         item.addEventListener('click', () => {
           if (typeof AudioManager !== 'undefined') AudioManager.playClick();
           openImageModal(i);
-      });
+        });
       } else {
         item.style.opacity = '0.4';
         item.innerHTML = `
@@ -709,7 +873,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="collection-badge">LEVEL ${i.toString().padStart(2, '0')}</div>
         `;
       }
-
       grid.appendChild(item);
     }
   }
@@ -721,7 +884,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (modalTitle) modalTitle.innerText = `LEVEL ${levelNum.toString().padStart(2, '0')}`;
     if (modalImg) modalImg.src = `image/level${levelNum}.jpeg`;
-
     if (modal) modal.classList.remove('hidden');
   }
 
@@ -744,231 +906,193 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// --- DYNAMIC PROFILE STATS & CLOUD-SYNCED LEVEL/XP/COINS ---
+async function updateProfileStats() {
+  await fetchCloudProfileData();
 
-
-// --- AUTO-SYNC FIRESTORE DATA ON PAGE LOAD ---
-async function syncUserWithFirestore() {
-  const loggedInUser = (() => {
-    try {
-      return JSON.parse(localStorage.getItem('loggedInUser'));
-    } catch (e) {
-      return null;
-    }
-  })();
-
-  if (!loggedInUser || !loggedInUser.username || !window.pixvinzDb) return;
+  let currentLevel = 1;
+  let totalCoins = 0;
+  let currentXp = 0;
 
   try {
-    const { db, doc, getDoc } = window.pixvinzDb;
-    const userDocRef = doc(db, 'players', loggedInUser.username);
-    const snap = await getDoc(userDocRef);
-
-    if (snap.exists()) {
-      const freshData = snap.data();
-       
-      // Update the local storage session object
-      localStorage.setItem('loggedInUser', JSON.stringify(freshData));
-
-      // Update user-specific keys (like coins and level)
-      const prefix = `${loggedInUser.username}_`;
-      if (freshData.coins !== undefined) {
-        localStorage.setItem(prefix + 'totalCoins', freshData.coins);
+    const loggedUser = JSON.parse(localStorage.getItem('loggedInUser'));
+    if (loggedUser) {
+      if (loggedUser.level !== undefined) currentLevel = parseInt(loggedUser.level);
+      if (loggedUser.coins !== undefined) totalCoins = parseInt(loggedUser.coins);
+      if (loggedUser.xp !== undefined) currentXp = parseInt(loggedUser.xp);
+      if (loggedUser.displayName) {
+        const nameElem = document.getElementById('userDisplayName') || document.querySelector('.player-name');
+        if (nameElem) nameElem.innerText = loggedUser.displayName;
       }
-      if (freshData.level !== undefined) {
-        localStorage.setItem(prefix + 'currentLevel', freshData.level);
-      }
-
-      // Refresh coin display on the header if visible
-      const coinElem = document.getElementById('coinCount');
-      if (coinElem && freshData.coins !== undefined) {
-        coinElem.innerText = freshData.coins;
+      if (loggedUser.avatar) {
+        const avatarImg = document.getElementById('profileHeaderImg');
+        const fallbackIcon = document.getElementById('profileIconFallback');
+        if (avatarImg) {
+          avatarImg.src = loggedUser.avatar;
+          avatarImg.style.display = 'block';
+        }
+        if (fallbackIcon) fallbackIcon.style.display = 'none';
       }
     }
-  } catch (err) {
-    console.warn("Could not sync with Firestore:", err);
+  } catch (e) {}
+
+  if (currentXp === 0 && currentLevel > 1) {
+    currentXp = (currentLevel - 1) * 500;
+  }
+
+  // Update coin counts
+  const coinHeaderElem = document.getElementById('coinCount');
+  if (coinHeaderElem) coinHeaderElem.innerText = totalCoins;
+
+  const coinBoxes = document.querySelectorAll('#profileView span, #profileView div');
+  coinBoxes.forEach(box => {
+    if (box.textContent.trim().match(/^\d+$/) && box.previousElementSibling && box.previousElementSibling.textContent.includes('🪙')) {
+      box.innerText = totalCoins;
+    }
+  });
+
+  // Update level text on profile
+  document.querySelectorAll('#profileView').forEach(view => {
+    const textNodes = document.createTreeWalker(view, NodeFilter.SHOW_TEXT, null, false);
+    let node;
+    while (node = textNodes.nextNode()) {
+      if (node.nodeValue.includes('Level:')) {
+        node.nodeValue = `Level: ${currentLevel}`;
+      }
+      if (node.nodeValue.includes('LEVEL 1') || node.nodeValue.includes('LEVEL ')) {
+        node.nodeValue = `LEVEL ${currentLevel}`;
+      }
+    }
+  });
+
+  const levelBadges = document.querySelectorAll('#profileView .level-badge, #profileView div');
+  levelBadges.forEach(el => {
+    if (el.innerText && el.innerText.startsWith('LEVEL')) {
+      el.innerText = `LEVEL ${currentLevel}`;
+    }
+  });
+
+  const xpTextElem = Array.from(document.querySelectorAll('span, div')).find(el => el.textContent.includes('/ 500 XP') || el.textContent.includes('XP'));
+  if (xpTextElem) {
+    const xpTarget = currentLevel * 500;
+    xpTextElem.innerText = `${currentXp} / ${xpTarget} XP`;
+  }
+
+  const progressBar = document.querySelector('#profileView .progress-bar-fill, #profileView div[style*="width"]');
+  if (progressBar) {
+    const percentage = Math.min(100, (currentXp % 500) / 5 * 1);
+    progressBar.style.width = `${percentage}%`;
   }
 }
 
-// Call this right when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-  syncUserWithFirestore();
+document.addEventListener('DOMContentLoaded', async () => {
+  await fetchCloudProfileData();
+  updateProfileStats();
 });
 
-
-
-
-// --- LEADERBOARD LOGIC (Safe DOM Binding, Avatars & Real Players Only) ---
+// --- LEADERBOARD LOGIC ---
 document.addEventListener('DOMContentLoaded', () => {
-    const navLeaderboard = document.getElementById('navLeaderboard');
-    if (navLeaderboard) {
-        navLeaderboard.addEventListener('click', () => {
-            if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-            document.querySelectorAll('[id$="View"]').forEach(view => view.classList.remove('active'));
-            const leaderboardView = document.getElementById('leaderboardView');
-            if (leaderboardView) leaderboardView.classList.add('active');
-            loadLeaderboardData();
-        });
-    }
+  const navLeaderboard = document.getElementById('navLeaderboard');
+  if (navLeaderboard) {
+    navLeaderboard.addEventListener('click', async () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      document.querySelectorAll('[id$="View"]').forEach(view => view.classList.remove('active'));
+      const leaderboardView = document.getElementById('leaderboardView');
+      if (leaderboardView) leaderboardView.classList.add('active');
+      await loadLeaderboardData();
+    });
+  }
 });
 
 async function loadLeaderboardData() {
-    const listContainer = document.getElementById('leaderboardList');
-    if (!listContainer) return;
-    
-    listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #aaa;">Loading leaderboard...</div>';
+  const listContainer = document.getElementById('leaderboardList');
+  if (!listContainer) return;
+  
+  listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #aaa;">Loading leaderboard...</div>';
 
-    let players = [];
-    let currentUsername = '';
-    try {
-        const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
-        if (userObj && userObj.username) currentUsername = userObj.username;
-    } catch (e) {}
-    if (!currentUsername) {
-        currentUsername = localStorage.getItem('vinpix_username') || '';
+  let players = [];
+  let currentUsername = '';
+  try {
+    const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
+    if (userObj && userObj.username) currentUsername = userObj.username;
+  } catch (e) {}
+
+  try {
+    if (window.pixvinzDb) {
+      const { db, collection, query, orderBy, limit, getDocs } = window.pixvinzDb;
+      const q = query(collection(db, 'players'), orderBy('xp', 'desc'), limit(100));
+      const querySnapshot = await getDocs(q);
+      
+      querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        players.push({
+          username: docSnap.id,
+          name: data.displayName || data.username || 'Anonymous',
+          coins: data.coins || 0,
+          xp: data.xp || 0,
+          level: data.level || 1,
+          avatar: data.avatar || ''
+        });
+      });
     }
+  } catch (err) {
+    console.warn("Could not fetch live leaderboard from Firestore:", err);
+  }
 
-    try {
-        if (window.pixvinzDb) {
-            const { db, collection, query, orderBy, limit, getDocs } = window.pixvinzDb;
-            const q = query(collection(db, 'players'), orderBy('xp', 'desc'), limit(100));
-            const querySnapshot = await getDocs(q);
-            
-            querySnapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                players.push({
-                    username: docSnap.id,
-                    name: data.displayName || data.username || 'Anonymous',
-                    coins: data.coins || 0,
-                    xp: data.xp || 0,
-                    level: data.level || 1,
-                    avatar: data.avatar || ''
-                });
-            });
-        }
-    } catch (err) {
-        console.warn("Could not fetch live leaderboard from Firestore:", err);
+  listContainer.innerHTML = '';
+
+  let userRank = '--';
+  if (currentUsername) {
+    const foundIndex = players.findIndex(p => p.username.toLowerCase() === currentUsername.toLowerCase() || p.name.toLowerCase() === currentUsername.toLowerCase());
+    if (foundIndex !== -1) {
+      userRank = `#${foundIndex + 1}`;
     }
+  }
 
-    listContainer.innerHTML = '';
+  const rankDisplay = document.getElementById('userRankDisplay');
+  if (rankDisplay) {
+    rankDisplay.textContent = userRank !== '--' ? userRank : '#--';
+    rankDisplay.style.textAlign = 'center';
+    rankDisplay.style.display = 'block';
+    rankDisplay.style.width = '100%';
+  }
 
-    let userRank = '--';
-    if (currentUsername) {
-        const foundIndex = players.findIndex(p => p.username.toLowerCase() === currentUsername.toLowerCase() || p.name.toLowerCase() === currentUsername.toLowerCase());
-        if (foundIndex !== -1) {
-            userRank = `#${foundIndex + 1}`;
-        }
-    }
-
-    const rankDisplay = document.getElementById('userRankDisplay');
-    if (rankDisplay) {
-        rankDisplay.textContent = userRank !== '--' ? userRank : '#--';
-        rankDisplay.style.textAlign = 'center';
-        rankDisplay.style.display = 'block';
-        rankDisplay.style.width = '100%';
-    }
-
-    if (players.length === 0) {
-        listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #aaa;">No players found on the leaderboard yet.</div>';
-        return;
-    }
-
-    const topPlayers = players.slice(0, 20);
-
-    topPlayers.forEach((player, index) => {
-        const rank = index + 1;
-        let rankBadgeHTML = '';
-        let specialStyle = '';
-        let frameStyle = 'border: 2px solid rgba(255,255,255,0.2);';
-
-        if (rank === 1) {
-            specialStyle = 'background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(255, 215, 0, 0.6);';
-            frameStyle = 'border: 3px solid #ffd700;';
-            rankBadgeHTML = `
-                <div style="min-width: 48px; height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #ffaa00, #ff5500); border-radius: 8px; border: 2px solid #fff; font-weight: 900; font-size: 15px; color: #fff;">
-                    <span>#1</span>
-                </div>`;
-        }
-        // ... (rest of your original leaderboard list generation code remains unchanged)
-    });
+  if (players.length === 0) {
+    listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #aaa;">No players found on the leaderboard yet.</div>';
+    return;
+  }
 }
 
-
 // --- PROFILE BADGES RENDERING LOGIC ---
-function renderProfileBadges() {
-    const badgesContainer = document.getElementById('badgesGrid');
-    if (!badgesContainer) return;
+async function renderProfileBadges() {
+    await fetchCloudProfileData();
 
-    // Pull variables safely from local storage session or fallback values
     let playerLevel = 1;
     let playerCoins = 0;
     try {
         const loggedUser = JSON.parse(localStorage.getItem('loggedInUser'));
         if (loggedUser) {
-            if (loggedUser.level) playerLevel = parseInt(loggedUser.level);
-            if (loggedUser.coins) playerCoins = parseInt(loggedUser.coins);
-        }
-        const userPrefix = loggedUser && loggedUser.username ? loggedUser.username : '';
-        if (userPrefix) {
-            const savedLevel = localStorage.getItem(`${userPrefix}_currentLevel`);
-            const savedCoins = localStorage.getItem(`${userPrefix}_totalCoins`);
-            if (savedLevel) playerLevel = parseInt(savedLevel);
-            if (savedCoins) playerCoins = parseInt(savedCoins);
+            if (loggedUser.level !== undefined) playerLevel = parseInt(loggedUser.level);
+            if (loggedUser.coins !== undefined) playerCoins = parseInt(loggedUser.coins);
         }
     } catch (e) {}
 
-    // Custom image badge data with unique unlock checks
     const allBadges = [
-        { 
-            title: 'Novice Genesis', 
-            desc: 'Completed Level 1', 
-            icon: 'image/badge1.png', 
-            unlocked: playerLevel >= 1, 
-        },
-        { 
-            title: 'Thunderbolt', 
-            desc: 'Speed run (20-30) < 1m', 
-            icon: 'image/badge2.png', 
-            unlocked: window.player?.speedThunder === true || window.player?.speedThunderUnlocked === true, 
-        },
-        { 
-            title: 'Aurelian Vault', 
-            desc: 'Reached 500 coins', 
-            icon: 'image/badge3.png', 
-            unlocked: playerCoins >= 500, 
-        },
-        { 
-            title: 'Celestial Elite', 
-            desc: 'Reached Level 50', 
-            icon: 'image/badge4.png', 
-            unlocked: playerLevel >= 50, 
-        },
-        { 
-            title: 'Grand Sovereign', 
-            desc: 'Reached Level 75', 
-            icon: 'image/badge5.png', 
-            unlocked: playerLevel >= 75, 
-        },
-        { 
-            title: 'Imperial Crown', 
-            desc: 'Reached Level 100', 
-            icon: 'image/badge6.png', 
-            unlocked: playerLevel >= 100, 
-        },
-        { 
-            title: 'Infernal Apex', 
-            desc: 'Reached Level 150', 
-            icon: 'image/badge7.png', 
-            unlocked: playerLevel >= 150, 
-        },
-        { 
-            title: 'Mythical Deity', 
-            desc: 'Reached Level 200', 
-            icon: 'image/badge8.png', 
-            unlocked: playerLevel >= 200, 
-        }
+        { title: 'Novice Genesis', desc: 'Completed Level 1', icon: 'image/badge1.png', unlocked: playerLevel >= 1 },
+        { title: 'Thunderbolt', desc: 'Speed run (20-30) < 1m', icon: 'image/badge2.png', unlocked: window.player?.speedThunder === true },
+        { title: 'Aurelian Vault', desc: 'Reached 500 coins', icon: 'image/badge3.png', unlocked: playerCoins >= 500 },
+        { title: 'Celestial Elite', desc: 'Reached Level 50', icon: 'image/badge4.png', unlocked: playerLevel >= 50 },
+        { title: 'Grand Sovereign', desc: 'Reached Level 75', icon: 'image/badge5.png', unlocked: playerLevel >= 75 },
+        { title: 'Imperial Crown', desc: 'Reached Level 100', icon: 'image/badge6.png', unlocked: playerLevel >= 100 },
+        { title: 'Infernal Apex', desc: 'Reached Level 150', icon: 'image/badge7.png', unlocked: playerLevel >= 150 },
+        { title: 'Mythical Deity', desc: 'Reached Level 200', icon: 'image/badge8.png', unlocked: playerLevel >= 200 }
     ];
 
+    const badgesContainer = document.getElementById('badgesGrid');
+    if (!badgesContainer) return;
+
     badgesContainer.innerHTML = '';
+    badgesContainer.style.gap = '16px 12px';
 
     allBadges.forEach(badge => {
         const isUnlocked = badge.unlocked;
@@ -980,17 +1104,17 @@ function renderProfileBadges() {
             flex-direction: column;
             align-items: center;
             text-align: center;
-            padding: 2px;
+            padding: 4px;
             width: 100%;
             box-sizing: border-box;
         `;
 
         badgeElement.innerHTML = `
-            <div style="width: 72px; height: 70px; display: flex; align-items: center; justify-content: center; margin-bottom: 2px; filter: ${isUnlocked ? 'drop-shadow(0 0 5px rgba(255, 215, 0, 0.4))' : 'none'};">
+            <div style="width: 84px; height: 82px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; filter: ${isUnlocked ? 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.5))' : 'none'};">
                 <img src="${badge.icon}" alt="${badge.title}" style="width: 100%; height: 100%; object-fit: contain; ${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.35;'}">
             </div>
-            <span class="badge-title" style="font-weight: 700; font-size: 9px; color: ${isUnlocked ? '#fff' : '#777'}; line-height: 1.1; margin-bottom: 1px; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${badge.title}</span>
-            <span class="badge-desc" style="font-size: 7.5px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1; width: 100%; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;">${badge.desc}</span>
+            <span class="badge-title" style="font-weight: 700; font-size: 10px; color: ${isUnlocked ? '#fff' : '#777'}; line-height: 1.2; margin-bottom: 2px; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${badge.title}</span>
+            <span class="badge-desc" style="font-size: 8px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1.1; width: 100%; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;">${badge.desc}</span>
         `;
         badgesContainer.appendChild(badgeElement);
     });
