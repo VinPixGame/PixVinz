@@ -18,8 +18,8 @@
     box-sizing: border-box;
     display: none;
     justify-content: center;
-    align-items: flex-start;
-    padding: 30px 14px 40px 14px;
+    align-items: center; /* Perfectly centers the profile container on screen */
+    padding: 20px 14px;
 }
 
 /* Automatically shows when script.js adds the 'active' class */
@@ -33,14 +33,19 @@ body:has(#profileView.active) #mainHeader {
     display: none !important;
 }
 
+/* Enclosing the ENTIRE profile page inside the gold glowing border */
 #profileView .profile-container {
     width: 100%;
-    max-width: 440px;
-    margin: 0 auto;
-    padding: 0;
+    max-width: 420px;
+    margin: auto;
+    padding: 18px 16px;
     box-sizing: border-box;
     height: auto;
     min-height: unset;
+    background: linear-gradient(135deg, rgba(22, 16, 48, 0.98), rgba(12, 9, 28, 0.99));
+    border: 2px solid #ffd700;
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.45), inset 0 0 15px rgba(255, 215, 0, 0.15);
+    border-radius: 20px;
 }
 
 /* Clean Header Wrapper: centers text and aligns back button on the left */
@@ -49,28 +54,15 @@ body:has(#profileView.active) #mainHeader {
     position: relative;
     display: flex;
     align-items: center;
-    justify-content: center; /* Centers the <h1> */
+    justify-content: space-between;
     width: 100%;
-    margin-bottom: 20px;
-    min-height: 44px;
-}
-
-/* Player Profile Title */
-#profileView .profile-header h1 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin: 0;
-    letter-spacing: 0.5px;
-    color: #ffffff;
-    text-align: center;
+    margin-bottom: 14px;
+    min-height: 40px;
 }
 
 /* Back Button - Positioned nicely on the left inside the header flow */
 #profileView .profile-header .back-btn {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
+    position: relative;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(8px);
@@ -93,26 +85,8 @@ body:has(#profileView.active) #mainHeader {
     border-color: #9c27b0;
 }
 
-/* Coins Badge - Fixed position on top right */
-#profileView .coin-badge,
-#profileView .coins-badge,
-#profileView .coins-counter {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    background: rgba(255, 215, 0, 0.12);
-    border: 1px solid rgba(255, 215, 0, 0.3);
-    backdrop-filter: blur(8px);
-    color: #ffd700;
-    padding: 8px 14px;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+#profileView .header-spacer {
+    width: 50px;
 }
 
 /* Avatar Section & Loading Overlay */
@@ -120,15 +94,26 @@ body:has(#profileView.active) #mainHeader {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
 
+#profileView .avatar-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #9c27b0;
+    box-shadow: 0 0 25px rgba(156, 39, 176, 0.7), inset 0 0 15px rgba(0, 0, 0, 0.5);
+    margin-bottom: 10px;
+    background: #11041f;
+}
 
 #profileView .avatar-wrapper img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.8s ease;
+    transition: transform 0.3s ease;
 }
 
 #profileView .avatar-wrapper:hover img {
@@ -158,7 +143,7 @@ body:has(#profileView.active) #mainHeader {
     border: 3px solid rgba(255, 255, 255, 0.2);
     border-top: 3px solid #00f2fe;
     border-radius: 50%;
-    animation: profileSpin 0.9s linear infinite;
+    animation: profileSpin 0.8s linear infinite;
 }
 
 @keyframes profileSpin {
@@ -166,17 +151,19 @@ body:has(#profileView.active) #mainHeader {
     100% { transform: rotate(360deg); }
 }
 
+/* Choose Avatar Button - Made larger to match avatar proportions */
 #profileView .upload-btn {
     background: linear-gradient(135deg, #9c27b0, #e91e63);
     color: #ffffff;
-    padding: 8px 20px;
-    border-radius: 20px;
-    font-size: 0.85rem;
+    padding: 10px 24px;
+    border-radius: 22px;
+    font-size: 0.95rem;
     cursor: pointer;
     font-weight: 700;
     box-shadow: 0 4px 15px rgba(156, 39, 176, 0.4);
     transition: all 0.2s ease;
     border: none;
+    letter-spacing: 0.5px;
 }
 
 #profileView .upload-btn:hover {
@@ -190,15 +177,15 @@ body:has(#profileView.active) #mainHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 20px 0;
+    margin: 12px 0;
     background: rgba(255, 255, 255, 0.03);
-    padding: 14px 18px;
-    border-radius: 14px;
+    padding: 10px 14px;
+    border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 #profileView .info-subtitle {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     opacity: 0.6;
     display: block;
     text-transform: uppercase;
@@ -207,39 +194,64 @@ body:has(#profileView.active) #mainHeader {
 
 #profileView .profile-info-row h3 {
     margin: 2px 0 0 0;
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 600;
+}
+
+/* Coins and Level Stats Row */
+#profileView .profile-stats-badge-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    font-size: 0.9rem;
+}
+
+#profileView #profileCoins {
+    font-weight: 700;
+    color: #ffd700;
+    margin-left: 6px;
+}
+
+#profileView #profileLevel {
+    background: linear-gradient(135deg, #fff2b2 0%, #d4af37 50%, #996515 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
 }
 
 /* Badges Section Header Layout */
 #profileView .badges-section {
-    margin-top: 24px;
+    margin-top: 14px;
 }
 
 #profileView .badges-section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
-    padding: 0 4px;
+    margin-bottom: 8px;
+    padding: 0 2px;
 }
 
 #profileView .badges-section-header h3,
 #profileView .badges-section > h3 {
-    font-size: 1.15rem;
+    font-size: 0.95rem;
     color: #ffd700;
     margin: 0;
-    font-family: 'Segoe UI', sans-serif;
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
 
 #profileView .global-rank-indicator {
-    font-size: 0.9rem;
+    font-size: 0.75rem;
     color: #d1c4e9;
     font-weight: 600;
     background: rgba(156, 39, 176, 0.2);
-    padding: 4px 10px;
+    padding: 3px 8px;
     border-radius: 20px;
     border: 1px solid rgba(156, 39, 176, 0.4);
 }
@@ -249,55 +261,58 @@ body:has(#profileView.active) #mainHeader {
     font-weight: bold;
 }
 
+/* Tighter vertical/horizontal spacing for badges without card containers */
 #profileView .badges-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    text-align: center;
 }
 
+/* Badge Item Styling with transparent PNG outline glow (no box container background) */
+#profileView .badge-item,
 #profileView .badge-card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    padding: 12px;
-    border-radius: 14px;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    transition: all 0.2s ease;
+    padding: 4px;
 }
 
-#profileView .badge-card.unlocked {
-    border-color: rgba(156, 39, 176, 0.5);
-    background: linear-gradient(135deg, rgba(156, 39, 176, 0.15), rgba(0, 0, 0, 0.3));
-    box-shadow: 0 4px 12px rgba(156, 39, 176, 0.15);
-}
-
-#profileView .badge-card.locked {
-    opacity: 0.35;
-    filter: grayscale(90%);
-}
-
+/* Applies glow strictly to the PNG image contour/lining, ignoring transparent edges */
+#profileView .badge-item img,
+#profileView .badge-card img,
 #profileView .badge-gem {
-    font-size: 1.6rem;
-    margin-right: 10px;
+    filter: drop-shadow(0 0 8px rgba(156, 39, 176, 0.7));
+    transition: transform 0.2s ease;
+}
+
+#profileView .badge-item.locked img,
+#profileView .badge-card.locked img {
+    filter: grayscale(90%) drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+    opacity: 0.35;
 }
 
 #profileView .badge-title {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     font-weight: 700;
     color: #fff;
+    margin-top: 4px;
 }
 
 #profileView .badge-desc {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     opacity: 0.65;
 }
 
 /* XP Progress Bar Section */
 #profileView .xp-section {
-    margin: 24px 0 4px 0;
+    margin: 14px 0 2px 0;
     background: rgba(255, 255, 255, 0.02);
-    padding: 16px;
-    border-radius: 16px;
+    padding: 12px 14px;
+    border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -305,14 +320,15 @@ body:has(#profileView.active) #mainHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+    font-size: 0.75rem;
 }
 
 #profileView #displayLevelBadge {
     background: linear-gradient(135deg, #9c27b0, #e91e63);
-    padding: 4px 10px;
-    border-radius: 8px;
-    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
     font-weight: 800;
     letter-spacing: 0.5px;
     color: #fff;
@@ -320,16 +336,16 @@ body:has(#profileView.active) #mainHeader {
 }
 
 #profileView #displayXpText {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     opacity: 0.7;
     font-weight: 600;
 }
 
 #profileView .xp-track {
     width: 100%;
-    height: 10px;
+    height: 8px;
     background: rgba(0, 0, 0, 0.4);
-    border-radius: 6px;
+    border-radius: 4px;
     overflow: hidden;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
 }
@@ -338,7 +354,7 @@ body:has(#profileView.active) #mainHeader {
     width: 0%;
     height: 100%;
     background: linear-gradient(90deg, #9c27b0, #00f2fe);
-    border-radius: 6px;
+    border-radius: 4px;
     transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
 }
@@ -357,8 +373,8 @@ body:has(#profileView.active) #mainHeader {
     background: rgba(156, 39, 176, 0.15);
     border: 1px solid rgba(156, 39, 176, 0.6);
     color: #fff;
-    padding: 6px 14px;
-    font-size: 0.85rem;
+    padding: 5px 12px;
+    font-size: 0.8rem;
     width: auto;
 }
 
@@ -410,10 +426,10 @@ body:has(#profileView.active) #mainHeader {
 
 #editNameModal .settings-card {
     background: linear-gradient(145deg, #2a1147, #19092d);
-    padding: 28px;
+    padding: 24px;
     border-radius: 20px;
     width: 90%;
-    max-width: 360px;
+    max-width: 340px;
     border: 2px solid #9c27b0;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
     position: relative;
@@ -425,12 +441,12 @@ body:has(#profileView.active) #mainHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
 }
 
 #editNameModal .settings-header h3 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1rem;
     letter-spacing: 0.5px;
 }
 
@@ -449,12 +465,12 @@ body:has(#profileView.active) #mainHeader {
 }
 
 #editNameModal .input-group {
-    margin-bottom: 15px;
+    margin-bottom: 14px;
 }
 
 #editNameModal .input-group input {
     width: 100%;
-    padding: 12px;
+    padding: 10px 12px;
     border-radius: 10px;
     border: 1px solid #9c27b0;
     background: rgba(0, 0, 0, 0.3);
@@ -470,9 +486,9 @@ body:has(#profileView.active) #mainHeader {
 }
 
 #editNameModal .save-status {
-    margin: 5px 0 15px 0;
-    font-size: 0.9rem;
+    margin: 4px 0 12px 0;
+    font-size: 0.85rem;
     text-align: center;
-    min-height: 20px;
+    min-height: 18px;
     font-weight: 600;
 }
