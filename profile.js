@@ -132,6 +132,19 @@ function calculateLevelAndXp(totalPuzzlesSolved) {
     };
 }
 
+// --- UPDATE COINS AND LEVEL UI STATS ---
+function updateProfileStats() {
+    const prefix = getCurrentUsername() + '_';
+    const totalCoins = parseInt(localStorage.getItem(prefix + 'totalCoins')) || 0;
+    const currentLevelVal = parseInt(localStorage.getItem(prefix + 'currentLevel')) || 1;
+
+    const profileCoinsEl = document.getElementById('profileCoins');
+    const profileLevelEl = document.getElementById('profileLevel');
+
+    if (profileCoinsEl) profileCoinsEl.textContent = totalCoins;
+    if (profileLevelEl) profileLevelEl.textContent = currentLevelVal;
+}
+
 function updateXpProgress() {
     const currentUsername = getCurrentUsername();
     let currentLevelVal = parseInt(localStorage.getItem(currentUsername + '_currentLevel')) || 3;
@@ -147,6 +160,9 @@ function updateXpProgress() {
     if (levelBadge) levelBadge.textContent = `LEVEL ${playerProgression.level}`;
     if (xpText) xpText.textContent = `${playerProgression.currentXp.toLocaleString()} / ${playerProgression.maxXp.toLocaleString()} XP`;
     if (xpBarFill) xpBarFill.style.width = `${progressPercent}%`;
+
+    // Keep profile coins & level UI fresh
+    updateProfileStats();
 }
 
 // --- LOAD & DISPLAY GLOBAL RANK ON PROFILE ---
@@ -361,6 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     updateXpProgress();
+    updateProfileStats();
     checkAndUnlockBadges();
     
     // Fetch and display global rank on profile open
