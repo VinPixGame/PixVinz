@@ -303,9 +303,10 @@ function checkAndUnlockBadges() {
         }
     ];
 
+    
     badgesContainer.style.display = 'grid';
     badgesContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
-    badgesContainer.style.gap = '14px 6px';
+    badgesContainer.style.gap = '6px 6px';
     badgesContainer.style.textAlign = 'center';
     badgesContainer.style.width = '100%';
     badgesContainer.innerHTML = '';
@@ -326,7 +327,7 @@ function checkAndUnlockBadges() {
         `;
 
         badgeElement.innerHTML = `
-            <div style="width: 72px; height: 70px; display: flex; align-items: center; justify-content: center; margin-bottom: 2px; filter: ${isUnlocked ? `drop-shadow(0 0 5px ${badge.glowColor}66)` : 'none'};">
+            <div style="width: 84px; height: 84px; display: flex; align-items: center; justify-content: center; margin-bottom: 2px; filter: ${isUnlocked ? `drop-shadow(0 0 6px ${badge.glowColor}66)` : 'none'};">
                 <img src="${badge.icon}" alt="${badge.title}" style="width: 100%; height: 100%; object-fit: contain; ${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.35;'}">
             </div>
             <span class="badge-title" style="font-weight: 700; font-size: 9px; color: ${isUnlocked ? '#fff' : '#777'}; line-height: 1.1; margin-bottom: 1px; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${badge.title}</span>
@@ -334,8 +335,9 @@ function checkAndUnlockBadges() {
         `;
         badgesContainer.appendChild(badgeElement);
     });
-}
 
+
+    
 document.addEventListener('DOMContentLoaded', () => {
     const avatarLoader = document.getElementById('avatarLoader');
     if (avatarLoader) avatarLoader.style.display = 'none';
