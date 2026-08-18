@@ -214,7 +214,7 @@ async function loadProfileGlobalRank() {
     }
 }
 
-// --- UNIFIED DYNAMIC BADGE CHECKER & 2-COLUMN RENDERER (NO SHAPES/GRADIENTS) ---
+// --- UNIFIED DYNAMIC BADGE CHECKER & 3-COLUMN RENDERER (NO CONTAINERS) ---
 function checkAndUnlockBadges() {
     const badgesContainer = document.getElementById('badgesGrid');
     if (!badgesContainer) return;
@@ -245,7 +245,6 @@ function checkAndUnlockBadges() {
         }
     }
 
-    // Clean badge definitions using custom image assets directly
     const allBadges = [
         { 
             title: 'Novice Genesis', 
@@ -305,26 +304,16 @@ function checkAndUnlockBadges() {
         }
     ];
 
-    // Force 2-column grid styling dynamically
+    // Force exact 3-column layout with optimal spacing and no background containers
     badgesContainer.style.display = 'grid';
-    badgesContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
-    badgesContainer.style.gap = '8px';
-    badgesContainer.style.textAlign = 'left';
+    badgesContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    badgesContainer.style.gap = '16px 8px';
+    badgesContainer.style.textAlign = 'center';
+    badgesContainer.style.width = '100%';
     badgesContainer.innerHTML = '';
 
     allBadges.forEach(badge => {
         const isUnlocked = badge.unlocked;
-        
-        const cardStyle = isUnlocked ? `
-            background: linear-gradient(135deg, rgba(22, 16, 48, 0.9), rgba(12, 9, 28, 0.95));
-            border: 1px solid ${badge.glowColor}66;
-            box-shadow: 0 0 12px ${badge.glowColor}25, inset 0 0 8px ${badge.glowColor}15;
-            opacity: 1;
-        ` : `
-            background: rgba(15, 15, 20, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            opacity: 0.35;
-        `;
 
         const badgeElement = document.createElement('div');
         badgeElement.style.cssText = `
@@ -332,18 +321,17 @@ function checkAndUnlockBadges() {
             flex-direction: column;
             align-items: center;
             text-align: center;
-            padding: 10px 6px;
-            border-radius: 14px;
-            transition: all 0.3s ease;
-            ${cardStyle}
+            padding: 4px;
+            width: 100%;
+            box-sizing: border-box;
         `;
 
         badgeElement.innerHTML = `
-            <div style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px;">
-                <img src="${badge.icon}" alt="${badge.title}" style="width: 100%; height: 100%; object-fit: contain; ${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.4;'}">
+            <div style="width: 72px; height: 72px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; filter: ${isUnlocked ? `drop-shadow(0 0 8px ${badge.glowColor}55)` : 'none'};">
+                <img src="${badge.icon}" alt="${badge.title}" style="width: 100%; height: 100%; object-fit: contain; ${isUnlocked ? '' : 'filter: grayscale(100%); opacity: 0.35;'}">
             </div>
-            <span style="font-weight: 700; font-size: 12px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.3px; line-height: 1.2; margin-bottom: 2px;">${badge.title}</span>
-            <span style="font-size: 9px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1.1;">${badge.desc}</span>
+            <span style="font-weight: 700; font-size: 11px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.2px; line-height: 1.1; margin-bottom: 2px; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${badge.title}</span>
+            <span style="font-size: 8.5px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1.1; width: 100%; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${badge.desc}</span>
         `;
         badgesContainer.appendChild(badgeElement);
     });
