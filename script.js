@@ -109,13 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Make showView globally accessible for profile.js and other scripts
   window.showView = showView;
 
-  function updateCoinDisplay() {
-    const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
-    const coinElem = document.getElementById('coinCount');
-    if (coinElem) {
-      coinElem.innerText = totalCoins;
-    }
-  }
+
 
   function playMainBGM() {
     if (typeof AudioManager !== 'undefined' && AudioManager.musicEnabled) {
@@ -564,8 +558,6 @@ if (skipLoading) {
           btn.classList.add('solved-bg');
         }
 
-        const levelCoins = parseInt(localStorage.getItem(getUserKey(`levelCoins_${i}`))) || 0;
-        const starsEarned = Math.min(3, Math.floor(levelCoins / 5)) || (isSolved ? 3 : 0);
         
         let moves = localStorage.getItem(getUserKey(`levelMoves_${i}`));
         let timeStr = localStorage.getItem(getUserKey(`levelTime_${i}`));
@@ -787,15 +779,7 @@ async function syncUserWithFirestore() {
       // Update the local storage session object
       localStorage.setItem('loggedInUser', JSON.stringify(freshData));
 
-      // Update user-specific keys (like coins and level)
-      const prefix = `${loggedInUser.username}_`;
-      if (freshData.coins !== undefined) {
-        localStorage.setItem(prefix + 'totalCoins', freshData.coins);
-      }
-      if (freshData.level !== undefined) {
-        localStorage.setItem(prefix + 'currentLevel', freshData.level);
-      }
-
+      
       // Refresh coin display on the header if visible
       const coinElem = document.getElementById('coinCount');
       if (coinElem && freshData.coins !== undefined) {
