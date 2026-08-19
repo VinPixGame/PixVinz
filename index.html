@@ -487,13 +487,12 @@
   const analytics = getAnalytics(app);
   const db = getFirestore(app);
 
-  // Expose database tools globally for game.js and script.js to share safely
+  // Expose database tools globally for script.js to share safely
   window.pixvinzDb = { db, doc, getDoc, setDoc, updateDoc };
 </script>
 
 <script src="audio.js"></script>
 <script src="playerstat.js"></script>
-<script src="game.js"></script>
 <script src="profile.js"></script>
 <script type="module" src="script.js"></script>
 
