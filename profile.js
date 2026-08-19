@@ -146,7 +146,7 @@ function updateProfileStats() {
 
 function updateXpProgress() {
     const currentUsername = getCurrentUsername();
-    let currentLevelVal = parseInt(localStorage.getItem(currentUsername ? currentUsername + '_currentLevel' : 'currentLevel')) || 3;
+    let currentLevelVal = parseInt(localStorage.getItem(currentUsername ? currentUsername + '_currentLevel' : 'currentLevel')) || 1;
 
     const puzzlesSolved = Math.max(0, currentLevelVal - 1);
     const playerProgression = calculateLevelAndXp(puzzlesSolved);
