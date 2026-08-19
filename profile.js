@@ -32,49 +32,6 @@ function goHome() {
     }
 }
 
-// --- FETCH FRESH DATA FROM CLOUD UPON OPENING ---
-async function fetchUserDataFromCloud() {
-    try {
-        if (!window.pixvinzDb || !window.pixvinzDb.db) return false;
-        const { db, doc, getDoc } = window.pixvinzDb;
-        const username = getCurrentUsername();
-        if (!username) return false;
-
-        const userDocRef = doc(db, "players", username);
-        const snap = await getDoc(userDocRef);
-
-        if (snap.exists()) {
-            const data = snap.data();
-            
-            // Update session storage with live data from Firebase
-            const userObj = {
-                username: data.username || username,
-                displayName: data.displayName || username,
-                level: data.level || 1,
-                xp: data.xp || 0,
-                coins: data.coins || 0,
-                avatar: data.avatar || ''
-            };
-            localStorage.setItem('loggedInUser', JSON.stringify(userObj));
-
-            // Sync prefixed local storage cache strictly with Firebase data
-            const prefix = `${username}_`;
-            localStorage.setItem(prefix + 'totalCoins', data.coins || 0);
-            localStorage.setItem(prefix + 'currentLevel', data.level || 1);
-            if (data.avatar) {
-                localStorage.setItem(prefix + 'vinpix_avatar', data.avatar);
-            } else {
-                localStorage.removeItem(prefix + 'vinpix_avatar');
-            }
-
-            return true;
-        }
-    } catch (error) {
-        console.warn("Failed to fetch fresh user data from cloud, falling back to local cache:", error);
-    }
-    return false;
-}
-
 // --- SAFE CLOUD SYNC ---
 async function saveUserDataToCloud() {
     try {
@@ -379,13 +336,8 @@ function checkAndUnlockBadges() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     const avatarLoader = document.getElementById('avatarLoader');
-    if (avatarLoader) avatarLoader.style.display = 'flex';
-
-    // Fetch fresh profile details from Firebase before rendering UI
-    await fetchUserDataFromCloud();
-
     if (avatarLoader) avatarLoader.style.display = 'none';
 
     let initialName = '';
@@ -419,6 +371,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateProfileStats();
     checkAndUnlockBadges();
     loadProfileGlobalRank();
+    saveUserDataToCloud();
 });
 
 // --- EDIT NAME MODAL HANDLERS ---
