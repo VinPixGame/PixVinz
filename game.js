@@ -1,3 +1,5 @@
+// game.js - Clean & Synchronized Game Logic
+
 document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const currentLevel = parseInt(urlParams.get('level')) || 1;
@@ -7,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     levelDisplay.innerText = currentLevel.toString().padStart(2, '0');
   }
 
-  // Fetch user data via playerstat.js if available
+  // Fetch cloud/local data and update coin display from playerstat.js
   if (typeof fetchUserDataFromFirestore === 'function') {
     await fetchUserDataFromFirestore();
   }
@@ -40,6 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let timerInterval = null;
   let tilesState = Array.from({ length: totalTiles }, (_, i) => i);
   let selectedTilePos = null;
+  let isGameStarted = false; // Prevents instant win evaluation on load
 
   const imageSrc = `image/level${getLevelImageIndex(currentLevel)}.jpeg`;
 
@@ -90,6 +93,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function handleTileClick(pos) {
+    if (!isGameStarted) return;
     if (typeof AudioManager !== 'undefined') AudioManager.playSelect();
 
     if (selectedTilePos === null) {
@@ -110,7 +114,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function shuffleGrid() {
     const tileCount = tilesState.length;
-    for (let i = 0; i < tileCount * 3; i++) {
+    for (let i = 0; i < tileCount * 5; i++) {
       const idx1 = Math.floor(Math.random() * tileCount);
       const idx2 = Math.floor(Math.random() * tileCount);
       [tilesState[idx1], tilesState[idx2]] = [tilesState[idx2], tilesState[idx1]];
@@ -120,6 +124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function checkWin() {
+    if (!isGameStarted) return;
     const isSolved = tilesState.every((val, idx) => val === idx);
     if (isSolved) {
       clearInterval(timerInterval);
@@ -129,44 +134,40 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (moves <= gridSize * 5) stars = 3;
       else if (moves <= gridSize * 8) stars = 2;
 
-      // Trigger playerstat.js win handler to update coins, level unlocks, and Firestore
+      // Populate victory modal fields before triggering playerstat victory
+      const victoryImg = document.getElementById('victoryImg');
+      if (victoryImg) victoryImg.src = imageSrc;
+
+      const vTime = document.getElementById('vTime');
+      if (vTime && timerDisplay) vTime.innerText = timerDisplay.innerText;
+
+      const vMoves = document.getElementById('vMoves');
+      if (vMoves) vMoves.innerText = moves;
+
+      const vCoins = document.getElementById('vCoins');
+      if (vCoins) vCoins.innerText = `+${stars * 5}`;
+
+      let tier = Math.floor((currentLevel - 1) / 10);
+      let xpGained = (tier + 1) * 100;
+      const vXp = document.getElementById('vXp');
+      if (vXp) vXp.innerText = `+${xpGained}`;
+
+      const starNodes = document.querySelectorAll('#victoryStars .star');
+      starNodes.forEach((star, index) => {
+        if (index < stars) star.classList.add('active');
+        else star.classList.remove('active');
+      });
+
+      // Call playerstat.js victory handler to save progress locally and to Firestore
       if (typeof handleLevelVictory === 'function') {
         handleLevelVictory(currentLevel, stars);
       } else {
-        showVictoryModal(stars, stars * 5);
+        const modal = document.getElementById('victoryModal');
+        if (modal) modal.classList.remove('hidden');
       }
+
+      startConfetti();
     }
-  }
-
-  window.showVictoryModal = function(stars, newCoins) {
-    const victoryImg = document.getElementById('victoryImg');
-    if (victoryImg) victoryImg.src = imageSrc;
-
-    const vTime = document.getElementById('vTime');
-    if (vTime && timerDisplay) vTime.innerText = timerDisplay.innerText;
-
-    const vMoves = document.getElementById('vMoves');
-    if (vMoves) vMoves.innerText = moves;
-
-    const vCoins = document.getElementById('vCoins');
-    if (vCoins) vCoins.innerText = `+${newCoins}`;
-
-    let tier = Math.floor((currentLevel - 1) / 10);
-    let xpGained = (tier + 1) * 100;
-
-    const vXp = document.getElementById('vXp');
-    if (vXp) vXp.innerText = `+${xpGained}`;
-
-    const starNodes = document.querySelectorAll('#victoryStars .star');
-    starNodes.forEach((star, index) => {
-      if (index < stars) star.classList.add('active');
-      else star.classList.remove('active');
-    });
-
-    if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
-    const modal = document.getElementById('victoryModal');
-    if (modal) modal.classList.remove('hidden');
-    startConfetti();
   }
 
   function startConfetti() {
@@ -227,12 +228,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       const previewCost = 5;
       let success = true;
 
+      // Use spendCoins from playerstat.js
       if (typeof spendCoins === 'function') {
         success = await spendCoins(previewCost);
       } else {
-        let totalCoins = window.currentPlayerData?.totalCoins || 0;
-        if (totalCoins < previewCost) success = false;
-        else window.currentPlayerData.totalCoins -= previewCost;
+        let totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
+        if (totalCoins < previewCost) {
+          success = false;
+        } else {
+          localStorage.setItem('totalCoins', totalCoins - previewCost);
+        }
       }
 
       if (!success) {
@@ -305,6 +310,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // Initialize board, shuffle properly, then unlock gameplay
   shuffleGrid();
+  isGameStarted = true;
   startTimer();
 });
