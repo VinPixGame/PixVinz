@@ -484,13 +484,22 @@
   };
 
   const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
   const db = getFirestore(app);
 
-  // Expose database tools globally for script.js to share safely
-  window.pixvinzDb = { db, doc, getDoc, setDoc, updateDoc };
+  // EXPOSE GLOBALLY SO playerstat.js CAN ACCESS THEM WITHOUT CRASHING
+  window.db = db;
+  window.doc = doc;
+  window.getDoc = getDoc;
+  window.setDoc = setDoc;
+  window.updateDoc = updateDoc;
+  window.getCurrentUser = function() {
+    try {
+      return JSON.parse(localStorage.getItem('loggedInUser'));
+    } catch (e) {
+      return null;
+    }
+  };
 </script>
-
 <script src="audio.js"></script>
 <script src="playerstat.js"></script>
 <script src="profile.js"></script>
