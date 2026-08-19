@@ -77,7 +77,7 @@ async function spendCoins(amount) {
     return true; 
 }
 
-
+// Handles victory, saves with profile.js keys, and triggers profile sync if available
 async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeStr) {
     const totalCoinsKey = getUserKey('totalCoins');
     const currentLevelKey = getUserKey('currentLevel');
@@ -105,13 +105,13 @@ async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeSt
 
     updateCoinDisplay();
 
-    const modal = document.getElementById('victoryModal');
-    if (modal) {
-        modal.classList.remove('hidden');
-    }
-
     // Trigger profile.js cloud sync function if it exists
     if (typeof saveUserDataToCloud === 'function') {
         await saveUserDataToCloud();
     }
 }
+
+document.addEventListener('DOMContentLoaded', async () => {
+    updateCoinDisplay();
+    await fetchUserDataFromFirestore();
+});
