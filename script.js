@@ -142,72 +142,80 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   });
 
-// --- 1. LOADING SCREEN & ROBUST 55-IMAGE PRELOADER ---
-const skipLoading = localStorage.getItem('skipLoading') === 'true';
-const percentageElem = document.getElementById('loadingPercentage');
-const barFillElem = document.getElementById('loadingBarFill');
+// --- 1. BULLETPROOF 1% STUCK FIX ---
+try {
+    const skipLoading = localStorage.getItem('skipLoading') === 'true';
+    const percentageElem = document.getElementById('loadingPercentage');
+    const barFillElem = document.getElementById('loadingBarFill');
 
-function finishLoading() {
-    localStorage.removeItem('skipLoading');
-    const loggedInUser = getCurrentUser();
-    if (loggedInUser) {
-        const nameElem = document.getElementById('userDisplayName');
-        if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
-        showView('home');
-        if (typeof playMainBGM === 'function') playMainBGM();
-    } else {
-        showView('login');
-    }
-}
+    function finishLoadingSafe() {
+        localStorage.removeItem('skipLoading');
+        let loggedInUser = null;
+        try {
+            loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+        } catch (e) {}
 
-if (skipLoading) {
-    finishLoading();
-} else {
-    // Preload only your 55 available image files
-    const assets = [];
-    for (let i = 1; i <= 55; i++) {
-        assets.push(`image/level${i}.jpeg`);
+        if (loggedInUser) {
+            const nameElem = document.getElementById('userDisplayName');
+            if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
+            if (typeof showView === 'function') showView('home');
+            if (typeof playMainBGM === 'function') playMainBGM();
+        } else {
+            if (typeof showView === 'function') showView('login');
+        }
     }
 
-    let loadedCount = 0;
-    const totalAssets = assets.length;
-
-    if (totalAssets === 0) {
-        finishLoading();
+    if (skipLoading) {
+        finishLoadingSafe();
     } else {
-        if (percentageElem) percentageElem.innerText = '1%';
-        if (barFillElem) barFillElem.style.width = '1%';
+        const assets = [];
+        for (let i = 1; i <= 55; i++) {
+            assets.push(`image/level${i}.jpeg`);
+        }
 
-        // Safety fallback timeout to prevent hanging on mobile networks
-        const safetyTimeout = setTimeout(() => {
+        let loadedCount = 0;
+        const totalAssets = assets.length;
+
+        // Immediate force-finish fallback after 2 seconds no matter what
+        const emergencyTimer = setTimeout(() => {
             if (percentageElem) percentageElem.innerText = '100%';
             if (barFillElem) barFillElem.style.width = '100%';
-            setTimeout(finishLoading, 200);
-        }, 4000);
+            finishLoadingSafe();
+        }, 2000);
 
-        assets.forEach(src => {
-            const img = new Image();
-            const markProcessed = () => {
-                loadedCount++;
-                let percent = Math.floor((loadedCount / totalAssets) * 100);
-                if (percent < 1) percent = 1;
+        if (totalAssets === 0) {
+            clearTimeout(emergencyTimer);
+            finishLoadingSafe();
+        } else {
+            if (percentageElem) percentageElem.innerText = '1%';
+            if (barFillElem) barFillElem.style.width = '1%';
 
-                if (percentageElem) percentageElem.innerText = `${percent}%`;
-                if (barFillElem) barFillElem.style.width = `${percent}%`;
+            assets.forEach(src => {
+                const img = new Image();
+                const markProcessed = () => {
+                    loadedCount++;
+                    let percent = Math.floor((loadedCount / totalAssets) * 100);
+                    if (percent < 1) percent = 1;
 
-                if (loadedCount === totalAssets) {
-                    clearTimeout(safetyTimeout);
-                    setTimeout(() => {
-                        finishLoading();
-                    }, 300);
-                }
-            };
+                    if (percentageElem) percentageElem.innerText = `${percent}%`;
+                    if (barFillElem) barFillElem.style.width = `${percent}%`;
 
-            img.onload = markProcessed;
-            img.onerror = markProcessed;
-            img.src = src;
-        });
+                    if (loadedCount >= totalAssets) {
+                        clearTimeout(emergencyTimer);
+                        setTimeout(finishLoadingSafe, 150);
+                    }
+                };
+                img.onload = markProcessed;
+                img.onerror = markProcessed;
+                img.src = src;
+            });
+        }
     }
+} catch (err) {
+    console.error("Preloader critical error:", err);
+    // Absolute last resort: force home/login view if script crashes
+    document.getElementById('loadingView')?.classList.remove('active');
+    document.getElementById('loginView')?.classList.add('active');
 }
 
   // --- 2. AUTHENTICATION & FORM NAVIGATION ---
