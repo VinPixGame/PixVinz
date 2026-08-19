@@ -360,7 +360,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const logForm = document.getElementById('loginForm');
+
+  
   const logForm = document.getElementById('loginForm');
   if (logForm) {
     logForm.addEventListener('submit', async (e) => {
@@ -378,6 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const userDocRef = doc(db, 'players', username);
           const snap = await getDoc(userDocRef);
           if (snap.exists()) {
+            // This pulls the 100% accurate data belonging strictly to this unique username from Firestore!
             userData = snap.data();
           }
         } else {
@@ -386,20 +388,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (userData && userData.password === pass) {
-          // --- CLEAR OLD GENERIC CACHE BEFORE SWITCHING ACCOUNTS ---
+          // --- CLEAR ALL OLD CACHE TO PREVENT CROSS-CONTAMINATION ---
           localStorage.removeItem('coins');
           localStorage.removeItem('level');
           localStorage.removeItem('xp');
           localStorage.removeItem('avatar');
+          
+          localStorage.removeItem(`${username}_coins`);
+          localStorage.removeItem(`${username}_level`);
+          localStorage.removeItem(`${username}_xp`);
+          localStorage.removeItem(`${username}_avatar`);
 
-          // Save the new user session
+          // --- SAVE THE FRESH FIRESTORE DATA AS THE ACTIVE SESSION ---
           localStorage.setItem('loggedInUser', JSON.stringify(userData));
           
           const nameElem = document.getElementById('userDisplayName');
           if (nameElem) nameElem.innerText = userData.displayName;
           if (errElem) errElem.innerText = "";
           
-          // Force a clean reload so old player data vanishes from browser memory
+          // Force a full page reload so the app initializes using ONLY this user's Firestore data
           window.location.reload();
         } else {
           if (errElem) errElem.innerText = "Invalid username or password!";
@@ -409,6 +416,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  
   const playBtn = document.getElementById('playBtn');
   if (playBtn) {
     playBtn.addEventListener('click', () => {
