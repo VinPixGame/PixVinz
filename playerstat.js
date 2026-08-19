@@ -185,3 +185,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+
+// Add this at the bottom of playerstat.js
+document.addEventListener('DOMContentLoaded', async () => {
+    await fetchUserDataFromFirestore();
+});
