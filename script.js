@@ -1098,8 +1098,24 @@ function initLeaderboardConfetti() {
         container = document.createElement('div');
         container.id = 'leaderboardConfetti';
         container.className = 'confetti-bg';
+        
+        // Push the container down so nothing spawns over the title/header area
+        container.style.position = 'absolute';
+        container.style.top = '140px'; // Adjust this value to lower where the confetti starts
+        container.style.left = '0';
+        container.style.width = '100%';
+        container.style.height = 'calc(100% - 140px)';
+        container.style.overflow = 'hidden';
+        container.style.pointerEvents = 'none';
+
         const lbView = document.getElementById('leaderboardView');
-        if (lbView) lbView.prepend(container);
+        if (lbView) {
+            // Ensure leaderboard view can hold absolute children properly
+            if (window.getComputedStyle(lbView).position === 'static') {
+                lbView.style.position = 'relative';
+            }
+            lbView.appendChild(container); // Append instead of prepend so it sits safely below the header
+        }
     }
     
     if (container.children.length === 0) {
