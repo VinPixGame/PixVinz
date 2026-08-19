@@ -188,7 +188,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }, intervalTime);
   }
 
-  // --- 2. AUTHENTICATION & FORM NAVIGATION ---
+
+
+// --- 2. AUTHENTICATION & FORM NAVIGATION ---
   const toRegBtn = document.getElementById('toRegister');
   if (toRegBtn) {
     toRegBtn.addEventListener('click', (e) => {
@@ -393,6 +395,32 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // --- COMPLETE LOGOUT STORAGE CLEANUP ---
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      if (confirm("Are you sure you want to log out?")) {
+        // Preserve audio settings if desired, or wipe everything clean to prevent any cache leakage
+        const savedSfx = localStorage.getItem('sfxEnabled');
+        const savedMusic = localStorage.getItem('musicEnabled');
+
+        localStorage.clear(); // Wipes all previous user cache, levels, coins, and session tokens
+
+        if (savedSfx !== null) localStorage.setItem('sfxEnabled', savedSfx);
+        if (savedMusic !== null) localStorage.setItem('musicEnabled', savedMusic);
+
+        if (settingsModal) settingsModal.classList.add('hidden');
+        if (typeof AudioManager !== 'undefined') AudioManager.stopBGM();
+        showView('login');
+      }
+    });
+  }
+
+
+  
+  
 
   const playBtn = document.getElementById('playBtn');
   if (playBtn) {
