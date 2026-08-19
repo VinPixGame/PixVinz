@@ -15,10 +15,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Expose globally so your sync helpers work perfectly
 window.pixvinzDb = { db, doc, getDoc, setDoc, updateDoc };
 
-// Helper to map any level (1-200) to your 55 available image files
 function getLevelImageIndex(levelNum) {
     return ((levelNum - 1) % 55) + 1;
 }
@@ -40,14 +38,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Generates user-specific localStorage keys (e.g., 'vinz_currentLevel')
+  // Consistent key builder matching playerstat.js standards
   function getUserKey(keyName) {
     const user = getCurrentUser();
     if (!user || !user.username) return keyName;
     return `${user.username}_${keyName}`;
   }
 
-  // --- FETCH CLOUD DATA ON LOAD TO KEEP LOCALSTORAGE SYNCED ---
   async function fetchUserDataFromFirestore() {
     const user = getCurrentUser();
     if (!user || !user.username) return;
@@ -56,8 +53,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       const docSnap = await getDoc(userRef);
       if (docSnap.exists()) {
         const cloudData = docSnap.data();
-        if (cloudData.totalCoins !== undefined) localStorage.setItem(getUserKey('totalCoins'), cloudData.totalCoins);
-        if (cloudData.currentLevel !== undefined) localStorage.setItem(getUserKey('currentLevel'), cloudData.currentLevel);
+        if (cloudData.totalCoins !== undefined) {
+          localStorage.setItem(getUserKey('totalCoins'), cloudData.totalCoins);
+          localStorage.setItem('totalCoins', cloudData.totalCoins);
+        }
+        if (cloudData.currentLevel !== undefined) {
+          localStorage.setItem(getUserKey('currentLevel'), cloudData.currentLevel);
+          localStorage.setItem('currentLevel', cloudData.currentLevel);
+        }
       }
     } catch (err) {
       console.error("Error fetching from Firestore:", err);
@@ -66,7 +69,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   await fetchUserDataFromFirestore();
 
-  // --- FIRESTORE SYNC HELPERS ---
   async function syncUserDataToFirestore(updates) {
     const user = getCurrentUser();
     if (!user || !user.username || !window.pixvinzDb) return;
@@ -80,7 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function updateCoinDisplay() {
-    const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
+    const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins')) || localStorage.getItem('totalCoins')) || 0;
     const coinElem = document.getElementById('coinCount');
     if (coinElem) coinElem.innerText = totalCoins;
   }
@@ -91,14 +93,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const movesDisplay = document.getElementById('movesDisplay');
   const timerDisplay = document.getElementById('timerDisplay');
 
-  // --- DYNAMIC GRID SIZE CALCULATION ---
   function getGridSize(level) {
-    if (level <= 10) return 3;        // Level 1-10 (3x3)
-    if (level <= 30) return 4;        // Level 11-30 (4x4)
-    if (level <= 60) return 5;        // Level 31-60 (5x5)
-    if (level <= 100) return 6;      // Level 61-100 (6x6)
-    if (level <= 150) return 7;      // Level 101-150 (7x7)
-    return 8;                        // Level 151-200 (8x8)
+    if (level <= 10) return 3;
+    if (level <= 30) return 4;
+    if (level <= 60) return 5;
+    if (level <= 100) return 6;
+    if (level <= 150) return 7;
+    return 8;
   }
 
   const gridSize = getGridSize(currentLevel);
@@ -130,12 +131,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 1000);
   }
 
-  // --- DYNAMIC TILE CUTTING & RENDERING ---
   function renderGrid() {
     if (!grid) return;
     grid.innerHTML = '';
-
-    // Apply dynamic CSS grid template
     grid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
     grid.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
 
@@ -180,7 +178,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // --- DYNAMIC SHUFFLE ---
   function shuffleGrid() {
     const tileCount = tilesState.length;
     for (let i = 0; i < tileCount * 3; i++) {
@@ -208,7 +205,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       const levelMovesKey = getUserKey(`levelMoves_${currentLevel}`);
       const levelTimeKey = getUserKey(`levelTime_${currentLevel}`);
 
-      // --- SAVE FEWEST MOVES RECORD ---
       const prevMoves = parseInt(localStorage.getItem(levelMovesKey)) || Infinity;
       let savedMoves = prevMoves;
       if (moves < prevMoves) {
@@ -216,7 +212,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         savedMoves = moves;
       }
 
-      // --- SAVE BEST TIME RECORD ---
       const timeString = timerDisplay ? timerDisplay.innerText : "00:00";
       const prevTimeStr = localStorage.getItem(levelTimeKey);
       let savedTimeString = prevTimeStr;
@@ -234,24 +229,31 @@ document.addEventListener('DOMContentLoaded', async () => {
       const currentLevelCoins = parseInt(localStorage.getItem(levelCoinsKey)) || 0;
       let targetCoins = stars * 5; 
       let newCoinsEarned = 0;
-      let totalCoins = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
+      let totalCoins = parseInt(localStorage.getItem(totalCoinsKey) || localStorage.getItem('totalCoins')) || 0;
 
       if (targetCoins > currentLevelCoins) {
         newCoinsEarned = targetCoins - currentLevelCoins;
         localStorage.setItem(levelCoinsKey, targetCoins);
+        localStorage.setItem(`levelCoins_${currentLevel}`, targetCoins);
 
         totalCoins += newCoinsEarned;
         localStorage.setItem(totalCoinsKey, totalCoins);
+        localStorage.setItem('totalCoins', totalCoins);
       }
 
-      let maxUnlocked = parseInt(localStorage.getItem(currentLevelKey)) || 1;
+      let maxUnlocked = parseInt(localStorage.getItem(currentLevelKey) || localStorage.getItem('currentLevel')) || 1;
       let nextLevelToUnlock = maxUnlocked;
       if (currentLevel >= maxUnlocked) {
         nextLevelToUnlock = currentLevel + 1;
         localStorage.setItem(currentLevelKey, nextLevelToUnlock);
+        localStorage.setItem('currentLevel', nextLevelToUnlock);
       }
 
-      // Sync progress updates to Firestore
+      // Also trigger playerstat if available globally
+      if (typeof handleLevelVictory === 'function') {
+        handleLevelVictory(currentLevel, stars);
+      }
+
       syncUserDataToFirestore({
         totalCoins: totalCoins,
         currentLevel: nextLevelToUnlock,
@@ -277,22 +279,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const vCoins = document.getElementById('vCoins');
     if (vCoins) vCoins.innerText = `+${newCoins}`;
 
-    // --- CALCULATE AND DISPLAY XP ON VICTORY MODAL ---
     let tier = Math.floor((currentLevel - 1) / 10);
     let xpGained = (tier + 1) * 100;
 
     const vXp = document.getElementById('vXp');
-    if (vXp) {
-        vXp.innerText = `+${xpGained}`;
-    }
+    if (vXp) vXp.innerText = `+${xpGained}`;
 
     const starNodes = document.querySelectorAll('#victoryStars .star');
     starNodes.forEach((star, index) => {
-      if (index < stars) {
-        star.classList.add('active');
-      } else {
-        star.classList.remove('active');
-      }
+      if (index < stars) star.classList.add('active');
+      else star.classList.remove('active');
     });
 
     updateCoinDisplay();
@@ -341,7 +337,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // --- PREVIEW BUTTON LOGIC (5 COINS, 10S COUNTDOWN, & CLOSE BUTTON) ---
   let previewTimer = null;
   let countdownInterval = null;
 
@@ -358,7 +353,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
 
       const coinKey = getUserKey('totalCoins');
-      let totalCoins = parseInt(localStorage.getItem(coinKey)) || 0;
+      let totalCoins = parseInt(localStorage.getItem(coinKey) || localStorage.getItem('totalCoins')) || 0;
       const previewCost = 5;
 
       if (totalCoins < previewCost) {
@@ -366,15 +361,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      // Deduct coins and update storage/UI
       totalCoins -= previewCost;
       localStorage.setItem(coinKey, totalCoins);
+      localStorage.setItem('totalCoins', totalCoins);
       updateCoinDisplay();
-
-      // Sync coin deduction to Firestore
       syncUserDataToFirestore({ totalCoins: totalCoins });
 
-      // Open modal and show current level image
       const modal = document.getElementById('imageModal');
       const modalImg = document.getElementById('modalPreviewImg');
       const modalTitle = document.getElementById('modalLevelTitle');
@@ -387,20 +379,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (countdownSpan) countdownSpan.innerText = timeLeft;
       if (modal) modal.classList.remove('hidden');
 
-      // Clear existing timers if any
       if (previewTimer) clearTimeout(previewTimer);
       if (countdownInterval) clearInterval(countdownInterval);
 
-      // Start live countdown ticker every second
       countdownInterval = setInterval(() => {
         timeLeft--;
         if (countdownSpan) countdownSpan.innerText = timeLeft;
-        if (timeLeft <= 0) {
-          clearInterval(countdownInterval);
-        }
+        if (timeLeft <= 0) clearInterval(countdownInterval);
       }, 1000);
 
-      // Automatically close after 10 seconds
       previewTimer = setTimeout(() => {
         closePreviewModal();
       }, 10000);
@@ -437,15 +424,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const backToHome = document.getElementById('backToHome');
   if (backToHome) {
     backToHome.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      localStorage.setItem('skipLoading', 'true');
-      window.location.href = 'index.html';
-    });
-  }
-
-  const collectionsBtn = document.getElementById('collectionsBtn');
-  if (collectionsBtn) {
-    collectionsBtn.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       localStorage.setItem('skipLoading', 'true');
       window.location.href = 'index.html';
