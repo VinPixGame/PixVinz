@@ -105,6 +105,12 @@ async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeSt
 
     updateCoinDisplay();
 
+    const modal = document.getElementById('victoryModal') || document.getElementById('winModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+    }
+
     // Trigger profile.js cloud sync function if it exists
     if (typeof saveUserDataToCloud === 'function') {
         await saveUserDataToCloud();
