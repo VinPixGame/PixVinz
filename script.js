@@ -188,10 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }, intervalTime);
   }
 
-
-
-
-// --- 2. AUTHENTICATION & FORM NAVIGATION ---
+  // --- 2. AUTHENTICATION & FORM NAVIGATION ---
   const toRegBtn = document.getElementById('toRegister');
   if (toRegBtn) {
     toRegBtn.addEventListener('click', (e) => {
@@ -342,15 +339,9 @@ document.addEventListener('DOMContentLoaded', () => {
           createdAt: new Date()
         };
 
-        // Save fresh account to Firestore
         await setDoc(userDocRef, newUserData);
 
-        // Store user and clear previous cache data to prevent leakage
         localStorage.setItem('loggedInUser', JSON.stringify(newUserData));
-        const prefix = `${username}_`;
-        localStorage.setItem(prefix + 'totalCoins', 0);
-        localStorage.setItem(prefix + 'currentLevel', 1);
-
         const nameElem = document.getElementById('userDisplayName');
         if (nameElem) nameElem.innerText = displayName;
 
@@ -388,18 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (userData && userData.password === pass) {
-          // Pull fresh data from Firebase into session and local storage
           localStorage.setItem('loggedInUser', JSON.stringify(userData));
-
-          const prefix = `${username}_`;
-          localStorage.setItem(prefix + 'totalCoins', userData.coins || 0);
-          localStorage.setItem(prefix + 'currentLevel', userData.level || 1);
-          if (userData.avatar) {
-            localStorage.setItem(`${username}_vinpix_avatar`, userData.avatar);
-          } else {
-            localStorage.removeItem(`${username}_vinpix_avatar`);
-          }
-
           const nameElem = document.getElementById('userDisplayName');
           if (nameElem) nameElem.innerText = userData.displayName;
           if (errElem) errElem.innerText = "";
@@ -448,181 +428,6 @@ document.addEventListener('DOMContentLoaded', () => {
       showView('home');
     });
   });
-
-  const collectionsBackBtn = document.getElementById('collectionsBackBtn');
-  if (collectionsBackBtn) {
-    collectionsBackBtn.addEventListener('click', (e) => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      const imagesContainer = document.getElementById('collectionsImagesContainer');
-      
-      if (imagesContainer && !imagesContainer.classList.contains('hidden')) {
-        e.stopImmediatePropagation();
-        renderCollectionFolders();
-      } else {
-        showView('home');
-      }
-    });
-  }
-
-  const settingsModal = document.getElementById('settingsModal');
-  const aboutModal = document.getElementById('aboutModal');
-  const sfxToggle = document.getElementById('sfxToggle');
-  const musicToggle = document.getElementById('musicToggle');
-
-  if (typeof AudioManager !== 'undefined') {
-    if (sfxToggle) sfxToggle.checked = AudioManager.sfxEnabled;
-    if (musicToggle) musicToggle.checked = AudioManager.musicEnabled;
-  }
-
-  const navSettings = document.getElementById('navSettings');
-  if (navSettings) {
-    navSettings.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      if (settingsModal) settingsModal.classList.remove('hidden');
-    });
-  }
-
-  const closeSettingsModal = document.getElementById('closeSettingsModal');
-  if (closeSettingsModal) {
-    closeSettingsModal.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      if (settingsModal) settingsModal.classList.add('hidden');
-    });
-  }
-
-  if (sfxToggle) {
-    sfxToggle.addEventListener('change', (e) => {
-      if (typeof AudioManager !== 'undefined') {
-        AudioManager.setSFX(e.target.checked);
-        if (e.target.checked) AudioManager.playClick();
-      }
-    });
-  }
-
-  if (musicToggle) {
-    musicToggle.addEventListener('change', (e) => {
-      if (typeof AudioManager !== 'undefined') {
-        AudioManager.setMusic(e.target.checked);
-      }
-    });
-  }
-
-  const aboutBtn = document.getElementById('aboutBtn');
-  if (aboutBtn) {
-    aboutBtn.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      if (aboutModal) aboutModal.classList.remove('hidden');
-    });
-  }
-
-  const closeAboutModal = document.getElementById('closeAboutModal');
-  if (closeAboutModal) {
-    closeAboutModal.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      if (aboutModal) aboutModal.classList.add('hidden');
-    });
-  }
-
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      if (confirm("Are you sure you want to log out?")) {
-        // Save audio settings before wiping
-        const savedSfx = localStorage.getItem('sfxEnabled');
-        const savedMusic = localStorage.getItem('musicEnabled');
-
-        // Completely clear cache so no user data remains for the next sign-in
-        localStorage.clear();
-
-        // Restore audio settings
-        if (savedSfx !== null) localStorage.setItem('sfxEnabled', savedSfx);
-        if (savedMusic !== null) localStorage.setItem('musicEnabled', savedMusic);
-
-        if (settingsModal) settingsModal.classList.add('hidden');
-        if (typeof AudioManager !== 'undefined') AudioManager.stopBGM();
-        showView('login');
-      }
-    });
-  }
-
-  function renderLevels() {
-    const grid = document.getElementById('levelsGrid');
-    if (!grid) return;
-    grid.innerHTML = '';
-
-    const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
-
-    let overallBestTimeSeconds = Infinity;
-    let overallFewestMoves = Infinity;
-
-    for (let i = 1; i <= 200; i++) {
-      const btn = document.createElement('div');
-      const isUnlocked = i <= currentLevel;
-      const isSolved = i < currentLevel;
-
-      btn.className = `level-btn ${isUnlocked ? 'unlocked' : 'locked'}`;
-      btn.style.setProperty('--level-bg', `url('image/level${i}.jpeg')`);
-
-      if (isUnlocked) {
-        if (!isSolved) {
-          btn.classList.add('unsolved-bg');
-        } else {
-          btn.classList.add('solved-bg');
-        }
-
-        const levelCoins = parseInt(localStorage.getItem(getUserKey(`levelCoins_${i}`))) || 0;
-        const starsEarned = Math.min(3, Math.floor(levelCoins / 5)) || (isSolved ? 3 : 0);
-        
-        let moves = localStorage.getItem(getUserKey(`levelMoves_${i}`));
-        let timeStr = localStorage.getItem(getUserKey(`levelTime_${i}`));
-
-        if (isSolved) {
-          const gSize = i <= 10 ? 3 : i <= 30 ? 4 : i <= 60 ? 5 : i <= 100 ? 6 : i <= 150 ? 7 : 8;
-          if (!moves) {
-            moves = gSize * 6;
-          }
-          if (!timeStr || timeStr === '--:--') {
-            const estSec = gSize * 15;
-            const m = Math.floor(estSec / 60).toString().padStart(2, '0');
-            const s = (estSec % 60).toString().padStart(2, '0');
-            timeStr = `${m}:${s}`;
-          }
-        }
-
-        if (moves) {
-          const parsedMoves = parseInt(moves);
-          if (parsedMoves < overallFewestMoves) {
-            overallFewestMoves = parsedMoves;
-          }
-        }
-        if (timeStr && timeStr !== '--:--') {
-          const parts = timeStr.split(':');
-          if (parts.length === 2) {
-            const totalSec = parseInt(parts[0]) * 60 + parseInt(parts[1]);
-            if (totalSec < overallBestTimeSeconds) {
-              overallBestTimeSeconds = totalSec;
-            }
-          }
-        }
-      }
-    }
-  }
-
-
-
-
-
-
-  
-  
-
-  const playBtn = document.getElementById('playBtn');
-  if (playBtn) {
-    playBtn.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
-      window.location.href = `game.html?level=${currentLevel}`;
 
   const collectionsBackBtn = document.getElementById('collectionsBackBtn');
   if (collectionsBackBtn) {
