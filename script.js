@@ -188,7 +188,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }, intervalTime);
   }
 
-  // --- 2. AUTHENTICATION & FORM NAVIGATION ---
+
+
+// --- 2. AUTHENTICATION & FORM NAVIGATION ---
   const toRegBtn = document.getElementById('toRegister');
   if (toRegBtn) {
     toRegBtn.addEventListener('click', (e) => {
@@ -320,7 +322,6 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        // Register the user in Firebase Auth using a valid email format
         const dummyEmail = `${username}@pixvinz.com`;
         let authUid = '';
         
@@ -339,11 +340,17 @@ document.addEventListener('DOMContentLoaded', () => {
           createdAt: new Date()
         };
 
-        // --- CLEAR STALE LOCAL STORAGE CACHE TO PREVENT GHOST DATA ---
+        // --- CLEAR STALE LOCAL STORAGE CACHE ---
+        localStorage.removeItem('loggedInUser');
+        localStorage.removeItem('coins');
+        localStorage.removeItem('level');
+        localStorage.removeItem('xp');
+        localStorage.removeItem('avatar');
+        
         localStorage.removeItem(`${username}_coins`);
         localStorage.removeItem(`${username}_level`);
         localStorage.removeItem(`${username}_xp`);
-        localStorage.removeItem(`${username}_avatar`); // Clears old avatar cache
+        localStorage.removeItem(`${username}_avatar`);
 
         await setDoc(userDocRef, newUserData);
 
@@ -352,16 +359,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (nameElem) nameElem.innerText = displayName;
 
         if (errElem) errElem.innerText = "";
-        showView('home');
-        playMainBGM();
+        window.location.reload(); 
       } catch (err) {
         if (errElem) errElem.innerText = "Registration error: " + err.message;
       }
     });
   }
 
-
-  
   const logForm = document.getElementById('loginForm');
   if (logForm) {
     logForm.addEventListener('submit', async (e) => {
@@ -379,7 +383,6 @@ document.addEventListener('DOMContentLoaded', () => {
           const userDocRef = doc(db, 'players', username);
           const snap = await getDoc(userDocRef);
           if (snap.exists()) {
-            // This pulls the 100% accurate data belonging strictly to this unique username from Firestore!
             userData = snap.data();
           }
         } else {
@@ -388,7 +391,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (userData && userData.password === pass) {
-          // --- CLEAR ALL OLD CACHE TO PREVENT CROSS-CONTAMINATION ---
+          // --- SCRUB ALL OLD CACHE TO PREVENT CROSS-ACCOUNT CONTAMINATION ---
+          localStorage.removeItem('loggedInUser');
           localStorage.removeItem('coins');
           localStorage.removeItem('level');
           localStorage.removeItem('xp');
@@ -406,7 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (nameElem) nameElem.innerText = userData.displayName;
           if (errElem) errElem.innerText = "";
           
-          // Force a full page reload so the app initializes using ONLY this user's Firestore data
+          // Force a full page reload so global memory wipes and loads exclusively this user's data
           window.location.reload();
         } else {
           if (errElem) errElem.innerText = "Invalid username or password!";
@@ -417,6 +421,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // --- ROBUST LOGOUT HANDLER ---
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      if (confirm("Are you sure you want to log out?")) {
+        localStorage.removeItem('loggedInUser');
+        localStorage.removeItem('coins');
+        localStorage.removeItem('level');
+        localStorage.removeItem('xp');
+        localStorage.removeItem('avatar');
+
+        if (typeof AudioManager !== 'undefined') AudioManager.stopBGM();
+        
+        window.location.reload();
+      }
+    });
+  }
+
+
+
+
+
+  
   
   const playBtn = document.getElementById('playBtn');
   if (playBtn) {
