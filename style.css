@@ -193,12 +193,17 @@ body {
   font-size: 20px;
 }
 
+/* ==========================================
+   VIEW HEADERS ADJUSTMENT
+   ========================================== */
+
 .view-header {
   display: grid;
   grid-template-columns: 44px 1fr 44px;
   align-items: center;
   width: 100%;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  transform: translateY(12px); /* Pushes only the header row down just enough to clear the top bar */
 }
 
 .view-header .icon-btn,
