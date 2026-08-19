@@ -359,10 +359,8 @@ try {
         const newUserData = {
           username: username,
           displayName: displayName,
-          currentLevel: 1,
           xp: 0,
-          totalCoins: 0,
-          levelCoins: {},
+          Coins: 0,
           avatar: '',
           password: pass,
           authUid: authUid,
