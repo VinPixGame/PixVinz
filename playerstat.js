@@ -28,13 +28,12 @@ function updateCoinDisplay() {
 }
 
 async function fetchUserDataFromFirestore() {
-    const username = getCurrentUsername();
-    if (!username) {
-        updateCoinDisplay();
-        return;
-    }
-    
     try {
+        const username = getCurrentUsername();
+        if (!username) {
+            return;
+        }
+        
         if (window.pixvinzDb && window.pixvinzDb.db) {
             const { db, doc, getDoc } = window.pixvinzDb;
             const userRef = doc(db, "players", username);
@@ -64,11 +63,13 @@ async function fetchUserDataFromFirestore() {
             }
         }
     } catch (err) {
-        console.warn("Cloud fetch warning:", err);
+        console.warn("Cloud fetch warning (safely bypassed):", err);
+    } finally {
+        // Always update the display, even if cloud fetch fails
+        updateCoinDisplay();
     }
-    
-    updateCoinDisplay();
-} // <-- FIXED: Added closing bracket here!
+}
+
 
 function earnCoins(amount) {
     const key = getUserKey('totalCoins');
