@@ -502,19 +502,52 @@ document.addEventListener('DOMContentLoaded', () => {
       if (aboutModal) aboutModal.classList.add('hidden');
     });
   }
-
+//*LogOut*//
   const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) {
+if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      if (confirm("Are you sure you want to log out?")) {
-        localStorage.removeItem('loggedInUser');
-        if (settingsModal) settingsModal.classList.add('hidden');
-        if (typeof AudioManager !== 'undefined') AudioManager.stopBGM();
-        showView('login');
-      }
+        if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+        
+        if (confirm("Are you sure you want to log out? This will clear all local session data, XP, and cached profile info.")) {
+            
+            // 1. Wipe all user-specific prefixed keys from localStorage (XP, Avatar choices, Level progress, Coins, etc.)
+            try {
+                const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
+                if (userObj && userObj.username) {
+                    const prefix = `${userObj.username}_`;
+                    Object.keys(localStorage).forEach(key => {
+                        if (key.startsWith(prefix)) {
+                            localStorage.removeItem(key);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn("Could not parse user object for deep cache cleanup:", e);
+            }
+
+            // 2. Clear general session markers, active profile object, and skip tokens
+            localStorage.removeItem('loggedInUser');
+            localStorage.removeItem('vinpix_username');
+            localStorage.removeItem('skipNavigation');
+            localStorage.removeItem('skipLoading');
+
+            // 3. UI and Audio cleanup
+            if (typeof settingsModal !== 'undefined' && settingsModal) {
+                settingsModal.classList.add('hidden');
+            }
+            if (typeof AudioManager !== 'undefined') {
+                AudioManager.stopBGM();
+            }
+
+            // 4. Redirect back to login view or reload
+            if (typeof showView === 'function') {
+                showView('login');
+            } else {
+                window.location.reload();
+            }
+        }
     });
-  }
+}
 
   function renderLevels() {
     const grid = document.getElementById('levelsGrid');
