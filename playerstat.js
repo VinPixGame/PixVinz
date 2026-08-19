@@ -35,35 +35,50 @@ async function fetchUserDataFromFirestore() {
     }
     
     try {
-        if (window.db && window.doc && window.getDoc) {
-            const userRef = window.doc(window.db, "players", username);
-            const docSnap = await window.getDoc(userRef);
+        if (window.pixvinzDb && window.pixvinzDb.db) {
+            const { db, doc, getDoc } = window.pixvinzDb;
+            const userRef = doc(db, "players", username);
+            const docSnap = await getDoc(userRef);
             
             if (docSnap.exists()) {
                 const cloudData = docSnap.data();
-                if (cloudData.coins !== undefined) {
-                    localStorage.setItem(getUserKey('totalCoins'), cloudData.coins);
+                
+                const localLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+                const localCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
+                
+                // Keep the highest level (prevents resetting to level 1)
+                const cloudLevel = cloudData.level || 1;
+                if (cloudLevel > localLevel) {
+                    localStorage.setItem(getUserKey('currentLevel'), cloudLevel);
+                } else if (localLevel > cloudLevel) {
+                    if (typeof saveUserDataToCloud === 'function') {
+                        await saveUserDataToCloud();
+                    }
                 }
-                if (cloudData.level !== undefined) {
-                    localStorage.setItem(getUserKey('currentLevel'), cloudData.level);
+                
+                // Keep the highest coin balance
+                const cloudCoins = cloudData.coins || 0;
+                if (cloudCoins > localCoins) {
+                    localStorage.setItem(getUserKey('totalCoins'), cloudCoins);
                 }
             }
         }
     } catch (err) {
-        console.error("Cloud fetch warning (using local fallback):", err);
+        console.warn("Cloud fetch warning:", err);
     }
     
     updateCoinDisplay();
-}
 
-async function earnCoins(amount) {
+function earnCoins(amount) {
     const key = getUserKey('totalCoins');
     let totalCoins = (parseInt(localStorage.getItem(key)) || 0) + amount;
     localStorage.setItem(key, totalCoins);
     updateCoinDisplay();
+    saveUserDataToCloud(); // Auto-sync to cloud when coins change!
 }
 
-async function spendCoins(amount) {
+// Safely deducts coins for purchases (returns true if successful, false if broke)
+function spendCoins(amount) {
     const key = getUserKey('totalCoins');
     let currentCoins = parseInt(localStorage.getItem(key)) || 0;
 
@@ -74,8 +89,9 @@ async function spendCoins(amount) {
     currentCoins -= amount;
     localStorage.setItem(key, currentCoins);
     updateCoinDisplay();
-    return true; 
-}
+    saveUserDataToCloud(); // Auto-sync to cloud when coins change!
+    return true;
+            
 
 // Handles victory, saves with profile.js keys, and triggers profile sync if available
 async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeStr) {
