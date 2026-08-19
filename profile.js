@@ -46,8 +46,8 @@ async function saveUserDataToCloud() {
             if (userObj && userObj.displayName) displayName = userObj.displayName;
         } catch (e) {}
 
-        const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 3;
-        const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 150;
+        const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+        const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
         const avatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
 
         const puzzlesSolved = Math.max(0, currentLevel - 1);
