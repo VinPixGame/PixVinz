@@ -68,6 +68,7 @@ async function fetchUserDataFromFirestore() {
     }
     
     updateCoinDisplay();
+} // <-- FIXED: Added closing bracket here!
 
 function earnCoins(amount) {
     const key = getUserKey('totalCoins');
@@ -90,8 +91,8 @@ function spendCoins(amount) {
     localStorage.setItem(key, currentCoins);
     updateCoinDisplay();
     saveUserDataToCloud(); // Auto-sync to cloud when coins change!
-    return true;
-            
+    return true; 
+} // <-- FIXED: Added closing bracket here!
 
 // Handles victory, saves with profile.js keys, and triggers profile sync if available
 async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeStr) {
