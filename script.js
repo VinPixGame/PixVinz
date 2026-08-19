@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fallbackIcon.style.display = 'none';
         }
     }
+
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -148,45 +149,67 @@ document.addEventListener('DOMContentLoaded', () => {
           }
       }
   });
+// --- 1. LOADING SCREEN & REAL 200-LEVEL PRELOADER ---
+const skipLoading = localStorage.getItem('skipLoading') === 'true';
+const percentageElem = document.getElementById('loadingPercentage');
+const barFillElem = document.getElementById('loadingBarFill');
 
-// --- 1. LOADING SCREEN ---
-  const skipLoading = localStorage.getItem('skipLoading') === 'true';
-  const percentageElem = document.getElementById('loadingPercentage');
-  const barFillElem = document.getElementById('loadingBarFill');
+function finishLoading() {
+    localStorage.removeItem('skipLoading');
+    const loggedInUser = getCurrentUser();
+    if (loggedInUser) {
+        const nameElem = document.getElementById('userDisplayName');
+        if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
+        showView('home');
+        if (typeof playMainBGM === 'function') playMainBGM();
+    } else {
+        showView('login');
+    }
+}
 
-  function finishLoading() {
-      localStorage.removeItem('skipLoading');
-      const loggedInUser = getCurrentUser();
-      if (loggedInUser) {
-          const nameElem = document.getElementById('userDisplayName');
-          if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
-          showView('home');
-          playMainBGM();
-      } else {
-          showView('login');
-      }
-  }
+if (skipLoading) {
+    finishLoading();
+} else {
+    // Automatically generate paths from level1.jpeg to level200.jpeg
+    const assets = [];
+    for (let i = 1; i <= 200; i++) {
+        assets.push(`image/level${i}.jpeg`);
+    }
 
-  if (skipLoading) {
-      finishLoading();
-  } else {
-      let currentPercent = 1;
-      const totalDuration = 10000; // 10 seconds in milliseconds
-      const intervalTime = 100; // Update every 100ms
-      const increment = 100 / (totalDuration / intervalTime);
+    let loadedCount = 0;
+    const totalAssets = assets.length;
 
-      const loadingInterval = setInterval(() => {
-          currentPercent += increment;
-          if (currentPercent >= 100) {
-              currentPercent = 100;
-              clearInterval(loadingInterval);
-              finishLoading();
-          }
-          
-          if (percentageElem) percentageElem.innerText = `${Math.floor(currentPercent)}%`;
-          if (barFillElem) barFillElem.style.width = `${currentPercent}%`;
-      }, intervalTime);
-  }
+    if (totalAssets === 0) {
+        finishLoading();
+    } else {
+        // Set initial state
+        if (percentageElem) percentageElem.innerText = '1%';
+        if (barFillElem) barFillElem.style.width = '1%';
+
+        assets.forEach(src => {
+            const img = new Image();
+            img.src = src;
+            
+            // As each image finishes loading or throws an error, count it and advance the real bar
+            img.onload = img.onerror = () => {
+                loadedCount++;
+                let percent = Math.floor((loadedCount / totalAssets) * 100);
+                if (percent < 1) percent = 1;
+
+                if (percentageElem) percentageElem.innerText = `${percent}%`;
+                if (barFillElem) barFillElem.style.width = `${percent}%`;
+
+                // When all 200 images are fully downloaded and cached
+                if (loadedCount === totalAssets) {
+                    console.log("All 200 level assets cached successfully!");
+                    setTimeout(() => {
+                        finishLoading();
+                    }, 300); // Brief pause at 100% so the player sees completion
+                }
+            };
+        });
+    }
+}
 
   // --- 2. AUTHENTICATION & FORM NAVIGATION ---
   const toRegBtn = document.getElementById('toRegister');
@@ -1140,3 +1163,6 @@ function initLeaderboardConfetti() {
 document.addEventListener('DOMContentLoaded', () => {
     initLeaderboardConfetti();
 });
+
+
+
