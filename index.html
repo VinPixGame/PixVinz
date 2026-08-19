@@ -469,7 +469,22 @@
   </div>
 
   <script src="audio.js"></script>
-  <script type="module" src="script.js"></script>
-  <script type="module" src="profile.js"></script>
+<!-- 1. Load Firebase SDK scripts first -->
+<script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-firestore-compat.js"></script>
+
+<!-- 2. Load your Firebase initialization file (where 'db' and 'firebase' are set up) -->
+<script src="firebase-init.js"></script>
+
+<!-- 3. Load your player stats manager NEXT -->
+<script src="playerstat.js"></script>
+
+<!-- 4. Load your main game and profile scripts LAST -->
+<script src="game.js"></script>
+<script src="profile.js"></script>
+<script src="script.js"></script>
+
 </body>
 </html>
+
+
