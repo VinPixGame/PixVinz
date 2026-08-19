@@ -1,7 +1,7 @@
 // --- FIREBASE INITIALIZATION & DATABASE BRIDGE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
-import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -20,7 +20,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // Expose Firestore database tools globally so UI scripts can use them
-window.pixvinzDb = { db, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs };
+window.pixvinzDb = { db, doc, getDoc, setDoc, updateDoc, collection, query, orderBy, limit, getDocs };
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (['home', 'levels', 'collections', 'profileView'].includes(targetView)) {
       if (mainHeader) mainHeader.classList.remove('hidden');
-      updateCoinDisplay();
+      if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
     } else {
       if (mainHeader) mainHeader.classList.add('hidden');
     }
@@ -108,8 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Make showView globally accessible for profile.js and other scripts
   window.showView = showView;
-
-
 
   function playMainBGM() {
     if (typeof AudioManager !== 'undefined' && AudioManager.musicEnabled) {
@@ -143,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
       }
   });
+
 // --- 1. LOADING SCREEN & REAL 200-LEVEL PRELOADER ---
 const skipLoading = localStorage.getItem('skipLoading') === 'true';
 const percentageElem = document.getElementById('loadingPercentage');
@@ -337,7 +336,6 @@ if (skipLoading) {
           return;
         }
 
-        // Register the user in Firebase Auth using a valid email format
         const dummyEmail = `${username}@pixvinz.com`;
         let authUid = '';
         
@@ -347,9 +345,10 @@ if (skipLoading) {
         const newUserData = {
           username: username,
           displayName: displayName,
-          level: 1,
+          currentLevel: 1,
           xp: 0,
-          coins: 0,
+          totalCoins: 0,
+          levelCoins: {},
           avatar: '',
           password: pass,
           authUid: authUid,
@@ -402,6 +401,11 @@ if (skipLoading) {
           if (errElem) errElem.innerText = "";
           showView('home');
           playMainBGM();
+          
+          // Trigger cloud fetch to sync into playerstat.js cache
+          if (typeof fetchUserDataFromFirestore === 'function') {
+              fetchUserDataFromFirestore();
+          }
         } else {
           if (errElem) errElem.innerText = "Invalid username or password!";
         }
@@ -415,7 +419,7 @@ if (skipLoading) {
   if (playBtn) {
     playBtn.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+      const currentLevel = (typeof getCurrentLevel === 'function') ? getCurrentLevel() : 1;
       window.location.href = `game.html?level=${currentLevel}`;
     });
   }
@@ -538,7 +542,7 @@ if (skipLoading) {
     if (!grid) return;
     grid.innerHTML = '';
 
-    const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+    const currentLevel = (typeof getCurrentLevel === 'function') ? getCurrentLevel() : 1;
 
     let overallBestTimeSeconds = Infinity;
     let overallFewestMoves = Infinity;
@@ -558,7 +562,6 @@ if (skipLoading) {
           btn.classList.add('solved-bg');
         }
 
-        
         let moves = localStorage.getItem(getUserKey(`levelMoves_${i}`));
         let timeStr = localStorage.getItem(getUserKey(`levelTime_${i}`));
 
@@ -590,6 +593,8 @@ if (skipLoading) {
             }
           }
         }
+
+        const starsEarned = (typeof getLevelStars === 'function') ? getLevelStars(i, isSolved) : (isSolved ? 3 : 0);
 
         let starsHTML = '';
         for (let s = 1; s <= 3; s++) {
@@ -695,7 +700,7 @@ if (skipLoading) {
     const grid = document.getElementById('collectionsGrid');
     if (!grid) return;
     grid.innerHTML = '';
-    const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+    const currentLevel = (typeof getCurrentLevel === 'function') ? getCurrentLevel() : 1;
 
     for (let i = start; i <= end; i++) {
       const isUnlocked = i < currentLevel;
@@ -755,45 +760,11 @@ if (skipLoading) {
 });
 
 
-
-// --- AUTO-SYNC FIRESTORE DATA ON PAGE LOAD ---
-async function syncUserWithFirestore() {
-  const loggedInUser = (() => {
-    try {
-      return JSON.parse(localStorage.getItem('loggedInUser'));
-    } catch (e) {
-      return null;
-    }
-  })();
-
-  if (!loggedInUser || !loggedInUser.username || !window.pixvinzDb) return;
-
-  try {
-    const { db, doc, getDoc } = window.pixvinzDb;
-    const userDocRef = doc(db, 'players', loggedInUser.username);
-    const snap = await getDoc(userDocRef);
-
-    if (snap.exists()) {
-      const freshData = snap.data();
-      
-      // Update the local storage session object
-      localStorage.setItem('loggedInUser', JSON.stringify(freshData));
-
-      
-      // Refresh coin display on the header if visible
-      const coinElem = document.getElementById('coinCount');
-      if (coinElem && freshData.coins !== undefined) {
-        coinElem.innerText = freshData.coins;
-      }
-    }
-  } catch (err) {
-    console.warn("Could not sync with Firestore:", err);
-  }
-}
-
-// Call this right when the page loads
+// --- AUTO-SYNC CLOUD DATA ON PAGE LOAD ---
 document.addEventListener('DOMContentLoaded', () => {
-  syncUserWithFirestore();
+    if (typeof fetchUserDataFromFirestore === 'function') {
+        fetchUserDataFromFirestore();
+    }
 });
 
 
