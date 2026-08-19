@@ -188,9 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }, intervalTime);
   }
 
-
-
-// --- 2. AUTHENTICATION & FORM NAVIGATION ---
+  // --- 2. AUTHENTICATION & FORM NAVIGATION ---
   const toRegBtn = document.getElementById('toRegister');
   if (toRegBtn) {
     toRegBtn.addEventListener('click', (e) => {
@@ -322,6 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
+        // Register the user in Firebase Auth using a valid email format
         const dummyEmail = `${username}@pixvinz.com`;
         let authUid = '';
         
@@ -340,17 +339,11 @@ document.addEventListener('DOMContentLoaded', () => {
           createdAt: new Date()
         };
 
-        // --- CLEAR STALE LOCAL STORAGE CACHE ---
-        localStorage.removeItem('loggedInUser');
-        localStorage.removeItem('coins');
-        localStorage.removeItem('level');
-        localStorage.removeItem('xp');
-        localStorage.removeItem('avatar');
-        
+        // --- CLEAR STALE LOCAL STORAGE CACHE TO PREVENT GHOST DATA ---
         localStorage.removeItem(`${username}_coins`);
         localStorage.removeItem(`${username}_level`);
         localStorage.removeItem(`${username}_xp`);
-        localStorage.removeItem(`${username}_avatar`);
+        localStorage.removeItem(`${username}_avatar`); // Clears old avatar cache
 
         await setDoc(userDocRef, newUserData);
 
@@ -359,13 +352,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (nameElem) nameElem.innerText = displayName;
 
         if (errElem) errElem.innerText = "";
-        window.location.reload(); 
+        showView('home');
+        playMainBGM();
       } catch (err) {
         if (errElem) errElem.innerText = "Registration error: " + err.message;
       }
     });
   }
 
+  const logForm = document.getElementById('loginForm');
   const logForm = document.getElementById('loginForm');
   if (logForm) {
     logForm.addEventListener('submit', async (e) => {
@@ -391,26 +386,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (userData && userData.password === pass) {
-          // --- SCRUB ALL OLD CACHE TO PREVENT CROSS-ACCOUNT CONTAMINATION ---
-          localStorage.removeItem('loggedInUser');
+          // --- CLEAR OLD GENERIC CACHE BEFORE SWITCHING ACCOUNTS ---
           localStorage.removeItem('coins');
           localStorage.removeItem('level');
           localStorage.removeItem('xp');
           localStorage.removeItem('avatar');
-          
-          localStorage.removeItem(`${username}_coins`);
-          localStorage.removeItem(`${username}_level`);
-          localStorage.removeItem(`${username}_xp`);
-          localStorage.removeItem(`${username}_avatar`);
 
-          // --- SAVE THE FRESH FIRESTORE DATA AS THE ACTIVE SESSION ---
+          // Save the new user session
           localStorage.setItem('loggedInUser', JSON.stringify(userData));
           
           const nameElem = document.getElementById('userDisplayName');
           if (nameElem) nameElem.innerText = userData.displayName;
           if (errElem) errElem.innerText = "";
           
-          // Force a full page reload so global memory wipes and loads exclusively this user's data
+          // Force a clean reload so old player data vanishes from browser memory
           window.location.reload();
         } else {
           if (errElem) errElem.innerText = "Invalid username or password!";
@@ -420,30 +409,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-
-  // --- ROBUST LOGOUT HANDLER ---
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      if (confirm("Are you sure you want to log out?")) {
-        localStorage.removeItem('loggedInUser');
-        localStorage.removeItem('coins');
-        localStorage.removeItem('level');
-        localStorage.removeItem('xp');
-        localStorage.removeItem('avatar');
-
-        if (typeof AudioManager !== 'undefined') AudioManager.stopBGM();
-        
-        window.location.reload();
-      }
-    });
-  }
-
-
-  
-  
   const playBtn = document.getElementById('playBtn');
   if (playBtn) {
     playBtn.addEventListener('click', () => {
