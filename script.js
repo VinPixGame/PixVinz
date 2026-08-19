@@ -361,6 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const logForm = document.getElementById('loginForm');
+  const logForm = document.getElementById('loginForm');
   if (logForm) {
     logForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -385,12 +386,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (userData && userData.password === pass) {
+          // --- CLEAR OLD GENERIC CACHE BEFORE SWITCHING ACCOUNTS ---
+          localStorage.removeItem('coins');
+          localStorage.removeItem('level');
+          localStorage.removeItem('xp');
+          localStorage.removeItem('avatar');
+
+          // Save the new user session
           localStorage.setItem('loggedInUser', JSON.stringify(userData));
+          
           const nameElem = document.getElementById('userDisplayName');
           if (nameElem) nameElem.innerText = userData.displayName;
           if (errElem) errElem.innerText = "";
-          showView('home');
-          playMainBGM();
+          
+          // Force a clean reload so old player data vanishes from browser memory
+          window.location.reload();
         } else {
           if (errElem) errElem.innerText = "Invalid username or password!";
         }
@@ -399,7 +409,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-
   const playBtn = document.getElementById('playBtn');
   if (playBtn) {
     playBtn.addEventListener('click', () => {
