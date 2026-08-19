@@ -158,12 +158,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         else star.classList.remove('active');
       });
 
-      // Call playerstat.js victory handler to save progress locally and to Firestore
+      // Capture the current moves and time string
+      const currentMoves = moves;
+      const currentTimeStr = timerDisplay ? timerDisplay.innerText : "00:00";
+
+      // Call playerstat.js victory handler and PASS the moves and time!
       if (typeof handleLevelVictory === 'function') {
-        handleLevelVictory(currentLevel, stars);
-      } else {
-        const modal = document.getElementById('victoryModal');
-        if (modal) modal.classList.remove('hidden');
+        handleLevelVictory(currentLevel, stars, currentMoves, currentTimeStr);
       }
 
       startConfetti();
