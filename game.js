@@ -40,14 +40,52 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Ensure playerstat data is loaded if available
-  if (typeof fetchUserDataFromFirestore === 'function') {
-    await fetchUserDataFromFirestore();
+  // Generates user-specific localStorage keys (e.g., 'vinz_currentLevel')
+  function getUserKey(keyName) {
+    const user = getCurrentUser();
+    if (!user || !user.username) return keyName;
+    return `${user.username}_${keyName}`;
   }
 
-  if (typeof updateCoinDisplay === 'function') {
-    updateCoinDisplay();
+  // --- FETCH CLOUD DATA ON LOAD TO KEEP LOCALSTORAGE SYNCED ---
+  async function fetchUserDataFromFirestore() {
+    const user = getCurrentUser();
+    if (!user || !user.username) return;
+    try {
+      const userRef = doc(db, "users", user.username);
+      const docSnap = await getDoc(userRef);
+      if (docSnap.exists()) {
+        const cloudData = docSnap.data();
+        if (cloudData.totalCoins !== undefined) localStorage.setItem(getUserKey('totalCoins'), cloudData.totalCoins);
+        if (cloudData.currentLevel !== undefined) localStorage.setItem(getUserKey('currentLevel'), cloudData.currentLevel);
+      }
+    } catch (err) {
+      console.error("Error fetching from Firestore:", err);
+    }
   }
+
+  await fetchUserDataFromFirestore();
+
+  // --- FIRESTORE SYNC HELPERS ---
+  async function syncUserDataToFirestore(updates) {
+    const user = getCurrentUser();
+    if (!user || !user.username || !window.pixvinzDb) return;
+    try {
+      const { db, doc, setDoc } = window.pixvinzDb;
+      const userRef = doc(db, "users", user.username);
+      await setDoc(userRef, updates, { merge: true });
+    } catch (err) {
+      console.error("Error syncing to Firestore:", err);
+    }
+  }
+
+  function updateCoinDisplay() {
+    const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
+    const coinElem = document.getElementById('coinCount');
+    if (coinElem) coinElem.innerText = totalCoins;
+  }
+
+  updateCoinDisplay();
 
   const grid = document.getElementById('puzzleGrid');
   const movesDisplay = document.getElementById('movesDisplay');
@@ -164,35 +202,65 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (moves <= gridSize * 5) stars = 3;
       else if (moves <= gridSize * 8) stars = 2;
 
-      const user = getCurrentUser();
-      const prefix = user && user.username ? `${user.username}_` : '';
-      const levelMovesKey = `${prefix}levelMoves_${currentLevel}`;
-      const levelTimeKey = `${prefix}levelTime_${currentLevel}`;
+      const levelCoinsKey = getUserKey(`levelCoins_${currentLevel}`);
+      const totalCoinsKey = getUserKey('totalCoins');
+      const currentLevelKey = getUserKey('currentLevel');
+      const levelMovesKey = getUserKey(`levelMoves_${currentLevel}`);
+      const levelTimeKey = getUserKey(`levelTime_${currentLevel}`);
 
       // --- SAVE FEWEST MOVES RECORD ---
       const prevMoves = parseInt(localStorage.getItem(levelMovesKey)) || Infinity;
+      let savedMoves = prevMoves;
       if (moves < prevMoves) {
         localStorage.setItem(levelMovesKey, moves);
+        savedMoves = moves;
       }
 
       // --- SAVE BEST TIME RECORD ---
       const timeString = timerDisplay ? timerDisplay.innerText : "00:00";
       const prevTimeStr = localStorage.getItem(levelTimeKey);
+      let savedTimeString = prevTimeStr;
       if (!prevTimeStr || prevTimeStr === '--:--') {
         localStorage.setItem(levelTimeKey, timeString);
+        savedTimeString = timeString;
       } else {
         const [pMin, pSec] = prevTimeStr.split(':').map(Number);
         if (seconds < (pMin * 60 + pSec)) {
           localStorage.setItem(levelTimeKey, timeString);
+          savedTimeString = timeString;
         }
       }
 
-      // --- DELEGATE PROGRESS TO PLAYERSTAT.JS ---
-      if (typeof handleLevelVictory === 'function') {
-        handleLevelVictory(currentLevel, stars);
-      } else {
-        showVictoryModal(stars, stars * 5);
+      const currentLevelCoins = parseInt(localStorage.getItem(levelCoinsKey)) || 0;
+      let targetCoins = stars * 5; 
+      let newCoinsEarned = 0;
+      let totalCoins = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
+
+      if (targetCoins > currentLevelCoins) {
+        newCoinsEarned = targetCoins - currentLevelCoins;
+        localStorage.setItem(levelCoinsKey, targetCoins);
+
+        totalCoins += newCoinsEarned;
+        localStorage.setItem(totalCoinsKey, totalCoins);
       }
+
+      let maxUnlocked = parseInt(localStorage.getItem(currentLevelKey)) || 1;
+      let nextLevelToUnlock = maxUnlocked;
+      if (currentLevel >= maxUnlocked) {
+        nextLevelToUnlock = currentLevel + 1;
+        localStorage.setItem(currentLevelKey, nextLevelToUnlock);
+      }
+
+      // Sync progress updates to Firestore
+      syncUserDataToFirestore({
+        totalCoins: totalCoins,
+        currentLevel: nextLevelToUnlock,
+        [`levelCoins_${currentLevel}`]: Math.max(targetCoins, currentLevelCoins),
+        [`levelMoves_${currentLevel}`]: savedMoves,
+        [`levelTime_${currentLevel}`]: savedTimeString
+      });
+
+      showVictoryModal(stars, newCoinsEarned);
     }
   }
 
@@ -227,7 +295,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
 
-    if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+    updateCoinDisplay();
     const modal = document.getElementById('victoryModal');
     if (modal) modal.classList.remove('hidden');
     startConfetti();
@@ -273,7 +341,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // --- PREVIEW BUTTON LOGIC (USING PLAYERSTAT.JS SPENDCOINS) ---
+  // --- PREVIEW BUTTON LOGIC (5 COINS, 10S COUNTDOWN, & CLOSE BUTTON) ---
   let previewTimer = null;
   let countdownInterval = null;
 
@@ -286,26 +354,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const previewBtn = document.getElementById('previewBtn');
   if (previewBtn) {
-    previewBtn.addEventListener('click', async () => {
+    previewBtn.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
 
+      const coinKey = getUserKey('totalCoins');
+      let totalCoins = parseInt(localStorage.getItem(coinKey)) || 0;
       const previewCost = 5;
-      let success = true;
 
-      if (typeof spendCoins === 'function') {
-        success = await spendCoins(previewCost);
-      } else {
-        let totalCoins = window.currentPlayerData?.totalCoins || 0;
-        if (totalCoins < previewCost) success = false;
-        else window.currentPlayerData.totalCoins -= previewCost;
-      }
-
-      if (!success) {
+      if (totalCoins < previewCost) {
         alert("Not enough coins! You need 5 coins to preview the image.");
         return;
       }
 
-      if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+      // Deduct coins and update storage/UI
+      totalCoins -= previewCost;
+      localStorage.setItem(coinKey, totalCoins);
+      updateCoinDisplay();
+
+      // Sync coin deduction to Firestore
+      syncUserDataToFirestore({ totalCoins: totalCoins });
 
       // Open modal and show current level image
       const modal = document.getElementById('imageModal');
@@ -320,9 +387,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (countdownSpan) countdownSpan.innerText = timeLeft;
       if (modal) modal.classList.remove('hidden');
 
+      // Clear existing timers if any
       if (previewTimer) clearTimeout(previewTimer);
       if (countdownInterval) clearInterval(countdownInterval);
 
+      // Start live countdown ticker every second
       countdownInterval = setInterval(() => {
         timeLeft--;
         if (countdownSpan) countdownSpan.innerText = timeLeft;
@@ -331,6 +400,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }, 1000);
 
+      // Automatically close after 10 seconds
       previewTimer = setTimeout(() => {
         closePreviewModal();
       }, 10000);
