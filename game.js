@@ -1,7 +1,4 @@
-// ==========================================
-// PIXVINZ - GAME SCRIPT (FIRESTORE FIRST)
-// ==========================================
-
+// --- FIREBASE INITIALIZATION FOR STANDALONE GAME.JS ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
 
@@ -21,61 +18,6 @@ const db = getFirestore(app);
 // Expose globally so your sync helpers work perfectly
 window.pixvinzDb = { db, doc, getDoc, setDoc, updateDoc };
 
-function getCurrentUser() {
-  try {
-    return JSON.parse(localStorage.getItem('loggedInUser'));
-  } catch (e) {
-    return null;
-  }
-}
-
-// Generates user-specific localStorage keys (e.g., 'vinz_currentLevel')
-function getUserKey(keyName) {
-  const user = getCurrentUser();
-  if (!user || !user.username) return keyName;
-  return `${user.username}_${keyName}`;
-}
-
-// --- FETCH CLOUD DATA FIRST UPON LOAD TO OVERRIDE STALE LOCAL CACHE ---
-async function fetchUserDataFromFirestore() {
-  const user = getCurrentUser();
-  if (!user || !user.username) return false;
-  try {
-    const userRef = doc(db, "players", user.username);
-    const docSnap = await getDoc(userRef);
-    if (docSnap.exists()) {
-      const cloudData = docSnap.data();
-      
-      // Force update local storage with live cloud values instantly
-      if (cloudData.coins !== undefined) localStorage.setItem(getUserKey('totalCoins'), cloudData.coins);
-      if (cloudData.level !== undefined) localStorage.setItem(getUserKey('currentLevel'), cloudData.level);
-      
-      // Also update session user object with latest values
-      user.level = cloudData.level || user.level;
-      user.coins = cloudData.coins || user.coins;
-      localStorage.setItem('loggedInUser', JSON.stringify(user));
-      
-      return true;
-    }
-  } catch (err) {
-    console.error("Error fetching from Firestore, falling back to local cache:", err);
-  }
-  return false;
-}
-
-// --- FIRESTORE SYNC HELPERS ---
-async function syncUserDataToFirestore(updates) {
-  const user = getCurrentUser();
-  if (!user || !user.username || !window.pixvinzDb) return;
-  try {
-    const { db, doc, setDoc } = window.pixvinzDb;
-    const userRef = doc(db, "players", user.username);
-    await setDoc(userRef, updates, { merge: true });
-  } catch (err) {
-    console.error("Error syncing to Firestore:", err);
-  }
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const currentLevel = parseInt(urlParams.get('level')) || 1;
@@ -85,8 +27,53 @@ document.addEventListener('DOMContentLoaded', async () => {
     levelDisplay.innerText = currentLevel.toString().padStart(2, '0');
   }
 
-  // --- AWAIT CLOUD DATA FIRST BEFORE RENDERING GAME UI ---
+  function getCurrentUser() {
+    try {
+      return JSON.parse(localStorage.getItem('loggedInUser'));
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Generates user-specific localStorage keys (e.g., 'vinz_currentLevel')
+  function getUserKey(keyName) {
+    const user = getCurrentUser();
+    if (!user || !user.username) return keyName;
+    return `${user.username}_${keyName}`;
+  }
+
+  // --- FETCH CLOUD DATA ON LOAD TO KEEP LOCALSTORAGE SYNCED ---
+  async function fetchUserDataFromFirestore() {
+    const user = getCurrentUser();
+    if (!user || !user.username) return;
+    try {
+      const userRef = doc(db, "users", user.username);
+      const docSnap = await getDoc(userRef);
+      if (docSnap.exists()) {
+        const cloudData = docSnap.data();
+        // Update local storage with cloud values if present
+        if (cloudData.totalCoins !== undefined) localStorage.setItem(getUserKey('totalCoins'), cloudData.totalCoins);
+        if (cloudData.currentLevel !== undefined) localStorage.setItem(getUserKey('currentLevel'), cloudData.currentLevel);
+      }
+    } catch (err) {
+      console.error("Error fetching from Firestore:", err);
+    }
+  }
+
   await fetchUserDataFromFirestore();
+
+  // --- FIRESTORE SYNC HELPERS ---
+  async function syncUserDataToFirestore(updates) {
+    const user = getCurrentUser();
+    if (!user || !user.username || !window.pixvinzDb) return;
+    try {
+      const { db, doc, setDoc } = window.pixvinzDb;
+      const userRef = doc(db, "users", user.username);
+      await setDoc(userRef, updates, { merge: true });
+    } catch (err) {
+      console.error("Error syncing to Firestore:", err);
+    }
+  }
 
   updateCoinDisplay();
 
@@ -260,20 +247,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         localStorage.setItem(currentLevelKey, nextLevelToUnlock);
       }
 
-      // Calculate XP for Firestore sync
-      const puzzlesSolved = Math.max(0, nextLevelToUnlock - 1);
-      let totalXpEarned = 0;
-      for (let i = 1; i <= puzzlesSolved; i++) {
-        let lvlForPuzzle = Math.floor((i - 1) / 5) + 1;
-        let tierNum = Math.floor((lvlForPuzzle - 1) / 10);
-        totalXpEarned += (tierNum + 1) * 100;
-      }
-
       // Sync progress updates to Firestore
       syncUserDataToFirestore({
-        level: nextLevelToUnlock,
-        coins: totalCoins,
-        xp: totalXpEarned,
+        totalCoins: totalCoins,
+        currentLevel: nextLevelToUnlock,
         [`levelCoins_${currentLevel}`]: Math.max(targetCoins, currentLevelCoins),
         [`levelMoves_${currentLevel}`]: savedMoves,
         [`levelTime_${currentLevel}`]: savedTimeString
@@ -391,7 +368,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateCoinDisplay();
 
       // Sync coin deduction to Firestore
-      syncUserDataToFirestore({ coins: totalCoins });
+      syncUserDataToFirestore({ totalCoins: totalCoins });
 
       // Open modal and show current level image
       const modal = document.getElementById('imageModal');
