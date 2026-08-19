@@ -339,6 +339,12 @@ document.addEventListener('DOMContentLoaded', () => {
           createdAt: new Date()
         };
 
+        // --- CLEAR STALE LOCAL STORAGE CACHE TO PREVENT GHOST DATA ---
+        localStorage.removeItem(`${username}_coins`);
+        localStorage.removeItem(`${username}_level`);
+        localStorage.removeItem(`${username}_xp`);
+        localStorage.removeItem(`${username}_avatar`); // Clears old avatar cache
+
         await setDoc(userDocRef, newUserData);
 
         localStorage.setItem('loggedInUser', JSON.stringify(newUserData));
