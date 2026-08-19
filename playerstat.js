@@ -1,14 +1,14 @@
-// playerstat.js - Handles all cloud-synced player data (Coins, XP, Levels, Avatar)
+// playerstat.js - Handles all cloud-synced player data (Coins, Levels, & Firestore)
 
-// In-memory cache so your game can read stats instantly without hitting Firestore every frame
+// --- 1. GLOBAL IN-MEMORY CACHE ---
 window.currentPlayerData = {
     totalCoins: 0,
-    level: 1,
+    currentLevel: 1,
+    levelCoins: {}, // Stores coins earned per level: { 1: 15, 2: 10 }
     xp: 0
-    // add other stats here as needed
 };
 
-// Update the coin count on the screen
+// --- 2. UI DISPLAY UPDATER ---
 function updateCoinDisplay() {
     const totalCoins = window.currentPlayerData.totalCoins || 0;
     const coinElem = document.getElementById('coinCount');
@@ -17,16 +17,46 @@ function updateCoinDisplay() {
     }
 }
 
-// Earn coins and sync to Firestore
+// --- 3. FETCH CLOUD DATA ON LOAD ---
+async function fetchUserDataFromFirestore() {
+    const user = getCurrentUser();
+    if (!user || !user.username) return;
+    
+    try {
+        const userRef = doc(db, "users", user.username);
+        const docSnap = await getDoc(userRef);
+        
+        if (docSnap.exists()) {
+            const cloudData = docSnap.data();
+            window.currentPlayerData = {
+                totalCoins: cloudData.totalCoins !== undefined ? cloudData.totalCoins : 0,
+                currentLevel: cloudData.currentLevel !== undefined ? cloudData.currentLevel : 1,
+                levelCoins: cloudData.levelCoins || {},
+                xp: cloudData.xp || 0
+            };
+        } else {
+            window.currentPlayerData = { totalCoins: 0, currentLevel: 1, levelCoins: {}, xp: 0 };
+        }
+        
+        // Refresh UI with loaded data
+        updateCoinDisplay();
+        if (typeof updateLevelDisplay === 'function') updateLevelDisplay();
+        
+    } catch (err) {
+        console.error("Error fetching from Firestore:", err);
+    }
+}
+
+// --- 4. EARN COINS (General use) ---
 async function earnCoins(amount) {
     window.currentPlayerData.totalCoins = (window.currentPlayerData.totalCoins || 0) + amount;
     updateCoinDisplay();
 
-    const loggedInUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-    if (loggedInUser && loggedInUser.displayName) {
+    const user = getCurrentUser();
+    if (user && user.username) {
         try {
-            const db = firebase.firestore();
-            await db.collection('players').doc(loggedInUser.displayName).update({
+            const userRef = doc(db, "users", user.username);
+            await updateDoc(userRef, {
                 totalCoins: window.currentPlayerData.totalCoins
             });
             console.log("Earned coins saved to Firestore!");
@@ -36,7 +66,7 @@ async function earnCoins(amount) {
     }
 }
 
-// Spend coins and sync to Firestore
+// --- 5. SPEND COINS ---
 async function spendCoins(amount) {
     const currentCoins = window.currentPlayerData.totalCoins || 0;
 
@@ -48,11 +78,11 @@ async function spendCoins(amount) {
     window.currentPlayerData.totalCoins = currentCoins - amount;
     updateCoinDisplay();
 
-    const loggedInUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-    if (loggedInUser && loggedInUser.displayName) {
+    const user = getCurrentUser();
+    if (user && user.username) {
         try {
-            const db = firebase.firestore();
-            await db.collection('players').doc(loggedInUser.displayName).update({
+            const userRef = doc(db, "users", user.username);
+            await updateDoc(userRef, {
                 totalCoins: window.currentPlayerData.totalCoins
             });
             console.log("Spent coins updated in Firestore!");
@@ -64,44 +94,7 @@ async function spendCoins(amount) {
     return true; 
 }
 
-
-
-
-
-// --- 1. CLOUD-SYNCED DATA CONTAINER ---
-window.currentPlayerData = window.currentPlayerData || {
-    totalCoins: 0,
-    currentLevel: 1,
-    levelCoins: {} // Stores coins earned per level, e.g., { 1: 10, 2: 5 }
-};
-
-// --- 2. COIN DISPLAY & MANAGEMENT ---
-function updateCoinDisplay() {
-    const totalCoins = window.currentPlayerData.totalCoins || 0;
-    const coinElem = document.getElementById('coinCount');
-    if (coinElem) {
-        coinElem.innerText = totalCoins;
-    }
-}
-
-async function earnCoins(amount) {
-    window.currentPlayerData.totalCoins = (window.currentPlayerData.totalCoins || 0) + amount;
-    updateCoinDisplay();
-
-    const loggedInUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-    if (loggedInUser && loggedInUser.displayName) {
-        try {
-            const db = firebase.firestore();
-            await db.collection('players').doc(loggedInUser.displayName).update({
-                totalCoins: window.currentPlayerData.totalCoins
-            });
-        } catch (error) {
-            console.error("Error saving earned coins:", error);
-        }
-    }
-}
-
-// --- 3. LEVEL & STAR HELPERS (Replaces localStorage level lookups) ---
+// --- 6. LEVEL & STAR HELPERS ---
 function getCurrentLevel() {
     return window.currentPlayerData.currentLevel || 1;
 }
@@ -112,31 +105,83 @@ function getLevelStars(levelNumber, isSolved) {
     return Math.min(3, Math.floor(levelCoins / 5)) || (isSolved ? 3 : 0);
 }
 
-// --- 4. CLOUD SYNC HANDLER (Replaces localStorage freshData loop) ---
-function applyFreshCloudData(freshData) {
-    if (!freshData) return;
+// --- 7. LEVEL VICTORY & PROGRESSION HANDLER ---
+async function handleLevelVictory(completedLevel, stars) {
+    const user = getCurrentUser();
+    if (!user || !user.username) return;
 
-    if (!window.currentPlayerData) {
-        window.currentPlayerData = {};
-    }
-
-    // Map incoming Firestore fields to memory
-    if (freshData.coins !== undefined) {
-        window.currentPlayerData.totalCoins = freshData.coins;
-    }
-    if (freshData.level !== undefined) {
-        window.currentPlayerData.currentLevel = freshData.level;
-    }
-    if (freshData.levelCoins !== undefined) {
-        window.currentPlayerData.levelCoins = freshData.levelCoins;
+    if (!window.currentPlayerData.levelCoins) {
+        window.currentPlayerData.levelCoins = {};
     }
 
-    // Refresh UI elements automatically
+    const currentLevelCoins = window.currentPlayerData.levelCoins[completedLevel] || 0;
+    let targetCoins = stars * 5; 
+    let newCoinsEarned = 0;
+    let totalCoins = window.currentPlayerData.totalCoins || 0;
+
+    if (targetCoins > currentLevelCoins) {
+        newCoinsEarned = targetCoins - currentLevelCoins;
+        window.currentPlayerData.levelCoins[completedLevel] = targetCoins;
+
+        totalCoins += newCoinsEarned;
+        window.currentPlayerData.totalCoins = totalCoins;
+    }
+
+    let maxUnlocked = window.currentPlayerData.currentLevel || 1;
+    let nextLevelToUnlock = maxUnlocked;
+    if (completedLevel >= maxUnlocked) {
+        nextLevelToUnlock = completedLevel + 1;
+        window.currentPlayerData.currentLevel = nextLevelToUnlock;
+    }
+
+    // Refresh UI & Show Victory Modal
     updateCoinDisplay();
-    
-    // Call any other UI refreshters you might have here if needed
-    if (typeof updateLevelDisplay === 'function') {
-        updateLevelDisplay();
+    const modal = document.getElementById('victoryModal');
+    if (modal) modal.classList.remove('hidden');
+    if (typeof startConfetti === 'function') startConfetti();
+
+    // Sync all updates directly to Firestore
+    try {
+        const userRef = doc(db, "users", user.username);
+        await updateDoc(userRef, {
+            totalCoins: window.currentPlayerData.totalCoins,
+            currentLevel: window.currentPlayerData.currentLevel,
+            levelCoins: window.currentPlayerData.levelCoins
+        });
+        console.log("Victory stats saved to Firestore!");
+    } catch (err) {
+        console.error("Error updating Firestore on victory:", err);
     }
 }
 
+// --- 8. PREVIEW BUTTON LOGIC ---
+let previewTimer = null;
+let countdownInterval = null;
+
+function closePreviewModal() {
+    const modal = document.getElementById('imageModal');
+    if (modal) modal.classList.add('hidden');
+    if (previewTimer) clearTimeout(previewTimer);
+    if (countdownInterval) clearInterval(countdownInterval);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const previewBtn = document.getElementById('previewBtn');
+    if (previewBtn) {
+        previewBtn.addEventListener('click', async () => {
+            if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+
+            let totalCoins = window.currentPlayerData.totalCoins || 0;
+            const previewCost = 5;
+
+            if (totalCoins < previewCost) {
+                alert("Not enough coins! You need 5 coins to preview the image.");
+                return;
+            }
+
+            // Deduct coins using the spendCoins function built above
+            await spendCoins(previewCost);
+            console.log("Preview coins deducted and saved!");
+        });
+    }
+});
