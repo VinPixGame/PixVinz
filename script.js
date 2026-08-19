@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   });
 
-// --- 1. LOADING SCREEN & REAL 200-LEVEL PRELOADER ---
+// --- 1. LOADING SCREEN & ROBUST 55-IMAGE PRELOADER ---
 const skipLoading = localStorage.getItem('skipLoading') === 'true';
 const percentageElem = document.getElementById('loadingPercentage');
 const barFillElem = document.getElementById('loadingBarFill');
@@ -163,9 +163,9 @@ function finishLoading() {
 if (skipLoading) {
     finishLoading();
 } else {
-    // Automatically generate paths from level1.jpeg to level200.jpeg
+    // Preload only your 55 available image files
     const assets = [];
-    for (let i = 1; i <= 200; i++) {
+    for (let i = 1; i <= 55; i++) {
         assets.push(`image/level${i}.jpeg`);
     }
 
@@ -175,16 +175,19 @@ if (skipLoading) {
     if (totalAssets === 0) {
         finishLoading();
     } else {
-        // Set initial state
         if (percentageElem) percentageElem.innerText = '1%';
         if (barFillElem) barFillElem.style.width = '1%';
 
+        // Safety fallback timeout to prevent hanging on mobile networks
+        const safetyTimeout = setTimeout(() => {
+            if (percentageElem) percentageElem.innerText = '100%';
+            if (barFillElem) barFillElem.style.width = '100%';
+            setTimeout(finishLoading, 200);
+        }, 4000);
+
         assets.forEach(src => {
             const img = new Image();
-            img.src = src;
-            
-            // As each image finishes loading or throws an error, count it and advance the real bar
-            img.onload = img.onerror = () => {
+            const markProcessed = () => {
                 loadedCount++;
                 let percent = Math.floor((loadedCount / totalAssets) * 100);
                 if (percent < 1) percent = 1;
@@ -192,14 +195,17 @@ if (skipLoading) {
                 if (percentageElem) percentageElem.innerText = `${percent}%`;
                 if (barFillElem) barFillElem.style.width = `${percent}%`;
 
-                // When all 200 images are fully downloaded and cached
                 if (loadedCount === totalAssets) {
-                    console.log("All 200 level assets cached successfully!");
+                    clearTimeout(safetyTimeout);
                     setTimeout(() => {
                         finishLoading();
-                    }, 300); // Brief pause at 100% so the player sees completion
+                    }, 300);
                 }
             };
+
+            img.onload = markProcessed;
+            img.onerror = markProcessed;
+            img.src = src;
         });
     }
 }
