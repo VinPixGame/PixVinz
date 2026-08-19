@@ -18,6 +18,11 @@ const db = getFirestore(app);
 // Expose globally so your sync helpers work perfectly
 window.pixvinzDb = { db, doc, getDoc, setDoc, updateDoc };
 
+// Helper to map any level (1-200) to your 55 available image files
+function getLevelImageIndex(levelNum) {
+    return ((levelNum - 1) % 55) + 1;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const currentLevel = parseInt(urlParams.get('level')) || 1;
@@ -100,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let tilesState = Array.from({ length: totalTiles }, (_, i) => i);
   let selectedTilePos = null;
 
-  const imageSrc = `image/level${currentLevel}.jpeg`;
+  const imageSrc = `image/level${getLevelImageIndex(currentLevel)}.jpeg`;
 
   function startGameBGM() {
     if (typeof AudioManager !== 'undefined' && AudioManager.musicEnabled) {
