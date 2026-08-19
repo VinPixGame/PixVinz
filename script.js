@@ -442,9 +442,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
-
-
-
   
   
   const playBtn = document.getElementById('playBtn');
