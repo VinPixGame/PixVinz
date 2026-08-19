@@ -29,19 +29,30 @@ body {
   overflow-y: auto;
 }
 /* ==========================================
-   GENERAL TOP BAR (LOGO UNTOUCHED)
+   GENERAL TOP BAR (CENTER ALIGNED)
    ========================================== */
 
 .top-bar {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   width: 100%;
   margin-bottom: 10px;
   padding-top: 8px;
 }
 
-/* Leaves the logo element completely untouched in its original layout */
+.top-bar > *:nth-child(1) {
+  justify-self: start;
+}
+
+.top-bar > *:nth-child(2) {
+  justify-self: center;
+}
+
+.top-bar > *:nth-child(3) {
+  justify-self: end;
+}
+
 .logo-container {
   display: flex;
   justify-content: center;
@@ -55,13 +66,7 @@ body {
   object-fit: contain;
 }
 
-/* Moves the icon and coin upward/leveled together */
-.top-bar > *:not(.logo-container),
-.icon-btn,
-.coin-badge {
-  transform: translateY(-4px); /* Adjust this negative value if you need them moved up slightly more or less */
-}
-
+/* Moves ONLY the Profile Icon upward */
 .icon-btn {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -74,8 +79,10 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  transform: translateY(-12px); /* Adjust this negative number to lift higher/lower */
 }
 
+/* Moves ONLY the Coins upward */
 .coin-badge {
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid #ffd700;
@@ -83,10 +90,8 @@ body {
   border-radius: 20px;
   font-weight: bold;
   color: #ffd700;
+  transform: translateY(-12px); /* Adjust this negative number to lift higher/lower */
 }
-
-
-
 
 
 
@@ -109,7 +114,7 @@ body {
 }
 
 #homeView {
-  margin-top: 38px;
+  margin-top: 10px;
   padding-bottom: 20px;
 }
 
