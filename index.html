@@ -51,6 +51,7 @@
     </section>
 
     <!-- 3. REGISTER PAGE -->
+    <!-- 3. REGISTER PAGE -->
     <section id="registerView" class="view">
       <div class="auth-card">
         <h2>CREATE ACCOUNT</h2>
@@ -58,24 +59,32 @@
           <div class="input-group">
             <input type="text" id="regDisplayName" placeholder="Display Name (e.g. Vinz)" required>
           </div>
-          <div class="input-group" style="position: relative;">
-            <input type="text" id="regUser" placeholder="Username (min 6 chars, lowercase & number)" required>
-            <span id="regUserIndicator" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.85rem; font-weight: bold;"></span>
+          
+          <!-- Username Input with Pre-loaded @pixvinz.com Suffix -->
+          <div class="input-group" style="display: flex; align-items: center; background: rgba(42, 17, 71, 0.8); border: 1px solid rgba(156, 39, 176, 0.4); border-radius: 10px; overflow: hidden; position: relative;">
+            <input type="text" id="regUser" placeholder="Username (min 6 chars, lowercase & number)" required style="flex: 1; background: transparent; border: none; padding: 12px; color: #fff; font-size: 1rem; outline: none;">
+            <span style="padding: 0 12px; color: #b19cd9; font-size: 0.95rem; font-weight: 600; user-select: none; background: rgba(0,0,0,0.2); line-height: 44px; white-space: nowrap;">@pixvinz.com</span>
+            <span id="regUserIndicator" style="position: absolute; right: 130px; top: 50%; transform: translateY(-50%); font-size: 0.85rem; font-weight: bold;"></span>
           </div>
-          <div class="input-group" style="position: relative;">
-            <input type="password" id="regPass" placeholder="Password (6-12 chars, Aa1)" required>
-            <button type="button" id="toggleRegPass" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #b388ff; font-weight: bold; font-size: 0.85rem;">Show</button>
+
+          <!-- Password Field with Show/Hide Button -->
+          <div class="input-group" style="position: relative; margin-top: 15px;">
+            <input type="password" id="regPass" placeholder="Password (6-12 chars, Aa1)" required style="width: 100%; padding-right: 60px;">
+            <button type="button" id="toggleRegPass" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #b388ff; font-weight: bold; font-size: 0.85rem; padding: 5px;">Show</button>
           </div>
-          <div class="input-group">
-            <input type="password" id="regPassConfirm" placeholder="Repeat Password" required>
+
+          <!-- Repeat Password Field with Show/Hide Button -->
+          <div class="input-group" style="position: relative; margin-top: 15px;">
+            <input type="password" id="regPassConfirm" placeholder="Repeat Password" required style="width: 100%; padding-right: 60px;">
+            <button type="button" id="toggleRegPassConfirm" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #b388ff; font-weight: bold; font-size: 0.85rem; padding: 5px;">Show</button>
           </div>
+
           <p id="regError" class="auth-error"></p>
-          <button type="submit" class="btn btn-primary">REGISTER</button>
+          <button type="submit" class="btn btn-primary" style="margin-top: 15px;">REGISTER</button>
         </form>
         <p class="auth-switch">Already have an account? <a href="#" id="toLogin">Log In</a></p>
       </div>
     </section>
-
     <!-- Top Header Bar -->
     <header class="top-bar hidden" id="mainHeader">
       <button class="icon-btn" id="profileHeaderBtn" onclick="showView('profileView')" style="background-color: #2a1147; border: 2px solid #9c27b0; overflow: hidden; padding: 0;">
