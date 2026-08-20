@@ -142,7 +142,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   });
 
-// --- TRUE CLOUD-FIRST LOADING SCREEN (WITH AVATAR & STATS) ---
+
+  
+// --- SELF-CONTAINED CLOUD LOADING SCREEN ---
 try {
     const percentageElem = document.getElementById('loadingPercentage');
     const barFillElem = document.getElementById('loadingBarFill');
@@ -152,50 +154,78 @@ try {
     if (percentageElem) percentageElem.innerText = '1%';
     if (barFillElem) barFillElem.style.width = '1%';
 
-    // 2. Smoothly crawl up to 85% while waiting for Firestore to respond
+    // 2. Smoothly crawl up to 80% while waiting for Firestore
     const loadingInterval = setInterval(() => {
-        if (currentPercent < 85) {
+        if (currentPercent < 80) {
             currentPercent += 2;
             if (percentageElem) percentageElem.innerText = `${currentPercent}%`;
-            if (barFillElem) barFillElem.style.width = `${currentPercent}%`;
+            if (barFillElem) barFillElem.style.width = `${barFillElem}%` || `${currentPercent}%`;
         }
     }, 60);
 
-    // 3. FORCE fetch from Firestore FIRST before touching local storage or UI
+    // 3. Directly fetch from Firestore
     (async () => {
         try {
-            if (typeof fetchUserDataFromFirestore === 'function') {
-                // This waits for the cloud data and updates localStorage with fresh stats
-                await fetchUserDataFromFirestore();
-            } else {
-                console.warn("fetchUserDataFromFirestore function is missing!");
+            // Find who is logged in locally to get their ID/email
+            let localUser = null;
+            try {
+                localUser = JSON.parse(localStorage.getItem('loggedInUser'));
+            } catch (e) {}
+
+            // Check if Firebase Auth has a current user, or if we have an identifier
+            const currentUser = window.auth ? window.auth.currentUser : null;
+            const uid = currentUser ? currentUser.uid : (localUser ? localUser.authUid : null);
+
+            if (uid && window.db && typeof window.doc === 'function' && typeof window.getDoc === 'function') {
+                // Fetch user document from Firestore (adjust 'users' if your collection name is different)
+                const userDocRef = window.doc(window.db, "users", uid);
+                const userSnap = await window.getDoc(userDocRef);
+
+                if (userSnap.exists()) {
+                    const cloudData = userSnap.data();
+
+                    // Merge fresh cloud data with local user object
+                    const updatedUser = {
+                        ...(localUser || {}),
+                        displayName: cloudData.displayName || localUser?.displayName || 'Vinz',
+                        username: cloudData.username || localUser?.username || '',
+                        coins: cloudData.coins !== undefined ? cloudData.coins : (localUser?.coins || 0),
+                        xp: cloudData.xp !== undefined ? cloudData.xp : (localUser?.xp || 0),
+                        level: cloudData.level !== undefined ? cloudData.level : (localUser?.level || 1),
+                        avatar: cloudData.avatar || localUser?.avatar || '',
+                        authUid: uid
+                    };
+
+                    // Save fresh data to localStorage
+                    localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
+                }
             }
 
-            // 4. Once cloud data is 100% secured, finish the loading bar
+            // 4. Finish the loading bar to 100%
             clearInterval(loadingInterval);
             currentPercent = 100;
             if (percentageElem) percentageElem.innerText = '100%';
             if (barFillElem) barFillElem.style.width = '100%';
 
-            // 5. Brief pause at 100% so you can see it, then launch into the game
+            // 5. Apply everything to the UI and enter the game
             setTimeout(() => {
-                let loggedInUser = null;
+                let finalUser = null;
                 try {
-                    loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+                    finalUser = JSON.parse(localStorage.getItem('loggedInUser'));
                 } catch (e) {}
 
-                if (loggedInUser) {
-                    // Update Display Name
+                if (finalUser) {
+                    // Update Name
                     const nameElem = document.getElementById('userDisplayName');
-                    if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
+                    if (nameElem) nameElem.innerText = finalUser.displayName || 'Vinz';
                     
-                    // Update Avatar using your exact HTML ID: avatar-preview
+                    // Update Avatar (using your exact HTML ID)
                     const avatarPreviewElem = document.getElementById('avatar-preview');
-                    if (avatarPreviewElem && loggedInUser.avatar) {
-                        avatarPreviewElem.src = loggedInUser.avatar;
+                    if (avatarPreviewElem && finalUser.avatar) {
+                        avatarPreviewElem.src = finalUser.avatar;
                     }
 
-                    // Refresh all displays with the brand new cloud data
+                    // Refresh coins/stats display if function exists
                     if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
                     
                     if (typeof showView === 'function') showView('home');
@@ -206,10 +236,10 @@ try {
             }, 400);
 
         } catch (err) {
-            console.error("Critical Cloud Fetch Error:", err);
+            console.error("Cloud fetch error:", err);
             clearInterval(loadingInterval);
             
-            // Fallback if offline
+            // Fallback to login if something fails
             if (typeof showView === 'function') showView('login');
         }
     })();
@@ -217,7 +247,6 @@ try {
 } catch (e) {
     console.error("Loading script error:", e);
 }
-
 
   
   // --- 2. AUTHENTICATION & FORM NAVIGATION ---
