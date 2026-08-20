@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   });
 
-// --- 1. BULLETPROOF 1% STUCK FIX & SMOOTH LOADER ---
+// --- 1. CLOUD-FIRST LOADING SCREEN ---
 try {
     const skipLoading = localStorage.getItem('skipLoading') === 'true';
     const percentageElem = document.getElementById('loadingPercentage');
@@ -158,6 +158,10 @@ try {
         if (loggedInUser) {
             const nameElem = document.getElementById('userDisplayName');
             if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
+            
+            // Refresh displays with the fresh cloud data
+            if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+            
             if (typeof showView === 'function') showView('home');
             if (typeof playMainBGM === 'function') playMainBGM();
         } else {
@@ -168,43 +172,56 @@ try {
     if (skipLoading) {
         finishLoadingSafe();
     } else {
-        const assets = [];
-        for (let i = 1; i <= 55; i++) {
-            assets.push(`image/level${i}.jpeg`);
-        }
+        let currentPercent = 1;
+        if (percentageElem) percentageElem.innerText = '1%';
+        if (barFillElem) barFillElem.style.width = '1%';
 
-        // Silently preload images in the background so they are cached
-        assets.forEach(src => {
-            const img = new Image();
-            img.src = src;
-        });
-
-        if (assets.length === 0) {
-            finishLoadingSafe();
-        } else {
-            let currentPercent = 1;
-            if (percentageElem) percentageElem.innerText = '1%';
-            if (barFillElem) barFillElem.style.width = '1%';
-
-            // Smoothly animate the loading bar like a polished mobile game
-            const loadingInterval = setInterval(() => {
-                currentPercent += 2; // Increases by 2% every tick
-                if (currentPercent > 100) currentPercent = 100;
-
+        // 1. Visually crawl up to 40% while preparing
+        const loadingInterval = setInterval(() => {
+            if (currentPercent < 40) {
+                currentPercent += 5;
                 if (percentageElem) percentageElem.innerText = `${currentPercent}%`;
                 if (barFillElem) barFillElem.style.width = `${currentPercent}%`;
+            }
+        }, 40);
 
-                // Once it hits 100%, finish up and enter the game smoothly
-                if (currentPercent >= 100) {
-                    clearInterval(loadingInterval);
-                    setTimeout(finishLoadingSafe, 300); // Tiny pause at 100%
+        // 2. Actually FETCH from Firestore FIRST before moving forward
+        (async () => {
+            try {
+                if (typeof fetchUserDataFromFirestore === 'function') {
+                    // This pauses the loading sequence until Firebase responds with fresh data
+                    await fetchUserDataFromFirestore(); 
                 }
-            }, 70); // Adjust this number if you want it slightly faster or slower
-        }
+                
+                // Once Firestore data is safely saved to localStorage, crawl the rest of the way to 100%
+                clearInterval(loadingInterval);
+                
+                let finishPercent = currentPercent;
+                const finishInterval = setInterval(() => {
+                    finishPercent += 10;
+                    if (finishPercent > 100) finishPercent = 100;
+
+                    if (percentageElem) percentageElem.innerText = `${finishPercent}%`;
+                    if (barFillElem) barFillElem.style.width = `${finishPercent}%`;
+
+                    if (finishPercent >= 100) {
+                        clearInterval(finishInterval);
+                        setTimeout(finishLoadingSafe, 250);
+                    }
+                }, 30);
+
+            } catch (err) {
+                console.warn("Firestore fetch failed during load, using local cache as fallback:", err);
+                clearInterval(loadingInterval);
+                finishLoadingSafe();
+            }
+        })();
     }
 } catch (e) {
     console.error("Loading error:", e);
 }
+
+  
   // --- 2. AUTHENTICATION & FORM NAVIGATION ---
   const toRegBtn = document.getElementById('toRegister');
   if (toRegBtn) {
