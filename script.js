@@ -146,46 +146,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
   
 // ==========================================
-// 1. TRUE CLOUD-FIRST LOADING SCREEN SCRIPT
+// 1. BULLETPROOF CLOUD LOADING SCREEN SCRIPT
 // ==========================================
 try {
     const percentageElem = document.getElementById('loadingPercentage');
     const barFillElem = document.getElementById('loadingBarFill');
 
-    // Initialize progress bar at 1%
     let currentPercent = 1;
     if (percentageElem) percentageElem.innerText = '1%';
     if (barFillElem) barFillElem.style.width = '1%';
 
-    // Smoothly crawl up to 85% while waiting for Firestore to respond
+    // Smooth loading bar animation
     const loadingInterval = setInterval(() => {
-        if (currentPercent < 85) {
-            currentPercent += 2;
+        if (currentPercent < 90) {
+            currentPercent += 3;
             if (percentageElem) percentageElem.innerText = `${currentPercent}%`;
             if (barFillElem) barFillElem.style.width = `${currentPercent}%`;
         }
-    }, 60);
+    }, 40);
 
-    // Force fetch from Firestore first before opening the game
+    // SAFETY TIMER: Forces the game to load within 3 seconds no matter what, preventing 1% freezes!
+    const safetyTimeout = setTimeout(() => {
+        finishLoadingAndEnterGame();
+    }, 3000);
+
+    // Main Cloud Fetch Logic
     (async () => {
         try {
-            // Find who is logged in locally to get their identifier/UID
             let localUser = null;
             try {
                 localUser = JSON.parse(localStorage.getItem('loggedInUser'));
             } catch (e) {}
 
-            const currentUser = window.auth && window.auth.currentUser ? window.auth.currentUser : null;
+            // Safe check for Firebase auth & db references
+            const firebaseAuth = window.auth || (typeof auth !== 'undefined' ? auth : null);
+            const firebaseDb = window.db || (typeof db !== 'undefined' ? db : null);
+            
+            const currentUser = firebaseAuth && firebaseAuth.currentUser ? firebaseAuth.currentUser : null;
             const uid = currentUser ? currentUser.uid : (localUser ? localUser.authUid : null);
 
-            if (uid && window.db && typeof window.doc === 'function' && typeof window.getDoc === 'function') {
-                const userDocRef = window.doc(window.db, "users", uid);
-                const userSnap = await window.getDoc(userDocRef);
+            if (uid && firebaseDb && typeof doc === 'function' && typeof getDoc === 'function') {
+                const userDocRef = doc(firebaseDb, "users", uid);
+                const userSnap = await getDoc(userDocRef);
 
                 if (userSnap.exists()) {
                     const cloudData = userSnap.data();
-
-                    // Merge fresh cloud data with local user object (guarantees cross-device sync)
                     const updatedUser = {
                         ...(localUser || {}),
                         authUid: uid,
@@ -196,61 +201,58 @@ try {
                         level: cloudData.level !== undefined ? cloudData.level : (localUser?.level || 1),
                         avatar: cloudData.avatar || localUser?.avatar || ''
                     };
-
                     localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
                 }
             }
-
-            // Once cloud data is secured, finish the loading bar to 100%
-            clearInterval(loadingInterval);
-            currentPercent = 100;
-            if (percentageElem) percentageElem.innerText = '100%';
-            if (barFillElem) barFillElem.style.width = '100%';
-
-            // Launch into the game smoothly
-            setTimeout(() => {
-                let finalUser = null;
-                try {
-                    finalUser = JSON.parse(localStorage.getItem('loggedInUser'));
-                } catch (e) {}
-
-                if (finalUser) {
-                    // Update Display Name
-                    const nameElem = document.getElementById('userDisplayName');
-                    if (nameElem) nameElem.innerText = finalUser.displayName || 'Vinz';
-                    
-                    // Update Avatar across browsers and devices using your exact HTML ID
-                    const avatarPreviewElem = document.getElementById('avatar-preview');
-                    if (avatarPreviewElem && finalUser.avatar) {
-                        avatarPreviewElem.src = finalUser.avatar;
-                    }
-
-                    // Refresh coins and stats display
-                    if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
-                    
-                    // Enter home view safely (Prevents back-button logout bugs)
-                    if (typeof showView === 'function') showView('home');
-                    if (typeof playMainBGM === 'function') playMainBGM();
-                } else {
-                    if (typeof showView === 'function') showView('login');
-                }
-            }, 400);
-
         } catch (err) {
-            console.error("Critical Cloud Fetch Error:", err);
-            clearInterval(loadingInterval);
-            if (typeof showView === 'function') showView('login');
+            console.warn("Cloud fetch skipped/failed, using local cache:", err);
+        } finally {
+            // Clear the safety timeout since we finished successfully
+            clearTimeout(safetyTimeout);
+            finishLoadingAndEnterGame();
         }
     })();
 
+    // Helper function to finish up and enter the game smoothly
+    function finishLoadingAndEnterGame() {
+        clearInterval(loadingInterval);
+        currentPercent = 100;
+        if (percentageElem) percentageElem.innerText = '100%';
+        if (barFillElem) barFillElem.style.width = '100%';
+
+        setTimeout(() => {
+            let finalUser = null;
+            try {
+                finalUser = JSON.parse(localStorage.getItem('loggedInUser'));
+            } catch (e) {}
+
+            if (finalUser) {
+                // Update Display Name
+                const nameElem = document.getElementById('userDisplayName');
+                if (nameElem) nameElem.innerText = finalUser.displayName || 'Vinz';
+                
+                // Update Avatar across browsers and devices
+                const avatarPreviewElem = document.getElementById('avatar-preview');
+                if (avatarPreviewElem && finalUser.avatar) {
+                    avatarPreviewElem.src = finalUser.avatar;
+                }
+
+                // Refresh coins and stats display
+                if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+                
+                // Enter home view safely
+                if (typeof showView === 'function') showView('home');
+                if (typeof playMainBGM === 'function') playMainBGM();
+            } else {
+                if (typeof showView === 'function') showView('login');
+            }
+        }, 300);
+    }
+
 } catch (e) {
     console.error("Loading script error:", e);
+    if (typeof showView === 'function') showView('login');
 }
-
-
-// ==========================================
-// 2. AUTHENTICATION & @pixvinz.com HANDLERS
-// ==========================================
 
 // ==========================================
 // COMPLETE LOGIN SCRIPT (HANDLER + TOGGLE + LISTENER)
