@@ -811,7 +811,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-
 // --- LEADERBOARD LOGIC (Safe DOM Binding, Avatars & Real Players Only) ---
 document.addEventListener('DOMContentLoaded', () => {
     const navLeaderboard = document.getElementById('navLeaderboard');
@@ -894,39 +893,60 @@ async function loadLeaderboardData() {
         let rankBadgeHTML = '';
         let specialStyle = '';
         let frameStyle = 'border: 2px solid rgba(255,255,255,0.2);';
+        let avatarHTML = '';
+
+        const avatarSrc = player.avatar ? player.avatar : 'image/avatar.png';
 
         if (rank === 1) {
             specialStyle = 'background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(255, 215, 0, 0.6);';
             frameStyle = 'border: 3px solid #ffd700;';
             rankBadgeHTML = `
-                <div style="min-width: 48px; height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #ffaa00, #ff5500); border-radius: 8px; border: 2px solid #fff; font-weight: 900; font-size: 15px; color: #fff;">
-                    <span>#1</span>
-                    <div style="width: 26px; height: 6px; background: #cc3300; clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%); margin-top: 2px;"></div>
+                <div style="min-width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                    <img src="image/rank1.png" alt="#1" style="width: 44px; height: 44px; object-fit: contain;">
+                </div>
+            `;
+            avatarHTML = `
+                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                    <span style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 18px; z-index: 3; filter: drop-shadow(0 0 6px #ffd700);">👑</span>
+                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${frameStyle} position: relative; z-index: 2;">
                 </div>
             `;
         } else if (rank === 2) {
             specialStyle = 'background: linear-gradient(135deg, rgba(192, 192, 192, 0.2), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(192, 192, 192, 0.6);';
             frameStyle = 'border: 3px solid #00e5ff;';
             rankBadgeHTML = `
-                <div style="min-width: 48px; height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #00d2ff, #3a7bd5); border-radius: 8px; border: 2px solid #fff; font-weight: 900; font-size: 15px; color: #fff;">
-                    <span>#2</span>
-                    <div style="width: 26px; height: 6px; background: #0055aa; clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%); margin-top: 2px;"></div>
+                <div style="min-width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                    <img src="image/rank2.png" alt="#2" style="width: 44px; height: 44px; object-fit: contain;">
+                </div>
+            `;
+            avatarHTML = `
+                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                    <span style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 18px; z-index: 3; filter: drop-shadow(0 0 6px #c0c0c0) brightness(1.3);">👑</span>
+                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${frameStyle} position: relative; z-index: 2;">
                 </div>
             `;
         } else if (rank === 3) {
             specialStyle = 'background: linear-gradient(135deg, rgba(205, 127, 50, 0.2), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(205, 127, 50, 0.6);';
             frameStyle = 'border: 3px solid #ff9933;';
             rankBadgeHTML = `
-                <div style="min-width: 48px; height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #cd7f32, #8b4513); border-radius: 8px; border: 2px solid #fff; font-weight: 900; font-size: 15px; color: #fff;">
-                    <span>#3</span>
-                    <div style="width: 26px; height: 6px; background: #5c2c16; clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%); margin-top: 2px;"></div>
+                <div style="min-width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                    <img src="image/rank3.png" alt="#3" style="width: 44px; height: 44px; object-fit: contain;">
+                </div>
+            `;
+            avatarHTML = `
+                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                    <span style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 18px; z-index: 3; filter: drop-shadow(0 0 6px #cd7f32) sepia(1) hue-rotate(10deg);">👑</span>
+                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${frameStyle} position: relative; z-index: 2;">
                 </div>
             `;
         } else {
             rankBadgeHTML = `<span style="min-width: 48px; text-align: center; font-weight: bold; font-size: 16px; color: #aaa;">#${rank}</span>`;
+            avatarHTML = `
+                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${frameStyle}">
+                </div>
+            `;
         }
-
-        const avatarSrc = player.avatar ? player.avatar : 'image/avatar.png';
 
         const row = document.createElement('div');
         row.className = `rank-row`;
@@ -947,7 +967,7 @@ async function loadLeaderboardData() {
         row.innerHTML = `
             <div style="display: flex; align-items: center; min-width: 0; flex: 1; overflow: hidden;">
                 ${rankBadgeHTML}
-                <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; margin: 0 14px; flex-shrink: 0; cursor: pointer; ${frameStyle}">
+                ${avatarHTML}
                 <div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
                     <span style="font-weight: 600; font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">${player.name}</span>
                     <div style="font-size: 12px; font-weight: bold; background: linear-gradient(90deg, #ffd700, #ffaa00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; border-bottom: 1px solid #ffd700; display: inline-block; padding-bottom: 1px; margin-top: 3px; width: fit-content;">LEVEL ${player.level}</div>
@@ -980,9 +1000,8 @@ async function loadLeaderboardData() {
         listContainer.appendChild(row);
     });
 }
-
-
-
+    
+    
 window.openPlayerProfile = function(player, rank) {
     const modal = document.getElementById('playerProfileModal');
     if (!modal) return;
@@ -994,6 +1013,42 @@ window.openPlayerProfile = function(player, rank) {
     
     const playerLevel = player.level || 1;
     const playerCoins = player.coins || 0;
+
+    // Dynamic Crown & Border Logic for Top 3 vs Rank 4+
+    const avatarImg = document.getElementById('profileModalAvatar');
+    const crownDiv = document.getElementById('profileModalCrown');
+    
+    if (avatarImg) {
+        if (rank === 1) {
+            if (crownDiv) {
+                crownDiv.style.display = 'block';
+                crownDiv.style.filter = 'drop-shadow(0 0 8px #ffd700)';
+            }
+            avatarImg.style.border = '3px solid #ffd700';
+            avatarImg.style.boxShadow = '0 0 18px rgba(255,215,0,0.7)';
+        } else if (rank === 2) {
+            if (crownDiv) {
+                crownDiv.style.display = 'block';
+                crownDiv.style.filter = 'drop-shadow(0 0 8px #c0c0c0) brightness(1.3)';
+            }
+            avatarImg.style.border = '3px solid #00e5ff';
+            avatarImg.style.boxShadow = '0 0 18px rgba(0,229,255,0.7)';
+        } else if (rank === 3) {
+            if (crownDiv) {
+                crownDiv.style.display = 'block';
+                crownDiv.style.filter = 'drop-shadow(0 0 8px #cd7f32) sepia(1) hue-rotate(10deg)';
+            }
+            avatarImg.style.border = '3px solid #ff9933';
+            avatarImg.style.boxShadow = '0 0 18px rgba(255,153,51,0.7)';
+        } else {
+            // Rank 4 and below: Hide crown and clear special styling
+            if (crownDiv) {
+                crownDiv.style.display = 'none';
+            }
+            avatarImg.style.border = '3px solid #ffd700'; // fallback border or keep default
+            avatarImg.style.boxShadow = '0 0 18px rgba(255,215,0,0.7)';
+        }
+    }
     
     // Custom image badge data with unique glow colors
     const allBadges = [
@@ -1107,6 +1162,8 @@ window.addEventListener('click', (event) => {
         window.closePlayerProfile();
     }
 });
+
+
 
 
 
