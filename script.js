@@ -298,7 +298,11 @@ try {
 // 2. AUTHENTICATION & @pixvinz.com HANDLERS
 // ==========================================
 
-// Universal Login Handler (Handles @pixvinz.com & Cross-Device Firestore Fetch)
+// ==========================================
+// COMPLETE LOGIN SCRIPT (HANDLER + TOGGLE + LISTENER)
+// ==========================================
+
+// 1. Universal Login Handler (Handles @pixvinz.com & Cross-Device Firestore Fetch)
 async function handleLogin(usernameOrEmail, password) {
     try {
         const email = usernameOrEmail.includes('@') 
@@ -332,6 +336,39 @@ async function handleLogin(usernameOrEmail, password) {
         alert("Login failed: " + error.message);
     }
 }
+
+// 2. Password Toggle & Form Submission Listeners
+document.addEventListener('DOMContentLoaded', () => {
+    // A. Toggle for Login Password Show/Hide
+    const toggleLoginPass = document.getElementById('toggleLoginPass');
+    const loginPass = document.getElementById('loginPass');
+    if (toggleLoginPass && loginPass) {
+        toggleLoginPass.addEventListener('click', () => {
+            if (loginPass.type === 'password') {
+                loginPass.type = 'text';
+                toggleLoginPass.innerText = 'Hide';
+            } else {
+                loginPass.type = 'password';
+                toggleLoginPass.innerText = 'Show';
+            }
+        });
+    }
+
+    // B. Handle Login Form Submit Button Click
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // Stops the page from refreshing
+            const rawUsername = document.getElementById('loginUser').value;
+            const password = document.getElementById('loginPass').value;
+            
+            // Calls the handleLogin function above
+            handleLogin(rawUsername, password);
+        });
+    }
+});
+
+
 
 // Universal Registration Handler (Handles @pixvinz.com & Creates Firestore Record)
 async function handleRegister(rawUsername, password, displayName) {
