@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   });
 
-// --- 1. BULLETPROOF 1% STUCK FIX ---
+// --- 1. BULLETPROOF 1% STUCK FIX & SMOOTH LOADER ---
 try {
     const skipLoading = localStorage.getItem('skipLoading') === 'true';
     const percentageElem = document.getElementById('loadingPercentage');
@@ -173,51 +173,38 @@ try {
             assets.push(`image/level${i}.jpeg`);
         }
 
-        let loadedCount = 0;
-        const totalAssets = assets.length;
+        // Silently preload images in the background so they are cached
+        assets.forEach(src => {
+            const img = new Image();
+            img.src = src;
+        });
 
-        // Immediate force-finish fallback after 2 seconds no matter what
-        const emergencyTimer = setTimeout(() => {
-            if (percentageElem) percentageElem.innerText = '100%';
-            if (barFillElem) barFillElem.style.width = '100%';
-            finishLoadingSafe();
-        }, 2000);
-
-        if (totalAssets === 0) {
-            clearTimeout(emergencyTimer);
+        if (assets.length === 0) {
             finishLoadingSafe();
         } else {
+            let currentPercent = 1;
             if (percentageElem) percentageElem.innerText = '1%';
             if (barFillElem) barFillElem.style.width = '1%';
 
-            assets.forEach(src => {
-                const img = new Image();
-                const markProcessed = () => {
-                    loadedCount++;
-                    let percent = Math.floor((loadedCount / totalAssets) * 100);
-                    if (percent < 1) percent = 1;
+            // Smoothly animate the loading bar like a polished mobile game
+            const loadingInterval = setInterval(() => {
+                currentPercent += 2; // Increases by 2% every tick
+                if (currentPercent > 100) currentPercent = 100;
 
-                    if (percentageElem) percentageElem.innerText = `${percent}%`;
-                    if (barFillElem) barFillElem.style.width = `${percent}%`;
+                if (percentageElem) percentageElem.innerText = `${currentPercent}%`;
+                if (barFillElem) barFillElem.style.width = `${currentPercent}%`;
 
-                    if (loadedCount >= totalAssets) {
-                        clearTimeout(emergencyTimer);
-                        setTimeout(finishLoadingSafe, 150);
-                    }
-                };
-                img.onload = markProcessed;
-                img.onerror = markProcessed;
-                img.src = src;
-            });
+                // Once it hits 100%, finish up and enter the game smoothly
+                if (currentPercent >= 100) {
+                    clearInterval(loadingInterval);
+                    setTimeout(finishLoadingSafe, 300); // Tiny pause at 100%
+                }
+            }, 70); // Adjust this number if you want it slightly faster or slower
         }
     }
-} catch (err) {
-    console.error("Preloader critical error:", err);
-    // Absolute last resort: force home/login view if script crashes
-    document.getElementById('loadingView')?.classList.remove('active');
-    document.getElementById('loginView')?.classList.add('active');
+} catch (e) {
+    console.error("Loading error:", e);
 }
-
   // --- 2. AUTHENTICATION & FORM NAVIGATION ---
   const toRegBtn = document.getElementById('toRegister');
   if (toRegBtn) {
