@@ -141,176 +141,334 @@ document.addEventListener('DOMContentLoaded', () => {
           }
       }
   });
-      
 
+// --- 1. BULLETPROOF 1% STUCK FIX ---
+try {
+    const skipLoading = localStorage.getItem('skipLoading') === 'true';
+    const percentageElem = document.getElementById('loadingPercentage');
+    const barFillElem = document.getElementById('loadingBarFill');
 
- // ==========================================
-// ULTRA-SIMPLE FAILSAFE SCRIPT
-// ==========================================
+    function finishLoadingSafe() {
+        localStorage.removeItem('skipLoading');
+        let loggedInUser = null;
+        try {
+            loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+        } catch (e) {}
 
-// 1. Instant View Switcher & Form Handlers
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM fully loaded and parsed");
-
-    // A. View Switching (Login <-> Register)
-    const toRegisterLink = document.getElementById('toRegister');
-    const toLoginLink = document.getElementById('toLogin');
-
-    if (toRegisterLink) {
-        toRegisterLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (typeof showView === 'function') {
-                showView('registerView');
-            } else {
-                // Fallback manual display toggle if showView function doesn't exist yet
-                document.getElementById('loginView').style.display = 'none';
-                document.getElementById('registerView').style.display = 'block';
-            }
-        });
+        if (loggedInUser) {
+            const nameElem = document.getElementById('userDisplayName');
+            if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
+            if (typeof showView === 'function') showView('home');
+            if (typeof playMainBGM === 'function') playMainBGM();
+        } else {
+            if (typeof showView === 'function') showView('login');
+        }
     }
 
-    if (toLoginLink) {
-        toLoginLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (typeof showView === 'function') {
-                showView('loginView');
-            } else {
-                document.getElementById('registerView').style.display = 'none';
-                document.getElementById('loginView').style.display = 'block';
-            }
-        });
-    }
+    if (skipLoading) {
+        finishLoadingSafe();
+    } else {
+        const assets = [];
+        for (let i = 1; i <= 55; i++) {
+            assets.push(`image/level${i}.jpeg`);
+        }
 
-    // B. Login Password Show/Hide Toggle
-    const toggleLoginPass = document.getElementById('toggleLoginPass');
-    const loginPass = document.getElementById('loginPass');
-    if (toggleLoginPass && loginPass) {
-        toggleLoginPass.addEventListener('click', () => {
-            if (loginPass.type === 'password') {
-                loginPass.type = 'text';
-                toggleLoginPass.innerText = 'Hide';
-            } else {
-                loginPass.type = 'password';
-                toggleLoginPass.innerText = 'Show';
-            }
-        });
-    }
+        let loadedCount = 0;
+        const totalAssets = assets.length;
 
-    // C. Login Form Submission
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const rawUsername = document.getElementById('loginUser').value;
-            const password = document.getElementById('loginPass').value;
-            
-            try {
-                const email = rawUsername.includes('@') ? rawUsername : `${rawUsername.trim().toLowerCase()}@pixvinz.com`;
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const uid = userCredential.user.uid;
+        // Immediate force-finish fallback after 2 seconds no matter what
+        const emergencyTimer = setTimeout(() => {
+            if (percentageElem) percentageElem.innerText = '100%';
+            if (barFillElem) barFillElem.style.width = '100%';
+            finishLoadingSafe();
+        }, 2000);
 
-                const userDocRef = doc(db, "users", uid);
-                const userSnap = await getDoc(userDocRef);
+        if (totalAssets === 0) {
+            clearTimeout(emergencyTimer);
+            finishLoadingSafe();
+        } else {
+            if (percentageElem) percentageElem.innerText = '1%';
+            if (barFillElem) barFillElem.style.width = '1%';
 
-                if (userSnap.exists()) {
-                    const cloudData = userSnap.data();
-                    const userSessionData = {
-                        authUid: uid,
-                        username: cloudData.username || rawUsername,
-                        displayName: cloudData.displayName || 'Vinz',
-                        coins: cloudData.coins || 0,
-                        xp: cloudData.xp || 0,
-                        level: cloudData.level || 1,
-                        avatar: cloudData.avatar || ''
-                    };
-                    localStorage.setItem('loggedInUser', JSON.stringify(userSessionData));
-                }
+            assets.forEach(src => {
+                const img = new Image();
+                const markProcessed = () => {
+                    loadedCount++;
+                    let percent = Math.floor((loadedCount / totalAssets) * 100);
+                    if (percent < 1) percent = 1;
 
-                if (typeof showView === 'function') showView('loadingView');
-            } catch (error) {
-                console.error("Login Error:", error);
-                alert("Login failed: " + error.message);
-            }
-        });
-    }
+                    if (percentageElem) percentageElem.innerText = `${percent}%`;
+                    if (barFillElem) barFillElem.style.width = `${percent}%`;
 
-    // D. Register Password Toggles
-    const toggleRegPass = document.getElementById('toggleRegPass');
-    const regPass = document.getElementById('regPass');
-    if (toggleRegPass && regPass) {
-        toggleRegPass.addEventListener('click', () => {
-            if (regPass.type === 'password') {
-                regPass.type = 'text';
-                toggleRegPass.innerText = 'Hide';
-            } else {
-                regPass.type = 'password';
-                toggleRegPass.innerText = 'Show';
-            }
-        });
-    }
-
-    const toggleRegPassConfirm = document.getElementById('toggleRegPassConfirm');
-    const regPassConfirm = document.getElementById('regPassConfirm');
-    if (toggleRegPassConfirm && regPassConfirm) {
-        toggleRegPassConfirm.addEventListener('click', () => {
-            if (regPassConfirm.type === 'password') {
-                regPassConfirm.type = 'text';
-                toggleRegPassConfirm.innerText = 'Hide';
-            } else {
-                regPassConfirm.type = 'password';
-                toggleRegPassConfirm.innerText = 'Show';
-            }
-        });
-    }
-
-    // E. Register Form Submission
-    const registerForm = document.getElementById('registerForm');
-    if (registerForm) {
-        registerForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const displayName = document.getElementById('regDisplayName').value;
-            const rawUsername = document.getElementById('regUser').value;
-            const password = document.getElementById('regPass').value;
-            const confirmPass = document.getElementById('regPassConfirm').value;
-
-            if (password !== confirmPass) {
-                alert("Passwords do not match!");
-                return;
-            }
-
-            try {
-                const cleanUsername = rawUsername.trim().toLowerCase();
-                const email = `${cleanUsername}@pixvinz.com`;
-
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const uid = userCredential.user.uid;
-
-                const newUserData = {
-                    username: cleanUsername,
-                    displayName: displayName || cleanUsername,
-                    xp: 0,
-                    coins: 0,
-                    avatar: '',
-                    level: 1,
-                    authUid: uid,
-                    createdAt: new Date()
+                    if (loadedCount >= totalAssets) {
+                        clearTimeout(emergencyTimer);
+                        setTimeout(finishLoadingSafe, 150);
+                    }
                 };
-
-                await setDoc(doc(db, "users", uid), newUserData);
-                localStorage.setItem('loggedInUser', JSON.stringify(newUserData));
-                
-                if (typeof showView === 'function') showView('loadingView');
-            } catch (error) {
-                console.error("Registration Error:", error);
-                alert("Sign up failed: " + error.message);
-            }
-        });
+                img.onload = markProcessed;
+                img.onerror = markProcessed;
+                img.src = src;
+            });
+        }
     }
-});
+} catch (err) {
+    console.error("Preloader critical error:", err);
+    // Absolute last resort: force home/login view if script crashes
+    document.getElementById('loadingView')?.classList.remove('active');
+    document.getElementById('loginView')?.classList.add('active');
+}
 
+  // --- 2. AUTHENTICATION & FORM NAVIGATION ---
+  const toRegBtn = document.getElementById('toRegister');
+  if (toRegBtn) {
+    toRegBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      showView('register');
+    });
+  }
 
+  const toLogBtn = document.getElementById('toLogin');
+  if (toLogBtn) {
+    toLogBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      showView('login');
+    });
+  }
+
+  function validateUsernameFormat(username) {
+    const regex = /^(?=.*[0-9])(?=.*[a-z])[a-z0-9]{6,}$/;
+    return regex.test(username);
+  }
+
+  function validatePasswordFormat(password) {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,12}$/;
+    return regex.test(password);
+  }
+
+  const regUserField = document.getElementById('regUser');
+  let usernameIndicator = document.getElementById('regUserIndicator');
+  if (regUserField && !usernameIndicator) {
+    usernameIndicator = document.createElement('span');
+    usernameIndicator.id = 'regUserIndicator';
+    usernameIndicator.style.marginLeft = '8px';
+    regUserField.parentNode.appendChild(usernameIndicator);
+  }
+
+  if (regUserField) {
+    regUserField.addEventListener('input', async () => {
+      const val = regUserField.value.trim().toLowerCase();
+      regUserField.value = val;
+
+      if (!validateUsernameFormat(val)) {
+        usernameIndicator.innerText = '❌ (Min 6 chars, lowercase & number)';
+        usernameIndicator.style.color = '#ff4d4d';
+        return;
+      }
+
+      try {
+        if (window.pixvinzDb) {
+          const { db, doc, getDoc } = window.pixvinzDb;
+          const userDocRef = doc(db, 'players', val);
+          const snap = await getDoc(userDocRef);
+          if (snap.exists()) {
+            usernameIndicator.innerText = '❌ Username already taken!';
+            usernameIndicator.style.color = '#ff4d4d';
+          } else {
+            usernameIndicator.innerText = '✔ Available';
+            usernameIndicator.style.color = '#2ecc71';
+          }
+        } else {
+          usernameIndicator.innerText = '⚠️ Database offline';
+          usernameIndicator.style.color = '#f39c12';
+        }
+      } catch (err) {
+        usernameIndicator.innerText = '✔ Available';
+        usernameIndicator.style.color = '#2ecc71';
+      }
+    });
+  }
+
+  function setupPasswordToggle(passwordInputId, toggleBtnId) {
+    const passInput = document.getElementById(passwordInputId);
+    const toggleBtn = document.getElementById(toggleBtnId);
+    if (passInput && toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        if (passInput.type === 'password') {
+          passInput.type = 'text';
+          toggleBtn.innerText = 'Hide';
+        } else {
+          passInput.type = 'password';
+          toggleBtn.innerText = 'Show';
+        }
+      });
+    }
+  }
+  setupPasswordToggle('regPass', 'toggleRegPass');
+  setupPasswordToggle('loginPass', 'toggleLoginPass');
+
+  const regForm = document.getElementById('registerForm');
+  if (regForm) {
+    regForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+
+      const displayName = document.getElementById('regDisplayName').value.trim();
+      const username = document.getElementById('regUser').value.trim().toLowerCase();
+      const pass = document.getElementById('regPass').value;
+      const passConfirm = document.getElementById('regPassConfirm').value;
+      const errElem = document.getElementById('regError');
+
+      if (!validateUsernameFormat(username)) {
+        if (errElem) errElem.innerText = "Username must be at least 6 characters and contain lowercase letters and numbers!";
+        return;
+      }
+
+      if (!validatePasswordFormat(pass)) {
+        if (errElem) errElem.innerText = "Password must be 6-12 characters and include at least one Uppercase letter, one lowercase letter, and one number!";
+        return;
+      }
+
+      if (pass !== passConfirm) {
+        if (errElem) errElem.innerText = "Passwords do not match!";
+        return;
+      }
+
+      try {
+        if (!window.pixvinzDb) {
+          if (errElem) errElem.innerText = "Database connection not available.";
+          return;
+        }
+
+        const { db, doc, getDoc, setDoc } = window.pixvinzDb;
+        const userDocRef = doc(db, 'players', username);
+        const userSnapshot = await getDoc(userDocRef);
+
+        if (userSnapshot.exists()) {
+          if (errElem) errElem.innerText = "Username is already taken or registered!";
+          return;
+        }
+
+        const dummyEmail = `${username}@pixvinz.com`;
+        let authUid = '';
         
+        const userCredential = await createUserWithEmailAndPassword(auth, dummyEmail, pass);
+        authUid = userCredential.user.uid;
+
+              const displayName = document.getElementById('regDisplayName').value.trim();
+      const username = document.getElementById('regUser').value.trim().toLowerCase();
+      const pass = document.getElementById('regPass').value;
+      const passConfirm = document.getElementById('regPassConfirm').value;
+      const errElem = document.getElementById('regError');
+
+      if (!validateUsernameFormat(username)) {
+        if (errElem) errElem.innerText = "Username must be at least 6 characters and contain lowercase letters and numbers!";
+        return;
+      }
+
+      if (!validatePasswordFormat(pass)) {
+        if (errElem) errElem.innerText = "Password must be 6-12 characters and include at least one Uppercase letter, one lowercase letter, and one number!";
+        return;
+      }
+
+      if (pass !== passConfirm) {
+        if (errElem) errElem.innerText = "Passwords do not match!";
+        return;
+      }
+
+      try {
+        if (!window.pixvinzDb) {
+          if (errElem) errElem.innerText = "Database connection not available.";
+          return;
+        }
+
+        const { db, doc, getDoc, setDoc } = window.pixvinzDb;
+        const userDocRef = doc(db, 'players', username);
+        const userSnapshot = await getDoc(userDocRef);
+
+        if (userSnapshot.exists()) {
+          if (errElem) errElem.innerText = "Username is already taken or registered!";
+          return;
+        }
+
+        const dummyEmail = `${username}@pixvinz.com`;
+        let authUid = '';
         
+        const userCredential = await createUserWithEmailAndPassword(auth, dummyEmail, pass);
+        authUid = userCredential.user.uid;
+
+        const newUserData = {
+          username: username,
+          displayName: displayName,
+          level: 1,
+          xp: 0,
+          coins: 0,
+          avatar: '',
+          password: pass,
+          authUid: authUid,
+          createdAt: new Date()
+        };
+
+        await setDoc(userDocRef, newUserData);
+
+        localStorage.setItem('loggedInUser', JSON.stringify(newUserData));
+        const nameElem = document.getElementById('userDisplayName');
+        if (nameElem) nameElem.innerText = displayName;
+
+        if (errElem) errElem.innerText = "";
+        showView('home');
+        playMainBGM();
+      } catch (err) {
+        if (errElem) errElem.innerText = "Registration error: " + err.message;
+      }
+    });
+  }
+
+  const logForm = document.getElementById('loginForm');
+  if (logForm) {
+    logForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+
+      const username = document.getElementById('loginUser').value.trim().toLowerCase();
+      const pass = document.getElementById('loginPass').value;
+      const errElem = document.getElementById('loginError');
+
+      try {
+        let userData = null;
+        if (window.pixvinzDb) {
+          const { db, doc, getDoc } = window.pixvinzDb;
+          const userDocRef = doc(db, 'players', username);
+          const snap = await getDoc(userDocRef);
+          if (snap.exists()) {
+            userData = snap.data();
+          }
+        } else {
+          if (errElem) errElem.innerText = "Database connection not available.";
+          return;
+        }
+
+        if (userData && userData.password === pass) {
+          localStorage.setItem('loggedInUser', JSON.stringify(userData));
+          const nameElem = document.getElementById('userDisplayName');
+          if (nameElem) nameElem.innerText = userData.displayName;
+          if (errElem) errElem.innerText = "";
+          showView('home');
+          playMainBGM();
+          
+          // Trigger cloud fetch to sync into playerstat.js cache
+          if (typeof fetchUserDataFromFirestore === 'function') {
+              fetchUserDataFromFirestore();
+          }
+        } else {
+          if (errElem) errElem.innerText = "Invalid username or password!";
+        }
+      } catch (err) {
+        if (errElem) errElem.innerText = "Login error occurred.";
+      }
+    });
+  }
 
   const playBtn = document.getElementById('playBtn');
   if (playBtn) {
@@ -1015,5 +1173,4 @@ function initLeaderboardConfetti() {
 document.addEventListener('DOMContentLoaded', () => {
     initLeaderboardConfetti();
 });
-
 
