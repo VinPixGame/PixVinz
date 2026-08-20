@@ -356,52 +356,9 @@ try {
         const userCredential = await createUserWithEmailAndPassword(auth, dummyEmail, pass);
         authUid = userCredential.user.uid;
 
-              const displayName = document.getElementById('regDisplayName').value.trim();
-      const username = document.getElementById('regUser').value.trim().toLowerCase();
-      const pass = document.getElementById('regPass').value;
-      const passConfirm = document.getElementById('regPassConfirm').value;
-      const errElem = document.getElementById('regError');
-
-      if (!validateUsernameFormat(username)) {
-        if (errElem) errElem.innerText = "Username must be at least 6 characters and contain lowercase letters and numbers!";
-        return;
-      }
-
-      if (!validatePasswordFormat(pass)) {
-        if (errElem) errElem.innerText = "Password must be 6-12 characters and include at least one Uppercase letter, one lowercase letter, and one number!";
-        return;
-      }
-
-      if (pass !== passConfirm) {
-        if (errElem) errElem.innerText = "Passwords do not match!";
-        return;
-      }
-
-      try {
-        if (!window.pixvinzDb) {
-          if (errElem) errElem.innerText = "Database connection not available.";
-          return;
-        }
-
-        const { db, doc, getDoc, setDoc } = window.pixvinzDb;
-        const userDocRef = doc(db, 'players', username);
-        const userSnapshot = await getDoc(userDocRef);
-
-        if (userSnapshot.exists()) {
-          if (errElem) errElem.innerText = "Username is already taken or registered!";
-          return;
-        }
-
-        const dummyEmail = `${username}@pixvinz.com`;
-        let authUid = '';
-        
-        const userCredential = await createUserWithEmailAndPassword(auth, dummyEmail, pass);
-        authUid = userCredential.user.uid;
-
         const newUserData = {
           username: username,
           displayName: displayName,
-          level: 1,
           xp: 0,
           coins: 0,
           avatar: '',
