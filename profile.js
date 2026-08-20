@@ -540,10 +540,186 @@ if (saveProfileBtn) {
         try {
             await saveUserDataToCloud();
         } catch (e) {}
-
         setTimeout(() => {
             if (statusEl) statusEl.textContent = '';
             if (editModal) editModal.classList.add('hidden');
         }, 1000);
     });
 }
+
+
+
+
+// --- 7-DAY DAILY CHECK-IN LOGIC ---
+const dailyRewardsData = [
+    { day: 1, coins: 15, xp: 50, label: '15 🪙' },
+    { day: 2, coins: 30, xp: 100, label: '30 🪙' },
+    { day: 3, coins: 50, xp: 150, label: '50 🪙' },
+    { day: 4, coins: 75, xp: 200, label: '75 🪙' },
+    { day: 5, coins: 100, xp: 300, label: '100 🪙' },
+    { day: 6, coins: 150, xp: 400, label: '150 🪙' },
+    { day: 7, coins: 300, xp: 750, label: '300 🪙 🔥' }
+];
+
+function getTodayDateString() {
+    return new Date().toISOString().split('T')[0];
+}
+
+function getYesterdayDateString() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return d.toISOString().split('T')[0];
+}
+
+function checkDailyRewardStatus() {
+    try {
+        const savedData = JSON.parse(localStorage.getItem('pixvinz_daily') || '{}');
+        const today = getTodayDateString();
+        const badge = document.getElementById('dailyNotificationBadge');
+
+        if (savedData.lastClaimDate !== today) {
+            if (badge) badge.style.display = 'inline-block';
+        } else {
+            if (badge) badge.style.display = 'none';
+        }
+    } catch (e) {}
+}
+
+window.openDailyModal = function() {
+    if (typeof AudioManager !== 'undefined' && typeof AudioManager.playClick === 'function') {
+        AudioManager.playClick();
+    }
+    renderDailyGrid();
+    document.getElementById('dailyModal').style.display = 'flex';
+};
+
+window.closeDailyModal = function() {
+    document.getElementById('dailyModal').style.display = 'none';
+};
+
+function renderDailyGrid() {
+    const grid = document.getElementById('dailyRewardsGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    let dailyState = JSON.parse(localStorage.getItem('pixvinz_daily') || '{"streak": 0, "lastClaimDate": ""}');
+    const today = getTodayDateString();
+    const yesterday = getYesterdayDateString();
+
+    // If user missed a day (last claim was older than yesterday), reset streak to 0
+    if (dailyState.lastClaimDate && dailyState.lastClaimDate !== today && dailyState.lastClaimDate !== yesterday) {
+        dailyState.streak = 0;
+    }
+
+    const hasClaimedToday = dailyState.lastClaimDate === today;
+    const currentDayIndex = hasClaimedToday ? dailyState.streak : dailyState.streak + 1;
+
+    dailyRewardsData.forEach((item) => {
+        const isCompleted = item.day <= dailyState.streak;
+        const isCurrent = item.day === currentDayIndex && !hasClaimedToday;
+
+        let boxBg = 'rgba(255,255,255,0.03)';
+        let borderColor = 'rgba(255,215,0,0.2)';
+        let textColor = '#aaa';
+
+        if (isCompleted) {
+            boxBg = 'rgba(0, 229, 255, 0.1)';
+            borderColor = '#00e5ff';
+            textColor = '#00e5ff';
+        } else if (isCurrent) {
+            boxBg = 'rgba(255, 215, 0, 0.15)';
+            borderColor = '#ffd700';
+            textColor = '#ffd700';
+        }
+
+        const card = document.createElement('div');
+        card.style.cssText = `
+            background: ${boxBg};
+            border: 2px solid ${borderColor};
+            border-radius: 12px;
+            padding: 10px 4px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        `;
+
+        card.innerHTML = `
+            <span style="font-size: 10px; font-weight: bold; color: ${textColor}; margin-bottom: 4px;">DAY ${item.day}</span>
+            <span style="font-size: 14px; margin-bottom: 4px;">🎁</span>
+            <span style="font-size: 11px; font-weight: 800; color: #fff;">${item.label}</span>
+            ${isCompleted ? '<span style="position: absolute; top: 4px; right: 4px; font-size: 10px;">✅</span>' : ''}
+        `;
+        grid.appendChild(card);
+    });
+
+    const claimBtn = document.getElementById('dailyClaimBtn');
+    if (claimBtn) {
+        if (hasClaimedToday) {
+            claimBtn.textContent = 'ALREADY CLAIMED TODAY ✓';
+            claimBtn.style.background = 'rgba(255,255,255,0.1)';
+            claimBtn.style.color = '#777';
+            claimBtn.style.cursor = 'not-allowed';
+            claimBtn.disabled = true;
+        } else {
+            claimBtn.textContent = `CLAIM DAY ${currentDayIndex} REWARD`;
+            claimBtn.style.background = 'linear-gradient(135deg, #ffd700, #ffaa00)';
+            claimBtn.style.color = '#130f2b';
+            claimBtn.style.cursor = 'pointer';
+            claimBtn.disabled = false;
+        }
+    }
+}
+
+window.claimDailyReward = async function() {
+    let dailyState = JSON.parse(localStorage.getItem('pixvinz_daily') || '{"streak": 0, "lastClaimDate": ""}');
+    const today = getTodayDateString();
+    
+    if (dailyState.lastClaimDate === today) return;
+
+    // Advance streak (loop back to 1 if past day 7)
+    let nextStreak = dailyState.streak + 1;
+    if (nextStreak > 7) nextStreak = 1;
+
+    const reward = dailyRewardsData[nextStreak - 1];
+
+    // Update local user object coins & XP
+    try {
+        let userObj = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+        userObj.coins = (userObj.coins || 0) + reward.coins;
+        userObj.xp = (userObj.xp || 0) + reward.xp;
+        localStorage.setItem('loggedInUser', JSON.stringify(userObj));
+    } catch (e) {}
+
+    // Save daily state
+    dailyState.streak = nextStreak;
+    dailyState.lastClaimDate = today;
+    localStorage.setItem('pixvinz_daily', JSON.stringify(dailyState));
+
+    // Sync to cloud Firestore if function exists
+    if (typeof saveUserDataToCloud === 'function') {
+        await saveUserDataToCloud();
+    }
+
+    // Refresh UI
+    renderDailyGrid();
+    checkDailyRewardStatus();
+
+    // Trigger profile update if function exists
+    if (typeof updateProfileUI === 'function') {
+        updateProfileUI();
+    }
+
+    alert(`🎉 Successfully claimed Day ${nextStreak} Reward!\n+${reward.coins} Coins & +${reward.xp} XP`);
+};
+
+// Check badge status on load
+document.addEventListener('DOMContentLoaded', () => {
+    checkDailyRewardStatus();
+});
+
+
+
+
