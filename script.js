@@ -142,84 +142,74 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   });
 
-// --- 1. CLOUD-FIRST LOADING SCREEN ---
+// --- TRUE CLOUD-FIRST LOADING SCREEN (NO SKIPPING) ---
 try {
-    const skipLoading = localStorage.getItem('skipLoading') === 'true';
     const percentageElem = document.getElementById('loadingPercentage');
     const barFillElem = document.getElementById('loadingBarFill');
 
-    function finishLoadingSafe() {
-        localStorage.removeItem('skipLoading');
-        let loggedInUser = null;
-        try {
-            loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-        } catch (e) {}
+    // 1. Initialize progress bar at 1%
+    let currentPercent = 1;
+    if (percentageElem) percentageElem.innerText = '1%';
+    if (barFillElem) barFillElem.style.width = '1%';
 
-        if (loggedInUser) {
-            const nameElem = document.getElementById('userDisplayName');
-            if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
+    // 2. Smoothly crawl up to 85% while waiting for Firestore to respond
+    const loadingInterval = setInterval(() => {
+        if (currentPercent < 85) {
+            currentPercent += 2;
+            if (percentageElem) percentageElem.innerText = `${currentPercent}%`;
+            if (barFillElem) barFillElem.style.width = `${currentPercent}%`;
+        }
+    }, 60);
+
+    // 3. FORCE fetch from Firestore FIRST before touching local storage or UI
+    (async () => {
+        try {
+            if (typeof fetchUserDataFromFirestore === 'function') {
+                // This waits for the cloud data and updates localStorage with fresh stats
+                await fetchUserDataFromFirestore();
+            } else {
+                console.warn("fetchUserDataFromFirestore function is missing!");
+            }
+
+            // 4. Once cloud data is 100% secured, finish the loading bar
+            clearInterval(loadingInterval);
+            currentPercent = 100;
+            if (percentageElem) percentageElem.innerText = '100%';
+            if (barFillElem) barFillElem.style.width = '100%';
+
+            // 5. Brief pause at 100% so you can see it, then launch into the game
+            setTimeout(() => {
+                let loggedInUser = null;
+                try {
+                    loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
+                } catch (e) {}
+
+                if (loggedInUser) {
+                    const nameElem = document.getElementById('userDisplayName');
+                    if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
+                    
+                    // Refresh all displays with the brand new cloud data
+                    if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+                    
+                    if (typeof showView === 'function') showView('home');
+                    if (typeof playMainBGM === 'function') playMainBGM();
+                } else {
+                    if (typeof showView === 'function') showView('login');
+                }
+            }, 400);
+
+        } catch (err) {
+            console.error("Critical Cloud Fetch Error:", err);
+            clearInterval(loadingInterval);
             
-            // Refresh displays with the fresh cloud data
-            if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
-            
-            if (typeof showView === 'function') showView('home');
-            if (typeof playMainBGM === 'function') playMainBGM();
-        } else {
+            // Fallback if offline
             if (typeof showView === 'function') showView('login');
         }
-    }
+    })();
 
-    if (skipLoading) {
-        finishLoadingSafe();
-    } else {
-        let currentPercent = 1;
-        if (percentageElem) percentageElem.innerText = '1%';
-        if (barFillElem) barFillElem.style.width = '1%';
-
-        // 1. Visually crawl up to 40% while preparing
-        const loadingInterval = setInterval(() => {
-            if (currentPercent < 40) {
-                currentPercent += 5;
-                if (percentageElem) percentageElem.innerText = `${currentPercent}%`;
-                if (barFillElem) barFillElem.style.width = `${currentPercent}%`;
-            }
-        }, 40);
-
-        // 2. Actually FETCH from Firestore FIRST before moving forward
-        (async () => {
-            try {
-                if (typeof fetchUserDataFromFirestore === 'function') {
-                    // This pauses the loading sequence until Firebase responds with fresh data
-                    await fetchUserDataFromFirestore(); 
-                }
-                
-                // Once Firestore data is safely saved to localStorage, crawl the rest of the way to 100%
-                clearInterval(loadingInterval);
-                
-                let finishPercent = currentPercent;
-                const finishInterval = setInterval(() => {
-                    finishPercent += 10;
-                    if (finishPercent > 100) finishPercent = 100;
-
-                    if (percentageElem) percentageElem.innerText = `${finishPercent}%`;
-                    if (barFillElem) barFillElem.style.width = `${finishPercent}%`;
-
-                    if (finishPercent >= 100) {
-                        clearInterval(finishInterval);
-                        setTimeout(finishLoadingSafe, 250);
-                    }
-                }, 30);
-
-            } catch (err) {
-                console.warn("Firestore fetch failed during load, using local cache as fallback:", err);
-                clearInterval(loadingInterval);
-                finishLoadingSafe();
-            }
-        })();
-    }
 } catch (e) {
-    console.error("Loading error:", e);
-}
+    console.error("Loading script error:", e);
+                }
 
   
   // --- 2. AUTHENTICATION & FORM NAVIGATION ---
