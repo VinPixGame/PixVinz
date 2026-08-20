@@ -142,80 +142,72 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   });
 
-// --- 1. BULLETPROOF 1% STUCK FIX ---
-try {
-    const skipLoading = localStorage.getItem('skipLoading') === 'true';
-    const percentageElem = document.getElementById('loadingPercentage');
-    const barFillElem = document.getElementById('loadingBarFill');
+// --- 1. LOADING SCREEN & ROBUST 55-IMAGE PRELOADER ---
+const skipLoading = localStorage.getItem('skipLoading') === 'true';
+const percentageElem = document.getElementById('loadingPercentage');
+const barFillElem = document.getElementById('loadingBarFill');
 
-    function finishLoadingSafe() {
-        localStorage.removeItem('skipLoading');
-        let loggedInUser = null;
-        try {
-            loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
-        } catch (e) {}
+function finishLoading() {
+    localStorage.removeItem('skipLoading');
+    const loggedInUser = getCurrentUser();
+    if (loggedInUser) {
+        const nameElem = document.getElementById('userDisplayName');
+        if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
+        showView('home');
+        if (typeof playMainBGM === 'function') playMainBGM();
+    } else {
+        showView('login');
+    }
+}
 
-        if (loggedInUser) {
-            const nameElem = document.getElementById('userDisplayName');
-            if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
-            if (typeof showView === 'function') showView('home');
-            if (typeof playMainBGM === 'function') playMainBGM();
-        } else {
-            if (typeof showView === 'function') showView('login');
-        }
+if (skipLoading) {
+    finishLoading();
+} else {
+    // Preload only your 55 available image files
+    const assets = [];
+    for (let i = 1; i <= 55; i++) {
+        assets.push(`image/level${i}.jpeg`);
     }
 
-    if (skipLoading) {
-        finishLoadingSafe();
+    let loadedCount = 0;
+    const totalAssets = assets.length;
+
+    if (totalAssets === 0) {
+        finishLoading();
     } else {
-        const assets = [];
-        for (let i = 1; i <= 55; i++) {
-            assets.push(`image/level${i}.jpeg`);
-        }
+        if (percentageElem) percentageElem.innerText = '1%';
+        if (barFillElem) barFillElem.style.width = '1%';
 
-        let loadedCount = 0;
-        const totalAssets = assets.length;
-
-        // Immediate force-finish fallback after 2 seconds no matter what
-        const emergencyTimer = setTimeout(() => {
+        // Safety fallback timeout to prevent hanging on mobile networks
+        const safetyTimeout = setTimeout(() => {
             if (percentageElem) percentageElem.innerText = '100%';
             if (barFillElem) barFillElem.style.width = '100%';
-            finishLoadingSafe();
-        }, 2000);
+            setTimeout(finishLoading, 200);
+        }, 4000);
 
-        if (totalAssets === 0) {
-            clearTimeout(emergencyTimer);
-            finishLoadingSafe();
-        } else {
-            if (percentageElem) percentageElem.innerText = '1%';
-            if (barFillElem) barFillElem.style.width = '1%';
+        assets.forEach(src => {
+            const img = new Image();
+            const markProcessed = () => {
+                loadedCount++;
+                let percent = Math.floor((loadedCount / totalAssets) * 100);
+                if (percent < 1) percent = 1;
 
-            assets.forEach(src => {
-                const img = new Image();
-                const markProcessed = () => {
-                    loadedCount++;
-                    let percent = Math.floor((loadedCount / totalAssets) * 100);
-                    if (percent < 1) percent = 1;
+                if (percentageElem) percentageElem.innerText = `${percent}%`;
+                if (barFillElem) barFillElem.style.width = `${percent}%`;
 
-                    if (percentageElem) percentageElem.innerText = `${percent}%`;
-                    if (barFillElem) barFillElem.style.width = `${percent}%`;
+                if (loadedCount === totalAssets) {
+                    clearTimeout(safetyTimeout);
+                    setTimeout(() => {
+                        finishLoading();
+                    }, 600);
+                }
+            };
 
-                    if (loadedCount >= totalAssets) {
-                        clearTimeout(emergencyTimer);
-                        setTimeout(finishLoadingSafe, 150);
-                    }
-                };
-                img.onload = markProcessed;
-                img.onerror = markProcessed;
-                img.src = src;
-            });
-        }
+            img.onload = markProcessed;
+            img.onerror = markProcessed;
+            img.src = src;
+        });
     }
-} catch (err) {
-    console.error("Preloader critical error:", err);
-    // Absolute last resort: force home/login view if script crashes
-    document.getElementById('loadingView')?.classList.remove('active');
-    document.getElementById('loginView')?.classList.add('active');
 }
 
   // --- 2. AUTHENTICATION & FORM NAVIGATION ---
@@ -356,55 +348,13 @@ try {
         const userCredential = await createUserWithEmailAndPassword(auth, dummyEmail, pass);
         authUid = userCredential.user.uid;
 
-              const displayName = document.getElementById('regDisplayName').value.trim();
-      const username = document.getElementById('regUser').value.trim().toLowerCase();
-      const pass = document.getElementById('regPass').value;
-      const passConfirm = document.getElementById('regPassConfirm').value;
-      const errElem = document.getElementById('regError');
-
-      if (!validateUsernameFormat(username)) {
-        if (errElem) errElem.innerText = "Username must be at least 6 characters and contain lowercase letters and numbers!";
-        return;
-      }
-
-      if (!validatePasswordFormat(pass)) {
-        if (errElem) errElem.innerText = "Password must be 6-12 characters and include at least one Uppercase letter, one lowercase letter, and one number!";
-        return;
-      }
-
-      if (pass !== passConfirm) {
-        if (errElem) errElem.innerText = "Passwords do not match!";
-        return;
-      }
-
-      try {
-        if (!window.pixvinzDb) {
-          if (errElem) errElem.innerText = "Database connection not available.";
-          return;
-        }
-
-        const { db, doc, getDoc, setDoc } = window.pixvinzDb;
-        const userDocRef = doc(db, 'players', username);
-        const userSnapshot = await getDoc(userDocRef);
-
-        if (userSnapshot.exists()) {
-          if (errElem) errElem.innerText = "Username is already taken or registered!";
-          return;
-        }
-
-        const dummyEmail = `${username}@pixvinz.com`;
-        let authUid = '';
-        
-        const userCredential = await createUserWithEmailAndPassword(auth, dummyEmail, pass);
-        authUid = userCredential.user.uid;
-
         const newUserData = {
           username: username,
           displayName: displayName,
-          level: 1,
           xp: 0,
           coins: 0,
           avatar: '',
+          level: 1,
           password: pass,
           authUid: authUid,
           createdAt: new Date()
@@ -1173,4 +1123,5 @@ function initLeaderboardConfetti() {
 document.addEventListener('DOMContentLoaded', () => {
     initLeaderboardConfetti();
 });
+
 
