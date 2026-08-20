@@ -98,6 +98,12 @@
         <button class="btn btn-primary" id="playBtn">▶ PLAY</button>
       </div>
 
+    <!-- Daily Check-in Home Button -->
+      <button onclick="openDailyModal()" style="width: 100%; max-width: 320px; margin: 10px auto; padding: 12px 20px; background: linear-gradient(135deg, #ff007f, #7928ca); border: 2px solid #ff75a0; border-radius: 16px; color: #fff; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 0 15px rgba(255,117,160,0.4); transition: all 0.2s;">
+      <span>🎁</span> DAILY REWARDS <span id="dailyNotificationBadge" style="background: #ffd700; color: #130f2b; font-size: 10px; padding: 2px 6px; border-radius: 10px; display: none;">NEW!</span>
+  </button>
+
+      
       <!-- Challenge 1v1 Active Menu Card -->
       <div class="card menu-card" id="navChallenge">
         <div class="card-icon">⚔️</div>
@@ -313,6 +319,28 @@
     </div>
 </div>
 
+       <!-- Daily Check-in Modal -->
+<div id="dailyModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.88); z-index: 1000; justify-content: center; align-items: center; padding: 15px;">
+    <div style="background: linear-gradient(135deg, #130f2b, #090618); border: 2px solid #ffd700; border-radius: 26px; padding: 22px 18px; width: 94%; max-width: 420px; text-align: center; position: relative; box-shadow: 0 0 35px rgba(255,215,0,0.5), inset 0 0 20px rgba(255,215,0,0.15);">
+        
+        <!-- Close Button -->
+        <button onclick="closeDailyModal()" style="position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,215,0,0.3); color: #fff; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center;">✕</button>
+        
+        <!-- Header -->
+        <h3 style="color: #ffd700; margin: 6px 0 4px 0; font-size: 22px; font-weight: 800; text-shadow: 0 0 10px rgba(255,215,0,0.6);">📅 DAILY REWARDS</h3>
+        <p style="color: #bbb; font-size: 12px; margin-bottom: 16px;">Log in every day to claim bigger prizes!</p>
+
+        <!-- 7 Days Grid Container -->
+        <div id="dailyRewardsGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 18px;">
+        </div>
+
+        <!-- Claim Button -->
+        <button id="dailyClaimBtn" onclick="claimDailyReward()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #ffd700, #ffaa00); border: none; border-radius: 14px; font-weight: 900; color: #130f2b; font-size: 16px; cursor: pointer; box-shadow: 0 0 18px rgba(255,215,0,0.6); transition: all 0.2s;">CLAIM REWARD</button>
+    </div>
+</div>
+
+
+    
 <!-- PROFILE PAGE VIEW -->
 <section id="profileView" class="view hidden">
   <div class="profile-container">
