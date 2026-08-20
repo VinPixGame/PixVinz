@@ -131,11 +131,11 @@ async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeSt
 
     // Trigger profile.js cloud sync function if it exists
     if (typeof saveUserDataToCloud === 'function') {
-        await saveUserDataToCloud();
+         saveUserDataToCloud();
     }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
     updateCoinDisplay();
-    await fetchUserDataFromFirestore();
+  await   fetchUserDataFromFirestore();
 });
