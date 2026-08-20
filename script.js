@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   });
 
-// --- TRUE CLOUD-FIRST LOADING SCREEN (NO SKIPPING) ---
+// --- TRUE CLOUD-FIRST LOADING SCREEN (WITH AVATAR & STATS) ---
 try {
     const percentageElem = document.getElementById('loadingPercentage');
     const barFillElem = document.getElementById('loadingBarFill');
@@ -185,9 +185,16 @@ try {
                 } catch (e) {}
 
                 if (loggedInUser) {
+                    // Update Display Name
                     const nameElem = document.getElementById('userDisplayName');
                     if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
                     
+                    // Update Avatar using your exact HTML ID: avatar-preview
+                    const avatarPreviewElem = document.getElementById('avatar-preview');
+                    if (avatarPreviewElem && loggedInUser.avatar) {
+                        avatarPreviewElem.src = loggedInUser.avatar;
+                    }
+
                     // Refresh all displays with the brand new cloud data
                     if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
                     
@@ -209,7 +216,8 @@ try {
 
 } catch (e) {
     console.error("Loading script error:", e);
-                }
+}
+
 
   
   // --- 2. AUTHENTICATION & FORM NAVIGATION ---
