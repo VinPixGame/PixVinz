@@ -11,10 +11,8 @@
 <body>
   <div class="app-container">
 
-<!-- ========================================== -->
-<!-- 1. LOGIN PAGE HTML                         -->
-<!-- ========================================== -->
-<section id="loginView" class="view">
+<!-- 2. LOGIN PAGE -->
+<section id="loginView" class="view" style="display: block;">
   <div class="auth-card">
     <h2>LOG IN</h2>
     <form id="loginForm">
@@ -35,22 +33,17 @@
       <button type="submit" class="btn btn-primary" style="margin-top: 5px; width: 100%; padding: 12px;">LOG IN</button>
     </form>
     
-    <!-- Larger, Clickable Register Link -->
     <p class="auth-switch" style="text-align: center; margin-top: 20px; color: #b19cd9; font-size: 1rem;">
         Don't have an account? <a href="#" id="toRegister" style="color: #ffeb3b; font-weight: bold; font-size: 1.15rem; text-decoration: underline; margin-left: 5px;">Register</a>
     </p>
   </div>
 </section>
 
-
-<!-- ========================================== -->
-<!-- 2. REGISTER PAGE HTML                      -->
-<!-- ========================================== -->
+<!-- 3. REGISTER PAGE -->
 <section id="registerView" class="view" style="display: none;">
   <div class="auth-card">
     <h2>CREATE ACCOUNT</h2>
     <form id="registerForm">
-      
       <div class="input-group" style="margin-bottom: 15px;">
         <input type="text" id="regDisplayName" placeholder="Display Name (e.g. Vinz)" required style="width: 100%; padding: 12px; background: rgba(42, 17, 71, 0.8); border: 1px solid rgba(156, 39, 176, 0.4); border-radius: 10px; color: #fff; font-size: 1rem; outline: none; box-sizing: border-box;">
       </div>
@@ -78,13 +71,11 @@
       <button type="submit" class="btn btn-primary" style="margin-top: 5px; width: 100%; padding: 12px;">REGISTER</button>
     </form>
     
-    <!-- Larger, Clickable Log In Link -->
     <p class="auth-switch" style="text-align: center; margin-top: 20px; color: #b19cd9; font-size: 1rem;">
         Already have an account? <a href="#" id="toLogin" style="color: #ffeb3b; font-weight: bold; font-size: 1.15rem; text-decoration: underline; margin-left: 5px;">Log In</a>
     </p>
   </div>
 </section>
-
 
     
     
