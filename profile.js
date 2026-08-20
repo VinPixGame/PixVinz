@@ -22,6 +22,9 @@ function goHome() {
     
     if (typeof showView === 'function') {
         showView('home');
+        updateProfileUI();
+    fetchUserDataFromFirestore()
+        
     } else {
         const homeViewElement = document.getElementById('homeView') || window.parent.document.getElementById('homeView');
         if (homeViewElement && typeof window.parent.showView === 'function') {
@@ -68,6 +71,80 @@ async function saveUserDataToCloud() {
         console.warn("Cloud sync skipped or failed safely:", error);
     }
 }
+
+function updateProfileUI() {
+    const user = getCurrentUser(); // gets the latest data from localStorage
+    if (!user) return;
+
+    // Update Display Name
+    document.querySelectorAll('#userDisplayName').forEach(el => {
+        el.innerText = user.displayName || user.username || 'Vinz';
+    });
+
+    // Update XP
+    document.querySelectorAll('#userXp, .user-xp').forEach(el => {
+        el.innerText = user.xp || 0;
+    });
+
+    // Update Coins
+    document.querySelectorAll('#userCoins, .user-coins').forEach(el => {
+        el.innerText = user.coins || 0;
+    });
+
+    // Update Level
+    document.querySelectorAll('#userLevel, .user-level').forEach(el => {
+        el.innerText = user.level || 1;
+    });
+
+    // Update Avatar
+    document.querySelectorAll('#userAvatar, .user-avatar').forEach(el => {
+        if (user.avatar) el.src = user.avatar;
+    });
+}
+
+
+async function fetchUserDataFromFirestore() {
+    // Get current user session from local storage to find their unique ID
+    const currentUser = JSON.parse(localStorage.getItem('loggedInUser'));
+    if (!currentUser || !currentUser.authUid) return;
+
+    try {
+        // Ensure Firestore functions are available
+        if (typeof db !== 'undefined' && typeof doc === 'function' && typeof getDoc === 'function') {
+            const userDocRef = doc(db, "users", currentUser.authUid);
+            const userSnap = await getDoc(userDocRef);
+
+            if (userSnap.exists()) {
+                const cloudData = userSnap.data();
+                
+                // Merge cloud data with local session
+                const updatedUser = {
+                    ...currentUser,
+                    username: cloudData.username || currentUser.username,
+                    displayName: cloudData.displayName || currentUser.displayName,
+                    coins: cloudData.coins !== undefined ? cloudData.coins : currentUser.coins,
+                    xp: cloudData.xp !== undefined ? cloudData.xp : currentUser.xp,
+                    level: cloudData.level !== undefined ? cloudData.level : currentUser.level,
+                    avatar: cloudData.avatar || currentUser.avatar
+                };
+                
+                // Save fresh data back to local storage
+                localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
+                
+                // Instantly update the screen so the user sees correct stats
+                if (typeof updateProfileUI === 'function') {
+                    updateProfileUI();
+                }
+                
+                console.log("Profile successfully synced from Firestore!");
+            }
+        }
+    } catch (err) {
+        console.error("Failed to fetch data from Firestore:", err);
+    }
+}
+
+
 
 function applyAvatarToUI(avatarData) {
     const avatarLoader = document.getElementById('avatarLoader');
