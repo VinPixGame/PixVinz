@@ -144,179 +144,183 @@ document.addEventListener('DOMContentLoaded', () => {
       
 
 
+window.addEventListener('load', () => {
+    console.log("App loaded successfully. Initializing...");
 
-                // ==========================================
-// 1. BULLETPROOF CLOUD LOADING SCREEN SCRIPT
-// ==========================================
-try {
-    const percentageElem = document.getElementById('loadingPercentage');
-    const barFillElem = document.getElementById('loadingBarFill');
+    // ==========================================
+    // 1. BULLETPROOF CLOUD LOADING SCREEN SCRIPT
+    // ==========================================
+    try {
+        const percentageElem = document.getElementById('loadingPercentage');
+        const barFillElem = document.getElementById('loadingBarFill');
 
-    let currentPercent = 1;
-    if (percentageElem) percentageElem.innerText = '1%';
-    if (barFillElem) barFillElem.style.width = '1%';
+        let currentPercent = 1;
+        if (percentageElem) percentageElem.innerText = '1%';
+        if (barFillElem) barFillElem.style.width = '1%';
 
-    const loadingInterval = setInterval(() => {
-        if (currentPercent < 90) {
-            currentPercent += 3;
-            if (percentageElem) percentageElem.innerText = `${currentPercent}%`;
-            if (barFillElem) barFillElem.style.width = `${currentPercent}%`;
-        }
-    }, 40);
-
-    const safetyTimeout = setTimeout(() => {
-        finishLoadingAndEnterGame();
-    }, 3000);
-
-    (async () => {
-        try {
-            let localUser = null;
-            try {
-                localUser = JSON.parse(localStorage.getItem('loggedInUser'));
-            } catch (e) {}
-
-            const firebaseAuth = window.auth || (typeof auth !== 'undefined' ? auth : null);
-            const firebaseDb = window.db || (typeof db !== 'undefined' ? db : null);
-            
-            const currentUser = firebaseAuth && firebaseAuth.currentUser ? firebaseAuth.currentUser : null;
-            const uid = currentUser ? currentUser.uid : (localUser ? localUser.authUid : null);
-
-            if (uid && firebaseDb && typeof doc === 'function' && typeof getDoc === 'function') {
-                const userDocRef = doc(firebaseDb, "users", uid);
-                const userSnap = await getDoc(userDocRef);
-
-                if (userSnap.exists()) {
-                    const cloudData = userSnap.data();
-                    const updatedUser = {
-                        ...(localUser || {}),
-                        authUid: uid,
-                        username: cloudData.username || localUser?.username || '',
-                        displayName: cloudData.displayName || localUser?.displayName || 'Vinz',
-                        coins: cloudData.coins !== undefined ? cloudData.coins : (localUser?.coins || 0),
-                        xp: cloudData.xp !== undefined ? cloudData.xp : (localUser?.xp || 0),
-                        level: cloudData.level !== undefined ? cloudData.level : (localUser?.level || 1),
-                        avatar: cloudData.avatar || localUser?.avatar || ''
-                    };
-                    localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
-                }
+        const loadingInterval = setInterval(() => {
+            if (currentPercent < 90) {
+                currentPercent += 3;
+                if (percentageElem) percentageElem.innerText = `${currentPercent}%`;
+                if (barFillElem) barFillElem.style.width = `${currentPercent}%`;
             }
-        } catch (err) {
-            console.warn("Cloud fetch skipped/failed, using local cache:", err);
-        } finally {
-            clearTimeout(safetyTimeout);
+        }, 40);
+
+        const safetyTimeout = setTimeout(() => {
             finishLoadingAndEnterGame();
-        }
-    })();
+        }, 3000);
 
-    function finishLoadingAndEnterGame() {
-        clearInterval(loadingInterval);
-        currentPercent = 100;
-        if (percentageElem) percentageElem.innerText = '100%';
-        if (barFillElem) barFillElem.style.width = '100%';
-
-        setTimeout(() => {
-            let finalUser = null;
+        (async () => {
             try {
-                finalUser = JSON.parse(localStorage.getItem('loggedInUser'));
-            } catch (e) {}
+                let localUser = null;
+                try {
+                    localUser = JSON.parse(localStorage.getItem('loggedInUser'));
+                } catch (e) {}
 
-            if (finalUser) {
-                const nameElem = document.getElementById('userDisplayName');
-                if (nameElem) nameElem.innerText = finalUser.displayName || 'Vinz';
+                const firebaseAuth = window.auth || (typeof auth !== 'undefined' ? auth : null);
+                const firebaseDb = window.db || (typeof db !== 'undefined' ? db : null);
                 
-                const avatarPreviewElem = document.getElementById('avatar-preview');
-                if (avatarPreviewElem && finalUser.avatar) {
-                    avatarPreviewElem.src = finalUser.avatar;
+                const currentUser = firebaseAuth && firebaseAuth.currentUser ? firebaseAuth.currentUser : null;
+                const uid = currentUser ? currentUser.uid : (localUser ? localUser.authUid : null);
+
+                if (uid && firebaseDb && typeof doc === 'function' && typeof getDoc === 'function') {
+                    const userDocRef = doc(firebaseDb, "users", uid);
+                    const userSnap = await getDoc(userDocRef);
+
+                    if (userSnap.exists()) {
+                        const cloudData = userSnap.data();
+                        const updatedUser = {
+                            ...(localUser || {}),
+                            authUid: uid,
+                            username: cloudData.username || localUser?.username || '',
+                            displayName: cloudData.displayName || localUser?.displayName || 'Vinz',
+                            coins: cloudData.coins !== undefined ? cloudData.coins : (localUser?.coins || 0),
+                            xp: cloudData.xp !== undefined ? cloudData.xp : (localUser?.xp || 0),
+                            level: cloudData.level !== undefined ? cloudData.level : (localUser?.level || 1),
+                            avatar: cloudData.avatar || localUser?.avatar || ''
+                        };
+                        localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
+                    }
                 }
-
-                if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
-                if (typeof showView === 'function') showView('home');
-                if (typeof playMainBGM === 'function') playMainBGM();
-            } else {
-                if (typeof showView === 'function') showView('loginView');
+            } catch (err) {
+                console.warn("Cloud fetch skipped/failed, using local cache:", err);
+            } finally {
+                clearTimeout(safetyTimeout);
+                finishLoadingAndEnterGame();
             }
-        }, 300);
-    }
+        })();
 
-} catch (e) {
-    console.error("Loading script error:", e);
-    if (typeof showView === 'function') showView('loginView');
-}
+        function finishLoadingAndEnterGame() {
+            clearInterval(loadingInterval);
+            currentPercent = 100;
+            if (percentageElem) percentageElem.innerText = '100%';
+            if (barFillElem) barFillElem.style.width = '100%';
 
+            setTimeout(() => {
+                let finalUser = null;
+                try {
+                    finalUser = JSON.parse(localStorage.getItem('loggedInUser'));
+                } catch (e) {}
 
-// ==========================================
-// 2. AUTHENTICATION & VIEW SWITCHING SCRIPT
-// ==========================================
+                if (finalUser) {
+                    const nameElem = document.getElementById('userDisplayName');
+                    if (nameElem) nameElem.innerText = finalUser.displayName || 'Vinz';
+                    
+                    const avatarPreviewElem = document.getElementById('avatar-preview');
+                    if (avatarPreviewElem && finalUser.avatar) {
+                        avatarPreviewElem.src = finalUser.avatar;
+                    }
 
-// Universal Login Handler
-async function handleLogin(usernameOrEmail, password) {
-    try {
-        const email = usernameOrEmail.includes('@') 
-            ? usernameOrEmail 
-            : `${usernameOrEmail.trim().toLowerCase()}@pixvinz.com`;
-
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const uid = userCredential.user.uid;
-
-        const userDocRef = doc(db, "users", uid);
-        const userSnap = await getDoc(userDocRef);
-
-        if (userSnap.exists()) {
-            const cloudData = userSnap.data();
-            const userSessionData = {
-                authUid: uid,
-                username: cloudData.username || usernameOrEmail,
-                displayName: cloudData.displayName || 'Vinz',
-                coins: cloudData.coins || 0,
-                xp: cloudData.xp || 0,
-                level: cloudData.level || 1,
-                avatar: cloudData.avatar || ''
-            };
-            localStorage.setItem('loggedInUser', JSON.stringify(userSessionData));
+                    if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+                    if (typeof showView === 'function') showView('home');
+                    if (typeof playMainBGM === 'function') playMainBGM();
+                } else {
+                    if (typeof showView === 'function') showView('loginView');
+                }
+            }, 300);
         }
 
-        if (typeof showView === 'function') showView('loadingView');
-
-    } catch (error) {
-        console.error("Login Error:", error);
-        alert("Login failed: " + error.message);
+    } catch (e) {
+        console.error("Loading script error:", e);
+        if (typeof showView === 'function') showView('loginView');
     }
-}
 
-// Universal Registration Handler
-async function handleRegister(rawUsername, password, displayName) {
-    try {
-        const cleanUsername = rawUsername.trim().toLowerCase();
-        const email = `${cleanUsername}@pixvinz.com`;
 
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const uid = userCredential.user.uid;
+    // ==========================================
+    // 2. AUTHENTICATION & VIEW SWITCHING SCRIPT
+    // ==========================================
 
-        const newUserData = {
-            username: cleanUsername,
-            displayName: displayName || cleanUsername,
-            xp: 0,
-            coins: 0,
-            avatar: '',
-            level: 1,
-            authUid: uid,
-            createdAt: new Date()
-        };
+    window.handleLogin = async function(usernameOrEmail, password) {
+        try {
+            const email = usernameOrEmail.includes('@') 
+                ? usernameOrEmail 
+                : `${usernameOrEmail.trim().toLowerCase()}@pixvinz.com`;
 
-        await setDoc(doc(db, "users", uid), newUserData);
-        localStorage.setItem('loggedInUser', JSON.stringify(newUserData));
-        
-        if (typeof showView === 'function') showView('loadingView');
+            const activeAuth = window.auth || auth;
+            const activeDb = window.db || db;
 
-    } catch (error) {
-        console.error("Registration Error:", error);
-        alert("Sign up failed: " + error.message);
-    }
-}
+            const userCredential = await signInWithEmailAndPassword(activeAuth, email, password);
+            const uid = userCredential.user.uid;
 
-// DOM Event Listeners (Forms, Toggles, and View Switchers)
-document.addEventListener('DOMContentLoaded', () => {
-    // A. View Switching (Login <-> Register)
+            const userDocRef = doc(activeDb, "users", uid);
+            const userSnap = await getDoc(userDocRef);
+
+            if (userSnap.exists()) {
+                const cloudData = userSnap.data();
+                const userSessionData = {
+                    authUid: uid,
+                    username: cloudData.username || usernameOrEmail,
+                    displayName: cloudData.displayName || 'Vinz',
+                    coins: cloudData.coins || 0,
+                    xp: cloudData.xp || 0,
+                    level: cloudData.level || 1,
+                    avatar: cloudData.avatar || ''
+                };
+                localStorage.setItem('loggedInUser', JSON.stringify(userSessionData));
+            }
+
+            if (typeof showView === 'function') showView('loadingView');
+
+        } catch (error) {
+            console.error("Login Error:", error);
+            alert("Login failed: " + error.message);
+        }
+    };
+
+    window.handleRegister = async function(rawUsername, password, displayName) {
+        try {
+            const cleanUsername = rawUsername.trim().toLowerCase();
+            const email = `${cleanUsername}@pixvinz.com`;
+
+            const activeAuth = window.auth || auth;
+            const activeDb = window.db || db;
+
+            const userCredential = await createUserWithEmailAndPassword(activeAuth, email, password);
+            const uid = userCredential.user.uid;
+
+            const newUserData = {
+                username: cleanUsername,
+                displayName: displayName || cleanUsername,
+                xp: 0,
+                coins: 0,
+                avatar: '',
+                level: 1,
+                authUid: uid,
+                createdAt: new Date()
+            };
+
+            await setDoc(doc(activeDb, "users", uid), newUserData);
+            localStorage.setItem('loggedInUser', JSON.stringify(newUserData));
+            
+            if (typeof showView === 'function') showView('loadingView');
+
+        } catch (error) {
+            console.error("Registration Error:", error);
+            alert("Sign up failed: " + error.message);
+        }
+    };
+
+    // UI Event Listeners
     const toRegisterLink = document.getElementById('toRegister');
     const toLoginLink = document.getElementById('toLogin');
 
@@ -334,7 +338,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // B. Login Password Show/Hide Toggle
     const toggleLoginPass = document.getElementById('toggleLoginPass');
     const loginPass = document.getElementById('loginPass');
     if (toggleLoginPass && loginPass) {
@@ -349,7 +352,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // C. Login Form Submission
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
@@ -360,7 +362,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // D. Register Passwords Show/Hide Toggles
     const toggleRegPass = document.getElementById('toggleRegPass');
     const regPass = document.getElementById('regPass');
     if (toggleRegPass && regPass) {
@@ -389,7 +390,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // E. Register Form Submission
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', (e) => {
@@ -408,6 +408,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+
+        
+        
 
   const playBtn = document.getElementById('playBtn');
   if (playBtn) {
