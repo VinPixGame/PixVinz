@@ -11,74 +11,71 @@
 <body>
   <div class="app-container">
 
-<!-- 2. LOGIN PAGE -->
-<section id="loginView" class="view" style="display: block;">
-  <div class="auth-card">
-    <h2>LOG IN</h2>
-    <form id="loginForm">
-      
-      <!-- Username Input with Pre-loaded @pixvinz.com Suffix -->
-      <div class="input-group" style="display: flex; align-items: center; background: rgba(42, 17, 71, 0.8); border: 1px solid rgba(156, 39, 176, 0.4); border-radius: 10px; overflow: hidden; position: relative; margin-bottom: 15px;">
-        <input type="text" id="loginUser" placeholder="Username" required style="flex: 1; background: transparent; border: none; padding: 12px; color: #fff; font-size: 1rem; outline: none;">
-        <span style="padding: 0 12px; color: #b19cd9; font-size: 0.95rem; font-weight: 600; user-select: none; background: rgba(0,0,0,0.2); line-height: 44px; white-space: nowrap;">@pixvinz.com</span>
+<!-- 1. LOADING SCREEN -->
+    <section id="loadingView" class="view active">
+      <div class="loading-content">
+        <video id="loadingLogo" autoplay loop muted playsinline preload="auto" style="background: transparent;">
+          <source src="image/logo.webm" type="video/webm">
+        </video>
+        <div class="loading-container" style="width: 80%; max-width: 280px; margin-top: 20px; text-align: center;">
+          <div id="loadingPercentage" style="color: #ffd700; font-weight: bold; font-size: 1.1rem; margin-bottom: 8px; font-family: 'Segoe UI', sans-serif;">1%</div>
+          <div class="loading-track" style="width: 100%; height: 10px; background: rgba(42, 17, 71, 0.8); border-radius: 10px; overflow: hidden; border: 1px solid rgba(156, 39, 176, 0.4); box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);">
+            <div id="loadingBarFill" style="width: 1%; height: 100%; background: linear-gradient(90deg, #9c27b0, #00f2fe); border-radius: 10px; box-shadow: 0 0 10px #00f2fe; transition: width 0.1s linear;"></div>
+          </div>
+        </div>
       </div>
+    </section>
 
-      <!-- Password Field with Show/Hide Button -->
-      <div class="input-group" style="position: relative; margin-bottom: 15px;">
-        <input type="password" id="loginPass" placeholder="Password" required style="width: 100%; padding: 12px; padding-right: 60px; background: rgba(42, 17, 71, 0.8); border: 1px solid rgba(156, 39, 176, 0.4); border-radius: 10px; color: #fff; font-size: 1rem; outline: none; box-sizing: border-box;">
-        <button type="button" id="toggleLoginPass" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #b388ff; font-weight: bold; font-size: 0.85rem; padding: 5px;">Show</button>
+    <!-- 2. LOGIN PAGE -->
+    <section id="loginView" class="view">
+      <div class="auth-card">
+        <div class="auth-logo">
+          <video autoplay loop muted playsinline preload="auto" style="background: transparent;">
+            <source src="image/logo.webm" type="video/webm">
+          </video>
+        </div>
+        <h2>LOG IN</h2>
+        <form id="loginForm">
+          <div class="input-group">
+            <input type="text" id="loginUser" placeholder="Username (min 6 chars, lowercase & number)" required>
+          </div>
+          <div class="input-group" style="position: relative;">
+            <input type="password" id="loginPass" placeholder="Password" required>
+            <button type="button" id="toggleLoginPass" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #b388ff; font-weight: bold; font-size: 0.85rem;">Show</button>
+          </div>
+          <p id="loginError" class="auth-error"></p>
+          <button type="submit" class="btn btn-primary">LOG IN</button>
+        </form>
+        <p class="auth-switch">Don't have an account? <a href="#" id="toRegister">Create Account</a></p>
       </div>
+    </section>
 
-      <p id="loginError" class="auth-error"></p>
-      <button type="submit" class="btn btn-primary" style="margin-top: 5px; width: 100%; padding: 12px;">LOG IN</button>
-    </form>
-    
-    <p class="auth-switch" style="text-align: center; margin-top: 20px; color: #b19cd9; font-size: 1rem;">
-        Don't have an account? <a href="#" id="toRegister" style="color: #ffeb3b; font-weight: bold; font-size: 1.15rem; text-decoration: underline; margin-left: 5px;">Register</a>
-    </p>
-  </div>
-</section>
-
-<!-- 3. REGISTER PAGE -->
-<section id="registerView" class="view" style="display: none;">
-  <div class="auth-card">
-    <h2>CREATE ACCOUNT</h2>
-    <form id="registerForm">
-      <div class="input-group" style="margin-bottom: 15px;">
-        <input type="text" id="regDisplayName" placeholder="Display Name (e.g. Vinz)" required style="width: 100%; padding: 12px; background: rgba(42, 17, 71, 0.8); border: 1px solid rgba(156, 39, 176, 0.4); border-radius: 10px; color: #fff; font-size: 1rem; outline: none; box-sizing: border-box;">
+    <!-- 3. REGISTER PAGE -->
+    <section id="registerView" class="view">
+      <div class="auth-card">
+        <h2>CREATE ACCOUNT</h2>
+        <form id="registerForm">
+          <div class="input-group">
+            <input type="text" id="regDisplayName" placeholder="Display Name (e.g. Vinz)" required>
+          </div>
+          <div class="input-group" style="position: relative;">
+            <input type="text" id="regUser" placeholder="Username (min 6 chars, lowercase & number)" required>
+            <span id="regUserIndicator" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.85rem; font-weight: bold;"></span>
+          </div>
+          <div class="input-group" style="position: relative;">
+            <input type="password" id="regPass" placeholder="Password (6-12 chars, Aa1)" required>
+            <button type="button" id="toggleRegPass" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #b388ff; font-weight: bold; font-size: 0.85rem;">Show</button>
+          </div>
+          <div class="input-group">
+            <input type="password" id="regPassConfirm" placeholder="Repeat Password" required>
+          </div>
+          <p id="regError" class="auth-error"></p>
+          <button type="submit" class="btn btn-primary">REGISTER</button>
+        </form>
+        <p class="auth-switch">Already have an account? <a href="#" id="toLogin">Log In</a></p>
       </div>
-      
-      <!-- Username Input with Pre-loaded @pixvinz.com Suffix -->
-      <div class="input-group" style="display: flex; align-items: center; background: rgba(42, 17, 71, 0.8); border: 1px solid rgba(156, 39, 176, 0.4); border-radius: 10px; overflow: hidden; position: relative; margin-bottom: 15px;">
-        <input type="text" id="regUser" placeholder="Username (min 6 chars)" required style="flex: 1; background: transparent; border: none; padding: 12px; color: #fff; font-size: 1rem; outline: none;">
-        <span style="padding: 0 12px; color: #b19cd9; font-size: 0.95rem; font-weight: 600; user-select: none; background: rgba(0,0,0,0.2); line-height: 44px; white-space: nowrap;">@pixvinz.com</span>
-        <span id="regUserIndicator" style="position: absolute; right: 130px; top: 50%; transform: translateY(-50%); font-size: 0.85rem; font-weight: bold;"></span>
-      </div>
+    </section>
 
-      <!-- Password Field with Show/Hide Button -->
-      <div class="input-group" style="position: relative; margin-bottom: 15px;">
-        <input type="password" id="regPass" placeholder="Password (6-12 chars, Aa1)" required style="width: 100%; padding: 12px; padding-right: 60px; background: rgba(42, 17, 71, 0.8); border: 1px solid rgba(156, 39, 176, 0.4); border-radius: 10px; color: #fff; font-size: 1rem; outline: none; box-sizing: border-box;">
-        <button type="button" id="toggleRegPass" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #b388ff; font-weight: bold; font-size: 0.85rem; padding: 5px;">Show</button>
-      </div>
-
-      <!-- Repeat Password Field with Show/Hide Button -->
-      <div class="input-group" style="position: relative; margin-bottom: 15px;">
-        <input type="password" id="regPassConfirm" placeholder="Repeat Password" required style="width: 100%; padding: 12px; padding-right: 60px; background: rgba(42, 17, 71, 0.8); border: 1px solid rgba(156, 39, 176, 0.4); border-radius: 10px; color: #fff; font-size: 1rem; outline: none; box-sizing: border-box;">
-        <button type="button" id="toggleRegPassConfirm" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #b388ff; font-weight: bold; font-size: 0.85rem; padding: 5px;">Show</button>
-      </div>
-
-      <p id="regError" class="auth-error"></p>
-      <button type="submit" class="btn btn-primary" style="margin-top: 5px; width: 100%; padding: 12px;">REGISTER</button>
-    </form>
-    
-    <p class="auth-switch" style="text-align: center; margin-top: 20px; color: #b19cd9; font-size: 1rem;">
-        Already have an account? <a href="#" id="toLogin" style="color: #ffeb3b; font-weight: bold; font-size: 1.15rem; text-decoration: underline; margin-left: 5px;">Log In</a>
-    </p>
-  </div>
-</section>
-
-    
-    
     <!-- Top Header Bar -->
     <header class="top-bar hidden" id="mainHeader">
       <button class="icon-btn" id="profileHeaderBtn" onclick="showView('profileView')" style="background-color: #2a1147; border: 2px solid #9c27b0; overflow: hidden; padding: 0;">
