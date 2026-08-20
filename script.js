@@ -142,14 +142,42 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   });
 
-// --- 1. LOADING SCREEN & ROBUST 55-IMAGE PRELOADER ---
+// --- 1. LOADING SCREEN & 6-SECOND GUARANTEED PRELOADER ---
 const skipLoading = localStorage.getItem('skipLoading') === 'true';
 const percentageElem = document.getElementById('loadingPercentage');
 const barFillElem = document.getElementById('loadingBarFill');
 
-function finishLoading() {
+async function finishLoading() {
     localStorage.removeItem('skipLoading');
-    const loggedInUser = getCurrentUser();
+    
+    let loggedInUser = getCurrentUser();
+    
+    // Fetch latest progress from Firestore in the background
+    if (loggedInUser && loggedInUser.authUid) {
+        try {
+            if (typeof db !== 'undefined' && typeof doc === 'function' && typeof getDoc === 'function') {
+                const userDocRef = doc(db, "users", loggedInUser.authUid);
+                const userSnap = await getDoc(userDocRef);
+
+                if (userSnap.exists()) {
+                    const cloudData = userSnap.data();
+                    loggedInUser = {
+                        ...loggedInUser,
+                        username: cloudData.username || loggedInUser.username,
+                        displayName: cloudData.displayName || loggedInUser.displayName,
+                        coins: cloudData.coins !== undefined ? cloudData.coins : loggedInUser.coins,
+                        xp: cloudData.xp !== undefined ? cloudData.xp : loggedInUser.xp,
+                        level: cloudData.level !== undefined ? cloudData.level : loggedInUser.level,
+                        avatar: cloudData.avatar || loggedInUser.avatar
+                    };
+                    localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+                }
+            }
+        } catch (err) {
+            console.warn("Could not fetch latest cloud data, using local cache:", err);
+        }
+    }
+
     if (loggedInUser) {
         const nameElem = document.getElementById('userDisplayName');
         if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
@@ -163,7 +191,6 @@ function finishLoading() {
 if (skipLoading) {
     finishLoading();
 } else {
-    // Preload only your 55 available image files
     const assets = [];
     for (let i = 1; i <= 55; i++) {
         assets.push(`image/level${i}.jpeg`);
@@ -171,43 +198,53 @@ if (skipLoading) {
 
     let loadedCount = 0;
     const totalAssets = assets.length;
+    const startTime = Date.now();
+    const minLoadingTime = 6000; // Exactly 6 seconds (6000 milliseconds)
 
-    if (totalAssets === 0) {
-        finishLoading();
-    } else {
-        if (percentageElem) percentageElem.innerText = '1%';
-        if (barFillElem) barFillElem.style.width = '1%';
+    if (percentageElem) percentageElem.innerText = '1%';
+    if (barFillElem) barFillElem.style.width = '1%';
 
-        // Safety fallback timeout to prevent hanging on mobile networks
-        const safetyTimeout = setTimeout(() => {
+    // Helper to check if both assets are loaded AND 6 seconds have passed
+    const checkCompletion = () => {
+        const elapsedTime = Date.now() - startTime;
+        const assetsDone = (totalAssets === 0) || (loadedCount >= totalAssets);
+
+        // Calculate progress percentage based on time OR assets, whichever is smoother
+        let timePercent = Math.floor((elapsedTime / minLoadingTime) * 100);
+        let assetPercent = totalAssets > 0 ? Math.floor((loadedCount / totalAssets) * 100) : 100;
+        let percent = Math.min(timePercent, assetPercent);
+        if (percent < 1) percent = 1;
+        if (percent > 100) percent = 100;
+
+        if (percentageElem) percentageElem.innerText = `${percent}%`;
+        if (barFillElem) barFillElem.style.width = `${percent}%`;
+
+        // Only finish when 6 seconds have elapsed AND images are ready
+        if (elapsedTime >= minLoadingTime && assetsDone) {
             if (percentageElem) percentageElem.innerText = '100%';
             if (barFillElem) barFillElem.style.width = '100%';
             setTimeout(finishLoading, 200);
-        }, 4000);
+        } else {
+            // Keep checking frequently until criteria are met
+            setTimeout(checkCompletion, 100);
+        }
+    };
 
+    // Start tracking asset loads
+    if (totalAssets > 0) {
         assets.forEach(src => {
             const img = new Image();
             const markProcessed = () => {
                 loadedCount++;
-                let percent = Math.floor((loadedCount / totalAssets) * 100);
-                if (percent < 1) percent = 1;
-
-                if (percentageElem) percentageElem.innerText = `${percent}%`;
-                if (barFillElem) barFillElem.style.width = `${percent}%`;
-
-                if (loadedCount === totalAssets) {
-                    clearTimeout(safetyTimeout);
-                    setTimeout(() => {
-                        finishLoading();
-                    }, 600);
-                }
             };
-
             img.onload = markProcessed;
             img.onerror = markProcessed;
             img.src = src;
         });
     }
+
+    // Kick off the smooth 6-second timer loop
+    setTimeout(checkCompletion, 100);
 }
 
   // --- 2. AUTHENTICATION & FORM NAVIGATION ---
