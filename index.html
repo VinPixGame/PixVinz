@@ -277,12 +277,12 @@
 
         <!-- Exit / Close Button -->
         <button onclick="closePlayerProfile()" style="position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,215,0,0.3); color: #fff; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">✕</button>
-        
-        <!-- Crown & Avatar Wrapper -->
-        <div style="position: relative; width: 80px; height: 80px; margin: 12px auto 8px auto; display: flex; align-items: center; justify-content: center;">
-            <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 24px; z-index: 3; filter: drop-shadow(0 0 8px #ffd700);">👑</div>
-            <img id="profileModalAvatar" src="" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #ffd700; box-shadow: 0 0 18px rgba(255,215,0,0.7); position: relative; z-index: 2;">
-        </div>
+    
+      <!-- Crown & Avatar Wrapper -->
+<div style="position: relative; width: 80px; height: 80px; margin: 12px auto 8px auto; display: flex; align-items: center; justify-content: center;">
+    <div id="profileModalCrown" style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 24px; z-index: 3; display: none;">👑</div>
+    <img id="profileModalAvatar" src="" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; position: relative; z-index: 2;">
+</div>
         
         <!-- Display Name -->
         <h3 id="profileModalName" style="color: #fff; margin: 6px 0 14px 0; font-size: 20px; font-weight: 800; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Player Name</h3>
