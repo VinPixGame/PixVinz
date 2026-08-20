@@ -144,68 +144,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   
-// --- SELF-CONTAINED CLOUD LOADING SCREEN ---
-try {
-    const percentageElem = document.getElementById('loadingPercentage');
-    const barFillElem = document.getElementById('loadingBarFill');
 
-    // 1. Initialize progress bar at 1%
-    let currentPercent = 1;
-    if (percentageElem) percentageElem.innerText = '1%';
-    if (barFillElem) barFillElem.style.width = '1%';
 
-    // 2. Smoothly crawl up to 80% while waiting for Firestore
-    const loadingInterval = setInterval(() => {
-        if (currentPercent < 80) {
-            currentPercent += 2;
-            if (percentageElem) percentageElem.innerText = `${currentPercent}%`;
-            if (barFillElem) barFillElem.style.width = `${barFillElem}%` || `${currentPercent}%`;
-        }
-    }, 60);
-
-    // 3. Directly fetch from Firestore
-    (async () => {
-        try {
-            // Find who is logged in locally to get their ID/email
-            let localUser = null;
-            try {
-                localUser = JSON.parse(localStorage.getItem('loggedInUser'));
-            } catch (e) {}
-
-            // Check if Firebase Auth has a current user, or if we have an identifier
-            const currentUser = window.auth ? window.auth.currentUser : null;
-            const uid = currentUser ? currentUser.uid : (localUser ? localUser.authUid : null);
-
-            if (uid && window.db && typeof window.doc === 'function' && typeof window.getDoc === 'function') {
-                // Fetch user document from Firestore (adjust 'users' if your collection name is different)
-                const userDocRef = window.doc(window.db, "users", uid);
-                const userSnap = await window.getDoc(userDocRef);
-
-                if (userSnap.exists()) {
-                    const cloudData = userSnap.data();
-
-                    // Merge fresh cloud data with local user object
-                    const updatedUser = {
-                        ...(localUser || {}),
-                        displayName: cloudData.displayName || localUser?.displayName || 'Vinz',
-                        username: cloudData.username || localUser?.username || '',
-                        coins: cloudData.coins !== undefined ? cloudData.coins : (localUser?.coins || 0),
-                        xp: cloudData.xp !== undefined ? cloudData.xp : (localUser?.xp || 0),
-                        level: cloudData.level !== undefined ? cloudData.level : (localUser?.level || 1),
-                        avatar: cloudData.avatar || localUser?.avatar || '',
-                        authUid: uid
-                    };
-
-                    // Save fresh data to localStorage
-                    localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
-                }
-            }
-
-            // 4. Finish the loading bar to 100%
-            clearInterval(loadingInterval);
-            currentPercent = 100;
-            if (percentageElem) percentageElem.innerText = '100%';
-            if (barFillElem) barFillElem.style.width = '100%';
+             
+.style.width = '100%';
 
             // 5. Apply everything to the UI and enter the game
             setTimeout(() => {
@@ -249,215 +191,217 @@ try {
 }
 
   
-  // --- 2. AUTHENTICATION & FORM NAVIGATION ---
-  const toRegBtn = document.getElementById('toRegister');
-  if (toRegBtn) {
-    toRegBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      showView('register');
-    });
-  }
+// ==========================================
+// 1. TRUE CLOUD-FIRST LOADING SCREEN SCRIPT
+// ==========================================
+try {
+    const percentageElem = document.getElementById('loadingPercentage');
+    const barFillElem = document.getElementById('loadingBarFill');
 
-  const toLogBtn = document.getElementById('toLogin');
-  if (toLogBtn) {
-    toLogBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      showView('login');
-    });
-  }
+    // Initialize progress bar at 1%
+    let currentPercent = 1;
+    if (percentageElem) percentageElem.innerText = '1%';
+    if (barFillElem) barFillElem.style.width = '1%';
 
-  function validateUsernameFormat(username) {
-    const regex = /^(?=.*[0-9])(?=.*[a-z])[a-z0-9]{6,}$/;
-    return regex.test(username);
-  }
-
-  function validatePasswordFormat(password) {
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,12}$/;
-    return regex.test(password);
-  }
-
-  const regUserField = document.getElementById('regUser');
-  let usernameIndicator = document.getElementById('regUserIndicator');
-  if (regUserField && !usernameIndicator) {
-    usernameIndicator = document.createElement('span');
-    usernameIndicator.id = 'regUserIndicator';
-    usernameIndicator.style.marginLeft = '8px';
-    regUserField.parentNode.appendChild(usernameIndicator);
-  }
-
-  if (regUserField) {
-    regUserField.addEventListener('input', async () => {
-      const val = regUserField.value.trim().toLowerCase();
-      regUserField.value = val;
-
-      if (!validateUsernameFormat(val)) {
-        usernameIndicator.innerText = '❌ (Min 6 chars, lowercase & number)';
-        usernameIndicator.style.color = '#ff4d4d';
-        return;
-      }
-
-      try {
-        if (window.pixvinzDb) {
-          const { db, doc, getDoc } = window.pixvinzDb;
-          const userDocRef = doc(db, 'players', val);
-          const snap = await getDoc(userDocRef);
-          if (snap.exists()) {
-            usernameIndicator.innerText = '❌ Username already taken!';
-            usernameIndicator.style.color = '#ff4d4d';
-          } else {
-            usernameIndicator.innerText = '✔ Available';
-            usernameIndicator.style.color = '#2ecc71';
-          }
-        } else {
-          usernameIndicator.innerText = '⚠️ Database offline';
-          usernameIndicator.style.color = '#f39c12';
+    // Smoothly crawl up to 85% while waiting for Firestore to respond
+    const loadingInterval = setInterval(() => {
+        if (currentPercent < 85) {
+            currentPercent += 2;
+            if (percentageElem) percentageElem.innerText = `${currentPercent}%`;
+            if (barFillElem) barFillElem.style.width = `${currentPercent}%`;
         }
-      } catch (err) {
-        usernameIndicator.innerText = '✔ Available';
-        usernameIndicator.style.color = '#2ecc71';
-      }
-    });
-  }
+    }, 60);
 
-  function setupPasswordToggle(passwordInputId, toggleBtnId) {
-    const passInput = document.getElementById(passwordInputId);
-    const toggleBtn = document.getElementById(toggleBtnId);
-    if (passInput && toggleBtn) {
-      toggleBtn.addEventListener('click', () => {
-        if (passInput.type === 'password') {
-          passInput.type = 'text';
-          toggleBtn.innerText = 'Hide';
-        } else {
-          passInput.type = 'password';
-          toggleBtn.innerText = 'Show';
+    // Force fetch from Firestore first before opening the game
+    (async () => {
+        try {
+            // Find who is logged in locally to get their identifier/UID
+            let localUser = null;
+            try {
+                localUser = JSON.parse(localStorage.getItem('loggedInUser'));
+            } catch (e) {}
+
+            const currentUser = window.auth && window.auth.currentUser ? window.auth.currentUser : null;
+            const uid = currentUser ? currentUser.uid : (localUser ? localUser.authUid : null);
+
+            if (uid && window.db && typeof window.doc === 'function' && typeof window.getDoc === 'function') {
+                const userDocRef = window.doc(window.db, "users", uid);
+                const userSnap = await window.getDoc(userDocRef);
+
+                if (userSnap.exists()) {
+                    const cloudData = userSnap.data();
+
+                    // Merge fresh cloud data with local user object (guarantees cross-device sync)
+                    const updatedUser = {
+                        ...(localUser || {}),
+                        authUid: uid,
+                        username: cloudData.username || localUser?.username || '',
+                        displayName: cloudData.displayName || localUser?.displayName || 'Vinz',
+                        coins: cloudData.coins !== undefined ? cloudData.coins : (localUser?.coins || 0),
+                        xp: cloudData.xp !== undefined ? cloudData.xp : (localUser?.xp || 0),
+                        level: cloudData.level !== undefined ? cloudData.level : (localUser?.level || 1),
+                        avatar: cloudData.avatar || localUser?.avatar || ''
+                    };
+
+                    localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
+                }
+            }
+
+            // Once cloud data is secured, finish the loading bar to 100%
+            clearInterval(loadingInterval);
+            currentPercent = 100;
+            if (percentageElem) percentageElem.innerText = '100%';
+            if (barFillElem) barFillElem.style.width = '100%';
+
+            // Launch into the game smoothly
+            setTimeout(() => {
+                let finalUser = null;
+                try {
+                    finalUser = JSON.parse(localStorage.getItem('loggedInUser'));
+                } catch (e) {}
+
+                if (finalUser) {
+                    // Update Display Name
+                    const nameElem = document.getElementById('userDisplayName');
+                    if (nameElem) nameElem.innerText = finalUser.displayName || 'Vinz';
+                    
+                    // Update Avatar across browsers and devices using your exact HTML ID
+                    const avatarPreviewElem = document.getElementById('avatar-preview');
+                    if (avatarPreviewElem && finalUser.avatar) {
+                        avatarPreviewElem.src = finalUser.avatar;
+                    }
+
+                    // Refresh coins and stats display
+                    if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+                    
+                    // Enter home view safely (Prevents back-button logout bugs)
+                    if (typeof showView === 'function') showView('home');
+                    if (typeof playMainBGM === 'function') playMainBGM();
+                } else {
+                    if (typeof showView === 'function') showView('login');
+                }
+            }, 400);
+
+        } catch (err) {
+            console.error("Critical Cloud Fetch Error:", err);
+            clearInterval(loadingInterval);
+            if (typeof showView === 'function') showView('login');
         }
-      });
+    })();
+
+} catch (e) {
+    console.error("Loading script error:", e);
+}
+
+
+// ==========================================
+// 2. AUTHENTICATION & @pixvinz.com HANDLERS
+// ==========================================
+
+// Universal Login Handler (Handles @pixvinz.com & Cross-Device Firestore Fetch)
+async function handleLogin(usernameOrEmail, password) {
+    try {
+        const email = usernameOrEmail.includes('@') 
+            ? usernameOrEmail 
+            : `${usernameOrEmail.trim().toLowerCase()}@pixvinz.com`;
+
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const uid = userCredential.user.uid;
+
+        const userDocRef = doc(db, "users", uid);
+        const userSnap = await getDoc(userDocRef);
+
+        if (userSnap.exists()) {
+            const cloudData = userSnap.data();
+            const userSessionData = {
+                authUid: uid,
+                username: cloudData.username || usernameOrEmail,
+                displayName: cloudData.displayName || 'Vinz',
+                coins: cloudData.coins || 0,
+                xp: cloudData.xp || 0,
+                level: cloudData.level || 1,
+                avatar: cloudData.avatar || ''
+            };
+            localStorage.setItem('loggedInUser', JSON.stringify(userSessionData));
+        }
+
+        if (typeof showView === 'function') showView('loadingView');
+
+    } catch (error) {
+        console.error("Login Error:", error);
+        alert("Login failed: " + error.message);
     }
-  }
-  setupPasswordToggle('regPass', 'toggleRegPass');
-  setupPasswordToggle('loginPass', 'toggleLoginPass');
+}
 
-  const regForm = document.getElementById('registerForm');
-  if (regForm) {
-    regForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+// Universal Registration Handler (Handles @pixvinz.com & Creates Firestore Record)
+async function handleRegister(rawUsername, password, displayName) {
+    try {
+        const cleanUsername = rawUsername.trim().toLowerCase();
+        const email = `${cleanUsername}@pixvinz.com`;
 
-      const displayName = document.getElementById('regDisplayName').value.trim();
-      const username = document.getElementById('regUser').value.trim().toLowerCase();
-      const pass = document.getElementById('regPass').value;
-      const passConfirm = document.getElementById('regPassConfirm').value;
-      const errElem = document.getElementById('regError');
-
-      if (!validateUsernameFormat(username)) {
-        if (errElem) errElem.innerText = "Username must be at least 6 characters and contain lowercase letters and numbers!";
-        return;
-      }
-
-      if (!validatePasswordFormat(pass)) {
-        if (errElem) errElem.innerText = "Password must be 6-12 characters and include at least one Uppercase letter, one lowercase letter, and one number!";
-        return;
-      }
-
-      if (pass !== passConfirm) {
-        if (errElem) errElem.innerText = "Passwords do not match!";
-        return;
-      }
-
-      try {
-        if (!window.pixvinzDb) {
-          if (errElem) errElem.innerText = "Database connection not available.";
-          return;
-        }
-
-        const { db, doc, getDoc, setDoc } = window.pixvinzDb;
-        const userDocRef = doc(db, 'players', username);
-        const userSnapshot = await getDoc(userDocRef);
-
-        if (userSnapshot.exists()) {
-          if (errElem) errElem.innerText = "Username is already taken or registered!";
-          return;
-        }
-
-        const dummyEmail = `${username}@pixvinz.com`;
-        let authUid = '';
-        
-        const userCredential = await createUserWithEmailAndPassword(auth, dummyEmail, pass);
-        authUid = userCredential.user.uid;
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const uid = userCredential.user.uid;
 
         const newUserData = {
-          username: username,
-          displayName: displayName,
-          xp: 0,
-          coins: 0,
-          avatar: '',
-          level: 1,
-          password: pass,
-          authUid: authUid,
-          createdAt: new Date()
+            username: cleanUsername,
+            displayName: displayName || cleanUsername,
+            xp: 0,
+            coins: 0,
+            avatar: '',
+            level: 1,
+            authUid: uid,
+            createdAt: new Date()
         };
 
-        await setDoc(userDocRef, newUserData);
-
+        await setDoc(doc(db, "users", uid), newUserData);
         localStorage.setItem('loggedInUser', JSON.stringify(newUserData));
-        const nameElem = document.getElementById('userDisplayName');
-        if (nameElem) nameElem.innerText = displayName;
+        
+        if (typeof showView === 'function') showView('loadingView');
 
-        if (errElem) errElem.innerText = "";
-        showView('home');
-        playMainBGM();
-      } catch (err) {
-        if (errElem) errElem.innerText = "Registration error: " + err.message;
-      }
-    });
-  }
+    } catch (error) {
+        console.error("Registration Error:", error);
+        alert("Sign up failed: " + error.message);
+    }
+}
 
-  const logForm = document.getElementById('loginForm');
-  if (logForm) {
-    logForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
 
-      const username = document.getElementById('loginUser').value.trim().toLowerCase();
-      const pass = document.getElementById('loginPass').value;
-      const errElem = document.getElementById('loginError');
+// ==========================================
+// 3. SHOW / HIDE PASSWORD TOGGLES
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Toggle for Password
+    const toggleRegPass = document.getElementById('toggleRegPass');
+    const regPass = document.getElementById('regPass');
+    if (toggleRegPass && regPass) {
+        toggleRegPass.addEventListener('click', () => {
+            if (regPass.type === 'password') {
+                regPass.type = 'text';
+                toggleRegPass.innerText = 'Hide';
+            } else {
+                regPass.type = 'password';
+                toggleRegPass.innerText = 'Show';
+            }
+        });
+    }
 
-      try {
-        let userData = null;
-        if (window.pixvinzDb) {
-          const { db, doc, getDoc } = window.pixvinzDb;
-          const userDocRef = doc(db, 'players', username);
-          const snap = await getDoc(userDocRef);
-          if (snap.exists()) {
-            userData = snap.data();
-          }
-        } else {
-          if (errElem) errElem.innerText = "Database connection not available.";
-          return;
-        }
+    // Toggle for Repeat Password
+    const toggleRegPassConfirm = document.getElementById('toggleRegPassConfirm');
+    const regPassConfirm = document.getElementById('regPassConfirm');
+    if (toggleRegPassConfirm && regPassConfirm) {
+        toggleRegPassConfirm.addEventListener('click', () => {
+            if (regPassConfirm.type === 'password') {
+                regPassConfirm.type = 'text';
+                toggleRegPassConfirm.innerText = 'Hide';
+            } else {
+                regPassConfirm.type = 'password';
+                toggleRegPassConfirm.innerText = 'Show';
+            }
+        });
+    }
+});
 
-        if (userData && userData.password === pass) {
-          localStorage.setItem('loggedInUser', JSON.stringify(userData));
-          const nameElem = document.getElementById('userDisplayName');
-          if (nameElem) nameElem.innerText = userData.displayName;
-          if (errElem) errElem.innerText = "";
-          showView('home');
-          playMainBGM();
-          
-          // Trigger cloud fetch to sync into playerstat.js cache
-          if (typeof fetchUserDataFromFirestore === 'function') {
-              fetchUserDataFromFirestore();
-          }
-        } else {
-          if (errElem) errElem.innerText = "Invalid username or password!";
-        }
-      } catch (err) {
-        if (errElem) errElem.innerText = "Login error occurred.";
-      }
-    });
-  }
+
+    
 
   const playBtn = document.getElementById('playBtn');
   if (playBtn) {
