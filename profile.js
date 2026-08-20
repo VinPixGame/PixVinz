@@ -21,9 +21,8 @@ function goHome() {
     localStorage.setItem('skipLoading', 'true');
     
     if (typeof showView === 'function') {
-        showView('home');
-        updateProfileUI();
-    fetchUserDataFromFirestore()
+        showView('home');     
+    fetchUserDataFromFirestore();
         
     } else {
         const homeViewElement = document.getElementById('homeView') || window.parent.document.getElementById('homeView');
@@ -70,36 +69,6 @@ async function saveUserDataToCloud() {
     } catch (error) {
         console.warn("Cloud sync skipped or failed safely:", error);
     }
-}
-
-function updateProfileUI() {
-    const user = getCurrentUser(); // gets the latest data from localStorage
-    if (!user) return;
-
-    // Update Display Name
-    document.querySelectorAll('#userDisplayName').forEach(el => {
-        el.innerText = user.displayName || user.username || 'Vinz';
-    });
-
-    // Update XP
-    document.querySelectorAll('#userXp, .user-xp').forEach(el => {
-        el.innerText = user.xp || 0;
-    });
-
-    // Update Coins
-    document.querySelectorAll('#userCoins, .user-coins').forEach(el => {
-        el.innerText = user.coins || 0;
-    });
-
-    // Update Level
-    document.querySelectorAll('#userLevel, .user-level').forEach(el => {
-        el.innerText = user.level || 1;
-    });
-
-    // Update Avatar
-    document.querySelectorAll('#userAvatar, .user-avatar').forEach(el => {
-        if (user.avatar) el.src = user.avatar;
-    });
 }
 
 
