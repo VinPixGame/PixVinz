@@ -362,6 +362,7 @@ try {
           xp: 0,
           coins: 0,
           avatar: '',
+          level: 1,
           password: pass,
           authUid: authUid,
           createdAt: new Date()
