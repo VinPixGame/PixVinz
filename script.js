@@ -141,54 +141,8 @@ document.addEventListener('DOMContentLoaded', () => {
           }
       }
   });
+      
 
-
-  
-
-
-             
-.style.width = '100%';
-
-            // 5. Apply everything to the UI and enter the game
-            setTimeout(() => {
-                let finalUser = null;
-                try {
-                    finalUser = JSON.parse(localStorage.getItem('loggedInUser'));
-                } catch (e) {}
-
-                if (finalUser) {
-                    // Update Name
-                    const nameElem = document.getElementById('userDisplayName');
-                    if (nameElem) nameElem.innerText = finalUser.displayName || 'Vinz';
-                    
-                    // Update Avatar (using your exact HTML ID)
-                    const avatarPreviewElem = document.getElementById('avatar-preview');
-                    if (avatarPreviewElem && finalUser.avatar) {
-                        avatarPreviewElem.src = finalUser.avatar;
-                    }
-
-                    // Refresh coins/stats display if function exists
-                    if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
-                    
-                    if (typeof showView === 'function') showView('home');
-                    if (typeof playMainBGM === 'function') playMainBGM();
-                } else {
-                    if (typeof showView === 'function') showView('login');
-                }
-            }, 400);
-
-        } catch (err) {
-            console.error("Cloud fetch error:", err);
-            clearInterval(loadingInterval);
-            
-            // Fallback to login if something fails
-            if (typeof showView === 'function') showView('login');
-        }
-    })();
-
-} catch (e) {
-    console.error("Loading script error:", e);
-}
 
   
 // ==========================================
