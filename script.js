@@ -144,8 +144,8 @@ document.addEventListener('DOMContentLoaded', () => {
       
 
 
-  
-// ==========================================
+
+                // ==========================================
 // 1. BULLETPROOF CLOUD LOADING SCREEN SCRIPT
 // ==========================================
 try {
@@ -156,7 +156,6 @@ try {
     if (percentageElem) percentageElem.innerText = '1%';
     if (barFillElem) barFillElem.style.width = '1%';
 
-    // Smooth loading bar animation
     const loadingInterval = setInterval(() => {
         if (currentPercent < 90) {
             currentPercent += 3;
@@ -165,12 +164,10 @@ try {
         }
     }, 40);
 
-    // SAFETY TIMER: Forces the game to load within 3 seconds no matter what, preventing 1% freezes!
     const safetyTimeout = setTimeout(() => {
         finishLoadingAndEnterGame();
     }, 3000);
 
-    // Main Cloud Fetch Logic
     (async () => {
         try {
             let localUser = null;
@@ -178,7 +175,6 @@ try {
                 localUser = JSON.parse(localStorage.getItem('loggedInUser'));
             } catch (e) {}
 
-            // Safe check for Firebase auth & db references
             const firebaseAuth = window.auth || (typeof auth !== 'undefined' ? auth : null);
             const firebaseDb = window.db || (typeof db !== 'undefined' ? db : null);
             
@@ -207,13 +203,11 @@ try {
         } catch (err) {
             console.warn("Cloud fetch skipped/failed, using local cache:", err);
         } finally {
-            // Clear the safety timeout since we finished successfully
             clearTimeout(safetyTimeout);
             finishLoadingAndEnterGame();
         }
     })();
 
-    // Helper function to finish up and enter the game smoothly
     function finishLoadingAndEnterGame() {
         clearInterval(loadingInterval);
         currentPercent = 100;
@@ -227,38 +221,34 @@ try {
             } catch (e) {}
 
             if (finalUser) {
-                // Update Display Name
                 const nameElem = document.getElementById('userDisplayName');
                 if (nameElem) nameElem.innerText = finalUser.displayName || 'Vinz';
                 
-                // Update Avatar across browsers and devices
                 const avatarPreviewElem = document.getElementById('avatar-preview');
                 if (avatarPreviewElem && finalUser.avatar) {
                     avatarPreviewElem.src = finalUser.avatar;
                 }
 
-                // Refresh coins and stats display
                 if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
-                
-                // Enter home view safely
                 if (typeof showView === 'function') showView('home');
                 if (typeof playMainBGM === 'function') playMainBGM();
             } else {
-                if (typeof showView === 'function') showView('login');
+                if (typeof showView === 'function') showView('loginView');
             }
         }, 300);
     }
 
 } catch (e) {
     console.error("Loading script error:", e);
-    if (typeof showView === 'function') showView('login');
+    if (typeof showView === 'function') showView('loginView');
 }
 
+
 // ==========================================
-// COMPLETE LOGIN SCRIPT (HANDLER + TOGGLE + LISTENER)
+// 2. AUTHENTICATION & VIEW SWITCHING SCRIPT
 // ==========================================
 
-// 1. Universal Login Handler (Handles @pixvinz.com & Cross-Device Firestore Fetch)
+// Universal Login Handler
 async function handleLogin(usernameOrEmail, password) {
     try {
         const email = usernameOrEmail.includes('@') 
@@ -293,40 +283,7 @@ async function handleLogin(usernameOrEmail, password) {
     }
 }
 
-// 2. Password Toggle & Form Submission Listeners
-document.addEventListener('DOMContentLoaded', () => {
-    // A. Toggle for Login Password Show/Hide
-    const toggleLoginPass = document.getElementById('toggleLoginPass');
-    const loginPass = document.getElementById('loginPass');
-    if (toggleLoginPass && loginPass) {
-        toggleLoginPass.addEventListener('click', () => {
-            if (loginPass.type === 'password') {
-                loginPass.type = 'text';
-                toggleLoginPass.innerText = 'Hide';
-            } else {
-                loginPass.type = 'password';
-                toggleLoginPass.innerText = 'Show';
-            }
-        });
-    }
-
-    // B. Handle Login Form Submit Button Click
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault(); // Stops the page from refreshing
-            const rawUsername = document.getElementById('loginUser').value;
-            const password = document.getElementById('loginPass').value;
-            
-            // Calls the handleLogin function above
-            handleLogin(rawUsername, password);
-        });
-    }
-});
-
-
-
-// Universal Registration Handler (Handles @pixvinz.com & Creates Firestore Record)
+// Universal Registration Handler
 async function handleRegister(rawUsername, password, displayName) {
     try {
         const cleanUsername = rawUsername.trim().toLowerCase();
@@ -357,12 +314,53 @@ async function handleRegister(rawUsername, password, displayName) {
     }
 }
 
-
-// ==========================================
-// 3. SHOW / HIDE PASSWORD TOGGLES
-// ==========================================
+// DOM Event Listeners (Forms, Toggles, and View Switchers)
 document.addEventListener('DOMContentLoaded', () => {
-    // Toggle for Password
+    // A. View Switching (Login <-> Register)
+    const toRegisterLink = document.getElementById('toRegister');
+    const toLoginLink = document.getElementById('toLogin');
+
+    if (toRegisterLink) {
+        toRegisterLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (typeof showView === 'function') showView('registerView');
+        });
+    }
+
+    if (toLoginLink) {
+        toLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (typeof showView === 'function') showView('loginView');
+        });
+    }
+
+    // B. Login Password Show/Hide Toggle
+    const toggleLoginPass = document.getElementById('toggleLoginPass');
+    const loginPass = document.getElementById('loginPass');
+    if (toggleLoginPass && loginPass) {
+        toggleLoginPass.addEventListener('click', () => {
+            if (loginPass.type === 'password') {
+                loginPass.type = 'text';
+                toggleLoginPass.innerText = 'Hide';
+            } else {
+                loginPass.type = 'password';
+                toggleLoginPass.innerText = 'Show';
+            }
+        });
+    }
+
+    // C. Login Form Submission
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const rawUsername = document.getElementById('loginUser').value;
+            const password = document.getElementById('loginPass').value;
+            handleLogin(rawUsername, password);
+        });
+    }
+
+    // D. Register Passwords Show/Hide Toggles
     const toggleRegPass = document.getElementById('toggleRegPass');
     const regPass = document.getElementById('regPass');
     if (toggleRegPass && regPass) {
@@ -377,7 +375,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Toggle for Repeat Password
     const toggleRegPassConfirm = document.getElementById('toggleRegPassConfirm');
     const regPassConfirm = document.getElementById('regPassConfirm');
     if (toggleRegPassConfirm && regPassConfirm) {
@@ -391,10 +388,26 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // E. Register Form Submission
+    const registerForm = document.getElementById('registerForm');
+    if (registerForm) {
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const displayName = document.getElementById('regDisplayName').value;
+            const rawUsername = document.getElementById('regUser').value;
+            const password = document.getElementById('regPass').value;
+            const confirmPass = document.getElementById('regPassConfirm').value;
+
+            if (password !== confirmPass) {
+                alert("Passwords do not match!");
+                return;
+            }
+
+            handleRegister(rawUsername, password, displayName);
+        });
+    }
 });
-
-
-    
 
   const playBtn = document.getElementById('playBtn');
   if (playBtn) {
