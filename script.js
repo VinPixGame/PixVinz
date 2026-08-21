@@ -549,7 +549,9 @@ if (logoutBtn) {
   }
 });
 
-// --- LEADERBOARD LOGIC (Local Storage Version) ---
+
+
+// --- LEADERBOARD LOGIC (Firestore Live Version) ---
 document.addEventListener('DOMContentLoaded', () => {
     const navLeaderboard = document.getElementById('navLeaderboard');
     if (navLeaderboard) {
@@ -567,9 +569,8 @@ async function loadLeaderboardData() {
     const listContainer = document.getElementById('leaderboardList');
     if (!listContainer) return;
     
-    listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #aaa;">Loading leaderboard...</div>';
+    listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #aaa;">Loading live leaderboard...</div>';
 
-    let players = [];
     let currentUsername = '';
     try {
         const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
@@ -579,8 +580,35 @@ async function loadLeaderboardData() {
         currentUsername = localStorage.getItem('vinpix_username') || '';
     }
 
-    // Pull mock player info from localStorage or current user
-    if (currentUsername) {
+    let players = [];
+
+    try {
+        if (window.pixvinzDb) {
+            const { db, collection, getDocs, query, orderBy, limit } = window.pixvinzDb;
+            // Fetch top players sorted by coins descending from Firestore
+            const q = query(collection(db, 'players'), orderBy('coins', 'desc'), limit(50));
+            const querySnapshot = await getDocs(q);
+            
+            querySnapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                players.push({
+                    username: data.username || docSnap.id,
+                    name: data.displayName || data.username || docSnap.id,
+                    coins: data.coins ?? 0,
+                    xp: data.xp ?? 0,
+                    level: data.level ?? 1,
+                    avatar: data.avatar || '',
+                    speedThunder: data.speedThunder || false,
+                    speedThunderUnlocked: data.speedThunderUnlocked || false
+                });
+            });
+        }
+    } catch (err) {
+        console.error("Error fetching Firestore leaderboard:", err);
+    }
+
+    // Fallback to local user if Firestore returned nothing or is offline
+    if (players.length === 0 && currentUsername) {
         const currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {
             username: currentUsername,
             displayName: currentUsername,
@@ -631,7 +659,7 @@ async function loadLeaderboardData() {
 
         const avatarHTML = `
             <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${frameStyle}">
+                <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" onclick="openPlayerProfile(${JSON.stringify(player).replace(/"/g, '&quot;')}, ${rank})" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${frameStyle}">
             </div>
         `;
 
@@ -739,21 +767,21 @@ window.openPlayerProfile = function(player, rank) {
             desc: 'Speed run (20-30) < 1m', 
             icon: 'image/badge2.png', 
             unlocked: player.speedThunder === true || player.speedThunderUnlocked === true, 
-            
+        
         },
         { 
             title: 'Aurelian Vault', 
             desc: 'Reached 500 coins', 
             icon: 'image/badge3.png', 
             unlocked: playerCoins >= 500, 
-            
+        
         },
         { 
             title: 'Celestial Elite', 
             desc: 'Reached Level 50', 
             icon: 'image/badge4.png', 
             unlocked: playerLevel >= 50, 
-            
+        
         },
         { 
             title: 'Grand Sovereign', 
@@ -774,14 +802,14 @@ window.openPlayerProfile = function(player, rank) {
             desc: 'Reached Level 150', 
             icon: 'image/badge7.png', 
             unlocked: playerLevel >= 150, 
-            
+        
         },
         { 
             title: 'Mythical Deity', 
             desc: 'Reached Level 200', 
             icon: 'image/badge8.png', 
             unlocked: playerLevel >= 200, 
-            
+        
         }
     ];
 
@@ -837,8 +865,12 @@ window.addEventListener('click', (event) => {
         window.closePlayerProfile();
     }
 });
+            
 
 
+            
+    
+        
 
 
 
