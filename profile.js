@@ -574,15 +574,7 @@ if (saveProfileBtn) {
             if (editModal) editModal.classList.add('hidden');
         }, 1000);
     });
-}
-
-
-    setTimeout(() => {
-        toast.style.transform = 'translateX(-50%) translateY(10px)';
-        toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-
+}    
 
 
 // --- 7-DAY DAILY CHECK-IN LOGIC (USER-TIED & SECURE) ---
