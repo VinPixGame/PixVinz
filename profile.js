@@ -79,51 +79,56 @@ async function saveUserDataToCloud() {
 
 
 async function fetchUserDataFromFirestore() {
-    // Get current user session from local storage to find their unique ID
-    const currentUser = JSON.parse(localStorage.getItem('loggedInUser'));
-    if (!currentUser || !currentUser.authUid) return;
+    const username = getCurrentUsername();
+    if (!username) return;
 
     try {
-        // Ensure Firestore functions are available
-        if (typeof db !== 'undefined' && typeof doc === 'function' && typeof getDoc === 'function') {
-            const userDocRef = doc(db, "users", currentUser.authUid);
+        if (window.pixvinzDb && window.pixvinzDb.db) {
+            const { db, doc, getDoc } = window.pixvinzDb;
+            const userDocRef = doc(db, "players", username);
             const userSnap = await getDoc(userDocRef);
 
             if (userSnap.exists()) {
                 const cloudData = userSnap.data();
-                
+                const currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
+
                 // Merge cloud data with local session
                 const updatedUser = {
                     ...currentUser,
                     username: cloudData.username || currentUser.username,
                     displayName: cloudData.displayName || currentUser.displayName,
-                    coins: cloudData.coins !== undefined ? cloudData.coins : currentUser.coins,
-                    xp: cloudData.xp !== undefined ? cloudData.xp : currentUser.xp,
-                    level: cloudData.level !== undefined ? cloudData.level : currentUser.level,
-                    avatar: cloudData.avatar || currentUser.avatar,
+                    coins: cloudData.coins !== undefined ? cloudData.coins : (currentUser.coins || 0),
+                    xp: cloudData.xp !== undefined ? cloudData.xp : (currentUser.xp || 0),
+                    level: cloudData.level !== undefined ? cloudData.level : (currentUser.level || 1),
+                    avatar: cloudData.avatar || currentUser.avatar || '',
                     dailyRewardState: cloudData.dailyRewardState || currentUser.dailyRewardState
                 };
-                
+
                 // Save fresh data back to local storage
                 localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
-                
-                // Sync daily reward state down to local storage key as well
+
+                // Sync stats to local storage keys used by playerstat.js
+                const prefix = username + '_';
+                if (cloudData.coins !== undefined) localStorage.setItem(prefix + 'totalCoins', cloudData.coins);
+                if (cloudData.level !== undefined) localStorage.setItem(prefix + 'currentLevel', cloudData.level);
+                if (cloudData.avatar) localStorage.setItem(prefix + 'vinpix_avatar', cloudData.avatar);
+
+                // Sync daily reward state down to local storage key
                 if (cloudData.dailyRewardState) {
-                    const targetUsername = updatedUser.username || currentUser.username;
-                    const dailyStorageKey = targetUsername ? `pixvinz_daily_${targetUsername}` : 'pixvinz_daily_guest';
+                    const dailyStorageKey = `pixvinz_daily_${username}`;
                     localStorage.setItem(dailyStorageKey, JSON.stringify(cloudData.dailyRewardState));
                     
                     if (typeof checkDailyRewardStatus === 'function') {
                         checkDailyRewardStatus();
                     }
                 }
-                
+
                 // Instantly update the screen so the user sees correct stats
-                if (typeof updateProfileUI === 'function') {
-                    updateProfileUI();
-                }
-                
-                console.log("Profile successfully synced from Firestore!");
+                if (typeof updateXpProgress === 'function') updateXpProgress();
+                if (typeof updateProfileStats === 'function') updateProfileStats();
+                if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+
+                console.log("Profile successfully synced from Firestore players collection!");
             }
         }
     } catch (err) {
