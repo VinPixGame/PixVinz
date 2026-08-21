@@ -551,7 +551,16 @@ if (logoutBtn) {
 
 
 
-// --- LEADERBOARD LOGIC (Firestore Live Version) ---
+
+
+
+
+
+    
+
+            
+
+// --- LEADERBOARD LOGIC (Safe DOM Binding, Avatars & Real Players Only) ---
 document.addEventListener('DOMContentLoaded', () => {
     const navLeaderboard = document.getElementById('navLeaderboard');
     if (navLeaderboard) {
@@ -569,8 +578,9 @@ async function loadLeaderboardData() {
     const listContainer = document.getElementById('leaderboardList');
     if (!listContainer) return;
     
-    listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #aaa;">Loading live leaderboard...</div>';
+    listContainer.innerHTML = '<div class="loading-text" style="text-align:center; padding: 20px; color: #aaa;">Loading leaderboard...</div>';
 
+    let players = [];
     let currentUsername = '';
     try {
         const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
@@ -580,51 +590,26 @@ async function loadLeaderboardData() {
         currentUsername = localStorage.getItem('vinpix_username') || '';
     }
 
-    let players = [];
-
     try {
         if (window.pixvinzDb) {
-            const { db, collection, getDocs, query, orderBy, limit } = window.pixvinzDb;
-            // Fetch top players sorted by coins descending from Firestore
-            const q = query(collection(db, 'players'), orderBy('coins', 'desc'), limit(50));
+            const { db, collection, query, orderBy, limit, getDocs } = window.pixvinzDb;
+            const q = query(collection(db, 'players'), orderBy('xp', 'desc'), limit(100));
             const querySnapshot = await getDocs(q);
             
             querySnapshot.forEach((docSnap) => {
                 const data = docSnap.data();
                 players.push({
-                    username: data.username || docSnap.id,
-                    name: data.displayName || data.username || docSnap.id,
-                    coins: data.coins ?? 0,
-                    xp: data.xp ?? 0,
-                    level: data.level ?? 1,
-                    avatar: data.avatar || '',
-                    speedThunder: data.speedThunder || false,
-                    speedThunderUnlocked: data.speedThunderUnlocked || false
+                    username: docSnap.id,
+                    name: data.displayName || data.username || 'Anonymous',
+                    coins: data.coins || 0,
+                    xp: data.xp || 0,
+                    level: data.level || 1,
+                    avatar: data.avatar || ''
                 });
             });
         }
     } catch (err) {
-        console.error("Error fetching Firestore leaderboard:", err);
-    }
-
-    // Fallback to local user if Firestore returned nothing or is offline
-    if (players.length === 0 && currentUsername) {
-        const currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {
-            username: currentUsername,
-            displayName: currentUsername,
-            coins: 0,
-            xp: 0,
-            level: 1,
-            avatar: ''
-        };
-        players.push({
-            username: currentUser.username,
-            name: currentUser.displayName || currentUser.username,
-            coins: currentUser.coins || 0,
-            xp: currentUser.xp || 0,
-            level: currentUser.level || 1,
-            avatar: currentUser.avatar || ''
-        });
+        console.warn("Could not fetch live leaderboard from Firestore:", err);
     }
 
     listContainer.innerHTML = '';
@@ -650,21 +635,71 @@ async function loadLeaderboardData() {
         return;
     }
 
-    players.forEach((player, index) => {
+    const topPlayers = players.slice(0, 20);
+
+    topPlayers.forEach((player, index) => {
         const rank = index + 1;
-        let rankBadgeHTML = `<span style="min-width: 48px; text-align: center; font-weight: bold; font-size: 16px; color: #aaa;">#${rank}</span>`;
+        let rankBadgeHTML = '';
         let specialStyle = '';
         let frameStyle = 'border: 2px solid rgba(255,255,255,0.2);';
+        let avatarHTML = '';
+
         const avatarSrc = player.avatar ? player.avatar : 'image/avatar.png';
 
-        const avatarHTML = `
-            <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" onclick="openPlayerProfile(${JSON.stringify(player).replace(/"/g, '&quot;')}, ${rank})" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${frameStyle}">
-            </div>
-        `;
+        if (rank === 1) {
+            specialStyle = 'background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(255, 215, 0, 0.6);';
+            frameStyle = 'border: 3px solid #ffd700;';
+            rankBadgeHTML = `
+                <div style="min-width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                    <img src="image/rank1.png" alt="#1" style="width: 44px; height: 44px; object-fit: contain;">
+                </div>
+            `;
+            avatarHTML = `
+                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                    <span style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 18px; z-index: 3; filter: drop-shadow(0 0 6px #ffd700);">👑</span>
+                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${frameStyle} position: relative; z-index: 2;">
+                </div>
+            `;
+        } else if (rank === 2) {
+            specialStyle = 'background: linear-gradient(135deg, rgba(192, 192, 192, 0.2), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(192, 192, 192, 0.6);';
+            frameStyle = 'border: 3px solid #00e5ff;';
+            rankBadgeHTML = `
+                <div style="min-width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                    <img src="image/rank2.png" alt="#2" style="width: 44px; height: 44px; object-fit: contain;">
+                </div>
+            `;
+            avatarHTML = `
+                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                    <span style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 18px; z-index: 3; filter: drop-shadow(0 0 6px #c0c0c0) brightness(1.3);">👑</span>
+                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${frameStyle} position: relative; z-index: 2;">
+                </div>
+            `;
+        } else if (rank === 3) {
+            specialStyle = 'background: linear-gradient(135deg, rgba(205, 127, 50, 0.2), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(205, 127, 50, 0.6);';
+            frameStyle = 'border: 3px solid #ff9933;';
+            rankBadgeHTML = `
+                <div style="min-width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                    <img src="image/rank3.png" alt="#3" style="width: 44px; height: 44px; object-fit: contain;">
+                </div>
+            `;
+            avatarHTML = `
+                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                    <span style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 18px; z-index: 3; filter: drop-shadow(0 0 6px #cd7f32) sepia(1) hue-rotate(10deg);">👑</span>
+                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${frameStyle} position: relative; z-index: 2;">
+                </div>
+            `;
+        } else {
+            rankBadgeHTML = `<span style="min-width: 48px; text-align: center; font-weight: bold; font-size: 16px; color: #aaa;">#${rank}</span>`;
+            avatarHTML = `
+                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${frameStyle}">
+                </div>
+            `;
+        }
 
         const row = document.createElement('div');
         row.className = `rank-row`;
+        
         row.style.cssText = `
             display: flex;
             justify-content: space-between;
@@ -699,6 +734,17 @@ async function loadLeaderboardData() {
                 </div>
             </div>
         `;
+
+        // Attach click listener to the avatar image
+        const avatarImg = row.querySelector('.leaderboard-avatar-img');
+        if (avatarImg) {
+            avatarImg.addEventListener('click', () => {
+                if (typeof AudioManager !== 'undefined' && typeof AudioManager.playClick === 'function') {
+                    AudioManager.playClick();
+                }
+                openPlayerProfile(player, rank);
+            });
+        }
 
         listContainer.appendChild(row);
     });
@@ -767,21 +813,21 @@ window.openPlayerProfile = function(player, rank) {
             desc: 'Speed run (20-30) < 1m', 
             icon: 'image/badge2.png', 
             unlocked: player.speedThunder === true || player.speedThunderUnlocked === true, 
-        
+            
         },
         { 
             title: 'Aurelian Vault', 
             desc: 'Reached 500 coins', 
             icon: 'image/badge3.png', 
             unlocked: playerCoins >= 500, 
-        
+            
         },
         { 
             title: 'Celestial Elite', 
             desc: 'Reached Level 50', 
             icon: 'image/badge4.png', 
             unlocked: playerLevel >= 50, 
-        
+            
         },
         { 
             title: 'Grand Sovereign', 
@@ -802,14 +848,14 @@ window.openPlayerProfile = function(player, rank) {
             desc: 'Reached Level 150', 
             icon: 'image/badge7.png', 
             unlocked: playerLevel >= 150, 
-        
+            
         },
         { 
             title: 'Mythical Deity', 
             desc: 'Reached Level 200', 
             icon: 'image/badge8.png', 
             unlocked: playerLevel >= 200, 
-        
+            
         }
     ];
 
@@ -865,8 +911,6 @@ window.addEventListener('click', (event) => {
         window.closePlayerProfile();
     }
 });
-            
-
 
             
     
