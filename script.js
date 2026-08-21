@@ -152,18 +152,13 @@ async function finishLoading() {
     
     let loggedInUser = getCurrentUser();
     
-    // Fetch latest progress from Firestore FIRST with a safety timeout (max 3 seconds)
+    // Fetch latest progress from Firestore FIRST using your exact schema: collection "players", document ID = username
     if (loggedInUser && loggedInUser.username) {
         try {
             if (window.pixvinzDb) {
                 const { db, doc, getDoc } = window.pixvinzDb;
                 const userDocRef = doc(db, "players", loggedInUser.username);
-                
-                // Race the Firestore fetch against a 3-second timer so it never gets stuck
-                const fetchPromise = getDoc(userDocRef);
-                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 3000));
-                
-                const userSnap = await Promise.race([fetchPromise, timeoutPromise]);
+                const userSnap = await getDoc(userDocRef);
 
                 if (userSnap.exists()) {
                     const cloudData = userSnap.data();
@@ -174,13 +169,17 @@ async function finishLoading() {
                         coins: cloudData.coins !== undefined ? cloudData.coins : loggedInUser.coins,
                         xp: cloudData.xp !== undefined ? cloudData.xp : loggedInUser.xp,
                         level: cloudData.level !== undefined ? cloudData.level : loggedInUser.level,
-                        avatar: cloudData.avatar || loggedInUser.avatar
+                        avatar: cloudData.avatar || loggedInUser.avatar,
+                        authUid: cloudData.authUid || loggedInUser.authUid,
+                        password: cloudData.password || loggedInUser.password,
+                        dailyRewardState: cloudData.dailyRewardState || loggedInUser.dailyRewardState || { streak: 0, lastClaimDate: '' },
+                        lastUpdated: cloudData.lastUpdated || loggedInUser.lastUpdated
                     };
                     localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
                 }
             }
         } catch (err) {
-            console.warn("Cloud fetch skipped or timed out, using local cache:", err);
+            console.warn("Could not fetch latest cloud data, using local cache:", err);
         }
     }
 
@@ -188,13 +187,8 @@ async function finishLoading() {
         const nameElem = document.getElementById('userDisplayName');
         if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
         
-        // Safely try syncing player stats if function exists
-        try {
-            if (typeof fetchUserDataFromFirestore === 'function') {
-                await fetchUserDataFromFirestore();
-            }
-        } catch (e) {
-            console.warn("Stat sync skipped:", e);
+        if (typeof fetchUserDataFromFirestore === 'function') {
+            await fetchUserDataFromFirestore();
         }
 
         showView('home');
@@ -203,6 +197,8 @@ async function finishLoading() {
         showView('login');
     }
 }
+
+  
 if (skipLoading) {
     finishLoading();
 } else {
