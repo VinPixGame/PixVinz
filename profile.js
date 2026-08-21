@@ -816,3 +816,8 @@ function showRewardToast(message) {
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
+
+
+// --- GLOBAL EXPOSURE FOR CROSS-SCRIPT SYNC ---
+window.saveUserDataToCloud = saveUserDataToCloud;
+window.fetchUserDataFromFirestore = fetchUserDataFromFirestore;
