@@ -1,7 +1,3 @@
-if (!localStorage.getItem('loggedInUser')) {
-    window.location.href = 'auth.html';
-}
-
 // --- FIREBASE INITIALIZATION & DATABASE BRIDGE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
@@ -34,6 +30,37 @@ document.addEventListener('DOMContentLoaded', () => {
         video.load();
         video.play().catch(() => {});
     });
+
+    // --- LOADING SCREEN PROGRESS & TRANSITION ---
+    let currentPercent = 1;
+    const percentageEl = document.getElementById('loadingPercentage');
+    const barFillEl = document.getElementById('loadingBarFill');
+
+    const loadingInterval = setInterval(() => {
+        currentPercent += Math.floor(Math.random() * 8) + 3; // Increment speed
+        if (currentPercent >= 100) {
+            currentPercent = 100;
+            clearInterval(loadingInterval);
+
+            // Loading is complete! Check authentication state before transitioning
+            setTimeout(() => {
+                const savedUser = localStorage.getItem('loggedInUser');
+
+                if (savedUser) {
+                    // If already logged in, refresh data and stay on index.html
+                    window.GameState.refreshUserData();
+                    // Hide loading view and show your home/game view here if needed
+                } else {
+                    // If NOT logged in, transition to your separate auth.html URL
+                    window.location.href = 'auth.html';
+                }
+            }, 400); // Small pause at 100% for visual smoothness
+        }
+
+        if (percentageEl) percentageEl.innerText = currentPercent + '%';
+        if (barFillEl) barFillEl.style.width = currentPercent + '%';
+    }, 50); // Adjust speed of loading simulation here
+});
 
 window.GameState = {
   currentUser: null,
