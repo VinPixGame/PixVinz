@@ -437,9 +437,8 @@ const logForm = document.getElementById('loginForm');
         }
 
         if (userData && userData.password === pass) {
-          // Normalize and map all fields from the cloud document so nothing is missing
+          // Use the exact live cloud data from Firestore, ensuring coins, XP, and level are preserved
           const fullUserData = {
-            ...userData,
             username: userData.username || username,
             displayName: userData.displayName || 'Vinz',
             coins: userData.coins !== undefined ? userData.coins : 0,
@@ -452,6 +451,7 @@ const logForm = document.getElementById('loginForm');
             lastUpdated: userData.lastUpdated || null
           };
 
+          // Save the real cloud data to localStorage
           localStorage.setItem('loggedInUser', JSON.stringify(fullUserData));
           
           if (typeof fetchUserDataFromFirestore === 'function') {
@@ -468,7 +468,7 @@ const logForm = document.getElementById('loginForm');
           if (errElem) errElem.innerText = "Invalid username or password!";
         }
       } catch (err) {
-        if (errElem) errElem.innerText = "Login error occurred.";
+        if (errElem) errElem.innerText = "Login error occurred: " + err.message;
       }
     });
   }
