@@ -1,27 +1,5 @@
-// --- FIREBASE INITIALIZATION & DATABASE BRIDGE ---
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
-import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
-    authDomain: "pixvinz2026.firebaseapp.com",
-    projectId: "pixvinz2026",
-    storageBucket: "pixvinz2026.firebasestorage.app",
-    messagingSenderId: "45609077809",
-    appId: "1:45609077809:web:575611e46acda9f64c5910",
-    measurementId: "G-W7FSERE8ZJ"
-};
-
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-// Expose Firestore database tools globally so UI scripts can use them
-window.pixvinzDb = { db, doc, getDoc, setDoc, updateDoc, collection, query, orderBy, limit, getDocs };
-
+// --- LOCAL STORAGE BRIDGE (Firebase Removed) ---
+window.pixvinzDb = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     // Force load/preload all logo videos across the document upon opening
@@ -55,10 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (currentUser) {
-            if (typeof fetchUserDataFromFirestore === 'function') {
-                await fetchUserDataFromFirestore();
-            }
-
             const homeView = document.getElementById('homeView');
             const mainHeader = document.getElementById('mainHeader');
 
@@ -100,19 +74,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        for (let i = 1; i <= 55; i++) {
-            const img = new Image();
-            img.src = `image/level${i}.jpeg`;
-        }
-
         setTimeout(checkCompletion, 100);
     }
 });
-
-
-  
   
   // --- AVATAR LOADER FIX (Account-Specific + Default Fallback) ---
+document.addEventListener('DOMContentLoaded', () => {
     let currentUsername = '';
     try {
         const user = JSON.parse(localStorage.getItem('loggedInUser'));
@@ -123,22 +90,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const fallbackIcon = document.getElementById('profileIconFallback');
 
     if (avatarImg && fallbackIcon) {
-        // Check if this specific logged-in user has a custom saved avatar
         const userCustomAvatar = currentUsername ? localStorage.getItem(`${currentUsername}_vinpix_avatar`) : null;
         
         if (userCustomAvatar) {
-            // Use their unique custom uploaded avatar
             avatarImg.src = userCustomAvatar;
             avatarImg.style.display = 'block';
             fallbackIcon.style.display = 'none';
         } else {
-            // Default fallback image for new accounts or users without custom avatars
             avatarImg.src = 'image/avatar.png';
             avatarImg.style.display = 'block';
             fallbackIcon.style.display = 'none';
         }
     }
-
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -187,7 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Make showView globally accessible for profile.js and other scripts
   window.showView = showView;
 
   function playMainBGM() {
@@ -205,7 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // --- PROFILE HEADER ICON NAVIGATION ---
   const profileHeaderImg = document.getElementById('profileHeaderImg');
   const profileIconFallback = document.getElementById('profileIconFallback');
 
@@ -222,9 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
           }
       }
   });
-
-  
-//playbutton//
 
   const playBtn = document.getElementById('playBtn');
   if (playBtn) {
@@ -570,17 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-
-// --- AUTO-SYNC CLOUD DATA ON PAGE LOAD ---
-document.addEventListener('DOMContentLoaded', () => {
-    if (typeof fetchUserDataFromFirestore === 'function') {
-        fetchUserDataFromFirestore();
-    }
-});
-
-
-
-// --- LEADERBOARD LOGIC (Safe DOM Binding, Avatars & Real Players Only) ---
+// --- LEADERBOARD LOGIC (Local Storage Version) ---
 document.addEventListener('DOMContentLoaded', () => {
     const navLeaderboard = document.getElementById('navLeaderboard');
     if (navLeaderboard) {
@@ -610,26 +558,24 @@ async function loadLeaderboardData() {
         currentUsername = localStorage.getItem('vinpix_username') || '';
     }
 
-    try {
-        if (window.pixvinzDb) {
-            const { db, collection, query, orderBy, limit, getDocs } = window.pixvinzDb;
-            const q = query(collection(db, 'players'), orderBy('xp', 'desc'), limit(100));
-            const querySnapshot = await getDocs(q);
-            
-            querySnapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                players.push({
-                    username: docSnap.id,
-                    name: data.displayName || data.username || 'Anonymous',
-                    coins: data.coins || 0,
-                    xp: data.xp || 0,
-                    level: data.level || 1,
-                    avatar: data.avatar || ''
-                });
-            });
-        }
-    } catch (err) {
-        console.warn("Could not fetch live leaderboard from Firestore:", err);
+    // Pull mock player info from localStorage or current user
+    if (currentUsername) {
+        const currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {
+            username: currentUsername,
+            displayName: currentUsername,
+            coins: 0,
+            xp: 0,
+            level: 1,
+            avatar: ''
+        };
+        players.push({
+            username: currentUser.username,
+            name: currentUser.displayName || currentUser.username,
+            coins: currentUser.coins || 0,
+            xp: currentUser.xp || 0,
+            level: currentUser.level || 1,
+            avatar: currentUser.avatar || ''
+        });
     }
 
     listContainer.innerHTML = '';
@@ -655,71 +601,21 @@ async function loadLeaderboardData() {
         return;
     }
 
-    const topPlayers = players.slice(0, 20);
-
-    topPlayers.forEach((player, index) => {
+    players.forEach((player, index) => {
         const rank = index + 1;
-        let rankBadgeHTML = '';
+        let rankBadgeHTML = `<span style="min-width: 48px; text-align: center; font-weight: bold; font-size: 16px; color: #aaa;">#${rank}</span>`;
         let specialStyle = '';
         let frameStyle = 'border: 2px solid rgba(255,255,255,0.2);';
-        let avatarHTML = '';
-
         const avatarSrc = player.avatar ? player.avatar : 'image/avatar.png';
 
-        if (rank === 1) {
-            specialStyle = 'background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(255, 215, 0, 0.6);';
-            frameStyle = 'border: 3px solid #ffd700;';
-            rankBadgeHTML = `
-                <div style="min-width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
-                    <img src="image/rank1.png" alt="#1" style="width: 44px; height: 44px; object-fit: contain;">
-                </div>
-            `;
-            avatarHTML = `
-                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                    <span style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 18px; z-index: 3; filter: drop-shadow(0 0 6px #ffd700);">👑</span>
-                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${frameStyle} position: relative; z-index: 2;">
-                </div>
-            `;
-        } else if (rank === 2) {
-            specialStyle = 'background: linear-gradient(135deg, rgba(192, 192, 192, 0.2), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(192, 192, 192, 0.6);';
-            frameStyle = 'border: 3px solid #00e5ff;';
-            rankBadgeHTML = `
-                <div style="min-width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
-                    <img src="image/rank2.png" alt="#2" style="width: 44px; height: 44px; object-fit: contain;">
-                </div>
-            `;
-            avatarHTML = `
-                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                    <span style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 18px; z-index: 3; filter: drop-shadow(0 0 6px #c0c0c0) brightness(1.3);">👑</span>
-                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${frameStyle} position: relative; z-index: 2;">
-                </div>
-            `;
-        } else if (rank === 3) {
-            specialStyle = 'background: linear-gradient(135deg, rgba(205, 127, 50, 0.2), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(205, 127, 50, 0.6);';
-            frameStyle = 'border: 3px solid #ff9933;';
-            rankBadgeHTML = `
-                <div style="min-width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
-                    <img src="image/rank3.png" alt="#3" style="width: 44px; height: 44px; object-fit: contain;">
-                </div>
-            `;
-            avatarHTML = `
-                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                    <span style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 18px; z-index: 3; filter: drop-shadow(0 0 6px #cd7f32) sepia(1) hue-rotate(10deg);">👑</span>
-                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${frameStyle} position: relative; z-index: 2;">
-                </div>
-            `;
-        } else {
-            rankBadgeHTML = `<span style="min-width: 48px; text-align: center; font-weight: bold; font-size: 16px; color: #aaa;">#${rank}</span>`;
-            avatarHTML = `
-                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${frameStyle}">
-                </div>
-            `;
-        }
+        const avatarHTML = `
+            <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${frameStyle}">
+            </div>
+        `;
 
         const row = document.createElement('div');
         row.className = `rank-row`;
-        
         row.style.cssText = `
             display: flex;
             justify-content: space-between;
@@ -754,17 +650,6 @@ async function loadLeaderboardData() {
                 </div>
             </div>
         `;
-
-        // Attach click listener to the avatar image
-        const avatarImg = row.querySelector('.leaderboard-avatar-img');
-        if (avatarImg) {
-            avatarImg.addEventListener('click', () => {
-                if (typeof AudioManager !== 'undefined' && typeof AudioManager.playClick === 'function') {
-                    AudioManager.playClick();
-                }
-                openPlayerProfile(player, rank);
-            });
-        }
 
         listContainer.appendChild(row);
     });
