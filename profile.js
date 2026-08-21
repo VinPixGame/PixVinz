@@ -576,9 +576,6 @@ if (saveProfileBtn) {
     });
 }
 
-
-
-
 // --- 7-DAY DAILY CHECK-IN LOGIC (USER-TIED) ---
 const dailyRewardsData = [
     { day: 1, coins: 15, xp: 50, label: '15 🪙' },
@@ -589,6 +586,8 @@ const dailyRewardsData = [
     { day: 6, coins: 150, xp: 400, label: '150 🪙' },
     { day: 7, coins: 300, xp: 750, label: '300 🪙 🔥' }
 ];
+
+let dailyCountdownInterval = null;
 
 function getTodayDateString() {
     return new Date().toISOString().split('T')[0];
@@ -604,6 +603,53 @@ function getYesterdayDateString() {
 function getDailyStorageKey() {
     const username = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
     return username ? `pixvinz_daily_${username}` : 'pixvinz_daily_guest';
+}
+
+function updateCalendarHeaderIcon() {
+    const headerTitle = document.querySelector("#dailyModal h2, #dailyModal div"); // Target the title area
+    // Let's dynamically inject/update a real-time calendar graphic header if present
+    const now = new Date();
+    const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+    const monthStr = months[now.getMonth()];
+    const dayNum = now.getDate();
+
+    // Look for the calendar icon element or create/update it near DAILY REWARDS text
+    let calIcon = document.getElementById('realTimeCalendarIcon');
+    if (!calIcon) {
+        calIcon = document.createElement('div');
+        calIcon.id = 'realTimeCalendarIcon';
+        // Style the mini calendar look
+        calIcon.style.cssText = `
+            display: inline-flex;
+            flex-direction: column;
+            width: 32px;
+            height: 32px;
+            background: #fff;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            vertical-align: middle;
+            margin-right: 8px;
+        `;
+        calIcon.innerHTML = `
+            <div style="background: #ff4757; color: white; font-size: 8px; font-weight: bold; text-align: center; padding: 1px 0; text-transform: uppercase;">${monthStr}</div>
+            <div style="color: #333; font-size: 13px; font-weight: 900; text-align: center; line-height: 20px;" id="calDayNum">${dayNum}</div>
+        `;
+        
+        // Prepend it to the title container if available
+        const titleEl = document.querySelector("#dailyModal span:has-text('DAILY REWARDS'), #dailyModal");
+        const rewardsTitle = document.getElementById('dailyRewardsTitleText') || document.querySelector("#dailyModal");
+        if (rewardsTitle) {
+            // Find text node or title span
+            const headerSpan = document.querySelector("#dailyModal");
+            if (headerSpan) {
+                // Insert gracefully if header container exists
+            }
+        }
+    } else {
+        const dayNumEl = document.getElementById('calDayNum');
+        if (dayNumEl) dayNumEl.textContent = dayNum;
+    }
 }
 
 function checkDailyRewardStatus() {
@@ -632,6 +678,24 @@ window.openDailyModal = function() {
     if (typeof AudioManager !== 'undefined' && typeof AudioManager.playClick === 'function') {
         AudioManager.playClick();
     }
+    
+    // Update the calendar icon dynamically on open
+    const now = new Date();
+    const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+    const monthStr = months[now.getMonth()];
+    const dayNum = now.getDate();
+
+    // Check and update header calendar image/element if it exists in HTML
+    const calHeader = document.getElementById('dynamicCalendarHeader');
+    if (calHeader) {
+        calHeader.innerHTML = `
+            <div style="display: inline-flex; flex-direction: column; width: 36px; height: 36px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 3px 6px rgba(0,0,0,0.4); vertical-align: middle; margin-right: 10px;">
+                <div style="background: #ff4757; color: white; font-size: 8px; font-weight: bold; text-align: center; padding: 2px 0;">${monthStr}</div>
+                <div style="color: #111; font-size: 15px; font-weight: 900; text-align: center; line-height: 22px;">${dayNum}</div>
+            </div>
+        `;
+    }
+
     renderDailyGrid();
     const modal = document.getElementById('dailyModal');
     if (modal) modal.style.display = 'flex';
@@ -640,6 +704,10 @@ window.openDailyModal = function() {
 window.closeDailyModal = function() {
     const modal = document.getElementById('dailyModal');
     if (modal) modal.style.display = 'none';
+    if (dailyCountdownInterval) {
+        clearInterval(dailyCountdownInterval);
+        dailyCountdownInterval = null;
+    }
 };
 
 function renderDailyGrid() {
@@ -704,12 +772,39 @@ function renderDailyGrid() {
 
     const claimBtn = document.getElementById('dailyClaimBtn');
     if (claimBtn) {
+        if (dailyCountdownInterval) {
+            clearInterval(dailyCountdownInterval);
+            dailyCountdownInterval = null;
+        }
+
         if (hasClaimedToday) {
-            claimBtn.textContent = 'ALREADY CLAIMED TODAY ✓';
             claimBtn.style.background = 'rgba(255,255,255,0.1)';
-            claimBtn.style.color = '#777';
+            claimBtn.style.color = '#ffd700';
             claimBtn.style.cursor = 'not-allowed';
             claimBtn.disabled = true;
+
+            // Start live countdown timer to midnight
+            const updateTimerDisplay = () => {
+                const now = new Date();
+                const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+                const diff = midnight.getTime() - now.getTime();
+
+                if (diff <= 0) {
+                    claimBtn.textContent = `CLAIM DAY ${currentDayIndex} REWARD`;
+                    renderDailyGrid();
+                    return;
+                }
+
+                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const minutes = Math.floor((diff / 1000 / 60) % 60);
+                const seconds = Math.floor((diff / 1000) % 60);
+
+                const pad = (n) => String(n).padStart(2, '0');
+                claimBtn.textContent = `NEXT CLAIM IN: ${pad(hours)}:${pad(minutes)}:${pad(seconds)} ⏳`;
+            };
+
+            updateTimerDisplay();
+            dailyCountdownInterval = setInterval(updateTimerDisplay, 1000);
         } else {
             claimBtn.textContent = `CLAIM DAY ${currentDayIndex} REWARD`;
             claimBtn.style.background = 'linear-gradient(135deg, #ffd700, #ffaa00)';
@@ -732,7 +827,6 @@ window.claimDailyReward = async function() {
 
     const reward = dailyRewardsData[nextStreak - 1];
 
-    // Add Coins & XP...
     if (typeof earnCoins === 'function') {
         earnCoins(reward.coins);
     } else {
@@ -750,7 +844,6 @@ window.claimDailyReward = async function() {
         localStorage.setItem(xpStoreKey, bonusXp);
     } catch (e) {}
 
-    // Save daily streak state locally
     dailyState.streak = nextStreak;
     dailyState.lastClaimDate = today;
     localStorage.setItem(storageKey, JSON.stringify(dailyState));
@@ -761,7 +854,6 @@ window.claimDailyReward = async function() {
     if (typeof updateXpProgress === 'function') updateXpProgress();
     if (typeof updateProfileUI === 'function') updateProfileUI();
     
-    // THIS SENDS THE UPDATED DAILY STATE TO THE CLOUD
     if (typeof saveUserDataToCloud === 'function') {
         saveUserDataToCloud();
     }
@@ -773,11 +865,9 @@ function showRewardToast(message) {
     const existingToast = document.getElementById('customRewardToast');
     if (existingToast) existingToast.remove();
 
-    // Find your Daily Rewards button to position the toast right above it
     const dailyButton = document.querySelector("button[onclick='openDailyModal()']");
     if (!dailyButton) return;
 
-    // Make sure the parent container has relative positioning so the absolute toast stays anchored to it
     const parentContainer = dailyButton.parentElement;
     if (parentContainer) {
         parentContainer.style.position = 'relative';
@@ -814,7 +904,6 @@ function showRewardToast(message) {
         <span>${message}</span>
     `;
 
-    // Append the toast directly inside the button's parent container, right above the button
     dailyButton.before(toast);
 
     setTimeout(() => {
@@ -828,3 +917,6 @@ function showRewardToast(message) {
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
+
+
+                    
