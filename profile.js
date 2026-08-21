@@ -22,8 +22,7 @@ function goHome() {
     
     if (typeof showView === 'function') {
         showView('home');     
-    fetchUserDataFromFirestore();
-        
+        fetchUserDataFromFirestore();
     } else {
         const homeViewElement = document.getElementById('homeView') || window.parent.document.getElementById('homeView');
         if (homeViewElement && typeof window.parent.showView === 'function') {
@@ -56,6 +55,12 @@ async function saveUserDataToCloud() {
         const playerProgression = calculateLevelAndXp(puzzlesSolved);
         const currentXpVal = playerProgression.currentXp;
 
+        // GRAB LOCAL DAILY REWARD STATE TO UPLOAD
+        const dailyStorageKey = getDailyStorageKey();
+        const dailyDataStr = localStorage.getItem(dailyStorageKey);
+        const dailyRewardState = dailyDataStr ? JSON.parse(dailyDataStr) : { streak: 0, lastClaimDate: "" };
+
+        // CORRECTION: Standardized to use the "players" collection matching fetchUserDataFromFirestore
         const userDocRef = doc(db, "players", username);
         await setDoc(userDocRef, {
             username: username,
@@ -64,6 +69,7 @@ async function saveUserDataToCloud() {
             xp: currentXpVal,
             coins: totalCoins,
             avatar: avatar,
+            dailyRewardState: dailyRewardState,
             lastUpdated: new Date()
         }, { merge: true });
     } catch (error) {
@@ -71,49 +77,60 @@ async function saveUserDataToCloud() {
     }
 }
 
-
 async function fetchUserDataFromFirestore() {
-    // Get current user session from local storage to find their unique ID
-    const currentUser = JSON.parse(localStorage.getItem('loggedInUser'));
-    if (!currentUser || !currentUser.authUid) return;
-
     try {
-        // Ensure Firestore functions are available
-        if (typeof db !== 'undefined' && typeof doc === 'function' && typeof getDoc === 'function') {
-            const userDocRef = doc(db, "users", currentUser.authUid);
-            const userSnap = await getDoc(userDocRef);
+        // Ensure Firestore functions and db configuration are accessible from window.pixvinzDb or global scope
+        const dbInstance = (window.pixvinzDb && window.pixvinzDb.db) || (typeof db !== 'undefined' ? db : null);
+        const docFunc = (window.pixvinzDb && window.pixvinzDb.doc) || (typeof doc === 'function' ? doc : null);
+        const getDocFunc = (window.pixvinzDb && window.pixvinzDb.getDoc) || (typeof getDoc === 'function' ? getDoc : null);
 
-            if (userSnap.exists()) {
-                const cloudData = userSnap.data();
-                
-                // Merge cloud data with local session
-                const updatedUser = {
-                    ...currentUser,
-                    username: cloudData.username || currentUser.username,
-                    displayName: cloudData.displayName || currentUser.displayName,
-                    coins: cloudData.coins !== undefined ? cloudData.coins : currentUser.coins,
-                    xp: cloudData.xp !== undefined ? cloudData.xp : currentUser.xp,
-                    level: cloudData.level !== undefined ? cloudData.level : currentUser.level,
-                    avatar: cloudData.avatar || currentUser.avatar
-                };
-                
-                // Save fresh data back to local storage
-                localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
-                
-                // Instantly update the screen so the user sees correct stats
-                if (typeof updateProfileUI === 'function') {
-                    updateProfileUI();
-                }
-                
-                console.log("Profile successfully synced from Firestore!");
+        if (!dbInstance || !docFunc || !getDocFunc) return;
+
+        const username = getCurrentUsername();
+        if (!username) return;
+
+        // CORRECTION: Strictly query the "players" collection using the username so it matches saveUserDataToCloud
+        const userDocRef = docFunc(dbInstance, "players", username);
+        const userSnap = await getDocFunc(userDocRef);
+
+        if (userSnap.exists()) {
+            const cloudData = userSnap.data();
+            
+            let currentUser = {};
+            try {
+                currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
+            } catch (e) {}
+
+            // Merge cloud data with local session
+            const updatedUser = {
+                ...currentUser,
+                username: cloudData.username || currentUser.username || username,
+                displayName: cloudData.displayName || currentUser.displayName || username,
+                coins: cloudData.coins !== undefined ? cloudData.coins : (currentUser.coins || 0),
+                xp: cloudData.xp !== undefined ? cloudData.xp : (currentUser.xp || 0),
+                level: cloudData.level !== undefined ? cloudData.level : (currentUser.level || 1),
+                avatar: cloudData.avatar || currentUser.avatar || '',
+                dailyRewardState: cloudData.dailyRewardState || currentUser.dailyRewardState
+            };
+            
+            // Save fresh data back to local storage session and individual user keys
+            localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
+            if (cloudData.coins !== undefined) localStorage.setItem(getUserKey('totalCoins'), cloudData.coins);
+            if (cloudData.level !== undefined) localStorage.setItem(getUserKey('currentLevel'), cloudData.level);
+            if (cloudData.avatar) localStorage.setItem(getUserKey('vinpix_avatar'), cloudData.avatar);
+            
+            // Sync daily reward state down to local storage key as well
+            if (cloudData.dailyRewardState) {
+                const dailyStorageKey = getDailyStorageKey();
+                localStorage.setItem(dailyStorageKey, JSON.stringify(cloudData.dailyRewardState));
             }
+            
+            console.log("Profile successfully synced from Firestore!");
         }
     } catch (err) {
         console.error("Failed to fetch data from Firestore:", err);
     }
 }
-
-
 
 function applyAvatarToUI(avatarData) {
     const avatarLoader = document.getElementById('avatarLoader');
@@ -185,9 +202,8 @@ function calculateLevelAndXp(totalPuzzlesSolved) {
 
 // --- UPDATE COINS AND LEVEL UI STATS ---
 function updateProfileStats() {
-    const prefix = getCurrentUsername() ? getCurrentUsername() + '_' : '';
-    const totalCoins = parseInt(localStorage.getItem(prefix + 'totalCoins')) || 0;
-    const currentLevelVal = parseInt(localStorage.getItem(prefix + 'currentLevel')) || 1;
+    const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
+    const currentLevelVal = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
 
     const profileCoinsEl = document.getElementById('profileCoins');
     const profileLevelEl = document.getElementById('profileLevel');
@@ -197,8 +213,7 @@ function updateProfileStats() {
 }
 
 function updateXpProgress() {
-    const currentUsername = getCurrentUsername();
-    let currentLevelVal = parseInt(localStorage.getItem(currentUsername ? currentUsername + '_currentLevel' : 'currentLevel')) || 1;
+    const currentLevelVal = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
 
     const puzzlesSolved = Math.max(0, currentLevelVal - 1);
     const playerProgression = calculateLevelAndXp(puzzlesSolved);
@@ -213,6 +228,41 @@ function updateXpProgress() {
     if (xpBarFill) xpBarFill.style.width = `${progressPercent}%`;
 
     updateProfileStats();
+}
+
+function updateProfileUI() {
+    let initialName = '';
+    try {
+        const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (userObj && userObj.displayName) {
+            initialName = userObj.displayName;
+        } else if (userObj && userObj.username) {
+            initialName = userObj.username;
+        }
+    } catch (e) {}
+
+    if (!initialName) {
+        initialName = localStorage.getItem('vinpix_username') || '';
+    }
+
+    const nameDisplay = document.getElementById('displayPlayerName');
+    if (nameDisplay) nameDisplay.innerText = initialName;
+
+    const inputElem = document.getElementById('username-input');
+    if (inputElem) inputElem.value = initialName;
+
+    const savedAvatar = localStorage.getItem(getUserKey('vinpix_avatar'));
+    if (savedAvatar) {
+        applyAvatarToUI(savedAvatar);
+    } else {
+        applyAvatarToUI('image/avatar.png');
+    }
+
+    updateXpProgress();
+    updateProfileStats();
+    checkAndUnlockBadges();
+    loadProfileGlobalRank();
+    checkDailyRewardStatus();
 }
 
 // --- LOAD & DISPLAY GLOBAL RANK ON PROFILE ---
@@ -269,21 +319,18 @@ function checkAndUnlockBadges() {
     const badgesContainer = document.getElementById('badgesGrid');
     if (!badgesContainer) return;
 
-    const currentUsername = getCurrentUsername();
-    const prefix = currentUsername ? currentUsername + '_' : '';
-
-    const playerLevel = parseInt(localStorage.getItem(prefix + 'currentLevel')) || 1;
-    const playerCoins = parseInt(localStorage.getItem(prefix + 'totalCoins')) || 0;
+    const playerLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+    const playerCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
     
-    let maxCoinsEarned = parseInt(localStorage.getItem(prefix + 'maxCoinsEarned')) || playerCoins;
+    let maxCoinsEarned = parseInt(localStorage.getItem(getUserKey('maxCoinsEarned'))) || playerCoins;
     if (playerCoins > maxCoinsEarned) {
         maxCoinsEarned = playerCoins;
-        localStorage.setItem(prefix + 'maxCoinsEarned', maxCoinsEarned);
+        localStorage.setItem(getUserKey('maxCoinsEarned'), maxCoinsEarned);
     }
 
     let beatSpeedThunder = false;
     for (let i = 20; i <= 30; i++) {
-        const timeStr = localStorage.getItem(prefix + `levelTime_${i}`);
+        const timeStr = localStorage.getItem(getUserKey(`levelTime_${i}`));
         if (timeStr && timeStr !== '--:--') {
             const parts = timeStr.split(':');
             if (parts.length === 2) {
@@ -388,42 +435,18 @@ function checkAndUnlockBadges() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+// STRICT LIFECYCLE STARTUP: Cloud data fetched FIRST before UI rendering or auto-saving
+document.addEventListener('DOMContentLoaded', async () => {
     const avatarLoader = document.getElementById('avatarLoader');
+    if (avatarLoader) avatarLoader.style.display = 'flex';
+
+    // STRICT PRIORITY: Fetch and overwrite local state with genuine cloud data before touching any UI
+    await fetchUserDataFromFirestore();
+
     if (avatarLoader) avatarLoader.style.display = 'none';
 
-    let initialName = '';
-    try {
-        const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
-        if (userObj && userObj.displayName) {
-            initialName = userObj.displayName;
-        } else if (userObj && userObj.username) {
-            initialName = userObj.username;
-        }
-    } catch (e) {}
-
-    if (!initialName) {
-        initialName = localStorage.getItem('vinpix_username') || '';
-    }
-
-    const nameDisplay = document.getElementById('displayPlayerName');
-    if (nameDisplay) nameDisplay.innerText = initialName;
-
-    const inputElem = document.getElementById('username-input');
-    if (inputElem) inputElem.value = initialName;
-
-    const savedAvatar = localStorage.getItem(getUserKey('vinpix_avatar'));
-    if (savedAvatar) {
-        applyAvatarToUI(savedAvatar);
-    } else {
-        applyAvatarToUI('image/avatar.png');
-    }
-
-    updateXpProgress();
-    updateProfileStats();
-    checkAndUnlockBadges();
-    loadProfileGlobalRank();
-    saveUserDataToCloud();
+    // Render interface using fully synchronized local/cloud profile data
+    updateProfileUI();
 });
 
 // --- EDIT NAME MODAL HANDLERS ---
@@ -553,9 +576,6 @@ if (saveProfileBtn) {
     });
 }
 
-
-
-
 // --- 7-DAY DAILY CHECK-IN LOGIC (USER-TIED) ---
 const dailyRewardsData = [
     { day: 1, coins: 15, xp: 50, label: '15 🪙' },
@@ -577,7 +597,6 @@ function getYesterdayDateString() {
     return d.toISOString().split('T')[0];
 }
 
-// Helper to get username-specific storage key for daily rewards
 function getDailyStorageKey() {
     const username = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
     return username ? `pixvinz_daily_${username}` : 'pixvinz_daily_guest';
@@ -591,7 +610,6 @@ function checkDailyRewardStatus() {
         const yesterday = getYesterdayDateString();
         const badge = document.getElementById('dailyNotificationBadge');
 
-        // Check if user missed a day -> reset streak to 0
         if (dailyState.lastClaimDate && dailyState.lastClaimDate !== today && dailyState.lastClaimDate !== yesterday) {
             dailyState.streak = 0;
             localStorage.setItem(storageKey, JSON.stringify(dailyState));
@@ -629,7 +647,6 @@ function renderDailyGrid() {
     const today = getTodayDateString();
     const yesterday = getYesterdayDateString();
 
-    // Reset streak if user missed a day
     if (dailyState.lastClaimDate && dailyState.lastClaimDate !== today && dailyState.lastClaimDate !== yesterday) {
         dailyState.streak = 0;
         localStorage.setItem(storageKey, JSON.stringify(dailyState));
@@ -704,45 +721,42 @@ window.claimDailyReward = async function() {
     
     if (dailyState.lastClaimDate === today) return;
 
-    // Advance streak (loop back to 1 if past day 7)
     let nextStreak = dailyState.streak + 1;
     if (nextStreak > 7) nextStreak = 1;
 
     const reward = dailyRewardsData[nextStreak - 1];
 
-    // 1. Add Coins using your built-in earnCoins function (updates display + cloud sync)
     if (typeof earnCoins === 'function') {
         earnCoins(reward.coins);
     } else {
-        const coinKey = typeof getUserKey === 'function' ? getUserKey('totalCoins') : 'totalCoins';
+        const coinKey = getUserKey('totalCoins');
         let totalCoins = (parseInt(localStorage.getItem(coinKey)) || 0) + reward.coins;
         localStorage.setItem(coinKey, totalCoins);
         if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
     }
 
-    // 2. Add Bonus XP (updates username-specific _bonusXp key)
     try {
-        const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
+        const currentUsername = getCurrentUsername();
         const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp';
         let bonusXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
         bonusXp += reward.xp;
         localStorage.setItem(xpStoreKey, bonusXp);
     } catch (e) {}
 
-    // 3. Save daily streak state to username key
     dailyState.streak = nextStreak;
     dailyState.lastClaimDate = today;
     localStorage.setItem(storageKey, JSON.stringify(dailyState));
 
-    // 4. Refresh UI, Grid, and XP Progression bar
     renderDailyGrid();
     checkDailyRewardStatus();
 
     if (typeof updateXpProgress === 'function') updateXpProgress();
     if (typeof updateProfileUI === 'function') updateProfileUI();
-    if (typeof saveUserDataToCloud === 'function') saveUserDataToCloud();
+    
+    if (typeof saveUserDataToCloud === 'function') {
+        saveUserDataToCloud();
+    }
 
-    // 5. Show custom animated notification toast banner
     showRewardToast(`🎉 Claimed Day ${nextStreak}! +${reward.coins} Coins & +${reward.xp} XP`);
 };
 
@@ -750,11 +764,9 @@ function showRewardToast(message) {
     const existingToast = document.getElementById('customRewardToast');
     if (existingToast) existingToast.remove();
 
-    // Find your Daily Rewards button to position the toast right above it
     const dailyButton = document.querySelector("button[onclick='openDailyModal()']");
     if (!dailyButton) return;
 
-    // Make sure the parent container has relative positioning so the absolute toast stays anchored to it
     const parentContainer = dailyButton.parentElement;
     if (parentContainer) {
         parentContainer.style.position = 'relative';
@@ -791,7 +803,6 @@ function showRewardToast(message) {
         <span>${message}</span>
     `;
 
-    // Append the toast directly inside the button's parent container, right above the button
     dailyButton.before(toast);
 
     setTimeout(() => {
