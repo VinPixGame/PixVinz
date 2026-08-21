@@ -31,35 +31,31 @@ document.addEventListener('DOMContentLoaded', () => {
         video.play().catch(() => {});
     });
 
-    // --- LOADING SCREEN PROGRESS & TRANSITION ---
+    // --- WORKING LOADING PROGRESS BAR & REDIRECT TO AUTH.HTML ---
     let currentPercent = 1;
     const percentageEl = document.getElementById('loadingPercentage');
     const barFillEl = document.getElementById('loadingBarFill');
 
     const loadingInterval = setInterval(() => {
-        currentPercent += Math.floor(Math.random() * 8) + 3; // Increment speed
+        currentPercent += Math.floor(Math.random() * 8) + 4; // Increments smoothly
+        
         if (currentPercent >= 100) {
             currentPercent = 100;
             clearInterval(loadingInterval);
 
-            // Loading is complete! Check authentication state before transitioning
+            // Update UI one last time to 100%
+            if (percentageEl) percentageEl.innerText = '100%';
+            if (barFillEl) barFillEl.style.width = '100%';
+
+            // Brief pause at 100% before transitioning to auth.html
             setTimeout(() => {
-                const savedUser = localStorage.getItem('loggedInUser');
-
-                if (savedUser) {
-                    // If already logged in, refresh data and stay on index.html
-                    window.GameState.refreshUserData();
-                    // Hide loading view and show your home/game view here if needed
-                } else {
-                    // If NOT logged in, transition to your separate auth.html URL
-                    window.location.href = 'auth.html';
-                }
-            }, 400); // Small pause at 100% for visual smoothness
+                window.location.href = 'auth.html';
+            }, 400);
+        } else {
+            if (percentageEl) percentageEl.innerText = currentPercent + '%';
+            if (barFillEl) barFillEl.style.width = currentPercent + '%';
         }
-
-        if (percentageEl) percentageEl.innerText = currentPercent + '%';
-        if (barFillEl) barFillEl.style.width = currentPercent + '%';
-    }, 50); // Adjust speed of loading simulation here
+    }, 40); // Speed of the loading bar
 });
 
 window.GameState = {
@@ -67,7 +63,6 @@ window.GameState = {
   
   // Directly fetch fresh data from Firestore first
   async refreshUserData(usernameToFetch) {
-    // If no username is passed, check if we have one stored temporarily
     const username = usernameToFetch || (JSON.parse(localStorage.getItem('loggedInUser') || '{}')).username;
     
     if (!username) return null;
@@ -79,10 +74,7 @@ window.GameState = {
         const snap = await getDoc(userDocRef);
         
         if (snap.exists()) {
-          // Cloud is the absolute source of truth!
           this.currentUser = snap.data();
-          
-          // Save the fresh cloud data to localStorage AFTER pulling it
           localStorage.setItem('loggedInUser', JSON.stringify(this.currentUser));
         } else {
           console.warn("User document not found in Firestore for:", username);
@@ -113,7 +105,6 @@ window.GameState = {
     });
   }
 };
-
 
   
   
