@@ -205,46 +205,11 @@ const barFillElem = document.getElementById('loadingBarFill');
 async function finishLoading() {
     localStorage.removeItem('skipLoading');
     
-    let loggedInUser = getCurrentUser();
-    
-    // Force a fresh fetch from Firestore using collection 'players', doc ID = username
-    if (loggedInUser && loggedInUser.username) {
-        try {
-            if (window.pixvinzDb) {
-                const { db, doc, getDoc } = window.pixvinzDb;
-                const userDocRef = doc(db, "players", loggedInUser.username);
-                const userSnap = await getDoc(userDocRef);
+    // Pulls fresh data directly from Firestore using our global state manager
+    await window.GameState.refreshUserData();
 
-                if (userSnap.exists()) {
-                    const cloudData = userSnap.data();
-                    
-                    // Build a completely fresh user object straight from the cloud database
-                    loggedInUser = {
-                        username: cloudData.username || loggedInUser.username,
-                        displayName: cloudData.displayName || loggedInUser.displayName,
-                        coins: cloudData.coins !== undefined ? cloudData.coins : 0,
-                        xp: cloudData.xp !== undefined ? cloudData.xp : 0,
-                        level: cloudData.level !== undefined ? cloudData.level : 1,
-                        avatar: cloudData.avatar || '',
-                        authUid: cloudData.authUid || '',
-                        password: cloudData.password || '',
-                        dailyRewardState: cloudData.dailyRewardState || { streak: 0, lastClaimDate: '' },
-                        lastUpdated: cloudData.lastUpdated || null
-                    };
-                    
-                    // Overwrite stale local storage cache with fresh cloud data
-                    localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
-                }
-            }
-        } catch (err) {
-            console.warn("Cloud fetch failed, falling back to local cache:", err);
-        }
-    }
-
-    if (loggedInUser) {
-        const nameElem = document.getElementById('userDisplayName');
-        if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
-        
+    // Check if we successfully got a user session
+    if (window.GameState.currentUser) {
         // Sync player stats if function exists
         if (typeof fetchUserDataFromFirestore === 'function') {
             await fetchUserDataFromFirestore();
@@ -295,7 +260,6 @@ if (skipLoading) {
     // Kick off the smooth 6-second timer loop
     setTimeout(checkCompletion, 100);
 }
-
   // --- 2. AUTHENTICATION & FORM NAVIGATION ---
   const toRegBtn = document.getElementById('toRegister');
   if (toRegBtn) {
@@ -453,9 +417,8 @@ if (skipLoading) {
 
         await setDoc(userDocRef, newUserData);
 
-        localStorage.setItem('loggedInUser', JSON.stringify(newUserData));
-        const nameElem = document.getElementById('userDisplayName');
-        if (nameElem) nameElem.innerText = displayName;
+        // Fetch and load the freshly created user via global state manager
+        await window.GameState.refreshUserData(username);
 
         if (errElem) errElem.innerText = "";
         showView('home');
@@ -492,29 +455,9 @@ const logForm = document.getElementById('loginForm');
         }
 
         if (userData && userData.password === pass) {
-          // Use the exact live cloud data from Firestore, ensuring coins, XP, and level are preserved
-          const fullUserData = {
-            username: userData.username || username,
-            displayName: userData.displayName || 'Vinz',
-            coins: userData.coins !== undefined ? userData.coins : 0,
-            xp: userData.xp !== undefined ? userData.xp : 0,
-            level: userData.level !== undefined ? userData.level : 1,
-            avatar: userData.avatar || '',
-            authUid: userData.authUid || '',
-            password: userData.password || pass,
-            dailyRewardState: userData.dailyRewardState || { streak: 0, lastClaimDate: '' },
-            lastUpdated: userData.lastUpdated || null
-          };
+          // 1. Fetch fresh data and populate everything using our global state manager
+          await window.GameState.refreshUserData(username);
 
-          // Save the real cloud data to localStorage
-          localStorage.setItem('loggedInUser', JSON.stringify(fullUserData));
-          
-          if (typeof fetchUserDataFromFirestore === 'function') {
-              await fetchUserDataFromFirestore();
-          }
-
-          const nameElem = document.getElementById('userDisplayName');
-          if (nameElem) nameElem.innerText = fullUserData.displayName;
           if (errElem) errElem.innerText = "";
           
           showView('home');
