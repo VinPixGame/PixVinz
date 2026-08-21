@@ -582,7 +582,8 @@ if (saveProfileBtn) {
         toast.style.opacity = '0';
         setTimeout(() => toast.remove(), 300);
     }, 3000);
-}
+
+
 
 // --- 7-DAY DAILY CHECK-IN LOGIC (USER-TIED & SECURE) ---
 const dailyRewardsData = [
@@ -733,12 +734,15 @@ function renderDailyGrid() {
         grid.appendChild(card);
     });
 
-    const claimBtn = document.getElementById('dailyClaimBtn');
+const claimBtn = document.getElementById('dailyClaimBtn');
     if (claimBtn) {
         if (dailyCountdownInterval) {
             clearInterval(dailyCountdownInterval);
             dailyCountdownInterval = null;
         }
+
+        // Ensure button pointer events are explicitly enabled
+        claimBtn.style.pointerEvents = 'auto';
 
         if (lockedOut) {
             claimBtn.style.background = 'rgba(255,255,255,0.1)';
@@ -753,6 +757,8 @@ function renderDailyGrid() {
 
                 if (diff <= 0) {
                     claimBtn.textContent = `CLAIM DAY ${currentDayIndex} REWARD`;
+                    claimBtn.disabled = false;
+                    claimBtn.style.cursor = 'pointer';
                     renderDailyGrid();
                     return;
                 }
@@ -775,8 +781,6 @@ function renderDailyGrid() {
             claimBtn.disabled = false;
         }
     }
-}
-
 window.claimDailyReward = async function() {
     const storageKey = getDailyStorageKey();
     let dailyState = JSON.parse(localStorage.getItem(storageKey) || '{"streak": 0, "lastClaimDate": "", "lastClaimTimestamp": 0}');
