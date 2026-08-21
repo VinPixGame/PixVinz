@@ -1,47 +1,30 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. View Switching with forced display toggling (fixes mobile touch blocking)
-    const loginView = document.getElementById('loginView');
-    const registerView = document.getElementById('registerView');
+    // 1. View Switching
+    const views = {
+        login: document.getElementById('loginView'),
+        register: document.getElementById('registerView')
+    };
 
-    function showView(viewName) {
-        if (viewName === 'login') {
-            if (loginView) {
-                loginView.classList.add('active');
-                loginView.style.display = 'block';
-            }
-            if (registerView) {
-                registerView.classList.remove('active');
-                registerView.style.display = 'none';
-            }
-        } else if (viewName === 'register') {
-            if (registerView) {
-                registerView.classList.add('active');
-                registerView.style.display = 'block';
-            }
-            if (loginView) {
-                loginView.classList.remove('active');
-                loginView.style.display = 'none';
-            }
+    function showView(targetView) {
+        Object.values(views).forEach(v => {
+            if (v) v.classList.remove('active');
+        });
+        if (views[targetView]) {
+            views[targetView].classList.add('active');
         }
     }
 
     showView('login');
 
-    const toRegister = document.getElementById('toRegister');
-    if (toRegister) {
-        toRegister.addEventListener('click', (e) => {
-            e.preventDefault();
-            showView('register');
-        });
-    }
+    document.getElementById('toRegister')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        showView('register');
+    });
 
-    const toLogin = document.getElementById('toLogin');
-    if (toLogin) {
-        toLogin.addEventListener('click', (e) => {
-            e.preventDefault();
-            showView('login');
-        });
-    }
+    document.getElementById('toLogin')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        showView('login');
+    });
 
     // 2. Format Validations
     function validateUsername(user) {
