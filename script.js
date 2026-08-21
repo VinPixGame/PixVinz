@@ -152,7 +152,7 @@ async function finishLoading() {
     
     let loggedInUser = getCurrentUser();
     
-    // Fetch latest progress from Firestore FIRST using your exact schema: collection "players", document ID = username
+    // Force a fresh fetch from Firestore using collection 'players', doc ID = username
     if (loggedInUser && loggedInUser.username) {
         try {
             if (window.pixvinzDb) {
@@ -162,24 +162,27 @@ async function finishLoading() {
 
                 if (userSnap.exists()) {
                     const cloudData = userSnap.data();
+                    
+                    // Build a completely fresh user object straight from the cloud database
                     loggedInUser = {
-                        ...loggedInUser,
                         username: cloudData.username || loggedInUser.username,
                         displayName: cloudData.displayName || loggedInUser.displayName,
-                        coins: cloudData.coins !== undefined ? cloudData.coins : loggedInUser.coins,
-                        xp: cloudData.xp !== undefined ? cloudData.xp : loggedInUser.xp,
-                        level: cloudData.level !== undefined ? cloudData.level : loggedInUser.level,
-                        avatar: cloudData.avatar || loggedInUser.avatar,
-                        authUid: cloudData.authUid || loggedInUser.authUid,
-                        password: cloudData.password || loggedInUser.password,
-                        dailyRewardState: cloudData.dailyRewardState || loggedInUser.dailyRewardState || { streak: 0, lastClaimDate: '' },
-                        lastUpdated: cloudData.lastUpdated || loggedInUser.lastUpdated
+                        coins: cloudData.coins !== undefined ? cloudData.coins : 0,
+                        xp: cloudData.xp !== undefined ? cloudData.xp : 0,
+                        level: cloudData.level !== undefined ? cloudData.level : 1,
+                        avatar: cloudData.avatar || '',
+                        authUid: cloudData.authUid || '',
+                        password: cloudData.password || '',
+                        dailyRewardState: cloudData.dailyRewardState || { streak: 0, lastClaimDate: '' },
+                        lastUpdated: cloudData.lastUpdated || null
                     };
+                    
+                    // Overwrite stale local storage cache with fresh cloud data
                     localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
                 }
             }
         } catch (err) {
-            console.warn("Could not fetch latest cloud data, using local cache:", err);
+            console.warn("Cloud fetch failed, falling back to local cache:", err);
         }
     }
 
@@ -187,6 +190,7 @@ async function finishLoading() {
         const nameElem = document.getElementById('userDisplayName');
         if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
         
+        // Sync player stats if function exists
         if (typeof fetchUserDataFromFirestore === 'function') {
             await fetchUserDataFromFirestore();
         }
@@ -197,7 +201,6 @@ async function finishLoading() {
         showView('login');
     }
 }
-
   
 if (skipLoading) {
     finishLoading();
