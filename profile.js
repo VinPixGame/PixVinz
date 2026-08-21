@@ -750,35 +750,49 @@ function showRewardToast(message) {
     const existingToast = document.getElementById('customRewardToast');
     if (existingToast) existingToast.remove();
 
+    // Find your Daily Rewards button to position the toast right above it
+    const dailyButton = document.querySelector("button[onclick='openDailyModal()']");
+    if (!dailyButton) return;
+
+    // Make sure the parent container has relative positioning so the absolute toast stays anchored to it
+    const parentContainer = dailyButton.parentElement;
+    if (parentContainer) {
+        parentContainer.style.position = 'relative';
+    }
+
     const toast = document.createElement('div');
     toast.id = 'customRewardToast';
     toast.style.cssText = `
-        position: fixed;
-        top: 20px;
+        position: absolute;
+        bottom: 100%;
         left: 50%;
-        transform: translateX(-50%) translateY(-20px);
+        transform: translateX(-50%) translateY(10px);
+        margin-bottom: 12px;
         background: linear-gradient(135deg, #130f2b, #2b1055);
         border: 2px solid #ffd700;
         color: #fff;
-        padding: 12px 24px;
-        border-radius: 16px;
+        padding: 10px 20px;
+        border-radius: 14px;
         font-weight: 700;
-        font-size: 14px;
+        font-size: 13px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 15px rgba(255,215,0,0.4);
         z-index: 99999;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
         opacity: 0;
+        white-space: nowrap;
+        pointer-events: none;
         transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
     `;
 
     toast.innerHTML = `
-        <span style="font-size: 20px;">🎁</span>
+        <span style="font-size: 18px;">🎁</span>
         <span>${message}</span>
     `;
 
-    document.body.appendChild(toast);
+    // Append the toast directly inside the button's parent container, right above the button
+    dailyButton.before(toast);
 
     setTimeout(() => {
         toast.style.transform = 'translateX(-50%) translateY(0)';
@@ -786,9 +800,8 @@ function showRewardToast(message) {
     }, 10);
 
     setTimeout(() => {
-        toast.style.transform = 'translateX(-50%) translateY(-20px)';
+        toast.style.transform = 'translateX(-50%) translateY(10px)';
         toast.style.opacity = '0';
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
-    
