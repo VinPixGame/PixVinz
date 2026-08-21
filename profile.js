@@ -576,7 +576,15 @@ if (saveProfileBtn) {
     });
 }
 
-// --- 7-DAY DAILY CHECK-IN LOGIC (USER-TIED) ---
+
+    setTimeout(() => {
+        toast.style.transform = 'translateX(-50%) translateY(10px)';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// --- 7-DAY DAILY CHECK-IN LOGIC (USER-TIED & SECURE) ---
 const dailyRewardsData = [
     { day: 1, coins: 15, xp: 50, label: '15 🪙' },
     { day: 2, coins: 30, xp: 100, label: '30 🪙' },
@@ -599,68 +607,19 @@ function getYesterdayDateString() {
     return d.toISOString().split('T')[0];
 }
 
-// Helper to get username-specific storage key for daily rewards
 function getDailyStorageKey() {
     const username = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
     return username ? `pixvinz_daily_${username}` : 'pixvinz_daily_guest';
 }
 
-function updateCalendarHeaderIcon() {
-    const headerTitle = document.querySelector("#dailyModal h2, #dailyModal div"); // Target the title area
-    // Let's dynamically inject/update a real-time calendar graphic header if present
-    const now = new Date();
-    const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-    const monthStr = months[now.getMonth()];
-    const dayNum = now.getDate();
-
-    // Look for the calendar icon element or create/update it near DAILY REWARDS text
-    let calIcon = document.getElementById('realTimeCalendarIcon');
-    if (!calIcon) {
-        calIcon = document.createElement('div');
-        calIcon.id = 'realTimeCalendarIcon';
-        // Style the mini calendar look
-        calIcon.style.cssText = `
-            display: inline-flex;
-            flex-direction: column;
-            width: 32px;
-            height: 32px;
-            background: #fff;
-            border-radius: 6px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            vertical-align: middle;
-            margin-right: 8px;
-        `;
-        calIcon.innerHTML = `
-            <div style="background: #ff4757; color: white; font-size: 8px; font-weight: bold; text-align: center; padding: 1px 0; text-transform: uppercase;">${monthStr}</div>
-            <div style="color: #333; font-size: 13px; font-weight: 900; text-align: center; line-height: 20px;" id="calDayNum">${dayNum}</div>
-        `;
-        
-        // Prepend it to the title container if available
-        const titleEl = document.querySelector("#dailyModal span:has-text('DAILY REWARDS'), #dailyModal");
-        const rewardsTitle = document.getElementById('dailyRewardsTitleText') || document.querySelector("#dailyModal");
-        if (rewardsTitle) {
-            // Find text node or title span
-            const headerSpan = document.querySelector("#dailyModal");
-            if (headerSpan) {
-                // Insert gracefully if header container exists
-            }
-        }
-    } else {
-        const dayNumEl = document.getElementById('calDayNum');
-        if (dayNumEl) dayNumEl.textContent = dayNum;
-    }
-}
-
 function checkDailyRewardStatus() {
     try {
         const storageKey = getDailyStorageKey();
-        let dailyState = JSON.parse(localStorage.getItem(storageKey) || '{"streak": 0, "lastClaimDate": ""}');
+        let dailyState = JSON.parse(localStorage.getItem(storageKey) || '{"streak": 0, "lastClaimDate": "", "lastClaimTimestamp": 0}');
         const today = getTodayDateString();
         const yesterday = getYesterdayDateString();
         const badge = document.getElementById('dailyNotificationBadge');
 
-        // Check if user missed a day -> reset streak to 0
         if (dailyState.lastClaimDate && dailyState.lastClaimDate !== today && dailyState.lastClaimDate !== yesterday) {
             dailyState.streak = 0;
             localStorage.setItem(storageKey, JSON.stringify(dailyState));
@@ -679,13 +638,12 @@ window.openDailyModal = function() {
         AudioManager.playClick();
     }
     
-    // Update the calendar icon dynamically on open
+    // Render real-time calendar graphic header dynamically
     const now = new Date();
     const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
     const monthStr = months[now.getMonth()];
     const dayNum = now.getDate();
 
-    // Check and update header calendar image/element if it exists in HTML
     const calHeader = document.getElementById('dynamicCalendarHeader');
     if (calHeader) {
         calHeader.innerHTML = `
@@ -716,28 +674,33 @@ function renderDailyGrid() {
     grid.innerHTML = '';
 
     const storageKey = getDailyStorageKey();
-    let dailyState = JSON.parse(localStorage.getItem(storageKey) || '{"streak": 0, "lastClaimDate": ""}');
+    let dailyState = JSON.parse(localStorage.getItem(storageKey) || '{"streak": 0, "lastClaimDate": "", "lastClaimTimestamp": 0}');
     const today = getTodayDateString();
     const yesterday = getYesterdayDateString();
 
-    // Reset streak if user missed a day
     if (dailyState.lastClaimDate && dailyState.lastClaimDate !== today && dailyState.lastClaimDate !== yesterday) {
         dailyState.streak = 0;
         localStorage.setItem(storageKey, JSON.stringify(dailyState));
     }
 
     const hasClaimedToday = dailyState.lastClaimDate === today;
-    const currentDayIndex = hasClaimedToday ? dailyState.streak : dailyState.streak + 1;
+    
+    const nowTime = Date.now();
+    const timeSinceLastClaim = dailyState.lastClaimTimestamp ? nowTime - dailyState.lastClaimTimestamp : Infinity;
+    const isUnder24Hours = timeSinceLastClaim < 24 * 60 * 60 * 1000;
+
+    const lockedOut = hasClaimedToday || isUnder24Hours;
+    const currentDayIndex = lockedOut ? dailyState.streak : (dailyState.streak + 1 > 7 ? 1 : dailyState.streak + 1);
 
     dailyRewardsData.forEach((item) => {
-        const isCompleted = item.day <= dailyState.streak;
-        const isCurrent = item.day === currentDayIndex && !hasClaimedToday;
+        const isCompleted = item.day <= dailyState.streak && !lockedOut;
+        const isCurrent = item.day === currentDayIndex && !lockedOut;
 
         let boxBg = 'rgba(255,255,255,0.03)';
         let borderColor = 'rgba(255,215,0,0.2)';
         let textColor = '#aaa';
 
-        if (isCompleted) {
+        if (item.day < dailyState.streak || (item.day === dailyState.streak && lockedOut)) {
             boxBg = 'rgba(0, 229, 255, 0.1)';
             borderColor = '#00e5ff';
             textColor = '#00e5ff';
@@ -765,7 +728,7 @@ function renderDailyGrid() {
             <span style="font-size: 10px; font-weight: bold; color: ${textColor}; margin-bottom: 4px;">DAY ${item.day}</span>
             <span style="font-size: 14px; margin-bottom: 4px;">🎁</span>
             <span style="font-size: 11px; font-weight: 800; color: #fff;">${item.label}</span>
-            ${isCompleted ? '<span style="position: absolute; top: 4px; right: 4px; font-size: 10px;">✅</span>' : ''}
+            ${(item.day < dailyState.streak || (item.day === dailyState.streak && lockedOut)) ? '<span style="position: absolute; top: 4px; right: 4px; font-size: 10px;">✅</span>' : ''}
         `;
         grid.appendChild(card);
     });
@@ -777,17 +740,16 @@ function renderDailyGrid() {
             dailyCountdownInterval = null;
         }
 
-        if (hasClaimedToday) {
+        if (lockedOut) {
             claimBtn.style.background = 'rgba(255,255,255,0.1)';
             claimBtn.style.color = '#ffd700';
             claimBtn.style.cursor = 'not-allowed';
             claimBtn.disabled = true;
 
-            // Start live countdown timer to midnight
             const updateTimerDisplay = () => {
-                const now = new Date();
-                const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
-                const diff = midnight.getTime() - now.getTime();
+                const currentTime = Date.now();
+                const targetTime = dailyState.lastClaimTimestamp + (24 * 60 * 60 * 1000);
+                const diff = targetTime - currentTime;
 
                 if (diff <= 0) {
                     claimBtn.textContent = `CLAIM DAY ${currentDayIndex} REWARD`;
@@ -817,10 +779,13 @@ function renderDailyGrid() {
 
 window.claimDailyReward = async function() {
     const storageKey = getDailyStorageKey();
-    let dailyState = JSON.parse(localStorage.getItem(storageKey) || '{"streak": 0, "lastClaimDate": ""}');
+    let dailyState = JSON.parse(localStorage.getItem(storageKey) || '{"streak": 0, "lastClaimDate": "", "lastClaimTimestamp": 0}');
     const today = getTodayDateString();
     
-    if (dailyState.lastClaimDate === today) return;
+    const nowTime = Date.now();
+    if (dailyState.lastClaimDate === today || (dailyState.lastClaimTimestamp && nowTime - dailyState.lastClaimTimestamp < 24 * 60 * 60 * 1000)) {
+        return;
+    }
 
     let nextStreak = dailyState.streak + 1;
     if (nextStreak > 7) nextStreak = 1;
@@ -846,6 +811,7 @@ window.claimDailyReward = async function() {
 
     dailyState.streak = nextStreak;
     dailyState.lastClaimDate = today;
+    dailyState.lastClaimTimestamp = nowTime;
     localStorage.setItem(storageKey, JSON.stringify(dailyState));
 
     renderDailyGrid();
@@ -857,6 +823,13 @@ window.claimDailyReward = async function() {
     if (typeof saveUserDataToCloud === 'function') {
         saveUserDataToCloud();
     }
+
+    // Play reward sound effect successfully
+    try {
+        const rewardAudio = new Audio('sounds/reward.mp3');
+        rewardAudio.volume = 0.6;
+        rewardAudio.play().catch(e => console.log("Audio play blocked:", e));
+    } catch (e) {}
 
     showRewardToast(`🎉 Claimed Day ${nextStreak}! +${reward.coins} Coins & +${reward.xp} XP`);
 };
@@ -917,6 +890,4 @@ function showRewardToast(message) {
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
-
-
                     
