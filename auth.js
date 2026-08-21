@@ -90,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.getElementById('regUser').value.trim().toLowerCase();
+        const displayNameInput = document.getElementById('regDisplayName').value.trim();
         const pass = document.getElementById('regPass').value;
         const passConfirm = document.getElementById('regPassConfirm').value;
         const errElem = document.getElementById('regError');
@@ -124,16 +125,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Create Firebase Auth account using dummy email format
             const dummyEmail = `${username}@pixvinz.com`;
             const userCredential = await createUserWithEmailAndPassword(auth, dummyEmail, pass);
             const uid = userCredential.user.uid;
 
-            // Define all required user properties mapped to Firestore
             const newUserData = {
                 username: username,
                 uid: uid,
-                displayName: userData.displayName || "",
+                displayName: displayNameInput,
                 avatar: "",
                 coins: 0,
                 level: 1,
@@ -142,11 +141,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     streak: 0,
                     lastClaimDate: ""
                 },
-                password: pass, // Optional: stored if your app checks plain text passwords on login, though Auth handles credentials.
+                password: pass,
                 createdAt: new Date()
             };
 
-            // Save to Firestore under 'players' collection using the username as document ID
             await setDoc(userDocRef, newUserData);
 
             localStorage.setItem('loggedInUser', JSON.stringify(newUserData));
@@ -160,8 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
-// 6. Login Submit (Firestore verification & progress fetch)
+    // 6. Login Submit (Firestore verification & progress fetch)
     document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.getElementById('loginUser').value.trim().toLowerCase();
@@ -181,13 +178,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (snap.exists()) {
                 const userData = snap.data();
                 
-                // Verify password matches
                 if (userData.password === pass) {
-                    // Fetch and save the latest Firestore values to localStorage session
                     const freshUserData = {
                         username: userData.username,
                         uid: userData.uid,
-                        displayName: displayName,
+                        displayName: userData.displayName || "", // Fixed variable scope issue here
                         avatar: userData.avatar || "",
                         coins: userData.coins ?? 0,
                         level: userData.level ?? 1,
@@ -210,4 +205,4 @@ document.addEventListener('DOMContentLoaded', () => {
             if (errElem) errElem.innerText = "Login error occurred: " + err.message;
         }
     });
-                          
+});
