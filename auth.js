@@ -49,11 +49,11 @@ document.addEventListener('DOMContentLoaded', () => {
     setupToggle('regPass', 'toggleRegPass');
     setupToggle('loginPass', 'toggleLoginPass');
 
-    // 4. Username Availability Check
+    // 4. Real-time Firestore Username Availability Check
     const regUser = document.getElementById('regUser');
     const indicator = document.getElementById('regUserIndicator');
     if (regUser && indicator) {
-        regUser.addEventListener('input', () => {
+        regUser.addEventListener('input', async () => {
             const val = regUser.value.trim().toLowerCase();
             regUser.value = val;
 
@@ -63,19 +63,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const users = JSON.parse(localStorage.getItem('pixvinz_users') || '{}');
-            if (users[val]) {
-                indicator.innerText = '❌ Taken';
-                indicator.style.color = '#ff4d4d';
-            } else {
+            try {
+                if (window.pixvinzDb) {
+                    const { db, doc, getDoc } = window.pixvinzDb;
+                    const userDocRef = doc(db, 'players', val);
+                    const snap = await getDoc(userDocRef);
+                    if (snap.exists()) {
+                        indicator.innerText = '❌ Taken';
+                        indicator.style.color = '#ff4d4d';
+                    } else {
+                        indicator.innerText = '✔ Available';
+                        indicator.style.color = '#2ecc71';
+                    }
+                } else {
+                    indicator.innerText = '⚠️ Database offline';
+                    indicator.style.color = '#f39c12';
+                }
+            } catch (err) {
                 indicator.innerText = '✔ Available';
                 indicator.style.color = '#2ecc71';
             }
         });
     }
 
-    // 5. Register Submit
-    document.getElementById('registerForm')?.addEventListener('submit', (e) => {
+    // 5. Register Submit (Firebase Auth + Firestore)
+    document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.getElementById('regUser').value.trim().toLowerCase();
         const pass = document.getElementById('regPass').value;
@@ -95,37 +107,107 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const users = JSON.parse(localStorage.getItem('pixvinz_users') || '{}');
-        if (users[username]) {
-            if (errElem) errElem.innerText = "Username already exists!";
-            return;
+        try {
+            if (!window.pixvinzDb || !window.pixvinzAuth) {
+                if (errElem) errElem.innerText = "Firebase connection not available.";
+                return;
+            }
+
+            const { db, doc, getDoc, setDoc } = window.pixvinzDb;
+            const { auth, createUserWithEmailAndPassword } = window.pixvinzAuth;
+
+            const userDocRef = doc(db, 'players', username);
+            const userSnapshot = await getDoc(userDocRef);
+
+            if (userSnapshot.exists()) {
+                if (errElem) errElem.innerText = "Username is already taken!";
+                return;
+            }
+
+            // Create Firebase Auth account using dummy email format
+            const dummyEmail = `${username}@pixvinz.com`;
+            const userCredential = await createUserWithEmailAndPassword(auth, dummyEmail, pass);
+            const uid = userCredential.user.uid;
+
+            // Define all required user properties mapped to Firestore
+            const newUserData = {
+                username: username,
+                uid: uid,
+                displayName: userData.displayName || "",
+                avatar: "",
+                coins: 0,
+                level: 1,
+                xp: 0,
+                dailyrewards: {
+                    streak: 0,
+                    lastClaimDate: ""
+                },
+                password: pass, // Optional: stored if your app checks plain text passwords on login, though Auth handles credentials.
+                createdAt: new Date()
+            };
+
+            // Save to Firestore under 'players' collection using the username as document ID
+            await setDoc(userDocRef, newUserData);
+
+            localStorage.setItem('loggedInUser', JSON.stringify(newUserData));
+            localStorage.setItem('skipLoading', 'true');
+
+            if (errElem) errElem.innerText = "";
+            window.location.href = 'index.html';
+
+        } catch (err) {
+            if (errElem) errElem.innerText = "Registration error: " + err.message;
         }
-
-        const newUser = { username, password: pass };
-        users[username] = newUser;
-        localStorage.setItem('pixvinz_users', JSON.stringify(users));
-        localStorage.setItem('loggedInUser', JSON.stringify(newUser));
-        localStorage.setItem('skipLoading', 'true');
-
-        window.location.href = 'index.html';
     });
 
-    // 6. Login Submit
-    document.getElementById('loginForm')?.addEventListener('submit', (e) => {
+
+// 6. Login Submit (Firestore verification & progress fetch)
+    document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.getElementById('loginUser').value.trim().toLowerCase();
         const pass = document.getElementById('loginPass').value;
         const errElem = document.getElementById('loginError');
 
-        const users = JSON.parse(localStorage.getItem('pixvinz_users') || '{}');
-        const user = users[username];
+        try {
+            if (!window.pixvinzDb) {
+                if (errElem) errElem.innerText = "Database connection not available.";
+                return;
+            }
 
-        if (user && user.password === pass) {
-            localStorage.setItem('loggedInUser', JSON.stringify(user));
-            localStorage.setItem('skipLoading', 'true');
-            window.location.href = 'index.html';
-        } else {
+            const { db, doc, getDoc } = window.pixvinzDb;
+            const userDocRef = doc(db, 'players', username);
+            const snap = await getDoc(userDocRef);
+
+            if (snap.exists()) {
+                const userData = snap.data();
+                
+                // Verify password matches
+                if (userData.password === pass) {
+                    // Fetch and save the latest Firestore values to localStorage session
+                    const freshUserData = {
+                        username: userData.username,
+                        uid: userData.uid,
+                        displayName: displayName,
+                        avatar: userData.avatar || "",
+                        coins: userData.coins ?? 0,
+                        level: userData.level ?? 1,
+                        xp: userData.xp ?? 0,
+                        dailyrewards: userData.dailyrewards || { streak: 0, lastClaimDate: "" }
+                    };
+
+                    localStorage.setItem('loggedInUser', JSON.stringify(freshUserData));
+                    localStorage.setItem('skipLoading', 'true');
+                    
+                    if (errElem) errElem.innerText = "";
+                    window.location.href = 'index.html';
+                    return;
+                }
+            }
+
             if (errElem) errElem.innerText = "Invalid username or password!";
+
+        } catch (err) {
+            if (errElem) errElem.innerText = "Login error occurred: " + err.message;
         }
     });
-});
+                          
