@@ -93,13 +93,6 @@ body {
   transform: translateY(-12px); /* Adjust this negative number to lift higher/lower */
 }
 
-/* Tighten spacing only inside the home view */
-#homeView {
-  display: flex;
-  flex-direction: column;
-  gap: 8px !important; /* Reduces the gap from 16px to 8px between containers */
-}
-
 
 
 .view {
@@ -136,7 +129,7 @@ body {
 .welcome-card {
   text-align: center;
   padding: 24px 20px;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .sub-title {
@@ -173,7 +166,7 @@ body {
 .menu-card {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
   cursor: pointer;
 }
 
