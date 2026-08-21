@@ -449,37 +449,34 @@
     </div>
   </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+<!-- Your existing game scripts -->
+    <script src="profile.js"></script>
+    <script src="playerstat.js"></script>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
-    authDomain: "pixvinz2026.firebaseapp.com",
-    projectId: "pixvinz2026",
-    storageBucket: "pixvinz2026.firebasestorage.app",
-    messagingSenderId: "45609077809",
-    appId: "1:45609077809:web:575611e46acda9f64c5910",
-    measurementId: "G-W7FSERE8ZJ"
-  };
+    <!-- Firebase Initialization Module Script -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+      import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+      import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+      const firebaseConfig = {
+        apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
+        authDomain: "pixvinz2026.firebaseapp.com",
+        projectId: "pixvinz2026",
+        storageBucket: "pixvinz2026.firebasestorage.app",
+        messagingSenderId: "45609077809",
+        appId: "1:45609077809:web:575611e46acda9f64c5910",
+        measurementId: "G-W7FSERE8ZJ"
+      };
 
-  // EXPOSE GLOBALLY SO playerstat.js CAN ACCESS THEM WITHOUT CRASHING
-  window.db = db;
-  window.doc = doc;
-  window.getDoc = getDoc;
-  window.setDoc = setDoc;
-  window.updateDoc = updateDoc;
-  window.getCurrentUser = function() {
-    try {
-      return JSON.parse(localStorage.getItem('loggedInUser'));
-    } catch (e) {
-      return null;
-    }
-  };
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      window.pixvinzDb = { db, doc, getDoc, setDoc };
+      window.pixvinzAuth = { auth, createUserWithEmailAndPassword };
+    
+
 </script>
 <script src="audio.js"></script>
 <script type="module" src="script.js"></script>
