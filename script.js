@@ -1,3 +1,33 @@
+// --- FIREBASE INITIALIZATION & DATABASE BRIDGE ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
+import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
+    authDomain: "pixvinz2026.firebaseapp.com",
+    projectId: "pixvinz2026",
+    storageBucket: "pixvinz2026.firebasestorage.app",
+    messagingSenderId: "45609077809",
+    appId: "1:45609077809:web:575611e46acda9f64c5910",
+    measurementId: "G-W7FSERE8ZJ"
+};
+
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// Expose Firestore database tools globally so UI scripts can use them
+window.pixvinzDb = { db, doc, getDoc, setDoc, updateDoc, collection, query, orderBy, limit, getDocs };
+
+
+
+
+
+
+
 // --- DEDICATED LOADING SCREEN SCRIPT ---
 document.addEventListener('DOMContentLoaded', () => {
     const loadingView = document.getElementById('loadingView');
