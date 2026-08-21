@@ -202,61 +202,38 @@ async function finishLoading() {
 if (skipLoading) {
     finishLoading();
 } else {
-    const assets = [];
-    for (let i = 1; i <= 55; i++) {
-        assets.push(`image/level${i}.jpeg`);
-    }
-
-    let loadedCount = 0;
-    const totalAssets = assets.length;
     const startTime = Date.now();
     const minLoadingTime = 6000; // Exactly 6 seconds (6000 milliseconds)
 
     if (percentageElem) percentageElem.innerText = '1%';
     if (barFillElem) barFillElem.style.width = '1%';
 
-    // Helper to check if both assets are loaded AND 6 seconds have passed
     const checkCompletion = () => {
         const elapsedTime = Date.now() - startTime;
-        const assetsDone = (totalAssets === 0) || (loadedCount >= totalAssets);
-
-        // Calculate progress percentage based on time OR assets, whichever is smoother
-        let timePercent = Math.floor((elapsedTime / minLoadingTime) * 100);
-        let assetPercent = totalAssets > 0 ? Math.floor((loadedCount / totalAssets) * 100) : 100;
-        let percent = Math.min(timePercent, assetPercent);
+        let percent = Math.floor((elapsedTime / minLoadingTime) * 100);
+        
         if (percent < 1) percent = 1;
         if (percent > 100) percent = 100;
 
         if (percentageElem) percentageElem.innerText = `${percent}%`;
         if (barFillElem) barFillElem.style.width = `${percent}%`;
 
-        // Only finish when 6 seconds have elapsed AND images are ready
-        if (elapsedTime >= minLoadingTime && assetsDone) {
+        // Finish strictly when the 6-second timer completes
+        if (elapsedTime >= minLoadingTime) {
             if (percentageElem) percentageElem.innerText = '100%';
             if (barFillElem) barFillElem.style.width = '100%';
             setTimeout(finishLoading, 200);
         } else {
-            // Keep checking frequently until criteria are met
             setTimeout(checkCompletion, 100);
         }
     };
 
-    // Start tracking asset loads
-    if (totalAssets > 0) {
-        assets.forEach(src => {
-            const img = new Image();
-            const markProcessed = () => {
-                loadedCount++;
-            };
-            img.onload = markProcessed;
-            img.onerror = markProcessed;
-            img.src = src;
-        });
+    // Preload assets quietly in the background without blocking the progress bar
+    for (let i = 1; i <= 55; i++) {
+        const img = new Image();
+        img.src = `image/level${i}.jpeg`;
     }
 
-    // Kick off the smooth 6-second timer loop
-    setTimeout(checkCompletion, 100);
-}
     // Kick off the smooth 6-second timer loop
     setTimeout(checkCompletion, 100);
 }
