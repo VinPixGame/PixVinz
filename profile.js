@@ -685,7 +685,7 @@ window.claimDailyReward = async function() {
 
     const reward = dailyRewardsData[nextStreak - 1];
 
-    // Update local user object coins & XP
+    // 1. Update loggedInUser in localStorage (Coins & XP)
     try {
         let userObj = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
         userObj.coins = (userObj.coins || 0) + reward.coins;
@@ -693,33 +693,32 @@ window.claimDailyReward = async function() {
         localStorage.setItem('loggedInUser', JSON.stringify(userObj));
     } catch (e) {}
 
-    // Save daily state
+    // 2. Update fallback storage keys just in case
+    let currentCoins = parseInt(localStorage.getItem('vinpix_coins') || '0', 10) + reward.coins;
+    localStorage.setItem('vinpix_coins', currentCoins);
+
+    let currentXp = parseInt(localStorage.getItem('vinpix_xp') || '0', 10) + reward.xp;
+    localStorage.setItem('vinpix_xp', currentXp);
+
+    // 3. Save daily state
     dailyState.streak = nextStreak;
     dailyState.lastClaimDate = today;
     localStorage.setItem('pixvinz_daily', JSON.stringify(dailyState));
 
-    // Sync to cloud Firestore if function exists
+    // 4. Sync to cloud Firestore if function exists
     if (typeof saveUserDataToCloud === 'function') {
         await saveUserDataToCloud();
     }
 
-    // Refresh UI
+    // 5. Refresh UI & Grid
     renderDailyGrid();
     checkDailyRewardStatus();
 
-    // Trigger profile update if function exists
-    if (typeof updateProfileUI === 'function') {
-        updateProfileUI();
-    }
+    // 6. Trigger game UI update functions if they exist in your script
+    if (typeof updateProfileUI === 'function') updateProfileUI();
+    if (typeof loadUserData === 'function') loadUserData();
+    if (typeof updateXPBar === 'function') updateXPBar();
 
-    alert(`🎉 Successfully claimed Day ${nextStreak} Reward!\n+${reward.coins} Coins & +${reward.xp} XP`);
+    // Show clean custom notification toast with both Coins and XP
+    showRewardToast(`🎉 Claimed Day ${nextStreak}! +${reward.coins} Coins & +${reward.xp} XP`);
 };
-
-// Check badge status on load
-document.addEventListener('DOMContentLoaded', () => {
-    checkDailyRewardStatus();
-});
-
-
-
-
