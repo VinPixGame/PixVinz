@@ -285,28 +285,46 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const nextLevelBtn = document.getElementById('nextLevelBtn');
   if (nextLevelBtn) {
-    nextLevelBtn.onclick = (e) => {
+    nextLevelBtn.onclick = async (e) => {
       e.stopPropagation();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      
+      // Ensure cloud save finishes uploading before changing pages
+      if (typeof saveUserDataToCloud === 'function') {
+        await saveUserDataToCloud();
+      }
+
       window.location.href = `game.html?level=${currentLevel + 1}`;
     };
   }
 
   const victoryHomeBtn = document.getElementById('victoryHomeBtn');
   if (victoryHomeBtn) {
-    victoryHomeBtn.onclick = (e) => {
+    victoryHomeBtn.onclick = async (e) => {
       e.stopPropagation();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       localStorage.setItem('skipLoading', 'true');
+      
+      // Ensure cloud save finishes uploading before changing pages
+      if (typeof saveUserDataToCloud === 'function') {
+        await saveUserDataToCloud();
+      }
+
       window.location.href = 'index.html';
     };
   }
 
   const backToHome = document.getElementById('backToHome');
   if (backToHome) {
-    backToHome.addEventListener('click', () => {
+    backToHome.addEventListener('click', async () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       localStorage.setItem('skipLoading', 'true');
+      
+      // Ensure cloud save finishes uploading before changing pages
+      if (typeof saveUserDataToCloud === 'function') {
+        await saveUserDataToCloud();
+      }
+
       window.location.href = 'index.html';
     });
   }
