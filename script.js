@@ -3,33 +3,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingView = document.getElementById('loadingView');
     if (!loadingView) return;
 
-    // 1. Instantly check if we are returning from auth.html
+    // 1. Check if user is already logged in (handles page refresh) OR coming from auth.html
     const skipLoading = localStorage.getItem('skipLoading') === 'true';
-    if (skipLoading) {
+    const storedUser = localStorage.getItem('loggedInUser');
+
+    if (skipLoading || storedUser) {
+        // Clear the flag if it was set
         localStorage.removeItem('skipLoading');
-        const storedUser = localStorage.getItem('loggedInUser');
         
         if (storedUser) {
+            // Instantly skip loader, go straight to homeView, and show the top bar
             loadingView.classList.remove('active');
             const homeView = document.getElementById('homeView');
             const mainHeader = document.getElementById('mainHeader');
+            
             if (homeView) homeView.classList.add('active');
-            if (mainHeader) mainHeader.classList.remove('hidden');
+            if (mainHeader) mainHeader.classList.remove('hidden'); // Ensures the top bar appears!
+            
             if (typeof playMainBGM === 'function') playMainBGM();
-            return; // Exit completely so the 6-second timer never runs
+            return; // Stop the script here so the timer never runs
         } else {
             window.location.href = 'auth.html';
             return;
         }
     }
 
-    // 2. Play the logo video explicitly (Normal loading flow)
+    // 2. Play the logo video explicitly (Only runs for cold visits when NOT logged in)
     const logoVideo = document.getElementById('loadingLogo');
     if (logoVideo) {
         logoVideo.play().catch(err => console.log("Video play prevented:", err));
     }
 
-    // 3. Grab elements
+    // 3. Grab elements for normal timer
     const percentageElem = document.getElementById('loadingPercentage');
     const barFillElem = document.getElementById('loadingBarFill');
 
@@ -57,16 +62,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (barFillElem) barFillElem.style.width = '100%';
 
             setTimeout(() => {
-                // Check if user is logged in
-                const storedUser = localStorage.getItem('loggedInUser');
+                const finalStoredUser = localStorage.getItem('loggedInUser');
                 
-                if (storedUser) {
-                    // Logged in: Hide loading view, show home view
+                if (finalStoredUser) {
                     loadingView.classList.remove('active');
                     const homeView = document.getElementById('homeView');
+                    const mainHeader = document.getElementById('mainHeader');
+                    
                     if (homeView) homeView.classList.add('active');
+                    if (mainHeader) mainHeader.classList.remove('hidden'); // Shows top bar on normal load too
                 } else {
-                    // Not logged in: Go to auth page
                     window.location.href = 'auth.html';
                 }
             }, 200);
