@@ -152,11 +152,12 @@ async function finishLoading() {
     
     let loggedInUser = getCurrentUser();
     
-    // Fetch latest progress from Firestore in the background
-    if (loggedInUser && loggedInUser.authUid) {
+    // Fetch latest progress from Firestore FIRST using the correct 'players' collection
+    if (loggedInUser && loggedInUser.username) {
         try {
-            if (typeof db !== 'undefined' && typeof doc === 'function' && typeof getDoc === 'function') {
-                const userDocRef = doc(db, "users", loggedInUser.authUid);
+            if (window.pixvinzDb) {
+                const { db, doc, getDoc } = window.pixvinzDb;
+                const userDocRef = doc(db, "players", loggedInUser.username);
                 const userSnap = await getDoc(userDocRef);
 
                 if (userSnap.exists()) {
@@ -181,6 +182,12 @@ async function finishLoading() {
     if (loggedInUser) {
         const nameElem = document.getElementById('userDisplayName');
         if (nameElem) nameElem.innerText = loggedInUser.displayName || 'Vinz';
+        
+        // Ensure playerstat.js fetches fully before revealing home view
+        if (typeof fetchUserDataFromFirestore === 'function') {
+            await fetchUserDataFromFirestore();
+        }
+
         showView('home');
         if (typeof playMainBGM === 'function') playMainBGM();
     } else {
@@ -243,6 +250,9 @@ if (skipLoading) {
         });
     }
 
+    // Kick off the smooth 6-second timer loop
+    setTimeout(checkCompletion, 100);
+}
     // Kick off the smooth 6-second timer loop
     setTimeout(checkCompletion, 100);
 }
@@ -411,8 +421,7 @@ if (skipLoading) {
       }
     });
   }
-
-  const logForm = document.getElementById('loginForm');
+const logForm = document.getElementById('loginForm');
   if (logForm) {
     logForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -437,17 +446,20 @@ if (skipLoading) {
         }
 
         if (userData && userData.password === pass) {
+          // 1. Save data and AWAIT full cloud fetch before showing UI
           localStorage.setItem('loggedInUser', JSON.stringify(userData));
+          
+          if (typeof fetchUserDataFromFirestore === 'function') {
+              await fetchUserDataFromFirestore();
+          }
+
           const nameElem = document.getElementById('userDisplayName');
           if (nameElem) nameElem.innerText = userData.displayName;
           if (errElem) errElem.innerText = "";
+          
+          // 2. ONLY THEN switch views to home
           showView('home');
           playMainBGM();
-          
-          // Trigger cloud fetch to sync into playerstat.js cache
-          if (typeof fetchUserDataFromFirestore === 'function') {
-              fetchUserDataFromFirestore();
-          }
         } else {
           if (errElem) errElem.innerText = "Invalid username or password!";
         }
@@ -456,7 +468,6 @@ if (skipLoading) {
       }
     });
   }
-
   const playBtn = document.getElementById('playBtn');
   if (playBtn) {
     playBtn.addEventListener('click', () => {
