@@ -35,7 +35,7 @@ function goHome() {
 }
 
 // --- SAFE CLOUD SYNC ---
-async function saveUserDataToCloud() {
+window.saveUserDataToCloud = async function() {
     try {
         if (!window.pixvinzDb || !window.pixvinzDb.db) return;
         const { db, doc, setDoc } = window.pixvinzDb;
@@ -56,7 +56,6 @@ async function saveUserDataToCloud() {
         const playerProgression = calculateLevelAndXp(puzzlesSolved);
         const currentXpVal = playerProgression.currentXp;
 
-        // GRAB LOCAL DAILY REWARD STATE TO UPLOAD
         const dailyStorageKey = getDailyStorageKey();
         const dailyDataStr = localStorage.getItem(dailyStorageKey);
         const dailyRewardState = dailyDataStr ? JSON.parse(dailyDataStr) : { streak: 0, lastClaimDate: "" };
@@ -69,14 +68,15 @@ async function saveUserDataToCloud() {
             xp: currentXpVal,
             coins: totalCoins,
             avatar: avatar,
-            dailyRewardState: dailyRewardState, // <-- SYNCED TO FIRESTORE
+            dailyRewardState: dailyRewardState,
             lastUpdated: new Date()
         }, { merge: true });
+        
+        console.log("Cloud sync successful for:", username);
     } catch (error) {
         console.warn("Cloud sync skipped or failed safely:", error);
     }
-}
-
+};
 
 async function fetchUserDataFromFirestore() {
     const username = getCurrentUsername();
