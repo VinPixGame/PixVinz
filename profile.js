@@ -577,6 +577,8 @@ if (saveProfileBtn) {
 }    
 
 
+
+
 // --- 7-DAY DAILY CHECK-IN LOGIC (USER-TIED & SECURE) ---
 const dailyRewardsData = [
     { day: 1, coins: 15, xp: 50, label: '15 🪙' },
@@ -631,7 +633,7 @@ window.openDailyModal = function() {
         AudioManager.playClick();
     }
     
-    // Render real-time calendar graphic header dynamically
+    // Render real-time calendar graphic header dynamically in the modal
     const now = new Date();
     const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
     const monthStr = months[now.getMonth()];
@@ -640,7 +642,7 @@ window.openDailyModal = function() {
     const calHeader = document.getElementById('dynamicCalendarHeader');
     if (calHeader) {
         calHeader.innerHTML = `
-            <div style="display: inline-flex; flex-direction: column; width: 36px; height: 36px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 3px 6px rgba(0,0,0,0.4); vertical-align: middle; margin-right: 10px;">
+            <div style="display: inline-flex; flex-direction: column; width: 36px; height: 36px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 3px 6px rgba(0,0,0,0.4); vertical-align: middle;">
                 <div style="background: #ff4757; color: white; font-size: 8px; font-weight: bold; text-align: center; padding: 2px 0;">${monthStr}</div>
                 <div style="color: #111; font-size: 15px; font-weight: 900; text-align: center; line-height: 22px;">${dayNum}</div>
             </div>
@@ -680,7 +682,7 @@ function renderDailyGrid() {
     
     const nowTime = Date.now();
     const timeSinceLastClaim = dailyState.lastClaimTimestamp ? nowTime - dailyState.lastClaimTimestamp : Infinity;
-    const isUnder24Hours = timeSinceLastClaim < 24 * 60 * 60 * 1000;
+    const isUnder24Hours = dailyState.lastClaimTimestamp && (timeSinceLastClaim < 24 * 60 * 60 * 1000);
 
     const lockedOut = hasClaimedToday || isUnder24Hours;
     const currentDayIndex = lockedOut ? dailyState.streak : (dailyState.streak + 1 > 7 ? 1 : dailyState.streak + 1);
@@ -733,7 +735,9 @@ function renderDailyGrid() {
             dailyCountdownInterval = null;
         }
 
-        if (lockedOut) {
+        claimBtn.style.pointerEvents = 'auto';
+
+        if (lockedOut && dailyState.lastClaimTimestamp) {
             claimBtn.style.background = 'rgba(255,255,255,0.1)';
             claimBtn.style.color = '#ffd700';
             claimBtn.style.cursor = 'not-allowed';
@@ -746,6 +750,8 @@ function renderDailyGrid() {
 
                 if (diff <= 0) {
                     claimBtn.textContent = `CLAIM DAY ${currentDayIndex} REWARD`;
+                    claimBtn.disabled = false;
+                    claimBtn.style.cursor = 'pointer';
                     renderDailyGrid();
                     return;
                 }
@@ -817,7 +823,6 @@ window.claimDailyReward = async function() {
         saveUserDataToCloud();
     }
 
-    // Play reward sound effect successfully
     try {
         const rewardAudio = new Audio('sounds/reward.mp3');
         rewardAudio.volume = 0.6;
@@ -884,4 +889,3 @@ function showRewardToast(message) {
     }, 3000);
 }
 
-        
