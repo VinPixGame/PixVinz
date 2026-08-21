@@ -31,13 +31,13 @@
             </form>
             <p class="auth-switch" style="position: relative; z-index: 10; pointer-events: auto;">
               Don't have an account? 
-              <a href="#" id="toRegister" onclick="document.getElementById('loginView').classList.remove('active'); document.getElementById('loginView').style.display='none'; document.getElementById('registerView').classList.add('active'); document.getElementById('registerView').style.display='block'; return false;" style="position: relative; z-index: 11; display: inline-block; padding: 5px;">Create Account</a>
+              <a href="#" id="toRegister" onclick="document.getElementById('loginView').classList.remove('active'); document.getElementById('registerView').classList.add('active'); return false;" style="position: relative; z-index: 11; display: inline-block; padding: 5px;">Create Account</a>
             </p>
           </div>
         </section>
 
         <!-- 3. REGISTER PAGE -->
-        <section id="registerView" class="view" style="display: none;">
+        <section id="registerView" class="view">
           <div class="auth-card">
             <h2>CREATE ACCOUNT</h2>
             <form id="registerForm">
@@ -63,7 +63,7 @@
             </form>
             <p class="auth-switch" style="position: relative; z-index: 10; pointer-events: auto;">
               Already have an account? 
-              <a href="#" id="toLogin" onclick="document.getElementById('registerView').classList.remove('active'); document.getElementById('registerView').style.display='none'; document.getElementById('loginView').classList.add('active'); document.getElementById('loginView').style.display='block'; return false;" style="position: relative; z-index: 11; display: inline-block; padding: 5px;">Log In</a>
+              <a href="#" id="toLogin" onclick="document.getElementById('registerView').classList.remove('active'); document.getElementById('loginView').classList.add('active'); return false;" style="position: relative; z-index: 11; display: inline-block; padding: 5px;">Log In</a>
             </p>
           </div>
         </section> 
