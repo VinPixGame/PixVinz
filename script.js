@@ -32,6 +32,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- 1. LOADING SCREEN & 6-SECOND GUARANTEED PRELOADER ---
+    const loadingView = document.getElementById('loadingView');
+    
+    // If there is no loadingView on this page (like in auth.html), skip this block entirely!
+    if (!loadingView) return;
+
     const skipLoading = localStorage.getItem('skipLoading') === 'true';
     const percentageElem = document.getElementById('loadingPercentage');
     const barFillElem = document.getElementById('loadingBarFill');
@@ -39,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
     async function finishLoading() {
         localStorage.removeItem('skipLoading');
         
-        // Pull stored user session data from localStorage
         const storedUser = localStorage.getItem('loggedInUser');
         let currentUser = null;
         if (storedUser) {
@@ -50,15 +54,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Check if we have a logged-in user session stored
         if (currentUser) {
-            // Sync player stats if function exists
             if (typeof fetchUserDataFromFirestore === 'function') {
                 await fetchUserDataFromFirestore();
             }
 
-            // Show home view and header since they are logged in!
-            const loadingView = document.getElementById('loadingView');
             const homeView = document.getElementById('homeView');
             const mainHeader = document.getElementById('mainHeader');
 
@@ -68,7 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (typeof playMainBGM === 'function') playMainBGM();
         } else {
-            // If NOT logged in, transition to your separate auth.html URL!
             window.location.href = 'auth.html';
         }
     }
@@ -77,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         finishLoading();
     } else {
         const startTime = Date.now();
-        const minLoadingTime = 6000; // Exactly 6 seconds (6000 milliseconds)
+        const minLoadingTime = 6000;
 
         if (percentageElem) percentageElem.innerText = '1%';
         if (barFillElem) barFillElem.style.width = '1%';
@@ -92,7 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (percentageElem) percentageElem.innerText = `${percent}%`;
             if (barFillElem) barFillElem.style.width = `${percent}%`;
 
-            // Finish strictly when the 6-second timer completes
             if (elapsedTime >= minLoadingTime) {
                 if (percentageElem) percentageElem.innerText = '100%';
                 if (barFillElem) barFillElem.style.width = '100%';
@@ -102,13 +100,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // Preload assets quietly in the background without blocking the progress bar
         for (let i = 1; i <= 55; i++) {
             const img = new Image();
             img.src = `image/level${i}.jpeg`;
         }
 
-        // Kick off the smooth 6-second timer loop
         setTimeout(checkCompletion, 100);
     }
 });
