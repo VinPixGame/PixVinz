@@ -9,60 +9,60 @@
 <body>
     <div class="app-container">
         
-    <!-- 1. LOGIN PAGE -->
-    <section id="loginView" class="view">
-      <div class="auth-card">
-        <div class="auth-logo">
-          <video autoplay loop muted playsinline preload="auto" style="background: transparent;">
-            <source src="image/logo.webm" type="video/webm">
-          </video>
-        </div>
-        <h2>LOG IN</h2>
-        <form id="loginForm">
-          <div class="input-group">
-            <input type="text" id="loginUser" placeholder="Username (min 6 chars, lowercase & number)" required>
+        <!-- 1. LOGIN PAGE -->
+        <section id="loginView" class="view active">
+          <div class="auth-card">
+            <div class="auth-logo">
+              <video autoplay loop muted playsinline preload="auto" style="background: transparent;">
+                <source src="image/logo.webm" type="video/webm">
+              </video>
+            </div>
+            <h2>LOG IN</h2>
+            <form id="loginForm">
+              <div class="input-group">
+                <input type="text" id="loginUser" placeholder="Username (min 6 chars, lowercase & number)" required>
+              </div>
+              <div class="input-group" style="position: relative;">
+                <input type="password" id="loginPass" placeholder="Password" required>
+                <button type="button" id="toggleLoginPass" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #b388ff; font-weight: bold; font-size: 0.85rem;">Show</button>
+              </div>
+              <p id="loginError" class="auth-error"></p>
+              <button type="submit" class="btn btn-primary">LOG IN</button>
+            </form>
+            <p class="auth-switch">Don't have an account? <a href="#" id="toRegister">Create Account</a></p>
           </div>
-          <div class="input-group" style="position: relative;">
-            <input type="password" id="loginPass" placeholder="Password" required>
-            <button type="button" id="toggleLoginPass" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #b388ff; font-weight: bold; font-size: 0.85rem;">Show</button>
-          </div>
-          <p id="loginError" class="auth-error"></p>
-          <button type="submit" class="btn btn-primary">LOG IN</button>
-        </form>
-        <p class="auth-switch">Don't have an account? <a href="#" id="toRegister">Create Account</a></p>
-      </div>
-    </section>
+        </section>
 
-    <!-- 3. REGISTER PAGE -->
-    <section id="registerView" class="view">
-      <div class="auth-card">
-        <h2>CREATE ACCOUNT</h2>
-        <form id="registerForm">
-          <div class="input-group">
-            <input type="text" id="regDisplayName" placeholder="Display Name (e.g. Vinz)" required>
-          </div>
-          
-          <!-- Username input with pre-loaded @pixvinz.com addon -->
-          <div class="input-group" style="position: relative; display: flex; align-items: center;">
-            <input type="text" id="regUser" placeholder="Username (min 6 chars)" required style="flex: 1; border-top-right-radius: 0; border-bottom-right-radius: 0;">
-            <span style="background: rgba(255, 255, 255, 0.1); padding: 12px 10px; border: 1px solid rgba(255, 255, 255, 0.2); border-left: none; border-top-right-radius: 8px; border-bottom-right-radius: 8px; color: #b388ff; font-size: 0.85rem; font-weight: bold; white-space: nowrap;">@pixvinz.com</span>
-            <span id="regUserIndicator" style="position: absolute; right: 130px; top: 50%; transform: translateY(-50%); font-size: 0.85rem; font-weight: bold;"></span>
-          </div>
+        <!-- 3. REGISTER PAGE -->
+        <section id="registerView" class="view">
+          <div class="auth-card">
+            <h2>CREATE ACCOUNT</h2>
+            <form id="registerForm">
+              <div class="input-group">
+                <input type="text" id="regDisplayName" placeholder="Display Name (e.g. Vinz)" required>
+              </div>
+              
+              <div class="input-group" style="position: relative; display: flex; align-items: center;">
+                <input type="text" id="regUser" placeholder="Username (min 6 chars, lowercase & number)" required style="flex: 1; border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                <span style="background: rgba(255, 255, 255, 0.1); padding: 12px 10px; border: 1px solid rgba(255, 255, 255, 0.2); border-left: none; border-top-right-radius: 8px; border-bottom-right-radius: 8px; color: #b388ff; font-size: 0.85rem; font-weight: bold; white-space: nowrap;">@pixvinz.com</span>
+                <span id="regUserIndicator" style="position: absolute; right: 130px; top: 50%; transform: translateY(-50%); font-size: 0.85rem; font-weight: bold;"></span>
+              </div>
 
-          <div class="input-group" style="position: relative;">
-            <input type="password" id="regPass" placeholder="Password (6-12 chars, Aa1)" required>
-            <button type="button" id="toggleRegPass" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #b388ff; font-weight: bold; font-size: 0.85rem;">Show</button>
+              <div class="input-group" style="position: relative;">
+                <input type="password" id="regPass" placeholder="Password (6-12 chars, Aa1)" required>
+                <button type="button" id="toggleRegPass" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #b388ff; font-weight: bold; font-size: 0.85rem;">Show</button>
+              </div>
+              <div class="input-group">
+                <input type="password" id="regPassConfirm" placeholder="Repeat Password" required>
+              </div>
+              <p id="regError" class="auth-error"></p>
+              <button type="submit" class="btn btn-primary">REGISTER</button>
+            </form>
+            <p class="auth-switch">Already have an account? <a href="#" id="toLogin">Log In</a></p>
           </div>
-          <div class="input-group">
-            <input type="password" id="regPassConfirm" placeholder="Repeat Password" required>
-          </div>
-          <p id="regError" class="auth-error"></p>
-          <button type="submit" class="btn btn-primary">REGISTER</button>
-        </form>
-        <p class="auth-switch">Already have an account? <a href="#" id="toLogin">Log In</a></p>
-      </div>
-        
-    </section> 
+        </section> 
+
+    </div>
 
     <!-- Firebase Initialization Module Script -->
     <script type="module">
@@ -88,7 +88,6 @@
       window.pixvinzAuth = { auth, createUserWithEmailAndPassword };
     </script>
 
-    <script type="module" src="script.js"></script>
     <script src="auth.js"></script>
 </body>
 </html>
