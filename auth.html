@@ -9,7 +9,7 @@
 <body>
     <div class="app-container">
         
-<!-- 2. LOGIN PAGE -->
+    <!-- 1. LOGIN PAGE -->
     <section id="loginView" class="view">
       <div class="auth-card">
         <div class="auth-logo">
@@ -41,10 +41,14 @@
           <div class="input-group">
             <input type="text" id="regDisplayName" placeholder="Display Name (e.g. Vinz)" required>
           </div>
-          <div class="input-group" style="position: relative;">
-            <input type="text" id="regUser" placeholder="Username (min 6 chars, lowercase & number)" required>
-            <span id="regUserIndicator" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.85rem; font-weight: bold;"></span>
+          
+          <!-- Username input with pre-loaded @pixvinz.com addon -->
+          <div class="input-group" style="position: relative; display: flex; align-items: center;">
+            <input type="text" id="regUser" placeholder="Username (min 6 chars)" required style="flex: 1; border-top-right-radius: 0; border-bottom-right-radius: 0;">
+            <span style="background: rgba(255, 255, 255, 0.1); padding: 12px 10px; border: 1px solid rgba(255, 255, 255, 0.2); border-left: none; border-top-right-radius: 8px; border-bottom-right-radius: 8px; color: #b388ff; font-size: 0.85rem; font-weight: bold; white-space: nowrap;">@pixvinz.com</span>
+            <span id="regUserIndicator" style="position: absolute; right: 130px; top: 50%; transform: translateY(-50%); font-size: 0.85rem; font-weight: bold;"></span>
           </div>
+
           <div class="input-group" style="position: relative;">
             <input type="password" id="regPass" placeholder="Password (6-12 chars, Aa1)" required>
             <button type="button" id="toggleRegPass" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #b388ff; font-weight: bold; font-size: 0.85rem;">Show</button>
@@ -57,13 +61,34 @@
         </form>
         <p class="auth-switch">Already have an account? <a href="#" id="toLogin">Log In</a></p>
       </div>
-    
         
-    </section> 
-        <script type="module" src="script.js"></script>
-        <script src="auth.js"></script>
-    
+    </section> 
+
+    <!-- Firebase Initialization Module Script -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+      import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+      import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
+        authDomain: "pixvinz2026.firebaseapp.com",
+        projectId: "pixvinz2026",
+        storageBucket: "pixvinz2026.firebasestorage.app",
+        messagingSenderId: "45609077809",
+        appId: "1:45609077809:web:575611e46acda9f64c5910",
+        measurementId: "G-W7FSERE8ZJ"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      window.pixvinzDb = { db, doc, getDoc, setDoc };
+      window.pixvinzAuth = { auth, createUserWithEmailAndPassword };
+    </script>
+
+    <script type="module" src="script.js"></script>
+    <script src="auth.js"></script>
 </body>
 </html>
-
-
