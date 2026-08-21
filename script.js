@@ -408,7 +408,12 @@ if (skipLoading) {
           level: 1,
           password: pass,
           authUid: authUid,
-          createdAt: new Date()
+          dailyRewardState: {
+            streak: 0,
+            lastClaimDate: ''
+          },
+          createdAt: new Date(),
+          lastUpdated: new Date()
         };
 
         await setDoc(userDocRef, newUserData);
@@ -425,6 +430,8 @@ if (skipLoading) {
       }
     });
   }
+
+
 const logForm = document.getElementById('loginForm');
   if (logForm) {
     logForm.addEventListener('submit', async (e) => {
@@ -450,18 +457,31 @@ const logForm = document.getElementById('loginForm');
         }
 
         if (userData && userData.password === pass) {
-          // 1. Save data and AWAIT full cloud fetch before showing UI
-          localStorage.setItem('loggedInUser', JSON.stringify(userData));
+          // Normalize and map all fields from the cloud document so nothing is missing
+          const fullUserData = {
+            ...userData,
+            username: userData.username || username,
+            displayName: userData.displayName || 'Vinz',
+            coins: userData.coins !== undefined ? userData.coins : 0,
+            xp: userData.xp !== undefined ? userData.xp : 0,
+            level: userData.level !== undefined ? userData.level : 1,
+            avatar: userData.avatar || '',
+            authUid: userData.authUid || '',
+            password: userData.password || pass,
+            dailyRewardState: userData.dailyRewardState || { streak: 0, lastClaimDate: '' },
+            lastUpdated: userData.lastUpdated || null
+          };
+
+          localStorage.setItem('loggedInUser', JSON.stringify(fullUserData));
           
           if (typeof fetchUserDataFromFirestore === 'function') {
               await fetchUserDataFromFirestore();
           }
 
           const nameElem = document.getElementById('userDisplayName');
-          if (nameElem) nameElem.innerText = userData.displayName;
+          if (nameElem) nameElem.innerText = fullUserData.displayName;
           if (errElem) errElem.innerText = "";
           
-          // 2. ONLY THEN switch views to home
           showView('home');
           playMainBGM();
         } else {
