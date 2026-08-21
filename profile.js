@@ -152,6 +152,12 @@ function calculateLevelAndXp(totalPuzzlesSolved) {
         totalXpEarned += xpPerPuzzle;
     }
 
+    // Add any stored bonus XP (e.g. from daily rewards)
+    const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
+    const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp';
+    let bonusXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
+    totalXpEarned += bonusXp;
+
     let currentLevel = 3; 
     let cumulativeXpRequired = 1500;
     let accumulated = 0;
