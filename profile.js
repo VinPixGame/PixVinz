@@ -821,3 +821,10 @@ function showRewardToast(message) {
 // --- GLOBAL EXPOSURE FOR CROSS-SCRIPT SYNC ---
 window.saveUserDataToCloud = saveUserDataToCloud;
 window.fetchUserDataFromFirestore = fetchUserDataFromFirestore;
+window.updateProfileStats = updateProfileStats;
+window.earnCoins = window.earnCoins || function(amount) {
+    const coinKey = getUserKey('totalCoins');
+    let totalCoins = (parseInt(localStorage.getItem(coinKey)) || 0) + amount;
+    localStorage.setItem(coinKey, totalCoins);
+    if (typeof updateProfileStats === 'function') updateProfileStats();
+};
