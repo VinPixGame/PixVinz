@@ -555,7 +555,6 @@ if (saveProfileBtn) {
 
 
 
-
 // --- 7-DAY DAILY CHECK-IN LOGIC ---
 const dailyRewardsData = [
     { day: 1, coins: 15, xp: 50, label: '15 🪙' },
@@ -579,11 +578,18 @@ function getYesterdayDateString() {
 
 function checkDailyRewardStatus() {
     try {
-        const savedData = JSON.parse(localStorage.getItem('pixvinz_daily') || '{}');
+        let dailyState = JSON.parse(localStorage.getItem('pixvinz_daily') || '{"streak": 0, "lastClaimDate": ""}');
         const today = getTodayDateString();
+        const yesterday = getYesterdayDateString();
         const badge = document.getElementById('dailyNotificationBadge');
 
-        if (savedData.lastClaimDate !== today) {
+        // Check if user missed a day -> reset streak to 0
+        if (dailyState.lastClaimDate && dailyState.lastClaimDate !== today && dailyState.lastClaimDate !== yesterday) {
+            dailyState.streak = 0;
+            localStorage.setItem('pixvinz_daily', JSON.stringify(dailyState));
+        }
+
+        if (dailyState.lastClaimDate !== today) {
             if (badge) badge.style.display = 'inline-block';
         } else {
             if (badge) badge.style.display = 'none';
@@ -596,11 +602,13 @@ window.openDailyModal = function() {
         AudioManager.playClick();
     }
     renderDailyGrid();
-    document.getElementById('dailyModal').style.display = 'flex';
+    const modal = document.getElementById('dailyModal');
+    if (modal) modal.style.display = 'flex';
 };
 
 window.closeDailyModal = function() {
-    document.getElementById('dailyModal').style.display = 'none';
+    const modal = document.getElementById('dailyModal');
+    if (modal) modal.style.display = 'none';
 };
 
 function renderDailyGrid() {
@@ -612,9 +620,10 @@ function renderDailyGrid() {
     const today = getTodayDateString();
     const yesterday = getYesterdayDateString();
 
-    // If user missed a day (last claim was older than yesterday), reset streak to 0
+    // Reset streak if user missed a day
     if (dailyState.lastClaimDate && dailyState.lastClaimDate !== today && dailyState.lastClaimDate !== yesterday) {
         dailyState.streak = 0;
+        localStorage.setItem('pixvinz_daily', JSON.stringify(dailyState));
     }
 
     const hasClaimedToday = dailyState.lastClaimDate === today;
@@ -691,40 +700,84 @@ window.claimDailyReward = async function() {
 
     const reward = dailyRewardsData[nextStreak - 1];
 
-    // 1. Update loggedInUser in localStorage (Coins & XP)
+    // 1. Add Coins using your built-in earnCoins function (updates display + cloud sync)
+    if (typeof earnCoins === 'function') {
+        earnCoins(reward.coins);
+    } else {
+        const coinKey = typeof getUserKey === 'function' ? getUserKey('totalCoins') : 'totalCoins';
+        let totalCoins = (parseInt(localStorage.getItem(coinKey)) || 0) + reward.coins;
+        localStorage.setItem(coinKey, totalCoins);
+        if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+    }
+
+    // 2. Add Bonus XP (updates _bonusXp so calculateLevelAndXp picks it up seamlessly)
     try {
-        let userObj = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
-        userObj.coins = (userObj.coins || 0) + reward.coins;
-        userObj.xp = (userObj.xp || 0) + reward.xp;
-        localStorage.setItem('loggedInUser', JSON.stringify(userObj));
+        const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
+        const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp';
+        let bonusXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
+        bonusXp += reward.xp;
+        localStorage.setItem(xpStoreKey, bonusXp);
     } catch (e) {}
 
-    // 2. Update fallback storage keys just in case
-    let currentCoins = parseInt(localStorage.getItem('vinpix_coins') || '0', 10) + reward.coins;
-    localStorage.setItem('vinpix_coins', currentCoins);
-
-    let currentXp = parseInt(localStorage.getItem('vinpix_xp') || '0', 10) + reward.xp;
-    localStorage.setItem('vinpix_xp', currentXp);
-
-    // 3. Save daily state
+    // 3. Save daily streak state
     dailyState.streak = nextStreak;
     dailyState.lastClaimDate = today;
     localStorage.setItem('pixvinz_daily', JSON.stringify(dailyState));
 
-    // 4. Sync to cloud Firestore if function exists
-    if (typeof saveUserDataToCloud === 'function') {
-        await saveUserDataToCloud();
-    }
-
-    // 5. Refresh UI & Grid
+    // 4. Refresh UI, Grid, and XP Progression bar
     renderDailyGrid();
     checkDailyRewardStatus();
 
-    // 6. Trigger game UI update functions if they exist in your script
+    if (typeof updateXpProgress === 'function') updateXpProgress();
     if (typeof updateProfileUI === 'function') updateProfileUI();
-    if (typeof loadUserData === 'function') loadUserData();
-    if (typeof updateXPBar === 'function') updateXPBar();
+    if (typeof saveUserDataToCloud === 'function') saveUserDataToCloud();
 
-    // Show clean custom notification toast with both Coins and XP
+    // 5. Show custom animated notification toast banner instead of plain text alerts
     showRewardToast(`🎉 Claimed Day ${nextStreak}! +${reward.coins} Coins & +${reward.xp} XP`);
 };
+
+function showRewardToast(message) {
+    const existingToast = document.getElementById('customRewardToast');
+    if (existingToast) existingToast.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'customRewardToast';
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-20px);
+        background: linear-gradient(135deg, #130f2b, #2b1055);
+        border: 2px solid #ffd700;
+        color: #fff;
+        padding: 12px 24px;
+        border-radius: 16px;
+        font-weight: 700;
+        font-size: 14px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 15px rgba(255,215,0,0.4);
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    `;
+
+    toast.innerHTML = `
+        <span style="font-size: 20px;">🎁</span>
+        <span>${message}</span>
+    `;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.transform = 'translateX(-50%) translateY(0)';
+        toast.style.opacity = '1';
+    }, 10);
+
+    setTimeout(() => {
+        toast.style.transform = 'translateX(-50%) translateY(-20px)';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
