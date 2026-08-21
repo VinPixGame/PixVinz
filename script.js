@@ -1,3 +1,7 @@
+if (!localStorage.getItem('loggedInUser')) {
+    window.location.href = 'auth.html';
+}
+
 // --- FIREBASE INITIALIZATION & DATABASE BRIDGE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
