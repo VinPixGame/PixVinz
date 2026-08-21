@@ -178,7 +178,7 @@ function calculateLevelAndXp(totalPuzzlesSolved) {
 
     return {
         level: currentLevel,
-        currentXp: totalXpEarned > 0 ? totalXpEarned : 1100, 
+        currentXp: totalXpEarned > 0 ? totalXpEarned : 0, 
         maxXp: cumulativeXpRequired > 0 ? cumulativeXpRequired : 1500
     };
 }
@@ -555,7 +555,8 @@ if (saveProfileBtn) {
 
 
 
-// --- 7-DAY DAILY CHECK-IN LOGIC ---
+
+// --- 7-DAY DAILY CHECK-IN LOGIC (USER-TIED) ---
 const dailyRewardsData = [
     { day: 1, coins: 15, xp: 50, label: '15 🪙' },
     { day: 2, coins: 30, xp: 100, label: '30 🪙' },
@@ -576,9 +577,16 @@ function getYesterdayDateString() {
     return d.toISOString().split('T')[0];
 }
 
+// Helper to get username-specific storage key for daily rewards
+function getDailyStorageKey() {
+    const username = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
+    return username ? `pixvinz_daily_${username}` : 'pixvinz_daily_guest';
+}
+
 function checkDailyRewardStatus() {
     try {
-        let dailyState = JSON.parse(localStorage.getItem('pixvinz_daily') || '{"streak": 0, "lastClaimDate": ""}');
+        const storageKey = getDailyStorageKey();
+        let dailyState = JSON.parse(localStorage.getItem(storageKey) || '{"streak": 0, "lastClaimDate": ""}');
         const today = getTodayDateString();
         const yesterday = getYesterdayDateString();
         const badge = document.getElementById('dailyNotificationBadge');
@@ -586,7 +594,7 @@ function checkDailyRewardStatus() {
         // Check if user missed a day -> reset streak to 0
         if (dailyState.lastClaimDate && dailyState.lastClaimDate !== today && dailyState.lastClaimDate !== yesterday) {
             dailyState.streak = 0;
-            localStorage.setItem('pixvinz_daily', JSON.stringify(dailyState));
+            localStorage.setItem(storageKey, JSON.stringify(dailyState));
         }
 
         if (dailyState.lastClaimDate !== today) {
@@ -616,14 +624,15 @@ function renderDailyGrid() {
     if (!grid) return;
     grid.innerHTML = '';
 
-    let dailyState = JSON.parse(localStorage.getItem('pixvinz_daily') || '{"streak": 0, "lastClaimDate": ""}');
+    const storageKey = getDailyStorageKey();
+    let dailyState = JSON.parse(localStorage.getItem(storageKey) || '{"streak": 0, "lastClaimDate": ""}');
     const today = getTodayDateString();
     const yesterday = getYesterdayDateString();
 
     // Reset streak if user missed a day
     if (dailyState.lastClaimDate && dailyState.lastClaimDate !== today && dailyState.lastClaimDate !== yesterday) {
         dailyState.streak = 0;
-        localStorage.setItem('pixvinz_daily', JSON.stringify(dailyState));
+        localStorage.setItem(storageKey, JSON.stringify(dailyState));
     }
 
     const hasClaimedToday = dailyState.lastClaimDate === today;
@@ -689,7 +698,8 @@ function renderDailyGrid() {
 }
 
 window.claimDailyReward = async function() {
-    let dailyState = JSON.parse(localStorage.getItem('pixvinz_daily') || '{"streak": 0, "lastClaimDate": ""}');
+    const storageKey = getDailyStorageKey();
+    let dailyState = JSON.parse(localStorage.getItem(storageKey) || '{"streak": 0, "lastClaimDate": ""}');
     const today = getTodayDateString();
     
     if (dailyState.lastClaimDate === today) return;
@@ -710,7 +720,7 @@ window.claimDailyReward = async function() {
         if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
     }
 
-    // 2. Add Bonus XP (updates _bonusXp so calculateLevelAndXp picks it up seamlessly)
+    // 2. Add Bonus XP (updates username-specific _bonusXp key)
     try {
         const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
         const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp';
@@ -719,10 +729,10 @@ window.claimDailyReward = async function() {
         localStorage.setItem(xpStoreKey, bonusXp);
     } catch (e) {}
 
-    // 3. Save daily streak state
+    // 3. Save daily streak state to username key
     dailyState.streak = nextStreak;
     dailyState.lastClaimDate = today;
-    localStorage.setItem('pixvinz_daily', JSON.stringify(dailyState));
+    localStorage.setItem(storageKey, JSON.stringify(dailyState));
 
     // 4. Refresh UI, Grid, and XP Progression bar
     renderDailyGrid();
@@ -732,7 +742,7 @@ window.claimDailyReward = async function() {
     if (typeof updateProfileUI === 'function') updateProfileUI();
     if (typeof saveUserDataToCloud === 'function') saveUserDataToCloud();
 
-    // 5. Show custom animated notification toast banner instead of plain text alerts
+    // 5. Show custom animated notification toast banner
     showRewardToast(`🎉 Claimed Day ${nextStreak}! +${reward.coins} Coins & +${reward.xp} XP`);
 };
 
@@ -781,3 +791,4 @@ function showRewardToast(message) {
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
+    
