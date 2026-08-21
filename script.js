@@ -109,6 +109,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+
+// Populate the user's display name on the home page view
+const loggedInUser = localStorage.getItem('loggedInUser');
+if (loggedInUser) {
+    try {
+        const user = JSON.parse(loggedInUser);
+        const nameEl = document.getElementById('userDisplayName');
+        if (nameEl && user.displayName) {
+            nameEl.innerText = user.displayName;
+        }
+    } catch (err) {
+        console.error("Could not load display name:", err);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const views = {
     loading: document.getElementById('loadingView'),
