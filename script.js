@@ -1,20 +1,39 @@
 // --- DEDICATED LOADING SCREEN SCRIPT ---
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Play the logo video explicitly
+    const loadingView = document.getElementById('loadingView');
+    if (!loadingView) return;
+
+    // 1. Instantly check if we are returning from auth.html
+    const skipLoading = localStorage.getItem('skipLoading') === 'true';
+    if (skipLoading) {
+        localStorage.removeItem('skipLoading');
+        const storedUser = localStorage.getItem('loggedInUser');
+        
+        if (storedUser) {
+            loadingView.classList.remove('active');
+            const homeView = document.getElementById('homeView');
+            const mainHeader = document.getElementById('mainHeader');
+            if (homeView) homeView.classList.add('active');
+            if (mainHeader) mainHeader.classList.remove('hidden');
+            if (typeof playMainBGM === 'function') playMainBGM();
+            return; // Exit completely so the 6-second timer never runs
+        } else {
+            window.location.href = 'auth.html';
+            return;
+        }
+    }
+
+    // 2. Play the logo video explicitly (Normal loading flow)
     const logoVideo = document.getElementById('loadingLogo');
     if (logoVideo) {
         logoVideo.play().catch(err => console.log("Video play prevented:", err));
     }
 
-    // 2. Grab elements
-    const loadingView = document.getElementById('loadingView');
+    // 3. Grab elements
     const percentageElem = document.getElementById('loadingPercentage');
     const barFillElem = document.getElementById('loadingBarFill');
 
-    // Safety check: if no loading view exists on this page, stop here
-    if (!loadingView) return;
-
-    // 3. Animation and Timer logic (6 seconds total)
+    // 4. Animation and Timer logic (6 seconds total)
     const startTime = Date.now();
     const minLoadingTime = 6000; // 6 seconds
 
@@ -57,7 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Kick off the progress bar loop
     updateProgress();
 });
-  
+
+
   // --- AVATAR LOADER FIX (Account-Specific + Default Fallback) ---
 document.addEventListener('DOMContentLoaded', () => {
     let currentUsername = '';
