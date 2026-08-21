@@ -1,81 +1,61 @@
-// --- LOCAL STORAGE BRIDGE (Firebase Removed) ---
-window.pixvinzDb = null;
-
+// --- DEDICATED LOADING SCREEN SCRIPT ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Force load/preload the loading logo video
+    // 1. Play the logo video explicitly
     const logoVideo = document.getElementById('loadingLogo');
     if (logoVideo) {
-        logoVideo.load();
-        logoVideo.play().catch(() => {});
+        logoVideo.play().catch(err => console.log("Video play prevented:", err));
     }
 
-    // --- 1. LOADING SCREEN & 6-SECOND GUARANTEED PRELOADER ---
+    // 2. Grab elements
     const loadingView = document.getElementById('loadingView');
-    
-    // If there is no loadingView on this page, skip this block entirely!
-    if (!loadingView) return;
-
-    const skipLoading = localStorage.getItem('skipLoading') === 'true';
     const percentageElem = document.getElementById('loadingPercentage');
     const barFillElem = document.getElementById('loadingBarFill');
 
-    async function finishLoading() {
-        localStorage.removeItem('skipLoading');
-        
-        const storedUser = localStorage.getItem('loggedInUser');
-        let currentUser = null;
-        if (storedUser) {
-            try {
-                currentUser = JSON.parse(storedUser);
-            } catch (e) {
-                currentUser = null;
-            }
-        }
+    // Safety check: if no loading view exists on this page, stop here
+    if (!loadingView) return;
 
-        if (currentUser) {
-            const homeView = document.getElementById('homeView');
-            const mainHeader = document.getElementById('mainHeader');
+    // 3. Animation and Timer logic (6 seconds total)
+    const startTime = Date.now();
+    const minLoadingTime = 6000; // 6 seconds
 
-            if (loadingView) loadingView.classList.remove('active');
-            if (homeView) homeView.classList.add('active');
-            if (mainHeader) mainHeader.classList.remove('hidden');
+    function updateProgress() {
+        const elapsedTime = Date.now() - startTime;
+        let percent = Math.floor((elapsedTime / minLoadingTime) * 100);
 
-            if (typeof playMainBGM === 'function') playMainBGM();
+        if (percent < 1) percent = 1;
+        if (percent > 100) percent = 100;
+
+        // Update DOM
+        if (percentageElem) percentageElem.innerText = `${percent}%`;
+        if (barFillElem) barFillElem.style.width = `${percent}%`;
+
+        if (elapsedTime < minLoadingTime) {
+            // Keep looping every 50ms for smooth progress
+            setTimeout(updateProgress, 50);
         } else {
-            window.location.href = 'auth.html';
+            // Finished! Ensure 100% and transition
+            if (percentageElem) percentageElem.innerText = '100%';
+            if (barFillElem) barFillElem.style.width = '100%';
+
+            setTimeout(() => {
+                // Check if user is logged in
+                const storedUser = localStorage.getItem('loggedInUser');
+                
+                if (storedUser) {
+                    // Logged in: Hide loading view, show home view
+                    loadingView.classList.remove('active');
+                    const homeView = document.getElementById('homeView');
+                    if (homeView) homeView.classList.add('active');
+                } else {
+                    // Not logged in: Go to auth page
+                    window.location.href = 'auth.html';
+                }
+            }, 200);
         }
     }
-      
-    if (skipLoading) {
-        finishLoading();
-    } else {
-        const startTime = Date.now();
-        const minLoadingTime = 6000; // 6 seconds duration
 
-        if (percentageElem) percentageElem.innerText = '1%';
-        if (barFillElem) barFillElem.style.width = '1%';
-
-        const checkCompletion = () => {
-            const elapsedTime = Date.now() - startTime;
-            let percent = Math.floor((elapsedTime / minLoadingTime) * 100);
-            
-            if (percent < 1) percent = 1;
-            if (percent > 100) percent = 100;
-
-            if (percentageElem) percentageElem.innerText = `${percent}%`;
-            if (barFillElem) barFillElem.style.width = `${percent}%`;
-
-            if (elapsedTime >= minLoadingTime) {
-                if (percentageElem) percentageElem.innerText = '100%';
-                if (barFillElem) barFillElem.style.width = '100%';
-                setTimeout(finishLoading, 200);
-            } else {
-                setTimeout(checkCompletion, 100);
-            }
-        };
-
-        setTimeout(checkCompletion, 100);
-    }
+    // Kick off the progress bar loop
+    updateProgress();
 });
   
   // --- AVATAR LOADER FIX (Account-Specific + Default Fallback) ---
