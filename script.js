@@ -31,7 +31,62 @@ document.addEventListener('DOMContentLoaded', () => {
         video.play().catch(() => {});
     });
 
-// --- AVATAR LOADER FIX (Account-Specific + Default Fallback) ---
+window.GameState = {
+  currentUser: null,
+  
+  // Directly fetch fresh data from Firestore first
+  async refreshUserData(usernameToFetch) {
+    // If no username is passed, check if we have one stored temporarily
+    const username = usernameToFetch || (JSON.parse(localStorage.getItem('loggedInUser') || '{}')).username;
+    
+    if (!username) return null;
+
+    try {
+      if (window.pixvinzDb) {
+        const { db, doc, getDoc } = window.pixvinzDb;
+        const userDocRef = doc(db, 'players', username);
+        const snap = await getDoc(userDocRef);
+        
+        if (snap.exists()) {
+          // Cloud is the absolute source of truth!
+          this.currentUser = snap.data();
+          
+          // Save the fresh cloud data to localStorage AFTER pulling it
+          localStorage.setItem('loggedInUser', JSON.stringify(this.currentUser));
+        } else {
+          console.warn("User document not found in Firestore for:", username);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch fresh user data from Firestore:", err);
+    }
+    
+    this.updateUI();
+    return this.currentUser;
+  },
+
+  // Updates all HTML elements across your views automatically
+  updateUI() {
+    if (!this.currentUser) return;
+    
+    document.querySelectorAll('.userDisplayName').forEach(el => {
+      el.innerText = this.currentUser.displayName || 'Vinz';
+    });
+    
+    document.querySelectorAll('.userCoins').forEach(el => {
+      el.innerText = this.currentUser.coins !== undefined ? this.currentUser.coins : 0;
+    });
+
+    document.querySelectorAll('.userLevel').forEach(el => {
+      el.innerText = this.currentUser.level || 1;
+    });
+  }
+};
+
+
+  
+  
+  // --- AVATAR LOADER FIX (Account-Specific + Default Fallback) ---
     let currentUsername = '';
     try {
         const user = JSON.parse(localStorage.getItem('loggedInUser'));
