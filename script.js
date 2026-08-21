@@ -298,18 +298,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      if (confirm("Are you sure you want to log out?")) {
+  const logoutBtn = document.getElementById('logoutBtn'); // Make sure this matches your logout button's ID
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        // Clear the session data
         localStorage.removeItem('loggedInUser');
-        if (settingsModal) settingsModal.classList.add('hidden');
-        if (typeof AudioManager !== 'undefined') AudioManager.stopBGM();
-        showView('login');
-      }
+        localStorage.removeItem('skipLoading');
+        
+        // Redirect to the login/register page
+        window.location.href = 'auth.html';
     });
-  }
+}
 
   function renderLevels() {
     const grid = document.getElementById('levelsGrid');
