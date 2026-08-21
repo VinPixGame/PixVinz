@@ -726,15 +726,12 @@ function renderDailyGrid() {
         grid.appendChild(card);
     });
 
-const claimBtn = document.getElementById('dailyClaimBtn');
+    const claimBtn = document.getElementById('dailyClaimBtn');
     if (claimBtn) {
         if (dailyCountdownInterval) {
             clearInterval(dailyCountdownInterval);
             dailyCountdownInterval = null;
         }
-
-        // Ensure button pointer events are explicitly enabled
-        claimBtn.style.pointerEvents = 'auto';
 
         if (lockedOut) {
             claimBtn.style.background = 'rgba(255,255,255,0.1)';
@@ -749,8 +746,6 @@ const claimBtn = document.getElementById('dailyClaimBtn');
 
                 if (diff <= 0) {
                     claimBtn.textContent = `CLAIM DAY ${currentDayIndex} REWARD`;
-                    claimBtn.disabled = false;
-                    claimBtn.style.cursor = 'pointer';
                     renderDailyGrid();
                     return;
                 }
@@ -773,6 +768,8 @@ const claimBtn = document.getElementById('dailyClaimBtn');
             claimBtn.disabled = false;
         }
     }
+}
+
 window.claimDailyReward = async function() {
     const storageKey = getDailyStorageKey();
     let dailyState = JSON.parse(localStorage.getItem(storageKey) || '{"streak": 0, "lastClaimDate": "", "lastClaimTimestamp": 0}');
@@ -886,4 +883,5 @@ function showRewardToast(message) {
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
-                    
+
+        
