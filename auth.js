@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const freshUserData = {
                         username: userData.username,
                         uid: userData.uid,
-                        displayName: userData.displayName || "", // Fixed variable scope issue here
+                        displayName: userData.displayName || "",
                         avatar: userData.avatar || "",
                         coins: userData.coins ?? 0,
                         level: userData.level ?? 1,
@@ -190,8 +190,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         dailyrewards: userData.dailyrewards || { streak: 0, lastClaimDate: "" }
                     };
 
+                    // 1. Save general session
                     localStorage.setItem('loggedInUser', JSON.stringify(freshUserData));
                     localStorage.setItem('skipLoading', 'true');
+
+                    // 2. MAP CLOUD DATA DIRECTLY TO YOUR GAME'S LOCALSTORAGE KEYS
+                    const prefix = username + '_';
+                    localStorage.setItem(prefix + 'totalCoins', freshUserData.coins);
+                    localStorage.setItem(prefix + 'currentLevel', freshUserData.level);
+                    localStorage.setItem(prefix + 'vinpix_avatar', freshUserData.avatar);
+                    
+                    if (freshUserData.dailyrewards) {
+                        localStorage.setItem(`pixvinz_daily_${username}`, JSON.stringify(freshUserData.dailyrewards));
+                    }
                     
                     if (errElem) errElem.innerText = "";
                     window.location.href = 'index.html';
@@ -205,4 +216,3 @@ document.addEventListener('DOMContentLoaded', () => {
             if (errElem) errElem.innerText = "Login error occurred: " + err.message;
         }
     });
-});
