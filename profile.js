@@ -56,6 +56,11 @@ async function saveUserDataToCloud() {
         const playerProgression = calculateLevelAndXp(puzzlesSolved);
         const currentXpVal = playerProgression.currentXp;
 
+        // GRAB LOCAL DAILY REWARD STATE TO UPLOAD
+        const dailyStorageKey = getDailyStorageKey();
+        const dailyDataStr = localStorage.getItem(dailyStorageKey);
+        const dailyRewardState = dailyDataStr ? JSON.parse(dailyDataStr) : { streak: 0, lastClaimDate: "" };
+
         const userDocRef = doc(db, "players", username);
         await setDoc(userDocRef, {
             username: username,
@@ -64,6 +69,7 @@ async function saveUserDataToCloud() {
             xp: currentXpVal,
             coins: totalCoins,
             avatar: avatar,
+            dailyRewardState: dailyRewardState, // <-- SYNCED TO FIRESTORE
             lastUpdated: new Date()
         }, { merge: true });
     } catch (error) {
@@ -94,11 +100,23 @@ async function fetchUserDataFromFirestore() {
                     coins: cloudData.coins !== undefined ? cloudData.coins : currentUser.coins,
                     xp: cloudData.xp !== undefined ? cloudData.xp : currentUser.xp,
                     level: cloudData.level !== undefined ? cloudData.level : currentUser.level,
-                    avatar: cloudData.avatar || currentUser.avatar
+                    avatar: cloudData.avatar || currentUser.avatar,
+                    dailyRewardState: cloudData.dailyRewardState || currentUser.dailyRewardState
                 };
                 
                 // Save fresh data back to local storage
                 localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
+                
+                // Sync daily reward state down to local storage key as well
+                if (cloudData.dailyRewardState) {
+                    const targetUsername = updatedUser.username || currentUser.username;
+                    const dailyStorageKey = targetUsername ? `pixvinz_daily_${targetUsername}` : 'pixvinz_daily_guest';
+                    localStorage.setItem(dailyStorageKey, JSON.stringify(cloudData.dailyRewardState));
+                    
+                    if (typeof checkDailyRewardStatus === 'function') {
+                        checkDailyRewardStatus();
+                    }
+                }
                 
                 // Instantly update the screen so the user sees correct stats
                 if (typeof updateProfileUI === 'function') {
@@ -704,13 +722,12 @@ window.claimDailyReward = async function() {
     
     if (dailyState.lastClaimDate === today) return;
 
-    // Advance streak (loop back to 1 if past day 7)
     let nextStreak = dailyState.streak + 1;
     if (nextStreak > 7) nextStreak = 1;
 
     const reward = dailyRewardsData[nextStreak - 1];
 
-    // 1. Add Coins using your built-in earnCoins function (updates display + cloud sync)
+    // Add Coins & XP...
     if (typeof earnCoins === 'function') {
         earnCoins(reward.coins);
     } else {
@@ -720,7 +737,6 @@ window.claimDailyReward = async function() {
         if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
     }
 
-    // 2. Add Bonus XP (updates username-specific _bonusXp key)
     try {
         const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
         const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp';
@@ -729,20 +745,22 @@ window.claimDailyReward = async function() {
         localStorage.setItem(xpStoreKey, bonusXp);
     } catch (e) {}
 
-    // 3. Save daily streak state to username key
+    // Save daily streak state locally
     dailyState.streak = nextStreak;
     dailyState.lastClaimDate = today;
     localStorage.setItem(storageKey, JSON.stringify(dailyState));
 
-    // 4. Refresh UI, Grid, and XP Progression bar
     renderDailyGrid();
     checkDailyRewardStatus();
 
     if (typeof updateXpProgress === 'function') updateXpProgress();
     if (typeof updateProfileUI === 'function') updateProfileUI();
-    if (typeof saveUserDataToCloud === 'function') saveUserDataToCloud();
+    
+    // THIS SENDS THE UPDATED DAILY STATE TO THE CLOUD
+    if (typeof saveUserDataToCloud === 'function') {
+        saveUserDataToCloud();
+    }
 
-    // 5. Show custom animated notification toast banner
     showRewardToast(`🎉 Claimed Day ${nextStreak}! +${reward.coins} Coins & +${reward.xp} XP`);
 };
 
