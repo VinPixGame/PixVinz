@@ -5,13 +5,13 @@ import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, g
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
-  authDomain: "pixvinz2026.firebaseapp.com",
-  projectId: "pixvinz2026",
-  storageBucket: "pixvinz2026.firebasestorage.app",
-  messagingSenderId: "45609077809",
-  appId: "1:45609077809:web:575611e46acda9f64c5910",
-  measurementId: "G-W7FSERE8ZJ"
+    apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
+    authDomain: "pixvinz2026.firebaseapp.com",
+    projectId: "pixvinz2026",
+    storageBucket: "pixvinz2026.firebasestorage.app",
+    messagingSenderId: "45609077809",
+    appId: "1:45609077809:web:575611e46acda9f64c5910",
+    measurementId: "G-W7FSERE8ZJ"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -30,79 +30,88 @@ document.addEventListener('DOMContentLoaded', () => {
         video.load();
         video.play().catch(() => {});
     });
-// --- 1. LOADING SCREEN & 6-SECOND GUARANTEED PRELOADER ---
-const skipLoading = localStorage.getItem('skipLoading') === 'true';
-const percentageElem = document.getElementById('loadingPercentage');
-const barFillElem = document.getElementById('loadingBarFill');
 
-async function finishLoading() {
-    localStorage.removeItem('skipLoading');
-    
-    // Pulls fresh data directly from Firestore using our global state manager
-    await window.GameState.refreshUserData();
+    // --- 1. LOADING SCREEN & 6-SECOND GUARANTEED PRELOADER ---
+    const skipLoading = localStorage.getItem('skipLoading') === 'true';
+    const percentageElem = document.getElementById('loadingPercentage');
+    const barFillElem = document.getElementById('loadingBarFill');
 
-    // Check if we already have a logged-in user session stored
-    if (window.GameState.currentUser) {
-        // Sync player stats if function exists
-        if (typeof fetchUserDataFromFirestore === 'function') {
-            await fetchUserDataFromFirestore();
-        }
-
-        // Show home view and header since they are logged in!
-        const loadingView = document.getElementById('loadingView');
-        const homeView = document.getElementById('homeView');
-        const mainHeader = document.getElementById('mainHeader');
-
-        if (loadingView) loadingView.classList.remove('active');
-        if (homeView) homeView.classList.add('active');
-        if (mainHeader) mainHeader.classList.remove('hidden');
-
-        if (typeof playMainBGM === 'function') playMainBGM();
-    } else {
-        // If NOT logged in, transition to your separate auth.html URL!
-        window.location.href = 'auth.html';
-    }
-}
-  
-if (skipLoading) {
-    finishLoading();
-} else {
-    const startTime = Date.now();
-    const minLoadingTime = 6000; // Exactly 6 seconds (6000 milliseconds)
-
-    if (percentageElem) percentageElem.innerText = '1%';
-    if (barFillElem) barFillElem.style.width = '1%';
-
-    const checkCompletion = () => {
-        const elapsedTime = Date.now() - startTime;
-        let percent = Math.floor((elapsedTime / minLoadingTime) * 100);
+    async function finishLoading() {
+        localStorage.removeItem('skipLoading');
         
-        if (percent < 1) percent = 1;
-        if (percent > 100) percent = 100;
-
-        if (percentageElem) percentageElem.innerText = `${percent}%`;
-        if (barFillElem) barFillElem.style.width = `${percent}%`;
-
-        // Finish strictly when the 6-second timer completes
-        if (elapsedTime >= minLoadingTime) {
-            if (percentageElem) percentageElem.innerText = '100%';
-            if (barFillElem) barFillElem.style.width = '100%';
-            setTimeout(finishLoading, 200);
-        } else {
-            setTimeout(checkCompletion, 100);
+        // Pull stored user session data from localStorage
+        const storedUser = localStorage.getItem('loggedInUser');
+        let currentUser = null;
+        if (storedUser) {
+            try {
+                currentUser = JSON.parse(storedUser);
+            } catch (e) {
+                currentUser = null;
+            }
         }
-    };
 
-    // Preload assets quietly in the background without blocking the progress bar
-    for (let i = 1; i <= 55; i++) {
-        const img = new Image();
-        img.src = `image/level${i}.jpeg`;
+        // Check if we have a logged-in user session stored
+        if (currentUser) {
+            // Sync player stats if function exists
+            if (typeof fetchUserDataFromFirestore === 'function') {
+                await fetchUserDataFromFirestore();
+            }
+
+            // Show home view and header since they are logged in!
+            const loadingView = document.getElementById('loadingView');
+            const homeView = document.getElementById('homeView');
+            const mainHeader = document.getElementById('mainHeader');
+
+            if (loadingView) loadingView.classList.remove('active');
+            if (homeView) homeView.classList.add('active');
+            if (mainHeader) mainHeader.classList.remove('hidden');
+
+            if (typeof playMainBGM === 'function') playMainBGM();
+        } else {
+            // If NOT logged in, transition to your separate auth.html URL!
+            window.location.href = 'auth.html';
+        }
     }
+      
+    if (skipLoading) {
+        finishLoading();
+    } else {
+        const startTime = Date.now();
+        const minLoadingTime = 6000; // Exactly 6 seconds (6000 milliseconds)
 
-    // Kick off the smooth 6-second timer loop
-    setTimeout(checkCompletion, 100);
-}
-  
+        if (percentageElem) percentageElem.innerText = '1%';
+        if (barFillElem) barFillElem.style.width = '1%';
+
+        const checkCompletion = () => {
+            const elapsedTime = Date.now() - startTime;
+            let percent = Math.floor((elapsedTime / minLoadingTime) * 100);
+            
+            if (percent < 1) percent = 1;
+            if (percent > 100) percent = 100;
+
+            if (percentageElem) percentageElem.innerText = `${percent}%`;
+            if (barFillElem) barFillElem.style.width = `${percent}%`;
+
+            // Finish strictly when the 6-second timer completes
+            if (elapsedTime >= minLoadingTime) {
+                if (percentageElem) percentageElem.innerText = '100%';
+                if (barFillElem) barFillElem.style.width = '100%';
+                setTimeout(finishLoading, 200);
+            } else {
+                setTimeout(checkCompletion, 100);
+            }
+        };
+
+        // Preload assets quietly in the background without blocking the progress bar
+        for (let i = 1; i <= 55; i++) {
+            const img = new Image();
+            img.src = `image/level${i}.jpeg`;
+        }
+
+        // Kick off the smooth 6-second timer loop
+        setTimeout(checkCompletion, 100);
+    }
+});
 
 
   
