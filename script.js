@@ -2,17 +2,17 @@
 window.pixvinzDb = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Force load/preload all logo videos across the document upon opening
-    const logoVideos = document.querySelectorAll('video#logoVideo, video#loadingLogo, .auth-logo video, .about-logo video');
-    logoVideos.forEach(video => {
-        video.load();
-        video.play().catch(() => {});
-    });
+    // Force load/preload the loading logo video
+    const logoVideo = document.getElementById('loadingLogo');
+    if (logoVideo) {
+        logoVideo.load();
+        logoVideo.play().catch(() => {});
+    }
 
     // --- 1. LOADING SCREEN & 6-SECOND GUARANTEED PRELOADER ---
     const loadingView = document.getElementById('loadingView');
     
-    // If there is no loadingView on this page (like in auth.html), skip this block entirely!
+    // If there is no loadingView on this page, skip this block entirely!
     if (!loadingView) return;
 
     const skipLoading = localStorage.getItem('skipLoading') === 'true';
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         finishLoading();
     } else {
         const startTime = Date.now();
-        const minLoadingTime = 6000;
+        const minLoadingTime = 6000; // 6 seconds duration
 
         if (percentageElem) percentageElem.innerText = '1%';
         if (barFillElem) barFillElem.style.width = '1%';
