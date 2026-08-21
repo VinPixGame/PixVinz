@@ -22,7 +22,7 @@ function goHome() {
     
     if (typeof showView === 'function') {
         showView('home');     
-    fetchUserDataFromFirestore();
+        fetchUserDataFromFirestore();
         
     } else {
         const homeViewElement = document.getElementById('homeView') || window.parent.document.getElementById('homeView');
@@ -34,7 +34,7 @@ function goHome() {
     }
 }
 
-// --- SAFE CLOUD SYNC ---
+// --- SAFE CLOUD SYNC (UPLOAD) ---
 async function saveUserDataToCloud() {
     try {
         if (!window.pixvinzDb || !window.pixvinzDb.db) return;
@@ -56,7 +56,7 @@ async function saveUserDataToCloud() {
         const playerProgression = calculateLevelAndXp(puzzlesSolved);
         const currentXpVal = playerProgression.currentXp;
 
-        // GRAB LOCAL DAILY REWARD STATE TO UPLOAD
+        // GRAB LOCAL DAILY REWARD STATE TO UPLOAD TO CLOUD
         const dailyStorageKey = getDailyStorageKey();
         const dailyDataStr = localStorage.getItem(dailyStorageKey);
         const dailyRewardState = dailyDataStr ? JSON.parse(dailyDataStr) : { streak: 0, lastClaimDate: "" };
@@ -69,7 +69,7 @@ async function saveUserDataToCloud() {
             xp: currentXpVal,
             coins: totalCoins,
             avatar: avatar,
-            dailyRewardState: dailyRewardState, // <-- SYNCED TO FIRESTORE
+            dailyRewardState: dailyRewardState, // <-- Saves the claim status to cloud!
             lastUpdated: new Date()
         }, { merge: true });
     } catch (error) {
@@ -77,14 +77,12 @@ async function saveUserDataToCloud() {
     }
 }
 
-
+// --- FETCH & SYNC FROM FIRESTORE (DOWNLOAD) ---
 async function fetchUserDataFromFirestore() {
-    // Get current user session from local storage to find their unique ID
     const currentUser = JSON.parse(localStorage.getItem('loggedInUser'));
     if (!currentUser || !currentUser.authUid) return;
 
     try {
-        // Ensure Firestore functions are available
         if (typeof db !== 'undefined' && typeof doc === 'function' && typeof getDoc === 'function') {
             const userDocRef = doc(db, "users", currentUser.authUid);
             const userSnap = await getDoc(userDocRef);
@@ -92,7 +90,6 @@ async function fetchUserDataFromFirestore() {
             if (userSnap.exists()) {
                 const cloudData = userSnap.data();
                 
-                // Merge cloud data with local session
                 const updatedUser = {
                     ...currentUser,
                     username: cloudData.username || currentUser.username,
@@ -104,33 +101,27 @@ async function fetchUserDataFromFirestore() {
                     dailyRewardState: cloudData.dailyRewardState || currentUser.dailyRewardState
                 };
                 
-                // Save fresh data back to local storage
                 localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
                 
-                // Sync daily reward state down to local storage key as well
+                // SYNC DAILY REWARD STATE DOWN TO THIS DEVICE'S PROPER KEY
                 if (cloudData.dailyRewardState) {
-                    const targetUsername = updatedUser.username || currentUser.username;
-                    const dailyStorageKey = targetUsername ? `pixvinz_daily_${targetUsername}` : 'pixvinz_daily_guest';
-                    localStorage.setItem(dailyStorageKey, JSON.stringify(cloudData.dailyRewardState));
-                    
+                    localStorage.setItem(getDailyStorageKey(), JSON.stringify(cloudData.dailyRewardState));
                     if (typeof checkDailyRewardStatus === 'function') {
                         checkDailyRewardStatus();
                     }
                 }
                 
-                // Instantly update the screen so the user sees correct stats
                 if (typeof updateProfileUI === 'function') {
                     updateProfileUI();
                 }
                 
-                console.log("Profile successfully synced from Firestore!");
+                console.log("Profile and daily rewards successfully synced from Firestore!");
             }
         }
     } catch (err) {
         console.error("Failed to fetch data from Firestore:", err);
     }
 }
-
 
 
 function applyAvatarToUI(avatarData) {
