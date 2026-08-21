@@ -30,81 +30,80 @@ document.addEventListener('DOMContentLoaded', () => {
         video.load();
         video.play().catch(() => {});
     });
+// --- 1. LOADING SCREEN & 6-SECOND GUARANTEED PRELOADER ---
+const skipLoading = localStorage.getItem('skipLoading') === 'true';
+const percentageElem = document.getElementById('loadingPercentage');
+const barFillElem = document.getElementById('loadingBarFill');
 
-    // --- WORKING LOADING PROGRESS BAR & REDIRECT TO AUTH.HTML ---
-    let currentPercent = 1;
-    const percentageEl = document.getElementById('loadingPercentage');
-    const barFillEl = document.getElementById('loadingBarFill');
-
-    const loadingInterval = setInterval(() => {
-        currentPercent += Math.floor(Math.random() * 8) + 4; // Increments smoothly
-        
-        if (currentPercent >= 100) {
-            currentPercent = 100;
-            clearInterval(loadingInterval);
-
-            // Update UI one last time to 100%
-            if (percentageEl) percentageEl.innerText = '100%';
-            if (barFillEl) barFillEl.style.width = '100%';
-
-            // Brief pause at 100% before transitioning to auth.html
-            setTimeout(() => {
-                window.location.href = 'auth.html';
-            }, 400);
-        } else {
-            if (percentageEl) percentageEl.innerText = currentPercent + '%';
-            if (barFillEl) barFillEl.style.width = currentPercent + '%';
-        }
-    }, 40); // Speed of the loading bar
-});
-
-window.GameState = {
-  currentUser: null,
-  
-  // Directly fetch fresh data from Firestore first
-  async refreshUserData(usernameToFetch) {
-    const username = usernameToFetch || (JSON.parse(localStorage.getItem('loggedInUser') || '{}')).username;
+async function finishLoading() {
+    localStorage.removeItem('skipLoading');
     
-    if (!username) return null;
+    // Pulls fresh data directly from Firestore using our global state manager
+    await window.GameState.refreshUserData();
 
-    try {
-      if (window.pixvinzDb) {
-        const { db, doc, getDoc } = window.pixvinzDb;
-        const userDocRef = doc(db, 'players', username);
-        const snap = await getDoc(userDocRef);
-        
-        if (snap.exists()) {
-          this.currentUser = snap.data();
-          localStorage.setItem('loggedInUser', JSON.stringify(this.currentUser));
-        } else {
-          console.warn("User document not found in Firestore for:", username);
+    // Check if we already have a logged-in user session stored
+    if (window.GameState.currentUser) {
+        // Sync player stats if function exists
+        if (typeof fetchUserDataFromFirestore === 'function') {
+            await fetchUserDataFromFirestore();
         }
-      }
-    } catch (err) {
-      console.error("Failed to fetch fresh user data from Firestore:", err);
+
+        // Show home view and header since they are logged in!
+        const loadingView = document.getElementById('loadingView');
+        const homeView = document.getElementById('homeView');
+        const mainHeader = document.getElementById('mainHeader');
+
+        if (loadingView) loadingView.classList.remove('active');
+        if (homeView) homeView.classList.add('active');
+        if (mainHeader) mainHeader.classList.remove('hidden');
+
+        if (typeof playMainBGM === 'function') playMainBGM();
+    } else {
+        // If NOT logged in, transition to your separate auth.html URL!
+        window.location.href = 'auth.html';
     }
-    
-    this.updateUI();
-    return this.currentUser;
-  },
+}
+  
+if (skipLoading) {
+    finishLoading();
+} else {
+    const startTime = Date.now();
+    const minLoadingTime = 6000; // Exactly 6 seconds (6000 milliseconds)
 
-  // Updates all HTML elements across your views automatically
-  updateUI() {
-    if (!this.currentUser) return;
-    
-    document.querySelectorAll('.userDisplayName').forEach(el => {
-      el.innerText = this.currentUser.displayName || 'Vinz';
-    });
-    
-    document.querySelectorAll('.userCoins').forEach(el => {
-      el.innerText = this.currentUser.coins !== undefined ? this.currentUser.coins : 0;
-    });
+    if (percentageElem) percentageElem.innerText = '1%';
+    if (barFillElem) barFillElem.style.width = '1%';
 
-    document.querySelectorAll('.userLevel').forEach(el => {
-      el.innerText = this.currentUser.level || 1;
-    });
-  }
-};
+    const checkCompletion = () => {
+        const elapsedTime = Date.now() - startTime;
+        let percent = Math.floor((elapsedTime / minLoadingTime) * 100);
+        
+        if (percent < 1) percent = 1;
+        if (percent > 100) percent = 100;
+
+        if (percentageElem) percentageElem.innerText = `${percent}%`;
+        if (barFillElem) barFillElem.style.width = `${percent}%`;
+
+        // Finish strictly when the 6-second timer completes
+        if (elapsedTime >= minLoadingTime) {
+            if (percentageElem) percentageElem.innerText = '100%';
+            if (barFillElem) barFillElem.style.width = '100%';
+            setTimeout(finishLoading, 200);
+        } else {
+            setTimeout(checkCompletion, 100);
+        }
+    };
+
+    // Preload assets quietly in the background without blocking the progress bar
+    for (let i = 1; i <= 55; i++) {
+        const img = new Image();
+        img.src = `image/level${i}.jpeg`;
+    }
+
+    // Kick off the smooth 6-second timer loop
+    setTimeout(checkCompletion, 100);
+}
+  
+
 
   
   
@@ -219,69 +218,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   });
 
-// --- 1. LOADING SCREEN & 6-SECOND GUARANTEED PRELOADER ---
-const skipLoading = localStorage.getItem('skipLoading') === 'true';
-const percentageElem = document.getElementById('loadingPercentage');
-const barFillElem = document.getElementById('loadingBarFill');
-
-async function finishLoading() {
-    localStorage.removeItem('skipLoading');
-    
-    // Pulls fresh data directly from Firestore using our global state manager
-    await window.GameState.refreshUserData();
-
-    // Check if we successfully got a user session
-    if (window.GameState.currentUser) {
-        // Sync player stats if function exists
-        if (typeof fetchUserDataFromFirestore === 'function') {
-            await fetchUserDataFromFirestore();
-        }
-
-        showView('home');
-        if (typeof playMainBGM === 'function') playMainBGM();
-    } else {
-        showView('login');
-    }
-}
-  
-if (skipLoading) {
-    finishLoading();
-} else {
-    const startTime = Date.now();
-    const minLoadingTime = 6000; // Exactly 6 seconds (6000 milliseconds)
-
-    if (percentageElem) percentageElem.innerText = '1%';
-    if (barFillElem) barFillElem.style.width = '1%';
-
-    const checkCompletion = () => {
-        const elapsedTime = Date.now() - startTime;
-        let percent = Math.floor((elapsedTime / minLoadingTime) * 100);
-        
-        if (percent < 1) percent = 1;
-        if (percent > 100) percent = 100;
-
-        if (percentageElem) percentageElem.innerText = `${percent}%`;
-        if (barFillElem) barFillElem.style.width = `${percent}%`;
-
-        // Finish strictly when the 6-second timer completes
-        if (elapsedTime >= minLoadingTime) {
-            if (percentageElem) percentageElem.innerText = '100%';
-            if (barFillElem) barFillElem.style.width = '100%';
-            setTimeout(finishLoading, 200);
-        } else {
-            setTimeout(checkCompletion, 100);
-        }
-    };
-
-    // Preload assets quietly in the background without blocking the progress bar
-    for (let i = 1; i <= 55; i++) {
-        const img = new Image();
-        img.src = `image/level${i}.jpeg`;
-    }
-
-    // Kick off the smooth 6-second timer loop
-    setTimeout(checkCompletion, 100);
-}
   
 //playbutton//
 
