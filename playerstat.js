@@ -27,16 +27,6 @@ function updateCoinDisplay() {
     }
 }
 
-// SAFE CLOUD SYNC WRAPPER: Ensures profile.js cloud sync is safely called if available
-function safeSyncToCloud() {
-    if (typeof window.saveUserDataToCloud === 'function') {
-        window.saveUserDataToCloud();
-    } else if (typeof saveUserDataToCloud === 'function') {
-        saveUserDataToCloud();
-    }
-}
-
-// STRICT PRIORITY: Fetch data from Firestore FIRST before any save/upload can occur
 async function fetchUserDataFromFirestore() {
     try {
         const username = getCurrentUsername();
@@ -55,15 +45,17 @@ async function fetchUserDataFromFirestore() {
                 const localLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
                 const localCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
                 
-                // Prioritize cloud truth or keep highest progression safely
+                // Keep the highest level (prevents resetting to level 1)
                 const cloudLevel = cloudData.level || 1;
                 if (cloudLevel > localLevel) {
                     localStorage.setItem(getUserKey('currentLevel'), cloudLevel);
                 } else if (localLevel > cloudLevel) {
-                    // Only push local up to cloud AFTER fetch comparison is fully complete
-                    safeSyncToCloud();
+                    if (typeof saveUserDataToCloud === 'function') {
+                        await saveUserDataToCloud();
+                    }
                 }
                 
+                // Keep the highest coin balance
                 const cloudCoins = cloudData.coins || 0;
                 if (cloudCoins > localCoins) {
                     localStorage.setItem(getUserKey('totalCoins'), cloudCoins);
@@ -73,19 +65,21 @@ async function fetchUserDataFromFirestore() {
     } catch (err) {
         console.warn("Cloud fetch warning (safely bypassed):", err);
     } finally {
-        // Always update display after fetch completion
+        // Always update the display, even if cloud fetch fails
         updateCoinDisplay();
     }
 }
+
 
 function earnCoins(amount) {
     const key = getUserKey('totalCoins');
     let totalCoins = (parseInt(localStorage.getItem(key)) || 0) + amount;
     localStorage.setItem(key, totalCoins);
     updateCoinDisplay();
-    safeSyncToCloud(); // Auto-sync to cloud when coins change
+    saveUserDataToCloud(); // Auto-sync to cloud when coins change!
 }
 
+// Safely deducts coins for purchases (returns true if successful, false if broke)
 function spendCoins(amount) {
     const key = getUserKey('totalCoins');
     let currentCoins = parseInt(localStorage.getItem(key)) || 0;
@@ -97,11 +91,11 @@ function spendCoins(amount) {
     currentCoins -= amount;
     localStorage.setItem(key, currentCoins);
     updateCoinDisplay();
-    safeSyncToCloud(); // Auto-sync to cloud when coins change
+    saveUserDataToCloud(); // Auto-sync to cloud when coins change!
     return true; 
-}
+} // <-- FIXED: Added closing bracket here!
 
-// Handles victory, saves locally, and triggers safe cloud sync
+// Handles victory, saves with profile.js keys, and triggers profile sync if available
 async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeStr) {
     const totalCoinsKey = getUserKey('totalCoins');
     const currentLevelKey = getUserKey('currentLevel');
@@ -119,6 +113,7 @@ async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeSt
         localStorage.setItem(currentLevelKey, nextLevelToUnlock);
     }
 
+    // Save individual level stats using the username prefix
     if (finalMoves !== undefined) {
         localStorage.setItem(getUserKey(`levelMoves_${completedLevel}`), finalMoves);
     }
@@ -134,12 +129,13 @@ async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeSt
         modal.style.display = 'flex';
     }
 
-    // Sync victory results to cloud safely
-    safeSyncToCloud();
+    // Trigger profile.js cloud sync function if it exists
+    if (typeof saveUserDataToCloud === 'function') {
+         saveUserDataToCloud();
+    }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
     updateCoinDisplay();
-    // STRICT ORDER: Always fetch cloud data first on page load before anything else
-    await fetchUserDataFromFirestore();
+  await   fetchUserDataFromFirestore();
 });
