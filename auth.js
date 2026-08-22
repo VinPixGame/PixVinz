@@ -285,6 +285,7 @@ if (!isRunningAsApp) {
     }
   });
 
+    
   // Handle what happens when the user clicks your DOWNLOAD APP button
   if (installBtn) {
     installBtn.addEventListener('click', async () => {
