@@ -704,8 +704,11 @@ body {
 }
 
 
+
+  
+}
 /* ==========================================
-    SETTINGS VIEW (Seamless Full-Screen)
+    SETTINGS VIEW (Exact Profile Page Match)
    ========================================== */
 
 #settingsView {
@@ -714,11 +717,11 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: #120624; /* Matches your exact app background color */
-  z-index: 99999; /* Forces it to sit strictly on top of everything */
+  background: #120624;
+  z-index: 99999;
   box-sizing: border-box;
   overflow-y: auto;
-  padding: 20px;
+  padding: 20px 0;
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -728,43 +731,62 @@ body {
   display: none !important;
 }
 
-/* Container matching your profile view layout */
+/* Matches your profile-container sizing precisely so it has the exact same width */
 #settingsView .profile-container {
   width: 100%;
   max-width: 420px;
   margin: 0 auto;
   box-sizing: border-box;
+  padding: 0 15px;
 }
 
-/* Make the inner content card completely clean without sharp conflicting box edges */
+/* Matches your profile-card styling with the light purple border and no harsh edges */
 #settingsView .profile-card,
 .settings-card {
   width: 100%;
-  background: rgba(45, 16, 84, 0.4); /* Soft transparent purple that blends naturally */
-  backdrop-filter: blur(10px);
-  border: 2px solid #b19cd9; /* Lighter purple border */
+  background: radial-gradient(circle at top, #2d1054 0%, #120624 100%);
+  border: 2px solid #b19cd9;
   border-radius: 20px;
-  padding: 25px;
-  box-shadow: 0 0 25px rgba(177, 156, 217, 0.15);
+  padding: 20px;
+  box-shadow: 0 0 25px rgba(177, 156, 217, 0.2);
   box-sizing: border-box;
 }
 
-/* Header Styling */
+/* Header layout mirroring the profile page */
 .settings-header {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   margin-bottom: 20px;
-  border-bottom: 1px solid rgba(177, 156, 217, 0.3);
-  padding-bottom: 10px;
+  padding: 0 5px;
 }
 
 .settings-header h3.profile-title-center {
   text-align: center;
   margin: 0;
-  color: #d1c4e9;
+  color: #ffd700; /* Matching your gold profile title style */
   font-size: 20px;
   letter-spacing: 1px;
+}
+
+/* Exact Back Button Style matching the Profile Page */
+#settingsView .back-btn {
+  background: rgba(157, 78, 221, 0.25);
+  border: 1px solid #b19cd9;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px; /* Pill shape */
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+
+#settingsView .back-btn:hover {
+  background: rgba(157, 78, 221, 0.5);
 }
 
 /* Setting Items */
@@ -772,7 +794,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 0;
+  padding: 12px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   font-weight: bold;
   color: #fff;
@@ -796,7 +818,7 @@ body {
   background: rgba(157, 78, 221, 0.2);
   border: 1px solid rgba(177, 156, 217, 0.4);
   color: #d1c4e9;
-  padding: 6px 12px;
+  padding: 5px 12px;
   border-radius: 8px;
   font-size: 12px;
   font-weight: 600;
@@ -804,12 +826,12 @@ body {
   cursor: not-allowed;
 }
 
-/* Action Buttons */
+/* Actions */
 .settings-actions {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 25px;
+  gap: 10px;
+  margin-top: 20px;
 }
 
 .btn-secondary {
@@ -820,7 +842,6 @@ body {
   border-radius: 10px;
   font-weight: bold;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .btn-danger {
@@ -831,7 +852,6 @@ body {
   border-radius: 10px;
   font-weight: bold;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 /* TOGGLE SWITCHES */
