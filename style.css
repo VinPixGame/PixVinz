@@ -966,14 +966,12 @@ input:checked + .slider:before {
 
 
 
-.profile-header-top {
+.profile-top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
-  padding: 0 10px;
   position: relative;
-  z-index: 10; /* Keeps it above other elements */
+  z-index: 10;
 }
 
 .profile-settings-btn {
@@ -983,8 +981,8 @@ input:checked + .slider:before {
   cursor: pointer;
   color: #ffd700;
   position: relative;
-  z-index: 20; /* Ensures it sits on top and catches clicks */
-  pointer-events: auto; /* Forces clickability */
+  z-index: 20;
+  pointer-events: auto;
 }
 
 
