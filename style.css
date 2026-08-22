@@ -964,6 +964,25 @@ input:checked + .slider:before {
   font-weight: bold;
 }
 
+
+
+.profile-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0 10px;
+}
+
+.profile-settings-btn {
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #ffd700;
+}
+
+
   /* ==========================================
     COMPLETE GAME PAGE LAYOUT CSS
    ========================================== */
