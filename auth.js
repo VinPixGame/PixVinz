@@ -264,45 +264,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- DOWNLOAD APP BUTTON LOGIC ---
 
-// 1. Check if the game is already running as an installed app
-const isRunningAsApp = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+const installButtons = document.querySelectorAll('.glass-install-btn');
 
-// 2. Only run the install logic if they are in a web browser
-if (!isRunningAsApp) {
-  let deferredPrompt;
-  const installBtn = document.getElementById('install-app-btn');
+const isRunningAsApp =
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true;
 
-  // Listen for the browser's install event
-  window.addEventListener('beforeinstallprompt', (e) => {
-    // Prevent the default browser mini-banner
-    e.preventDefault();
-    // Save the event for later
-    deferredPrompt = e;
-    
-    // Show your custom glassmorphic download button
-    if (installBtn) {
-      installBtn.style.display = 'flex';
-    }
-  });
-
-    
-  // Handle what happens when the user clicks your DOWNLOAD APP button
-  if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-      
-      // Show the native install prompt
-      deferredPrompt.prompt();
-      
-      // Wait for the user's choice
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        console.log('User installed the app');
-        // Hide the button after successful installation
-        installBtn.style.display = 'none';
-      }
-      
-      deferredPrompt = null;
+// Always hide buttons if already installed/running as an app
+if (isRunningAsApp) {
+    installButtons.forEach(btn => {
+        btn.style.display = 'none';
     });
-  }
+} else {
+    let deferredPrompt = null;
+
+    // Keep hidden until installation is actually available
+    installButtons.forEach(btn => {
+        btn.style.display = 'none';
+    });
+
+    // Browser says the app can be installed
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+
+        installButtons.forEach(btn => {
+            btn.style.display = 'block';
+        });
+    });
+
+    // Handle both Download App buttons
+    installButtons.forEach(btn => {
+        btn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+
+            deferredPrompt.prompt();
+
+            const { outcome } = await deferredPrompt.userChoice;
+
+            if (outcome === 'accepted') {
+                installButtons.forEach(button => {
+                    button.style.display = 'none';
+                });
+            }
+
+            deferredPrompt = null;
+        });
+    });
+
+    // Hide after the app has been installed
+    window.addEventListener('appinstalled', () => {
+        installButtons.forEach(btn => {
+            btn.style.display = 'none';
+        });
+
+        deferredPrompt = null;
+    });
 }
