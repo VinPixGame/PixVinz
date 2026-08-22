@@ -262,49 +262,49 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// --- DOWNLOAD APP BUTTON LOGIC ---
+// DOWNLOAD BUTTON / PWA INSTALLATION LOGIC
+let deferredPrompt;
 
-// 1. Check if the game is already running as an installed app
-const isRunningAsApp = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-
-// 2. Only run the install logic if they are in a web browser
-if (!isRunningAsApp) {
-  let deferredPrompt;
-  const installBtn = document.getElementById('install-app-btn');
-
-  // Listen for the browser's install event
-  window.addEventListener('beforeinstallprompt', (e) => {
-    // Prevent the default browser mini-banner
-    e.preventDefault();
-    // Save the event for later
-    deferredPrompt = e;
-    
-    // Show your custom glassmorphic download button
-    if (installBtn) {
-      installBtn.style.display = 'flex';
-    }
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Prevent Chrome from automatically showing the prompt
+  e.preventDefault();
+  // Stash the event so it can be triggered later.
+  deferredPrompt = e;
+  
+  // Show the download buttons on the active views
+  const installBtns = document.querySelectorAll('#install-app-btn, .install-app-btn-ref');
+  installBtns.forEach(btn => {
+    btn.style.display = 'flex';
   });
+  console.log('beforeinstallprompt event fired successfully!');
+});
 
-  // Handle what happens when the user clicks your DOWNLOAD APP button
-  if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-      
-      // Show the native install prompt
+// Handle the click event for both install buttons
+document.addEventListener('click', async (e) => {
+  if (e.target && (e.target.id === 'install-app-btn' || e.target.id === 'install-app-btn-ref' || e.target.classList.contains('install-app-btn-ref'))) {
+    if (deferredPrompt) {
+      // Show the install prompt
       deferredPrompt.prompt();
-      
-      // Wait for the user's choice
+      // Wait for the user to respond to the prompt
       const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        console.log('User installed the app');
-        // Hide the button after successful installation
-        installBtn.style.display = 'none';
-      }
-      
+      console.log(`User response to the install prompt: ${outcome}`);
+      // Clear the deferred prompt variable, it can only be used once.
       deferredPrompt = null;
-    });
+    } else {
+      // This will tell you if you click it before the browser is ready
+      alert("Install prompt is not ready yet. Make sure you are serving via HTTPS and your service worker is registered.");
+      console.log('Install button clicked, but deferredPrompt is null/undefined.');
+    }
   }
-}
+});
+
+window.addEventListener('appinstalled', (evt) => {
+  console.log('PixVinz was successfully installed');
+  const installBtns = document.querySelectorAll('#install-app-btn, .install-app-btn-ref');
+  installBtns.forEach(btn => {
+    btn.style.display = 'none';
+  });
+});
 
 
 if ('serviceWorker' in navigator) {
