@@ -285,17 +285,14 @@
 <!-- PROFILE PAGE VIEW -->
 <section id="profileView" class="view hidden">
   <div class="profile-container">
-    <!-- Header with Back Button and Centered Title -->
+    <!-- Header with Back Button, Centered Title, and Settings Gear -->
     <div class="profile-header profile-top-bar">
       <button class="back-btn" onclick="goHome()"><span>←</span> Back</button>
       <h2 class="profile-title-center">Player Profile</h2>
       <button id="openSettings" class="profile-settings-btn">⚙️</button>
     </div>
-      
-      <div class="header-spacer"></div>
-    </div>
 
-    <!-- Profile Card -->
+    
     <div class="profile-card">
       <!-- Avatar Display & Upload with Loading State -->
       <div class="avatar-section">
@@ -312,12 +309,13 @@
 
       <!-- Player Name Display Row with Small Edit Button -->
       <div class="profile-info-row">
-    <div class="profile-info-top">
-        <span class="info-subtitle">PLAYER NAME</span>
-        <h3 id="displayPlayerName">Player</h3> <!-- Dynamic placeholder -->
-    </div>
-    <button class="btn-secondary" id="openEditNameModal">Edit</button>
-</div>
+        <div class="profile-info-top">
+          <span class="info-subtitle">PLAYER NAME</span>
+          <h3 id="displayPlayerName">Player</h3>
+        </div>
+        <button class="btn-secondary" id="openEditNameModal">Edit</button>
+      </div>
+
       <!-- Coins and Level Display -->
       <div class="profile-stats-badge-row">
         <span class="coins-display">🪙<span id="profileCoins">0</span></span>
@@ -327,7 +325,7 @@
         </span>
       </div>
 
-<!-- XP Progress Bar Section -->
+      <!-- XP Progress Bar Section -->
       <div class="xp-section">
         <div class="xp-header-row">
           <span id="displayLevelBadge">
@@ -358,6 +356,7 @@
       </div>
     </div>
   </div>
+</section>
 
 
 
