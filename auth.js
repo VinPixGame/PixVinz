@@ -208,3 +208,49 @@ if (logForm) {
         }
     });
 }
+
+
+
+// DOWNLOAD BUTTON / PWA INSTALLATION LOGIC
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Prevent Chrome from automatically showing the prompt
+  e.preventDefault();
+  // Stash the event so it can be triggered later.
+  deferredPrompt = e;
+  
+  // Show the download buttons on the active views
+  const installBtns = document.querySelectorAll('#install-app-btn, .install-app-btn-ref');
+  installBtns.forEach(btn => {
+    btn.style.display = 'flex';
+  });
+  console.log('beforeinstallprompt event fired successfully!');
+});
+
+// Handle the click event for both install buttons
+document.addEventListener('click', async (e) => {
+  if (e.target && (e.target.id === 'install-app-btn' || e.target.id === 'install-app-btn-ref' || e.target.classList.contains('install-app-btn-ref'))) {
+    if (deferredPrompt) {
+      // Show the install prompt
+      deferredPrompt.prompt();
+      // Wait for the user to respond to the prompt
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`User response to the install prompt: ${outcome}`);
+      // Clear the deferred prompt variable, it can only be used once.
+      deferredPrompt = null;
+    } else {
+      // This will tell you if you click it before the browser is ready
+      alert("Install prompt is not ready yet. Make sure you are serving via HTTPS and your service worker is registered.");
+      console.log('Install button clicked, but deferredPrompt is null/undefined.');
+    }
+  }
+});
+
+window.addEventListener('appinstalled', (evt) => {
+  console.log('PixVinz was successfully installed');
+  const installBtns = document.querySelectorAll('#install-app-btn, .install-app-btn-ref');
+  installBtns.forEach(btn => {
+    btn.style.display = 'none';
+  });
+});
