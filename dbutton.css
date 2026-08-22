@@ -1,0 +1,29 @@
+/* DOWNLOAD APP BUTTON */
+.glass-install-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 350px;
+  padding: 14px 20px;
+  margin: 0 auto 12px auto;
+  background: rgba(35, 16, 64, 0.85);
+  border: 2px solid #7b2cbf;
+  border-radius: 20px;
+  color: #ffd700;
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 0 25px rgba(123, 44, 191, 0.3);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.glass-install-btn:hover {
+  border-color: #ffd700;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+}
