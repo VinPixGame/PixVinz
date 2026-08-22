@@ -1679,9 +1679,25 @@ video {
     margin: 0 auto 6px auto;
 }
 
+
+
+
 /* Optional styling for locked vs unlocked state */
 .badge-card.locked img,
 .badge-card.locked .badge-img {
     opacity: 0.35;
     filter: grayscale(100%);
 }
+
+
+@media all and (display-mode: browser) {
+  .homeView {
+    padding-top: 15px;
+    margin-bottom: 20px;
+  }
+
+  .homeView .welcome-header {
+    margin-top: 5px;
+  }
+}
+
