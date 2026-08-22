@@ -287,19 +287,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 const settingsView = document.getElementById('settingsView');
 const profileView = document.getElementById('profileView');
-const homeView = document.getElementById('homeView');
-const openSettings = document.getElementById('openSettings');
-const closeSettingsModal = document.getElementById('closeSettingsModal');
+const openSettings = document.getElementById('openSettings');       // The gear icon inside profileView
+const closeSettingsModal = document.getElementById('closeSettingsModal'); // The back button inside settingsView
 
 if (openSettings) {
   openSettings.addEventListener('click', () => {
     if (typeof AudioManager !== 'undefined') AudioManager.playClick();
     
-    // Hide everything else so settings takes over fully
-    if (homeView) homeView.classList.add('hidden');
+    // Hide the profile view and open the settings view
     if (profileView) profileView.classList.add('hidden');
-    
-    // Show settings
     if (settingsView) settingsView.classList.remove('hidden');
   });
 }
@@ -308,10 +304,8 @@ if (closeSettingsModal) {
   closeSettingsModal.addEventListener('click', () => {
     if (typeof AudioManager !== 'undefined') AudioManager.playClick();
     
-    // Hide settings view
+    // Hide the settings view and show the profile view again
     if (settingsView) settingsView.classList.add('hidden');
-    
-    // Return directly to the profile view
     if (profileView) profileView.classList.remove('hidden');
   });
 }
