@@ -1,0 +1,101 @@
+/* AUTH CARDS (LOGIN & REGISTER) */
+
+.auth-card {
+  width: 100%;
+  max-width: 350px;
+  background: rgba(35, 16, 64, 0.85);
+  border: 2px solid #7b2cbf;
+  border-radius: 20px;
+  padding: 24px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 25px rgba(123, 44, 191, 0.3);
+  margin: 0 auto;
+}
+
+
+.auth-stack-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 350px;
+  margin: 0 auto;
+  gap: 8px; /* This controls the exact gap between your button and your card! Change to 4px or 0px if you want them even closer. */
+}
+
+
+.auth-logo video {
+  width: 110px;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.auth-card h2 {
+  color: #ffd700;
+  margin-bottom: 20px;
+  font-size: 22px;
+  letter-spacing: 1px;
+}
+
+.input-group {
+  margin-bottom: 12px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(157, 78, 221, 0.5);
+  background: rgba(12, 5, 28, 0.8);
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+}
+
+.input-group input:focus {
+  border-color: #ffd700;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+}
+
+.auth-error {
+  color: #ff4d4d;
+  font-size: 13px;
+  margin-bottom: 10px;
+  min-height: 18px;
+}
+
+.auth-switch {
+  margin-top: 16px;
+  font-size: 13px;
+  color: #a892ee;
+}
+
+.auth-switch a {
+  color: #ffd700;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+
+.glass-install-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 20px;
+  margin: 0; /* Clears out old margins so the wrapper's gap controls the spacing */
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
