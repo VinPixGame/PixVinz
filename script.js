@@ -284,31 +284,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const settingsModal = document.getElementById('settingsModal');
-  const aboutModal = document.getElementById('aboutModal');
-  const sfxToggle = document.getElementById('sfxToggle');
-  const musicToggle = document.getElementById('musicToggle');
+const settingsView = document.getElementById('settingsView');
+const profileView = document.getElementById('profileView'); 
+const openSettings = document.getElementById('openSettings');
+const closeSettingsModal = document.getElementById('closeSettingsModal');
 
-  if (typeof AudioManager !== 'undefined') {
-    if (sfxToggle) sfxToggle.checked = AudioManager.sfxEnabled;
-    if (musicToggle) musicToggle.checked = AudioManager.musicEnabled;
-  }
+if (openSettings) {
+  openSettings.addEventListener('click', () => {
+    if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+    if (profileView) profileView.classList.add('hidden');
+    if (settingsView) settingsView.classList.remove('hidden');
+  });
+}
 
-  const openSettings = document.getElementById('openSettings');
-  if (openSettings) {
-    openSettings.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      if (settingsModal) settingsModal.classList.remove('hidden');
-    });
-  }
-
-  const closeSettingsModal = document.getElementById('closeSettingsModal');
-  if (closeSettingsModal) {
-    closeSettingsModal.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      if (settingsModal) settingsModal.classList.add('hidden');
-    });
-  }
+if (closeSettingsModal) {
+  closeSettingsModal.addEventListener('click', () => {
+    if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+    if (settingsView) settingsView.classList.add('hidden');
+    if (profileView) profileView.classList.remove('hidden');
+  });
+}
 
   if (sfxToggle) {
     sfxToggle.addEventListener('change', (e) => {
