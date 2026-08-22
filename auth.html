@@ -2,68 +2,66 @@
     <div class="app-container">
         
         <!-- 1. LOGIN PAGE -->
-        <section id="loginView" class="view active" style="width: 100%; max-width: 350px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px;">
-            
-            <!-- DOWNLOAD BUTTON: Outside the purple box, right on top of it -->
-            <button id="install-app-btn" class="glass-install-btn" style="display: none; width: 100%; margin: 0;">
-              📱 DOWNLOAD APP
-            </button>
+        <section id="loginView" class="view active">
+          
+          <button id="install-app-btn" class="glass-install-btn" style="display: none;">
+            📱 DOWNLOAD APP
+          </button>
 
-            <div class="auth-card" style="margin: 0; max-width: 100%;">
-              <div class="auth-logo">
-                <video autoplay loop muted playsinline preload="auto" style="background: transparent;">
-                  <source src="image/logo.webm" type="video/webm">
-                </video>
-              </div>
-              <h2>LOG IN</h2>
-              <form id="loginForm">
-                <div class="input-group">
-                  <input type="text" id="loginUser" placeholder="Username (min 6 chars, lowercase & number)" required>
-                </div>
-                <div class="input-group" style="position: relative;">
-                  <input type="password" id="loginPass" placeholder="Password" required>
-                  <button type="button" id="toggleLoginPass" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #b388ff; font-weight: bold; font-size: 0.85rem;">Show</button>
-                </div>
-                <p id="loginError" class="auth-error"></p>
-                <button type="submit" class="btn btn-primary">LOG IN</button>
-              </form>
-              <p class="auth-switch" style="position: relative; z-index: 10; pointer-events: auto;">Don't have an account? <a href="#" id="toRegister" style="position: relative; z-index: 11; display: inline-block; padding: 5px;">Create Account</a></p>
+          <div class="auth-card">
+            <div class="auth-logo">
+              <video autoplay loop muted playsinline preload="auto" style="background: transparent;">
+                <source src="image/logo.webm" type="video/webm">
+              </video>
             </div>
+            <h2>LOG IN</h2>
+            <form id="loginForm">
+              <div class="input-group">
+                <input type="text" id="loginUser" placeholder="Username (min 6 chars, lowercase & number)" required>
+              </div>
+              <div class="input-group" style="position: relative;">
+                <input type="password" id="loginPass" placeholder="Password" required>
+                <button type="button" id="toggleLoginPass" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #b388ff; font-weight: bold; font-size: 0.85rem;">Show</button>
+              </div>
+              <p id="loginError" class="auth-error"></p>
+              <button type="submit" class="btn btn-primary">LOG IN</button>
+            </form>
+            <p class="auth-switch" style="position: relative; z-index: 10; pointer-events: auto;">Don't have an account? <a href="#" id="toRegister" style="position: relative; z-index: 11; display: inline-block; padding: 5px;">Create Account</a></p>
+          </div>
         </section>
 
         <!-- 3. REGISTER PAGE -->
-        <section id="registerView" class="view" style="width: 100%; max-width: 350px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px;">
-            
-            <!-- DOWNLOAD BUTTON FOR REGISTER PAGE -->
-            <button class="install-app-btn-ref glass-install-btn" style="display: none; width: 100%; margin: 0;">
-              📱 DOWNLOAD APP
-            </button>
+        <section id="registerView" class="view">
+          
+          <button class="install-app-btn-ref glass-install-btn" style="display: none;">
+            📱 DOWNLOAD APP
+          </button>
 
-            <div class="auth-card" style="margin: 0; max-width: 100%;">
-              <h2>CREATE ACCOUNT</h2>
-              <form id="registerForm">
-                <div class="input-group">
-                  <input type="text" id="regDisplayName" placeholder="Display Name (e.g. Vinz)" required>
-                </div>
-                
-                <div class="input-group" style="position: relative; display: flex; align-items: center;">
-                  <input type="text" id="regUser" placeholder="Username (min 6 chars, lowercase & number)" required style="flex: 1; border-top-right-radius: 0; border-bottom-right-radius: 0;">
-                  <span style="background: rgba(255, 255, 255, 0.1); padding: 12px 10px; border: 1px solid rgba(255, 255, 255, 0.2); border-left: none; border-top-right-radius: 8px; border-bottom-right-radius: 8px; color: #b388ff; font-size: 0.85rem; font-weight: bold; white-space: nowrap;">@pixvinz.com</span>
-                  <span id="regUserIndicator" style="position: absolute; right: 130px; top: 50%; transform: translateY(-50%); font-size: 0.85rem; font-weight: bold;"></span>
-                </div>
+          <div class="auth-card">
+            <h2>CREATE ACCOUNT</h2>
+            <form id="registerForm">
+              <div class="input-group">
+                <input type="text" id="regDisplayName" placeholder="Display Name (e.g. Vinz)" required>
+              </div>
+              
+              <div class="input-group" style="position: relative; display: flex; align-items: center;">
+                <input type="text" id="regUser" placeholder="Username (min 6 chars, lowercase & number)" required style="flex: 1; border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                <span style="background: rgba(255, 255, 255, 0.1); padding: 12px 10px; border: 1px solid rgba(255, 255, 255, 0.2); border-left: none; border-top-right-radius: 8px; border-bottom-right-radius: 8px; color: #b388ff; font-size: 0.85rem; font-weight: bold; white-space: nowrap;">@pixvinz.com</span>
+                <span id="regUserIndicator" style="position: absolute; right: 130px; top: 50%; transform: translateY(-50%); font-size: 0.85rem; font-weight: bold;"></span>
+              </div>
 
-                <div class="input-group" style="position: relative;">
-                  <input type="password" id="regPass" placeholder="Password (6-12 chars, Aa1)" required>
-                  <button type="button" id="toggleRegPass" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #b388ff; font-weight: bold; font-size: 0.85rem;">Show</button>
-                </div>
-                <div class="input-group">
-                  <input type="password" id="regPassConfirm" placeholder="Repeat Password" required>
-                </div>
-                <p id="regError" class="auth-error"></p>
-                <button type="submit" class="btn btn-primary">REGISTER</button>
-              </form>
-              <p class="auth-switch" style="position: relative; z-index: 10; pointer-events: auto;">Already have an account? <a href="#" id="toLogin" style="position: relative; z-index: 11; display: inline-block; padding: 5px;">Log In</a></p>
-            </div>
+              <div class="input-group" style="position: relative;">
+                <input type="password" id="regPass" placeholder="Password (6-12 chars, Aa1)" required>
+                <button type="button" id="toggleRegPass" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #b388ff; font-weight: bold; font-size: 0.85rem;">Show</button>
+              </div>
+              <div class="input-group">
+                <input type="password" id="regPassConfirm" placeholder="Repeat Password" required>
+              </div>
+              <p id="regError" class="auth-error"></p>
+              <button type="submit" class="btn btn-primary">REGISTER</button>
+            </form>
+            <p class="auth-switch" style="position: relative; z-index: 10; pointer-events: auto;">Already have an account? <a href="#" id="toLogin" style="position: relative; z-index: 11; display: inline-block; padding: 5px;">Log In</a></p>
+          </div>
         </section>  
 
     </div>
