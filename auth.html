@@ -8,10 +8,7 @@
     <link rel="manifest" href="manifest.json">
 </head>
 <body>
-    <div class="app-container">
-        <button id="install-app-btn" class="glass-install-btn" style="display: none;">
-  📱 DOWNLOAD APP
-</button>
+    
         
         <!-- 1. LOGIN PAGE -->
         <section id="loginView" class="view active">
@@ -21,7 +18,11 @@
                 <source src="image/logo.webm" type="video/webm">
               </video>
             </div>
-            <h2>LOG IN</h2>
+            <div class="app-container">
+             <button id="install-app-btn" class="glass-install-btn" style="display: none;">
+             📱 DOWNLOAD APP
+             </button>
+              <h2>LOG IN</h2>
             <form id="loginForm">
               <div class="input-group">
                 <input type="text" id="loginUser" placeholder="Username (min 6 chars, lowercase & number)" required>
@@ -40,6 +41,10 @@
         <!-- 3. REGISTER PAGE -->
         <section id="registerView" class="view">
           <div class="auth-card">
+             <div class="app-container">
+             <button id="install-app-btn" class="glass-install-btn" style="display: none;">
+             📱 DOWNLOAD APP
+            </button> 
             <h2>CREATE ACCOUNT</h2>
             <form id="registerForm">
               <div class="input-group">
