@@ -294,9 +294,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (musicToggle) musicToggle.checked = AudioManager.musicEnabled;
   }
 
-  const navSettings = document.getElementById('navSettings');
-  if (navSettings) {
-    navSettings.addEventListener('click', () => {
+  const openSettings = document.getElementById('openSettings');
+  if (openSettings) {
+    openSettings.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       if (settingsModal) settingsModal.classList.remove('hidden');
     });
