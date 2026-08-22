@@ -284,9 +284,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+
 const settingsView = document.getElementById('settingsView');
 const profileView = document.getElementById('profileView');
-const homeView = document.getElementById('homeView'); // Make sure this matches your home section ID
+const homeView = document.getElementById('homeView');
 const openSettings = document.getElementById('openSettings');
 const closeSettingsModal = document.getElementById('closeSettingsModal');
 
@@ -306,12 +307,15 @@ if (openSettings) {
 if (closeSettingsModal) {
   closeSettingsModal.addEventListener('click', () => {
     if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+    
+    // Hide settings view
     if (settingsView) settingsView.classList.add('hidden');
     
-    // Return to home (or whichever view you prefer to go back to)
-    if (homeView) homeView.classList.remove('hidden');
+    // Return directly to the profile view
+    if (profileView) profileView.classList.remove('hidden');
   });
 }
+    
 
   if (sfxToggle) {
     sfxToggle.addEventListener('change', (e) => {
