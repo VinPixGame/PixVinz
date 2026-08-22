@@ -972,14 +972,19 @@ input:checked + .slider:before {
   align-items: center;
   width: 100%;
   padding: 0 10px;
+  position: relative;
+  z-index: 10; /* Keeps it above other elements */
 }
 
 .profile-settings-btn {
   background: transparent;
   border: none;
-  font-size: 22px;
+  font-size: 24px;
   cursor: pointer;
   color: #ffd700;
+  position: relative;
+  z-index: 20; /* Ensures it sits on top and catches clicks */
+  pointer-events: auto; /* Forces clickability */
 }
 
 
