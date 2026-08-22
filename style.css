@@ -1692,13 +1692,14 @@ video {
   justify-content: center;
   gap: 8px;
   width: 100%;
+  max-width: 350px;
   padding: 14px 20px;
-  margin-bottom: 16px; /* Creates nice spacing above your login container */
-  background: rgba(255, 255, 255, 0.08); /* Subtle glass tint */
+  margin: 0 auto 12px auto;
+  background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 16px; /* Semi-rounded smooth edges */
+  border-radius: 16px;
   color: #ffffff;
   font-size: 14px;
   font-weight: 600;
