@@ -285,14 +285,20 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 const settingsView = document.getElementById('settingsView');
-const profileView = document.getElementById('profileView'); 
+const profileView = document.getElementById('profileView');
+const homeView = document.getElementById('homeView'); // Make sure this matches your home section ID
 const openSettings = document.getElementById('openSettings');
 const closeSettingsModal = document.getElementById('closeSettingsModal');
 
 if (openSettings) {
   openSettings.addEventListener('click', () => {
     if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+    
+    // Hide everything else so settings takes over fully
+    if (homeView) homeView.classList.add('hidden');
     if (profileView) profileView.classList.add('hidden');
+    
+    // Show settings
     if (settingsView) settingsView.classList.remove('hidden');
   });
 }
@@ -301,7 +307,9 @@ if (closeSettingsModal) {
   closeSettingsModal.addEventListener('click', () => {
     if (typeof AudioManager !== 'undefined') AudioManager.playClick();
     if (settingsView) settingsView.classList.add('hidden');
-    if (profileView) profileView.classList.remove('hidden');
+    
+    // Return to home (or whichever view you prefer to go back to)
+    if (homeView) homeView.classList.remove('hidden');
   });
 }
 
