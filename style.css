@@ -912,6 +912,18 @@ input:checked + .slider:before {
   margin: 0 auto;
 }
 
+
+.auth-stack-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 350px;
+  margin: 0 auto;
+  gap: 8px; /* This controls the exact gap between your button and your card! Change to 4px or 0px if you want them even closer. */
+}
+
+
 .auth-logo video {
   width: 110px;
   height: auto;
@@ -1692,9 +1704,8 @@ video {
   justify-content: center;
   gap: 8px;
   width: 100%;
-  max-width: 350px;
   padding: 14px 20px;
-  margin: 30px auto 12px auto; /* <-- Changed the top margin from 0 to 24px to push it down */
+  margin: 0; /* Clears out old margins so the wrapper's gap controls the spacing */
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -1707,10 +1718,4 @@ video {
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
-}
-
-.glass-install-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-1px);
 }
