@@ -1694,7 +1694,7 @@ video {
   width: 100%;
   max-width: 350px;
   padding: 14px 20px;
-  margin: 40px auto 6px auto; /* <-- Changed the top margin from 0 to 24px to push it down */
+  margin: 30px auto 12px auto; /* <-- Changed the top margin from 0 to 24px to push it down */
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
