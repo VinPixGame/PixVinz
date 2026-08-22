@@ -3,7 +3,7 @@
   "short_name": "PixVinz",
   "start_url": "/PixVinz/",
   "scope": "/PixVinz/",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#121212",
   "theme_color": "#121212",
   "icons": [
