@@ -78,24 +78,31 @@
 }
 
 
+/* DOWNLOAD APP BUTTON (MATCHES AUTH THEME) */
 .glass-install-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   width: 100%;
+  max-width: 350px;
   padding: 14px 20px;
-  margin: 0; /* Clears out old margins so the wrapper's gap controls the spacing */
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 16px;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  margin: 0 auto 10px auto;
+  background: rgba(35, 16, 64, 0.85); /* Matches your auth-card background */
+  border: 2px solid #7b2cbf; /* Matches your auth-card border */
+  border-radius: 20px; /* Matches your auth-card rounding */
+  color: #ffd700; /* Matches your accent heading color */
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 1px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 0 25px rgba(123, 44, 191, 0.3); /* Matches your auth-card glow */
   transition: all 0.3s ease;
+}
+
+.glass-install-btn:hover {
+  border-color: #ffd700;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
 }
