@@ -10,11 +10,13 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding-top: 2in;
+  padding-top: 4cm;
 }
 
-.glass-install-btn {
-  display: flex;
+/* Force the install button to show up immediately */
+#install-app-btn,
+.install-app-btn-ref {
+  display: flex !important;
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -33,11 +35,11 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 0 25px rgba(123, 44, 191, 0.3);
-  transition: all 0.3s ease;
   box-sizing: border-box;
 }
 
-.glass-install-btn:hover {
+#install-app-btn:hover,
+.install-app-btn-ref:hover {
   border-color: #ffd700;
   box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
 }
