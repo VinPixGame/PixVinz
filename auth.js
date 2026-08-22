@@ -261,48 +261,37 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// DOWNLOAD APP BUTTON LOGIC (No Service Worker Needed)
-
 let deferredPrompt = null;
 
-// 1. Check if the app is already running as an installed PWA (Standalone mode)
+// 1. Check if the app is already running as an installed PWA
 function isAppInstalled() {
   return window.matchMedia('(display-mode: standalone)').matches || 
          window.navigator.standalone === true || 
          document.referrer.includes('android-app://');
 }
 
-// 2. Control button visibility on load
+// 2. Hide button if already installed, show it if viewed in a browser
 window.addEventListener('DOMContentLoaded', () => {
   const installBtns = document.querySelectorAll('#install-app-btn, .install-app-btn-ref');
-  
   if (isAppInstalled()) {
-    // Hide buttons completely if running inside the installed app (even on login/sign out screen)
     installBtns.forEach(btn => btn.style.display = 'none');
   } else {
-    // Show buttons on regular browsers (Mobile, Chrome, Windows Desktop, etc.)
     installBtns.forEach(btn => btn.style.display = 'flex');
   }
 });
 
-// 3. Capture the browser's install prompt event
+// 3. Capture the browser's install event
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  
-  // Ensure buttons stay visible if not installed
-  if (!isAppInstalled()) {
-    const installBtns = document.querySelectorAll('#install-app-btn, .install-app-btn-ref');
-    installBtns.forEach(btn => btn.style.display = 'flex');
-  }
 });
 
-// 4. Handle the click event to trigger the install popup
+// 4. Directly trigger the native install window on click (No alerts!)
 document.addEventListener('click', async (e) => {
   const target = e.target.closest('#install-app-btn, .install-app-btn-ref');
   if (target) {
     if (deferredPrompt) {
-      // Triggers the native browser install popup
+      // This forces the real browser installation popup to appear immediately
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       console.log(`User response: ${outcome}`);
@@ -313,13 +302,14 @@ document.addEventListener('click', async (e) => {
       }
       deferredPrompt = null;
     } else {
-      // Fallback instruction for browsers that withhold the automatic prompt event
-      alert("📲 To install PixVinz:\n\n1. Tap your browser menu (three dots ⋮).\n2. Select 'Install app' or 'Add to Home screen'.");
+      // If the browser hasn't generated the event yet, we simply do nothing 
+      // instead of showing an ugly alert box.
+      console.log('Install prompt not yet available from browser.');
     }
   }
 });
 
-// 5. Hide buttons immediately if successfully installed during the session
+// 5. Hide buttons if installation finishes
 window.addEventListener('appinstalled', () => {
   const installBtns = document.querySelectorAll('#install-app-btn, .install-app-btn-ref');
   installBtns.forEach(btn => btn.style.display = 'none');
