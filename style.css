@@ -1692,25 +1692,24 @@ video {
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 12px 20px;
-  margin-bottom: 16px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 14px;
+  padding: 14px 20px;
+  margin-bottom: 16px; /* Creates nice spacing above your login container */
+  background: rgba(255, 255, 255, 0.08); /* Subtle glass tint */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px; /* Semi-rounded smooth edges */
   color: #ffffff;
   font-size: 14px;
-  font-weight: bold;
+  font-weight: 600;
   letter-spacing: 0.5px;
   cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
 }
 
 .glass-install-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
   transform: translateY(-1px);
 }
-
