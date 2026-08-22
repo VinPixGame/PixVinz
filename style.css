@@ -897,6 +897,72 @@ input:checked + .slider:before {
   text-align: center;
 }
 
+/* AUTH CARDS (LOGIN & REGISTER) */
+
+.auth-card {
+  width: 100%;
+  max-width: 350px;
+  background: rgba(35, 16, 64, 0.85);
+  border: 2px solid #7b2cbf;
+  border-radius: 20px;
+  padding: 24px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 25px rgba(123, 44, 191, 0.3);
+  margin: 0 auto;
+}
+
+.auth-logo video {
+  width: 110px;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.auth-card h2 {
+  color: #ffd700;
+  margin-bottom: 20px;
+  font-size: 22px;
+  letter-spacing: 1px;
+}
+
+.input-group {
+  margin-bottom: 12px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(157, 78, 221, 0.5);
+  background: rgba(12, 5, 28, 0.8);
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+}
+
+.input-group input:focus {
+  border-color: #ffd700;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+}
+
+.auth-error {
+  color: #ff4d4d;
+  font-size: 13px;
+  margin-bottom: 10px;
+  min-height: 18px;
+}
+
+.auth-switch {
+  margin-top: 16px;
+  font-size: 13px;
+  color: #a892ee;
+}
+
+.auth-switch a {
+  color: #ffd700;
+  text-decoration: none;
+  font-weight: bold;
+}
 
   /* ==========================================
     COMPLETE GAME PAGE LAYOUT CSS
@@ -1619,4 +1685,3 @@ video {
     opacity: 0.35;
     filter: grayscale(100%);
 }
-
