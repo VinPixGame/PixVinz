@@ -1,5 +1,27 @@
-/* AUTH CARDS (LOGIN & REGISTER) */
+/* APP CONTAINER & VIEW SWITCHING */
+.app-container {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 10px;
+  box-sizing: border-box;
+}
 
+.view {
+  display: none;
+  width: 100%;
+  max-width: 350px;
+  margin: 0 auto;
+}
+
+.view.active {
+  display: block;
+}
+
+/* AUTH CARDS (LOGIN & REGISTER) */
 .auth-card {
   width: 100%;
   max-width: 350px;
@@ -9,12 +31,11 @@
   padding: 24px;
   text-align: center;
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 0 25px rgba(123, 44, 191, 0.3);
   margin: 0 auto;
+  box-sizing: border-box;
 }
-
-
-
 
 .auth-logo video {
   width: 110px;
@@ -42,6 +63,7 @@
   color: #fff;
   font-size: 15px;
   outline: none;
+  box-sizing: border-box;
 }
 
 .input-group input:focus {
@@ -68,7 +90,6 @@
   font-weight: bold;
 }
 
-
 /* DOWNLOAD APP BUTTON (MATCHES AUTH THEME) */
 .glass-install-btn {
   display: flex;
@@ -79,18 +100,19 @@
   max-width: 350px;
   padding: 14px 20px;
   margin: 0 auto 10px auto;
-  background: rgba(35, 16, 64, 0.85); /* Matches your auth-card background */
-  border: 2px solid #7b2cbf; /* Matches your auth-card border */
-  border-radius: 20px; /* Matches your auth-card rounding */
-  color: #ffd700; /* Matches your accent heading color */
+  background: rgba(35, 16, 64, 0.85);
+  border: 2px solid #7b2cbf;
+  border-radius: 20px;
+  color: #ffd700;
   font-size: 15px;
   font-weight: bold;
   letter-spacing: 1px;
   cursor: pointer;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 0 25px rgba(123, 44, 191, 0.3); /* Matches your auth-card glow */
+  box-shadow: 0 0 25px rgba(123, 44, 191, 0.3);
   transition: all 0.3s ease;
+  box-sizing: border-box;
 }
 
 .glass-install-btn:hover {
