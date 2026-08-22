@@ -262,64 +262,46 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// --- DOWNLOAD APP BUTTON LOGIC ---
+// DOWNLOAD BUTTON / PWA INSTALLATION LOGIC
+let deferredPrompt;
 
-let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Prevent Chrome 67 and earlier from automatically showing the prompt
+  e.preventDefault();
+  // Stash the event so it can be triggered later.
+  deferredPrompt = e;
+  
+  // Show the download buttons on the active views
+  const installBtns = document.querySelectorAll('#install-app-btn, .install-app-btn-ref');
+  installBtns.forEach(btn => {
+    btn.style.display = 'flex';
+  });
+});
 
-const isRunningAsApp =
-    window.matchMedia('(display-mode: standalone)').matches ||
-    window.navigator.standalone === true;
-
-const installButtons = document.querySelectorAll('.glass-install-btn');
-
-// If already running as the installed app, hide Download App
-if (isRunningAsApp) {
-    installButtons.forEach(button => {
-        button.style.display = 'none';
-    });
-}
-
-// Browser is allowed to install the app
-window.addEventListener('beforeinstallprompt', (event) => {
-    event.preventDefault();
-
-    deferredPrompt = event;
-
-    // Show Download App buttons in browser
-    if (!isRunningAsApp) {
-        installButtons.forEach(button => {
-            button.style.display = 'block';
-        });
+// Handle the click event for both install buttons
+document.addEventListener('click', async (e) => {
+  if (e.target && (e.target.id === 'install-app-btn' || e.target.classList.contains('install-app-btn-ref'))) {
+    if (deferredPrompt) {
+      // Show the install prompt
+      deferredPrompt.prompt();
+      // Wait for the user to respond to the prompt
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      } else {
+        console.log('User dismissed the install prompt');
+      }
+      // Clear the deferred prompt variable, it can only be used once.
+      deferredPrompt = null;
     }
+  }
 });
 
-// Download App button click
-installButtons.forEach(button => {
-    button.addEventListener('click', async () => {
-
-        if (!deferredPrompt) {
-            return;
-        }
-
-        deferredPrompt.prompt();
-
-        const choice = await deferredPrompt.userChoice;
-
-        if (choice.outcome === 'accepted') {
-            installButtons.forEach(btn => {
-                btn.style.display = 'none';
-            });
-        }
-
-        deferredPrompt = null;
-    });
-});
-
-// App successfully installed
-window.addEventListener('appinstalled', () => {
-    installButtons.forEach(button => {
-        button.style.display = 'none';
-    });
-
-    deferredPrompt = null;
+window.addEventListener('appinstalled', (evt) => {
+  console.log('PixVinz was successfully installed');
+  // Hide the download buttons once installed
+  const installBtns = document.querySelectorAll('#install-app-btn, .install-app-btn-ref');
+  installBtns.forEach(btn => {
+    btn.style.display = 'none';
+  });
 });
