@@ -1,11 +1,3 @@
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/PixVinz/sw.js')
-      .then((reg) => console.log('Service Worker registered successfully!', reg.scope))
-      .catch((err) => console.log('Service Worker registration failed:', err));
-  });
-}
 document.addEventListener('DOMContentLoaded', () => {
     // 1. View Switching
     const views = {
@@ -269,48 +261,66 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// DOWNLOAD BUTTON / PWA INSTALLATION LOGIC
-let deferredPrompt;
+// DOWNLOAD APP BUTTON LOGIC (No Service Worker Needed)
 
-window.addEventListener('beforeinstallprompt', (e) => {
-  // Prevent Chrome from automatically showing the prompt
-  e.preventDefault();
-  // Stash the event so it can be triggered later.
-  deferredPrompt = e;
-  
-  // Show the download buttons on the active views
+let deferredPrompt = null;
+
+// 1. Check if the app is already running as an installed PWA (Standalone mode)
+function isAppInstalled() {
+  return window.matchMedia('(display-mode: standalone)').matches || 
+         window.navigator.standalone === true || 
+         document.referrer.includes('android-app://');
+}
+
+// 2. Control button visibility on load
+window.addEventListener('DOMContentLoaded', () => {
   const installBtns = document.querySelectorAll('#install-app-btn, .install-app-btn-ref');
-  installBtns.forEach(btn => {
-    btn.style.display = 'flex';
-  });
-  console.log('beforeinstallprompt event fired successfully!');
+  
+  if (isAppInstalled()) {
+    // Hide buttons completely if running inside the installed app (even on login/sign out screen)
+    installBtns.forEach(btn => btn.style.display = 'none');
+  } else {
+    // Show buttons on regular browsers (Mobile, Chrome, Windows Desktop, etc.)
+    installBtns.forEach(btn => btn.style.display = 'flex');
+  }
 });
 
-// Handle the click event for both install buttons
+// 3. Capture the browser's install prompt event
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  // Ensure buttons stay visible if not installed
+  if (!isAppInstalled()) {
+    const installBtns = document.querySelectorAll('#install-app-btn, .install-app-btn-ref');
+    installBtns.forEach(btn => btn.style.display = 'flex');
+  }
+});
+
+// 4. Handle the click event to trigger the install popup
 document.addEventListener('click', async (e) => {
-  if (e.target && (e.target.id === 'install-app-btn' || e.target.id === 'install-app-btn-ref' || e.target.classList.contains('install-app-btn-ref'))) {
+  const target = e.target.closest('#install-app-btn, .install-app-btn-ref');
+  if (target) {
     if (deferredPrompt) {
-      // Show the install prompt
+      // Triggers the native browser install popup
       deferredPrompt.prompt();
-      // Wait for the user to respond to the prompt
       const { outcome } = await deferredPrompt.userChoice;
-      console.log(`User response to the install prompt: ${outcome}`);
-      // Clear the deferred prompt variable, it can only be used once.
+      console.log(`User response: ${outcome}`);
+      
+      if (outcome === 'accepted') {
+        const installBtns = document.querySelectorAll('#install-app-btn, .install-app-btn-ref');
+        installBtns.forEach(btn => btn.style.display = 'none');
+      }
       deferredPrompt = null;
     } else {
-      // This will tell you if you click it before the browser is ready
-      alert("Install prompt is not ready yet. Make sure you are serving via HTTPS and your service worker is registered.");
-      console.log('Install button clicked, but deferredPrompt is null/undefined.');
+      // Fallback instruction for browsers that withhold the automatic prompt event
+      alert("📲 To install PixVinz:\n\n1. Tap your browser menu (three dots ⋮).\n2. Select 'Install app' or 'Add to Home screen'.");
     }
   }
 });
 
-window.addEventListener('appinstalled', (evt) => {
-  console.log('PixVinz was successfully installed');
+// 5. Hide buttons immediately if successfully installed during the session
+window.addEventListener('appinstalled', () => {
   const installBtns = document.querySelectorAll('#install-app-btn, .install-app-btn-ref');
-  installBtns.forEach(btn => {
-    btn.style.display = 'none';
-  });
+  installBtns.forEach(btn => btn.style.display = 'none');
 });
-
-
