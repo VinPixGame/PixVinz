@@ -14,15 +14,6 @@
 }
 
 
-.auth-stack-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 350px;
-  margin: 0 auto;
-  gap: 8px; /* This controls the exact gap between your button and your card! Change to 4px or 0px if you want them even closer. */
-}
 
 
 .auth-logo video {
