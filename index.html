@@ -289,9 +289,8 @@
     <div class="profile-header profile-top-bar">
       <button class="back-btn" onclick="goHome()"><span>←</span>Back</button>
       <h2 class="profile-title-center">Player Profile</h2>
-      <button id="openSettings" class="profile-settings-btn">⚙️</button>
-    </div>
-
+      <button id="openSettings" class="profile-settings-btn" onclick="document.getElementById('settingsView').classList.remove('hidden'); document.getElementById('profileView').classList.add('hidden');">⚙️</button>
+</div>
     
     <div class="profile-card">
       <!-- Avatar Display & Upload with Loading State -->
@@ -300,7 +299,7 @@
           <img id="avatar-preview" src="image/avatar.png" alt="Profile Avatar" onerror="this.src='https://via.placeholder.com/120/4a154b/ffffff?text=Avatar'">
           <div class="avatar-loader" id="avatarLoader">
             <div class="spinner"></div>
-          </div>
+          
         </div>
         <label for="avatar-input" class="upload-btn">Choose Avatar</label>
         <input type="file" id="avatar-input" accept="image/*" style="display: none;">
@@ -401,7 +400,7 @@
   <div class="profile-container">
     
       <div class="settings-header">
-  <button class="back-btn" onclick="showView('profileView')"><span>←</span>Back</button>
+  <button class="back-btn" id="closeSettingsModal" onclick="document.getElementById('settingsView').classList.add('hidden'); document.getElementById('profileView').classList.remove('hidden');"><span>←</span>Back</button>
   <h3 class="profile-title-center">SETTINGS</h3>
   <div></div>
 </div>
