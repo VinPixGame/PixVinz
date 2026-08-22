@@ -397,18 +397,17 @@
           
     
 <!-- SETTINGS VIEW (Full Page View) -->
-  <section id="settingsView" class="view hidden">
-    <div class="profile-container">
-      
+<section id="settingsView" class="view hidden">
+  <div class="profile-container">
+    
       <div class="settings-header">
-        <button class="back-btn" id="closeSettingsModal"><span>←</span> Back</button>
-        <h3 class="profile-title-center">SETTINGS</h3>
-        <div></div>
-      </div>
+  <button class="back-btn" onclick="showView('profileView')"><span>←</span>Back</button>
+  <h3 class="profile-title-center">SETTINGS</h3>
+  <div></div>
+</div>
 
       <div class="profile-card">
         
-        <!-- Audio Toggles -->
         <div class="setting-item">
           <span>Sound Effects</span>
           <label class="switch">
@@ -425,36 +424,46 @@
           </label>
         </div>
 
-        <!-- New Placeholder Buttons (Not clickable yet) -->
-        <div class="setting-item" style="justify-content: space-between;">
-          <span>Shop</span>
-          <button class="btn btn-secondary" disabled style="opacity: 0.6; cursor: not-allowed; padding: 6px 14px;">Coming Soon</button>
+        <div class="setting-item">
+          <div class="setting-item-label">
+            <span>Shop</span>
+            <span class="coming-soon-text">Coming Soon</span>
+          </div>
+          <div class="setting-value-badge">Locked</div>
         </div>
 
-        <div class="setting-item" style="justify-content: space-between;">
-          <span>Theme</span>
-          <button class="btn btn-secondary" disabled style="opacity: 0.6; cursor: not-allowed; padding: 6px 14px;">Default</button>
+        <div class="setting-item">
+          <div class="setting-item-label">
+            <span>Theme</span>
+            <span class="coming-soon-text">Coming Soon</span>
+          </div>
+          <div class="setting-value-badge">Default</div>
         </div>
 
-        <div class="setting-item" style="justify-content: space-between;">
-          <span>Soundtrack</span>
-          <button class="btn btn-secondary" disabled style="opacity: 0.6; cursor: not-allowed; padding: 6px 14px;">Track 1</button>
+        <div class="setting-item">
+          <div class="setting-item-label">
+            <span>Soundtrack</span>
+            <span class="coming-soon-text">Coming Soon</span>
+          </div>
+          <div class="setting-value-badge">Track 1</div>
         </div>
 
-        <div class="setting-item" style="justify-content: space-between;">
-          <span>Terms & Conditions</span>
-          <button class="btn btn-secondary" disabled style="opacity: 0.6; cursor: not-allowed; padding: 6px 14px;">View</button>
+        <div class="setting-item">
+          <div class="setting-item-label">
+            <span>Terms & Conditions</span>
+            <span class="coming-soon-text">Coming Soon</span>
+          </div>
+          <div class="setting-value-badge">View</div>
         </div>
 
-        <!-- Actions / About & Logout -->
-        <div class="settings-actions" style="margin-top: 25px;">
+        <div class="settings-actions">
           <button class="btn btn-secondary" id="aboutBtn">ℹ️ ABOUT</button>
           <button class="btn btn-danger" id="logoutBtn">🚪 LOG OUT</button>
         </div>
 
       </div>
-    </div>
-  </section>
+  </div>
+</section>
 
   <!-- ABOUT MODAL -->
   <div id="aboutModal" class="modal-overlay hidden">
