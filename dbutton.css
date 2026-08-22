@@ -1,46 +1,36 @@
-.view {
-  display: none;
-  width: 100%;
-  max-width: 350px;
-  margin: 0 auto;
+/* DOWNLOAD APP BUTTON */
+.glass-install-btn {
+    display: block;
+    width: fit-content;
+    min-width: 210px;
+    margin: 0 auto 18px auto;
+    padding: 13px 24px;
+
+    background: linear-gradient(135deg, #ffd429, #ffad00);
+    color: #160a2b;
+
+    border: 2px solid #ffd84d;
+    border-radius: 14px;
+
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+
+    cursor: pointer;
+    box-shadow:
+        0 0 12px rgba(255, 204, 0, 0.45),
+        0 6px 18px rgba(0, 0, 0, 0.3);
+
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.view.active {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding-top: 4cm;
+.glass-install-btn:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 0 20px rgba(255, 204, 0, 0.7),
+        0 8px 22px rgba(0, 0, 0, 0.35);
 }
 
-.view .glass-install-btn,
-.view #install-app-btn,
-.view .install-app-btn-ref {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  max-width: 350px;
-  padding: 14px 20px;
-  margin-bottom: 12px;
-  background: rgba(35, 16, 64, 0.85);
-  border: 2px solid #7b2cbf;
-  border-radius: 20px;
-  color: #ffd700;
-  font-size: 15px;
-  font-weight: bold;
-  letter-spacing: 1px;
-  cursor: pointer;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 0 25px rgba(123, 44, 191, 0.3);
-  box-sizing: border-box;
-}
-
-.view .glass-install-btn:hover,
-.view #install-app-btn:hover,
-.view .install-app-btn-ref:hover {
-  border-color: #ffd700;
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+.glass-install-btn:active {
+    transform: scale(0.97);
 }
