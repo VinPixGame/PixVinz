@@ -999,4 +999,13 @@ document.addEventListener('DOMContentLoaded', () => {
     initLeaderboardConfetti();
 });
 
-
+// Force full-screen API if supported and running standalone
+if (window.matchMedia('(display-mode: fullscreen)').matches || window.matchMedia('(display-mode: standalone)').matches) {
+  document.addEventListener('click', () => {
+    if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => {
+        console.log("Fullscreen request skipped or denied:", err);
+      });
+    }
+  }, { once: true });
+}
