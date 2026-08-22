@@ -284,29 +284,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-
 const settingsView = document.getElementById('settingsView');
 const profileView = document.getElementById('profileView');
-const openSettings = document.getElementById('openSettings');       // The gear icon inside profileView
-const closeSettingsModal = document.getElementById('closeSettingsModal'); // The back button inside settingsView
+const openSettings = document.getElementById('openSettings');
+const closeSettingsModal = document.getElementById('closeSettingsModal');
 
-if (openSettings) {
+if (openSettings && settingsView && profileView) {
   openSettings.addEventListener('click', () => {
-    if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-    
-    // Hide the profile view and open the settings view
-    if (profileView) profileView.classList.add('hidden');
-    if (settingsView) settingsView.classList.remove('hidden');
+    profileView.classList.add('hidden');
+    settingsView.classList.remove('hidden');
   });
 }
 
-if (closeSettingsModal) {
+if (closeSettingsModal && settingsView && profileView) {
   closeSettingsModal.addEventListener('click', () => {
-    if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-    
-    // Hide the settings view and show the profile view again
-    if (settingsView) settingsView.classList.add('hidden');
-    if (profileView) profileView.classList.remove('hidden');
+    settingsView.classList.add('hidden');
+    profileView.classList.remove('hidden');
   });
 }
     
