@@ -1,0 +1,350 @@
+/* =========================================
+   PIXVINZ AUTH PAGE
+   Login + Create Account
+   ========================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+
+    background:
+        radial-gradient(
+            circle at 50% 35%,
+            rgba(91, 36, 145, 0.18),
+            transparent 45%
+        ),
+        #0d031c;
+
+    color: #fff;
+    font-family: Arial, sans-serif;
+}
+
+/* MAIN FULL PAGE */
+
+.app-container {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* AUTH VIEW */
+
+.view {
+    display: none;
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+
+    flex: 1;
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+
+    gap: 16px;
+
+    padding: 30px 20px;
+}
+
+.view.active {
+    display: flex;
+}
+
+/* DOWNLOAD APP BUTTON */
+
+.glass-install-btn {
+    display: block;
+
+    width: min(100%, 610px);
+    height: 80px;
+
+    flex-shrink: 0;
+
+    background: rgba(48, 30, 70, 0.78);
+    color: #fff;
+
+    border: 1px solid rgba(180, 136, 255, 0.25);
+    border-radius: 28px;
+
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 0 20px rgba(123, 44, 191, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+    backdrop-filter: blur(10px);
+
+    transition: 0.2s ease;
+}
+
+.glass-install-btn:hover {
+    border-color: #7b2cbf;
+    box-shadow:
+        0 0 25px rgba(123, 44, 191, 0.3);
+}
+
+.glass-install-btn:active {
+    transform: scale(0.98);
+}
+
+/* AUTH CARD */
+
+.auth-card {
+    width: 100%;
+    max-width: 610px;
+
+    background: rgba(35, 16, 64, 0.85);
+
+    border: 2px solid #7b2cbf;
+    border-radius: 30px;
+
+    padding: 50px 42px;
+
+    text-align: center;
+
+    backdrop-filter: blur(10px);
+
+    box-shadow:
+        0 0 25px rgba(123, 44, 191, 0.3);
+
+    margin: 0;
+}
+
+/* LOGO */
+
+.auth-logo video {
+    display: block;
+
+    width: 150px;
+    height: auto;
+
+    margin: 0 auto 18px;
+}
+
+/* HEADINGS */
+
+.auth-card h2 {
+    color: #ffd700;
+
+    margin: 0 0 30px;
+
+    font-size: 32px;
+    letter-spacing: 1px;
+}
+
+/* INPUTS */
+
+.input-group {
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+.input-group input {
+    width: 100%;
+
+    padding: 17px 18px;
+
+    border-radius: 14px;
+    border: 1px solid rgba(157, 78, 221, 0.5);
+
+    background: rgba(12, 5, 28, 0.8);
+
+    color: #fff;
+
+    font-size: 17px;
+
+    outline: none;
+}
+
+.input-group input:focus {
+    border-color: #ffd700;
+
+    box-shadow:
+        0 0 8px rgba(255, 215, 0, 0.4);
+}
+
+.input-group input::placeholder {
+    color: #777;
+}
+
+/* LOGIN / REGISTER BUTTON */
+
+.btn.btn-primary {
+    width: 100%;
+
+    min-height: 64px;
+
+    margin-top: 10px;
+
+    border: none;
+    border-radius: 18px;
+
+    background: linear-gradient(
+        135deg,
+        #ffd92f,
+        #ffad00
+    );
+
+    color: #08020f;
+
+    font-size: 20px;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 8px 20px rgba(255, 174, 0, 0.3);
+
+    transition: 0.2s ease;
+}
+
+.btn.btn-primary:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 10px 25px rgba(255, 174, 0, 0.45);
+}
+
+.btn.btn-primary:active {
+    transform: scale(0.98);
+}
+
+/* ERROR */
+
+.auth-error {
+    color: #ff4d4d;
+
+    font-size: 13px;
+
+    margin: 0 0 10px;
+
+    min-height: 18px;
+}
+
+/* LOGIN / REGISTER SWITCH */
+
+.auth-switch {
+    margin: 22px 0 0;
+
+    font-size: 16px;
+
+    color: #a892ee;
+}
+
+.auth-switch a {
+    color: #ffd700;
+
+    text-decoration: none;
+
+    font-weight: bold;
+}
+
+/* PASSWORD SHOW BUTTON */
+
+#toggleLoginPass,
+#toggleRegPass {
+    color: #b388ff !important;
+}
+
+/* REGISTER USERNAME */
+
+#regUser {
+    min-width: 0;
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+    .view {
+        padding: 20px 16px;
+        gap: 16px;
+    }
+
+    .glass-install-btn {
+        width: 100%;
+        max-width: 100%;
+
+        height: 80px;
+
+        font-size: 22px;
+    }
+
+    .auth-card {
+        max-width: 100%;
+
+        padding: 38px 24px;
+
+        border-radius: 28px;
+    }
+
+    .auth-logo video {
+        width: 125px;
+    }
+
+    .auth-card h2 {
+        font-size: 30px;
+        margin-bottom: 26px;
+    }
+
+    .input-group input {
+        padding: 16px;
+
+        font-size: 16px;
+    }
+
+    .btn.btn-primary {
+        min-height: 62px;
+
+        font-size: 19px;
+    }
+
+    .auth-switch {
+        font-size: 15px;
+    }
+}
+
+/* SMALL PHONES */
+
+@media (max-width: 380px) {
+
+    .view {
+        padding: 16px 12px;
+    }
+
+    .auth-card {
+        padding: 30px 18px;
+    }
+
+    .glass-install-btn {
+        height: 68px;
+        font-size: 19px;
+    }
+
+    .auth-logo video {
+        width: 110px;
+    }
+
+    .auth-card h2 {
+        font-size: 26px;
+    }
+}
