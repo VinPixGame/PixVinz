@@ -264,69 +264,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- DOWNLOAD APP BUTTON LOGIC ---
 
-document.addEventListener("DOMContentLoaded", () => {
+let deferredPrompt = null;
 
-    const installButtons = document.querySelectorAll(".glass-install-btn");
+const isRunningAsApp =
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true;
 
-    // Hide buttons by default
+const installButtons = document.querySelectorAll('.glass-install-btn');
+
+// If already running as the installed app, hide Download App
+if (isRunningAsApp) {
     installButtons.forEach(button => {
-        button.style.display = "none";
+        button.style.display = 'none';
     });
+}
 
-    // Check if already running as an installed app
-    const isRunningAsApp =
-        window.matchMedia("(display-mode: standalone)").matches ||
-        window.navigator.standalone === true;
+// Browser is allowed to install the app
+window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
 
-    if (isRunningAsApp) {
-        return;
+    deferredPrompt = event;
+
+    // Show Download App buttons in browser
+    if (!isRunningAsApp) {
+        installButtons.forEach(button => {
+            button.style.display = 'block';
+        });
     }
+});
 
-    let deferredPrompt = null;
+// Download App button click
+installButtons.forEach(button => {
+    button.addEventListener('click', async () => {
 
-    // Browser confirms that the PWA can be installed
-    window.addEventListener("beforeinstallprompt", (event) => {
-        event.preventDefault();
+        if (!deferredPrompt) {
+            return;
+        }
 
-        deferredPrompt = event;
+        deferredPrompt.prompt();
 
-        installButtons.forEach(button => {
-            button.style.display = "block";
-        });
-    });
+        const choice = await deferredPrompt.userChoice;
 
-    // Handle both Download App buttons
-    installButtons.forEach(button => {
-
-        button.addEventListener("click", async () => {
-
-            if (!deferredPrompt) {
-                return;
-            }
-
-            deferredPrompt.prompt();
-
-            const result = await deferredPrompt.userChoice;
-
-            if (result.outcome === "accepted") {
-                installButtons.forEach(btn => {
-                    btn.style.display = "none";
-                });
-            }
-
-            deferredPrompt = null;
-        });
-
-    });
-
-    // Hide buttons after successful installation
-    window.addEventListener("appinstalled", () => {
-
-        installButtons.forEach(button => {
-            button.style.display = "none";
-        });
+        if (choice.outcome === 'accepted') {
+            installButtons.forEach(btn => {
+                btn.style.display = 'none';
+            });
+        }
 
         deferredPrompt = null;
     });
+});
 
+// App successfully installed
+window.addEventListener('appinstalled', () => {
+    installButtons.forEach(button => {
+        button.style.display = 'none';
+    });
+
+    deferredPrompt = null;
 });
