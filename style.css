@@ -722,6 +722,23 @@ body {
   box-sizing: border-box;
 }
 
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vw; /* or 100vh */
+  background: rgba(18, 6, 36, 0.95); /* Semi-transparent dark background */
+  z-index: 99999; /* Super high so it's always on top */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* If it has the hidden class, make sure it actually hides */
+.modal-overlay.hidden {
+  display: none !important;
+}
 /* About card can stay as a clean card or modal box inside */
 .about-card {
   width: 100%;
@@ -737,15 +754,17 @@ body {
 }
 
 .settings-header {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   margin-bottom: 20px;
   border-bottom: 1px solid rgba(157, 78, 221, 0.3);
   padding-bottom: 10px;
 }
 
-.settings-header h3 {
+.settings-header h3.profile-title-center {
+  text-align: center;
+  margin: 0;
   color: #ffd700;
   font-size: 20px;
 }
