@@ -284,24 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-const settingsView = document.getElementById('settingsView');
-const profileView = document.getElementById('profileView');
-const openSettings = document.getElementById('openSettings');
-const closeSettingsModal = document.getElementById('closeSettingsModal');
 
-if (openSettings && settingsView && profileView) {
-  openSettings.addEventListener('click', () => {
-    profileView.classList.add('hidden');
-    settingsView.classList.remove('hidden');
-  });
-}
-
-if (closeSettingsModal && settingsView && profileView) {
-  closeSettingsModal.addEventListener('click', () => {
-    settingsView.classList.add('hidden');
-    profileView.classList.remove('hidden');
-  });
-}
     
 
   if (sfxToggle) {
