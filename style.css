@@ -402,7 +402,7 @@ body {
 
 .level-btn.unsolved-bg::after,
 .level-btn.solved-bg::after {
-  content: "🔶️";
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: 16px;
@@ -421,7 +421,7 @@ body {
 }
 
 .level-btn.solved-bg::before {
-  content: "â—†";
+  content: "💎";
   position: absolute;
   top: -8px;
   left: 50%;
