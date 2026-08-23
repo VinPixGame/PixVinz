@@ -19,15 +19,15 @@ const finalTime = document.getElementById('finalTime');
 const finalMoves = document.getElementById('finalMoves');
 const nextChallengeBtn = document.getElementById('nextChallengeBtn');
 
-// Persistent DOM elements for the 9 tiles so videos never reload or flicker
 let tilesCache = [];
 
+// Initialize DOM elements once per level
 function initBoardDOM() {
   puzzleBoard.innerHTML = '';
   tilesCache = [];
   const videoSrc = `challenge/challenge${currentLevel}.webm`;
 
-  for (let i = 0; i < 9; i++) {
+  for (let currentPosition = 0; currentPosition < 9; currentPosition++) {
     const tile = document.createElement('div');
     tile.classList.add('puzzle-tile');
 
@@ -48,40 +48,32 @@ function initBoardDOM() {
     tile.appendChild(video);
     video.play().catch(err => console.log("Playback error:", err));
 
-    const tileIndex = i;
     tile.addEventListener('click', () => {
-      const currentPosition = boardState.indexOf(tileIndex);
       handleTileClick(currentPosition);
     });
 
-    tilesCache.push({ tile, video, tileIndex });
+    puzzleBoard.appendChild(tile);
+    tilesCache.push({ tile, video });
   }
 }
 
-// Update layout without destroying video elements
-function updateBoard() {
-  puzzleBoard.innerHTML = '';
-
+// Instantly update slice positions without moving DOM elements
+function updateBoardVisuals() {
   boardState.forEach((tileIndex, currentPosition) => {
-    const cacheObj = tilesCache.find(t => t.tileIndex === tileIndex);
-    if (!cacheObj) return;
+    const { tile, video } = tilesCache[currentPosition];
 
-    const { tile, video } = cacheObj;
-
-    // Update slice video offset based on its original correct video coordinate
     const row = Math.floor(tileIndex / 3);
     const col = tileIndex % 3;
+    
+    // Instantly snap video offset to the correct slice
     video.style.left = `-${col * 100}%`;
     video.style.top = `-${row * 100}%`;
 
-    // Handle selection highlight
     if (selectedTileIndex === currentPosition) {
       tile.classList.add('selected');
     } else {
       tile.classList.remove('selected');
     }
-
-    puzzleBoard.appendChild(tile);
   });
 }
 
@@ -93,18 +85,18 @@ function handleTileClick(clickedPos) {
 
   if (selectedTileIndex === null) {
     selectedTileIndex = clickedPos;
-    updateBoard();
+    updateBoardVisuals();
   } else if (selectedTileIndex === clickedPos) {
     selectedTileIndex = null;
-    updateBoard();
+    updateBoardVisuals();
   } else {
-    // Swap positions in the array
+    // Swap slice mappings instantly
     [boardState[selectedTileIndex], boardState[clickedPos]] = [boardState[clickedPos], boardState[selectedTileIndex]];
     selectedTileIndex = null;
     moves++;
     moveCountDisplay.textContent = moves;
 
-    updateBoard();
+    updateBoardVisuals();
 
     if (checkWin()) {
       endGame();
@@ -131,7 +123,7 @@ function shuffleBoard() {
   timerDisplay.textContent = "00:00";
   stopTimer();
   isPlaying = false;
-  updateBoard();
+  updateBoardVisuals();
 }
 
 function startTimer() {
