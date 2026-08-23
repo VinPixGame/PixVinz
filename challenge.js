@@ -32,9 +32,8 @@ function initGame() {
 // Render tiles based on boardState array
 function renderBoard() {
   puzzleBoard.innerHTML = '';
-  const videoSrc = `challenge/challenge${currentLevel}.webm`;
 
-boardState.forEach((tileIndex, currentPosition) => {
+  boardState.forEach((tileIndex, currentPosition) => {
     const tile = document.createElement('div');
     tile.classList.add('puzzle-tile');
     
@@ -77,6 +76,7 @@ boardState.forEach((tileIndex, currentPosition) => {
 
     puzzleBoard.appendChild(tile);
   });
+} // <--- THIS CLOSING BRACE WAS MISSING!
 
 // Handle movement logic for sliding tiles
 function handleTileClick(clickedPos) {
@@ -113,7 +113,6 @@ function isAdjacent(pos1, pos2) {
 
 // Shuffle the board cleanly ensuring it is always solvable
 function shuffleBoard() {
-  // Simple valid random moves shuffle to guarantee solvability
   for (let i = 0; i < 100; i++) {
     const emptyPos = boardState.indexOf(8);
     const validMoves = [];
@@ -121,7 +120,7 @@ function shuffleBoard() {
     const r = Math.floor(emptyPos / gridSize);
     const c = emptyPos % gridSize;
 
-    if (r > 0) validMoves.use = validMoves.push(emptyPos - gridSize);
+    if (r > 0) validMoves.push(emptyPos - gridSize);
     if (r < gridSize - 1) validMoves.push(emptyPos + gridSize);
     if (c > 0) validMoves.push(emptyPos - 1);
     if (c < gridSize - 1) validMoves.push(emptyPos + 1);
@@ -130,7 +129,6 @@ function shuffleBoard() {
     [boardState[emptyPos], boardState[randomMove]] = [boardState[randomMove], boardState[emptyPos]];
   }
   
-  // Prevent accidental instant win configuration upon shuffle
   if (checkWin()) {
     shuffleBoard();
     return;
@@ -172,7 +170,7 @@ function endGame() {
   winModal.classList.remove('hidden');
 }
 
-// Preview Button (Hold or toggle preview of full video)
+// Preview Button
 previewBtn.addEventListener('mousedown', () => {
   puzzleBoard.innerHTML = `
     <div style="width:100%; height:100%; position:relative; overflow:hidden; border-radius:8px;">
@@ -181,7 +179,9 @@ previewBtn.addEventListener('mousedown', () => {
   `;
 });
 
-
+previewBtn.addEventListener('mouseup', () => {
+  renderBoard();
+});
 
 previewBtn.addEventListener('mouseleave', () => {
   renderBoard();
@@ -194,7 +194,7 @@ shuffleBtn.addEventListener('click', () => {
 
 // Next Challenge Button
 nextChallengeBtn.addEventListener('click', () => {
-  currentLevel = currentLevel < 100 ? currentLevel + 1 : 1; // Loop back or cap at 100
+  currentLevel = currentLevel < 100 ? currentLevel + 1 : 1;
   winModal.classList.add('hidden');
   shuffleBoard();
 });
