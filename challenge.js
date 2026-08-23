@@ -151,6 +151,21 @@ function endGame() {
   winModal.classList.remove('hidden');
 }
 
+
+function updateCoinDisplay() {
+  // Pulls the coin value from localStorage (adjust 'totalCoins' or your key if it's named differently in your app)
+  const savedCoins = localStorage.getItem('totalCoins') || 0;
+  const coinElement = document.getElementById('coinCount');
+  if (coinElement) {
+    coinElement.textContent = savedCoins;
+  }
+}
+
+// Call it when the challenge page loads
+window.addEventListener('DOMContentLoaded', () => {
+  updateCoinDisplay();
+});
+
 // Safe Preview Overlay
 let previewOverlay = null;
 previewBtn.addEventListener('click', () => {
