@@ -890,13 +890,3 @@ function showRewardToast(message) {
 }
 
 
-const openSettingsBtn = document.getElementById('openSettings');
-const settingsView = document.getElementById('settingsView');
-const profileView = document.getElementById('profileView');
-
-if (openSettingsBtn) {
-  openSettingsBtn.addEventListener('click', () => {
-    if (profileView) profileView.classList.add('hidden');
-    if (settingsView) settingsView.classList.remove('hidden');
-  });
-}
