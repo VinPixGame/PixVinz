@@ -1,5 +1,7 @@
+/* Top Header Bar Styles - Matched width to challenge container */
 .top-bar {
   width: 100%;
+  max-width: 420px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -27,7 +29,7 @@
 }
 
 .logo-container {
-  height: 55px; /* Gives the logo breathing room to match Image 2 */
+  height: 55px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -35,8 +37,9 @@
 }
 
 .logo-container video {
+  width: 100%;
   height: 100%;
-  max-width: 160px; /* Expands the video width to match your main view */
+  max-width: 160px;
   object-fit: contain;
   background: transparent;
 }
@@ -82,7 +85,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 0px; /* Removes unnecessary gap below header */
+  margin-top: 0px;
 }
 
 .challenge-header {
