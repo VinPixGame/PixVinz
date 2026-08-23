@@ -1,3 +1,58 @@
+/* Top Header Bar Styles */
+.top-bar {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  box-sizing: border-box;
+  background-color: var(--card-bg);
+  border-bottom: 2px solid #33285c;
+  margin-bottom: 10px;
+}
+
+.top-bar.hidden {
+  display: none !important;
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+}
+
+.logo-container {
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-container video {
+  height: 100%;
+  max-width: 120px;
+  object-type: contain;
+}
+
+.coin-badge {
+  background: #2a2442;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.95rem;
+  border: 1px solid #4a3b75;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+
 :root {
   --bg-color: #0f0c1b;
   --card-bg: #1a162b;
