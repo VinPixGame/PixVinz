@@ -1,13 +1,12 @@
-/* Top Header Bar Styles - Matching Main View */
+/* Top Header Bar Styles - Fixed to span properly */
 .top-bar {
   width: 100%;
-  max-width: 420px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 20px;
+  padding: 15px 25px;
   box-sizing: border-box;
-  background-color: transparent; /* Matches the dark background feel */
+  background-color: transparent;
   margin-bottom: 5px;
 }
 
@@ -16,8 +15,8 @@
 }
 
 .icon-btn {
-  width: 45px;
-  height: 45px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
@@ -27,7 +26,7 @@
 }
 
 .logo-container {
-  height: 50px; /* Taller to match the big logo in image 2 */
+  height: 60px; /* Increased height to match main view */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -36,16 +35,16 @@
 
 .logo-container video {
   height: 100%;
-  max-width: 150px;
+  max-width: 180px;
   object-fit: contain;
 }
 
 .coin-badge {
   background: #1a162b;
-  padding: 8px 14px;
+  padding: 8px 16px;
   border-radius: 25px;
   font-weight: bold;
-  font-size: 0.95rem;
+  font-size: 1rem;
   border: 1px solid #7928ca;
   display: flex;
   align-items: center;
