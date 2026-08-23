@@ -47,12 +47,18 @@ function renderBoard() {
       const col = tileIndex % gridSize;
 
       const video = document.createElement('video');
+      const video = document.createElement('video');
       video.src = videoSrc;
       video.autoplay = true;
       video.loop = true;
       video.muted = true;
       video.playsInline = true;
+      video.setAttribute('playsinline', '');
+      video.setAttribute('webkit-playsinline', '');
       
+      // Force play to prevent mobile browser blocking inline autoplay
+      video.play().catch(err => console.log("Autoplay prevented:", err));
+
       // Offset video placement so each tile displays its specific grid section
       video.style.left = `-${col * 100}%`;
       video.style.top = `-${row * 100}%`;
