@@ -224,21 +224,79 @@ body {
    USERNAME AVAILABILITY
    ========================================= */
 
+/* REGISTER USERNAME */
+
+.username-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.username-input-wrapper #regUser {
+    flex: 1;
+    min-width: 0;
+    padding-right: 90px;
+
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.username-domain {
+    flex-shrink: 0;
+
+    background: rgba(255, 255, 255, 0.1);
+    padding: 12px 10px;
+
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-left: none;
+
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+
+    color: #b388ff;
+    font-size: 0.85rem;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+/* AVAILABLE / TAKEN — INSIDE FIELD */
+
 #regUserIndicator {
     position: absolute;
-    right: 130px;
+    right: 105px;
     top: 50%;
     transform: translateY(-50%);
 
     font-size: 0.85rem;
     font-weight: bold;
-
-    pointer-events: none !important;
     white-space: nowrap;
 
+    pointer-events: none !important;
     z-index: 5;
 }
 
+/* INVALID USERNAME — BELOW FIELD */
+
+#regUserRequirement {
+    display: none;
+
+    width: 100%;
+    margin: 5px 0 10px;
+    padding: 0 4px;
+
+    color: #ff4d4d;
+
+    font-size: 11px;
+    font-weight: bold;
+
+    text-align: left;
+    line-height: 1.4;
+}
+
+#regUserRequirement.show {
+    display: block;
+}
 
 /* LOGIN / REGISTER BUTTON */
 
