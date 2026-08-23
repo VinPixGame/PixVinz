@@ -12,19 +12,21 @@ body {
   color: var(--text-color);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   display: flex;
-  justify-content: center;
+  flex-direction: column; /* Stack header and container vertically */
   align-items: center;
   min-height: 100vh;
+  overflow-y: auto; /* Allow scrolling if screen is short */
 }
 
 .challenge-container {
   width: 100%;
   max-width: 420px;
-  padding: 20px;
+  padding: 10px 20px 20px 20px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: 10px; /* Space out nicely below your header */
 }
 
 .challenge-header {
