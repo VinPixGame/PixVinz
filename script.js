@@ -286,23 +286,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 document.addEventListener('click', (event) => {
+
   if (event.target.closest('#openSettings')) {
-    const settingsView = document.getElementById('settingsView');
-    const profileView = document.getElementById('profileView');
-    
-    if (profileView) profileView.classList.add('hidden');
-    if (settingsView) settingsView.classList.remove('hidden');
+    document.getElementById('profileView')?.classList.add('hidden');
+    document.getElementById('settingsView')?.classList.remove('hidden');
   }
 
   if (event.target.closest('#closeSettingsModal')) {
-    const settingsView = document.getElementById('settingsView');
-    const profileView = document.getElementById('profileView');
-    
-    if (settingsView) settingsView.classList.add('hidden');
-    if (profileView) profileView.classList.remove('hidden');
+    document.getElementById('settingsView')?.classList.add('hidden');
+    document.getElementById('profileView')?.classList.remove('hidden');
   }
-});
 
+});
     
     
 
