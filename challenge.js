@@ -9,11 +9,15 @@ let currentChallenge = 1;
 let challengeMoves = 0;
 let challengeSeconds = 0;
 let challengeTimerInterval = null;
+
 let challengeStarted = false;
 let challengeSolved = false;
 
 let challengeTiles = [];
 let challengeVideo = null;
+
+let selectedChallengeTile = null;
+let previewTimeout = null;
 
 
 /* =========================================================
@@ -57,7 +61,10 @@ if (navChallenge) {
 }
 
 if (backFromChallenge) {
-  backFromChallenge.addEventListener("click", closeExtraChallenge);
+  backFromChallenge.addEventListener(
+    "click",
+    closeExtraChallenge
+  );
 }
 
 
@@ -78,6 +85,8 @@ function openExtraChallenge() {
 function closeExtraChallenge() {
 
   stopChallengeTimer();
+
+  clearPreview();
 
   destroyChallengeVideo();
 
@@ -106,39 +115,46 @@ function closeExtraChallenge() {
 function loadExtraChallenge(number) {
 
   if (number < 1) number = 1;
-  if (number > EXTRA_CHALLENGE_TOTAL) number = 1;
+
+  if (number > EXTRA_CHALLENGE_TOTAL) {
+    number = 1;
+  }
 
   currentChallenge = number;
 
   challengeMoves = 0;
   challengeSeconds = 0;
+
   challengeStarted = false;
   challengeSolved = false;
 
+  selectedChallengeTile = null;
+
   stopChallengeTimer();
+  clearPreview();
   destroyChallengeVideo();
 
   updateChallengeUI();
 
   if (challengeTitle) {
+
     challengeTitle.textContent =
       `CHALLENGE ${String(number).padStart(2, "0")}`;
   }
 
-  createVideoPuzzle(number);
+  createChallengeVideo(number);
 }
 
 
 /* =========================================================
-   CREATE MASTER VIDEO
+   CREATE VIDEO
    ========================================================= */
 
-function createVideoPuzzle(number) {
+function createChallengeVideo(number) {
 
   if (!challengePuzzleGrid) return;
 
   challengePuzzleGrid.innerHTML = "";
-  challengeTiles = [];
 
   challengeVideo =
     document.createElement("video");
@@ -154,13 +170,11 @@ function createVideoPuzzle(number) {
 
   /*
      Hidden master video.
-     The visible puzzle tiles use this video as
-     their source.
+     The visible puzzle tiles use this
+     video's current frame.
   */
 
   challengeVideo.style.position = "fixed";
-  challengeVideo.style.left = "-9999px";
-  challengeVideo.style.top = "0";
   challengeVideo.style.width = "1px";
   challengeVideo.style.height = "1px";
   challengeVideo.style.opacity = "0";
@@ -174,40 +188,47 @@ function createVideoPuzzle(number) {
 
       challengeVideo.play().catch(() => {});
 
-      buildChallengeTiles();
+      buildChallengePuzzle();
 
-      shuffleChallengeTiles();
-
-      updateChallengeUI();
+      shuffleChallengePuzzle();
 
     },
     { once: true }
   );
 
-  challengeVideo.addEventListener("error", () => {
+  challengeVideo.addEventListener(
+    "error",
+    () => {
 
-    console.error(
-      `Unable to load image/challenge${number}.webm`
-    );
+      console.error(
+        `Unable to load image/challenge${number}.webm`
+      );
 
-  });
+      if (challengeTitle) {
+
+        challengeTitle.textContent =
+          `CHALLENGE ${String(number).padStart(2, "0")}`;
+      }
+    }
+  );
 
   challengeVideo.load();
 }
 
 
 /* =========================================================
-   BUILD 3 × 3 VIDEO PUZZLE
+   BUILD 3 × 3 PUZZLE
    ========================================================= */
 
-function buildChallengeTiles() {
+function buildChallengePuzzle() {
 
-  if (!challengePuzzleGrid || !challengeVideo) return;
+  if (!challengePuzzleGrid) return;
 
   challengePuzzleGrid.innerHTML = "";
+
   challengeTiles = [];
 
-  for (let i = 0; i < 9; i++) {
+  for (let correctPosition = 0; correctPosition < 9; correctPosition++) {
 
     const tile =
       document.createElement("div");
@@ -215,19 +236,22 @@ function buildChallengeTiles() {
     tile.className =
       "tile challenge-video-tile";
 
-    tile.dataset.correctPosition = i;
+    tile.dataset.correctPosition =
+      correctPosition;
 
-    tile.dataset.currentPosition = i;
+    tile.dataset.currentPosition =
+      correctPosition;
 
     /*
-       Each tile contains its own video.
-       Every video plays the same challenge file.
+       The tile displays the moving video
+       through a video element.
     */
 
     const video =
       document.createElement("video");
 
-    video.src = challengeVideo.src;
+    video.src =
+      challengeVideo.src;
 
     video.muted = true;
     video.loop = true;
@@ -235,25 +259,25 @@ function buildChallengeTiles() {
     video.playsInline = true;
     video.preload = "auto";
 
-    /*
-       The video is enlarged to 300%.
-       This allows each tile to display
-       one third of the original video.
-    */
-
     video.style.position = "absolute";
+
     video.style.width = "300%";
     video.style.height = "300%";
+
     video.style.maxWidth = "none";
     video.style.maxHeight = "none";
+
     video.style.objectFit = "cover";
-    video.style.pointerEvents = "none";
+
+    /*
+       Correct location of this piece.
+    */
 
     const row =
-      Math.floor(i / 3);
+      Math.floor(correctPosition / 3);
 
     const col =
-      i % 3;
+      correctPosition % 3;
 
     video.style.left =
       `${-col * 100}%`;
@@ -261,13 +285,9 @@ function buildChallengeTiles() {
     video.style.top =
       `${-row * 100}%`;
 
-    /*
-       Make sure the tile clips
-       everything outside itself.
-    */
-
     tile.style.position = "relative";
     tile.style.overflow = "hidden";
+    tile.style.cursor = "pointer";
 
     tile.appendChild(video);
 
@@ -275,24 +295,7 @@ function buildChallengeTiles() {
 
     challengeTiles.push(tile);
 
-    video.addEventListener(
-      "loadeddata",
-      () => {
-
-        if (challengeVideo) {
-
-          try {
-            video.currentTime =
-              challengeVideo.currentTime;
-          } catch (error) {}
-
-        }
-
-        video.play().catch(() => {});
-
-      },
-      { once: true }
-    );
+    video.play().catch(() => {});
   }
 
   synchronizeChallengeVideos();
@@ -322,61 +325,59 @@ function synchronizeChallengeVideos() {
     } catch (error) {}
 
     video.play().catch(() => {});
-
   });
 }
 
 
 /* =========================================================
-   KEEP VIDEO TILES SYNCHRONIZED
+   KEEP VIDEO SYNCHRONIZED
    ========================================================= */
 
-const challengeVideoSync =
-  setInterval(() => {
+setInterval(() => {
+
+  if (!challengeVideo) return;
+
+  if (
+    challengeVideo.paused ||
+    challengeVideo.readyState < 2
+  ) {
+    return;
+  }
+
+  const masterTime =
+    challengeVideo.currentTime;
+
+  challengeTiles.forEach(tile => {
+
+    const video =
+      tile.querySelector("video");
+
+    if (!video) return;
 
     if (
-      !challengeVideo ||
-      challengeVideo.readyState < 2
+      Math.abs(
+        video.currentTime - masterTime
+      ) > 0.08
     ) {
-      return;
+
+      try {
+        video.currentTime = masterTime;
+      } catch (error) {}
     }
 
-    const masterTime =
-      challengeVideo.currentTime;
+    if (video.paused) {
+      video.play().catch(() => {});
+    }
+  });
 
-    challengeTiles.forEach(tile => {
-
-      const video =
-        tile.querySelector("video");
-
-      if (!video) return;
-
-      if (
-        Math.abs(
-          video.currentTime - masterTime
-        ) > 0.08
-      ) {
-
-        try {
-          video.currentTime = masterTime;
-        } catch (error) {}
-
-      }
-
-      if (video.paused) {
-        video.play().catch(() => {});
-      }
-
-    });
-
-  }, 250);
+}, 200);
 
 
 /* =========================================================
-   SHUFFLE
+   SHUFFLE PUZZLE
    ========================================================= */
 
-function shuffleChallengeTiles() {
+function shuffleChallengePuzzle() {
 
   if (challengeTiles.length !== 9) return;
 
@@ -411,21 +412,26 @@ function shuffleChallengeTiles() {
     isChallengeSolvedOrder(shuffled)
   );
 
+  challengeTiles =
+    shuffled;
+
   challengePuzzleGrid.innerHTML = "";
 
-  shuffled.forEach(
-    (tile, position) => {
+  challengeTiles.forEach(
+    (tile, index) => {
 
       tile.dataset.currentPosition =
-        position;
+        index;
+
+      tile.classList.remove(
+        "selected"
+      );
 
       challengePuzzleGrid.appendChild(tile);
-
     }
   );
 
-  challengeTiles = shuffled;
-
+  selectedChallengeTile = null;
   challengeSolved = false;
 }
 
@@ -434,19 +440,26 @@ function shuffleChallengeTiles() {
    CHECK SOLVED ORDER
    ========================================================= */
 
-function isChallengeSolvedOrder(tiles) {
+function isChallengeSolvedOrder(
+  tiles
+) {
 
   return tiles.every(
-    (tile, index) =>
-      Number(
-        tile.dataset.correctPosition
-      ) === index
+    (tile, index) => {
+
+      return (
+        Number(
+          tile.dataset.correctPosition
+        ) === index
+      );
+
+    }
   );
 }
 
 
 /* =========================================================
-   TILE CLICK
+   TILE SELECTION
    ========================================================= */
 
 if (challengePuzzleGrid) {
@@ -464,13 +477,61 @@ if (challengePuzzleGrid) {
 
       if (challengeSolved) return;
 
-      const clickedIndex =
-        challengeTiles.indexOf(tile);
+      /*
+         First tap = select.
+      */
 
-      if (clickedIndex === -1) return;
+      if (!selectedChallengeTile) {
+
+        selectedChallengeTile =
+          tile;
+
+        tile.classList.add(
+          "selected"
+        );
+
+        return;
+      }
 
       /*
-         Start timer on first move.
+         Tapping the same tile cancels selection.
+      */
+
+      if (
+        selectedChallengeTile === tile
+      ) {
+
+        tile.classList.remove(
+          "selected"
+        );
+
+        selectedChallengeTile = null;
+
+        return;
+      }
+
+      /*
+         Second tap = swap.
+      */
+
+      const firstIndex =
+        challengeTiles.indexOf(
+          selectedChallengeTile
+        );
+
+      const secondIndex =
+        challengeTiles.indexOf(tile);
+
+      if (
+        firstIndex === -1 ||
+        secondIndex === -1
+      ) {
+        selectedChallengeTile = null;
+        return;
+      }
+
+      /*
+         Start timer on first actual move.
       */
 
       if (!challengeStarted) {
@@ -480,67 +541,14 @@ if (challengePuzzleGrid) {
         startChallengeTimer();
       }
 
-      /*
-         Keep your current behavior:
-         tapping a tile swaps it with
-         one random adjacent tile.
-      */
-
-      const possibleMoves =
-        getAdjacentChallengePositions(
-          clickedIndex
-        );
-
-      if (!possibleMoves.length) return;
-
-      const swapIndex =
-        possibleMoves[
-          Math.floor(
-            Math.random() *
-            possibleMoves.length
-          )
-        ];
-
       swapChallengeTiles(
-        clickedIndex,
-        swapIndex
+        firstIndex,
+        secondIndex
       );
+
+      selectedChallengeTile = null;
     }
   );
-}
-
-
-/* =========================================================
-   GET ADJACENT POSITIONS
-   ========================================================= */
-
-function getAdjacentChallengePositions(index) {
-
-  const row =
-    Math.floor(index / 3);
-
-  const col =
-    index % 3;
-
-  const positions = [];
-
-  if (row > 0) {
-    positions.push(index - 3);
-  }
-
-  if (row < 2) {
-    positions.push(index + 3);
-  }
-
-  if (col > 0) {
-    positions.push(index - 1);
-  }
-
-  if (col < 2) {
-    positions.push(index + 1);
-  }
-
-  return positions;
 }
 
 
@@ -559,7 +567,9 @@ function swapChallengeTiles(
   const secondTile =
     challengeTiles[secondIndex];
 
-  if (!firstTile || !secondTile) return;
+  if (!firstTile || !secondTile) {
+    return;
+  }
 
   [
     challengeTiles[firstIndex],
@@ -577,8 +587,13 @@ function swapChallengeTiles(
       tile.dataset.currentPosition =
         index;
 
-      challengePuzzleGrid.appendChild(tile);
+      tile.classList.remove(
+        "selected"
+      );
 
+      challengePuzzleGrid.appendChild(
+        tile
+      );
     }
   );
 
@@ -591,17 +606,22 @@ function swapChallengeTiles(
 
 
 /* =========================================================
-   CHECK VICTORY
+   CHECK IF SOLVED
    ========================================================= */
 
 function checkChallengeSolved() {
 
   const solved =
     challengeTiles.every(
-      (tile, index) =>
-        Number(
-          tile.dataset.correctPosition
-        ) === index
+      (tile, index) => {
+
+        return (
+          Number(
+            tile.dataset.correctPosition
+          ) === index
+        );
+
+      }
     );
 
   if (!solved) return;
@@ -610,11 +630,15 @@ function checkChallengeSolved() {
 
   stopChallengeTimer();
 
-  setTimeout(() => {
+  /*
+     Small delay so the player can see
+     the completed moving video.
+  */
 
-    handleChallengeVictory();
-
-  }, 500);
+  setTimeout(
+    handleChallengeVictory,
+    700
+  );
 }
 
 
@@ -629,8 +653,8 @@ function handleChallengeVictory() {
   );
 
   /*
-     Use your existing victory screen
-     if one is available.
+     Use your existing victory system
+     if your game already has one.
   */
 
   if (
@@ -706,7 +730,9 @@ function startChallengeTimer() {
 
 function stopChallengeTimer() {
 
-  if (challengeTimerInterval) {
+  if (
+    challengeTimerInterval
+  ) {
 
     clearInterval(
       challengeTimerInterval
@@ -762,10 +788,11 @@ if (challengeShuffleBtn) {
 
       if (challengeSolved) return;
 
-      shuffleChallengeTiles();
+      shuffleChallengePuzzle();
 
       challengeMoves = 0;
       challengeSeconds = 0;
+
       challengeStarted = false;
 
       stopChallengeTimer();
@@ -791,27 +818,18 @@ if (challengePreviewBtn) {
 
 function showChallengePreview() {
 
-  if (
-    !challengeVideo ||
-    !challengePuzzleGrid
-  ) {
-    return;
-  }
+  if (!challengeVideo) return;
 
-  /*
-     Don't allow multiple previews.
-  */
+  clearPreview();
 
-  if (
-    challengePuzzleGrid.querySelector(
-      ".challenge-full-preview-video"
-    )
-  ) {
-    return;
-  }
+  challengePuzzleGrid.classList.add(
+    "challenge-preview-mode"
+  );
 
   challengeTiles.forEach(tile => {
+
     tile.style.display = "none";
+
   });
 
   const previewVideo =
@@ -828,31 +846,94 @@ function showChallengePreview() {
   previewVideo.className =
     "challenge-full-preview-video";
 
-  previewVideo.style.width = "100%";
-  previewVideo.style.height = "100%";
-  previewVideo.style.objectFit = "cover";
-  previewVideo.style.display = "block";
-
   challengePuzzleGrid.appendChild(
     previewVideo
   );
 
-  previewVideo.currentTime =
-    challengeVideo.currentTime;
+  /*
+     Start preview from the same
+     point as the puzzle.
+  */
 
-  previewVideo.play().catch(() => {});
+  const setPreviewTime = () => {
 
-  setTimeout(() => {
+    try {
+      previewVideo.currentTime =
+        challengeVideo.currentTime;
+    } catch (error) {}
 
-    previewVideo.remove();
+    previewVideo.play().catch(() => {});
+  };
 
-    challengeTiles.forEach(tile => {
-      tile.style.display = "";
-    });
+  if (
+    previewVideo.readyState >= 2
+  ) {
 
-    synchronizeChallengeVideos();
+    setPreviewTime();
 
-  }, 3000);
+  } else {
+
+    previewVideo.addEventListener(
+      "loadeddata",
+      setPreviewTime,
+      { once: true }
+    );
+  }
+
+  /*
+     Preview for 3 seconds.
+  */
+
+  previewTimeout =
+    setTimeout(() => {
+
+      clearPreview();
+
+      synchronizeChallengeVideos();
+
+    }, 3000);
+}
+
+
+/* =========================================================
+   CLEAR PREVIEW
+   ========================================================= */
+
+function clearPreview() {
+
+  if (previewTimeout) {
+
+    clearTimeout(
+      previewTimeout
+    );
+
+    previewTimeout = null;
+  }
+
+  if (!challengePuzzleGrid) {
+    return;
+  }
+
+  const preview =
+    challengePuzzleGrid.querySelector(
+      ".challenge-full-preview-video"
+    );
+
+  if (preview) {
+
+    preview.pause();
+    preview.remove();
+  }
+
+  challengeTiles.forEach(tile => {
+
+    tile.style.display = "";
+
+  });
+
+  challengePuzzleGrid.classList.remove(
+    "challenge-preview-mode"
+  );
 }
 
 
@@ -861,8 +942,6 @@ function showChallengePreview() {
    ========================================================= */
 
 function destroyChallengeVideo() {
-
-  stopChallengeTimer();
 
   if (challengeVideo) {
 
@@ -881,7 +960,10 @@ function destroyChallengeVideo() {
 
   challengeTiles = [];
 
+  selectedChallengeTile = null;
+
   if (challengePuzzleGrid) {
+
     challengePuzzleGrid.innerHTML = "";
   }
 }
