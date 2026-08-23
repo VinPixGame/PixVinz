@@ -4,8 +4,10 @@ let moves = 0;
 let timerInterval = null;
 let secondsElapsed = 0;
 let isPlaying = false;
-let boardState = []; // Holds the current layout of tile indices (0 to 8, where 8 is empty)
+let boardState = [0, 1, 2, 3, 4, 5, 6, 7, 8]; // Full 9 pieces, no empty slot
 let winningState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+
+let selectedTileIndex = null; // Tracks the first clicked tile for swapping
 
 const puzzleBoard = document.getElementById('puzzleBoard');
 const moveCountDisplay = document.getElementById('moveCount');
@@ -17,18 +19,6 @@ const finalTime = document.getElementById('finalTime');
 const finalMoves = document.getElementById('finalMoves');
 const nextChallengeBtn = document.getElementById('nextChallengeBtn');
 
-// Initialize game
-function initGame() {
-  boardState = [...winningState];
-  moves = 0;
-  secondsElapsed = 0;
-  moveCountDisplay.textContent = moves;
-  timerDisplay.textContent = "00:00";
-  stopTimer();
-  
-  renderBoard();
-}
-
 // Render tiles based on boardState array
 function renderBoard() {
   puzzleBoard.innerHTML = '';
@@ -37,61 +27,68 @@ function renderBoard() {
     const tile = document.createElement('div');
     tile.classList.add('puzzle-tile');
     
-    if (tileIndex === 8) {
-      tile.classList.add('empty');
-    } else {
-      const row = Math.floor(tileIndex / 3);
-      const col = tileIndex % 3;
-
-      const video = document.createElement('video');
-      video.autoplay = true;
-      video.loop = true;
-      video.muted = true;
-      video.playsInline = true;
-      video.setAttribute('playsinline', '');
-      
-      const source = document.createElement('source');
-      source.src = `challenge/challenge${currentLevel}.webm`;
-      source.type = 'video/webm';
-      
-      video.appendChild(source);
-
-      // Offset video placement for the 3x3 grid cut
-      video.style.width = '300%';
-      video.style.height = '300%';
-      video.style.maxWidth = 'none';  // Prevents global CSS squishing
-      video.style.maxHeight = 'none';
-      video.style.left = `-${col * 100}%`;
-      video.style.top = `-${row * 100}%`;
-      video.style.position = 'absolute';
-
-      tile.appendChild(video);
-      
-      // Force load and play
-      video.load();
-      video.play().catch(err => console.log("Playback error:", err));
-
-      tile.addEventListener('click', () => {
-        handleTileClick(currentPosition);
-      });
+    if (selectedTileIndex === currentPosition) {
+      tile.classList.add('selected'); // Optional visual cue for active selection
     }
+
+    const row = Math.floor(tileIndex / 3);
+    const col = tileIndex % 3;
+
+    const video = document.createElement('video');
+    video.autoplay = true;
+    video.loop = true;
+    video.muted = true;
+    video.playsInline = true;
+    video.setAttribute('playsinline', '');
+    
+    const source = document.createElement('source');
+    source.src = `challenge/challenge${currentLevel}.webm`;
+    source.type = 'video/webm';
+    
+    video.appendChild(source);
+
+    // Scale to 300% and offset to show this specific piece of the video canvas
+    video.style.width = '300%';
+    video.style.height = '300%';
+    video.style.maxWidth = 'none';
+    video.style.maxHeight = 'none';
+    video.style.left = `-${col * 100}%`;
+    video.style.top = `-${row * 100}%`;
+    video.style.position = 'absolute';
+    video.style.objectFit = 'fill';
+
+    tile.appendChild(video);
+    
+    video.load();
+    video.play().catch(err => console.log("Playback error:", err));
+
+    // Swap logic: Click first tile, then click second tile to swap them
+    tile.addEventListener('click', () => {
+      handleTileClick(currentPosition);
+    });
 
     puzzleBoard.appendChild(tile);
   });
-} // <--- THIS CLOSING BRACE WAS MISSING!
+}
 
-// Handle movement logic for sliding tiles
 function handleTileClick(clickedPos) {
-  const emptyPos = boardState.indexOf(8);
-  
-  if (isAdjacent(clickedPos, emptyPos)) {
-    if (!isPlaying && secondsElapsed === 0) {
-      startTimer();
-      isPlaying = true;
-    }
+  if (!isPlaying && secondsElapsed === 0) {
+    startTimer();
+    isPlaying = true;
+  }
 
-    // Swap clicked tile with empty slot
-    [boardState[clickedPos], boardState[emptyPos]] = [boardState[emptyPos], boardState[clickedPos]];
+  if (selectedTileIndex === null) {
+    // First tile clicked
+    selectedTileIndex = clickedPos;
+    renderBoard();
+  } else if (selectedTileIndex === clickedPos) {
+    // Deselect if clicking the same tile again
+    selectedTileIndex = null;
+    renderBoard();
+  } else {
+    // Second tile clicked: Swap the two tiles!
+    [boardState[selectedTileIndex], boardState[clickedPos]] = [boardState[clickedPos], boardState[selectedTileIndex]];
+    selectedTileIndex = null;
     moves++;
     moveCountDisplay.textContent = moves;
 
@@ -103,39 +100,21 @@ function handleTileClick(clickedPos) {
   }
 }
 
-// Check if clicked position is directly next to the empty slot (up, down, left, right)
-function isAdjacent(pos1, pos2) {
-  const r1 = Math.floor(pos1 / gridSize);
-  const c1 = pos1 % gridSize;
-  const r2 = Math.floor(pos2 / gridSize);
-  const c2 = pos2 % gridSize;
-
-  return Math.abs(r1 - r2) + Math.abs(c1 - c2) === 1;
-}
-
-// Shuffle the board cleanly ensuring it is always solvable
+// Shuffle the board by randomly swapping pieces
 function shuffleBoard() {
-  for (let i = 0; i < 100; i++) {
-    const emptyPos = boardState.indexOf(8);
-    const validMoves = [];
-
-    const r = Math.floor(emptyPos / gridSize);
-    const c = emptyPos % gridSize;
-
-    if (r > 0) validMoves.push(emptyPos - gridSize);
-    if (r < gridSize - 1) validMoves.push(emptyPos + gridSize);
-    if (c > 0) validMoves.push(emptyPos - 1);
-    if (c < gridSize - 1) validMoves.push(emptyPos + 1);
-
-    const randomMove = validMoves[Math.floor(Math.random() * validMoves.length)];
-    [boardState[emptyPos], boardState[randomMove]] = [boardState[randomMove], boardState[emptyPos]];
+  for (let i = 0; i < 50; i++) {
+    const pos1 = Math.floor(Math.random() * 9);
+    const pos2 = Math.floor(Math.random() * 9);
+    [boardState[pos1], boardState[pos2]] = [boardState[pos2], boardState[pos1]];
   }
   
+  // Prevent instant win layout
   if (checkWin()) {
     shuffleBoard();
     return;
   }
 
+  selectedTileIndex = null;
   moves = 0;
   moveCountDisplay.textContent = moves;
   secondsElapsed = 0;
