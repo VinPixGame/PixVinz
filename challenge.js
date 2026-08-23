@@ -1,976 +1,198 @@
-/* =========================================================
-   EXTRA CHALLENGE — MOVING VIDEO PUZZLE
-   challenge1.webm → challenge100.webm
-   ========================================================= */
+const gridSize = 3;
+let currentLevel = 1;
+let moves = 0;
+let timerInterval = null;
+let secondsElapsed = 0;
+let isPlaying = false;
+let boardState = []; // Holds the current layout of tile indices (0 to 8, where 8 is empty)
+let winningState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 
-const EXTRA_CHALLENGE_TOTAL = 100;
+const puzzleBoard = document.getElementById('puzzleBoard');
+const moveCountDisplay = document.getElementById('moveCount');
+const timerDisplay = document.getElementById('timer');
+const shuffleBtn = document.getElementById('shuffleBtn');
+const previewBtn = document.getElementById('previewBtn');
+const winModal = document.getElementById('winModal');
+const finalTime = document.getElementById('finalTime');
+const finalMoves = document.getElementById('finalMoves');
+const nextChallengeBtn = document.getElementById('nextChallengeBtn');
 
-let currentChallenge = 1;
-let challengeMoves = 0;
-let challengeSeconds = 0;
-let challengeTimerInterval = null;
-
-let challengeStarted = false;
-let challengeSolved = false;
-
-let challengeTiles = [];
-let challengeVideo = null;
-
-let selectedChallengeTile = null;
-let previewTimeout = null;
-
-
-/* =========================================================
-   ELEMENTS
-   ========================================================= */
-
-const navChallenge =
-  document.getElementById("navChallenge");
-
-const challengeView =
-  document.getElementById("challengeView");
-
-const backFromChallenge =
-  document.getElementById("backFromChallenge");
-
-const challengePuzzleGrid =
-  document.getElementById("challengePuzzleGrid");
-
-const challengeTitle =
-  document.getElementById("challengeTitle");
-
-const challengeTimer =
-  document.getElementById("challengeTimer");
-
-const challengeMovesDisplay =
-  document.getElementById("challengeMoves");
-
-const challengePreviewBtn =
-  document.getElementById("challengePreviewBtn");
-
-const challengeShuffleBtn =
-  document.getElementById("challengeShuffleBtn");
-
-
-/* =========================================================
-   NAVIGATION
-   ========================================================= */
-
-if (navChallenge) {
-  navChallenge.addEventListener("click", openExtraChallenge);
+// Initialize game
+function initGame() {
+  boardState = [...winningState];
+  moves = 0;
+  secondsElapsed = 0;
+  moveCountDisplay.textContent = moves;
+  timerDisplay.textContent = "00:00";
+  stopTimer();
+  
+  renderBoard();
 }
 
-if (backFromChallenge) {
-  backFromChallenge.addEventListener(
-    "click",
-    closeExtraChallenge
-  );
-}
+// Render tiles based on boardState array
+function renderBoard() {
+  puzzleBoard.innerHTML = '';
+  const videoSrc = `challenge/challenge${currentLevel}.webm`;
 
+  boardState.forEach((tileIndex, currentPosition) => {
+    const tile = document.createElement('div');
+    tile.classList.add('puzzle-tile');
+    
+    if (tileIndex === 8) {
+      // Empty tile slot
+      tile.classList.add('empty');
+    } else {
+      // Calculate background slice position for 3x3 grid
+      const row = Math.floor(tileIndex / gridSize);
+      const col = tileIndex % gridSize;
 
-function openExtraChallenge() {
+      const video = document.createElement('video');
+      video.src = videoSrc;
+      video.autoplay = true;
+      video.loop = true;
+      video.muted = true;
+      video.playsInline = true;
+      
+      // Offset video placement so each tile displays its specific grid section
+      video.style.left = `-${col * 100}%`;
+      video.style.top = `-${row * 100}%`;
 
-  if (!challengeView) return;
+      tile.appendChild(video);
 
-  document.querySelectorAll(".view").forEach(view => {
-    view.classList.remove("active");
-  });
-
-  challengeView.classList.add("active");
-
-  loadExtraChallenge(currentChallenge);
-}
-
-
-function closeExtraChallenge() {
-
-  stopChallengeTimer();
-
-  clearPreview();
-
-  destroyChallengeVideo();
-
-  if (challengeView) {
-    challengeView.classList.remove("active");
-  }
-
-  const homeView =
-    document.getElementById("homeView");
-
-  if (homeView) {
-
-    document.querySelectorAll(".view").forEach(view => {
-      view.classList.remove("active");
-    });
-
-    homeView.classList.add("active");
-  }
-}
-
-
-/* =========================================================
-   LOAD CHALLENGE
-   ========================================================= */
-
-function loadExtraChallenge(number) {
-
-  if (number < 1) number = 1;
-
-  if (number > EXTRA_CHALLENGE_TOTAL) {
-    number = 1;
-  }
-
-  currentChallenge = number;
-
-  challengeMoves = 0;
-  challengeSeconds = 0;
-
-  challengeStarted = false;
-  challengeSolved = false;
-
-  selectedChallengeTile = null;
-
-  stopChallengeTimer();
-  clearPreview();
-  destroyChallengeVideo();
-
-  updateChallengeUI();
-
-  if (challengeTitle) {
-
-    challengeTitle.textContent =
-      `CHALLENGE ${String(number).padStart(2, "0")}`;
-  }
-
-  createChallengeVideo(number);
-}
-
-
-/* =========================================================
-   CREATE VIDEO
-   ========================================================= */
-
-function createChallengeVideo(number) {
-
-  if (!challengePuzzleGrid) return;
-
-  challengePuzzleGrid.innerHTML = "";
-
-  challengeVideo =
-    document.createElement("video");
-
-  challengeVideo.src =
-    `image/challenge${number}.webm`;
-
-  challengeVideo.muted = true;
-  challengeVideo.loop = true;
-  challengeVideo.autoplay = true;
-  challengeVideo.playsInline = true;
-  challengeVideo.preload = "auto";
-
-  /*
-     Hidden master video.
-     The visible puzzle tiles use this
-     video's current frame.
-  */
-
-  challengeVideo.style.position = "fixed";
-  challengeVideo.style.width = "1px";
-  challengeVideo.style.height = "1px";
-  challengeVideo.style.opacity = "0";
-  challengeVideo.style.pointerEvents = "none";
-
-  document.body.appendChild(challengeVideo);
-
-  challengeVideo.addEventListener(
-    "loadeddata",
-    () => {
-
-      challengeVideo.play().catch(() => {});
-
-      buildChallengePuzzle();
-
-      shuffleChallengePuzzle();
-
-    },
-    { once: true }
-  );
-
-  challengeVideo.addEventListener(
-    "error",
-    () => {
-
-      console.error(
-        `Unable to load image/challenge${number}.webm`
-      );
-
-      if (challengeTitle) {
-
-        challengeTitle.textContent =
-          `CHALLENGE ${String(number).padStart(2, "0")}`;
-      }
+      // Click event for sliding tiles
+      tile.addEventListener('click', () => {
+        handleTileClick(currentPosition);
+      });
     }
-  );
 
-  challengeVideo.load();
-}
-
-
-/* =========================================================
-   BUILD 3 × 3 PUZZLE
-   ========================================================= */
-
-function buildChallengePuzzle() {
-
-  if (!challengePuzzleGrid) return;
-
-  challengePuzzleGrid.innerHTML = "";
-
-  challengeTiles = [];
-
-  for (let correctPosition = 0; correctPosition < 9; correctPosition++) {
-
-    const tile =
-      document.createElement("div");
-
-    tile.className =
-      "tile challenge-video-tile";
-
-    tile.dataset.correctPosition =
-      correctPosition;
-
-    tile.dataset.currentPosition =
-      correctPosition;
-
-    /*
-       The tile displays the moving video
-       through a video element.
-    */
-
-    const video =
-      document.createElement("video");
-
-    video.src =
-      challengeVideo.src;
-
-    video.muted = true;
-    video.loop = true;
-    video.autoplay = true;
-    video.playsInline = true;
-    video.preload = "auto";
-
-    video.style.position = "absolute";
-
-    video.style.width = "300%";
-    video.style.height = "300%";
-
-    video.style.maxWidth = "none";
-    video.style.maxHeight = "none";
-
-    video.style.objectFit = "cover";
-
-    /*
-       Correct location of this piece.
-    */
-
-    const row =
-      Math.floor(correctPosition / 3);
-
-    const col =
-      correctPosition % 3;
-
-    video.style.left =
-      `${-col * 100}%`;
-
-    video.style.top =
-      `${-row * 100}%`;
-
-    tile.style.position = "relative";
-    tile.style.overflow = "hidden";
-    tile.style.cursor = "pointer";
-
-    tile.appendChild(video);
-
-    challengePuzzleGrid.appendChild(tile);
-
-    challengeTiles.push(tile);
-
-    video.play().catch(() => {});
-  }
-
-  synchronizeChallengeVideos();
-}
-
-
-/* =========================================================
-   SYNCHRONIZE VIDEO TILES
-   ========================================================= */
-
-function synchronizeChallengeVideos() {
-
-  if (!challengeVideo) return;
-
-  const masterTime =
-    challengeVideo.currentTime;
-
-  challengeTiles.forEach(tile => {
-
-    const video =
-      tile.querySelector("video");
-
-    if (!video) return;
-
-    try {
-      video.currentTime = masterTime;
-    } catch (error) {}
-
-    video.play().catch(() => {});
+    puzzleBoard.appendChild(tile);
   });
 }
 
+// Handle movement logic for sliding tiles
+function handleTileClick(clickedPos) {
+  const emptyPos = boardState.indexOf(8);
+  
+  if (isAdjacent(clickedPos, emptyPos)) {
+    if (!isPlaying && secondsElapsed === 0) {
+      startTimer();
+      isPlaying = true;
+    }
 
-/* =========================================================
-   KEEP VIDEO SYNCHRONIZED
-   ========================================================= */
+    // Swap clicked tile with empty slot
+    [boardState[clickedPos], boardState[emptyPos]] = [boardState[emptyPos], boardState[clickedPos]];
+    moves++;
+    moveCountDisplay.textContent = moves;
 
-setInterval(() => {
+    renderBoard();
 
-  if (!challengeVideo) return;
+    if (checkWin()) {
+      endGame();
+    }
+  }
+}
 
-  if (
-    challengeVideo.paused ||
-    challengeVideo.readyState < 2
-  ) {
+// Check if clicked position is directly next to the empty slot (up, down, left, right)
+function isAdjacent(pos1, pos2) {
+  const r1 = Math.floor(pos1 / gridSize);
+  const c1 = pos1 % gridSize;
+  const r2 = Math.floor(pos2 / gridSize);
+  const c2 = pos2 % gridSize;
+
+  return Math.abs(r1 - r2) + Math.abs(c1 - c2) === 1;
+}
+
+// Shuffle the board cleanly ensuring it is always solvable
+function shuffleBoard() {
+  // Simple valid random moves shuffle to guarantee solvability
+  for (let i = 0; i < 100; i++) {
+    const emptyPos = boardState.indexOf(8);
+    const validMoves = [];
+
+    const r = Math.floor(emptyPos / gridSize);
+    const c = emptyPos % gridSize;
+
+    if (r > 0) validMoves.use = validMoves.push(emptyPos - gridSize);
+    if (r < gridSize - 1) validMoves.push(emptyPos + gridSize);
+    if (c > 0) validMoves.push(emptyPos - 1);
+    if (c < gridSize - 1) validMoves.push(emptyPos + 1);
+
+    const randomMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+    [boardState[emptyPos], boardState[randomMove]] = [boardState[randomMove], boardState[emptyPos]];
+  }
+  
+  // Prevent accidental instant win configuration upon shuffle
+  if (checkWin()) {
+    shuffleBoard();
     return;
   }
 
-  const masterTime =
-    challengeVideo.currentTime;
-
-  challengeTiles.forEach(tile => {
-
-    const video =
-      tile.querySelector("video");
-
-    if (!video) return;
-
-    if (
-      Math.abs(
-        video.currentTime - masterTime
-      ) > 0.08
-    ) {
-
-      try {
-        video.currentTime = masterTime;
-      } catch (error) {}
-    }
-
-    if (video.paused) {
-      video.play().catch(() => {});
-    }
-  });
-
-}, 200);
-
-
-/* =========================================================
-   SHUFFLE PUZZLE
-   ========================================================= */
-
-function shuffleChallengePuzzle() {
-
-  if (challengeTiles.length !== 9) return;
-
-  let shuffled;
-
-  do {
-
-    shuffled =
-      [...challengeTiles];
-
-    for (
-      let i = shuffled.length - 1;
-      i > 0;
-      i--
-    ) {
-
-      const j =
-        Math.floor(
-          Math.random() * (i + 1)
-        );
-
-      [
-        shuffled[i],
-        shuffled[j]
-      ] = [
-        shuffled[j],
-        shuffled[i]
-      ];
-    }
-
-  } while (
-    isChallengeSolvedOrder(shuffled)
-  );
-
-  challengeTiles =
-    shuffled;
-
-  challengePuzzleGrid.innerHTML = "";
-
-  challengeTiles.forEach(
-    (tile, index) => {
-
-      tile.dataset.currentPosition =
-        index;
-
-      tile.classList.remove(
-        "selected"
-      );
-
-      challengePuzzleGrid.appendChild(tile);
-    }
-  );
-
-  selectedChallengeTile = null;
-  challengeSolved = false;
+  moves = 0;
+  moveCountDisplay.textContent = moves;
+  secondsElapsed = 0;
+  timerDisplay.textContent = "00:00";
+  stopTimer();
+  isPlaying = false;
+  renderBoard();
 }
 
-
-/* =========================================================
-   CHECK SOLVED ORDER
-   ========================================================= */
-
-function isChallengeSolvedOrder(
-  tiles
-) {
-
-  return tiles.every(
-    (tile, index) => {
-
-      return (
-        Number(
-          tile.dataset.correctPosition
-        ) === index
-      );
-
-    }
-  );
+// Timer Controls
+function startTimer() {
+  timerInterval = setInterval(() => {
+    secondsElapsed++;
+    const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+    const secs = String(secondsElapsed % 60).padStart(2, '0');
+    timerDisplay.textContent = `${mins}:${secs}`;
+  }, 1000);
 }
 
-
-/* =========================================================
-   TILE SELECTION
-   ========================================================= */
-
-if (challengePuzzleGrid) {
-
-  challengePuzzleGrid.addEventListener(
-    "click",
-    event => {
-
-      const tile =
-        event.target.closest(
-          ".challenge-video-tile"
-        );
-
-      if (!tile) return;
-
-      if (challengeSolved) return;
-
-      /*
-         First tap = select.
-      */
-
-      if (!selectedChallengeTile) {
-
-        selectedChallengeTile =
-          tile;
-
-        tile.classList.add(
-          "selected"
-        );
-
-        return;
-      }
-
-      /*
-         Tapping the same tile cancels selection.
-      */
-
-      if (
-        selectedChallengeTile === tile
-      ) {
-
-        tile.classList.remove(
-          "selected"
-        );
-
-        selectedChallengeTile = null;
-
-        return;
-      }
-
-      /*
-         Second tap = swap.
-      */
-
-      const firstIndex =
-        challengeTiles.indexOf(
-          selectedChallengeTile
-        );
-
-      const secondIndex =
-        challengeTiles.indexOf(tile);
-
-      if (
-        firstIndex === -1 ||
-        secondIndex === -1
-      ) {
-        selectedChallengeTile = null;
-        return;
-      }
-
-      /*
-         Start timer on first actual move.
-      */
-
-      if (!challengeStarted) {
-
-        challengeStarted = true;
-
-        startChallengeTimer();
-      }
-
-      swapChallengeTiles(
-        firstIndex,
-        secondIndex
-      );
-
-      selectedChallengeTile = null;
-    }
-  );
+function stopTimer() {
+  clearInterval(timerInterval);
 }
 
-
-/* =========================================================
-   SWAP TILES
-   ========================================================= */
-
-function swapChallengeTiles(
-  firstIndex,
-  secondIndex
-) {
-
-  const firstTile =
-    challengeTiles[firstIndex];
-
-  const secondTile =
-    challengeTiles[secondIndex];
-
-  if (!firstTile || !secondTile) {
-    return;
-  }
-
-  [
-    challengeTiles[firstIndex],
-    challengeTiles[secondIndex]
-  ] = [
-    challengeTiles[secondIndex],
-    challengeTiles[firstIndex]
-  ];
-
-  challengePuzzleGrid.innerHTML = "";
-
-  challengeTiles.forEach(
-    (tile, index) => {
-
-      tile.dataset.currentPosition =
-        index;
-
-      tile.classList.remove(
-        "selected"
-      );
-
-      challengePuzzleGrid.appendChild(
-        tile
-      );
-    }
-  );
-
-  challengeMoves++;
-
-  updateChallengeUI();
-
-  checkChallengeSolved();
+// Win validation
+function checkWin() {
+  return boardState.every((val, index) => val === winningState[index]);
 }
 
-
-/* =========================================================
-   CHECK IF SOLVED
-   ========================================================= */
-
-function checkChallengeSolved() {
-
-  const solved =
-    challengeTiles.every(
-      (tile, index) => {
-
-        return (
-          Number(
-            tile.dataset.correctPosition
-          ) === index
-        );
-
-      }
-    );
-
-  if (!solved) return;
-
-  challengeSolved = true;
-
-  stopChallengeTimer();
-
-  /*
-     Small delay so the player can see
-     the completed moving video.
-  */
-
-  setTimeout(
-    handleChallengeVictory,
-    700
-  );
+function endGame() {
+  stopTimer();
+  isPlaying = false;
+  finalTime.textContent = timerDisplay.textContent;
+  finalMoves.textContent = moves;
+  winModal.classList.remove('hidden');
 }
 
-
-/* =========================================================
-   VICTORY
-   ========================================================= */
-
-function handleChallengeVictory() {
-
-  console.log(
-    `Extra Challenge ${currentChallenge} completed!`
-  );
-
-  /*
-     Use your existing victory system
-     if your game already has one.
-  */
-
-  if (
-    typeof showVictoryScreen ===
-    "function"
-  ) {
-
-    showVictoryScreen(
-      currentChallenge,
-      challengeSeconds,
-      challengeMoves
-    );
-
-    return;
-  }
-
-  if (
-    typeof showVictory ===
-    "function"
-  ) {
-
-    showVictory(
-      currentChallenge,
-      challengeSeconds,
-      challengeMoves
-    );
-
-    return;
-  }
-
-  /*
-     Fallback.
-  */
-
-  if (
-    currentChallenge <
-    EXTRA_CHALLENGE_TOTAL
-  ) {
-
-    currentChallenge++;
-
-    loadExtraChallenge(
-      currentChallenge
-    );
-
-  } else {
-
-    alert(
-      "Congratulations! You completed all 100 Extra Challenges!"
-    );
-  }
-}
-
-
-/* =========================================================
-   TIMER
-   ========================================================= */
-
-function startChallengeTimer() {
-
-  stopChallengeTimer();
-
-  challengeTimerInterval =
-    setInterval(() => {
-
-      challengeSeconds++;
-
-      updateChallengeTimer();
-
-    }, 1000);
-}
-
-
-function stopChallengeTimer() {
-
-  if (
-    challengeTimerInterval
-  ) {
-
-    clearInterval(
-      challengeTimerInterval
-    );
-
-    challengeTimerInterval = null;
-  }
-}
-
-
-function updateChallengeTimer() {
-
-  if (!challengeTimer) return;
-
-  const minutes =
-    Math.floor(
-      challengeSeconds / 60
-    );
-
-  const seconds =
-    challengeSeconds % 60;
-
-  challengeTimer.textContent =
-    `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-}
-
-
-/* =========================================================
-   UPDATE UI
-   ========================================================= */
-
-function updateChallengeUI() {
-
-  updateChallengeTimer();
-
-  if (challengeMovesDisplay) {
-
-    challengeMovesDisplay.textContent =
-      challengeMoves;
-  }
-}
-
-
-/* =========================================================
-   SHUFFLE BUTTON
-   ========================================================= */
-
-if (challengeShuffleBtn) {
-
-  challengeShuffleBtn.addEventListener(
-    "click",
-    () => {
-
-      if (challengeSolved) return;
-
-      shuffleChallengePuzzle();
-
-      challengeMoves = 0;
-      challengeSeconds = 0;
-
-      challengeStarted = false;
-
-      stopChallengeTimer();
-
-      updateChallengeUI();
-    }
-  );
-}
-
-
-/* =========================================================
-   PREVIEW BUTTON
-   ========================================================= */
-
-if (challengePreviewBtn) {
-
-  challengePreviewBtn.addEventListener(
-    "click",
-    showChallengePreview
-  );
-}
-
-
-function showChallengePreview() {
-
-  if (!challengeVideo) return;
-
-  clearPreview();
-
-  challengePuzzleGrid.classList.add(
-    "challenge-preview-mode"
-  );
-
-  challengeTiles.forEach(tile => {
-
-    tile.style.display = "none";
-
-  });
-
-  const previewVideo =
-    document.createElement("video");
-
-  previewVideo.src =
-    challengeVideo.src;
-
-  previewVideo.muted = true;
-  previewVideo.autoplay = true;
-  previewVideo.loop = true;
-  previewVideo.playsInline = true;
-
-  previewVideo.className =
-    "challenge-full-preview-video";
-
-  challengePuzzleGrid.appendChild(
-    previewVideo
-  );
-
-  /*
-     Start preview from the same
-     point as the puzzle.
-  */
-
-  const setPreviewTime = () => {
-
-    try {
-      previewVideo.currentTime =
-        challengeVideo.currentTime;
-    } catch (error) {}
-
-    previewVideo.play().catch(() => {});
-  };
-
-  if (
-    previewVideo.readyState >= 2
-  ) {
-
-    setPreviewTime();
-
-  } else {
-
-    previewVideo.addEventListener(
-      "loadeddata",
-      setPreviewTime,
-      { once: true }
-    );
-  }
-
-  /*
-     Preview for 3 seconds.
-  */
-
-  previewTimeout =
-    setTimeout(() => {
-
-      clearPreview();
-
-      synchronizeChallengeVideos();
-
-    }, 3000);
-}
-
-
-/* =========================================================
-   CLEAR PREVIEW
-   ========================================================= */
-
-function clearPreview() {
-
-  if (previewTimeout) {
-
-    clearTimeout(
-      previewTimeout
-    );
-
-    previewTimeout = null;
-  }
-
-  if (!challengePuzzleGrid) {
-    return;
-  }
-
-  const preview =
-    challengePuzzleGrid.querySelector(
-      ".challenge-full-preview-video"
-    );
-
-  if (preview) {
-
-    preview.pause();
-    preview.remove();
-  }
-
-  challengeTiles.forEach(tile => {
-
-    tile.style.display = "";
-
-  });
-
-  challengePuzzleGrid.classList.remove(
-    "challenge-preview-mode"
-  );
-}
-
-
-/* =========================================================
-   CLEANUP
-   ========================================================= */
-
-function destroyChallengeVideo() {
-
-  if (challengeVideo) {
-
-    challengeVideo.pause();
-
-    challengeVideo.removeAttribute(
-      "src"
-    );
-
-    challengeVideo.load();
-
-    challengeVideo.remove();
-
-    challengeVideo = null;
-  }
-
-  challengeTiles = [];
-
-  selectedChallengeTile = null;
-
-  if (challengePuzzleGrid) {
-
-    challengePuzzleGrid.innerHTML = "";
-  }
-}
-
-
-/* =========================================================
-   START AT CHALLENGE 1
-   ========================================================= */
-
-currentChallenge = 1;
+// Preview Button (Hold or toggle preview of full video)
+previewBtn.addEventListener('mousedown', () => {
+  puzzleBoard.innerHTML = `
+    <div style="width:100%; height:100%; position:relative; overflow:hidden; border-radius:8px;">
+      <video src="challenge/challenge${currentLevel}.webm" autoplay loop muted playsinline style="width:100%; height:100%; object-fit:cover;"></video>
+    </div>
+  `;
+});
+
+previewBtn.addEventListener('mouseup', () => {
+  renderBoard();
+});
+
+previewBtn.addEventListener('mouseleave', () => {
+  renderBoard();
+});
+
+// Shuffle Button Click
+shuffleBtn.addEventListener('click', () => {
+  shuffleBoard();
+});
+
+// Next Challenge Button
+nextChallengeBtn.addEventListener('click', () => {
+  currentLevel = currentLevel < 100 ? currentLevel + 1 : 1; // Loop back or cap at 100
+  winModal.classList.add('hidden');
+  shuffleBoard();
+});
+
+// Initialize on load
+window.addEventListener('DOMContentLoaded', () => {
+  shuffleBoard();
+});
