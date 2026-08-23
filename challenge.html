@@ -4,47 +4,48 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Extra Challenge - PixVinz</title>  
+  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="challenge.css">
 </head>
 <body>
 
-  <!-- Top Header Bar -->
+  <div class="app-container">
+    <!-- Top Header Bar (Using main app grid style) -->
     <header class="top-bar" id="mainHeader">
-      <button class="icon-btn" id="profileHeaderBtn" onclick="showView('profileView')" style="background-color: #2a1147; border: 2px solid #9c27b0; overflow: hidden; padding: 0;">
+      <button class="icon-btn" id="profileHeaderBtn" onclick="window.location.href='index.html'">
         <span id="profileIconFallback">👤</span>
         <img id="profileHeaderImg" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; display: none;">
       </button>
       <div class="logo-container">
-        <video id="logoVideo" autoplay loop muted playsinline preload="auto" style="background: transparent;">
+        <video id="logoVideo" autoplay loop muted playsinline preload="auto">
           <source src="image/logo.webm" type="video/webm">
         </video>
       </div>
       <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
     </header>
-  
-  <div class="challenge-container">
+
     <!-- Header -->
-    <div class="challenge-header">
-      <button class="back-btn" onclick="window.location.href='index.html'"><span>←</span>Back</button>
-      <h2 class="challenge-title">Extra Challenge</h2>
+    <div class="challenge-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; width: 100%;">
+      <button class="back-btn" onclick="window.location.href='index.html'" style="background: #2a2442; border: none; color: white; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: bold;"><span>←</span>Back</button>
+      <h2 class="challenge-title" style="font-size: 1.25rem; font-weight: bold; color: #ffcc00; margin: 0;">Extra Challenge</h2>
       <div style="width: 60px;"></div>
     </div>
 
     <!-- Stats Bar -->
-    <div class="challenge-stats">
+    <div class="challenge-stats" style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 15px; font-size: 0.95rem; background: #1a162b; padding: 10px 15px; border-radius: 8px; box-sizing: border-box;">
       <div class="stat-box">Time: <span id="timer">00:00</span></div>
       <div class="stat-box">Moves: <span id="moveCount">0</span></div>
     </div>
 
     <!-- Puzzle Board Wrapper -->
-    <div class="puzzle-board-wrapper">
-      <div id="puzzleBoard" class="puzzle-board">
+    <div class="puzzle-board-wrapper" style="width: 100%; max-width: 360px; aspect-ratio: 1 / 1; background: #1a162b; border-radius: 12px; padding: 10px; box-sizing: border-box; box-shadow: 0 8px 16px rgba(0,0,0,0.4); border: 2px solid #33285c; display: flex; justify-content: center; align-items: center; margin: 0 auto; position: relative;">
+      <div id="puzzleBoard" class="puzzle-board" style="width: 100%; height: 100%; display: grid !important; grid-template-columns: repeat(3, 1fr) !important; grid-template-rows: repeat(3, 1fr) !important; gap: 3px; background: #000; border-radius: 8px; overflow: hidden;">
         <!-- 9 tiles generated dynamically -->
       </div>
     </div>
 
     <!-- Action Controls -->
-    <div class="challenge-actions">
+    <div class="challenge-actions" style="display: flex; gap: 10px; width: 100%; margin-top: 20px;">
       <button id="previewBtn" class="btn btn-secondary">👁️ Preview</button>
       <button id="shuffleBtn" class="btn btn-primary">🔀 Shuffle</button>
     </div>
@@ -52,7 +53,7 @@
 
   <!-- Win Modal Popup -->
   <div id="winModal" class="modal-overlay hidden">
-    <div class="win-card">
+    <div class="win-card" style="background: #1a162b; padding: 30px; border-radius: 16px; text-align: center; border: 2px solid #7928ca; width: 80%; max-width: 300px;">
       <h2>🎉 Challenge Completed!</h2>
       <p>You solved the video puzzle!</p>
       <p>Time: <span id="finalTime">00:00</span> | Moves: <span id="finalMoves">0</span></p>
