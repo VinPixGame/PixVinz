@@ -37,7 +37,7 @@
 .logo-container video {
   height: 100%;
   max-width: 120px;
-  object-type: contain;
+  object-fit: contain; /* Fixed from object-type */
 }
 
 .coin-badge {
@@ -51,7 +51,6 @@
   align-items: center;
   gap: 5px;
 }
-
 
 :root {
   --bg-color: #0f0c1b;
@@ -67,10 +66,10 @@ body {
   color: var(--text-color);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   display: flex;
-  flex-direction: column; /* Stack header and container vertically */
+  flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  overflow-y: auto; /* Allow scrolling if screen is short */
+  overflow-y: auto;
 }
 
 .challenge-container {
@@ -81,7 +80,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 10px; /* Space out nicely below your header */
+  margin-top: 5px;
 }
 
 .challenge-header {
