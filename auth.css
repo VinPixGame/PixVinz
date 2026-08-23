@@ -264,7 +264,7 @@ body {
 
 #regUserIndicator {
     position: absolute;
-    right: 100px;
+    right: 25px;
     top: 50%;
     transform: translateY(-50%);
 
