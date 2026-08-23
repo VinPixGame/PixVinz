@@ -93,8 +93,6 @@ body {
   transform: translateY(-12px); /* Adjust this negative number to lift higher/lower */
 }
 
-
-
 .view {
   display: none;
   flex-direction: column;
@@ -112,8 +110,6 @@ body {
   justify-content: center;
   align-items: center;
 }
-
-
 
 .card {
   background: rgba(35, 16, 64, 0.6);
@@ -208,7 +204,6 @@ body {
   grid-column: 1;
 }
 
-
 /* ==========================================
     LEVEL & COLLECTION SELECT STYLES
    ========================================== */
@@ -274,7 +269,7 @@ body {
 }
 
 .overall-best-card::before {
-  content: "🏆";
+  content: "ðŸ†";
   position: absolute;
   top: -18px;
   left: 50%;
@@ -446,7 +441,7 @@ body {
 }
 
 .level-btn.solved-bg::before {
-  content: "◆";
+  content: "â—†";
   position: absolute;
   top: -8px;
   left: 50%;
@@ -533,7 +528,6 @@ body {
   color: #a892ee;
   letter-spacing: 1px;
 }
-
 
 /* ==========================================
     COLLECTION CARDS WITH BADGES
@@ -702,8 +696,6 @@ body {
     opacity: 1;
   }
 }
-
-
 
   
 
@@ -947,8 +939,6 @@ input:checked + .slider:before {
   font-size: 13px;
   color: #a892ee;
 }
-  
-
 
 /* FULL SCREEN & HIDDEN HELPERS */
 
@@ -1063,8 +1053,6 @@ input:checked + .slider:before {
   font-weight: bold;
 }
 
-
-
 .profile-top-bar {
   display: flex;
   justify-content: space-between;
@@ -1083,7 +1071,6 @@ input:checked + .slider:before {
   z-index: 20;
   pointer-events: auto;
 }
-
 
   /* ==========================================
     COMPLETE GAME PAGE LAYOUT CSS
@@ -1246,7 +1233,6 @@ input:checked + .slider:before {
   gap: 8px;
   cursor: pointer;
 }
-
 
 /* ==========================================
    GLOBAL CANVAS & EFFECTS
@@ -1491,9 +1477,6 @@ input:checked + .slider:before {
   box-shadow: 0 2px 0 transparent;
 }
 
-
-
-
 /* MOBILE SAFETY */
 
 @media (max-width: 600px) {
@@ -1699,7 +1682,6 @@ video {
     color: #00f2fe;
 }
 
-
 #globalRankSummaryCard {
     position: relative;
     display: flex;
@@ -1710,7 +1692,7 @@ video {
 }
 
 #globalRankSummaryCard::before {
-  content: "🏆";
+  content: "ðŸ†";
   position: absolute;
   top: -18px;
   left: 50%;
@@ -1744,7 +1726,6 @@ video {
     display: block !important;
     width: 100% !important;
 }
-
 
 .confetti-bg {
     position: absolute;
@@ -1787,9 +1768,6 @@ video {
     z-index: 2;
 }
 
-
-
-
 /* Style and size for your custom badge images */
 .badge-card img, 
 .badge-img {
@@ -1800,16 +1778,12 @@ video {
     margin: 0 auto 6px auto;
 }
 
-
-
-
 /* Optional styling for locked vs unlocked state */
 .badge-card.locked img,
 .badge-card.locked .badge-img {
     opacity: 0.35;
     filter: grayscale(100%);
 }
-
 
 @media all and (display-mode: browser) {
   .homeView {
@@ -1821,4 +1795,3 @@ video {
     margin-top: 5px;
   }
 }
-
