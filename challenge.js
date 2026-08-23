@@ -5,7 +5,6 @@ let timerInterval = null;
 let secondsElapsed = 0;
 let isPlaying = false;
 
-// 9 tiles, no empty space. Board state tracks which piece is at which grid position.
 let boardState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 let winningState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 let selectedTileIndex = null;
@@ -20,22 +19,17 @@ const finalTime = document.getElementById('finalTime');
 const finalMoves = document.getElementById('finalMoves');
 const nextChallengeBtn = document.getElementById('nextChallengeBtn');
 
-// Render the 3x3 swapping grid layout
-function renderBoard() {
+// Persistent DOM elements for the 9 tiles so videos never reload or flicker
+let tilesCache = [];
+
+function initBoardDOM() {
   puzzleBoard.innerHTML = '';
+  tilesCache = [];
   const videoSrc = `challenge/challenge${currentLevel}.webm`;
 
-  boardState.forEach((tileIndex, currentPosition) => {
+  for (let i = 0; i < 9; i++) {
     const tile = document.createElement('div');
     tile.classList.add('puzzle-tile');
-    
-    if (selectedTileIndex === currentPosition) {
-      tile.classList.add('selected');
-    }
-
-    // Determine correct slice offsets for this piece of the video canvas
-    const row = Math.floor(tileIndex / 3);
-    const col = tileIndex % 3;
 
     const video = document.createElement('video');
     video.src = videoSrc;
@@ -44,17 +38,48 @@ function renderBoard() {
     video.muted = true;
     video.playsInline = true;
     video.setAttribute('playsinline', '');
-    
-    video.style.left = `-${col * 100}%`;
-    video.style.top = `-${row * 100}%`;
+    video.style.position = 'absolute';
+    video.style.width = '300%';
+    video.style.height = '300%';
+    video.style.maxWidth = 'none';
+    video.style.maxHeight = 'none';
+    video.style.objectFit = 'fill';
 
     tile.appendChild(video);
     video.play().catch(err => console.log("Playback error:", err));
 
-    // Click to select and swap mechanics
+    const tileIndex = i;
     tile.addEventListener('click', () => {
+      const currentPosition = boardState.indexOf(tileIndex);
       handleTileClick(currentPosition);
     });
+
+    tilesCache.push({ tile, video, tileIndex });
+  }
+}
+
+// Update layout without destroying video elements
+function updateBoard() {
+  puzzleBoard.innerHTML = '';
+
+  boardState.forEach((tileIndex, currentPosition) => {
+    const cacheObj = tilesCache.find(t => t.tileIndex === tileIndex);
+    if (!cacheObj) return;
+
+    const { tile, video } = cacheObj;
+
+    // Update slice video offset based on its original correct video coordinate
+    const row = Math.floor(tileIndex / 3);
+    const col = tileIndex % 3;
+    video.style.left = `-${col * 100}%`;
+    video.style.top = `-${row * 100}%`;
+
+    // Handle selection highlight
+    if (selectedTileIndex === currentPosition) {
+      tile.classList.add('selected');
+    } else {
+      tile.classList.remove('selected');
+    }
 
     puzzleBoard.appendChild(tile);
   });
@@ -68,18 +93,18 @@ function handleTileClick(clickedPos) {
 
   if (selectedTileIndex === null) {
     selectedTileIndex = clickedPos;
-    renderBoard();
+    updateBoard();
   } else if (selectedTileIndex === clickedPos) {
     selectedTileIndex = null;
-    renderBoard();
+    updateBoard();
   } else {
-    // Swap the positions of the two clicked tiles
+    // Swap positions in the array
     [boardState[selectedTileIndex], boardState[clickedPos]] = [boardState[clickedPos], boardState[selectedTileIndex]];
     selectedTileIndex = null;
     moves++;
     moveCountDisplay.textContent = moves;
 
-    renderBoard();
+    updateBoard();
 
     if (checkWin()) {
       endGame();
@@ -88,7 +113,6 @@ function handleTileClick(clickedPos) {
 }
 
 function shuffleBoard() {
-  // Randomly swap tiles to shuffle
   for (let i = 0; i < 50; i++) {
     const pos1 = Math.floor(Math.random() * 9);
     const pos2 = Math.floor(Math.random() * 9);
@@ -107,7 +131,7 @@ function shuffleBoard() {
   timerDisplay.textContent = "00:00";
   stopTimer();
   isPlaying = false;
-  renderBoard();
+  updateBoard();
 }
 
 function startTimer() {
@@ -191,9 +215,11 @@ nextChallengeBtn.addEventListener('click', () => {
   }
   currentLevel = currentLevel < 100 ? currentLevel + 1 : 1;
   winModal.classList.add('hidden');
+  initBoardDOM();
   shuffleBoard();
 });
 
 window.addEventListener('DOMContentLoaded', () => {
+  initBoardDOM();
   shuffleBoard();
 });
