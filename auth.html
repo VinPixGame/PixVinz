@@ -113,32 +113,30 @@
 
 
                 <!-- USERNAME -->
-                <div class="input-group">
+            <div class="input-group username-group">
 
-                    <div style="display: flex; align-items: center;">
+    <div class="username-input-wrapper">
 
-                        <input
-                            type="text"
-                            id="regUser"
-                            placeholder="Username (min 6 chars, lowercase & number)"
-                            required
-                            style="flex: 1; border-top-right-radius: 0; border-bottom-right-radius: 0;"
-                        >
+        <input
+            type="text"
+            id="regUser"
+            placeholder="Username (min 6 chars, lowercase & number)"
+            required
+        >
 
-                        <span
-                            style="background: rgba(255, 255, 255, 0.1); padding: 12px 10px; border: 1px solid rgba(255, 255, 255, 0.2); border-left: none; border-top-right-radius: 8px; border-bottom-right-radius: 8px; color: #b388ff; font-size: 0.85rem; font-weight: bold; white-space: nowrap;"
-                        >@pixvinz.com</span>
+        <span id="regUserIndicator"></span>
 
-                    </div>
+        <span class="username-domain">
+            @pixvinz.com
+        </span>
 
-                    <!-- USERNAME REQUIREMENT -->
-                    <span
-                        id="regUserIndicator"
-                        style="display: none; color: #ff4d4d; font-size: 0.85rem; font-weight: bold; text-align: left; margin-top: 6px;"
-                    ></span>
+    </div>
 
-                </div>
+    <p id="regUserRequirement" class="field-requirement">
+        ❌ Min 6 characters, lowercase letters & at least 1 number
+    </p>
 
+</div>
 
                 <!-- PASSWORD -->
                 <div class="input-group">
