@@ -61,41 +61,12 @@ document.addEventListener('DOMContentLoaded', () => {
     setupToggle('regPassConfirm', 'toggleRegPassConfirm');
 
 
-// 4. Real-time Username + Password Validation
+// 4. Real-time Firestore Username Availability Check
 const regUser = document.getElementById('regUser');
 const indicator = document.getElementById('regUserIndicator');
+const requirement = document.getElementById('regUserRequirement');
 
-
-// ==========================================
-// USERNAME VALIDATION
-// ==========================================
-
-if (regUser && indicator) {
-
-    // Username requirement message BELOW the username field
-    const usernameRule = document.createElement('p');
-
-    usernameRule.id = 'regUserRule';
-    usernameRule.innerText =
-        '❌ Min 6 characters, lowercase letters & at least 1 number';
-
-    usernameRule.style.margin = '5px 0 10px';
-    usernameRule.style.fontSize = '12px';
-    usernameRule.style.fontWeight = 'bold';
-    usernameRule.style.color = '#ff4d4d';
-    usernameRule.style.textAlign = 'left';
-    usernameRule.style.display = 'none';
-    usernameRule.style.pointerEvents = 'none';
-
-    const usernameGroup = regUser.closest('.input-group');
-
-    if (usernameGroup) {
-        usernameGroup.insertAdjacentElement(
-            'afterend',
-            usernameRule
-        );
-    }
-
+if (regUser && indicator && requirement) {
 
     regUser.addEventListener('input', async () => {
 
@@ -103,31 +74,21 @@ if (regUser && indicator) {
 
         regUser.value = val;
 
-        // Clear old availability result
-        indicator.innerText = '';
-        indicator.style.color = '';
-
-
-        // INVALID USERNAME
+        // INVALID FORMAT
         if (!validateUsername(val)) {
 
-            usernameRule.innerText =
-                '❌ Min 6 characters, lowercase letters & at least 1 number';
+            // Hide Available / Taken
+            indicator.innerText = '';
 
-            usernameRule.style.display = 'block';
+            // Show requirement BELOW field
+            requirement.classList.add('show');
 
             return;
         }
 
-
-        // VALID USERNAME
-        usernameRule.style.display = 'none';
-
-
-        // Availability stays INSIDE username field
-        indicator.innerText = 'Checking...';
-        indicator.style.color = '#b388ff';
-
+        // VALID FORMAT
+        // Hide invalid requirement
+        requirement.classList.remove('show');
 
         try {
 
@@ -135,36 +96,36 @@ if (regUser && indicator) {
 
                 const { db, doc, getDoc } = window.pixvinzDb;
 
-                const userDocRef = doc(
-                    db,
-                    'players',
-                    val
-                );
+                const userDocRef = doc(db, 'players', val);
 
                 const snap = await getDoc(userDocRef);
 
-
                 if (snap.exists()) {
 
+                    // TAKEN stays INSIDE field
                     indicator.innerText = '❌ Taken';
                     indicator.style.color = '#ff4d4d';
 
                 } else {
 
+                    // AVAILABLE stays INSIDE field
                     indicator.innerText = '✔ Available';
                     indicator.style.color = '#2ecc71';
+
                 }
 
             } else {
 
                 indicator.innerText = '⚠️ Database offline';
                 indicator.style.color = '#f39c12';
+
             }
 
         } catch (err) {
 
             indicator.innerText = '✔ Available';
             indicator.style.color = '#2ecc71';
+
         }
     });
 }
