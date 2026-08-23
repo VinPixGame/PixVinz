@@ -293,7 +293,7 @@ body {
 
 .overall-best-card::before,
 #globalRankSummaryCard::before {
-  content: "ðŸ†";
+  content: "🏆";
   position: absolute;
   top: -18px;
   left: 50%;
@@ -402,7 +402,7 @@ body {
 
 .level-btn.unsolved-bg::after,
 .level-btn.solved-bg::after {
-  content: "";
+  content: "🔶️";
   position: absolute;
   inset: 0;
   border-radius: 16px;
