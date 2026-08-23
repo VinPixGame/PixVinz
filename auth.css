@@ -56,41 +56,56 @@ body {
     justify-content: center;
     align-items: center;
 
-    gap: 16px;
+    gap: 14px;
 
-    padding: 30px 20px;
+    padding: 26px 18px;
 }
 
 .view.active {
     display: flex;
 }
 
+/* DOWNLOAD APP BUTTON */
+
 .glass-install-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 12px 20px;
-  margin-bottom: 12px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 14px;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: bold;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    width: 100%;
+
+    padding: 10px 18px;
+    margin-bottom: 10px;
+
+    background: rgba(255, 255, 255, 0.15);
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 14px;
+
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 4px 6px rgba(0, 0, 0, 0.1);
+
+    transition: all 0.3s ease;
 }
 
 .glass-install-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.25);
+
+    border-color: rgba(255, 255, 255, 0.5);
+
+    transform: translateY(-1px);
 }
 
 
@@ -98,14 +113,14 @@ body {
 
 .auth-card {
     width: 100%;
-    max-width: 610px;
+    max-width: 560px;
 
     background: rgba(35, 16, 64, 0.85);
 
     border: 2px solid #7b2cbf;
-    border-radius: 30px;
+    border-radius: 28px;
 
-    padding: 50px 42px;
+    padding: 42px 36px;
 
     text-align: center;
 
@@ -117,48 +132,52 @@ body {
     margin: 0;
 }
 
+
 /* LOGO */
 
 .auth-logo video {
     display: block;
 
-    width: 150px;
+    width: 135px;
     height: auto;
 
-    margin: 0 auto 18px;
+    margin: 0 auto 15px;
 }
+
 
 /* HEADINGS */
 
 .auth-card h2 {
     color: #ffd700;
 
-    margin: 0 0 30px;
+    margin: 0 0 26px;
 
-    font-size: 32px;
+    font-size: 29px;
     letter-spacing: 1px;
 }
+
 
 /* INPUTS */
 
 .input-group {
     width: 100%;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }
 
 .input-group input {
     width: 100%;
 
-    padding: 17px 18px;
+    padding: 15px 17px;
 
     border-radius: 14px;
+
     border: 1px solid rgba(157, 78, 221, 0.5);
 
     background: rgba(12, 5, 28, 0.8);
 
     color: #fff;
 
-    font-size: 17px;
+    font-size: 16px;
 
     outline: none;
 }
@@ -174,17 +193,18 @@ body {
     color: #777;
 }
 
+
 /* LOGIN / REGISTER BUTTON */
 
 .btn.btn-primary {
     width: 100%;
 
-    min-height: 64px;
+    min-height: 58px;
 
-    margin-top: 10px;
+    margin-top: 9px;
 
     border: none;
-    border-radius: 18px;
+    border-radius: 17px;
 
     background: linear-gradient(
         135deg,
@@ -194,7 +214,7 @@ body {
 
     color: #08020f;
 
-    font-size: 20px;
+    font-size: 19px;
     font-weight: 800;
 
     cursor: pointer;
@@ -216,24 +236,26 @@ body {
     transform: scale(0.98);
 }
 
+
 /* ERROR */
 
 .auth-error {
     color: #ff4d4d;
 
-    font-size: 13px;
+    font-size: 12px;
 
-    margin: 0 0 10px;
+    margin: 0 0 9px;
 
-    min-height: 18px;
+    min-height: 17px;
 }
+
 
 /* LOGIN / REGISTER SWITCH */
 
 .auth-switch {
-    margin: 22px 0 0;
+    margin: 20px 0 0;
 
-    font-size: 16px;
+    font-size: 15px;
 
     color: #a892ee;
 }
@@ -246,6 +268,7 @@ body {
     font-weight: bold;
 }
 
+
 /* PASSWORD SHOW BUTTON */
 
 #toggleLoginPass,
@@ -253,86 +276,119 @@ body {
     color: #b388ff !important;
 }
 
+
 /* REGISTER USERNAME */
 
 #regUser {
     min-width: 0;
 }
 
+
 /* MOBILE */
 
 @media (max-width: 600px) {
 
     .view {
-        padding: 20px 16px;
-        gap: 16px;
+        padding: 18px 15px;
+        gap: 14px;
     }
 
     .glass-install-btn {
         width: 100%;
         max-width: 100%;
 
-        height: 80px;
+        padding: 10px 16px;
 
-        font-size: 22px;
+        font-size: 13px;
     }
 
     .auth-card {
         max-width: 100%;
 
-        padding: 38px 24px;
+        padding: 34px 22px;
 
-        border-radius: 28px;
+        border-radius: 26px;
     }
 
     .auth-logo video {
-        width: 125px;
+        width: 115px;
+
+        margin-bottom: 13px;
     }
 
     .auth-card h2 {
-        font-size: 30px;
-        margin-bottom: 26px;
+        font-size: 27px;
+
+        margin-bottom: 23px;
+    }
+
+    .input-group {
+        margin-bottom: 13px;
     }
 
     .input-group input {
-        padding: 16px;
+        padding: 15px;
 
-        font-size: 16px;
+        font-size: 15px;
     }
 
     .btn.btn-primary {
-        min-height: 62px;
+        min-height: 58px;
 
-        font-size: 19px;
+        font-size: 18px;
     }
 
     .auth-switch {
-        font-size: 15px;
+        font-size: 14px;
+
+        margin-top: 18px;
     }
 }
+
 
 /* SMALL PHONES */
 
 @media (max-width: 380px) {
 
     .view {
-        padding: 16px 12px;
+        padding: 15px 12px;
     }
 
     .auth-card {
-        padding: 30px 18px;
+        padding: 29px 17px;
+
+        border-radius: 24px;
     }
 
     .glass-install-btn {
-        height: 68px;
-        font-size: 19px;
+        padding: 9px 14px;
+
+        font-size: 12px;
     }
 
     .auth-logo video {
-        width: 110px;
+        width: 105px;
     }
 
     .auth-card h2 {
-        font-size: 26px;
+        font-size: 25px;
+
+        margin-bottom: 21px;
+    }
+
+    .input-group input {
+        padding: 14px;
+
+        font-size: 15px;
+    }
+
+    .btn.btn-primary {
+        min-height: 55px;
+
+        font-size: 17px;
+    }
+
+    .auth-switch {
+        font-size: 13px;
     }
 }
