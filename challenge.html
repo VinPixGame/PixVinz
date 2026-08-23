@@ -26,11 +26,22 @@
       <h2 class="challenge-title" style="font-size: 1.25rem; font-weight: bold; color: #ffcc00; margin: 0; text-align: center;">Extra Challenge</h2>
     </div>
 
-    <!-- Stats Bar -->
-    <div class="challenge-stats" style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 15px; font-size: 0.95rem; background: #1a162b; padding: 10px 15px; border-radius: 8px; box-sizing: border-box;">
-      <div class="stat-box">Time: <span id="timer">00:00</span></div>
-      <div class="stat-box">Moves: <span id="moveCount">0</span></div>
+<div class="challenge-stats">
+  <div class="stat-badge-item">
+    <span class="stat-icon-symbol">⏱️</span>
+    <div class="stat-text-stack">
+      <span class="stat-label-title">TIME</span>
+      <span class="stat-main-val" id="timer">00:00</span>
     </div>
+  </div>
+  <div class="stat-badge-item">
+    <span class="stat-icon-symbol">🎲</span>
+    <div class="stat-text-stack">
+      <span class="stat-label-title">MOVES</span>
+      <span class="stat-main-val" id="moveCount">0</span>
+    </div>
+  </div>
+</div>
 
     <!-- Puzzle Board Wrapper -->
     <div class="puzzle-board-wrapper" style="width: 100%; max-width: 360px; aspect-ratio: 1 / 1; background: #1a162b; border-radius: 12px; padding: 10px; box-sizing: border-box; box-shadow: 0 8px 16px rgba(0,0,0,0.4); border: 2px solid #33285c; display: flex; justify-content: center; align-items: center; margin: 0 auto; position: relative;">
