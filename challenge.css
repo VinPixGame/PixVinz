@@ -1,0 +1,169 @@
+:root {
+  --bg-color: #0f0c1b;
+  --card-bg: #1a162b;
+  --accent-color: #7928ca;
+  --text-color: #ffffff;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.challenge-container {
+  width: 100%;
+  max-width: 420px;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.challenge-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.challenge-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #ffcc00;
+  margin: 0;
+}
+
+.back-btn {
+  background: #2a2442;
+  border: none;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.challenge-stats {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 15px;
+  font-size: 0.95rem;
+  background: var(--card-bg);
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+/* 1:1 Aspect Ratio Centered Puzzle Board */
+.puzzle-board-wrapper {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 10px;
+  box-sizing: border-box;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+  border: 2px solid #33285c;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.puzzle-board {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 4px;
+  position: relative;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.puzzle-tile {
+  position: relative;
+  overflow: hidden;
+  background: #222;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.puzzle-tile video {
+  position: absolute;
+  width: 300%;
+  height: 300%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.puzzle-tile.empty {
+  background: #111;
+  cursor: default;
+}
+
+.challenge-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #7928ca, #b100ff);
+  color: white;
+}
+
+.btn-secondary {
+  background: #33285c;
+  color: white;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.modal-overlay.hidden {
+  display: none;
+}
+
+.win-card {
+  background: var(--card-bg);
+  padding: 30px;
+  border-radius: 16px;
+  text-align: center;
+  border: 2px solid var(--accent-color);
+  width: 80%;
+  max-width: 300px;
+}
