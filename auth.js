@@ -74,6 +74,18 @@ if (regUser && indicator && requirement) {
 
         regUser.value = val;
 
+        // EMPTY FIELD
+        if (val === '') {
+
+            // Hide Available / Taken
+            indicator.innerText = '';
+
+            // Hide requirement
+            requirement.classList.remove('show');
+
+            return;
+        }
+
         // INVALID FORMAT
         if (!validateUsername(val)) {
 
@@ -90,6 +102,7 @@ if (regUser && indicator && requirement) {
         // Hide invalid requirement
         requirement.classList.remove('show');
 
+        
         try {
 
             if (window.pixvinzDb) {
@@ -130,6 +143,9 @@ if (regUser && indicator && requirement) {
     });
 }
 
+
+
+    
 
 // ==========================================
 // PASSWORD VALIDATION
