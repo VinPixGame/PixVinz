@@ -35,20 +35,24 @@ document.addEventListener('DOMContentLoaded', () => {
         return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,12}$/.test(pass);
     }
 
-    // 3. Password Toggle
-    function setupToggle(inputId, btnId) {
-        const input = document.getElementById(inputId);
-        const btn = document.getElementById(btnId);
-        if (input && btn) {
-            btn.addEventListener('click', () => {
-                input.type = input.type === 'password' ? 'text' : 'password';
-                btn.innerText = input.type === 'password' ? 'Show' : 'Hide';
-            });
-        }
-    }
-    setupToggle('regPass', 'toggleRegPass');
-    setupToggle('loginPass', 'toggleLoginPass');
+// 3. Password Toggle
+function setupToggle(inputId, btnId) {
+    const input = document.getElementById(inputId);
+    const btn = document.getElementById(btnId);
 
+    if (input && btn) {
+        btn.addEventListener('click', () => {
+            input.type = input.type === 'password' ? 'text' : 'password';
+            btn.innerText = input.type === 'password' ? 'Show' : 'Hide';
+        });
+    }
+}
+
+setupToggle('regPass', 'toggleRegPass');
+setupToggle('regPassConfirm', 'toggleRegPassConfirm');
+setupToggle('loginPass', 'toggleLoginPass');
+
+    
     // 4. Real-time Firestore Username Availability Check
     const regUser = document.getElementById('regUser');
     const indicator = document.getElementById('regUserIndicator');
@@ -57,11 +61,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const val = regUser.value.trim().toLowerCase();
             regUser.value = val;
 
-            if (!validateUsername(val)) {
-                indicator.innerText = '❌ (Min 6 chars, lowercase & number)';
-                indicator.style.color = '#ff4d4d';
-                return;
-            }
+          if (!validateUsername(val)) {
+    indicator.innerText = '❌ (Min 6 chars, lowercase & number)';
+    indicator.style.color = '#ff4d4d';
+    indicator.style.pointerEvents = 'none';
+    return;
+}
 
             try {
                 if (window.pixvinzDb) {
