@@ -39,33 +39,31 @@ function renderBoard() {
     tile.classList.add('puzzle-tile');
     
     if (tileIndex === 8) {
-      // Empty tile slot
       tile.classList.add('empty');
     } else {
-      // Calculate background slice position for 3x3 grid
-      const row = Math.floor(tileIndex / gridSize);
-      const col = tileIndex % gridSize;
+      // Calculate row (0, 1, 2) and column (0, 1, 2) for a 3x3 grid
+      const row = Math.floor(tileIndex / 3);
+      const col = tileIndex % 3;
 
       const video = document.createElement('video');
-      const video = document.createElement('video');
-      video.src = videoSrc;
+      video.src = `challenge/challenge${currentLevel}.webm`;
       video.autoplay = true;
       video.loop = true;
       video.muted = true;
       video.playsInline = true;
       video.setAttribute('playsinline', '');
-      video.setAttribute('webkit-playsinline', '');
       
-      // Force play to prevent mobile browser blocking inline autoplay
-      video.play().catch(err => console.log("Autoplay prevented:", err));
+      // Force play for mobile browsers
+      video.play().catch(err => console.log("Autoplay error:", err));
 
-      // Offset video placement so each tile displays its specific grid section
+      // Shift the 300% sized video so this specific tile shows its 1/3 slice
+      video.style.width = '300%';
+      video.style.height = '300%';
       video.style.left = `-${col * 100}%`;
       video.style.top = `-${row * 100}%`;
 
       tile.appendChild(video);
 
-      // Click event for sliding tiles
       tile.addEventListener('click', () => {
         handleTileClick(currentPosition);
       });
@@ -73,7 +71,6 @@ function renderBoard() {
 
     puzzleBoard.appendChild(tile);
   });
-}
 
 // Handle movement logic for sliding tiles
 function handleTileClick(clickedPos) {
