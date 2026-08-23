@@ -59,6 +59,8 @@ function renderBoard() {
       // Offset video placement for the 3x3 grid cut
       video.style.width = '300%';
       video.style.height = '300%';
+      video.style.maxWidth = 'none';  // Prevents global CSS squishing
+      video.style.maxHeight = 'none';
       video.style.left = `-${col * 100}%`;
       video.style.top = `-${row * 100}%`;
       video.style.position = 'absolute';
