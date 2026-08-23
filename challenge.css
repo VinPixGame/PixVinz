@@ -1,201 +1,186 @@
-:root {
-  --bg-color: #0f0c1b;
-  --card-bg: #1a162b;
-  --accent-color: #7928ca;
-  --text-color: #ffffff;
+const gridSize = 3;
+let currentLevel = 1;
+let moves = 0;
+let timerInterval = null;
+let secondsElapsed = 0;
+let isPlaying = false;
+let boardState = [0, 1, 2, 3, 4, 5, 6, 7, 8]; // Full 9 pieces, no empty slot
+let winningState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+
+let selectedTileIndex = null; // Tracks the first clicked tile for swapping
+
+const puzzleBoard = document.getElementById('puzzleBoard');
+const moveCountDisplay = document.getElementById('moveCount');
+const timerDisplay = document.getElementById('timer');
+const shuffleBtn = document.getElementById('shuffleBtn');
+const previewBtn = document.getElementById('previewBtn');
+const winModal = document.getElementById('winModal');
+const finalTime = document.getElementById('finalTime');
+const finalMoves = document.getElementById('finalMoves');
+const nextChallengeBtn = document.getElementById('nextChallengeBtn');
+
+// Render tiles based on boardState array
+function renderBoard() {
+  puzzleBoard.innerHTML = '';
+
+  boardState.forEach((tileIndex, currentPosition) => {
+    const tile = document.createElement('div');
+    tile.classList.add('puzzle-tile');
+    
+    if (selectedTileIndex === currentPosition) {
+      tile.classList.add('selected'); // Highlights the selected tile
+    }
+
+    const row = Math.floor(tileIndex / 3);
+    const col = tileIndex % 3;
+
+    const video = document.createElement('video');
+    video.autoplay = true;
+    video.loop = true;
+    video.muted = true;
+    video.playsInline = true;
+    video.setAttribute('playsinline', '');
+    
+    const source = document.createElement('source');
+    source.src = `challenge/challenge${currentLevel}.webm`;
+    source.type = 'video/webm';
+    
+    video.appendChild(source);
+
+    // Position the slice for this tile
+    video.style.width = '300%';
+    video.style.height = '300%';
+    video.style.maxWidth = 'none';
+    video.style.maxHeight = 'none';
+    video.style.left = `-${col * 100}%`;
+    video.style.top = `-${row * 100}%`;
+    video.style.position = 'absolute';
+    video.style.objectFit = 'fill';
+
+    tile.appendChild(video);
+    
+    video.load();
+    video.play().catch(err => console.log("Playback error:", err));
+
+    // Tile click logic for swapping
+    tile.addEventListener('click', () => {
+      handleTileClick(currentPosition);
+    });
+
+    puzzleBoard.appendChild(tile);
+  });
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+function handleTileClick(clickedPos) {
+  if (!isPlaying && secondsElapsed === 0) {
+    startTimer();
+    isPlaying = true;
+  }
+
+  if (selectedTileIndex === null) {
+    // Select the first tile
+    selectedTileIndex = clickedPos;
+    renderBoard();
+  } else if (selectedTileIndex === clickedPos) {
+    // Deselect if clicking the same tile again
+    selectedTileIndex = null;
+    renderBoard();
+  } else {
+    // Second tile clicked: Swap them!
+    [boardState[selectedTileIndex], boardState[clickedPos]] = [boardState[clickedPos], boardState[selectedTileIndex]];
+    selectedTileIndex = null;
+    moves++;
+    moveCountDisplay.textContent = moves;
+
+    renderBoard();
+
+    if (checkWin()) {
+      endGame();
+    }
+  }
 }
 
-.challenge-container {
-  width: 100%;
-  max-width: 420px;
-  padding: 20px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+// Shuffle the board by randomly swapping pieces
+function shuffleBoard() {
+  for (let i = 0; i < 50; i++) {
+    const pos1 = Math.floor(Math.random() * 9);
+    const pos2 = Math.floor(Math.random() * 9);
+    [boardState[pos1], boardState[pos2]] = [boardState[pos2], boardState[pos1]];
+  }
+  
+  // Prevent instant win layout
+  if (checkWin()) {
+    shuffleBoard();
+    return;
+  }
+
+  selectedTileIndex = null;
+  moves = 0;
+  moveCountDisplay.textContent = moves;
+  secondsElapsed = 0;
+  timerDisplay.textContent = "00:00";
+  stopTimer();
+  isPlaying = false;
+  renderBoard();
 }
 
-.challenge-header {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
+// Timer Controls
+function startTimer() {
+  timerInterval = setInterval(() => {
+    secondsElapsed++;
+    const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+    const secs = String(secondsElapsed % 60).padStart(2, '0');
+    timerDisplay.textContent = `${mins}:${secs}`;
+  }, 1000);
 }
 
-.challenge-title {
-  font-size: 1.25rem;
-  font-weight: bold;
-  color: #ffcc00;
-  margin: 0;
+function stopTimer() {
+  clearInterval(timerInterval);
 }
 
-.back-btn {
-  background: #2a2442;
-  border: none;
-  color: white;
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
+// Win validation
+function checkWin() {
+  return boardState.every((val, index) => val === winningState[index]);
 }
 
-.challenge-stats {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  margin-bottom: 15px;
-  font-size: 0.95rem;
-  background: var(--card-bg);
-  padding: 10px 15px;
-  border-radius: 8px;
-  box-sizing: border-box;
+function endGame() {
+  stopTimer();
+  isPlaying = false;
+  finalTime.textContent = timerDisplay.textContent;
+  finalMoves.textContent = moves;
+  winModal.classList.remove('hidden');
 }
 
-/* 1:1 Aspect Ratio Centered Puzzle Board */
-.puzzle-board-wrapper {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  background: var(--card-bg);
-  border-radius: 12px;
-  padding: 10px;
-  box-sizing: border-box;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-  border: 2px solid #33285c;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+// Preview Button
+previewBtn.addEventListener('mousedown', () => {
+  puzzleBoard.innerHTML = `
+    <div style="width:100%; height:100%; position:relative; overflow:hidden; border-radius:8px;">
+      <video src="challenge/challenge${currentLevel}.webm" autoplay loop muted playsinline style="width:100%; height:100%; object-fit:cover;"></video>
+    </div>
+  `;
+});
 
-.puzzle-board-wrapper {
-  width: 100%;
-  max-width: 360px;
-  aspect-ratio: 1 / 1;
-  background: var(--card-bg);
-  border-radius: 12px;
-  padding: 10px;
-  box-sizing: border-box;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-  border: 2px solid #33285c;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 auto;
-}
-.puzzle-board-wrapper {
-  width: 100%;
-  max-width: 360px;
-  aspect-ratio: 1 / 1;
-  background: var(--card-bg);
-  border-radius: 12px;
-  padding: 10px;
-  box-sizing: border-box;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-  border: 2px solid #33285c;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 auto;
-}
+previewBtn.addEventListener('mouseup', () => {
+  renderBoard();
+});
 
-.puzzle-board {
-  width: 100%;
-  height: 100%;
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
-  grid-template-rows: repeat(3, 1fr) !important;
-  gap: 3px;
-  background: #000;
-  border-radius: 8px;
-  overflow: hidden;
-}
+previewBtn.addEventListener('mouseleave', () => {
+  renderBoard();
+});
 
-.puzzle-tile {
-  position: relative !important;
-  width: 100% !important;
-  height: 100% !important;
-  overflow: hidden !important;
-  background: #111;
-  cursor: pointer;
-}
+// Shuffle Button Click
+shuffleBtn.addEventListener('click', () => {
+  shuffleBoard();
+});
 
-/* Force the video to expand to 300% and override default max-width limits */
-.puzzle-tile video {
-  position: absolute !important;
-  width: 300% !important;
-  height: 300% !important;
-  max-width: none !important;   /* <--- CRITICAL FIX */
-  max-height: none !important;  /* <--- CRITICAL FIX */
-  object-fit: fill !important;
-  pointer-events: none;
-}
-.puzzle-tile.empty {
-  background: #111;
-  cursor: default;
-}
-.challenge-actions {
-  display: flex;
-  gap: 10px;
-  width: 100%;
-  margin-top: 20px;
-}
+// Next Challenge Button
+nextChallengeBtn.addEventListener('click', () => {
+  currentLevel = currentLevel < 100 ? currentLevel + 1 : 1;
+  winModal.classList.add('hidden');
+  shuffleBoard();
+});
 
-.btn {
-  flex: 1;
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #7928ca, #b100ff);
-  color: white;
-}
-
-.btn-secondary {
-  background: #33285c;
-  color: white;
-}
-
-/* Modal Overlay */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
-}
-
-.modal-overlay.hidden {
-  display: none;
-}
-
-.win-card {
-  background: var(--card-bg);
-  padding: 30px;
-  border-radius: 16px;
-  text-align: center;
-  border: 2px solid var(--accent-color);
-  width: 80%;
-  max-width: 300px;
-}
+// Initialize on load
+window.addEventListener('DOMContentLoaded', () => {
+  shuffleBoard();
+});
