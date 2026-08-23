@@ -140,12 +140,43 @@ body {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  margin-bottom: 15px;
-  font-size: 0.95rem;
-  background: var(--card-bg);
+  margin-bottom: 15px; /* Keeps your exact spacing */
+  background: rgba(35, 16, 64, 0.85);
+  border: 1.5px solid rgba(157, 78, 221, 0.7);
   padding: 10px 15px;
-  border-radius: 8px;
+  border-radius: 16px;
   box-sizing: border-box;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.stat-badge-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stat-icon-symbol {
+  font-size: 20px;
+}
+
+.stat-text-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.stat-label-title {
+  font-size: 10px;
+  color: #a892ee;
+  letter-spacing: 1px;
+  font-weight: bold;
+}
+
+.stat-main-val {
+  font-size: 18px;
+  color: #ffffff;
+  font-weight: 900;
 }
 
 .puzzle-board-wrapper {
