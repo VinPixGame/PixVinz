@@ -181,9 +181,7 @@ previewBtn.addEventListener('mousedown', () => {
   `;
 });
 
-previewBtn.addEventListener('mouseup', () => {
-  renderBoard();
-});
+
 
 previewBtn.addEventListener('mouseleave', () => {
   renderBoard();
