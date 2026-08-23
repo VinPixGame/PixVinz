@@ -1,13 +1,12 @@
-/* Top Header Bar Styles - Fixed to span properly */
 .top-bar {
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 25px;
+  padding: 15px 20px;
   box-sizing: border-box;
   background-color: transparent;
-  margin-bottom: 5px;
+  margin-bottom: 0px;
 }
 
 .top-bar.hidden {
@@ -15,18 +14,20 @@
 }
 
 .icon-btn {
-  width: 48px;
-  height: 48px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 1.2rem;
+  background-color: #2a1147;
+  border: 2px solid #9c27b0;
 }
 
 .logo-container {
-  height: 60px; /* Increased height to match main view */
+  height: 55px; /* Gives the logo breathing room to match Image 2 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -35,23 +36,23 @@
 
 .logo-container video {
   height: 100%;
-  max-width: 180px;
+  max-width: 160px; /* Expands the video width to match your main view */
   object-fit: contain;
+  background: transparent;
 }
 
 .coin-badge {
   background: #1a162b;
-  padding: 8px 16px;
+  padding: 8px 14px;
   border-radius: 25px;
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 0.95rem;
   border: 1px solid #7928ca;
   display: flex;
   align-items: center;
   gap: 6px;
   color: #fff;
 }
-
 
 :root {
   --bg-color: #0f0c1b;
@@ -81,7 +82,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 5px;
+  margin-top: 0px; /* Removes unnecessary gap below header */
 }
 
 .challenge-header {
