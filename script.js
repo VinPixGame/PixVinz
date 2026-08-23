@@ -1000,3 +1000,15 @@ if (window.matchMedia('(display-mode: fullscreen)').matches || window.matchMedia
     }
   }, { once: true });
 }
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const navChallenge = document.getElementById('navChallenge');
+  if (navChallenge) {
+    navChallenge.addEventListener('click', () => {
+      window.location.href = 'challenge.html';
+    });
+  }
+});
+
