@@ -34,35 +34,41 @@ function renderBoard() {
   puzzleBoard.innerHTML = '';
   const videoSrc = `challenge/challenge${currentLevel}.webm`;
 
-  boardState.forEach((tileIndex, currentPosition) => {
+boardState.forEach((tileIndex, currentPosition) => {
     const tile = document.createElement('div');
     tile.classList.add('puzzle-tile');
     
     if (tileIndex === 8) {
       tile.classList.add('empty');
     } else {
-      // Calculate row (0, 1, 2) and column (0, 1, 2) for a 3x3 grid
       const row = Math.floor(tileIndex / 3);
       const col = tileIndex % 3;
 
       const video = document.createElement('video');
-      video.src = `challenge/challenge${currentLevel}.webm`;
       video.autoplay = true;
       video.loop = true;
       video.muted = true;
       video.playsInline = true;
       video.setAttribute('playsinline', '');
       
-      // Force play for mobile browsers
-      video.play().catch(err => console.log("Autoplay error:", err));
+      const source = document.createElement('source');
+      source.src = `challenge/challenge${currentLevel}.webm`;
+      source.type = 'video/webm';
+      
+      video.appendChild(source);
 
-      // Shift the 300% sized video so this specific tile shows its 1/3 slice
+      // Offset video placement for the 3x3 grid cut
       video.style.width = '300%';
       video.style.height = '300%';
       video.style.left = `-${col * 100}%`;
       video.style.top = `-${row * 100}%`;
+      video.style.position = 'absolute';
 
       tile.appendChild(video);
+      
+      // Force load and play
+      video.load();
+      video.play().catch(err => console.log("Playback error:", err));
 
       tile.addEventListener('click', () => {
         handleTileClick(currentPosition);
