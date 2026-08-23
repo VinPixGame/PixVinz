@@ -111,10 +111,9 @@ body {
 }
 
 .puzzle-board {
-.puzzle-board {
   width: 100%;
   height: 100%;
-  display: grid;
+  display: grid !important;
   grid-template-columns: repeat(3, 1fr) !important;
   grid-template-rows: repeat(3, 1fr) !important;
   gap: 3px;
@@ -124,21 +123,22 @@ body {
 }
 
 .puzzle-tile {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background: #222;
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  background: #111;
   cursor: pointer;
-  border-radius: 2px;
 }
 
+/* Force the video to expand to 300% and override default max-width limits */
 .puzzle-tile video {
-  position: absolute;
+  position: absolute !important;
   width: 300% !important;
   height: 300% !important;
-  max-width: none !important;
-  object-fit: cover;
+  max-width: none !important;   /* <--- CRITICAL FIX */
+  max-height: none !important;  /* <--- CRITICAL FIX */
+  object-fit: fill !important;
   pointer-events: none;
 }
 .puzzle-tile.empty {
