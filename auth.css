@@ -194,6 +194,7 @@ body {
 }
 
 
+
 /* =========================================
    FIELD REQUIREMENT MESSAGES
    ========================================= */
@@ -217,8 +218,9 @@ body {
 
 .field-requirement.show {
     display: block;
+    position: relative;
+    z-index: 10;
 }
-
 
 /* =========================================
    USERNAME AVAILABILITY
