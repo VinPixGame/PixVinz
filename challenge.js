@@ -411,11 +411,16 @@ function endGame() {
     earnCoins(earnedCoins);
   }
 
-  // Save XP locally using profile key system
-  if (typeof getUserKey === 'function') {
-    const xpKey = getUserKey('totalXp');
-    let currentXp = parseInt(localStorage.getItem(xpKey)) || 0;
-    localStorage.setItem(xpKey, currentXp + earnedXp);
+  const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
+  const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp'; 
+  
+  let currentXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
+  currentXp += earnedXp; // Adds your computed challenge XP!
+  localStorage.setItem(xpStoreKey, currentXp);
+
+  // Sync to cloud if available
+  if (typeof saveUserDataToCloud === 'function') {
+      saveUserDataToCloud();
   }
 
   // Record that this challenge is finished and increment daily count
