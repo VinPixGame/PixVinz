@@ -232,7 +232,48 @@ function endGame() {
   isPlaying = false;
   finalTime.textContent = timerDisplay.textContent;
   finalMoves.textContent = moves;
+
+  // Set standard rewards
+  const earnedCoins = 50;
+  const earnedXp = 100;
+  
+  const coinsEl = document.getElementById('earnedCoins');
+  const xpEl = document.getElementById('earnedXp');
+  if (coinsEl) coinsEl.textContent = earnedCoins;
+  if (xpEl) xpEl.textContent = earnedXp;
+
+  // Render solved video preview inside the modal if container exists
+  let winVideoContainer = document.getElementById('winVideoContainer');
+  if (!winVideoContainer && winModal) {
+    // Create container dynamically if missing from HTML layout
+    const card = winModal.querySelector('.win-card') || winModal.firstElementChild;
+    if (card) {
+      winVideoContainer = document.createElement('div');
+      winVideoContainer.id = 'winVideoContainer';
+      winVideoContainer.style.cssText = 'width: 100%; aspect-ratio: 1/1; border-radius: 8px; overflow: hidden; margin-bottom: 15px; background: #000; border: 1px solid #33285c; position: relative;';
+      card.insertBefore(winVideoContainer, card.firstChild.nextSibling);
+    }
+  }
+
+  if (winVideoContainer) {
+    winVideoContainer.innerHTML = '';
+    const winVideo = document.createElement('video');
+    winVideo.src = `challenge/challenge${currentLevel}.webm`;
+    winVideo.autoplay = true;
+    winVideo.loop = true;
+    winVideo.muted = true;
+    winVideo.playsInline = true;
+    winVideo.setAttribute('playsinline', '');
+    winVideo.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
+    winVideoContainer.appendChild(winVideo);
+    winVideo.play().catch(err => console.log("Win video play error:", err));
+  }
+
   winModal.classList.remove('hidden');
+
+  if (typeof confetti === 'function') {
+    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+  }
 }
 
 // Safe Preview Overlay
@@ -283,17 +324,24 @@ shuffleBtn.addEventListener('click', () => {
   shuffleBoard();
 });
 
-nextChallengeBtn.addEventListener('click', () => {
-  if (previewOverlay) {
-    previewOverlay.remove();
-    previewOverlay = null;
-    previewBtn.textContent = "👁️ Preview";
-  }
-  currentLevel = currentLevel < 100 ? currentLevel + 1 : 1;
-  winModal.classList.add('hidden');
-  initBoardDOM();
-  shuffleBoard();
-});
+// Close button on win modal routes back to homeView instead of next level
+if (nextChallengeBtn) {
+  // Re-purpose or listen to the button to close and return home
+  nextChallengeBtn.addEventListener('click', () => {
+    if (previewOverlay) {
+      previewOverlay.remove();
+      previewOverlay = null;
+      previewBtn.textContent = "👁️ Preview";
+    }
+    winModal.classList.add('hidden');
+
+    // Route to homeView safely
+    const challengeView = document.getElementById('challengeView');
+    const homeView = document.getElementById('homeView');
+    if (challengeView) challengeView.style.display = 'none';
+    if (homeView) homeView.style.display = 'block';
+  });
+}
 
 window.addEventListener('DOMContentLoaded', () => {
   initBoardDOM();
