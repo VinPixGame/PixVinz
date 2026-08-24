@@ -227,13 +227,7 @@ function checkWin() {
   return boardState.every((val, index) => val === winningState[index]);
 }
 
-function endGame() {
-  stopTimer();
-  isPlaying = false;
-  finalTime.textContent = timerDisplay.textContent;
-  finalMoves.textContent = moves;
-  winModal.classList.remove('hidden');
-}
+
 
 // Safe Preview Overlay
 let previewOverlay = null;
@@ -283,19 +277,52 @@ shuffleBtn.addEventListener('click', () => {
   shuffleBoard();
 });
 
-nextChallengeBtn.addEventListener('click', () => {
-  if (previewOverlay) {
-    previewOverlay.remove();
-    previewOverlay = null;
-    previewBtn.textContent = "👁️ Preview";
-  }
-  currentLevel = currentLevel < 100 ? currentLevel + 1 : 1;
-  winModal.classList.add('hidden');
-  initBoardDOM();
-  shuffleBoard();
-});
+function endGame() {
+  stopTimer();
+  isPlaying = false;
+  
+  finalTime.textContent = timerDisplay.textContent;
+  finalMoves.textContent = moves;
 
-window.addEventListener('DOMContentLoaded', () => {
-  initBoardDOM();
-  shuffleBoard();
-});
+  // Calculate rewards (e.g., 50 coins, 100 XP base)
+  const earnedCoins = 50;
+  const earnedXp = 100;
+  document.getElementById('earnedCoins').textContent = earnedCoins;
+  document.getElementById('earnedXp').textContent = earnedXp;
+
+  // Add solved playing video into the modal container
+  const winVideoContainer = document.getElementById('winVideoContainer');
+  winVideoContainer.innerHTML = '';
+  
+  const winVideo = document.createElement('video');
+  winVideo.src = `challenge/challenge${currentLevel}.webm`;
+  winVideo.autoplay = true;
+  winVideo.loop = true;
+  winVideo.muted = true;
+  winVideo.playsInline = true;
+  winVideo.setAttribute('playsinline', '');
+  winVideo.style.width = '100%';
+  winVideo.style.height = '100%';
+  winVideo.style.objectFit = 'cover';
+  winVideoContainer.appendChild(winVideo);
+
+  // Show modal
+  winModal.classList.remove('hidden');
+
+  // Optional: Trigger simple celebratory confetti effect if canvas-confetti script exists
+  if (typeof confetti === 'function') {
+    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+  }
+}
+
+// Handle close / continue button on win modal
+const closeWinModalBtn = document.getElementById('closeWinModalBtn');
+if (closeWinModalBtn) {
+  closeWinModalBtn.addEventListener('click', () => {
+    winModal.classList.add('hidden');
+    // Advance to next level automatically or loop back
+    currentLevel = currentLevel < 100 ? currentLevel + 1 : 1;
+    initBoardDOM();
+    shuffleBoard();
+  });
+}
