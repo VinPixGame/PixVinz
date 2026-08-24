@@ -13,18 +13,18 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Matching HomeView Top Header */
+/* --- TOP HEADER BAR --- */
 .top-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
     margin-bottom: 20px;
-    padding: 0 4px;
+    padding: 0;
     box-sizing: border-box;
 }
 
-.icon-btn {
+.icon-btn.back-btn {
     background: #241e3d;
     border: 1px solid #33285c;
     color: #fff;
@@ -36,21 +36,22 @@
     align-items: center;
     cursor: pointer;
     font-size: 1.25rem;
-    transition: background 0.2s;
+    box-sizing: border-box;
 }
 
-.icon-btn:hover {
+.icon-btn.back-btn:hover {
     background: #33285c;
 }
 
-/* Proper Sized Logo Container matching HomeView */
+/* 1:1 Square Ratio Logo Container matching button heights */
 .logo-container {
-    width: 120px;
-    height: 50px;
+    width: 44px;
+    height: 44px;
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
+    background: transparent;
 }
 
 #logoVideo {
@@ -63,14 +64,15 @@
 .coin-badge {
     background: #241e3d;
     border: 1px solid #33285c;
-    padding: 8px 14px;
-    border-radius: 14px;
+    padding: 0 14px;
+    border-radius: 12px;
     font-weight: bold;
     color: #ffcc00;
     font-size: 0.95rem;
     display: flex;
     align-items: center;
     gap: 6px;
+    height: 44px;
     box-sizing: border-box;
 }
 
