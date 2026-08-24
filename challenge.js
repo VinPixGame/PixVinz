@@ -1,3 +1,57 @@
+// --- CHALLENGE VIEW COIN LOADER ---
+function loadChallengeCoins() {
+    // Helper to get the logged-in user
+    function getCurrentUser() {
+        try {
+            return JSON.parse(localStorage.getItem('loggedInUser'));
+        } catch (e) {
+            return null;
+        }
+    }
+
+    // Helper to format the key with the username prefix
+    function getUserKey(keyName) {
+        const user = getCurrentUser();
+        if (!user || !user.username) return keyName;
+        return `${user.username}_${keyName}`;
+    }
+
+    const coinKey = getUserKey('totalCoins');
+    let totalCoins = parseInt(localStorage.getItem(coinKey)) || 0;
+
+    // Optional: Pull from Firebase if available
+    const user = getCurrentUser();
+    if (user && user.username && window.pixvinzDb) {
+        const { db, doc, getDoc } = window.pixvinzDb;
+        getDoc(doc(db, 'players', user.username)).then(userSnap => {
+            if (userSnap.exists() && typeof userSnap.data().coins === 'number') {
+                totalCoins = userSnap.data().coins;
+                localStorage.setItem(coinKey, totalCoins);
+                updateChallengeUI(totalCoins);
+            }
+        }).catch(err => console.warn("Firestore coin sync warning:", err));
+    }
+
+    updateChallengeUI(totalCoins);
+}
+
+function updateChallengeUI(coins) {
+    document.querySelectorAll('#challengeView #coinCount, #challengeView .coin-display, #coinCount').forEach(el => {
+        el.textContent = coins;
+    });
+}
+
+// Run when the challenge page/view loads
+document.addEventListener('DOMContentLoaded', () => {
+    loadChallengeCoins();
+});
+
+
+
+
+
+
+
 const gridSize = 3;
 let currentLevel = 1;
 let moves = 0;
@@ -153,12 +207,45 @@ function endGame() {
 
 
 function updateCoinDisplay() {
-  // Pulls the coin value from localStorage (adjust 'totalCoins' or your key if it's named differently in your app)
-  const savedCoins = localStorage.getItem('totalCoins') || 0;
-  const coinElement = document.getElementById('coinCount');
-  if (coinElement) {
-    coinElement.textContent = savedCoins;
+  // Helper to get the logged-in user
+  function getCurrentUser() {
+    try {
+      return JSON.parse(localStorage.getItem('loggedInUser'));
+    } catch (e) {
+      return null;
+    }
   }
+
+  // Helper to format the key with the username prefix
+  function getUserKey(keyName) {
+    const user = getCurrentUser();
+    if (!user || !user.username) return keyName;
+    return `${user.username}_${keyName}`;
+  }
+
+  const coinKey = getUserKey('totalCoins');
+  let totalCoins = parseInt(localStorage.getItem(coinKey)) || 0;
+
+  // Optional: Pull from Firebase if available
+  const user = getCurrentUser();
+  if (user && user.username && window.pixvinzDb) {
+    const { db, doc, getDoc } = window.pixvinzDb;
+    getDoc(doc(db, 'players', user.username)).then(userSnap => {
+      if (userSnap.exists() && typeof userSnap.data().coins === 'number') {
+        totalCoins = userSnap.data().coins;
+        localStorage.setItem(coinKey, totalCoins);
+        updateChallengeUI(totalCoins);
+      }
+    }).catch(err => console.warn("Firestore coin sync warning:", err));
+  }
+
+  updateChallengeUI(totalCoins);
+}
+
+function updateChallengeUI(coins) {
+  document.querySelectorAll('#challengeView #coinCount, #challengeView .coin-display, #coinCount').forEach(el => {
+    el.textContent = coins;
+  });
 }
 
 // Call it when the challenge page loads
