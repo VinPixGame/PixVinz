@@ -571,48 +571,92 @@ function calculateChallengeRewards(timeInSeconds, moves) {
 
 
 
+let challengePreviewTimer = null;
+let challengeCountdownInterval = null;
 
-
-
-// Safe Preview Overlay
-let previewOverlay = null;
-if (previewBtn) {
-  previewBtn.addEventListener('click', () => {
+if (challengePreviewBtn) {
+  challengePreviewBtn.addEventListener('click', async () => {
     if (!challengeStarted) return;
-    const boardWrapper = document.querySelector('.puzzle-board-wrapper');
-    
-    if (!previewOverlay) {
-      previewBtn.textContent = "❌ Close Preview";
-      
-      previewOverlay = document.createElement('div');
-      previewOverlay.style.position = 'absolute';
-      previewOverlay.style.width = 'calc(100% - 20px)';
-      previewOverlay.style.height = 'calc(100% - 20px)';
-      previewOverlay.style.top = '10px';
-      previewOverlay.style.left = '10px';
-      previewOverlay.style.zIndex = '10';
-      previewOverlay.style.borderRadius = '8px';
-      previewOverlay.style.overflow = 'hidden';
-      previewOverlay.style.background = '#000';
 
-      const previewVideo = document.createElement('video');
-      previewVideo.src = `challenge/challenge${currentLevel}.webm`;
-      previewVideo.autoplay = true;
-      previewVideo.loop = true;
-      previewVideo.muted = true;
-      previewVideo.playsInline = true;
-      previewVideo.setAttribute('playsinline', '');
-      previewVideo.style.width = '100%';
-      previewVideo.style.height = '100%';
-      previewVideo.style.objectFit = 'cover';
+    const previewCost = 10; // 🪙 10 Coins cost
+    let success = true;
 
-      previewOverlay.appendChild(previewVideo);
-      boardWrapper.appendChild(previewOverlay);
+    // Use spendCoins if available, otherwise fallback to localStorage
+    if (typeof spendCoins === 'function') {
+      success = await spendCoins(previewCost);
     } else {
-      previewBtn.textContent = "👁️ Preview";
-      previewOverlay.remove();
-      previewOverlay = null;
+      const coinKey = getUserKey('totalCoins');
+      let totalCoins = parseInt(localStorage.getItem(coinKey)) || 0;
+      if (totalCoins < previewCost) {
+        success = false;
+      } else {
+        localStorage.setItem(coinKey, totalCoins - previewCost);
+      }
     }
+
+    if (!success) {
+      alert("Not enough coins! You need 10 coins to preview the challenge.");
+      return;
+    }
+
+    // Refresh coin UI if loader exists
+    if (typeof loadChallengeCoins === 'function') loadChallengeCoins();
+
+    const modal = document.getElementById('challengePreviewModal');
+    const modalVideo = document.getElementById('challengeModalVideo');
+    const modalTitle = document.getElementById('challengeModalTitle');
+    const countdownSpan = document.getElementById('challengeCountdownSeconds');
+
+    if (modalTitle) modalTitle.innerText = `LEVEL ${String(currentLevel).padStart(2, '0')} PREVIEW`;
+    if (modalVideo) {
+      modalVideo.src = `challenge/challenge${currentLevel}.webm`;
+      modalVideo.play().catch(err => console.log("Modal preview video error:", err));
+    }
+    
+    let timeLeft = 15; // 15 seconds timer
+    if (countdownSpan) countdownSpan.innerText = timeLeft;
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.style.display = 'flex';
+    }
+
+    if (challengePreviewTimer) clearTimeout(challengePreviewTimer);
+    if (challengeCountdownInterval) clearInterval(challengeCountdownInterval);
+
+    challengeCountdownInterval = setInterval(() => {
+      timeLeft--;
+      if (countdownSpan) countdownSpan.innerText = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(challengeCountdownInterval);
+      }
+    }, 1000);
+
+    challengePreviewTimer = setTimeout(() => {
+      closeChallengePreviewModal();
+    }, 15000); // 15 seconds duration
+  });
+}
+
+function closeChallengePreviewModal() {
+  const modal = document.getElementById('challengePreviewModal');
+  const modalVideo = document.getElementById('challengeModalVideo');
+  
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+  }
+  if (modalVideo) {
+    modalVideo.pause();
+    modalVideo.src = '';
+  }
+  if (challengePreviewTimer) clearTimeout(challengePreviewTimer);
+  if (challengeCountdownInterval) clearInterval(challengeCountdownInterval);
+}
+
+const closeChallengePreviewBtn = document.getElementById('closeChallengePreviewBtn');
+if (closeChallengePreviewBtn) {
+  closeChallengePreviewBtn.addEventListener('click', () => {
+    closeChallengePreviewModal();
   });
 }
 
