@@ -284,13 +284,12 @@ function endGame() {
   finalTime.textContent = timerDisplay.textContent;
   finalMoves.textContent = moves;
 
-  // Calculate rewards (e.g., 50 coins, 100 XP base)
   const earnedCoins = 50;
   const earnedXp = 100;
   document.getElementById('earnedCoins').textContent = earnedCoins;
   document.getElementById('earnedXp').textContent = earnedXp;
 
-  // Add solved playing video into the modal container
+  // Populate the victory video using the same active source safely
   const winVideoContainer = document.getElementById('winVideoContainer');
   winVideoContainer.innerHTML = '';
   
@@ -305,11 +304,10 @@ function endGame() {
   winVideo.style.height = '100%';
   winVideo.style.objectFit = 'cover';
   winVideoContainer.appendChild(winVideo);
+  winVideo.play().catch(err => console.log("Win video play error:", err));
 
-  // Show modal
   winModal.classList.remove('hidden');
 
-  // Optional: Trigger simple celebratory confetti effect if canvas-confetti script exists
   if (typeof confetti === 'function') {
     confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
   }
