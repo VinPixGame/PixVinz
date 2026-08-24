@@ -88,6 +88,7 @@ function initBoardDOM() {
   challengeStarted = false;
 
   // Reset progress bar elements
+  let currentProgress = 0;
   if (loadingPercentEl) loadingPercentEl.textContent = '0%';
   if (loadingBarFill) loadingBarFill.style.width = '0%';
 
@@ -102,27 +103,52 @@ function initBoardDOM() {
     document.body.appendChild(masterVideo);
   }
 
-  masterVideo.src = videoSrc;
-  masterVideo.load();
+  let isReadyToStart = false;
 
-  // Smooth simulated progress bar so it doesn't instantly flash away
-  let currentProgress = 0;
-  const progressInterval = setInterval(() => {
-    currentProgress += Math.floor(Math.random() * 15) + 10; // smooth increments
-    if (currentProgress >= 100) {
-      currentProgress = 100;
-      clearInterval(progressInterval);
-      
-      // Reveal the start button smoothly after hitting 100%
+  const updateProgress = (targetPercent) => {
+    if (isReadyToStart) return;
+    if (targetPercent > currentProgress) {
+      currentProgress = targetPercent;
+      if (loadingPercentEl) loadingPercentEl.textContent = `${currentProgress}%`;
+      if (loadingBarFill) loadingBarFill.style.width = `${currentProgress}%`;
+    }
+
+    if (currentProgress >= 100 && !isReadyToStart) {
+      isReadyToStart = true;
       setTimeout(() => {
         if (loadingSpinner) loadingSpinner.style.display = 'none';
         if (startChallengeBtn) startChallengeBtn.classList.remove('hidden');
-      }, 250);
+      }, 200);
     }
-    
-    if (loadingPercentEl) loadingPercentEl.textContent = `${currentProgress}%`;
-    if (loadingBarFill) loadingBarFill.style.width = `${currentProgress}%`;
-  }, 120); // controls the filling speed
+  };
+
+  // Simulate steady loading increments so it looks smooth and never freezes
+  const progressInterval = setInterval(() => {
+    if (isReadyToStart) {
+      clearInterval(progressInterval);
+      return;
+    }
+    if (currentProgress < 90) {
+      updateProgress(currentProgress + 10);
+    }
+  }, 100);
+
+  // Hook into actual video loading states to finish up
+  masterVideo.oncanplaythrough = () => {
+    updateProgress(100);
+  };
+
+  masterVideo.onloadeddata = () => {
+    updateProgress(100);
+  };
+
+  // Ultimate fallback safety timer (forces 100% after 2 seconds no matter what)
+  setTimeout(() => {
+    updateProgress(100);
+  }, 2000);
+
+  masterVideo.src = videoSrc;
+  masterVideo.load();
 
   // 2. Create the 9 grid tiles with canvas slices
   for (let currentPosition = 0; currentPosition < 9; currentPosition++) {
