@@ -78,11 +78,13 @@ function initBoardDOM() {
   tilesCache = [];
   const videoSrc = `challenge/challenge${currentLevel}.webm`;
 
+  const loadingPercentEl = document.getElementById('loadingPercent');
+
   // Show loading overlay & lock state
   if (loadingOverlay) loadingOverlay.style.display = 'flex';
   if (loadingSpinner) {
     loadingSpinner.style.display = 'block';
-    loadingSpinner.textContent = "⏳ Preparing your challenge...";
+    if (loadingPercentEl) loadingPercentEl.textContent = '0%';
   }
   if (startChallengeBtn) startChallengeBtn.classList.add('hidden');
   challengeStarted = false;
@@ -98,14 +100,41 @@ function initBoardDOM() {
     document.body.appendChild(masterVideo);
   }
 
+  let isLoaded = false;
+  const revealStartButton = () => {
+    if (isLoaded) return;
+    isLoaded = true;
+    if (loadingPercentEl) loadingPercentEl.textContent = '100%';
+    setTimeout(() => {
+      if (loadingSpinner) loadingSpinner.style.display = 'none';
+      if (startChallengeBtn) startChallengeBtn.classList.remove('hidden');
+    }, 300);
+  };
+
+  // Track real download progress
+  masterVideo.onprogress = () => {
+    if (masterVideo.buffered && masterVideo.buffered.length > 0 && masterVideo.duration > 0) {
+      try {
+        const bufferedEnd = masterVideo.buffered.end(masterVideo.buffered.length - 1);
+        const percent = Math.min(100, Math.floor((bufferedEnd / masterVideo.duration) * 100));
+        if (loadingPercentEl) loadingPercentEl.textContent = `${percent}%`;
+        if (percent >= 99) {
+          revealStartButton();
+        }
+      } catch (e) {
+        // Fallback safety
+      }
+    }
+  };
+
+  masterVideo.onloadeddata = revealStartButton;
+  masterVideo.oncanplaythrough = revealStartButton;
+
+  // Fallback timer in case progress events fire quickly or get blocked locally
+  setTimeout(revealStartButton, 2000);
+
   masterVideo.src = videoSrc;
   masterVideo.load();
-
-  // Wait until video is fully buffered and ready with zero lag
-  masterVideo.onloadeddata = () => {
-    if (loadingSpinner) loadingSpinner.style.display = 'none';
-    if (startChallengeBtn) startChallengeBtn.classList.remove('hidden');
-  };
 
   // 2. Create the 9 grid tiles with canvas slices
   for (let currentPosition = 0; currentPosition < 9; currentPosition++) {
@@ -124,7 +153,7 @@ function initBoardDOM() {
     tile.appendChild(canvas);
 
     tile.addEventListener('click', () => {
-      if (!challengeStarted) return; // Prevent interaction before starting
+      if (!challengeStarted) return;
       handleTileClick(currentPosition);
     });
 
