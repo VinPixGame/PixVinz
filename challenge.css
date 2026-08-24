@@ -1,79 +1,65 @@
-/* --- CHALLENGE PAGE CSS --- */
-
-.app-container {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 15px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    background-color: #120e21;
-    color: #ffffff;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+:root {
+  --bg-color: #0f0c1b;
+  --card-bg: #1a162b;
+  --accent-color: #7928ca;
+  --text-color: #ffffff;
 }
 
-/* --- TOP HEADER BAR --- */
+
+/* Challenge Page Specific Styles matched to main app */
+
 .top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    margin-bottom: 20px;
-    padding: 0;
-    box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 10px;
+  padding-top: 8px;
 }
 
-.icon-btn.back-btn {
-    background: #241e3d;
-    border: 1px solid #33285c;
-    color: #fff;
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    font-size: 1.25rem;
-    box-sizing: border-box;
+.top-bar > *:nth-child(1) { justify-self: start; }
+.top-bar > *:nth-child(2) { justify-self: center; }
+.top-bar > *:nth-child(3) { justify-self: end; }
+
+.top-bar.hidden {
+  display: none !important;
 }
 
-.icon-btn.back-btn:hover {
-    background: #33285c;
+.icon-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* 1:1 Square Ratio Logo Container matching button heights */
 .logo-container {
-    width: 44px;
-    height: 44px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    background: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
+.logo-container video,
 #logoVideo {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    display: block;
+  width: 160px;
+  height: auto;
+  object-fit: contain;
+  background: transparent !important;
 }
 
 .coin-badge {
-    background: #241e3d;
-    border: 1px solid #33285c;
-    padding: 0 14px;
-    border-radius: 12px;
-    font-weight: bold;
-    color: #ffcc00;
-    font-size: 0.95rem;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    height: 44px;
-    box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid #ffd700;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: bold;
+  color: #ffd700;
 }
 
 /* Stats Badges Row */
