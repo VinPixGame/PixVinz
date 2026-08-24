@@ -174,7 +174,7 @@ function startRenderLoop() {
   render();
 }
 
-// Start Challenge Button Event
+// Start Challenge Image Button Click Event
 if (startChallengeBtn) {
   startChallengeBtn.addEventListener('click', () => {
     masterVideo.play().catch(err => console.log("Playback error:", err));
