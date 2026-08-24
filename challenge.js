@@ -40,6 +40,7 @@ function updateChallengeUI(coins) {
 
 document.addEventListener('DOMContentLoaded', () => {
     loadChallengeCoins();
+    initBoardDOM();
 });
 
 const gridSize = 3;
@@ -72,7 +73,7 @@ let tilesCache = [];
 let masterVideo = null;
 let animFrameId = null;
 
-// Initialize DOM elements once per level using ONE master video preloaded fully
+// Initialize DOM elements with a smooth simulated & event-backed loader
 function initBoardDOM() {
   puzzleBoard.innerHTML = '';
   tilesCache = [];
@@ -87,12 +88,10 @@ function initBoardDOM() {
   if (startChallengeBtn) startChallengeBtn.classList.add('hidden');
   challengeStarted = false;
 
-  // Reset progress bar elements
   let currentProgress = 0;
   if (loadingPercentEl) loadingPercentEl.textContent = '0%';
   if (loadingBarFill) loadingBarFill.style.width = '0%';
 
-  // 1. Create ONE master video element
   if (!masterVideo) {
     masterVideo = document.createElement('video');
     masterVideo.loop = true;
@@ -122,35 +121,26 @@ function initBoardDOM() {
     }
   };
 
-  // Simulate steady loading increments so it looks smooth and never freezes
   const progressInterval = setInterval(() => {
     if (isReadyToStart) {
       clearInterval(progressInterval);
       return;
     }
     if (currentProgress < 90) {
-      updateProgress(currentProgress + 10);
+      updateProgress(currentProgress + 15);
     }
   }, 100);
 
-  // Hook into actual video loading states to finish up
-  masterVideo.oncanplaythrough = () => {
-    updateProgress(100);
-  };
+  masterVideo.oncanplaythrough = () => updateProgress(100);
+  masterVideo.onloadeddata = () => updateProgress(100);
 
-  masterVideo.onloadeddata = () => {
-    updateProgress(100);
-  };
-
-  // Ultimate fallback safety timer (forces 100% after 2 seconds no matter what)
   setTimeout(() => {
     updateProgress(100);
-  }, 2000);
+  }, 1500);
 
   masterVideo.src = videoSrc;
   masterVideo.load();
 
-  // 2. Create the 9 grid tiles with canvas slices
   for (let currentPosition = 0; currentPosition < 9; currentPosition++) {
     const tile = document.createElement('div');
     tile.classList.add('puzzle-tile');
@@ -222,10 +212,9 @@ if (startChallengeBtn) {
   startChallengeBtn.addEventListener('click', () => {
     masterVideo.play().catch(err => console.log("Playback error:", err));
     
-    // Play background music
     const bgm = document.getElementById('challengeBGM');
     if (bgm) {
-      bgm.volume = 0.5; // Set background volume to 50% (adjust as needed)
+      bgm.volume = 0.5;
       bgm.play().catch(err => console.log("Audio autoplay restriction prevented BGM:", err));
     }
 
@@ -300,7 +289,6 @@ function endGame() {
   isPlaying = false;
   challengeStarted = false;
   
-  // Stop background music when winning
   const bgm = document.getElementById('challengeBGM');
   if (bgm) {
     bgm.pause();
@@ -310,7 +298,6 @@ function endGame() {
   finalTime.textContent = timerDisplay.textContent;
   finalMoves.textContent = moves;
   
-}
   const earnedCoinsEl = document.getElementById('earnedCoins');
   const earnedXpEl = document.getElementById('earnedXp');
   if (earnedCoinsEl) earnedCoinsEl.textContent = '50';
@@ -334,61 +321,61 @@ function endGame() {
   }
 
   winModal.classList.remove('hidden');
-
-  if (typeof confetti === 'function') {
-    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-  }
 }
 
 // Safe Preview Overlay
 let previewOverlay = null;
-previewBtn.addEventListener('click', () => {
-  if (!challengeStarted) return;
-  const boardWrapper = document.querySelector('.puzzle-board-wrapper');
-  
-  if (!previewOverlay) {
-    previewBtn.textContent = "❌ Close Preview";
+if (previewBtn) {
+  previewBtn.addEventListener('click', () => {
+    if (!challengeStarted) return;
+    const boardWrapper = document.querySelector('.puzzle-board-wrapper');
     
-    previewOverlay = document.createElement('div');
-    previewOverlay.style.position = 'absolute';
-    previewOverlay.style.width = 'calc(100% - 20px)';
-    previewOverlay.style.height = 'calc(100% - 20px)';
-    previewOverlay.style.top = '10px';
-    previewOverlay.style.left = '10px';
-    previewOverlay.style.zIndex = '10';
-    previewOverlay.style.borderRadius = '8px';
-    previewOverlay.style.overflow = 'hidden';
-    previewOverlay.style.background = '#000';
+    if (!previewOverlay) {
+      previewBtn.textContent = "❌ Close Preview";
+      
+      previewOverlay = document.createElement('div');
+      previewOverlay.style.position = 'absolute';
+      previewOverlay.style.width = 'calc(100% - 20px)';
+      previewOverlay.style.height = 'calc(100% - 20px)';
+      previewOverlay.style.top = '10px';
+      previewOverlay.style.left = '10px';
+      previewOverlay.style.zIndex = '10';
+      previewOverlay.style.borderRadius = '8px';
+      previewOverlay.style.overflow = 'hidden';
+      previewOverlay.style.background = '#000';
 
-    const previewVideo = document.createElement('video');
-    previewVideo.src = `challenge/challenge${currentLevel}.webm`;
-    previewVideo.autoplay = true;
-    previewVideo.loop = true;
-    previewVideo.muted = true;
-    previewVideo.playsInline = true;
-    previewVideo.setAttribute('playsinline', '');
-    previewVideo.style.width = '100%';
-    previewVideo.style.height = '100%';
-    previewVideo.style.objectFit = 'cover';
+      const previewVideo = document.createElement('video');
+      previewVideo.src = `challenge/challenge${currentLevel}.webm`;
+      previewVideo.autoplay = true;
+      previewVideo.loop = true;
+      previewVideo.muted = true;
+      previewVideo.playsInline = true;
+      previewVideo.setAttribute('playsinline', '');
+      previewVideo.style.width = '100%';
+      previewVideo.style.height = '100%';
+      previewVideo.style.objectFit = 'cover';
 
-    previewOverlay.appendChild(previewVideo);
-    boardWrapper.appendChild(previewOverlay);
-  } else {
-    previewBtn.textContent = "👁️ Preview";
-    previewOverlay.remove();
-    previewOverlay = null;
-  }
-});
+      previewOverlay.appendChild(previewVideo);
+      boardWrapper.appendChild(previewOverlay);
+    } else {
+      previewBtn.textContent = "👁️ Preview";
+      previewOverlay.remove();
+      previewOverlay = null;
+    }
+  });
+}
 
-shuffleBtn.addEventListener('click', () => {
-  if (!challengeStarted) return;
-  if (previewOverlay) {
-    previewOverlay.remove();
-    previewOverlay = null;
-    previewBtn.textContent = "👁️ Preview";
-  }
-  shuffleBoard();
-});
+if (shuffleBtn) {
+  shuffleBtn.addEventListener('click', () => {
+    if (!challengeStarted) return;
+    if (previewOverlay) {
+      previewOverlay.remove();
+      previewOverlay = null;
+      previewBtn.textContent = "👁️ Preview";
+    }
+    shuffleBoard();
+  });
+}
 
 if (closeWinModalBtn) {
   closeWinModalBtn.addEventListener('click', () => {
@@ -404,6 +391,3 @@ if (closeWinModalBtn) {
     window.location.href = 'index.html';
   });
 }
-window.addEventListener('DOMContentLoaded', () => {
-  initBoardDOM();
-});
