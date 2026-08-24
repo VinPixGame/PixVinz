@@ -46,12 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadChallengeCoins();
 });
 
-
-
-
-
-
-
 const gridSize = 3;
 let currentLevel = 1;
 let moves = 0;
@@ -74,59 +68,81 @@ const finalMoves = document.getElementById('finalMoves');
 const nextChallengeBtn = document.getElementById('nextChallengeBtn');
 
 let tilesCache = [];
+let masterVideo = null;
 
-// Initialize DOM elements once per level
+// Initialize DOM elements once per level using ONE master background video
 function initBoardDOM() {
   puzzleBoard.innerHTML = '';
   tilesCache = [];
   const videoSrc = `challenge/challenge${currentLevel}.webm`;
 
+  // 1. Create ONE master video that plays continuously in the background
+  if (!masterVideo) {
+    masterVideo = document.createElement('video');
+    masterVideo.autoplay = true;
+    masterVideo.loop = true;
+    masterVideo.muted = true;
+    masterVideo.playsInline = true;
+    masterVideo.setAttribute('playsinline', '');
+    masterVideo.style.position = 'absolute';
+    masterVideo.style.top = '0';
+    masterVideo.style.left = '0';
+    masterVideo.style.width = '100%';
+    masterVideo.style.height = '100%';
+    masterVideo.style.objectFit = 'cover';
+    masterVideo.style.zIndex = '1';
+    masterVideo.style.pointerEvents = 'none';
+    
+    const boardWrapper = document.querySelector('.puzzle-board-wrapper');
+    if (boardWrapper) {
+      boardWrapper.style.position = 'relative';
+      boardWrapper.style.overflow = 'hidden';
+      boardWrapper.appendChild(masterVideo);
+    }
+  }
+  
+  if (!masterVideo.src.includes(videoSrc)) {
+    masterVideo.src = videoSrc;
+    masterVideo.play().catch(err => console.log("Playback error:", err));
+  }
+
+  // 2. Create the 9 transparent grid tiles acting as windows/cutouts
   for (let currentPosition = 0; currentPosition < 9; currentPosition++) {
     const tile = document.createElement('div');
     tile.classList.add('puzzle-tile');
-
-    const video = document.createElement('video');
-    video.src = videoSrc;
-    video.autoplay = true;
-    video.loop = true;
-    video.muted = true;
-    video.playsInline = true;
-    video.setAttribute('playsinline', '');
-    video.style.position = 'absolute';
-    video.style.width = '300%';
-    video.style.height = '300%';
-    video.style.maxWidth = 'none';
-    video.style.maxHeight = 'none';
-    video.style.objectFit = 'fill';
-
-    tile.appendChild(video);
-    video.play().catch(err => console.log("Playback error:", err));
+    tile.style.position = 'relative';
+    tile.style.zIndex = '2';
+    tile.style.background = 'rgba(0,0,0,0.2)';
+    tile.style.cursor = 'pointer';
+    tile.style.border = '1px solid rgba(255,255,255,0.1)';
 
     tile.addEventListener('click', () => {
       handleTileClick(currentPosition);
     });
 
     puzzleBoard.appendChild(tile);
-    tilesCache.push({ tile, video });
+    tilesCache.push({ tile });
   }
 }
 
-// Instantly update slice positions without moving DOM elements
+// Update slice positions instantly using background coordinates
 function updateBoardVisuals() {
   boardState.forEach((tileIndex, currentPosition) => {
-    const { tile, video } = tilesCache[currentPosition];
+    const { tile } = tilesCache[currentPosition];
 
     const row = Math.floor(tileIndex / 3);
     const col = tileIndex % 3;
     
-    // Instantly snap video offset to the correct slice
-    video.style.left = `-${col * 100}%`;
-    video.style.top = `-${row * 100}%`;
+    tile.style.backgroundImage = `url(${masterVideo.src})`;
+    tile.style.backgroundSize = '300% 300%';
+    tile.style.backgroundPosition = `${(col / 2) * 100}% ${(row / 2) * 100}%`;
 
     if (selectedTileIndex === currentPosition) {
       tile.classList.add('selected');
+      tile.style.border = '2px solid #ffcc00';
     } else {
       tile.classList.remove('selected');
+      tile.style.border = '1px solid rgba(255,255,255,0.1)';
     }
   });
 }
@@ -144,7 +160,6 @@ function handleTileClick(clickedPos) {
     selectedTileIndex = null;
     updateBoardVisuals();
   } else {
-    // Swap slice mappings instantly
     [boardState[selectedTileIndex], boardState[clickedPos]] = [boardState[clickedPos], boardState[selectedTileIndex]];
     selectedTileIndex = null;
     moves++;
@@ -204,54 +219,6 @@ function endGame() {
   finalMoves.textContent = moves;
   winModal.classList.remove('hidden');
 }
-
-
-function updateCoinDisplay() {
-  // Helper to get the logged-in user
-  function getCurrentUser() {
-    try {
-      return JSON.parse(localStorage.getItem('loggedInUser'));
-    } catch (e) {
-      return null;
-    }
-  }
-
-  // Helper to format the key with the username prefix
-  function getUserKey(keyName) {
-    const user = getCurrentUser();
-    if (!user || !user.username) return keyName;
-    return `${user.username}_${keyName}`;
-  }
-
-  const coinKey = getUserKey('totalCoins');
-  let totalCoins = parseInt(localStorage.getItem(coinKey)) || 0;
-
-  // Optional: Pull from Firebase if available
-  const user = getCurrentUser();
-  if (user && user.username && window.pixvinzDb) {
-    const { db, doc, getDoc } = window.pixvinzDb;
-    getDoc(doc(db, 'players', user.username)).then(userSnap => {
-      if (userSnap.exists() && typeof userSnap.data().coins === 'number') {
-        totalCoins = userSnap.data().coins;
-        localStorage.setItem(coinKey, totalCoins);
-        updateChallengeUI(totalCoins);
-      }
-    }).catch(err => console.warn("Firestore coin sync warning:", err));
-  }
-
-  updateChallengeUI(totalCoins);
-}
-
-function updateChallengeUI(coins) {
-  document.querySelectorAll('#challengeView #coinCount, #challengeView .coin-display, #coinCount').forEach(el => {
-    el.textContent = coins;
-  });
-}
-
-// Call it when the challenge page loads
-window.addEventListener('DOMContentLoaded', () => {
-  updateCoinDisplay();
-});
 
 // Safe Preview Overlay
 let previewOverlay = null;
