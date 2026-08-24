@@ -57,6 +57,12 @@
         <div id="loadingSpinner" style="font-size: 1.15rem; color: #ffcc00; font-weight: bold; margin-bottom: 15px;">
           ⏳ Loading Challenge... <span id="loadingPercent">0%</span>
         </div>
+        
+        <!-- Loading Progress Bar Added Here -->
+        <div style="width: 80%; max-width: 200px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-bottom: 15px;">
+          <div id="loadingBarFill" style="width: 0%; height: 100%; background: #ffcc00; transition: width 0.1s ease;"></div>
+        </div>
+
         <!-- Custom Image Start Button -->
         <button id="startChallengeBtn" class="hidden" style="background: none; border: none; padding: 0; cursor: pointer;">
           <img src="image/start.png" alt="Start Challenge" style="width: 140px; height: auto; display: block; transition: transform 0.1s ease;" />
