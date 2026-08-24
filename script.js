@@ -247,6 +247,13 @@ function updateCoinDisplay() {
               profileTrigger.addEventListener('click', (e) => {
                   e.preventDefault();
                   if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+                  
+                  // Refresh stats right before showing the view!
+                  if (typeof updateXpProgress === 'function') updateXpProgress();
+                  if (typeof updateProfileStats === 'function') updateProfileStats();
+                  if (typeof checkAndUnlockBadges === 'function') checkAndUnlockBadges();
+                  if (typeof loadProfileGlobalRank === 'function') loadProfileGlobalRank();
+
                   showView('profileView');
               });
           }
