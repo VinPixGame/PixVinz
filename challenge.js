@@ -288,17 +288,97 @@ function stopTimer() {
 function checkWin() {
   return boardState.every((val, index) => val === winningState[index]);
 }
+// --- 1. CALCULATE STARS, COINS, AND XP ---
+function calculateChallengeRewards(timeInSeconds, moves) {
+    const safeMoves = Math.max(moves, 1);
+    
+    // Stars calculation based on time
+    let stars = 1;
+    if (timeInSeconds <= 60) {
+        stars = 3;
+    } else if (timeInSeconds <= 120) {
+        stars = 2;
+    } else {
+        stars = 1;
+    }
 
+    // Coins based on stars
+    let earnedCoins = 30;
+    if (stars === 3) earnedCoins = 100;
+    else if (stars === 2) earnedCoins = 60;
+
+    // XP calculation: (time in seconds ÷ number of moves) * 100
+    let earnedXp = Math.round((timeInSeconds / safeMoves) * 100);
+
+    return { stars, earnedCoins, earnedXp };
+}
+
+// Helper to convert MM:SS or similar timer text into total seconds
+function getTimerSeconds() {
+    // Assuming timerDisplay.textContent looks like "01:15" or similar
+    const parts = timerDisplay.textContent.split(':');
+    if (parts.length === 2) {
+        return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+    }
+    return parseInt(timerDisplay.textContent) || 0;
+}
+
+
+// --- 2. DAILY LIMIT & LOCKOUT SYSTEM ---
+function checkDailyChallengeStatus() {
+    const todayStr = new Date().toDateString(); // e.g., "Mon Aug 24 2026"
+    const lastDateKey = getUserKey('challenge_last_date');
+    const dailyCountKey = getUserKey('challenge_daily_count');
+    const lockTimerKey = getUserKey('challenge_lock_expiry');
+
+    const lastDate = localStorage.getItem(lastDateKey);
+    let dailyCount = parseInt(localStorage.getItem(dailyCountKey)) || 0;
+    const lockExpiry = parseInt(localStorage.getItem(lockTimerKey)) || 0;
+
+    // Check if a new day has arrived or if lockout expired
+    if (lastDate !== todayStr) {
+        // Reset daily counter for the new day
+        localStorage.setItem(lastDateKey, todayStr);
+        localStorage.setItem(dailyCountKey, '0');
+        localStorage.removeItem(lockTimerKey);
+        return { locked: false, remaining: 3 };
+    }
+
+    // Check if currently locked out due to hitting the 3-challenge limit
+    if (lockExpiry > Date.now()) {
+        return { locked: true, expiry: lockExpiry };
+    }
+
+    if (dailyCount >= 3) {
+        // Set a 24-hour lockout timer from now
+        const twentyFourHours = 24 * 60 * 60 * 1000;
+        const expiryTime = Date.now() + twentyFourHours;
+        localStorage.setItem(lockTimerKey, expiryTime);
+        return { locked: true, expiry: expiryTime };
+    }
+
+    return { locked: false, remaining: 3 - dailyCount };
+}
+
+function recordCompletedChallenge(challengeId) {
+    const dailyCountKey = getUserKey('challenge_daily_count');
+    let dailyCount = parseInt(localStorage.getItem(dailyCountKey)) || 0;
+    dailyCount++;
+    localStorage.setItem(dailyCountKey, dailyCount);
+
+    // Mark this specific challenge as completed so it cannot be played again
+    localStorage.setItem(getUserKey(`challenge_done_${challengeId}`), 'true');
+}
+
+
+// --- 3. UPDATED END GAME FUNCTION ---
 function endGame() {
   stopTimer();
   isPlaying = false;
   challengeStarted = false;
   
   const bgm = document.getElementById('challengeBGM');
-  if (bgm) {
-    bgm.pause();
-    bgm.currentTime = 0;
-  }
+  if (bgm) { bgm.pause(); bgm.currentTime = 0; }
 
   const victoryAudio = document.getElementById('challengeVictoryBGM');
   if (victoryAudio) {
@@ -308,12 +388,47 @@ function endGame() {
 
   finalTime.textContent = timerDisplay.textContent;
   finalMoves.textContent = moves;
-  
+
+  // Calculate metrics
+  const totalSeconds = getTimerSeconds();
+  const { stars, earnedCoins, earnedXp } = calculateChallengeRewards(totalSeconds, moves);
+
+  // Display rewards & stars on the win modal
   const earnedCoinsEl = document.getElementById('earnedCoins');
   const earnedXpEl = document.getElementById('earnedXp');
-  if (earnedCoinsEl) earnedCoinsEl.textContent = '50';
-  if (earnedXpEl) earnedXpEl.textContent = '100';
+  const starContainerEl = document.getElementById('starContainer'); // Make sure you have an element for stars in your modal
+  
+  if (earnedCoinsEl) earnedCoinsEl.textContent = earnedCoins;
+  if (earnedXpEl) earnedXpEl.textContent = earnedXp;
+  
+  // Render visual stars if container exists
+  if (starContainerEl) {
+      starContainerEl.innerHTML = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+  }
 
+  // Add coins via playerstat.js
+  if (typeof earnCoins === 'function') {
+    earnCoins(earnedCoins);
+  }
+
+  // Save XP locally using profile key system
+  if (typeof getUserKey === 'function') {
+    const xpKey = getUserKey('totalXp');
+    let currentXp = parseInt(localStorage.getItem(xpKey)) || 0;
+    localStorage.setItem(xpKey, currentXp + earnedXp);
+  }
+
+  // Record that this challenge is finished and increment daily count
+  recordCompletedChallenge(currentLevel);
+
+  // Unlock next level sequentially
+  const currentLevelKey = getUserKey('currentLevel');
+  let maxUnlocked = parseInt(localStorage.getItem(currentLevelKey)) || 1;
+  if (currentLevel >= maxUnlocked) {
+      localStorage.setItem(currentLevelKey, currentLevel + 1);
+  }
+
+  // Load Win Video Preview
   const winVideoContainer = document.getElementById('winVideoContainer');
   if (winVideoContainer) {
     winVideoContainer.innerHTML = '';
@@ -323,17 +438,11 @@ function endGame() {
     winVideo.loop = true;
     winVideo.muted = true;
     winVideo.playsInline = true;
-    winVideo.setAttribute('playsinline', '');
-    winVideo.style.width = '100%';
-    winVideo.style.height = '100%';
-    winVideo.style.objectFit = 'cover';
     winVideoContainer.appendChild(winVideo);
     winVideo.play().catch(err => console.log("Win video play error:", err));
   }
 
   winModal.classList.remove('hidden');
-
-  // Fire the brand new multi-directional ribbon confetti!
   startConfetti();
 }
     
@@ -415,6 +524,38 @@ function endGame() {
         canvas.style.display = 'none';
     }, 4000);
 }
+
+
+function calculateChallengeRewards(timeInSeconds, moves) {
+    // Prevent division by zero if moves is somehow 0
+    const safeMoves = Math.max(moves, 1);
+    
+    // 1. Calculate Stars based on time
+    let stars = 1;
+    if (timeInSeconds <= 60) {
+        stars = 3;
+    } else if (timeInSeconds <= 120) {
+        stars = 2;
+    } else {
+        stars = 1;
+    }
+
+    // 2. Calculate Coins based on stars
+    let earnedCoins = 30;
+    if (stars === 3) earnedCoins = 100;
+    else if (stars === 2) earnedCoins = 60;
+    else earnedCoins = 30;
+
+    // 3. Calculate XP: (time ÷ moves) * 100 (rounded to nearest whole number)
+    let earnedXp = Math.round((timeInSeconds / safeMoves) * 100);
+
+    return { stars, earnedCoins, earnedXp };
+}
+
+
+
+
+
 
 // Safe Preview Overlay
 let previewOverlay = null;
