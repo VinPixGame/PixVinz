@@ -274,17 +274,12 @@ function endGame() {
     winVideo.play().catch(err => console.log("Win video play error:", err));
   }
 
-winModal.classList.remove('hidden');
+  winModal.classList.remove('hidden');
 
-  // Trigger confetti explicitly on top of the modal popup
   if (typeof confetti === 'function') {
-    confetti({
-      particleCount: 120,
-      spread: 80,
-      origin: { y: 0.6 },
-      zIndex: 9999 // Forces confetti to render above the win modal (z-index: 1000)
-    });
+    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
   }
+}
 
 // Safe Preview Overlay
 let previewOverlay = null;
