@@ -294,7 +294,6 @@ function endGame() {
   isPlaying = false;
   challengeStarted = false;
   
-  // Stop challenge background music and play victory sound
   const bgm = document.getElementById('challengeBGM');
   if (bgm) {
     bgm.pause();
@@ -334,18 +333,77 @@ function endGame() {
 
   winModal.classList.remove('hidden');
 
-  // --- TRIGGER CONFETTI WITH DEBUGGING ---
-  if (typeof confetti === 'function') {
-    console.log("Confetti function found, firing...");
-    confetti({
-      particleCount: 150,
-      spread: 100,
-      origin: { y: 0.6 },
-      zIndex: 99999 // Forces it above modals and overlays
-    });
-  } else {
-    console.error("Confetti function is NOT defined! Check your script tag.");
-  }
+  // Fire the brand new multi-directional ribbon confetti!
+  startConfetti();
+}
+    
+    function startConfetti() {
+    const canvas = document.getElementById('confettiCanvas');
+    if (!canvas) return;
+    canvas.style.display = 'block';
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Create 120 dynamic particles with varied shapes, rotation, and velocities
+    const particles = Array.from({ length: 120 }, () => ({
+        x: canvas.width / 2,
+        y: canvas.height * 0.6, // bursts up from the modal area
+        vx: (Math.random() - 0.5) * 18, // wider horizontal spread
+        vy: (Math.random() - 0.7) * 16 - 4, // upward initial pop
+        sizeX: Math.random() * 10 + 5, // rectangular ribbon width
+        sizeY: Math.random() * 6 + 3,  // rectangular ribbon height
+        angle: Math.random() * Math.PI * 2,
+        spin: (Math.random() - 0.5) * 0.2, // spinning effect
+        gravity: 0.35,
+        opacity: 1,
+        color: ['#ff3366', '#ffcc00', '#00ffcc', '#7928ca', '#38ef7d', '#ffffff'][Math.floor(Math.random() * 6)]
+    }));
+
+    let animationId;
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        let activeParticles = 0;
+
+        particles.forEach(p => {
+            p.vx *= 0.96; // air resistance
+            p.vy += p.gravity; // gravity pull
+            p.x += p.vx;
+            p.y += p.vy;
+            p.angle += p.spin; // spin the confetti piece
+
+            if (p.y < canvas.height) {
+                activeParticles++;
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.angle);
+                ctx.fillStyle = p.color;
+                
+                // Draw as a spinning rectangular ribbon
+                ctx.fillRect(-p.sizeX / 2, -p.sizeY / 2, p.sizeX, p.sizeY);
+                ctx.restore();
+            }
+        });
+
+        if (activeParticles > 0) {
+            animationId = requestAnimationFrame(animate);
+        } else {
+            cancelAnimationFrame(animationId);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            canvas.style.display = 'none';
+        }
+    }
+    
+    animate();
+
+    // Safety fallback timeout to clear canvas after 4 seconds max
+    setTimeout(() => {
+        cancelAnimationFrame(animationId);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.style.display = 'none';
+    }, 4000);
+}
 
 // Safe Preview Overlay
 let previewOverlay = null;
