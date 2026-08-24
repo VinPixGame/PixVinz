@@ -422,7 +422,8 @@ function endGame() {
   if (typeof saveUserDataToCloud === 'function') {
       saveUserDataToCloud();
   }
-
+if (typeof updateXpProgress === 'function') updateXpProgress();
+  if (typeof updateProfileUI === 'function') updateProfileUI();
   // Record that this challenge is finished and increment daily count
   recordCompletedChallenge(currentLevel);
 
