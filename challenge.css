@@ -18,9 +18,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
     width: 100%;
-    padding: 0 5px;
+    margin-bottom: 20px;
+    padding: 0 4px;
     box-sizing: border-box;
 }
 
@@ -28,8 +28,8 @@
     background: #241e3d;
     border: 1px solid #33285c;
     color: #fff;
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     border-radius: 12px;
     display: flex;
     justify-content: center;
@@ -43,10 +43,10 @@
     background: #33285c;
 }
 
-/* Larger, perfectly aligned logo container matching homeView */
+/* Proper Sized Logo Container matching HomeView */
 .logo-container {
-    width: 90px;
-    height: 45px;
+    width: 120px;
+    height: 50px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -57,19 +57,21 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
+    display: block;
 }
 
 .coin-badge {
     background: #241e3d;
     border: 1px solid #33285c;
     padding: 8px 14px;
-    border-radius: 20px;
+    border-radius: 14px;
     font-weight: bold;
     color: #ffcc00;
     font-size: 0.95rem;
     display: flex;
     align-items: center;
     gap: 6px;
+    box-sizing: border-box;
 }
 
 /* Stats Badges Row */
