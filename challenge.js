@@ -294,10 +294,17 @@ function endGame() {
   isPlaying = false;
   challengeStarted = false;
   
+  // Stop challenge background music and play victory sound
   const bgm = document.getElementById('challengeBGM');
   if (bgm) {
     bgm.pause();
     bgm.currentTime = 0;
+  }
+
+  const victoryAudio = document.getElementById('challengeVictoryBGM');
+  if (victoryAudio) {
+    victoryAudio.currentTime = 0;
+    victoryAudio.play().catch(err => console.log("Victory audio play error:", err));
   }
 
   finalTime.textContent = timerDisplay.textContent;
@@ -386,6 +393,9 @@ if (closeWinModalBtn) {
   closeWinModalBtn.addEventListener('click', () => {
     const bgm = document.getElementById('challengeBGM');
     if (bgm) { bgm.pause(); }
+    
+    const victoryAudio = document.getElementById('challengeVictoryBGM');
+    if (victoryAudio) { victoryAudio.pause(); }
     
     if (previewOverlay) {
       previewOverlay.remove();
