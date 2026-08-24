@@ -210,12 +210,17 @@ function startRenderLoop() {
 // Start Challenge Image Button Click Event
 if (startChallengeBtn) {
   startChallengeBtn.addEventListener('click', () => {
-    masterVideo.play().catch(err => console.log("Playback error:", err));
+    masterVideo.play().catch(err => console.log("Video error:", err));
     
     const bgm = document.getElementById('challengeBGM');
     if (bgm) {
-      bgm.volume = 0.5;
-      bgm.play().catch(err => console.log("Audio autoplay restriction prevented BGM:", err));
+      bgm.currentTime = 0;
+      // Delay audio playback slightly so it doesn't conflict with the video stream request
+      setTimeout(() => {
+        bgm.play()
+          .then(() => console.log("BGM playing successfully"))
+          .catch(err => console.log("BGM play failed:", err));
+      }, 150);
     }
 
     if (loadingOverlay) loadingOverlay.style.display = 'none';
