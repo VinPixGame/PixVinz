@@ -69,14 +69,15 @@ const nextChallengeBtn = document.getElementById('nextChallengeBtn');
 
 let tilesCache = [];
 let masterVideo = null;
+let animFrameId = null;
 
-// Initialize DOM elements once per level using ONE master background video
+// Initialize DOM elements once per level using ONE master video sliced onto canvases
 function initBoardDOM() {
   puzzleBoard.innerHTML = '';
   tilesCache = [];
   const videoSrc = `challenge/challenge${currentLevel}.webm`;
 
-  // 1. Create ONE master video that plays continuously in the background
+  // 1. Create ONE master video element running quietly in the background
   if (!masterVideo) {
     masterVideo = document.createElement('video');
     masterVideo.autoplay = true;
@@ -84,67 +85,85 @@ function initBoardDOM() {
     masterVideo.muted = true;
     masterVideo.playsInline = true;
     masterVideo.setAttribute('playsinline', '');
-    masterVideo.style.position = 'absolute';
-    masterVideo.style.top = '0';
-    masterVideo.style.left = '0';
-    masterVideo.style.width = '100%';
-    masterVideo.style.height = '100%';
-    masterVideo.style.objectFit = 'cover';
-    masterVideo.style.zIndex = '1';
-    masterVideo.style.pointerEvents = 'none';
-    
-    const boardWrapper = document.querySelector('.puzzle-board-wrapper');
-    if (boardWrapper) {
-      boardWrapper.style.position = 'relative';
-      boardWrapper.style.overflow = 'hidden';
-      boardWrapper.appendChild(masterVideo);
-    }
+    masterVideo.style.display = 'none';
+    document.body.appendChild(masterVideo);
   }
-  
+
   if (!masterVideo.src.includes(videoSrc)) {
     masterVideo.src = videoSrc;
     masterVideo.play().catch(err => console.log("Playback error:", err));
   }
 
-  // 2. Create the 9 transparent grid tiles acting as windows/cutouts
+  // 2. Create the 9 grid tiles with canvas slices
   for (let currentPosition = 0; currentPosition < 9; currentPosition++) {
     const tile = document.createElement('div');
     tile.classList.add('puzzle-tile');
     tile.style.position = 'relative';
-    tile.style.zIndex = '2';
-    tile.style.background = 'rgba(0,0,0,0.2)';
+    tile.style.width = '100%';
+    tile.style.height = '100%';
+    tile.style.overflow = 'hidden';
     tile.style.cursor = 'pointer';
-    tile.style.border = '1px solid rgba(255,255,255,0.1)';
+
+    const canvas = document.createElement('canvas');
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.display = 'block';
+    tile.appendChild(canvas);
 
     tile.addEventListener('click', () => {
       handleTileClick(currentPosition);
     });
 
     puzzleBoard.appendChild(tile);
-    tilesCache.push({ tile });
+    tilesCache.push({ tile, ctx: canvas.getContext('2d') });
   }
+
+  if (animFrameId) cancelAnimationFrame(animFrameId);
+  startRenderLoop();
 }
 
-// Update slice positions instantly using background coordinates
-function updateBoardVisuals() {
-  boardState.forEach((tileIndex, currentPosition) => {
-    const { tile } = tilesCache[currentPosition];
+function startRenderLoop() {
+  function render() {
+    if (masterVideo.readyState >= masterVideo.HAVE_CURRENT_DATA) {
+      const vWidth = masterVideo.videoWidth;
+      const vHeight = masterVideo.videoHeight;
+      const sliceW = vWidth / 3;
+      const sliceH = vHeight / 3;
 
-    const row = Math.floor(tileIndex / 3);
-    const col = tileIndex % 3;
-    
-    tile.style.backgroundImage = `url(${masterVideo.src})`;
-    tile.style.backgroundSize = '300% 300%';
-    tile.style.backgroundPosition = `${(col / 2) * 100}% ${(row / 2) * 100}%`;
+      boardState.forEach((tileIndex, currentPosition) => {
+        const { tile, ctx } = tilesCache[currentPosition];
+        const canvas = ctx.canvas;
 
-    if (selectedTileIndex === currentPosition) {
-      tile.classList.add('selected');
-      tile.style.border = '2px solid #ffcc00';
-    } else {
-      tile.classList.remove('selected');
-      tile.style.border = '1px solid rgba(255,255,255,0.1)';
+        if (canvas.width !== canvas.offsetWidth || canvas.height !== canvas.offsetHeight) {
+          canvas.width = canvas.offsetWidth;
+          canvas.height = canvas.offsetHeight;
+        }
+
+        const row = Math.floor(tileIndex / 3);
+        const col = tileIndex % 3;
+
+        // Draw the moving video slice onto this puzzle tile
+        ctx.drawImage(
+          masterVideo,
+          col * sliceW, row * sliceH, sliceW, sliceH,
+          0, 0, canvas.width, canvas.height
+        );
+
+        // Gold highlight border for selected tile
+        if (selectedTileIndex === currentPosition) {
+          tile.style.border = '3px solid #ffcc00';
+        } else {
+          tile.style.border = '1px solid rgba(255,255,255,0.2)';
+        }
+      });
     }
-  });
+    animFrameId = requestAnimationFrame(render);
+  }
+  render();
+}
+
+function updateBoardVisuals() {
+  // Handled dynamically by the continuous render loop tracking boardState swaps
 }
 
 function handleTileClick(clickedPos) {
@@ -155,17 +174,14 @@ function handleTileClick(clickedPos) {
 
   if (selectedTileIndex === null) {
     selectedTileIndex = clickedPos;
-    updateBoardVisuals();
   } else if (selectedTileIndex === clickedPos) {
     selectedTileIndex = null;
-    updateBoardVisuals();
   } else {
+    // Swap tile positions
     [boardState[selectedTileIndex], boardState[clickedPos]] = [boardState[clickedPos], boardState[selectedTileIndex]];
     selectedTileIndex = null;
     moves++;
     moveCountDisplay.textContent = moves;
-
-    updateBoardVisuals();
 
     if (checkWin()) {
       endGame();
@@ -192,7 +208,6 @@ function shuffleBoard() {
   timerDisplay.textContent = "00:00";
   stopTimer();
   isPlaying = false;
-  updateBoardVisuals();
 }
 
 function startTimer() {
