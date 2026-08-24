@@ -1,6 +1,5 @@
 /* --- CHALLENGE PAGE CSS --- */
 
-/* App Container Layout */
 .app-container {
     max-width: 480px;
     margin: 0 auto;
@@ -14,27 +13,29 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Top Bar & Header */
+/* Matching HomeView Top Header */
 .top-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     width: 100%;
+    padding: 0 5px;
+    box-sizing: border-box;
 }
 
 .icon-btn {
     background: #241e3d;
     border: 1px solid #33285c;
     color: #fff;
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     transition: background 0.2s;
 }
 
@@ -42,13 +43,14 @@
     background: #33285c;
 }
 
+/* Larger, perfectly aligned logo container matching homeView */
 .logo-container {
-    width: 50px;
-    height: 35px;
-    overflow: hidden;
+    width: 90px;
+    height: 45px;
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
 }
 
 #logoVideo {
