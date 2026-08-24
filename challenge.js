@@ -58,8 +58,8 @@ let selectedTileIndex = null;
 const puzzleBoard = document.getElementById('puzzleBoard');
 const moveCountDisplay = document.getElementById('moveCount');
 const timerDisplay = document.getElementById('timer');
-const shuffleBtn = document.getElementById('shuffleBtn');
-const previewBtn = document.getElementById('previewBtn');
+const challengeShuffleBtn = document.getElementById('shuffleBtn');
+const challengePreviewBtn = document.getElementById('previewBtn');
 const winModal = document.getElementById('winModal');
 const finalTime = document.getElementById('finalTime');
 const finalMoves = document.getElementById('finalMoves');
@@ -215,7 +215,6 @@ if (startChallengeBtn) {
     const bgm = document.getElementById('challengeBGM');
     if (bgm) {
       bgm.currentTime = 0;
-      // Delay audio playback slightly so it doesn't conflict with the video stream request
       setTimeout(() => {
         bgm.play()
           .then(() => console.log("BGM playing successfully"))
@@ -288,11 +287,11 @@ function stopTimer() {
 function checkWin() {
   return boardState.every((val, index) => val === winningState[index]);
 }
-// --- 1. CALCULATE STARS, COINS, AND XP ---
+
+// --- CALCULATE STARS, COINS, AND XP ---
 function calculateChallengeRewards(timeInSeconds, moves) {
     const safeMoves = Math.max(moves, 1);
     
-    // Stars calculation based on time
     let stars = 1;
     if (timeInSeconds <= 60) {
         stars = 3;
@@ -302,12 +301,11 @@ function calculateChallengeRewards(timeInSeconds, moves) {
         stars = 1;
     }
 
-    // Coins based on stars
     let earnedCoins = 30;
     if (stars === 3) earnedCoins = 100;
     else if (stars === 2) earnedCoins = 60;
+    else earnedCoins = 30;
 
-    // XP calculation: (time in seconds ÷ number of moves) * 100
     let earnedXp = Math.round((timeInSeconds / safeMoves) * 100);
 
     return { stars, earnedCoins, earnedXp };
@@ -315,7 +313,6 @@ function calculateChallengeRewards(timeInSeconds, moves) {
 
 // Helper to convert MM:SS or similar timer text into total seconds
 function getTimerSeconds() {
-    // Assuming timerDisplay.textContent looks like "01:15" or similar
     const parts = timerDisplay.textContent.split(':');
     if (parts.length === 2) {
         return parseInt(parts[0]) * 60 + parseInt(parts[1]);
@@ -323,10 +320,9 @@ function getTimerSeconds() {
     return parseInt(timerDisplay.textContent) || 0;
 }
 
-
-// --- 2. DAILY LIMIT & LOCKOUT SYSTEM ---
+// --- DAILY LIMIT & LOCKOUT SYSTEM ---
 function checkDailyChallengeStatus() {
-    const todayStr = new Date().toDateString(); // e.g., "Mon Aug 24 2026"
+    const todayStr = new Date().toDateString();
     const lastDateKey = getUserKey('challenge_last_date');
     const dailyCountKey = getUserKey('challenge_daily_count');
     const lockTimerKey = getUserKey('challenge_lock_expiry');
@@ -335,22 +331,18 @@ function checkDailyChallengeStatus() {
     let dailyCount = parseInt(localStorage.getItem(dailyCountKey)) || 0;
     const lockExpiry = parseInt(localStorage.getItem(lockTimerKey)) || 0;
 
-    // Check if a new day has arrived or if lockout expired
     if (lastDate !== todayStr) {
-        // Reset daily counter for the new day
         localStorage.setItem(lastDateKey, todayStr);
         localStorage.setItem(dailyCountKey, '0');
         localStorage.removeItem(lockTimerKey);
         return { locked: false, remaining: 3 };
     }
 
-    // Check if currently locked out due to hitting the 3-challenge limit
     if (lockExpiry > Date.now()) {
         return { locked: true, expiry: lockExpiry };
     }
 
     if (dailyCount >= 3) {
-        // Set a 24-hour lockout timer from now
         const twentyFourHours = 24 * 60 * 60 * 1000;
         const expiryTime = Date.now() + twentyFourHours;
         localStorage.setItem(lockTimerKey, expiryTime);
@@ -366,12 +358,10 @@ function recordCompletedChallenge(challengeId) {
     dailyCount++;
     localStorage.setItem(dailyCountKey, dailyCount);
 
-    // Mark this specific challenge as completed so it cannot be played again
     localStorage.setItem(getUserKey(`challenge_done_${challengeId}`), 'true');
 }
 
-
-// --- 3. UPDATED END GAME FUNCTION ---
+// --- END GAME FUNCTION ---
 function endGame() {
   stopTimer();
   isPlaying = false;
@@ -389,32 +379,26 @@ function endGame() {
   finalTime.textContent = timerDisplay.textContent;
   finalMoves.textContent = moves;
 
-  // Calculate metrics
   const totalSeconds = getTimerSeconds();
   const { stars, earnedCoins, earnedXp } = calculateChallengeRewards(totalSeconds, moves);
 
-  // Check if already completed to prevent duplicate rewards on replays
   const isAlreadyCompleted = localStorage.getItem(getUserKey(`challenge_done_${currentLevel}`)) === 'true';
 
-  // Adjust rewards to 0 if replaying
   const finalCoins = isAlreadyCompleted ? 0 : earnedCoins;
   const finalXp = isAlreadyCompleted ? 0 : earnedXp;
 
-  // Display rewards & stars on the win modal
   const earnedCoinsEl = document.getElementById('earnedCoins');
   const earnedXpEl = document.getElementById('earnedXp');
-  const starContainerEl = document.getElementById('starContainer'); // Make sure you have an element for stars in your modal
+  const starContainerEl = document.getElementById('starContainer');
   
   if (earnedCoinsEl) earnedCoinsEl.textContent = finalCoins;
   if (earnedXpEl) earnedXpEl.textContent = finalXp;
   
-  // Render visual stars if container exists
   if (starContainerEl) {
       starContainerEl.innerHTML = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
   }
 
   if (!isAlreadyCompleted) {
-      // Add coins via playerstat.js
       if (typeof earnCoins === 'function') {
         earnCoins(finalCoins);
       }
@@ -423,28 +407,24 @@ function endGame() {
       const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp'; 
       
       let currentXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
-      currentXp += finalXp; // Adds your computed challenge XP!
+      currentXp += finalXp;
       localStorage.setItem(xpStoreKey, currentXp);
 
-      // Sync to cloud if available
       if (typeof saveUserDataToCloud === 'function') {
           saveUserDataToCloud();
       }
       if (typeof updateXpProgress === 'function') updateXpProgress();
       if (typeof updateProfileUI === 'function') updateProfileUI();
       
-      // Record that this challenge is finished and increment daily count
       recordCompletedChallenge(currentLevel);
   }
 
-  // Unlock next level sequentially
   const currentLevelKey = getUserKey('currentLevel');
   let maxUnlocked = parseInt(localStorage.getItem(currentLevelKey)) || 1;
   if (currentLevel >= maxUnlocked) {
       localStorage.setItem(currentLevelKey, currentLevel + 1);
   }
 
-  // Load Win Video Preview
   const winVideoContainer = document.getElementById('winVideoContainer');
   if (winVideoContainer) {
     winVideoContainer.innerHTML = '';
@@ -462,18 +442,16 @@ function endGame() {
   winModal.style.display = 'flex';
   startConfetti();
 }
-    
-    function startConfetti() {
+
+function startConfetti() {
     const canvas = document.getElementById('confettiCanvas');
     if (!canvas) return;
     
     const videoContainer = document.getElementById('winVideoContainer');
     
-    // Default fallback to center of screen if video container isn't found
     let startX = window.innerWidth / 2;
     let startY = window.innerHeight / 2;
 
-    // If the video container exists, get its exact center coordinates
     if (videoContainer) {
         const rect = videoContainer.getBoundingClientRect();
         startX = rect.left + rect.width / 2;
@@ -485,12 +463,11 @@ function endGame() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // Create particles originating precisely from the video's center
     const particles = Array.from({ length: 120 }, () => ({
         x: startX,
         y: startY,
-        vx: (Math.random() - 0.5) * 18, // horizontal spread
-        vy: (Math.random() - 0.7) * 16 - 5, // upward initial pop out of the box
+        vx: (Math.random() - 0.5) * 18,
+        vy: (Math.random() - 0.7) * 16 - 5,
         sizeX: Math.random() * 10 + 5, 
         sizeY: Math.random() * 6 + 3,  
         angle: Math.random() * Math.PI * 2,
@@ -507,11 +484,11 @@ function endGame() {
         let activeParticles = 0;
 
         particles.forEach(p => {
-            p.vx *= 0.96; // air resistance
-            p.vy += p.gravity; // gravity pull
+            p.vx *= 0.96;
+            p.vy += p.gravity;
             p.x += p.vx;
             p.y += p.vy;
-            p.angle += p.spin; // spin the confetti piece
+            p.angle += p.spin;
 
             if (p.y < canvas.height) {
                 activeParticles++;
@@ -542,38 +519,7 @@ function endGame() {
     }, 4000);
 }
 
-
-function calculateChallengeRewards(timeInSeconds, moves) {
-    // Prevent division by zero if moves is somehow 0
-    const safeMoves = Math.max(moves, 1);
-    
-    // 1. Calculate Stars based on time
-    let stars = 1;
-    if (timeInSeconds <= 60) {
-        stars = 3;
-    } else if (timeInSeconds <= 120) {
-        stars = 2;
-    } else {
-        stars = 1;
-    }
-
-    // 2. Calculate Coins based on stars
-    let earnedCoins = 30;
-    if (stars === 3) earnedCoins = 100;
-    else if (stars === 2) earnedCoins = 60;
-    else earnedCoins = 30;
-
-    // 3. Calculate XP: (time ÷ moves) * 100 (rounded to nearest whole number)
-    let earnedXp = Math.round((timeInSeconds / safeMoves) * 100);
-
-    return { stars, earnedCoins, earnedXp };
-}
-
-
-
-
-
-
+// --- PREVIEW MODAL & BUTTON HANDLERS ---
 let challengePreviewTimer = null;
 let challengeCountdownInterval = null;
 
@@ -581,10 +527,9 @@ if (challengePreviewBtn) {
   challengePreviewBtn.addEventListener('click', async () => {
     if (!challengeStarted) return;
 
-    const previewCost = 10; // 🪙 10 Coins cost
+    const previewCost = 10;
     let success = true;
 
-    // Use spendCoins if available, otherwise fallback to localStorage
     if (typeof spendCoins === 'function') {
       success = await spendCoins(previewCost);
     } else {
@@ -602,7 +547,6 @@ if (challengePreviewBtn) {
       return;
     }
 
-    // Refresh coin UI if loader exists
     if (typeof loadChallengeCoins === 'function') loadChallengeCoins();
 
     const modal = document.getElementById('challengePreviewModal');
@@ -616,7 +560,7 @@ if (challengePreviewBtn) {
       modalVideo.play().catch(err => console.log("Modal preview video error:", err));
     }
     
-    let timeLeft = 15; // 15 seconds timer
+    let timeLeft = 15;
     if (countdownSpan) countdownSpan.innerText = timeLeft;
     if (modal) {
       modal.classList.remove('hidden');
@@ -636,7 +580,7 @@ if (challengePreviewBtn) {
 
     challengePreviewTimer = setTimeout(() => {
       closeChallengePreviewModal();
-    }, 15000); // 15 seconds duration
+    }, 15000);
   });
 }
 
@@ -663,7 +607,6 @@ if (closeChallengePreviewBtn) {
   });
 }
 
-const challengeShuffleBtn = document.getElementById('shuffleBtn');
 if (challengeShuffleBtn) {
   challengeShuffleBtn.addEventListener('click', () => {
     if (!challengeStarted) return;
