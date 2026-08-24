@@ -571,6 +571,9 @@ function calculateChallengeRewards(timeInSeconds, moves) {
 
 
 
+
+
+
 let challengePreviewTimer = null;
 let challengeCountdownInterval = null;
 
@@ -660,14 +663,10 @@ if (closeChallengePreviewBtn) {
   });
 }
 
-if (shuffleBtn) {
-  shuffleBtn.addEventListener('click', () => {
+const challengeShuffleBtn = document.getElementById('shuffleBtn');
+if (challengeShuffleBtn) {
+  challengeShuffleBtn.addEventListener('click', () => {
     if (!challengeStarted) return;
-    if (previewOverlay) {
-      previewOverlay.remove();
-      previewOverlay = null;
-      previewBtn.textContent = "👁️ Preview";
-    }
     shuffleBoard();
   });
 }
@@ -680,11 +679,6 @@ if (closeWinModalBtn) {
     const victoryAudio = document.getElementById('challengeVictoryBGM');
     if (victoryAudio) { victoryAudio.pause(); }
     
-    if (previewOverlay) {
-      previewOverlay.remove();
-      previewOverlay = null;
-      previewBtn.textContent = "👁️ Preview";
-    }
     winModal.classList.add('hidden');
     window.location.href = 'index.html';
   });
