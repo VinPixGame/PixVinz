@@ -26,25 +26,36 @@
       <h2 class="challenge-title" style="font-size: 1.25rem; font-weight: bold; color: #ffcc00; margin: 0; text-align: center;">Extra Challenge</h2>
     </div>
 
-<div class="challenge-stats">
-  <div class="stat-badge-item">
-    <span class="stat-icon-symbol">⏱️</span>
-    <div class="stat-text-stack">
-      <span class="stat-label-title">TIME</span>
-      <span class="stat-main-val" id="timer">00:00</span>
+    <div class="challenge-stats">
+      <div class="stat-badge-item">
+        <span class="stat-icon-symbol">⏱️</span>
+        <div class="stat-text-stack">
+          <span class="stat-label-title">TIME</span>
+          <span class="stat-main-val" id="timer">00:00</span>
+        </div>
+      </div>
+      <div class="stat-badge-item">
+        <span class="stat-icon-symbol">🎲</span>
+        <div class="stat-text-stack">
+          <span class="stat-label-title">MOVES</span>
+          <span class="stat-main-val" id="moveCount">0</span>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="stat-badge-item">
-    <span class="stat-icon-symbol">🎲</span>
-    <div class="stat-text-stack">
-      <span class="stat-label-title">MOVES</span>
-      <span class="stat-main-val" id="moveCount">0</span>
-    </div>
-  </div>
-</div>
 
     <!-- Puzzle Board Wrapper -->
-    <div class="puzzle-board-wrapper" style="width: 100%; max-width: 360px; aspect-ratio: 1 / 1; background: #1a162b; border-radius: 12px; padding: 10px; box-sizing: border-box; box-shadow: 0 8px 16px rgba(0,0,0,0.4); border: 2px solid #33285c; display: flex; justify-content: center; align-items: center; margin: 0 auto; position: relative;">
+    <div class="puzzle-board-wrapper" style="width: 100%; max-width: 360px; aspect-ratio: 1 / 1; background: #1a162b; border-radius: 12px; padding: 10px; box-sizing: border-box; box-shadow: 0 8px 16px rgba(0,0,0,0.4); border: 2px solid #33285c; display: flex; justify-content: center; align-items: center; margin: 0 auto; position: relative; overflow: hidden;">
+      
+      <!-- Loading & Start Overlay -->
+      <div id="challengeLoadingOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 22, 43, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 50; border-radius: 10px; text-align: center; padding: 20px; box-sizing: border-box;">
+        <div id="loadingSpinner" style="font-size: 1.15rem; color: #ffcc00; font-weight: bold; margin-bottom: 15px;">
+          ⏳ Preparing your challenge...
+        </div>
+        <button id="startChallengeBtn" class="btn btn-primary hidden" style="padding: 12px 24px; background: #7928ca; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 1.05rem; cursor: pointer; box-shadow: 0 4px 12px rgba(121,40,202,0.4);">
+          ▶️ Start Challenge
+        </button>
+      </div>
+
       <div id="puzzleBoard" class="puzzle-board" style="width: 100%; height: 100%; display: grid !important; grid-template-columns: repeat(3, 1fr) !important; grid-template-rows: repeat(3, 1fr) !important; gap: 3px; background: #000; border-radius: 8px; overflow: hidden;">
         <!-- 9 tiles generated dynamically -->
       </div>
@@ -57,7 +68,7 @@
     </div>
   </div>
 
-<!-- Win Modal Popup -->
+  <!-- Win Modal Popup -->
   <div id="winModal" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 1000;">
     <div class="win-card" style="background: #1a162b; padding: 25px; border-radius: 16px; text-align: center; border: 2px solid #7928ca; width: 85%; max-width: 340px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
       <h2 style="color: #ffcc00; font-size: 1.4rem; margin-bottom: 15px;">CHALLENGE COMPLETE!</h2>
@@ -82,8 +93,9 @@
       <button id="closeWinModalBtn" class="btn btn-primary" style="width: 100%; padding: 10px; background: #7928ca; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Continue / Close</button>
     </div>
   </div>
-<!-- Confetti Library CDN -->
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Confetti Library CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script src="challenge.js"></script>
 </body>
 </html>
