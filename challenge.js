@@ -227,7 +227,13 @@ function checkWin() {
   return boardState.every((val, index) => val === winningState[index]);
 }
 
-
+function endGame() {
+  stopTimer();
+  isPlaying = false;
+  finalTime.textContent = timerDisplay.textContent;
+  finalMoves.textContent = moves;
+  winModal.classList.remove('hidden');
+}
 
 // Safe Preview Overlay
 let previewOverlay = null;
@@ -277,50 +283,19 @@ shuffleBtn.addEventListener('click', () => {
   shuffleBoard();
 });
 
-function endGame() {
-  stopTimer();
-  isPlaying = false;
-  
-  finalTime.textContent = timerDisplay.textContent;
-  finalMoves.textContent = moves;
-
-  const earnedCoins = 50;
-  const earnedXp = 100;
-  document.getElementById('earnedCoins').textContent = earnedCoins;
-  document.getElementById('earnedXp').textContent = earnedXp;
-
-  // Populate the victory video using the same active source safely
-  const winVideoContainer = document.getElementById('winVideoContainer');
-  winVideoContainer.innerHTML = '';
-  
-  const winVideo = document.createElement('video');
-  winVideo.src = `challenge/challenge${currentLevel}.webm`;
-  winVideo.autoplay = true;
-  winVideo.loop = true;
-  winVideo.muted = true;
-  winVideo.playsInline = true;
-  winVideo.setAttribute('playsinline', '');
-  winVideo.style.width = '100%';
-  winVideo.style.height = '100%';
-  winVideo.style.objectFit = 'cover';
-  winVideoContainer.appendChild(winVideo);
-  winVideo.play().catch(err => console.log("Win video play error:", err));
-
-  winModal.classList.remove('hidden');
-
-  if (typeof confetti === 'function') {
-    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+nextChallengeBtn.addEventListener('click', () => {
+  if (previewOverlay) {
+    previewOverlay.remove();
+    previewOverlay = null;
+    previewBtn.textContent = "👁️ Preview";
   }
-}
+  currentLevel = currentLevel < 100 ? currentLevel + 1 : 1;
+  winModal.classList.add('hidden');
+  initBoardDOM();
+  shuffleBoard();
+});
 
-// Handle close / continue button on win modal
-const closeWinModalBtn = document.getElementById('closeWinModalBtn');
-if (closeWinModalBtn) {
-  closeWinModalBtn.addEventListener('click', () => {
-    winModal.classList.add('hidden');
-    // Advance to next level automatically or loop back
-    currentLevel = currentLevel < 100 ? currentLevel + 1 : 1;
-    initBoardDOM();
-    shuffleBoard();
-  });
-}
+window.addEventListener('DOMContentLoaded', () => {
+  initBoardDOM();
+  shuffleBoard();
+});
