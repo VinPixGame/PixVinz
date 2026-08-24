@@ -85,7 +85,28 @@
       <!-- ⭐ Star Rating Display -->
       <div id="starContainer" style="font-size: 1.6rem; margin-bottom: 15px; color: #ffcc00; letter-spacing: 4px;"></div>
      
-      <!-- Preview Modal Popup -->
+      <!-- Solved Video Preview Box -->
+      <div id="winVideoContainer" style="width: 100%; aspect-ratio: 1/1; border-radius: 8px; overflow: hidden; margin-bottom: 15px; background: #000; border: 1px solid #33285c; position: relative;">
+        <!-- Solved video injected dynamically -->
+      </div>
+
+      <!-- Stats Grid -->
+      <div style="display: flex; justify-content: space-around; background: #241e3d; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem; color: #fff;">
+        <div>⏱️ <span id="finalTime">00:00</span></div>
+        <div>🎲 <span id="finalMoves">0</span> moves</div>
+      </div>
+
+      <!-- Rewards -->
+      <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; font-weight: bold; color: #ffcc00;">
+        <div>🪙 +<span id="earnedCoins">0</span> Coins</div>
+        <div>✨ +<span id="earnedXp">0</span> XP</div>
+      </div>
+
+      <button id="closeWinModalBtn" class="btn btn-primary" style="width: 100%; padding: 10px; background: #7928ca; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Continue / Close</button>
+    </div>
+  </div>
+
+<!-- Preview Modal Popup -->
 <div id="challengePreviewModal" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000;">
   <div class="win-card" style="background: #1a162b; padding: 25px; border-radius: 16px; text-align: center; border: 2px solid #7928ca; width: 85%; max-width: 340px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
     <h3 id="challengeModalTitle" style="color: #ffcc00; font-size: 1.2rem; margin-bottom: 15px;">LEVEL 01 PREVIEW</h3>
@@ -104,21 +125,6 @@
   </div>
 </div>
 
-      <!-- Stats Grid -->
-      <div style="display: flex; justify-content: space-around; background: #241e3d; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem; color: #fff;">
-        <div>⏱️ <span id="finalTime">00:00</span></div>
-        <div>🎲 <span id="finalMoves">0</span> moves</div>
-      </div>
-
-      <!-- Rewards -->
-      <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; font-weight: bold; color: #ffcc00;">
-        <div>🪙 +<span id="earnedCoins">0</span> Coins</div>
-        <div>⚡️ +<span id="earnedXp">0</span> XP</div>
-      </div>
-
-      <button id="closeWinModalBtn" class="btn btn-primary" style="width: 100%; padding: 10px; background: #7928ca; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Continue / Close</button>
-    </div>
-  </div>
   
   <script src="playerstat.js"></script>
   <script src="profile.js"></script>
