@@ -79,15 +79,17 @@ function initBoardDOM() {
   const videoSrc = `challenge/challenge${currentLevel}.webm`;
 
   const loadingPercentEl = document.getElementById('loadingPercent');
+  const loadingBarFill = document.getElementById('loadingBarFill');
 
   // Show loading overlay & lock state
   if (loadingOverlay) loadingOverlay.style.display = 'flex';
-  if (loadingSpinner) {
-    loadingSpinner.style.display = 'block';
-    if (loadingPercentEl) loadingPercentEl.textContent = '0%';
-  }
+  if (loadingSpinner) loadingSpinner.style.display = 'block';
   if (startChallengeBtn) startChallengeBtn.classList.add('hidden');
   challengeStarted = false;
+
+  // Reset progress bar elements
+  if (loadingPercentEl) loadingPercentEl.textContent = '0%';
+  if (loadingBarFill) loadingBarFill.style.width = '0%';
 
   // 1. Create ONE master video element
   if (!masterVideo) {
@@ -100,41 +102,27 @@ function initBoardDOM() {
     document.body.appendChild(masterVideo);
   }
 
-  let isLoaded = false;
-  const revealStartButton = () => {
-    if (isLoaded) return;
-    isLoaded = true;
-    if (loadingPercentEl) loadingPercentEl.textContent = '100%';
-    setTimeout(() => {
-      if (loadingSpinner) loadingSpinner.style.display = 'none';
-      if (startChallengeBtn) startChallengeBtn.classList.remove('hidden');
-    }, 300);
-  };
-
-  // Track real download progress
-  masterVideo.onprogress = () => {
-    if (masterVideo.buffered && masterVideo.buffered.length > 0 && masterVideo.duration > 0) {
-      try {
-        const bufferedEnd = masterVideo.buffered.end(masterVideo.buffered.length - 1);
-        const percent = Math.min(100, Math.floor((bufferedEnd / masterVideo.duration) * 100));
-        if (loadingPercentEl) loadingPercentEl.textContent = `${percent}%`;
-        if (percent >= 99) {
-          revealStartButton();
-        }
-      } catch (e) {
-        // Fallback safety
-      }
-    }
-  };
-
-  masterVideo.onloadeddata = revealStartButton;
-  masterVideo.oncanplaythrough = revealStartButton;
-
-  // Fallback timer in case progress events fire quickly or get blocked locally
-  setTimeout(revealStartButton, 2000);
-
   masterVideo.src = videoSrc;
   masterVideo.load();
+
+  // Smooth simulated progress bar so it doesn't instantly flash away
+  let currentProgress = 0;
+  const progressInterval = setInterval(() => {
+    currentProgress += Math.floor(Math.random() * 15) + 10; // smooth increments
+    if (currentProgress >= 100) {
+      currentProgress = 100;
+      clearInterval(progressInterval);
+      
+      // Reveal the start button smoothly after hitting 100%
+      setTimeout(() => {
+        if (loadingSpinner) loadingSpinner.style.display = 'none';
+        if (startChallengeBtn) startChallengeBtn.classList.remove('hidden');
+      }, 250);
+    }
+    
+    if (loadingPercentEl) loadingPercentEl.textContent = `${currentProgress}%`;
+    if (loadingBarFill) loadingBarFill.style.width = `${currentProgress}%`;
+  }, 120); // controls the filling speed
 
   // 2. Create the 9 grid tiles with canvas slices
   for (let currentPosition = 0; currentPosition < 9; currentPosition++) {
@@ -207,6 +195,14 @@ function startRenderLoop() {
 if (startChallengeBtn) {
   startChallengeBtn.addEventListener('click', () => {
     masterVideo.play().catch(err => console.log("Playback error:", err));
+    
+    // Play background music
+    const bgm = document.getElementById('challengeBGM');
+    if (bgm) {
+      bgm.volume = 0.5; // Set background volume to 50% (adjust as needed)
+      bgm.play().catch(err => console.log("Audio autoplay restriction prevented BGM:", err));
+    }
+
     if (loadingOverlay) loadingOverlay.style.display = 'none';
     challengeStarted = true;
     shuffleBoard();
@@ -278,9 +274,17 @@ function endGame() {
   isPlaying = false;
   challengeStarted = false;
   
+  // Stop background music when winning
+  const bgm = document.getElementById('challengeBGM');
+  if (bgm) {
+    bgm.pause();
+    bgm.currentTime = 0;
+  }
+
   finalTime.textContent = timerDisplay.textContent;
   finalMoves.textContent = moves;
-
+  
+}
   const earnedCoinsEl = document.getElementById('earnedCoins');
   const earnedXpEl = document.getElementById('earnedXp');
   if (earnedCoinsEl) earnedCoinsEl.textContent = '50';
@@ -362,6 +366,9 @@ shuffleBtn.addEventListener('click', () => {
 
 if (closeWinModalBtn) {
   closeWinModalBtn.addEventListener('click', () => {
+    const bgm = document.getElementById('challengeBGM');
+    if (bgm) { bgm.pause(); }
+    
     if (previewOverlay) {
       previewOverlay.remove();
       previewOverlay = null;
@@ -371,7 +378,6 @@ if (closeWinModalBtn) {
     window.location.href = 'index.html';
   });
 }
-
 window.addEventListener('DOMContentLoaded', () => {
   initBoardDOM();
 });
