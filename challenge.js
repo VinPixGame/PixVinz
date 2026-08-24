@@ -333,6 +333,17 @@ function endGame() {
   }
 
   winModal.classList.remove('hidden');
+
+  // --- TRIGGER CONFETTI HERE ---
+  if (typeof confetti === 'function') {
+    confetti({
+      particleCount: 120,
+      spread: 80,
+      origin: { y: 0.6 }
+    });
+  } else {
+    console.log("Confetti library not loaded or found.");
+  }
 }
 
 // Safe Preview Overlay
