@@ -448,6 +448,7 @@ function endGame() {
   }
 
   winModal.classList.remove('hidden');
+  winModal.style.display = 'flex';
   startConfetti();
 }
     
