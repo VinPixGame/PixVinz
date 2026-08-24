@@ -334,17 +334,18 @@ function endGame() {
 
   winModal.classList.remove('hidden');
 
-  // --- TRIGGER CONFETTI HERE ---
+  // --- TRIGGER CONFETTI WITH DEBUGGING ---
   if (typeof confetti === 'function') {
+    console.log("Confetti function found, firing...");
     confetti({
-      particleCount: 120,
-      spread: 80,
-      origin: { y: 0.6 }
+      particleCount: 150,
+      spread: 100,
+      origin: { y: 0.6 },
+      zIndex: 99999 // Forces it above modals and overlays
     });
   } else {
-    console.log("Confetti library not loaded or found.");
+    console.error("Confetti function is NOT defined! Check your script tag.");
   }
-}
 
 // Safe Preview Overlay
 let previewOverlay = null;
