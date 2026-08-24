@@ -393,39 +393,49 @@ function endGame() {
   const totalSeconds = getTimerSeconds();
   const { stars, earnedCoins, earnedXp } = calculateChallengeRewards(totalSeconds, moves);
 
+  // Check if already completed to prevent duplicate rewards on replays
+  const isAlreadyCompleted = localStorage.getItem(getUserKey(`challenge_done_${currentLevel}`)) === 'true';
+
+  // Adjust rewards to 0 if replaying
+  const finalCoins = isAlreadyCompleted ? 0 : earnedCoins;
+  const finalXp = isAlreadyCompleted ? 0 : earnedXp;
+
   // Display rewards & stars on the win modal
   const earnedCoinsEl = document.getElementById('earnedCoins');
   const earnedXpEl = document.getElementById('earnedXp');
   const starContainerEl = document.getElementById('starContainer'); // Make sure you have an element for stars in your modal
   
-  if (earnedCoinsEl) earnedCoinsEl.textContent = earnedCoins;
-  if (earnedXpEl) earnedXpEl.textContent = earnedXp;
+  if (earnedCoinsEl) earnedCoinsEl.textContent = finalCoins;
+  if (earnedXpEl) earnedXpEl.textContent = finalXp;
   
   // Render visual stars if container exists
   if (starContainerEl) {
       starContainerEl.innerHTML = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
   }
 
-  // Add coins via playerstat.js
-  if (typeof earnCoins === 'function') {
-    earnCoins(earnedCoins);
-  }
+  if (!isAlreadyCompleted) {
+      // Add coins via playerstat.js
+      if (typeof earnCoins === 'function') {
+        earnCoins(finalCoins);
+      }
 
-  const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
-  const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp'; 
-  
-  let currentXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
-  currentXp += earnedXp; // Adds your computed challenge XP!
-  localStorage.setItem(xpStoreKey, currentXp);
+      const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
+      const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp'; 
+      
+      let currentXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
+      currentXp += finalXp; // Adds your computed challenge XP!
+      localStorage.setItem(xpStoreKey, currentXp);
 
-  // Sync to cloud if available
-  if (typeof saveUserDataToCloud === 'function') {
-      saveUserDataToCloud();
+      // Sync to cloud if available
+      if (typeof saveUserDataToCloud === 'function') {
+          saveUserDataToCloud();
+      }
+      if (typeof updateXpProgress === 'function') updateXpProgress();
+      if (typeof updateProfileUI === 'function') updateProfileUI();
+      
+      // Record that this challenge is finished and increment daily count
+      recordCompletedChallenge(currentLevel);
   }
-if (typeof updateXpProgress === 'function') updateXpProgress();
-  if (typeof updateProfileUI === 'function') updateProfileUI();
-  // Record that this challenge is finished and increment daily count
-  recordCompletedChallenge(currentLevel);
 
   // Unlock next level sequentially
   const currentLevelKey = getUserKey('currentLevel');
