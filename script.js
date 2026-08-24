@@ -183,6 +183,25 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${user.username}_${keyName}`;
   }
 
+function updateCoinDisplay() {
+    const coinKey = getUserKey('totalCoins');
+    const totalCoins = parseInt(localStorage.getItem(coinKey)) || 0;
+    
+    // Target all elements displaying the coin count (e.g., in your mainHeader or homeView)
+    document.querySelectorAll('#coinCount, .coin-display, [data-coin-count]').forEach(el => {
+      el.textContent = totalCoins;
+    });
+  }
+  
+  // Expose it globally so other views/scripts can trigger it
+  window.updateCoinDisplay = updateCoinDisplay;
+
+  // Run it immediately on load
+  updateCoinDisplay();
+
+    
+    
+
   function showView(targetView) {
     Object.values(views).forEach(v => {
       if (v) v.classList.remove('active');
