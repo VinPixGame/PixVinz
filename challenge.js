@@ -1,6 +1,5 @@
 // --- CHALLENGE VIEW COIN LOADER ---
 function loadChallengeCoins() {
-    // Helper to get the logged-in user
     function getCurrentUser() {
         try {
             return JSON.parse(localStorage.getItem('loggedInUser'));
@@ -9,7 +8,6 @@ function loadChallengeCoins() {
         }
     }
 
-    // Helper to format the key with the username prefix
     function getUserKey(keyName) {
         const user = getCurrentUser();
         if (!user || !user.username) return keyName;
@@ -19,7 +17,6 @@ function loadChallengeCoins() {
     const coinKey = getUserKey('totalCoins');
     let totalCoins = parseInt(localStorage.getItem(coinKey)) || 0;
 
-    // Optional: Pull from Firebase if available
     const user = getCurrentUser();
     if (user && user.username && window.pixvinzDb) {
         const { db, doc, getDoc } = window.pixvinzDb;
@@ -41,7 +38,6 @@ function updateChallengeUI(coins) {
     });
 }
 
-// Run when the challenge page/view loads
 document.addEventListener('DOMContentLoaded', () => {
     loadChallengeCoins();
 });
@@ -52,6 +48,7 @@ let moves = 0;
 let timerInterval = null;
 let secondsElapsed = 0;
 let isPlaying = false;
+let challengeStarted = false;
 
 let boardState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
 let winningState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
@@ -67,20 +64,32 @@ const finalTime = document.getElementById('finalTime');
 const finalMoves = document.getElementById('finalMoves');
 const closeWinModalBtn = document.getElementById('closeWinModalBtn');
 
+const loadingOverlay = document.getElementById('challengeLoadingOverlay');
+const loadingSpinner = document.getElementById('loadingSpinner');
+const startChallengeBtn = document.getElementById('startChallengeBtn');
+
 let tilesCache = [];
 let masterVideo = null;
 let animFrameId = null;
 
-// Initialize DOM elements once per level using ONE master video sliced onto canvases
+// Initialize DOM elements once per level using ONE master video preloaded fully
 function initBoardDOM() {
   puzzleBoard.innerHTML = '';
   tilesCache = [];
   const videoSrc = `challenge/challenge${currentLevel}.webm`;
 
-  // 1. Create ONE master video element running quietly in the background
+  // Show loading overlay & lock state
+  if (loadingOverlay) loadingOverlay.style.display = 'flex';
+  if (loadingSpinner) {
+    loadingSpinner.style.display = 'block';
+    loadingSpinner.textContent = "⏳ Preparing your challenge...";
+  }
+  if (startChallengeBtn) startChallengeBtn.classList.add('hidden');
+  challengeStarted = false;
+
+  // 1. Create ONE master video element
   if (!masterVideo) {
     masterVideo = document.createElement('video');
-    masterVideo.autoplay = true;
     masterVideo.loop = true;
     masterVideo.muted = true;
     masterVideo.playsInline = true;
@@ -89,10 +98,14 @@ function initBoardDOM() {
     document.body.appendChild(masterVideo);
   }
 
-  if (!masterVideo.src.includes(videoSrc)) {
-    masterVideo.src = videoSrc;
-    masterVideo.play().catch(err => console.log("Playback error:", err));
-  }
+  masterVideo.src = videoSrc;
+  masterVideo.load();
+
+  // Wait until video is fully buffered and ready with zero lag
+  masterVideo.onloadeddata = () => {
+    if (loadingSpinner) loadingSpinner.style.display = 'none';
+    if (startChallengeBtn) startChallengeBtn.classList.remove('hidden');
+  };
 
   // 2. Create the 9 grid tiles with canvas slices
   for (let currentPosition = 0; currentPosition < 9; currentPosition++) {
@@ -111,6 +124,7 @@ function initBoardDOM() {
     tile.appendChild(canvas);
 
     tile.addEventListener('click', () => {
+      if (!challengeStarted) return; // Prevent interaction before starting
       handleTileClick(currentPosition);
     });
 
@@ -124,7 +138,7 @@ function initBoardDOM() {
 
 function startRenderLoop() {
   function render() {
-    if (masterVideo.readyState >= masterVideo.HAVE_CURRENT_DATA) {
+    if (masterVideo && masterVideo.readyState >= masterVideo.HAVE_CURRENT_DATA) {
       const vWidth = masterVideo.videoWidth;
       const vHeight = masterVideo.videoHeight;
       const sliceW = vWidth / 3;
@@ -142,15 +156,13 @@ function startRenderLoop() {
         const row = Math.floor(tileIndex / 3);
         const col = tileIndex % 3;
 
-        // Draw the moving video slice onto this puzzle tile
         ctx.drawImage(
           masterVideo,
           col * sliceW, row * sliceH, sliceW, sliceH,
           0, 0, canvas.width, canvas.height
         );
 
-        // Gold highlight border for selected tile
-        if (selectedTileIndex === currentPosition) {
+        if (challengeStarted && selectedTileIndex === currentPosition) {
           tile.style.border = '3px solid #ffcc00';
         } else {
           tile.style.border = '1px solid rgba(255,255,255,0.2)';
@@ -162,8 +174,14 @@ function startRenderLoop() {
   render();
 }
 
-function updateBoardVisuals() {
-  // Handled dynamically by the continuous render loop tracking boardState swaps
+// Start Challenge Button Event
+if (startChallengeBtn) {
+  startChallengeBtn.addEventListener('click', () => {
+    masterVideo.play().catch(err => console.log("Playback error:", err));
+    if (loadingOverlay) loadingOverlay.style.display = 'none';
+    challengeStarted = true;
+    shuffleBoard();
+  });
 }
 
 function handleTileClick(clickedPos) {
@@ -177,7 +195,6 @@ function handleTileClick(clickedPos) {
   } else if (selectedTileIndex === clickedPos) {
     selectedTileIndex = null;
   } else {
-    // Swap tile positions
     [boardState[selectedTileIndex], boardState[clickedPos]] = [boardState[clickedPos], boardState[selectedTileIndex]];
     selectedTileIndex = null;
     moves++;
@@ -230,17 +247,16 @@ function checkWin() {
 function endGame() {
   stopTimer();
   isPlaying = false;
+  challengeStarted = false;
   
   finalTime.textContent = timerDisplay.textContent;
   finalMoves.textContent = moves;
 
-  // Set rewards text if elements exist in HTML modal
   const earnedCoinsEl = document.getElementById('earnedCoins');
   const earnedXpEl = document.getElementById('earnedXp');
   if (earnedCoinsEl) earnedCoinsEl.textContent = '50';
   if (earnedXpEl) earnedXpEl.textContent = '100';
 
-  // Inject solved video playing inside win modal container
   const winVideoContainer = document.getElementById('winVideoContainer');
   if (winVideoContainer) {
     winVideoContainer.innerHTML = '';
@@ -258,10 +274,8 @@ function endGame() {
     winVideo.play().catch(err => console.log("Win video play error:", err));
   }
 
-  // Show modal
   winModal.classList.remove('hidden');
 
-  // Trigger confetti celebration
   if (typeof confetti === 'function') {
     confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
   }
@@ -270,6 +284,7 @@ function endGame() {
 // Safe Preview Overlay
 let previewOverlay = null;
 previewBtn.addEventListener('click', () => {
+  if (!challengeStarted) return;
   const boardWrapper = document.querySelector('.puzzle-board-wrapper');
   
   if (!previewOverlay) {
@@ -307,6 +322,7 @@ previewBtn.addEventListener('click', () => {
 });
 
 shuffleBtn.addEventListener('click', () => {
+  if (!challengeStarted) return;
   if (previewOverlay) {
     previewOverlay.remove();
     previewOverlay = null;
@@ -315,7 +331,6 @@ shuffleBtn.addEventListener('click', () => {
   shuffleBoard();
 });
 
-// Close button on win modal routes back to index.html / home view
 if (closeWinModalBtn) {
   closeWinModalBtn.addEventListener('click', () => {
     if (previewOverlay) {
@@ -330,5 +345,4 @@ if (closeWinModalBtn) {
 
 window.addEventListener('DOMContentLoaded', () => {
   initBoardDOM();
-  shuffleBoard();
 });
