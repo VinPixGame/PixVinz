@@ -156,7 +156,8 @@ function recordCompletedChallenge(challengeId) {
     }
 }
 
-// Initialize DOM elements with a smooth simulated & event-backed loader
+
+  // Initialize DOM elements with a smooth simulated & event-backed loader
 function initBoardDOM() {
     // --- CHECK DAILY LOCKOUT STATUS BEFORE RENDERING ---
     const status = checkDailyChallengeStatus();
@@ -171,17 +172,22 @@ function initBoardDOM() {
 
     // If locked out due to the 24-hour 3-challenge limit
     if (status.locked) {
-        if (loadingOverlay) loadingOverlay.style.display = 'flex';
+        // Ensure regular loading elements are completely hidden when locked
+        const loadingOverlay = document.getElementById('challengeLoadingOverlay');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const startChallengeBtn = document.getElementById('startChallengeBtn');
+        
+        if (loadingOverlay) loadingOverlay.style.display = 'none';
         if (loadingSpinner) loadingSpinner.style.display = 'none';
         if (startChallengeBtn) startChallengeBtn.classList.add('hidden');
         challengeStarted = false;
 
-        // Render a clean lock overlay message with countdown
+        // Render a clean lock overlay message with countdown right inside the board
         puzzleBoard.innerHTML = `
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; color: #fff; text-align: center; padding: 20px; background: rgba(0,0,0,0.85); position: absolute; top: 0; left: 0; z-index: 10;">
-                <h2 style="color: #ff3366; margin-bottom: 10px;">🔒 Daily Limit Reached</h2>
-                <p style="margin-bottom: 15px; font-size: 14px;">You have completed your 3 challenges for this cycle.</p>
-                <div id="activeLockCountdown" style="font-size: 18px; font-weight: bold; color: #ffcc00;">Calculing timer...</div>
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; color: #fff; text-align: center; padding: 20px; background: rgba(20, 10, 35, 0.95); position: absolute; top: 0; left: 0; z-index: 10; border-radius: 12px;">
+                <h2 style="color: #ff3366; margin-bottom: 10px; font-size: 22px;">🔒 Daily Limit Reached</h2>
+                <p style="margin-bottom: 15px; font-size: 14px; color: #ddd;">You have completed your 3 challenges for this cycle.</p>
+                <div id="activeLockCountdown" style="font-size: 16px; font-weight: bold; color: #ffcc00; background: rgba(0,0,0,0.4); padding: 10px 15px; border-radius: 8px;">Calculating timer...</div>
             </div>
         `;
 
