@@ -1304,7 +1304,7 @@ input:checked + .slider:before { transform: translateX(22px); }
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 100000;
+  z-index: 2147483647; /* Forces the modal to sit on absolute top of everything */
   padding: 16px;
   overflow-y: auto;
 }
