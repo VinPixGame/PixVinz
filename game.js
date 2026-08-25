@@ -211,6 +211,157 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // =========================================================
+  // LEVEL PREVIEW
+  // Shows the current level image for 10 seconds.
+  // Costs 5 coins per preview.
+  // =========================================================
+
+  let gamePreviewCountdownInterval = null;
+
+  window.openGameLevelPreview = function () {
+    // Use the existing PixVinz coin system
+    if (typeof spendCoins !== 'function') {
+      console.warn('spendCoins() is not available.');
+      return;
+    }
+
+    // Deduct exactly 5 coins.
+    // If the player does not have enough, spendCoins returns false.
+    const previewPurchased = spendCoins(5);
+
+    if (!previewPurchased) {
+      showNotEnoughCoinsPrompt();
+      return;
+    }
+
+    const previewModal = document.getElementById('gameLevelPreviewModal');
+    const previewImg = document.getElementById('gameLevelPreviewModalImg');
+    const previewTitle = document.getElementById('gameLevelPreviewModalTitle');
+    const countdownDisplay = document.getElementById('gameLevelPreviewCountdownSeconds');
+
+    if (!previewModal || !previewImg) return;
+
+    // Always show the image belonging to the CURRENT level.
+    previewImg.src = imageSrc;
+
+    if (previewTitle) {
+      previewTitle.innerText =
+        `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
+    }
+
+    // Reset countdown
+    let remainingSeconds = 10;
+
+    if (countdownDisplay) {
+      countdownDisplay.innerText = remainingSeconds;
+    }
+
+    // Clear any previous countdown
+    clearInterval(gamePreviewCountdownInterval);
+
+    // Show preview
+    previewModal.classList.remove('hidden');
+    previewModal.style.display = 'flex';
+
+    // Start 10-second countdown
+    gamePreviewCountdownInterval = setInterval(() => {
+      remainingSeconds--;
+
+      if (countdownDisplay) {
+        countdownDisplay.innerText = remainingSeconds;
+      }
+
+      if (remainingSeconds <= 0) {
+        closeGameLevelPreview();
+      }
+    }, 1000);
+  };
+
+
+  // =========================================================
+  // CLOSE LEVEL PREVIEW
+  // =========================================================
+
+  function closeGameLevelPreview() {
+    const previewModal = document.getElementById('gameLevelPreviewModal');
+
+    clearInterval(gamePreviewCountdownInterval);
+    gamePreviewCountdownInterval = null;
+
+    if (previewModal) {
+      previewModal.classList.add('hidden');
+      previewModal.style.display = 'none';
+    }
+  }
+
+
+  // =========================================================
+  // NOT ENOUGH COINS PROMPT
+  // =========================================================
+
+  function showNotEnoughCoinsPrompt() {
+    // Prevent duplicate prompts
+    const existingPrompt = document.getElementById('notEnoughCoinsPrompt');
+    if (existingPrompt) {
+      existingPrompt.remove();
+    }
+
+    const prompt = document.createElement('div');
+    prompt.id = 'notEnoughCoinsPrompt';
+
+    prompt.innerHTML = `
+      <div class="not-enough-coins-card">
+        <div class="not-enough-coins-icon">🪙</div>
+
+        <div class="not-enough-coins-title">
+          NOT ENOUGH COINS
+        </div>
+
+        <div class="not-enough-coins-message">
+          You need 5 coins to see the preview.
+        </div>
+
+        <button id="closeNotEnoughCoinsPrompt">
+          OK
+        </button>
+      </div>
+    `;
+
+    document.body.appendChild(prompt);
+
+    const closeBtn = document.getElementById('closeNotEnoughCoinsPrompt');
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        prompt.remove();
+      });
+    }
+
+    // Also allow clicking outside the popup to close it
+    prompt.addEventListener('click', (e) => {
+      if (e.target === prompt) {
+        prompt.remove();
+      }
+    });
+  }
+
+
+  // =========================================================
+  // PREVIEW CLOSE BUTTON
+  // =========================================================
+
+  const closeGameLevelPreviewModalBtn =
+    document.getElementById('closeGameLevelPreviewModalBtn');
+
+  if (closeGameLevelPreviewModalBtn) {
+    closeGameLevelPreviewModalBtn.addEventListener('click', () => {
+      closeGameLevelPreview();
+    });
+  }
+
+
+  
 
   const nextLevelBtn = document.getElementById('nextLevelBtn');
   if (nextLevelBtn) {
