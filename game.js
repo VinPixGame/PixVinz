@@ -269,6 +269,198 @@ document.addEventListener('DOMContentLoaded', async () => {
   shuffleGrid();
   isGameStarted = true;
   startTimer();
+
+// =========================================================
+// NORMAL PUZZLE — LEVEL PREVIEW
+// Costs 5 coins and shows the current level image for 10s
+// =========================================================
+
+let gamePreviewCountdownInterval = null;
+
+const gamePreviewBtn = document.getElementById('gamePreviewBtn');
+const gameLevelPreviewModal = document.getElementById('gameLevelPreviewModal');
+const gameLevelPreviewModalImg = document.getElementById('gameLevelPreviewModalImg');
+const gameLevelPreviewModalTitle = document.getElementById('gameLevelPreviewModalTitle');
+const gameLevelPreviewCountdownSeconds = document.getElementById('gameLevelPreviewCountdownSeconds');
+const closeGameLevelPreviewModalBtn = document.getElementById('closeGameLevelPreviewModalBtn');
+
+
+// ---------------------------------------------------------
+// OPEN PREVIEW
+// ---------------------------------------------------------
+
+function openGameLevelPreview() {
+
+  // Safety check
+  if (!gameLevelPreviewModal || !gameLevelPreviewModalImg) {
+    console.error('Game level preview elements are missing from HTML.');
+    return;
+  }
+
+  // Deduct exactly 5 coins through playerstat.js
+  if (typeof spendCoins !== 'function') {
+    console.error('spendCoins() was not found in playerstat.js.');
+    return;
+  }
+
+  const paymentSuccessful = spendCoins(5);
+
+  // Not enough coins
+  if (!paymentSuccessful) {
+    showNotEnoughCoinsPrompt();
+    return;
+  }
+
+  // Current level image
+  gameLevelPreviewModalImg.src = imageSrc;
+
+  // Current level title
+  if (gameLevelPreviewModalTitle) {
+    gameLevelPreviewModalTitle.textContent =
+      `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
+  }
+
+  // Reset countdown
+  let secondsLeft = 10;
+
+  if (gameLevelPreviewCountdownSeconds) {
+    gameLevelPreviewCountdownSeconds.textContent = secondsLeft;
+  }
+
+  // Stop previous countdown if one exists
+  if (gamePreviewCountdownInterval) {
+    clearInterval(gamePreviewCountdownInterval);
+    gamePreviewCountdownInterval = null;
+  }
+
+  // Show modal
+  gameLevelPreviewModal.classList.remove('hidden');
+  gameLevelPreviewModal.style.display = 'flex';
+
+  // Countdown
+  gamePreviewCountdownInterval = setInterval(() => {
+
+    secondsLeft--;
+
+    if (gameLevelPreviewCountdownSeconds) {
+      gameLevelPreviewCountdownSeconds.textContent = secondsLeft;
+    }
+
+    if (secondsLeft <= 0) {
+      closeGameLevelPreview();
+    }
+
+  }, 1000);
+}
+
+
+// ---------------------------------------------------------
+// CLOSE PREVIEW
+// ---------------------------------------------------------
+
+function closeGameLevelPreview() {
+
+  if (gamePreviewCountdownInterval) {
+    clearInterval(gamePreviewCountdownInterval);
+    gamePreviewCountdownInterval = null;
+  }
+
+  if (gameLevelPreviewModal) {
+    gameLevelPreviewModal.classList.add('hidden');
+    gameLevelPreviewModal.style.display = 'none';
+  }
+
+  // Clear image after closing
+  if (gameLevelPreviewModalImg) {
+    gameLevelPreviewModalImg.src = '';
+  }
+}
+
+
+// ---------------------------------------------------------
+// PREVIEW BUTTON
+// ---------------------------------------------------------
+
+if (gamePreviewBtn) {
+
+  gamePreviewBtn.addEventListener('click', () => {
+    openGameLevelPreview();
+  });
+
+}
+
+
+// ---------------------------------------------------------
+// CLOSE BUTTON
+// ---------------------------------------------------------
+
+if (closeGameLevelPreviewModalBtn) {
+
+  closeGameLevelPreviewModalBtn.addEventListener('click', () => {
+    closeGameLevelPreview();
+  });
+
+}
+
+
+// ---------------------------------------------------------
+// NOT ENOUGH COINS MESSAGE
+// ---------------------------------------------------------
+
+function showNotEnoughCoinsPrompt() {
+
+  const existing = document.getElementById('notEnoughCoinsPrompt');
+
+  if (existing) {
+    existing.remove();
+  }
+
+  const prompt = document.createElement('div');
+
+  prompt.id = 'notEnoughCoinsPrompt';
+
+  prompt.innerHTML = `
+    <div class="not-enough-coins-card">
+
+      <div class="not-enough-coins-icon">🪙</div>
+
+      <div class="not-enough-coins-title">
+        NOT ENOUGH COINS
+      </div>
+
+      <div class="not-enough-coins-message">
+        You need 5 coins to see the preview.
+      </div>
+
+      <button type="button" id="closeNotEnoughCoinsPrompt">
+        OK
+      </button>
+
+    </div>
+  `;
+
+  document.body.appendChild(prompt);
+
+  const closeButton =
+    document.getElementById('closeNotEnoughCoinsPrompt');
+
+  if (closeButton) {
+    closeButton.addEventListener('click', () => {
+      prompt.remove();
+    });
+  }
+
+  prompt.addEventListener('click', (event) => {
+
+    if (event.target === prompt) {
+      prompt.remove();
+    }
+
+  });
+}
+
+
+  
 });
 
 
