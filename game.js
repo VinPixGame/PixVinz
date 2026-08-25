@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-   // =========================================================
+  // =========================================================
   // NORMAL PUZZLE — LEVEL PREVIEW
   // Costs 5 coins and shows the current level image for 10s
   // =========================================================
@@ -219,7 +219,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   let gamePreviewCountdownInterval = null;
 
   window.openGameLevelPreview = function () {
-    // Check and deduct 5 coins using the existing coin system
+
+    // Check and deduct 5 coins
     if (typeof spendCoins !== 'function') {
       console.warn('spendCoins() is not available.');
       return;
@@ -240,10 +241,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    // Show the exact image currently used by this level
+    // Current level image
     previewImg.src = imageSrc;
 
-    // Update title to current level
+    // Current level title
     if (title) {
       title.innerText =
         `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
@@ -256,24 +257,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       countdown.innerText = secondsLeft;
     }
 
-    // Clear any previous countdown
+    // Stop any previous countdown
     clearInterval(gamePreviewCountdownInterval);
 
-    // Open modal
+    // IMPORTANT: explicitly show the modal
     modal.classList.remove('hidden');
+    modal.style.display = 'flex';
 
-    // Start 10-second countdown
+    // 10-second countdown
     gamePreviewCountdownInterval = setInterval(() => {
+
       secondsLeft--;
 
       if (countdown) {
         countdown.innerText = secondsLeft;
       }
 
-      // Automatically close at 0
       if (secondsLeft <= 0) {
         closeGameLevelPreview();
       }
+
     }, 1000);
   };
 
@@ -283,6 +286,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // =========================================================
 
   function closeGameLevelPreview() {
+
     const modal = document.getElementById('gameLevelPreviewModal');
 
     clearInterval(gamePreviewCountdownInterval);
@@ -290,15 +294,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (modal) {
       modal.classList.add('hidden');
+      modal.style.display = 'none';
     }
   }
 
 
   // =========================================================
-  // NOT ENOUGH COINS PROMPT
+  // NOT ENOUGH COINS
   // =========================================================
 
   function showNotEnoughCoinsPrompt() {
+
     const existing = document.getElementById('notEnoughCoinsPrompt');
 
     if (existing) {
@@ -321,7 +327,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           You need 5 coins to see the preview.
         </div>
 
-        <button id="closeNotEnoughCoinsPrompt">
+        <button type="button" id="closeNotEnoughCoinsPrompt">
           OK
         </button>
       </div>
@@ -338,7 +344,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
 
-    // Clicking outside the popup also closes it
     prompt.addEventListener('click', (event) => {
       if (event.target === prompt) {
         prompt.remove();
@@ -358,7 +363,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     closeGameLevelPreviewModalBtn.addEventListener('click', () => {
       closeGameLevelPreview();
     });
-  }
+  }   
+
+
+  
+  
   
 
   
