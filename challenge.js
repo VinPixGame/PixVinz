@@ -69,7 +69,9 @@ const challengePreviewBtn = document.getElementById('previewBtn');
 const winModal = document.getElementById('winModal');
 const finalTime = document.getElementById('finalTime');
 const finalMoves = document.getElementById('finalMoves');
-const closeWinModalBtn = document.getElementById('closeWinModalBtn');
+const homeBtn = document.getElementById('homeBtn');
+const nextChallengeBtn = document.getElementById('nextChallengeBtn');
+
 
 const loadingOverlay = document.getElementById('challengeLoadingOverlay');
 const loadingSpinner = document.getElementById('loadingSpinner');
@@ -630,6 +632,14 @@ if (challengeShuffleBtn) {
 const homeBtn = document.getElementById('homeBtn');
 if (homeBtn) {
     homeBtn.addEventListener('click', () => {
+        // Clear/hide confetti canvas immediately
+        const canvas = document.getElementById('confettiCanvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+            canvas.style.display = 'none';
+        }
+
         const bgm = document.getElementById('challengeBGM');
         if (bgm) { bgm.pause(); bgm.currentTime = 0; }
         
@@ -646,6 +656,14 @@ if (homeBtn) {
 const nextChallengeBtn = document.getElementById('nextChallengeBtn');
 if (nextChallengeBtn) {
     nextChallengeBtn.addEventListener('click', () => {
+        // Clear/hide confetti canvas immediately so it doesn't linger or pop up
+        const canvas = document.getElementById('confettiCanvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+            canvas.style.display = 'none';
+        }
+
         const bgm = document.getElementById('challengeBGM');
         if (bgm) { bgm.pause(); bgm.currentTime = 0; }
         
