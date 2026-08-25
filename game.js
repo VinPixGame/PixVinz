@@ -272,7 +272,9 @@ let countdownInterval = null;
 
 function closePreviewModal() {
     const modal = document.getElementById('imageModal');
-    if (modal) modal.classList.add('hidden');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
     if (previewTimer) clearTimeout(previewTimer);
     if (countdownInterval) clearInterval(countdownInterval);
 }
@@ -284,31 +286,26 @@ if (previewBtn) {
 
         const previewCost = 5;
 
-        // 1. Directly check your user-specific coin key to be 100% sure before deducting
-        const coinKey = (typeof getUserKey === 'function') ? getUserKey('totalCoins') : 'totalCoins';
-        let currentCoins = parseInt(localStorage.getItem(coinKey)) || 0;
+        // Securely check and deduct coins using playerstat.js
+        if (typeof spendCoins !== 'function') {
+            alert("Error: playerstat.js is not loaded.");
+            return;
+        }
 
-        if (currentCoins < previewCost) {
+        let success = spendCoins(previewCost);
+        if (!success) {
             alert("Not enough coins! You need 5 coins to preview the image.");
             return;
         }
 
-        // 2. Deduct safely using your playerstat function
-        if (typeof spendCoins === 'function') {
-            spendCoins(previewCost);
-        } else {
-            localStorage.setItem(coinKey, currentCoins - previewCost);
-            if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
-        }
-
-        // 3. Force open the modal immediately
+        // Target the modal elements
         const modal = document.getElementById('imageModal');
         const modalImg = document.getElementById('modalPreviewImg');
         const modalTitle = document.getElementById('modalLevelTitle');
         const countdownSpan = document.getElementById('countdownSeconds');
 
         if (!modal) {
-            console.error("Error: #imageModal element not found in HTML!");
+            console.error("imageModal element not found in HTML!");
             return;
         }
 
@@ -323,15 +320,15 @@ if (previewBtn) {
         if (lvl < 1) lvl = 1;
         if (lvl > 200) lvl = 200;
 
+        // Update modal title and image source
         if (modalTitle) modalTitle.innerText = `LEVEL ${lvl.toString().padStart(2, '0')} PREVIEW`;
         if (modalImg) modalImg.src = `image/level${lvl}.jpeg`;
         
         let timeLeft = 10;
         if (countdownSpan) countdownSpan.innerText = timeLeft;
         
-        // Remove hidden class and force display to ensure it pops up
+        // Show modal by removing the .hidden class (Relies on your .modal-overlay CSS)
         modal.classList.remove('hidden');
-        modal.style.display = 'flex';
 
         if (previewTimer) clearTimeout(previewTimer);
         if (countdownInterval) clearInterval(countdownInterval);
