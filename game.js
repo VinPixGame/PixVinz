@@ -1,4 +1,4 @@
-// game.js - Clean & Synchronized Game Logic
+// game.js - Clean & Synchronized Game Logic with Isolated Preview
 
 document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -158,11 +158,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         else star.classList.remove('active');
       });
 
-      // Capture the current moves and time string
       const currentMoves = moves;
       const currentTimeStr = timerDisplay ? timerDisplay.innerText : "00:00";
 
-      // Call playerstat.js victory handler and PASS the moves and time!
       if (typeof handleLevelVictory === 'function') {
         handleLevelVictory(currentLevel, stars, currentMoves, currentTimeStr);
       }
@@ -211,25 +209,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  let previewTimer = null;
-  let countdownInterval = null;
+  // --- ISOLATED PREVIEW COMPONENT LOGIC ---
+  let pvTimer = null;
+  let pvCountdownInterval = null;
 
-  function closePreviewModal() {
-    const modal = document.getElementById('imageModal');
-    if (modal) modal.classList.add('hidden');
-    if (previewTimer) clearTimeout(previewTimer);
-    if (countdownInterval) clearInterval(countdownInterval);
+  function dismissPreview() {
+    const container = document.getElementById('pv-container');
+    if (container) container.classList.add('pv-hidden');
+    if (pvTimer) clearTimeout(pvTimer);
+    if (pvCountdownInterval) clearInterval(pvCountdownInterval);
   }
 
-  const previewBtn = document.getElementById('previewBtn');
-  if (previewBtn) {
-    previewBtn.addEventListener('click', async () => {
+  const pvCloseBtn = document.getElementById('pv-close-btn');
+  if (pvCloseBtn) {
+    pvCloseBtn.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      dismissPreview();
+    });
+  }
+
+  const pvTriggerBtn = document.getElementById('pv-trigger-btn');
+  if (pvTriggerBtn) {
+    pvTriggerBtn.addEventListener('click', async () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
 
       const previewCost = 5;
       let success = true;
 
-      // Use spendCoins from playerstat.js
       if (typeof spendCoins === 'function') {
         success = await spendCoins(previewCost);
       } else {
@@ -248,40 +254,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
 
-      const modal = document.getElementById('imageModal');
-      const modalImg = document.getElementById('modalPreviewImg');
-      const modalTitle = document.getElementById('modalLevelTitle');
-      const countdownSpan = document.getElementById('countdownSeconds');
+      const container = document.getElementById('pv-container');
+      const imgElement = document.getElementById('pv-image');
+      const titleElement = document.getElementById('pv-title');
+      const countdownSpan = document.getElementById('pv-countdown');
 
-      if (modalTitle) modalTitle.innerText = `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
-      if (modalImg) modalImg.src = imageSrc;
+      if (titleElement) titleElement.innerText = `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
+      if (imgElement) imgElement.src = imageSrc;
       
       let timeLeft = 10;
       if (countdownSpan) countdownSpan.innerText = timeLeft;
-      if (modal) modal.classList.remove('hidden');
+      if (container) container.classList.remove('pv-hidden');
 
-      if (previewTimer) clearTimeout(previewTimer);
-      if (countdownInterval) clearInterval(countdownInterval);
+      if (pvTimer) clearTimeout(pvTimer);
+      if (pvCountdownInterval) clearInterval(pvCountdownInterval);
 
-      countdownInterval = setInterval(() => {
+      pvCountdownInterval = setInterval(() => {
         timeLeft--;
         if (countdownSpan) countdownSpan.innerText = timeLeft;
-        if (timeLeft <= 0) clearInterval(countdownInterval);
+        if (timeLeft <= 0) clearInterval(pvCountdownInterval);
       }, 1000);
 
-      previewTimer = setTimeout(() => {
-        closePreviewModal();
+      pvTimer = setTimeout(() => {
+        dismissPreview();
       }, 10000);
     });
   }
-
-  const closePreviewBtn = document.getElementById('closePreviewBtn');
-  if (closePreviewBtn) {
-    closePreviewBtn.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      closePreviewModal();
-    });
-  }
+  // --- END OF PREVIEW LOGIC ---
 
   const nextLevelBtn = document.getElementById('nextLevelBtn');
   if (nextLevelBtn) {
@@ -289,7 +288,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       e.stopPropagation();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       
-      // Ensure cloud save finishes uploading before changing pages
       if (typeof saveUserDataToCloud === 'function') {
         await saveUserDataToCloud();
       }
@@ -305,7 +303,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       localStorage.setItem('skipLoading', 'true');
       
-      // Ensure cloud save finishes uploading before changing pages
       if (typeof saveUserDataToCloud === 'function') {
         await saveUserDataToCloud();
       }
@@ -320,7 +317,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       localStorage.setItem('skipLoading', 'true');
       
-      // Ensure cloud save finishes uploading before changing pages
       if (typeof saveUserDataToCloud === 'function') {
         await saveUserDataToCloud();
       }
