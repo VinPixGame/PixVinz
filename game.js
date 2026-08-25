@@ -267,18 +267,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-let previewTimer = null;
-let countdownInterval = null;
+let levelPreviewTimer = null;
+let levelCountdownInterval = null;
 
-// Use your existing collection modal close button ID
-const closeImageModalBtn = document.getElementById('closeImageModal');
-if (closeImageModalBtn) {
-    closeImageModalBtn.addEventListener('click', () => {
+function closeLevelPreviewModal() {
+    const modal = document.getElementById('previewModal');
+    if (modal) modal.classList.add('hidden');
+    if (levelPreviewTimer) clearTimeout(levelPreviewTimer);
+    if (levelCountdownInterval) clearInterval(levelCountdownInterval);
+}
+
+// Close button listener for the preview modal
+const closePreviewModalBtn = document.getElementById('closePreviewModalBtn');
+if (closePreviewModalBtn) {
+    closePreviewModalBtn.addEventListener('click', () => {
         if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-        const modal = document.getElementById('imageModal');
-        if (modal) modal.classList.add('hidden');
-        if (previewTimer) clearTimeout(previewTimer);
-        if (countdownInterval) clearInterval(countdownInterval);
+        closeLevelPreviewModal();
     });
 }
 
@@ -289,6 +293,7 @@ if (previewBtn) {
 
         const previewCost = 5;
 
+        // Check and deduct coins securely using playerstat.js
         if (typeof spendCoins !== 'function') {
             alert("Error: playerstat.js is not loaded.");
             return;
@@ -300,13 +305,14 @@ if (previewBtn) {
             return;
         }
 
-        // Target your existing collection modal elements
-        const modal = document.getElementById('imageModal');
-        const modalImg = document.getElementById('modalPreviewImg');
-        const modalTitle = document.getElementById('modalLevelTitle');
+        // Target the dedicated preview modal elements
+        const modal = document.getElementById('previewModal');
+        const modalImg = document.getElementById('previewModalImg');
+        const modalTitle = document.getElementById('previewModalTitle');
+        const countdownSpan = document.getElementById('previewCountdownSeconds');
 
         if (!modal) {
-            console.error("imageModal element not found!");
+            console.error("previewModal element not found in HTML!");
             return;
         }
 
@@ -320,22 +326,30 @@ if (previewBtn) {
         if (lvl < 1) lvl = 1;
         if (lvl > 200) lvl = 200;
 
-        // Set title and image
+        // Set title, image source, and timer
         if (modalTitle) modalTitle.innerText = `LEVEL ${lvl.toString().padStart(2, '0')} PREVIEW`;
         if (modalImg) modalImg.src = `image/level${lvl}.jpeg`;
         
-        // Show modal
+        let timeLeft = 10;
+        if (countdownSpan) countdownSpan.innerText = timeLeft;
+        
+        // Open the preview modal
         modal.classList.remove('hidden');
         modal.style.display = 'flex';
 
-        if (previewTimer) clearTimeout(previewTimer);
-        if (countdownInterval) clearInterval(countdownInterval);
+        if (levelPreviewTimer) clearTimeout(levelPreviewTimer);
+        if (levelCountdownInterval) clearInterval(levelCountdownInterval);
 
-        // Optional: Auto-close after 10 seconds if you still want the timer
-        previewTimer = setTimeout(() => {
-            modal.classList.add('hidden');
-            if (previewTimer) clearTimeout(previewTimer);
-            if (countdownInterval) clearInterval(countdownInterval);
+        levelCountdownInterval = setInterval(() => {
+            timeLeft--;
+            if (countdownSpan) countdownSpan.innerText = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(levelCountdownInterval);
+            }
+        }, 1000);
+
+        levelPreviewTimer = setTimeout(() => {
+            closeLevelPreviewModal();
         }, 10000);
     });
 }
