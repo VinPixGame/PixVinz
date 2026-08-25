@@ -626,15 +626,39 @@ if (challengeShuffleBtn) {
   });
 }
 
-if (closeWinModalBtn) {
-  closeWinModalBtn.addEventListener('click', () => {
-    const bgm = document.getElementById('challengeBGM');
-    if (bgm) { bgm.pause(); }
-    
-    const victoryAudio = document.getElementById('challengeVictoryBGM');
-    if (victoryAudio) { victoryAudio.pause(); }
-    
-    winModal.classList.add('hidden');
-    window.location.href = 'index.html';
-  });
+// --- HOME BUTTON HANDLER ---
+const homeBtn = document.getElementById('homeBtn');
+if (homeBtn) {
+    homeBtn.addEventListener('click', () => {
+        const bgm = document.getElementById('challengeBGM');
+        if (bgm) { bgm.pause(); bgm.currentTime = 0; }
+        
+        const victoryAudio = document.getElementById('challengeVictoryBGM');
+        if (victoryAudio) { victoryAudio.pause(); victoryAudio.currentTime = 0; }
+        
+        winModal.classList.add('hidden');
+        winModal.style.display = 'none';
+        window.location.href = 'index.html';
+    });
+}
+
+// --- NEXT CHALLENGE BUTTON HANDLER ---
+const nextChallengeBtn = document.getElementById('nextChallengeBtn');
+if (nextChallengeBtn) {
+    nextChallengeBtn.addEventListener('click', () => {
+        const bgm = document.getElementById('challengeBGM');
+        if (bgm) { bgm.pause(); bgm.currentTime = 0; }
+        
+        const victoryAudio = document.getElementById('challengeVictoryBGM');
+        if (victoryAudio) { victoryAudio.pause(); victoryAudio.currentTime = 0; }
+        
+        winModal.classList.add('hidden');
+        winModal.style.display = 'none';
+
+        // Advance to the next level
+        currentLevel++;
+
+        // Re-initialize the puzzle board for the next challenge
+        initBoardDOM();
+    });
 }
