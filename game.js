@@ -318,17 +318,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            let lvl = 1;
-            if (typeof getCurrentLevel === 'function') {
-                lvl = getCurrentLevel();
-            } else if (typeof currentLevel !== 'undefined') {
-                lvl = currentLevel;
-            }
+            // Grab level from URL parameters directly so it's guaranteed to work
+            const urlParams = new URLSearchParams(window.location.search);
+            let lvl = parseInt(urlParams.get('level')) || 1;
             if (lvl < 1) lvl = 1;
             if (lvl > 200) lvl = 200;
 
+            // Use your exact getLevelImageIndex math so it matches the puzzle image
+            const imageIndex = ((lvl - 1) % 55) + 1;
+
             if (modalTitle) modalTitle.innerText = `LEVEL ${lvl.toString().padStart(2, '0')} PREVIEW`;
-            if (modalImg) modalImg.src = `image/level${lvl}.jpeg`;
+            if (modalImg) modalImg.src = `image/level${imageIndex}.jpeg`;
             
             let timeLeft = 10;
             if (countdownSpan) countdownSpan.innerText = timeLeft;
@@ -351,6 +351,3 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 10000);
         });
     }
-});
-
-
