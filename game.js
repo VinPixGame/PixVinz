@@ -220,63 +220,69 @@ document.addEventListener('DOMContentLoaded', async () => {
   let gamePreviewCountdownInterval = null;
 
   window.openGameLevelPreview = function () {
-    // Use the existing PixVinz coin system
-    if (typeof spendCoins !== 'function') {
-      console.warn('spendCoins() is not available.');
-      return;
-    }
+  if (typeof spendCoins !== 'function') {
+    console.warn('spendCoins() is not available.');
+    return;
+  }
 
-    // Deduct exactly 5 coins.
-    // If the player does not have enough, spendCoins returns false.
-    const previewPurchased = spendCoins(5);
+  // Check and deduct 5 coins
+  const previewPurchased = spendCoins(5);
 
-    if (!previewPurchased) {
-      showNotEnoughCoinsPrompt();
-      return;
-    }
+  if (!previewPurchased) {
+    showNotEnoughCoinsPrompt();
+    return;
+  }
 
-    const previewModal = document.getElementById('gameLevelPreviewModal');
-    const previewImg = document.getElementById('gameLevelPreviewModalImg');
-    const previewTitle = document.getElementById('gameLevelPreviewModalTitle');
-    const countdownDisplay = document.getElementById('gameLevelPreviewCountdownSeconds');
+  const previewModal = document.getElementById('gameLevelPreviewModal');
+  const previewImg = document.getElementById('gameLevelPreviewModalImg');
+  const previewTitle = document.getElementById('gameLevelPreviewModalTitle');
+  const countdownDisplay = document.getElementById('gameLevelPreviewCountdownSeconds');
 
-    if (!previewModal || !previewImg) return;
+  if (!previewModal || !previewImg) {
+    console.error('Preview modal elements were not found.');
+    return;
+  }
 
-    // Always show the image belonging to the CURRENT level.
-    previewImg.src = imageSrc;
+  // Current level image
+  previewImg.src = imageSrc;
 
-    if (previewTitle) {
-      previewTitle.innerText =
-        `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
-    }
+  // Current level title
+  if (previewTitle) {
+    previewTitle.innerText =
+      `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
+  }
 
-    // Reset countdown
-    let remainingSeconds = 10;
+  // Reset countdown
+  let remainingSeconds = 10;
+
+  if (countdownDisplay) {
+    countdownDisplay.innerText = remainingSeconds;
+  }
+
+  // Stop previous countdown
+  clearInterval(gamePreviewCountdownInterval);
+
+  // IMPORTANT:
+  // Remove hidden class and force the modal to display
+  previewModal.classList.remove('hidden');
+
+  previewModal.style.display = 'flex';
+  previewModal.style.visibility = 'visible';
+  previewModal.style.opacity = '1';
+
+  // Start countdown
+  gamePreviewCountdownInterval = setInterval(() => {
+    remainingSeconds--;
 
     if (countdownDisplay) {
       countdownDisplay.innerText = remainingSeconds;
     }
 
-    // Clear any previous countdown
-    clearInterval(gamePreviewCountdownInterval);
-
-    // Show preview
-    previewModal.classList.remove('hidden');
-    previewModal.style.display = 'flex';
-
-    // Start 10-second countdown
-    gamePreviewCountdownInterval = setInterval(() => {
-      remainingSeconds--;
-
-      if (countdownDisplay) {
-        countdownDisplay.innerText = remainingSeconds;
-      }
-
-      if (remainingSeconds <= 0) {
-        closeGameLevelPreview();
-      }
-    }, 1000);
-  };
+    if (remainingSeconds <= 0) {
+      closeGameLevelPreview();
+    }
+  }, 1000);
+};
 
 
   // =========================================================
