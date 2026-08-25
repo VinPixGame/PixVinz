@@ -3,14 +3,90 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>PixVinz - Game</title>
-  <link rel="stylesheet" href="preview-modal.css">
+  <title>PixVinz - Isolated Game Test</title>
   <link rel="stylesheet" href="style.css">
   
+  <!-- ISOLATED STYLES FOR PREVIEW -->
+  <style>
+    .pv-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+    }
+    .pv-wrapper.pv-hidden {
+      display: none !important;
+    }
+    .pv-card {
+      background: #1a0b2e;
+      padding: 20px;
+      border-radius: 16px;
+      border: 2px solid #ffd700;
+      width: 90%;
+      max-width: 320px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-sizing: border-box;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+      z-index: 100000;
+      position: relative;
+    }
+    .pv-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+    #pv-title {
+      color: #ffd700;
+      font-size: 14px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .pv-timer-text {
+      color: #fff;
+      font-size: 12px;
+    }
+    #pv-countdown {
+      color: #ffd700;
+      font-weight: bold;
+    }
+    .pv-icon-close {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .pv-img-box {
+      width: 100%;
+      height: 250px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    #pv-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+  </style>
 </head>
 <body>
   <div class="app-container game-container">
-  <!-- Top Bar (Logo remains completely untouched here) -->
     <header class="top-bar">
       <button class="icon-btn" id="backToHome">‹</button>
       <div class="logo-container">
@@ -18,13 +94,11 @@
           <source src="image/logo.webm" type="video/webm">
         </video>
       </div>
-      <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
+      <div class="coin-badge">🪙 <span id="coinCount">50</span></div>
     </header>
 
-    <!-- Level Title positioned in the middle gap -->
     <h2 id="levelTitle" class="centered-level-title">LEVEL <span id="levelDisplay">01</span></h2>
 
-    <!-- Premium Stats Bar (Timer & Moves) -->
     <div class="game-header">
       <div class="premium-stats-bar">
         <div class="stat-badge">
@@ -44,131 +118,83 @@
       </div>
     </div>
 
-    <!-- 3x3 TAP-TO-SWAP BOARD -->
     <div class="puzzle-wrapper">
       <div class="puzzle-grid" id="puzzleGrid"></div>
     </div>
 
-    <!-- Game Actions -->
     <div class="game-actions">
+      <!-- ISOLATED PREVIEW BUTTON ID -->
       <button class="btn btn-secondary" id="pv-trigger-btn">🖼️ PREVIEW (🪙5)</button>
       <button class="btn btn-primary" id="shuffleBtn">🔀 SHUFFLE</button>
     </div>
   </div>
 
-<!-- Custom Preview Widget (No modal conflicts) -->
-<div id="pv-container" class="pv-wrapper pv-hidden">
-  <div class="pv-card">
-    <div class="pv-header">
-      <span id="pv-title">LEVEL 01 PREVIEW</span>
-      <span class="pv-timer-text">Auto-closing in <span id="pv-countdown">10</span>s</span>
-      <button id="pv-close-btn" class="pv-icon-close">✕</button>
-    </div>
-    <div class="pv-img-box">
-      <img id="pv-image" src="" alt="Level Solution Preview">
-    </div>
-  </div>
-</div>
-
-  <!-- Victory Modal -->
-  <div id="victoryModal" class="modal-overlay hidden">
-    <canvas id="confettiCanvas"></canvas>
-
-    <div class="victory-card-pro">
-      <div class="top-crest-badge">
-        <div class="badge-shield">⭐</div>
+  <!-- ISOLATED PREVIEW HTML CONTAINER -->
+  <div id="pv-container" class="pv-wrapper pv-hidden">
+    <div class="pv-card">
+      <div class="pv-header">
+        <span id="pv-title">LEVEL 01 PREVIEW</span>
+        <span class="pv-timer-text">Closing in <span id="pv-countdown">10</span>s</span>
+        <button id="pv-close-btn" class="pv-icon-close">✕</button>
       </div>
-
-      <div class="banner-ribbon">
-        <h1 class="victory-title-pro">LEVEL CLEARED!</h1>
-      </div>
-      <div class="victory-subtitle-pro">✦ Amazing work! ✦</div>
-
-      <div class="victory-img-container-pro">
-        <img id="victoryImg" src="" alt="Solved Puzzle">
-      </div>
-
-      <div class="star-rating-pro" id="victoryStars">
-        <span class="star star-pro active">★</span>
-        <span class="star star-pro active">★</span>
-        <span class="star star-pro active">★</span>
-      </div>
-
-      <div class="stats-panel-pro">
-        <div class="stat-col">
-          <span class="stat-icon-pro">⏱️</span>
-          <span class="stat-label-pro">TIME</span>
-          <span class="stat-value-pro" id="vTime">00:00</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat-col">
-          <span class="stat-icon-pro">👣</span>
-          <span class="stat-label-pro">MOVES</span>
-          <span class="stat-value-pro" id="vMoves">0</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat-col">
-          <span class="stat-icon-pro">🪙</span>
-          <span class="stat-label-pro">EARNED</span>
-          <span class="stat-value-pro gold-val" id="vCoins">+0</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat-col">
-          <span class="stat-icon-pro">⚡️</span>
-          <span class="stat-label-pro">XP GAINED</span>
-          <span class="stat-value-pro" id="vXp">+0</span>
-        </div>
-      </div>
-
-      <div class="victory-buttons-pro">
-        <button class="btn-pro btn-home-pro" id="victoryHomeBtn">
-          <span>🏠</span> HOME
-        </button>
-        <button class="btn-pro btn-next-pro" id="nextLevelBtn">
-          NEXT ▶
-        </button>
+      <div class="pv-img-box">
+        <img id="pv-image" src="" alt="Level Solution Preview">
       </div>
     </div>
   </div>
-    
-  <script src="audio.js"></script>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+  <!-- ISOLATED EMBEDDED SCRIPT FOR TESTING -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const currentLevel = 1;
+      const imageSrc = 'image/level1.jpeg'; // Hardcoded test path
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
-    authDomain: "pixvinz2026.firebaseapp.com",
-    projectId: "pixvinz2026",
-    storageBucket: "pixvinz2026.firebasestorage.app",
-    messagingSenderId: "45609077809",
-    appId: "1:45609077809:web:575611e46acda9f64c5910",
-    measurementId: "G-W7FSERE8ZJ"
-  };
+      const container = document.getElementById('pv-container');
+      const imgElement = document.getElementById('pv-image');
+      const titleElement = document.getElementById('pv-title');
+      const countdownSpan = document.getElementById('pv-countdown');
+      const triggerBtn = document.getElementById('pv-trigger-btn');
+      const closeBtn = document.getElementById('pv-close-btn');
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+      let pvTimer = null;
+      let pvCountdownInterval = null;
 
-  // EXPOSE GLOBALLY SO playerstat.js CAN ACCESS THEM WITHOUT CRASHING
-  window.db = db;
-  window.doc = doc;
-  window.getDoc = getDoc;
-  window.setDoc = setDoc;
-  window.updateDoc = updateDoc;
-  window.getCurrentUser = function() {
-    try {
-      return JSON.parse(localStorage.getItem('loggedInUser'));
-    } catch (e) {
-      return null;
-    }
-  };
-</script>
+      function dismissPreview() {
+        if (container) container.classList.add('pv-hidden');
+        if (pvTimer) clearTimeout(pvTimer);
+        if (pvCountdownInterval) clearInterval(pvCountdownInterval);
+      }
 
-<!-- Player Stats & Main Game Scripts -->
-  <script src="playerstat.js"></script>
-  <script type="module" src="game.js"></script>
+      if (closeBtn) {
+        closeBtn.addEventListener('click', dismissPreview);
+      }
 
-</body> 
+      if (triggerBtn) {
+        triggerBtn.addEventListener('click', () => {
+          console.log("Isolated Preview clicked!");
+          if (imgElement) imgElement.src = imageSrc;
+          if (titleElement) titleElement.innerText = `LEVEL 01 PREVIEW`;
+          
+          let timeLeft = 10;
+          if (countdownSpan) countdownSpan.innerText = timeLeft;
+          if (container) container.classList.remove('pv-hidden');
+
+          if (pvTimer) clearTimeout(pvTimer);
+          if (pvCountdownInterval) clearInterval(pvCountdownInterval);
+
+          pvCountdownInterval = setInterval(() => {
+            timeLeft--;
+            if (countdownSpan) countdownSpan.innerText = timeLeft;
+            if (timeLeft <= 0) clearInterval(pvCountdownInterval);
+          }, 1000);
+
+          pvTimer = setTimeout(() => {
+            dismissPreview();
+          }, 10000);
+        });
+      }
+    });
+  </script>
+
+</body>
 </html>
