@@ -270,13 +270,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 let previewTimer = null;
 let countdownInterval = null;
 
-function closePreviewModal() {
-    const modal = document.getElementById('imageModal');
-    if (modal) {
-        modal.classList.add('hidden');
-    }
-    if (previewTimer) clearTimeout(previewTimer);
-    if (countdownInterval) clearInterval(countdownInterval);
+// Use your existing collection modal close button ID
+const closeImageModalBtn = document.getElementById('closeImageModal');
+if (closeImageModalBtn) {
+    closeImageModalBtn.addEventListener('click', () => {
+        if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+        const modal = document.getElementById('imageModal');
+        if (modal) modal.classList.add('hidden');
+        if (previewTimer) clearTimeout(previewTimer);
+        if (countdownInterval) clearInterval(countdownInterval);
+    });
 }
 
 const previewBtn = document.getElementById('previewBtn');
@@ -286,7 +289,6 @@ if (previewBtn) {
 
         const previewCost = 5;
 
-        // Securely check and deduct coins using playerstat.js
         if (typeof spendCoins !== 'function') {
             alert("Error: playerstat.js is not loaded.");
             return;
@@ -298,14 +300,13 @@ if (previewBtn) {
             return;
         }
 
-        // Target the modal elements
+        // Target your existing collection modal elements
         const modal = document.getElementById('imageModal');
         const modalImg = document.getElementById('modalPreviewImg');
         const modalTitle = document.getElementById('modalLevelTitle');
-        const countdownSpan = document.getElementById('countdownSeconds');
 
         if (!modal) {
-            console.error("imageModal element not found in HTML!");
+            console.error("imageModal element not found!");
             return;
         }
 
@@ -316,41 +317,25 @@ if (previewBtn) {
         } else if (typeof currentLevel !== 'undefined') {
             lvl = currentLevel;
         }
-        
         if (lvl < 1) lvl = 1;
         if (lvl > 200) lvl = 200;
 
-        // Update modal title and image source
+        // Set title and image
         if (modalTitle) modalTitle.innerText = `LEVEL ${lvl.toString().padStart(2, '0')} PREVIEW`;
         if (modalImg) modalImg.src = `image/level${lvl}.jpeg`;
         
-        let timeLeft = 10;
-        if (countdownSpan) countdownSpan.innerText = timeLeft;
-        
-        // Show modal by removing the .hidden class (Relies on your .modal-overlay CSS)
+        // Show modal
         modal.classList.remove('hidden');
+        modal.style.display = 'flex';
 
         if (previewTimer) clearTimeout(previewTimer);
         if (countdownInterval) clearInterval(countdownInterval);
 
-        countdownInterval = setInterval(() => {
-            timeLeft--;
-            if (countdownSpan) countdownSpan.innerText = timeLeft;
-            if (timeLeft <= 0) {
-                clearInterval(countdownInterval);
-            }
-        }, 1000);
-
+        // Optional: Auto-close after 10 seconds if you still want the timer
         previewTimer = setTimeout(() => {
-            closePreviewModal();
+            modal.classList.add('hidden');
+            if (previewTimer) clearTimeout(previewTimer);
+            if (countdownInterval) clearInterval(countdownInterval);
         }, 10000);
-    });
-}
-
-const closePreviewBtn = document.getElementById('closePreviewBtn');
-if (closePreviewBtn) {
-    closePreviewBtn.addEventListener('click', () => {
-        if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-        closePreviewModal();
     });
 }
