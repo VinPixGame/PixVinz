@@ -271,68 +271,110 @@ document.addEventListener('DOMContentLoaded', async () => {
   startTimer();
 
 
-
 // =========================================================
-// NORMAL PUZZLE — LEVEL PREVIEW
+// NORMAL LEVEL PREVIEW
 // Costs 5 coins and shows the current level image for 10s
 // =========================================================
 
 let gamePreviewCountdownInterval = null;
 
+const gamePreviewBtn = document.getElementById('gamePreviewBtn');
+const gameLevelPreviewModal = document.getElementById('gameLevelPreviewModal');
+const gameLevelPreviewModalImg = document.getElementById('gameLevelPreviewModalImg');
+const gameLevelPreviewModalTitle = document.getElementById('gameLevelPreviewModalTitle');
+const gameLevelPreviewCountdownSeconds =
+  document.getElementById('gameLevelPreviewCountdownSeconds');
+const closeGameLevelPreviewModalBtn =
+  document.getElementById('closeGameLevelPreviewModalBtn');
+
 async function openGameLevelPreview() {
 
+  // Prevent opening multiple times
+  if (!gameLevelPreviewModal || !gameLevelPreviewModalImg) {
+    console.error('Level Preview modal elements are missing.');
+    return;
+  }
+
+  // ---------------------------------------------------------
+  // 1. CHECK / DEDUCT 5 COINS
+  // ---------------------------------------------------------
   if (typeof spendCoins !== 'function') {
     console.error('spendCoins() is not available.');
     return;
   }
 
-  // IMPORTANT: spendCoins is async
-  const paymentSuccessful = await spendCoins(5);
+  let coinsAccepted = false;
 
-  if (!paymentSuccessful) {
+  try {
+    // IMPORTANT:
+    // spendCoins() may be synchronous OR return a Promise.
+    // Promise.resolve() handles both correctly.
+    coinsAccepted = await Promise.resolve(spendCoins(5));
+  } catch (error) {
+    console.error('Error spending preview coins:', error);
+    coinsAccepted = false;
+  }
+
+  // Not enough coins
+  if (!coinsAccepted) {
     showNotEnoughCoinsPrompt();
     return;
   }
 
-  const modal = document.getElementById('gameLevelPreviewModal');
-  const previewImg = document.getElementById('gameLevelPreviewModalImg');
-  const title = document.getElementById('gameLevelPreviewModalTitle');
-  const countdown =
-    document.getElementById('gameLevelPreviewCountdownSeconds');
+  // ---------------------------------------------------------
+  // 2. BUILD THE CURRENT LEVEL IMAGE PATH
+  // ---------------------------------------------------------
+  const previewImageSrc =
+    `image/level${getLevelImageIndex(currentLevel)}.jpeg`;
 
-  if (!modal || !previewImg) {
-    console.error('Game level preview HTML elements are missing.');
-    return;
-  }
+  console.log('Opening level preview:', previewImageSrc);
 
-  // Make absolutely sure the preview image uses
-  // the SAME image currently used by the puzzle.
-  previewImg.onload = () => {
+  // ---------------------------------------------------------
+  // 3. PRELOAD THE IMAGE FIRST
+  // ---------------------------------------------------------
+  const preloadImage = new Image();
 
-    previewImg.style.display = 'block';
+  preloadImage.onload = function () {
 
-    if (title) {
-      title.textContent =
-        `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
+    // Put the actual loaded image into the modal
+    gameLevelPreviewModalImg.src = previewImageSrc;
+
+    // Current level title
+    if (gameLevelPreviewModalTitle) {
+      gameLevelPreviewModalTitle.textContent =
+        `LEVEL ${String(currentLevel).padStart(2, '0')} PREVIEW`;
     }
 
+    // -------------------------------------------------------
+    // 4. RESET COUNTDOWN
+    // -------------------------------------------------------
     let secondsLeft = 10;
 
-    if (countdown) {
-      countdown.textContent = secondsLeft;
+    if (gameLevelPreviewCountdownSeconds) {
+      gameLevelPreviewCountdownSeconds.textContent = secondsLeft;
     }
 
     clearInterval(gamePreviewCountdownInterval);
 
-    modal.classList.remove('hidden');
-    modal.style.display = 'flex';
+    // -------------------------------------------------------
+    // 5. SHOW MODAL
+    // -------------------------------------------------------
+    gameLevelPreviewModal.classList.remove('hidden');
 
+    // Force it visible in case another CSS rule is interfering
+    gameLevelPreviewModal.style.display = 'flex';
+    gameLevelPreviewModal.style.visibility = 'visible';
+    gameLevelPreviewModal.style.opacity = '1';
+
+    // -------------------------------------------------------
+    // 6. START 10 SECOND COUNTDOWN
+    // -------------------------------------------------------
     gamePreviewCountdownInterval = setInterval(() => {
 
       secondsLeft--;
 
-      if (countdown) {
-        countdown.textContent = secondsLeft;
+      if (gameLevelPreviewCountdownSeconds) {
+        gameLevelPreviewCountdownSeconds.textContent = secondsLeft;
       }
 
       if (secondsLeft <= 0) {
@@ -342,22 +384,31 @@ async function openGameLevelPreview() {
     }, 1000);
   };
 
-  previewImg.onerror = () => {
+  // If the image itself cannot be found
+  preloadImage.onerror = function () {
     console.error(
-      'Preview image failed to load:',
-      imageSrc
+      'LEVEL PREVIEW IMAGE FAILED TO LOAD:',
+      previewImageSrc
     );
 
-    closeGameLevelPreview();
+    // Refund the 5 coins because the preview could not be displayed.
+    // Only do this if your playerstat.js exposes earnCoins().
+    if (typeof earnCoins === 'function') {
+      earnCoins(5);
+    }
+
+    alert(
+      `Preview image could not be loaded.\n\nMissing file:\n${previewImageSrc}`
+    );
   };
 
-  // SAME image path used by the puzzle board
-  previewImg.src = imageSrc;
+  // Start loading the image
+  preloadImage.src = previewImageSrc;
 }
 
 
 // =========================================================
-// CLOSE LEVEL PREVIEW
+// CLOSE NORMAL LEVEL PREVIEW
 // =========================================================
 
 function closeGameLevelPreview() {
@@ -365,18 +416,15 @@ function closeGameLevelPreview() {
   clearInterval(gamePreviewCountdownInterval);
   gamePreviewCountdownInterval = null;
 
-  const modal = document.getElementById('gameLevelPreviewModal');
-  const previewImg = document.getElementById('gameLevelPreviewModalImg');
-
-  if (modal) {
-    modal.classList.add('hidden');
-    modal.style.display = 'none';
+  if (gameLevelPreviewModal) {
+    gameLevelPreviewModal.classList.add('hidden');
+    gameLevelPreviewModal.style.display = 'none';
+    gameLevelPreviewModal.style.visibility = '';
+    gameLevelPreviewModal.style.opacity = '';
   }
 
-  if (previewImg) {
-    previewImg.onload = null;
-    previewImg.onerror = null;
-    previewImg.src = '';
+  if (gameLevelPreviewModalImg) {
+    gameLevelPreviewModalImg.src = '';
   }
 }
 
@@ -384,9 +432,6 @@ function closeGameLevelPreview() {
 // =========================================================
 // PREVIEW BUTTON
 // =========================================================
-
-const gamePreviewBtn =
-  document.getElementById('gamePreviewBtn');
 
 if (gamePreviewBtn) {
 
@@ -398,11 +443,8 @@ if (gamePreviewBtn) {
 
 
 // =========================================================
-// CLOSE BUTTON
+// PREVIEW CLOSE BUTTON
 // =========================================================
-
-const closeGameLevelPreviewModalBtn =
-  document.getElementById('closeGameLevelPreviewModalBtn');
 
 if (closeGameLevelPreviewModalBtn) {
 
@@ -414,13 +456,12 @@ if (closeGameLevelPreviewModalBtn) {
 
 
 // =========================================================
-// NOT ENOUGH COINS
+// NOT ENOUGH COINS POPUP
 // =========================================================
 
 function showNotEnoughCoinsPrompt() {
 
-  const existing =
-    document.getElementById('notEnoughCoinsPrompt');
+  const existing = document.getElementById('notEnoughCoinsPrompt');
 
   if (existing) {
     existing.remove();
@@ -432,7 +473,6 @@ function showNotEnoughCoinsPrompt() {
 
   prompt.innerHTML = `
     <div class="not-enough-coins-card">
-
       <div class="not-enough-coins-icon">🪙</div>
 
       <div class="not-enough-coins-title">
@@ -446,7 +486,6 @@ function showNotEnoughCoinsPrompt() {
       <button type="button" id="closeNotEnoughCoinsPrompt">
         OK
       </button>
-
     </div>
   `;
 
@@ -462,14 +501,12 @@ function showNotEnoughCoinsPrompt() {
   }
 
   prompt.addEventListener('click', (event) => {
-
     if (event.target === prompt) {
       prompt.remove();
     }
-
   });
 }
-  
+    
 });
 
 
