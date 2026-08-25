@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>PixVinz - Game</title>
-  <link rel="stylesheet" href="game.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -47,50 +46,24 @@
     <div class="puzzle-wrapper">
       <div class="puzzle-grid" id="puzzleGrid"></div>
     </div>
-<!-- Game Actions -->
-<div class="game-actions">
-  <button class="btn btn-secondary" id="gamePreviewBtn">
-    👁️ PREVIEW (-🪙5)
-  </button>
 
-  <button class="btn btn-primary" id="shuffleBtn">
-    🔀 SHUFFLE
-  </button>
-</div>
-
-
-<!-- Dedicated Level Preview Modal -->
-<div id="gameLevelPreviewModal" class="game-level-preview-overlay hidden">
-
-  <div class="game-level-preview-card">
-
-    <div class="game-level-preview-header">
-      <span id="gameLevelPreviewModalTitle">
-        LEVEL 01 PREVIEW
-      </span>
-
-      <button
-        class="icon-btn close-modal-btn"
-        id="closeGameLevelPreviewModalBtn"
-        type="button">
-        ✕
-      </button>
+    <!-- Game Actions -->
+    <div class="game-actions">
+      <button class="btn btn-secondary" id="previewBtn">🖼️ PREVIEW (🪙5)</button>
+      <button class="btn btn-primary" id="shuffleBtn">🔀 SHUFFLE</button>
     </div>
-
-    <div class="game-level-preview-img-container">
-      <img
-        id="gameLevelPreviewModalImg"
-        src=""
-        alt="Level Preview">
-    </div>
-
-    <div class="game-level-preview-countdown">
-      Closing in
-      <span id="gameLevelPreviewCountdownSeconds">10</span>s
-    </div>
-
   </div>
 
+  <!-- Image Preview Modal -->
+<div id="imageModal" class="modal-overlay hidden">
+  <div class="preview-modal-content">
+    <h3 id="modalLevelTitle" style="color: #ffd700; margin: 0 0 10px 0; font-size: 16px; letter-spacing: 1px; width: 100%;">LEVEL PREVIEW</h3>
+    <div style="width: 100%; display: flex; justify-content: center; align-items: center; margin-bottom: 12px;">
+      <img id="modalPreviewImg" src="" alt="Level Preview" style="display: block; max-width: 100%; max-height: 40vh; width: auto; height: auto; object-fit: contain; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); margin: 0 auto;">
+    </div>
+    <div id="previewCountdown" style="color: #fff; font-size: 13px; margin-bottom: 12px; width: 100%;">Closing in <span id="countdownSeconds" style="color: #ffd700; font-weight: bold;">10</span>s</div>
+    <button id="closePreviewBtn" style="width: 100%; padding: 12px; font-weight: bold; background: #ffd700; color: #1a0b2e; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">CLOSE</button>
+  </div>
 </div>
 
   <!-- Victory Modal -->
@@ -192,7 +165,6 @@
 <!-- Player Stats & Main Game Scripts -->
   <script src="playerstat.js"></script>
   <script type="module" src="game.js"></script>
-  </div>
+
 </body> 
 </html>
-
