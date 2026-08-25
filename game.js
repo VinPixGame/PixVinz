@@ -269,19 +269,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-document.addEventListener('DOMContentLoaded', () => {
-    let levelPreviewTimer = null;
-    let levelCountdownInterval = null;
+// Global Preview Modal Functions
+let levelPreviewTimer = null;
+let levelCountdownInterval = null;
 
-    function closeLevelPreviewModal() {
-        const modal = document.getElementById('gameLevelPreviewModal');
-        if (modal) {
-            modal.classList.add('hidden');
-        }
-        if (levelPreviewTimer) clearTimeout(levelPreviewTimer);
-        if (levelCountdownInterval) clearInterval(levelCountdownInterval);
+function closeLevelPreviewModal() {
+    const modal = document.getElementById('gameLevelPreviewModal');
+    if (modal) {
+        modal.classList.add('hidden');
     }
+    if (levelPreviewTimer) clearTimeout(levelPreviewTimer);
+    if (levelCountdownInterval) clearInterval(levelCountdownInterval);
+}
 
+// Hook up the close button once DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
     const closePreviewModalBtn = document.getElementById('closeGameLevelPreviewModalBtn');
     if (closePreviewModalBtn) {
         closePreviewModalBtn.addEventListener('click', () => {
@@ -289,66 +291,63 @@ document.addEventListener('DOMContentLoaded', () => {
             closeLevelPreviewModal();
         });
     }
-
-    const gamePreviewBtn = document.getElementById('gamePreviewBtn');
-    if (gamePreviewBtn) {
-        gamePreviewBtn.addEventListener('click', () => {
-            if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-
-            const previewCost = 5;
-
-            if (typeof spendCoins !== 'function') {
-                alert("Error: playerstat.js is not loaded.");
-                return;
-            }
-
-            let success = spendCoins(previewCost);
-            if (!success) {
-                alert("Not enough coins! You need 5 coins to preview the image.");
-                return;
-            }
-
-            const modal = document.getElementById('gameLevelPreviewModal');
-            const modalImg = document.getElementById('gameLevelPreviewModalImg');
-            const modalTitle = document.getElementById('gameLevelPreviewModalTitle');
-            const countdownSpan = document.getElementById('gameLevelPreviewCountdownSeconds');
-
-            if (!modal) {
-                console.error("gameLevelPreviewModal element not found in HTML!");
-                return;
-            }
-
-            // Grab level from URL parameters directly so it's guaranteed to work
-            const urlParams = new URLSearchParams(window.location.search);
-            let lvl = parseInt(urlParams.get('level')) || 1;
-            if (lvl < 1) lvl = 1;
-            if (lvl > 200) lvl = 200;
-
-            // Use your exact getLevelImageIndex math so it matches the puzzle image
-            const imageIndex = ((lvl - 1) % 55) + 1;
-
-            if (modalTitle) modalTitle.innerText = `LEVEL ${lvl.toString().padStart(2, '0')} PREVIEW`;
-            if (modalImg) modalImg.src = `image/level${imageIndex}.jpeg`;
-            
-            let timeLeft = 10;
-            if (countdownSpan) countdownSpan.innerText = timeLeft;
-            
-            modal.classList.remove('hidden');
-
-            if (levelPreviewTimer) clearTimeout(levelPreviewTimer);
-            if (levelCountdownInterval) clearInterval(levelCountdownInterval);
-
-            levelCountdownInterval = setInterval(() => {
-                timeLeft--;
-                if (countdownSpan) countdownSpan.innerText = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(levelCountdownInterval);
-                }
-            }, 1000);
-
-            levelPreviewTimer = setTimeout(() => {
-                closeLevelPreviewModal();
-            }, 10000);
-        });
-    }
 });
+
+// Called directly by the button's onclick attribute
+function openGameLevelPreview() {
+    if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+
+    const previewCost = 5;
+
+    if (typeof spendCoins !== 'function') {
+        alert("Error: playerstat.js is not loaded.");
+        return;
+    }
+
+    let success = spendCoins(previewCost);
+    if (!success) {
+        alert("Not enough coins! You need 5 coins to preview the image.");
+        return;
+    }
+
+    const modal = document.getElementById('gameLevelPreviewModal');
+    const modalImg = document.getElementById('gameLevelPreviewModalImg');
+    const modalTitle = document.getElementById('gameLevelPreviewModalTitle');
+    const countdownSpan = document.getElementById('gameLevelPreviewCountdownSeconds');
+
+    if (!modal) {
+        alert("Error: gameLevelPreviewModal element not found in HTML!");
+        return;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let lvl = parseInt(urlParams.get('level')) || 1;
+    if (lvl < 1) lvl = 1;
+    if (lvl > 200) lvl = 200;
+
+    const imageIndex = ((lvl - 1) % 55) + 1;
+
+    if (modalTitle) modalTitle.innerText = `LEVEL ${lvl.toString().padStart(2, '0')} PREVIEW`;
+    if (modalImg) modalImg.src = `image/level${imageIndex}.jpeg`;
+    
+    let timeLeft = 10;
+    if (countdownSpan) countdownSpan.innerText = timeLeft;
+    
+    // Force show the modal
+    modal.classList.remove('hidden');
+
+    if (levelPreviewTimer) clearTimeout(levelPreviewTimer);
+    if (levelCountdownInterval) clearInterval(levelCountdownInterval);
+
+    levelCountdownInterval = setInterval(() => {
+        timeLeft--;
+        if (countdownSpan) countdownSpan.innerText = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(levelCountdownInterval);
+        }
+    }, 1000);
+
+    levelPreviewTimer = setTimeout(() => {
+        closeLevelPreviewModal();
+    }, 10000);
+}
