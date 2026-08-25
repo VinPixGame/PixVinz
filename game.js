@@ -211,11 +211,85 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  
+let currentLevel = 1; // Change this dynamically as your level changes
+let previewTimer = null;
+let countdownInterval = null;
 
+function closePreviewModal() {
+    const modal = document.getElementById('imageModal');
+    if (modal) modal.classList.add('hidden');
+    if (previewTimer) clearTimeout(previewTimer);
+    if (countdownInterval) clearInterval(countdownInterval);
+}
+
+const previewBtn = document.getElementById('previewBtn');
+if (previewBtn) {
+    previewBtn.addEventListener('click', async () => {
+        if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+
+        const previewCost = 5;
+        let success = true;
+
+        if (typeof spendCoins === 'function') {
+            success = await spendCoins(previewCost);
+        } else {
+            let totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
+            if (totalCoins < previewCost) {
+                success = false;
+            } else {
+                localStorage.setItem('totalCoins', totalCoins - previewCost);
+            }
+        }
+
+        if (!success) {
+            alert("Not enough coins! You need 5 coins to preview the image.");
+            return;
+        }
+
+        if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalPreviewImg');
+        const modalTitle = document.getElementById('modalLevelTitle');
+        const countdownSpan = document.getElementById('countdownSeconds');
+
+        // Dynamically set level text (caps/ensures between 1 and 200)
+        let lvl = (typeof currentLevel !== 'undefined' ? currentLevel : 1);
+        if (lvl < 1) lvl = 1;
+        if (lvl > 200) lvl = 200;
+
+        if (modalTitle) modalTitle.innerText = `LEVEL ${lvl.toString().padStart(2, '0')} PREVIEW`;
         
-  
-  
+        // Dynamically point to image/level1.jpeg up to image/level200.jpeg
+        if (modalImg) modalImg.src = `image/level${lvl}.jpeg`;
+        
+        let timeLeft = 10;
+        if (countdownSpan) countdownSpan.innerText = timeLeft;
+        if (modal) modal.classList.remove('hidden');
+
+        if (previewTimer) clearTimeout(previewTimer);
+        if (countdownInterval) clearInterval(countdownInterval);
+
+        countdownInterval = setInterval(() => {
+            timeLeft--;
+            if (countdownSpan) countdownSpan.innerText = timeLeft;
+            if (timeLeft <= 0) clearInterval(countdownInterval);
+        }, 1000);
+
+        previewTimer = setTimeout(() => {
+            closePreviewModal();
+        }, 10000);
+    });
+}
+
+const closePreviewBtn = document.getElementById('closePreviewBtn');
+if (closePreviewBtn) {
+    closePreviewBtn.addEventListener('click', () => {
+        if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+        closePreviewModal();
+    });
+}
+
 
   
 
@@ -269,193 +343,4 @@ document.addEventListener('DOMContentLoaded', async () => {
   shuffleGrid();
   isGameStarted = true;
   startTimer();
-
-
-// =========================================================
-// NORMAL PUZZLE — LEVEL PREVIEW
-// Costs exactly 5 coins and shows the current level image
-// =========================================================
-
-let gamePreviewCountdownInterval = null;
-
-const gamePreviewBtn = document.getElementById('gamePreviewBtn');
-const gameLevelPreviewModal = document.getElementById('gameLevelPreviewModal');
-const gameLevelPreviewModalImg = document.getElementById('gameLevelPreviewModalImg');
-const gameLevelPreviewModalTitle = document.getElementById('gameLevelPreviewModalTitle');
-const gameLevelPreviewCountdownSeconds = document.getElementById('gameLevelPreviewCountdownSeconds');
-const closeGameLevelPreviewModalBtn =
-  document.getElementById('closeGameLevelPreviewModalBtn');
-
-
-// ---------------------------------------------------------
-// OPEN PREVIEW
-// ---------------------------------------------------------
-
-async function openGameLevelPreview() {
-
-  if (!gameLevelPreviewModal || !gameLevelPreviewModalImg) {
-    console.error('Level preview modal elements are missing from HTML.');
-    return;
-  }
-
-  // Spend exactly 5 coins.
-  // spendCoins() is async in playerstat.js, so WAIT for its result.
-  if (typeof spendCoins !== 'function') {
-    console.error('spendCoins() is not available.');
-    return;
-  }
-
-  const paymentSuccessful = await spendCoins(5);
-
-  // ONLY show this when the player really cannot pay.
-  if (paymentSuccessful !== true) {
-    showNotEnoughCoinsPrompt();
-    return;
-  }
-
-  // Use the EXACT SAME image source as the puzzle.
-  gameLevelPreviewModalImg.src = imageSrc;
-
-  // Make sure the image is loaded before displaying the modal.
-  gameLevelPreviewModalImg.onload = () => {
-    gameLevelPreviewModal.classList.remove('hidden');
-    gameLevelPreviewModal.style.display = 'flex';
-  };
-
-  gameLevelPreviewModalImg.onerror = () => {
-    console.error('Could not load level preview image:', imageSrc);
-  };
-
-  gameLevelPreviewModalTitle.textContent =
-    `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
-
-  let secondsLeft = 10;
-
-  gameLevelPreviewCountdownSeconds.textContent = secondsLeft;
-
-  if (gamePreviewCountdownInterval) {
-    clearInterval(gamePreviewCountdownInterval);
-    gamePreviewCountdownInterval = null;
-  }
-
-  // Set the image first.
-  gameLevelPreviewModalImg.src = imageSrc;
-
-  // In case the image is already cached, onload may fire before this.
-  if (gameLevelPreviewModalImg.complete &&
-      gameLevelPreviewModalImg.naturalWidth > 0) {
-    gameLevelPreviewModal.classList.remove('hidden');
-    gameLevelPreviewModal.style.display = 'flex';
-  }
-
-  gamePreviewCountdownInterval = setInterval(() => {
-
-    secondsLeft--;
-
-    gameLevelPreviewCountdownSeconds.textContent = secondsLeft;
-
-    if (secondsLeft <= 0) {
-      closeGameLevelPreview();
-    }
-
-  }, 1000);
-}
-
-
-// ---------------------------------------------------------
-// CLOSE PREVIEW
-// ---------------------------------------------------------
-
-function closeGameLevelPreview() {
-
-  if (gamePreviewCountdownInterval) {
-    clearInterval(gamePreviewCountdownInterval);
-    gamePreviewCountdownInterval = null;
-  }
-
-  if (gameLevelPreviewModal) {
-    gameLevelPreviewModal.classList.add('hidden');
-    gameLevelPreviewModal.style.display = 'none';
-  }
-
-  if (gameLevelPreviewModalImg) {
-    gameLevelPreviewModalImg.src = '';
-  }
-}
-
-
-// ---------------------------------------------------------
-// PREVIEW BUTTON
-// ---------------------------------------------------------
-
-if (gamePreviewBtn) {
-  gamePreviewBtn.addEventListener('click', openGameLevelPreview);
-}
-
-
-// ---------------------------------------------------------
-// CLOSE BUTTON
-// ---------------------------------------------------------
-
-if (closeGameLevelPreviewModalBtn) {
-  closeGameLevelPreviewModalBtn.addEventListener('click', closeGameLevelPreview);
-}
-
-
-// ---------------------------------------------------------
-// NOT ENOUGH COINS
-// ---------------------------------------------------------
-
-function showNotEnoughCoinsPrompt() {
-
-  const existing = document.getElementById('notEnoughCoinsPrompt');
-
-  if (existing) {
-    existing.remove();
-  }
-
-  const prompt = document.createElement('div');
-
-  prompt.id = 'notEnoughCoinsPrompt';
-
-  prompt.innerHTML = `
-    <div class="not-enough-coins-card">
-
-      <div class="not-enough-coins-icon">🪙</div>
-
-      <div class="not-enough-coins-title">
-        NOT ENOUGH COINS
-      </div>
-
-      <div class="not-enough-coins-message">
-        You need 5 coins to see the preview.
-      </div>
-
-      <button type="button" id="closeNotEnoughCoinsPrompt">
-        OK
-      </button>
-
-    </div>
-  `;
-
-  document.body.appendChild(prompt);
-
-  const closeButton =
-    document.getElementById('closeNotEnoughCoinsPrompt');
-
-  if (closeButton) {
-    closeButton.addEventListener('click', () => {
-      prompt.remove();
-    });
-  }
-
-  prompt.addEventListener('click', (event) => {
-    if (event.target === prompt) {
-      prompt.remove();
-    }
-  });
-}
-
-  
-
-                          
+});
