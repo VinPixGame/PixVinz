@@ -1291,90 +1291,266 @@ input:checked + .slider:before { transform: translateX(22px); }
 }
 
 
-/* Game Level Preview Button */
-#gamePreviewBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  cursor: pointer;
-}
+/* =========================================================
+   PIXVINZ — LEVEL PREVIEW
+   Premium Dark Purple + Gold Glassmorphic
+   ========================================================= */
 
-/* Game Level Preview Modal Overlay */
 .game-level-preview-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.75);
+  inset: 0;
+  z-index: 9998;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
-  transition: opacity 0.3s ease;
-}
 
-/* Hidden state utility class */
-.game-level-preview-overlay.hidden {
-  display: none !important;
-}
-
-/* Modal Card Container */
-.game-level-preview-card {
-  background: #1e1e2f;
-  border: 2px solid #4a4ae2;
-  border-radius: 12px;
   padding: 20px;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(92, 43, 145, 0.28),
+      rgba(8, 2, 20, 0.94) 70%
+    );
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  animation: previewFadeIn 0.25s ease;
+}
+
+.game-level-preview-overlay.hidden {
+  display: none;
+}
+
+.game-level-preview-card {
+  width: min(92vw, 520px);
+  max-height: 92vh;
+
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
+
+  padding: 16px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(55, 22, 91, 0.94),
+      rgba(19, 6, 36, 0.97)
+    );
+
+  border: 2px solid #ffd700;
+  border-radius: 24px;
+
+  box-shadow:
+    0 0 10px rgba(255, 215, 0, 0.55),
+    0 0 30px rgba(255, 215, 0, 0.22),
+    0 0 60px rgba(125, 45, 180, 0.28),
+    inset 0 0 25px rgba(255, 215, 0, 0.05);
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  animation: previewCardIn 0.3s ease;
 }
 
-/* Modal Header */
+/* Header */
+
 .game-level-preview-header {
+  min-height: 42px;
+
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  color: #ffffff;
-  font-weight: bold;
-  font-size: 16px;
+  justify-content: space-between;
+
+  padding: 0 4px 8px;
+
+  border-bottom: 1px solid rgba(255, 215, 0, 0.35);
 }
 
-/* Close Button */
-.game-level-preview-header .close-modal-btn {
-  background: transparent;
-  border: none;
-  color: #aaa;
+#gameLevelPreviewModalTitle {
+  color: #ffd700;
+
   font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+
+  text-shadow:
+    0 0 8px rgba(255, 215, 0, 0.55);
+}
+
+/* Close button */
+
+.game-level-preview-header .close-modal-btn {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  color: #ffd700;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(125, 45, 180, 0.35),
+      rgba(30, 10, 50, 0.75)
+    );
+
+  border: 1px solid rgba(255, 215, 0, 0.65);
+  border-radius: 12px;
+
+  box-shadow:
+    0 0 10px rgba(255, 215, 0, 0.18);
+
   cursor: pointer;
-  transition: color 0.2s;
+
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
 }
 
 .game-level-preview-header .close-modal-btn:hover {
-  color: #fff;
+  background: rgba(255, 215, 0, 0.12);
+
+  box-shadow:
+    0 0 14px rgba(255, 215, 0, 0.45);
 }
 
-/* Image Container & Preview Image */
+.game-level-preview-header .close-modal-btn:active {
+  transform: scale(0.92);
+}
+
+/* Image */
+
 .game-level-preview-img-container {
   width: 100%;
-  aspect-ratio: 1 / 1;
-  background: #000;
-  border-radius: 8px;
-  overflow: hidden;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  overflow: hidden;
+
+  padding: 4px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 215, 0, 0.12),
+      rgba(93, 39, 140, 0.18)
+    );
+
+  border: 1px solid rgba(255, 215, 0, 0.55);
+  border-radius: 18px;
+
+  box-shadow:
+    0 0 16px rgba(255, 215, 0, 0.18),
+    inset 0 0 20px rgba(0, 0, 0, 0.35);
 }
 
 #gameLevelPreviewModalImg {
+  display: block;
+
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
+  max-height: 68vh;
+
+  object-fit: contain;
+
+  border-radius: 14px;
+
+  background: #12051f;
+
+  box-shadow:
+    0 0 8px rgba(255, 215, 0, 0.22);
 }
+
+/* Countdown */
+
+.game-level-preview-card > div:last-child {
+  padding: 4px 0 2px;
+
+  color: rgba(255, 255, 255, 0.85) !important;
+
+  font-size: 13px !important;
+  letter-spacing: 0.3px;
+}
+
+#gameLevelPreviewCountdownSeconds {
+  color: #ffd700 !important;
+
+  font-size: 16px;
+
+  text-shadow:
+    0 0 8px rgba(255, 215, 0, 0.65);
+}
+
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
+@keyframes previewFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes previewCardIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  .game-level-preview-overlay {
+    padding: 14px;
+  }
+
+  .game-level-preview-card {
+    width: 94vw;
+
+    padding: 12px;
+
+    border-radius: 20px;
+  }
+
+  #gameLevelPreviewModalTitle {
+    font-size: 15px;
+    letter-spacing: 1px;
+  }
+
+  .game-level-preview-header .close-modal-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+  }
+
+  #gameLevelPreviewModalImg {
+    max-height: 65vh;
+    border-radius: 12px;
+  }
 
 
 
