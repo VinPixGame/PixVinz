@@ -55,16 +55,16 @@
   </div>
 
   <!-- Image Preview Modal -->
-<div id="imageModal" class="modal-overlay hidden">
-  <div class="preview-modal-content">
-    <h3 id="modalLevelTitle" style="color: #ffd700; margin: 0 0 10px 0; font-size: 16px; letter-spacing: 1px; width: 100%;">LEVEL PREVIEW</h3>
-    <div style="width: 100%; display: flex; justify-content: center; align-items: center; margin-bottom: 12px;">
-      <img id="modalPreviewImg" src="" alt="Level Preview" style="display: block; max-width: 100%; max-height: 40vh; width: auto; height: auto; object-fit: contain; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); margin: 0 auto;">
+  <div id="imageModal" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+    <div class="modal-content" style="background: #1a0b2e; padding: 20px; border-radius: 16px; border: 2px solid #ffd700; width: 90%; max-width: 320px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.7);">
+      <h3 id="modalLevelTitle" style="color: #ffd700; margin: 0 0 10px 0; font-size: 16px; letter-spacing: 1px; width: 100%;">LEVEL PREVIEW</h3>
+      <div style="width: 100%; display: flex; justify-content: center; align-items: center; margin-bottom: 12px;">
+        <img id="modalPreviewImg" src="" alt="Level Preview" style="display: block; max-width: 100%; max-height: 40vh; width: auto; height: auto; object-fit: contain; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); margin: 0 auto;">
+      </div>
+      <div id="previewCountdown" style="color: #fff; font-size: 13px; margin-bottom: 12px; width: 100%;">Closing in <span id="countdownSeconds" style="color: #ffd700; font-weight: bold;">10</span>s</div>
+      <button id="closePreviewBtn" style="width: 100%; padding: 12px; font-weight: bold; background: #ffd700; color: #1a0b2e; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">CLOSE</button>
     </div>
-    <div id="previewCountdown" style="color: #fff; font-size: 13px; margin-bottom: 12px; width: 100%;">Closing in <span id="countdownSeconds" style="color: #ffd700; font-weight: bold;">10</span>s</div>
-    <button id="closePreviewBtn" style="width: 100%; padding: 12px; font-weight: bold; background: #ffd700; color: #1a0b2e; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;">CLOSE</button>
   </div>
-</div>
 
   <!-- Victory Modal -->
   <div id="victoryModal" class="modal-overlay hidden">
