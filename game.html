@@ -46,27 +46,50 @@
     <div class="puzzle-wrapper">
       <div class="puzzle-grid" id="puzzleGrid"></div>
     </div>
-
 <!-- Game Actions -->
 <div class="game-actions">
-  <button class="btn btn-secondary" id="gamePreviewBtn" onclick="openGameLevelPreview()">👁️ PREVIEW (-🪙5)</button>
-  <button class="btn btn-primary" id="shuffleBtn">🔀 SHUFFLE</button>
+  <button class="btn btn-secondary" id="gamePreviewBtn">
+    👁️ PREVIEW (-🪙5)
+  </button>
+
+  <button class="btn btn-primary" id="shuffleBtn">
+    🔀 SHUFFLE
+  </button>
 </div>
+
 
 <!-- Dedicated Level Preview Modal -->
 <div id="gameLevelPreviewModal" class="game-level-preview-overlay hidden">
+
   <div class="game-level-preview-card">
+
     <div class="game-level-preview-header">
-      <span id="gameLevelPreviewModalTitle">LEVEL 01 PREVIEW</span>
-      <button class="icon-btn close-modal-btn" id="closeGameLevelPreviewModalBtn">✕</button>
+      <span id="gameLevelPreviewModalTitle">
+        LEVEL 01 PREVIEW
+      </span>
+
+      <button
+        class="icon-btn close-modal-btn"
+        id="closeGameLevelPreviewModalBtn"
+        type="button">
+        ✕
+      </button>
     </div>
+
     <div class="game-level-preview-img-container">
-      <img id="gameLevelPreviewModalImg" src="" alt="Level Preview">
+      <img
+        id="gameLevelPreviewModalImg"
+        src=""
+        alt="Level Preview">
     </div>
-    <div style="color: #fff; font-size: 13px; text-align: center;">
-      Closing in <span id="gameLevelPreviewCountdownSeconds" style="color: #ffd700; font-weight: bold;">10</span>s
+
+    <div class="game-level-preview-countdown">
+      Closing in
+      <span id="gameLevelPreviewCountdownSeconds">10</span>s
     </div>
+
   </div>
+
 </div>
 
   <!-- Victory Modal -->
