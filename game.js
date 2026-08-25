@@ -1,4 +1,4 @@
-// game.js - Clean & Synchronized Game Logic with Isolated Preview
+// game.js - Complete Synchronized Logic with Working Preview Component
 
 document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -134,7 +134,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (moves <= gridSize * 5) stars = 3;
       else if (moves <= gridSize * 8) stars = 2;
 
-      // Populate victory modal fields before triggering playerstat victory
       const victoryImg = document.getElementById('victoryImg');
       if (victoryImg) victoryImg.src = imageSrc;
 
@@ -209,7 +208,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // --- ISOLATED PREVIEW COMPONENT LOGIC ---
+  // --- WORKING ISOLATED PREVIEW COMPONENT LOGIC ---
   let pvTimer = null;
   let pvCountdownInterval = null;
 
@@ -236,6 +235,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const previewCost = 5;
       let success = true;
 
+      // Use spendCoins from playerstat.js with fallback
       if (typeof spendCoins === 'function') {
         success = await spendCoins(previewCost);
       } else {
