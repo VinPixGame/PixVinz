@@ -211,77 +211,87 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  let previewTimer = null;
-  let countdownInterval = null;
+let currentLevel = 1; // Change this dynamically as your level changes
+let previewTimer = null;
+let countdownInterval = null;
 
-  function closePreviewModal() {
+function closePreviewModal() {
     const modal = document.getElementById('imageModal');
     if (modal) modal.classList.add('hidden');
     if (previewTimer) clearTimeout(previewTimer);
     if (countdownInterval) clearInterval(countdownInterval);
-  }
+}
 
-  const previewBtn = document.getElementById('previewBtn');
-  if (previewBtn) {
+const previewBtn = document.getElementById('previewBtn');
+if (previewBtn) {
     previewBtn.addEventListener('click', async () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+        if (typeof AudioManager !== 'undefined') AudioManager.playClick();
 
-      const previewCost = 5;
-      let success = true;
+        const previewCost = 5;
+        let success = true;
 
-      // Use spendCoins from playerstat.js
-      if (typeof spendCoins === 'function') {
-        success = await spendCoins(previewCost);
-      } else {
-        let totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
-        if (totalCoins < previewCost) {
-          success = false;
+        if (typeof spendCoins === 'function') {
+            success = await spendCoins(previewCost);
         } else {
-          localStorage.setItem('totalCoins', totalCoins - previewCost);
+            let totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
+            if (totalCoins < previewCost) {
+                success = false;
+            } else {
+                localStorage.setItem('totalCoins', totalCoins - previewCost);
+            }
         }
-      }
 
-      if (!success) {
-        alert("Not enough coins! You need 5 coins to preview the image.");
-        return;
-      }
+        if (!success) {
+            alert("Not enough coins! You need 5 coins to preview the image.");
+            return;
+        }
 
-      if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+        if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
 
-      const modal = document.getElementById('imageModal');
-      const modalImg = document.getElementById('modalPreviewImg');
-      const modalTitle = document.getElementById('modalLevelTitle');
-      const countdownSpan = document.getElementById('countdownSeconds');
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalPreviewImg');
+        const modalTitle = document.getElementById('modalLevelTitle');
+        const countdownSpan = document.getElementById('countdownSeconds');
 
-      if (modalTitle) modalTitle.innerText = `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
-      if (modalImg) modalImg.src = imageSrc;
-      
-      let timeLeft = 10;
-      if (countdownSpan) countdownSpan.innerText = timeLeft;
-      if (modal) modal.classList.remove('hidden');
+        // Dynamically set level text (caps/ensures between 1 and 200)
+        let lvl = (typeof currentLevel !== 'undefined' ? currentLevel : 1);
+        if (lvl < 1) lvl = 1;
+        if (lvl > 200) lvl = 200;
 
-      if (previewTimer) clearTimeout(previewTimer);
-      if (countdownInterval) clearInterval(countdownInterval);
-
-      countdownInterval = setInterval(() => {
-        timeLeft--;
+        if (modalTitle) modalTitle.innerText = `LEVEL ${lvl.toString().padStart(2, '0')} PREVIEW`;
+        
+        // Dynamically point to image/level1.jpeg up to image/level200.jpeg
+        if (modalImg) modalImg.src = `image/level${lvl}.jpeg`;
+        
+        let timeLeft = 10;
         if (countdownSpan) countdownSpan.innerText = timeLeft;
-        if (timeLeft <= 0) clearInterval(countdownInterval);
-      }, 1000);
+        if (modal) modal.classList.remove('hidden');
 
-      previewTimer = setTimeout(() => {
-        closePreviewModal();
-      }, 10000);
+        if (previewTimer) clearTimeout(previewTimer);
+        if (countdownInterval) clearInterval(countdownInterval);
+
+        countdownInterval = setInterval(() => {
+            timeLeft--;
+            if (countdownSpan) countdownSpan.innerText = timeLeft;
+            if (timeLeft <= 0) clearInterval(countdownInterval);
+        }, 1000);
+
+        previewTimer = setTimeout(() => {
+            closePreviewModal();
+        }, 10000);
     });
-  }
+}
 
-  const closePreviewBtn = document.getElementById('closePreviewBtn');
-  if (closePreviewBtn) {
+const closePreviewBtn = document.getElementById('closePreviewBtn');
+if (closePreviewBtn) {
     closePreviewBtn.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      closePreviewModal();
+        if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+        closePreviewModal();
     });
-  }
+}
+
+
+  
 
   const nextLevelBtn = document.getElementById('nextLevelBtn');
   if (nextLevelBtn) {
