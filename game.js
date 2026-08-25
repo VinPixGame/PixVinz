@@ -266,90 +266,87 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
+document.addEventListener('DOMContentLoaded', () => {
+    let levelPreviewTimer = null;
+    let levelCountdownInterval = null;
 
-let levelPreviewTimer = null;
-let levelCountdownInterval = null;
-
-function closeLevelPreviewModal() {
-    const modal = document.getElementById('previewModal');
-    if (modal) modal.classList.add('hidden');
-    if (levelPreviewTimer) clearTimeout(levelPreviewTimer);
-    if (levelCountdownInterval) clearInterval(levelCountdownInterval);
-}
-
-// Close button listener for the preview modal
-const closePreviewModalBtn = document.getElementById('closePreviewModalBtn');
-if (closePreviewModalBtn) {
-    closePreviewModalBtn.addEventListener('click', () => {
-        if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-        closeLevelPreviewModal();
-    });
-}
-
-const previewBtn = document.getElementById('previewBtn');
-if (previewBtn) {
-    previewBtn.addEventListener('click', () => {
-        if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-
-        const previewCost = 5;
-
-        // Check and deduct coins securely using playerstat.js
-        if (typeof spendCoins !== 'function') {
-            alert("Error: playerstat.js is not loaded.");
-            return;
-        }
-
-        let success = spendCoins(previewCost);
-        if (!success) {
-            alert("Not enough coins! You need 5 coins to preview the image.");
-            return;
-        }
-
-        // Target the dedicated preview modal elements
+    function closeLevelPreviewModal() {
         const modal = document.getElementById('previewModal');
-        const modalImg = document.getElementById('previewModalImg');
-        const modalTitle = document.getElementById('previewModalTitle');
-        const countdownSpan = document.getElementById('previewCountdownSeconds');
-
-        if (!modal) {
-            console.error("previewModal element not found in HTML!");
-            return;
+        if (modal) {
+            modal.classList.add('hidden');
         }
-
-        // Fetch current level safely
-        let lvl = 1;
-        if (typeof getCurrentLevel === 'function') {
-            lvl = getCurrentLevel();
-        } else if (typeof currentLevel !== 'undefined') {
-            lvl = currentLevel;
-        }
-        if (lvl < 1) lvl = 1;
-        if (lvl > 200) lvl = 200;
-
-        // Set title, image source, and timer
-        if (modalTitle) modalTitle.innerText = `LEVEL ${lvl.toString().padStart(2, '0')} PREVIEW`;
-        if (modalImg) modalImg.src = `image/level${lvl}.jpeg`;
-        
-        let timeLeft = 10;
-        if (countdownSpan) countdownSpan.innerText = timeLeft;
-        
-        // Open the preview modal (removes hidden class and forces display flex)
-        modal.classList.remove('hidden');
-        modal.style.display = 'flex';
-
         if (levelPreviewTimer) clearTimeout(levelPreviewTimer);
         if (levelCountdownInterval) clearInterval(levelCountdownInterval);
+    }
 
-        levelCountdownInterval = setInterval(() => {
-            timeLeft--;
-            if (countdownSpan) countdownSpan.innerText = timeLeft;
-            if (timeLeft <= 0) {
-                clearInterval(levelCountdownInterval);
-            }
-        }, 1000);
-
-        levelPreviewTimer = setTimeout(() => {
+    const closePreviewModalBtn = document.getElementById('closePreviewModalBtn');
+    if (closePreviewModalBtn) {
+        closePreviewModalBtn.addEventListener('click', () => {
+            if (typeof AudioManager !== 'undefined') AudioManager.playClick();
             closeLevelPreviewModal();
-        }, 10000);
-    });
-}
+        });
+    }
+
+    const previewBtn = document.getElementById('previewBtn');
+    if (previewBtn) {
+        previewBtn.addEventListener('click', () => {
+            if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+
+            const previewCost = 5;
+
+            if (typeof spendCoins !== 'function') {
+                alert("Error: playerstat.js is not loaded.");
+                return;
+            }
+
+            let success = spendCoins(previewCost);
+            if (!success) {
+                alert("Not enough coins! You need 5 coins to preview the image.");
+                return;
+            }
+
+            const modal = document.getElementById('previewModal');
+            const modalImg = document.getElementById('previewModalImg');
+            const modalTitle = document.getElementById('previewModalTitle');
+            const countdownSpan = document.getElementById('previewCountdownSeconds');
+
+            if (!modal) {
+                console.error("previewModal element not found in HTML!");
+                return;
+            }
+
+            let lvl = 1;
+            if (typeof getCurrentLevel === 'function') {
+                lvl = getCurrentLevel();
+            } else if (typeof currentLevel !== 'undefined') {
+                lvl = currentLevel;
+            }
+            if (lvl < 1) lvl = 1;
+            if (lvl > 200) lvl = 200;
+
+            if (modalTitle) modalTitle.innerText = `LEVEL ${lvl.toString().padStart(2, '0')} PREVIEW`;
+            if (modalImg) modalImg.src = `image/level${lvl}.jpeg`;
+            
+            let timeLeft = 10;
+            if (countdownSpan) countdownSpan.innerText = timeLeft;
+            
+            // Remove the hidden class so the CSS flex display takes over
+            modal.classList.remove('hidden');
+
+            if (levelPreviewTimer) clearTimeout(levelPreviewTimer);
+            if (levelCountdownInterval) clearInterval(levelCountdownInterval);
+
+            levelCountdownInterval = setInterval(() => {
+                timeLeft--;
+                if (countdownSpan) countdownSpan.innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(levelCountdownInterval);
+                }
+            }, 1000);
+
+            levelPreviewTimer = setTimeout(() => {
+                closeLevelPreviewModal();
+            }, 10000);
+        });
+    }
+});
