@@ -270,9 +270,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   isGameStarted = true;
   startTimer();
 
+
 // =========================================================
 // NORMAL PUZZLE — LEVEL PREVIEW
-// Costs 5 coins and shows the current level image for 10s
+// Costs exactly 5 coins and shows the current level image
 // =========================================================
 
 let gamePreviewCountdownInterval = null;
@@ -282,69 +283,76 @@ const gameLevelPreviewModal = document.getElementById('gameLevelPreviewModal');
 const gameLevelPreviewModalImg = document.getElementById('gameLevelPreviewModalImg');
 const gameLevelPreviewModalTitle = document.getElementById('gameLevelPreviewModalTitle');
 const gameLevelPreviewCountdownSeconds = document.getElementById('gameLevelPreviewCountdownSeconds');
-const closeGameLevelPreviewModalBtn = document.getElementById('closeGameLevelPreviewModalBtn');
+const closeGameLevelPreviewModalBtn =
+  document.getElementById('closeGameLevelPreviewModalBtn');
 
 
 // ---------------------------------------------------------
 // OPEN PREVIEW
 // ---------------------------------------------------------
 
-function openGameLevelPreview() {
+async function openGameLevelPreview() {
 
-  // Safety check
   if (!gameLevelPreviewModal || !gameLevelPreviewModalImg) {
-    console.error('Game level preview elements are missing from HTML.');
+    console.error('Level preview modal elements are missing from HTML.');
     return;
   }
 
-  // Deduct exactly 5 coins through playerstat.js
+  // Spend exactly 5 coins.
+  // spendCoins() is async in playerstat.js, so WAIT for its result.
   if (typeof spendCoins !== 'function') {
-    console.error('spendCoins() was not found in playerstat.js.');
+    console.error('spendCoins() is not available.');
     return;
   }
 
-  const paymentSuccessful = spendCoins(5);
+  const paymentSuccessful = await spendCoins(5);
 
-  // Not enough coins
-  if (!paymentSuccessful) {
+  // ONLY show this when the player really cannot pay.
+  if (paymentSuccessful !== true) {
     showNotEnoughCoinsPrompt();
     return;
   }
 
-  // Current level image
+  // Use the EXACT SAME image source as the puzzle.
   gameLevelPreviewModalImg.src = imageSrc;
 
-  // Current level title
-  if (gameLevelPreviewModalTitle) {
-    gameLevelPreviewModalTitle.textContent =
-      `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
-  }
+  // Make sure the image is loaded before displaying the modal.
+  gameLevelPreviewModalImg.onload = () => {
+    gameLevelPreviewModal.classList.remove('hidden');
+    gameLevelPreviewModal.style.display = 'flex';
+  };
 
-  // Reset countdown
+  gameLevelPreviewModalImg.onerror = () => {
+    console.error('Could not load level preview image:', imageSrc);
+  };
+
+  gameLevelPreviewModalTitle.textContent =
+    `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
+
   let secondsLeft = 10;
 
-  if (gameLevelPreviewCountdownSeconds) {
-    gameLevelPreviewCountdownSeconds.textContent = secondsLeft;
-  }
+  gameLevelPreviewCountdownSeconds.textContent = secondsLeft;
 
-  // Stop previous countdown if one exists
   if (gamePreviewCountdownInterval) {
     clearInterval(gamePreviewCountdownInterval);
     gamePreviewCountdownInterval = null;
   }
 
-  // Show modal
-  gameLevelPreviewModal.classList.remove('hidden');
-  gameLevelPreviewModal.style.display = 'flex';
+  // Set the image first.
+  gameLevelPreviewModalImg.src = imageSrc;
 
-  // Countdown
+  // In case the image is already cached, onload may fire before this.
+  if (gameLevelPreviewModalImg.complete &&
+      gameLevelPreviewModalImg.naturalWidth > 0) {
+    gameLevelPreviewModal.classList.remove('hidden');
+    gameLevelPreviewModal.style.display = 'flex';
+  }
+
   gamePreviewCountdownInterval = setInterval(() => {
 
     secondsLeft--;
 
-    if (gameLevelPreviewCountdownSeconds) {
-      gameLevelPreviewCountdownSeconds.textContent = secondsLeft;
-    }
+    gameLevelPreviewCountdownSeconds.textContent = secondsLeft;
 
     if (secondsLeft <= 0) {
       closeGameLevelPreview();
@@ -370,7 +378,6 @@ function closeGameLevelPreview() {
     gameLevelPreviewModal.style.display = 'none';
   }
 
-  // Clear image after closing
   if (gameLevelPreviewModalImg) {
     gameLevelPreviewModalImg.src = '';
   }
@@ -382,11 +389,7 @@ function closeGameLevelPreview() {
 // ---------------------------------------------------------
 
 if (gamePreviewBtn) {
-
-  gamePreviewBtn.addEventListener('click', () => {
-    openGameLevelPreview();
-  });
-
+  gamePreviewBtn.addEventListener('click', openGameLevelPreview);
 }
 
 
@@ -395,16 +398,12 @@ if (gamePreviewBtn) {
 // ---------------------------------------------------------
 
 if (closeGameLevelPreviewModalBtn) {
-
-  closeGameLevelPreviewModalBtn.addEventListener('click', () => {
-    closeGameLevelPreview();
-  });
-
+  closeGameLevelPreviewModalBtn.addEventListener('click', closeGameLevelPreview);
 }
 
 
 // ---------------------------------------------------------
-// NOT ENOUGH COINS MESSAGE
+// NOT ENOUGH COINS
 // ---------------------------------------------------------
 
 function showNotEnoughCoinsPrompt() {
@@ -451,19 +450,12 @@ function showNotEnoughCoinsPrompt() {
   }
 
   prompt.addEventListener('click', (event) => {
-
     if (event.target === prompt) {
       prompt.remove();
     }
-
   });
 }
 
-
   
-});
 
-
-
-
-
+                          
