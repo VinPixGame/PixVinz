@@ -333,7 +333,7 @@ if (previewBtn) {
         let timeLeft = 10;
         if (countdownSpan) countdownSpan.innerText = timeLeft;
         
-        // Open the preview modal
+        // Open the preview modal (removes hidden class and forces display flex)
         modal.classList.remove('hidden');
         modal.style.display = 'flex';
 
