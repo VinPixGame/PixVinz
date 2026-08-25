@@ -550,6 +550,15 @@ function startConfetti() {
     const canvas = document.getElementById('confettiCanvas');
     if (!canvas) return;
     
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100vw';
+    canvas.style.height = '100vh';
+    canvas.style.zIndex = '99999';
+    canvas.style.pointerEvents = 'none';
+    // ------------------------------------------------
+
     const videoContainer = document.getElementById('winVideoContainer');
     
     let startX = window.innerWidth / 2;
@@ -557,8 +566,10 @@ function startConfetti() {
 
     if (videoContainer) {
         const rect = videoContainer.getBoundingClientRect();
-        startX = rect.left + rect.width / 2;
-        startY = rect.top + rect.height / 2;
+        if (rect.width > 0 && rect.height > 0) {
+            startX = rect.left + rect.width / 2;
+            startY = rect.top + rect.height / 2;
+        }
     }
 
     canvas.style.display = 'block';
