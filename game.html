@@ -49,23 +49,23 @@
 
     <!-- Game Actions -->
     <div class="game-actions">
-      <button class="btn btn-secondary" id="previewBtn">🖼️ PREVIEW (🪙5)</button>
+      <button class="btn btn-secondary" id="gamePreviewBtn" data-action="game-preview">👁️ PREVIEW (-🪙5)</button>
       <button class="btn btn-primary" id="shuffleBtn">🔀 SHUFFLE</button>
     </div>
   </div>
 
 <!-- Dedicated Level Preview Modal -->
-<div id="previewModal" class="preview-modal-overlay hidden">
-  <div class="preview-modal-card">
-    <div class="preview-modal-header">
-      <span id="previewModalTitle">LEVEL 01 PREVIEW</span>
-      <button class="icon-btn close-modal-btn" id="closePreviewModalBtn">✕</button>
+<div id="gameLevelPreviewModal" class="game-level-preview-overlay hidden">
+  <div class="game-level-preview-card">
+    <div class="game-level-preview-header">
+      <span id="gameLevelPreviewModalTitle">LEVEL 01 PREVIEW</span>
+      <button class="icon-btn close-modal-btn" id="closeGameLevelPreviewModalBtn">✕</button>
     </div>
-    <div class="preview-modal-img-container">
-      <img id="previewModalImg" src="" alt="Level Preview">
+    <div class="game-level-preview-img-container">
+      <img id="gameLevelPreviewModalImg" src="" alt="Level Preview">
     </div>
     <div style="color: #fff; font-size: 13px; text-align: center;">
-      Closing in <span id="previewCountdownSeconds" style="color: #ffd700; font-weight: bold;">10</span>s
+      Closing in <span id="gameLevelPreviewCountdownSeconds" style="color: #ffd700; font-weight: bold;">10</span>s
     </div>
   </div>
 </div>
