@@ -50,7 +50,20 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const gridSize = 3;
-let currentLevel = 1;
+
+// --- LOAD SAVED CHALLENGE INSTEAD OF LEVEL ---
+function getSavedChallenge() {
+    try {
+        const user = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (!user || !user.username) return 1;
+        const saved = localStorage.getItem(`${user.username}_currentChallenge`);
+        return saved ? parseInt(saved) : 1;
+    } catch (e) {
+        return 1;
+    }
+}
+
+let currentChallenge = getSavedChallenge();
 let moves = 0;
 let timerInterval = null;
 let secondsElapsed = 0;
@@ -72,7 +85,6 @@ const finalMoves = document.getElementById('finalMoves');
 const homeBtn = document.getElementById('homeBtn');
 const nextChallengeBtn = document.getElementById('nextChallengeBtn');
 
-
 const loadingOverlay = document.getElementById('challengeLoadingOverlay');
 const loadingSpinner = document.getElementById('loadingSpinner');
 const startChallengeBtn = document.getElementById('startChallengeBtn');
@@ -83,217 +95,217 @@ let animFrameId = null;
 
 // Initialize DOM elements with a smooth simulated & event-backed loader
 function initBoardDOM() {
-  puzzleBoard.innerHTML = '';
-  tilesCache = [];
-  const videoSrc = `challenge/challenge${currentLevel}.webm`;
+ puzzleBoard.innerHTML = '';
+ tilesCache = [];
+ const videoSrc = `challenge/challenge${currentChallenge}.webm`;
 
-  const loadingPercentEl = document.getElementById('loadingPercent');
-  const loadingBarFill = document.getElementById('loadingBarFill');
+ const loadingPercentEl = document.getElementById('loadingPercent');
+ const loadingBarFill = document.getElementById('loadingBarFill');
 
-  // Show loading overlay & lock state
-  if (loadingOverlay) loadingOverlay.style.display = 'flex';
-  if (loadingSpinner) loadingSpinner.style.display = 'block';
-  if (startChallengeBtn) startChallengeBtn.classList.add('hidden');
-  challengeStarted = false;
+ // Show loading overlay & lock state
+ if (loadingOverlay) loadingOverlay.style.display = 'flex';
+ if (loadingSpinner) loadingSpinner.style.display = 'block';
+ if (startChallengeBtn) startChallengeBtn.classList.add('hidden');
+ challengeStarted = false;
 
-  let currentProgress = 0;
-  if (loadingPercentEl) loadingPercentEl.textContent = '0%';
-  if (loadingBarFill) loadingBarFill.style.width = '0%';
+ let currentProgress = 0;
+ if (loadingPercentEl) loadingPercentEl.textContent = '0%';
+ if (loadingBarFill) loadingBarFill.style.width = '0%';
 
-  if (!masterVideo) {
-    masterVideo = document.createElement('video');
-    masterVideo.loop = true;
-    masterVideo.muted = true;
-    masterVideo.playsInline = true;
-    masterVideo.setAttribute('playsinline', '');
-    masterVideo.style.display = 'none';
-    document.body.appendChild(masterVideo);
-  }
+ if (!masterVideo) {
+   masterVideo = document.createElement('video');
+   masterVideo.loop = true;
+   masterVideo.muted = true;
+   masterVideo.playsInline = true;
+   masterVideo.setAttribute('playsinline', '');
+   masterVideo.style.display = 'none';
+   document.body.appendChild(masterVideo);
+ }
 
-  let isReadyToStart = false;
+ let isReadyToStart = false;
 
-  const updateProgress = (targetPercent) => {
-    if (isReadyToStart) return;
-    if (targetPercent > currentProgress) {
-      currentProgress = targetPercent;
-      if (loadingPercentEl) loadingPercentEl.textContent = `${currentProgress}%`;
-      if (loadingBarFill) loadingBarFill.style.width = `${currentProgress}%`;
-    }
+ const updateProgress = (targetPercent) => {
+   if (isReadyToStart) return;
+   if (targetPercent > currentProgress) {
+     currentProgress = targetPercent;
+     if (loadingPercentEl) loadingPercentEl.textContent = `${currentProgress}%`;
+     if (loadingBarFill) loadingBarFill.style.width = `${currentProgress}%`;
+   }
 
-    if (currentProgress >= 100 && !isReadyToStart) {
-      isReadyToStart = true;
-      setTimeout(() => {
-        if (loadingSpinner) loadingSpinner.style.display = 'none';
-        if (startChallengeBtn) startChallengeBtn.classList.remove('hidden');
-      }, 200);
-    }
-  };
+   if (currentProgress >= 100 && !isReadyToStart) {
+     isReadyToStart = true;
+     setTimeout(() => {
+       if (loadingSpinner) loadingSpinner.style.display = 'none';
+       if (startChallengeBtn) startChallengeBtn.classList.remove('hidden');
+     }, 200);
+   }
+ };
 
-  const progressInterval = setInterval(() => {
-    if (isReadyToStart) {
-      clearInterval(progressInterval);
-      return;
-    }
-    if (currentProgress < 90) {
-      updateProgress(currentProgress + 15);
-    }
-  }, 100);
+ const progressInterval = setInterval(() => {
+   if (isReadyToStart) {
+     clearInterval(progressInterval);
+     return;
+   }
+   if (currentProgress < 90) {
+     updateProgress(currentProgress + 15);
+   }
+ }, 100);
 
-  masterVideo.oncanplaythrough = () => updateProgress(100);
-  masterVideo.onloadeddata = () => updateProgress(100);
+ masterVideo.oncanplaythrough = () => updateProgress(100);
+ masterVideo.onloadeddata = () => updateProgress(100);
 
-  setTimeout(() => {
-    updateProgress(100);
-  }, 1500);
+ setTimeout(() => {
+   updateProgress(100);
+ }, 1500);
 
-  masterVideo.src = videoSrc;
-  masterVideo.load();
+ masterVideo.src = videoSrc;
+ masterVideo.load();
 
-  for (let currentPosition = 0; currentPosition < 9; currentPosition++) {
-    const tile = document.createElement('div');
-    tile.classList.add('puzzle-tile');
-    tile.style.position = 'relative';
-    tile.style.width = '100%';
-    tile.style.height = '100%';
-    tile.style.overflow = 'hidden';
-    tile.style.cursor = 'pointer';
+ for (let currentPosition = 0; currentPosition < 9; currentPosition++) {
+   const tile = document.createElement('div');
+   tile.classList.add('puzzle-tile');
+   tile.style.position = 'relative';
+   tile.style.width = '100%';
+   tile.style.height = '100%';
+   tile.style.overflow = 'hidden';
+   tile.style.cursor = 'pointer';
 
-    const canvas = document.createElement('canvas');
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-    canvas.style.display = 'block';
-    tile.appendChild(canvas);
+   const canvas = document.createElement('canvas');
+   canvas.style.width = '100%';
+   canvas.style.height = '100%';
+   canvas.style.display = 'block';
+   tile.appendChild(canvas);
 
-    tile.addEventListener('click', () => {
-      if (!challengeStarted) return;
-      handleTileClick(currentPosition);
-    });
+   tile.addEventListener('click', () => {
+     if (!challengeStarted) return;
+     handleTileClick(currentPosition);
+   });
 
-    puzzleBoard.appendChild(tile);
-    tilesCache.push({ tile, ctx: canvas.getContext('2d') });
-  }
+   puzzleBoard.appendChild(tile);
+   tilesCache.push({ tile, ctx: canvas.getContext('2d') });
+ }
 
-  if (animFrameId) cancelAnimationFrame(animFrameId);
-  startRenderLoop();
+ if (animFrameId) cancelAnimationFrame(animFrameId);
+ startRenderLoop();
 }
 
 function startRenderLoop() {
-  function render() {
-    if (masterVideo && masterVideo.readyState >= masterVideo.HAVE_CURRENT_DATA) {
-      const vWidth = masterVideo.videoWidth;
-      const vHeight = masterVideo.videoHeight;
-      const sliceW = vWidth / 3;
-      const sliceH = vHeight / 3;
+ function render() {
+   if (masterVideo && masterVideo.readyState >= masterVideo.HAVE_CURRENT_DATA) {
+     const vWidth = masterVideo.videoWidth;
+     const vHeight = masterVideo.videoHeight;
+     const sliceW = vWidth / 3;
+     const sliceH = vHeight / 3;
 
-      boardState.forEach((tileIndex, currentPosition) => {
-        const { tile, ctx } = tilesCache[currentPosition];
-        const canvas = ctx.canvas;
+     boardState.forEach((tileIndex, currentPosition) => {
+       const { tile, ctx } = tilesCache[currentPosition];
+       const canvas = ctx.canvas;
 
-        if (canvas.width !== canvas.offsetWidth || canvas.height !== canvas.offsetHeight) {
-          canvas.width = canvas.offsetWidth;
-          canvas.height = canvas.offsetHeight;
-        }
+       if (canvas.width !== canvas.offsetWidth || canvas.height !== canvas.offsetHeight) {
+         canvas.width = canvas.offsetWidth;
+         canvas.height = canvas.offsetHeight;
+       }
 
-        const row = Math.floor(tileIndex / 3);
-        const col = tileIndex % 3;
+       const row = Math.floor(tileIndex / 3);
+       const col = tileIndex % 3;
 
-        ctx.drawImage(
-          masterVideo,
-          col * sliceW, row * sliceH, sliceW, sliceH,
-          0, 0, canvas.width, canvas.height
-        );
+       ctx.drawImage(
+         masterVideo,
+         col * sliceW, row * sliceH, sliceW, sliceH,
+         0, 0, canvas.width, canvas.height
+       );
 
-        if (challengeStarted && selectedTileIndex === currentPosition) {
-          tile.style.border = '3px solid #ffcc00';
-        } else {
-          tile.style.border = '1px solid rgba(255,255,255,0.2)';
-        }
-      });
-    }
-    animFrameId = requestAnimationFrame(render);
-  }
-  render();
+       if (challengeStarted && selectedTileIndex === currentPosition) {
+         tile.style.border = '3px solid #ffcc00';
+       } else {
+         tile.style.border = '1px solid rgba(255,255,255,0.2)';
+       }
+     });
+   }
+   animFrameId = requestAnimationFrame(render);
+ }
+ render();
 }
 
 // Start Challenge Image Button Click Event
 if (startChallengeBtn) {
-  startChallengeBtn.addEventListener('click', () => {
-    masterVideo.play().catch(err => console.log("Video error:", err));
-    
-    const bgm = document.getElementById('challengeBGM');
-    if (bgm) {
-      bgm.currentTime = 0;
-      setTimeout(() => {
-        bgm.play()
-          .then(() => console.log("BGM playing successfully"))
-          .catch(err => console.log("BGM play failed:", err));
-      }, 150);
-    }
+ startChallengeBtn.addEventListener('click', () => {
+   masterVideo.play().catch(err => console.log("Video error:", err));
+   
+   const bgm = document.getElementById('challengeBGM');
+   if (bgm) {
+     bgm.currentTime = 0;
+     setTimeout(() => {
+       bgm.play()
+         .then(() => console.log("BGM playing successfully"))
+         .catch(err => console.log("BGM play failed:", err));
+     }, 150);
+   }
 
-    if (loadingOverlay) loadingOverlay.style.display = 'none';
-    challengeStarted = true;
-    shuffleBoard();
-  });
+   if (loadingOverlay) loadingOverlay.style.display = 'none';
+   challengeStarted = true;
+   shuffleBoard();
+ });
 }
 
 function handleTileClick(clickedPos) {
-  if (!isPlaying && secondsElapsed === 0) {
-    startTimer();
-    isPlaying = true;
-  }
+ if (!isPlaying && secondsElapsed === 0) {
+   startTimer();
+   isPlaying = true;
+ }
 
-  if (selectedTileIndex === null) {
-    selectedTileIndex = clickedPos;
-  } else if (selectedTileIndex === clickedPos) {
-    selectedTileIndex = null;
-  } else {
-    [boardState[selectedTileIndex], boardState[clickedPos]] = [boardState[clickedPos], boardState[selectedTileIndex]];
-    selectedTileIndex = null;
-    moves++;
-    moveCountDisplay.textContent = moves;
+ if (selectedTileIndex === null) {
+   selectedTileIndex = clickedPos;
+ } else if (selectedTileIndex === clickedPos) {
+   selectedTileIndex = null;
+ } else {
+   [boardState[selectedTileIndex], boardState[clickedPos]] = [boardState[clickedPos], boardState[selectedTileIndex]];
+   selectedTileIndex = null;
+   moves++;
+   moveCountDisplay.textContent = moves;
 
-    if (checkWin()) {
-      endGame();
-    }
-  }
+   if (checkWin()) {
+     endGame();
+   }
+ }
 }
 
 function shuffleBoard() {
-  for (let i = 0; i < 50; i++) {
-    const pos1 = Math.floor(Math.random() * 9);
-    const pos2 = Math.floor(Math.random() * 9);
-    [boardState[pos1], boardState[pos2]] = [boardState[pos2], boardState[pos1]];
-  }
-  
-  if (checkWin()) {
-    shuffleBoard();
-    return;
-  }
+ for (let i = 0; i < 50; i++) {
+   const pos1 = Math.floor(Math.random() * 9);
+   const pos2 = Math.floor(Math.random() * 9);
+   [boardState[pos1], boardState[pos2]] = [boardState[pos2], boardState[pos1]];
+ }
+ 
+ if (checkWin()) {
+   shuffleBoard();
+   return;
+ }
 
-  selectedTileIndex = null;
-  moves = 0;
-  moveCountDisplay.textContent = moves;
-  secondsElapsed = 0;
-  timerDisplay.textContent = "00:00";
-  stopTimer();
-  isPlaying = false;
+ selectedTileIndex = null;
+ moves = 0;
+ moveCountDisplay.textContent = moves;
+ secondsElapsed = 0;
+ timerDisplay.textContent = "00:00";
+ stopTimer();
+ isPlaying = false;
 }
 
 function startTimer() {
-  timerInterval = setInterval(() => {
-    secondsElapsed++;
-    const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
-    const secs = String(secondsElapsed % 60).padStart(2, '0');
-    timerDisplay.textContent = `${mins}:${secs}`;
-  }, 1000);
+ timerInterval = setInterval(() => {
+   secondsElapsed++;
+   const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+   const secs = String(secondsElapsed % 60).padStart(2, '0');
+   timerDisplay.textContent = `${mins}:${secs}`;
+ }, 1000);
 }
 
 function stopTimer() {
-  clearInterval(timerInterval);
+ clearInterval(timerInterval);
 }
 
 function checkWin() {
-  return boardState.every((val, index) => val === winningState[index]);
+ return boardState.every((val, index) => val === winningState[index]);
 }
 
 // --- CALCULATE STARS, COINS, AND XP ---
@@ -315,7 +327,7 @@ function calculateChallengeRewards(timeInSeconds, moves) {
     else earnedCoins = 30;
 
     // --- UPDATED XP FORMULA (Base 2000 XP) ---
-    const baseXP = 2000;                  
+    const baseXP = 2000;                    
     const timePenalty = timeInSeconds * 3; // Lose 3 XP per second taken
     const movePenalty = safeMoves * 15;    // Lose 15 XP per move made
     
@@ -377,84 +389,84 @@ function recordCompletedChallenge(challengeId) {
 
 // --- END GAME FUNCTION ---
 function endGame() {
-  stopTimer();
-  isPlaying = false;
-  challengeStarted = false;
-  
-  const bgm = document.getElementById('challengeBGM');
-  if (bgm) { bgm.pause(); bgm.currentTime = 0; }
+ stopTimer();
+ isPlaying = false;
+ challengeStarted = false;
+ 
+ const bgm = document.getElementById('challengeBGM');
+ if (bgm) { bgm.pause(); bgm.currentTime = 0; }
 
-  const victoryAudio = document.getElementById('challengeVictoryBGM');
-  if (victoryAudio) {
-    victoryAudio.currentTime = 0;
-    victoryAudio.play().catch(err => console.log("Victory audio play error:", err));
-  }
+ const victoryAudio = document.getElementById('challengeVictoryBGM');
+ if (victoryAudio) {
+   victoryAudio.currentTime = 0;
+   victoryAudio.play().catch(err => console.log("Victory audio play error:", err));
+ }
 
-  finalTime.textContent = timerDisplay.textContent;
-  finalMoves.textContent = moves;
+ finalTime.textContent = timerDisplay.textContent;
+ finalMoves.textContent = moves;
 
-  const totalSeconds = getTimerSeconds();
-  const { stars, earnedCoins, earnedXp } = calculateChallengeRewards(totalSeconds, moves);
+ const totalSeconds = getTimerSeconds();
+ const { stars, earnedCoins, earnedXp } = calculateChallengeRewards(totalSeconds, moves);
 
-  const isAlreadyCompleted = localStorage.getItem(getUserKey(`challenge_done_${currentLevel}`)) === 'true';
+ const isAlreadyCompleted = localStorage.getItem(getUserKey(`challenge_done_${currentChallenge}`)) === 'true';
 
-  const finalCoins = isAlreadyCompleted ? 0 : earnedCoins;
-  const finalXp = isAlreadyCompleted ? 0 : earnedXp;
+ const finalCoins = isAlreadyCompleted ? 0 : earnedCoins;
+ const finalXp = isAlreadyCompleted ? 0 : earnedXp;
 
-  const earnedCoinsEl = document.getElementById('earnedCoins');
-  const earnedXpEl = document.getElementById('earnedXp');
-  const starContainerEl = document.getElementById('starContainer');
-  
-  if (earnedCoinsEl) earnedCoinsEl.textContent = finalCoins;
-  if (earnedXpEl) earnedXpEl.textContent = finalXp;
-  
-  if (starContainerEl) {
-      starContainerEl.innerHTML = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
-  }
+ const earnedCoinsEl = document.getElementById('earnedCoins');
+ const earnedXpEl = document.getElementById('earnedXp');
+ const starContainerEl = document.getElementById('starContainer');
+ 
+ if (earnedCoinsEl) earnedCoinsEl.textContent = finalCoins;
+ if (earnedXpEl) earnedXpEl.textContent = finalXp;
+ 
+ if (starContainerEl) {
+     starContainerEl.innerHTML = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+ }
 
-  if (!isAlreadyCompleted) {
-      if (typeof earnCoins === 'function') {
-        earnCoins(finalCoins);
-      }
+ if (!isAlreadyCompleted) {
+     if (typeof earnCoins === 'function') {
+       earnCoins(finalCoins);
+     }
 
-      const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
-      const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp'; 
-      
-      let currentXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
-      currentXp += finalXp;
-      localStorage.setItem(xpStoreKey, currentXp);
+     const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
+     const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp'; 
+     
+     let currentXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
+     currentXp += finalXp;
+     localStorage.setItem(xpStoreKey, currentXp);
 
-      if (typeof saveUserDataToCloud === 'function') {
-          saveUserDataToCloud();
-      }
-      if (typeof updateXpProgress === 'function') updateXpProgress();
-      if (typeof updateProfileUI === 'function') updateProfileUI();
-      
-      recordCompletedChallenge(currentLevel);
-  }
+     if (typeof saveUserDataToCloud === 'function') {
+         saveUserDataToCloud();
+     }
+     if (typeof updateXpProgress === 'function') updateXpProgress();
+     if (typeof updateProfileUI === 'function') updateProfileUI();
+     
+     recordCompletedChallenge(currentChallenge);
+ }
 
-  const currentLevelKey = getUserKey('currentLevel');
-  let maxUnlocked = parseInt(localStorage.getItem(currentLevelKey)) || 1;
-  if (currentLevel >= maxUnlocked) {
-      localStorage.setItem(currentLevelKey, currentLevel + 1);
-  }
+ const currentChallengeKey = getUserKey('currentChallenge');
+ let maxUnlocked = parseInt(localStorage.getItem(currentChallengeKey)) || 1;
+ if (currentChallenge >= maxUnlocked && currentChallenge < 100) {
+     localStorage.setItem(currentChallengeKey, currentChallenge + 1);
+ }
 
-  const winVideoContainer = document.getElementById('winVideoContainer');
-  if (winVideoContainer) {
-    winVideoContainer.innerHTML = '';
-    const winVideo = document.createElement('video');
-    winVideo.src = `challenge/challenge${currentLevel}.webm`;
-    winVideo.autoplay = true;
-    winVideo.loop = true;
-    winVideo.muted = true;
-    winVideo.playsInline = true;
-    winVideoContainer.appendChild(winVideo);
-    winVideo.play().catch(err => console.log("Win video play error:", err));
-  }
+ const winVideoContainer = document.getElementById('winVideoContainer');
+ if (winVideoContainer) {
+   winVideoContainer.innerHTML = '';
+   const winVideo = document.createElement('video');
+   winVideo.src = `challenge/challenge${currentChallenge}.webm`;
+   winVideo.autoplay = true;
+   winVideo.loop = true;
+   winVideo.muted = true;
+   winVideo.playsInline = true;
+   winVideoContainer.appendChild(winVideo);
+   winVideo.play().catch(err => console.log("Win video play error:", err));
+ }
 
-  winModal.classList.remove('hidden');
-  winModal.style.display = 'flex';
-  startConfetti();
+ winModal.classList.remove('hidden');
+ winModal.style.display = 'flex';
+ startConfetti();
 }
 
 function startConfetti() {
@@ -568,9 +580,9 @@ if (challengePreviewBtn) {
     const modalTitle = document.getElementById('challengeModalTitle');
     const countdownSpan = document.getElementById('challengeCountdownSeconds');
 
-    if (modalTitle) modalTitle.innerText = `LEVEL ${String(currentLevel).padStart(2, '0')} PREVIEW`;
+    if (modalTitle) modalTitle.innerText = `CHALLENGE ${String(currentChallenge).padStart(2, '0')} PREVIEW`;
     if (modalVideo) {
-      modalVideo.src = `challenge/challenge${currentLevel}.webm`;
+      modalVideo.src = `challenge/challenge${currentChallenge}.webm`;
       modalVideo.play().catch(err => console.log("Modal preview video error:", err));
     }
     
@@ -629,7 +641,6 @@ if (challengeShuffleBtn) {
 }
 
 // --- HOME BUTTON HANDLER ---
-const homeBtn = document.getElementById('homeBtn');
 if (homeBtn) {
     homeBtn.addEventListener('click', () => {
         // Clear/hide confetti canvas immediately
@@ -653,7 +664,6 @@ if (homeBtn) {
 }
 
 // --- NEXT CHALLENGE BUTTON HANDLER ---
-const nextChallengeBtn = document.getElementById('nextChallengeBtn');
 if (nextChallengeBtn) {
     nextChallengeBtn.addEventListener('click', () => {
         // Clear/hide confetti canvas immediately so it doesn't linger or pop up
@@ -673,8 +683,20 @@ if (nextChallengeBtn) {
         winModal.classList.add('hidden');
         winModal.style.display = 'none';
 
-        // Advance to the next level
-        currentLevel++;
+        // Advance to the next challenge up to 100 max
+        if (currentChallenge < 100) {
+            currentChallenge++;
+        } else {
+            alert("Congratulations! You've beaten all 100 challenges!");
+            window.location.href = 'index.html';
+            return;
+        }
+
+        // Save progress to localStorage
+        const user = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (user && user.username) {
+            localStorage.setItem(`${user.username}_currentChallenge`, currentChallenge);
+        }
 
         // Re-initialize the puzzle board for the next challenge
         initBoardDOM();
