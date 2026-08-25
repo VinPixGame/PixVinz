@@ -267,7 +267,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-
 let previewTimer = null;
 let countdownInterval = null;
 
@@ -285,27 +284,42 @@ if (previewBtn) {
 
         const previewCost = 5;
 
-        // Use playerstat.js spendCoins function which correctly handles usernames & cloud sync
-        if (typeof spendCoins !== 'function') {
-            alert("Error: playerstat.js is not loaded.");
-            return;
-        }
+        // 1. Directly check your user-specific coin key to be 100% sure before deducting
+        const coinKey = (typeof getUserKey === 'function') ? getUserKey('totalCoins') : 'totalCoins';
+        let currentCoins = parseInt(localStorage.getItem(coinKey)) || 0;
 
-        let success = spendCoins(previewCost);
-
-        if (!success) {
+        if (currentCoins < previewCost) {
             alert("Not enough coins! You need 5 coins to preview the image.");
             return;
         }
 
-        // Open modal and start 10s countdown timer
+        // 2. Deduct safely using your playerstat function
+        if (typeof spendCoins === 'function') {
+            spendCoins(previewCost);
+        } else {
+            localStorage.setItem(coinKey, currentCoins - previewCost);
+            if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+        }
+
+        // 3. Force open the modal immediately
         const modal = document.getElementById('imageModal');
         const modalImg = document.getElementById('modalPreviewImg');
         const modalTitle = document.getElementById('modalLevelTitle');
         const countdownSpan = document.getElementById('countdownSeconds');
 
-        // Fetch current level safely using playerstat.js or fallback variables
-        let lvl = (typeof getCurrentLevel === 'function' ? getCurrentLevel() : (typeof currentLevel !== 'undefined' ? currentLevel : 1));
+        if (!modal) {
+            console.error("Error: #imageModal element not found in HTML!");
+            return;
+        }
+
+        // Fetch current level safely
+        let lvl = 1;
+        if (typeof getCurrentLevel === 'function') {
+            lvl = getCurrentLevel();
+        } else if (typeof currentLevel !== 'undefined') {
+            lvl = currentLevel;
+        }
+        
         if (lvl < 1) lvl = 1;
         if (lvl > 200) lvl = 200;
 
@@ -314,7 +328,10 @@ if (previewBtn) {
         
         let timeLeft = 10;
         if (countdownSpan) countdownSpan.innerText = timeLeft;
-        if (modal) modal.classList.remove('hidden');
+        
+        // Remove hidden class and force display to ensure it pops up
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
 
         if (previewTimer) clearTimeout(previewTimer);
         if (countdownInterval) clearInterval(countdownInterval);
