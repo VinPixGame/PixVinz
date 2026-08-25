@@ -219,66 +219,119 @@ document.addEventListener('DOMContentLoaded', async () => {
   let gamePreviewCountdownInterval = null;
 
   window.openGameLevelPreview = function () {
+window.openGameLevelPreview = function () {
 
-    // Check and deduct 5 coins
-    if (typeof spendCoins !== 'function') {
-      console.warn('spendCoins() is not available.');
-      return;
-    }
+  // =========================================================
+  // CHECK COINS FIRST
+  // =========================================================
 
-    if (!spendCoins(5)) {
-      showNotEnoughCoinsPrompt();
-      return;
-    }
+  if (typeof spendCoins !== 'function') {
+    console.warn('spendCoins() is not available.');
+    return;
+  }
 
-    const modal = document.getElementById('gameLevelPreviewModal');
-    const previewImg = document.getElementById('gameLevelPreviewModalImg');
-    const title = document.getElementById('gameLevelPreviewModalTitle');
-    const countdown = document.getElementById('gameLevelPreviewCountdownSeconds');
+  if (!spendCoins(5)) {
+    showNotEnoughCoinsPrompt();
+    return;
+  }
 
-    if (!modal || !previewImg) {
-      console.error('Game level preview modal elements not found.');
-      return;
-    }
 
-    // Current level image
-    previewImg.src = imageSrc;
+  // =========================================================
+  // GET PREVIEW MODAL ELEMENTS
+  // =========================================================
 
-    // Current level title
-    if (title) {
-      title.innerText =
-        `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
-    }
+  const modal = document.getElementById('gameLevelPreviewModal');
+  const previewImg = document.getElementById('gameLevelPreviewModalImg');
+  const title = document.getElementById('gameLevelPreviewModalTitle');
+  const countdown =
+    document.getElementById('gameLevelPreviewCountdownSeconds');
 
-    // Reset countdown
-    let secondsLeft = 10;
+  if (!modal || !previewImg) {
+    console.error('Game level preview modal elements not found.');
+    return;
+  }
+
+
+  // =========================================================
+  // CURRENT LEVEL IMAGE
+  // =========================================================
+
+  const previewImageSrc =
+    `image/level${getLevelImageIndex(currentLevel)}.jpeg`;
+
+  previewImg.onload = function () {
+    previewImg.style.display = 'block';
+    previewImg.style.visibility = 'visible';
+  };
+
+  previewImg.onerror = function () {
+    console.error(
+      'NORMAL LEVEL PREVIEW IMAGE FAILED TO LOAD:',
+      previewImageSrc
+    );
+  };
+
+  // Clear old image first, then load the correct one
+  previewImg.removeAttribute('src');
+  previewImg.style.display = 'block';
+  previewImg.style.visibility = 'visible';
+  previewImg.src = previewImageSrc;
+
+
+  // =========================================================
+  // TITLE
+  // =========================================================
+
+  if (title) {
+    title.innerText =
+      `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
+  }
+
+
+  // =========================================================
+  // COUNTDOWN
+  // =========================================================
+
+  let secondsLeft = 10;
+
+  if (countdown) {
+    countdown.innerText = secondsLeft;
+  }
+
+  clearInterval(gamePreviewCountdownInterval);
+
+
+  // =========================================================
+  // SHOW MODAL
+  // =========================================================
+
+  modal.classList.remove('hidden');
+
+  // Force the modal to appear above the game
+  modal.style.display = 'flex';
+  modal.style.position = 'fixed';
+  modal.style.inset = '0';
+  modal.style.zIndex = '99999';
+
+
+  // =========================================================
+  // 10 SECOND COUNTDOWN
+  // =========================================================
+
+  gamePreviewCountdownInterval = setInterval(() => {
+
+    secondsLeft--;
 
     if (countdown) {
       countdown.innerText = secondsLeft;
     }
 
-    // Stop any previous countdown
-    clearInterval(gamePreviewCountdownInterval);
+    if (secondsLeft <= 0) {
+      closeGameLevelPreview();
+    }
 
-    // IMPORTANT: explicitly show the modal
-    modal.classList.remove('hidden');
-    modal.style.display = 'flex';
-
-    // 10-second countdown
-    gamePreviewCountdownInterval = setInterval(() => {
-
-      secondsLeft--;
-
-      if (countdown) {
-        countdown.innerText = secondsLeft;
-      }
-
-      if (secondsLeft <= 0) {
-        closeGameLevelPreview();
-      }
-
-    }, 1000);
-  };
+  }, 1000);
+};
 
 
   // =========================================================
