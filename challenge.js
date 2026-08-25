@@ -254,19 +254,12 @@ function initBoardDOM() {
             isReadyToStart = true;
             setTimeout(() => {
                 if (loadingSpinner) loadingSpinner.style.display = 'none';
-                
-                // Hide the loading bar container completely when done
-                const barContainer = document.getElementById('loadingBarContainer');
-                if (barContainer) barContainer.style.display = 'none';
-                
+                if (loadingBarFill) loadingBarFill.parentElement.style.display = 'none';
                 if (loadingPercentEl) loadingPercentEl.style.display = 'none';
-                
-                if (startChallengeBtn) {
-                    startChallengeBtn.classList.remove('hidden');
-                    startChallengeBtn.style.display = 'block';
-                }
-            }, 200);
+                if (startChallengeBtn) startChallengeBtn.classList.remove('hidden');
+            }, 300);
         }
+    };
 
     const progressInterval = setInterval(() => {
         if (isReadyToStart) {
