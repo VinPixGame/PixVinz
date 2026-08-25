@@ -208,80 +208,102 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // --- WORKING ISOLATED PREVIEW COMPONENT LOGIC ---
-  let pvTimer = null;
-  let pvCountdownInterval = null;
 
-  function dismissPreview() {
-    const container = document.getElementById('pv-container');
-    if (container) container.classList.add('pv-hidden');
-    if (pvTimer) clearTimeout(pvTimer);
-    if (pvCountdownInterval) clearInterval(pvCountdownInterval);
-  }
 
+document.addEventListener('DOMContentLoaded', () => {
+  const previewBtn = document.getElementById('pv-trigger-btn');
+  const pvContainer = document.getElementById('pv-container');
   const pvCloseBtn = document.getElementById('pv-close-btn');
-  if (pvCloseBtn) {
-    pvCloseBtn.addEventListener('click', () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      dismissPreview();
-    });
+  const pvCountdown = document.getElementById('pv-countdown');
+  const pvImage = document.getElementById('pv-image');
+  const pvTitle = document.getElementById('pv-title');
+
+  let countdownInterval = null;
+  let timeLeft = 10;
+
+  // Function to show preview
+  function showPreview(imageSrc, levelNumber = 1) {
+    if (!pvContainer) return;
+    
+    // Set image and title
+    if (pvImage) pvImage.src = imageSrc || '';
+    if (pvTitle) pvTitle.textContent = `LEVEL ${String(levelNumber).padStart(2, '0')} PREVIEW`;
+    
+    // Reset countdown
+    timeLeft = 10;
+    if (pvCountdown) pvCountdown.textContent = timeLeft;
+
+    // Show container
+    pvContainer.classList.remove('pv-hidden');
+
+    // Clear any existing interval
+    if (countdownInterval) clearInterval(countdownInterval);
+
+    // Start countdown timer
+    countdownInterval = setInterval(() => {
+      timeLeft--;
+      if (pvCountdown) pvCountdown.textContent = timeLeft;
+
+      if (timeLeft <= 0) {
+        hidePreview();
+      }
+    }, 1000);
   }
 
-  const pvTriggerBtn = document.getElementById('pv-trigger-btn');
-  if (pvTriggerBtn) {
-    pvTriggerBtn.addEventListener('click', async () => {
-      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+  // Function to hide preview
+  function hidePreview() {
+    if (!pvContainer) return;
+    pvContainer.classList.add('pv-hidden');
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+    }
+  }
 
-      const previewCost = 5;
-      let success = true;
-
-      // Use spendCoins from playerstat.js with fallback
-      if (typeof spendCoins === 'function') {
-        success = await spendCoins(previewCost);
-      } else {
-        let totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
-        if (totalCoins < previewCost) {
-          success = false;
+  // Event Listeners
+  if (previewBtn) {
+    previewBtn.addEventListener('click', () => {
+      // Access or manage user coins (assumes window.userCoins exists in your game state)
+      if (typeof window.userCoins !== 'undefined') {
+        if (window.userCoins < 5) {
+          alert('Not enough coins! You need 5 coins for a preview.');
+          return;
+        }
+        // Deduct 5 coins
+        window.userCoins -= 5;
+        
+        // Update coin display on UI if you have an update function or element
+        if (typeof window.updateCoinDisplay === 'function') {
+          window.updateCoinDisplay();
         } else {
-          localStorage.setItem('totalCoins', totalCoins - previewCost);
+          const coinBadge = document.querySelector('.coin-badge');
+          if (coinBadge) coinBadge.textContent = `🪙 ${window.userCoins}`;
         }
       }
 
-      if (!success) {
-        alert("Not enough coins! You need 5 coins to preview the image.");
-        return;
-      }
-
-      if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
-
-      const container = document.getElementById('pv-container');
-      const imgElement = document.getElementById('pv-image');
-      const titleElement = document.getElementById('pv-title');
-      const countdownSpan = document.getElementById('pv-countdown');
-
-      if (titleElement) titleElement.innerText = `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
-      if (imgElement) imgElement.src = imageSrc;
+      // Get current level data and show preview
+      const currentLevelImage = window.currentLevelImageSrc || 'path/to/default-preview.jpg';
+      const currentLevelNum = window.currentLevelNumber || 1;
       
-      let timeLeft = 10;
-      if (countdownSpan) countdownSpan.innerText = timeLeft;
-      if (container) container.classList.remove('pv-hidden');
-
-      if (pvTimer) clearTimeout(pvTimer);
-      if (pvCountdownInterval) clearInterval(pvCountdownInterval);
-
-      pvCountdownInterval = setInterval(() => {
-        timeLeft--;
-        if (countdownSpan) countdownSpan.innerText = timeLeft;
-        if (timeLeft <= 0) clearInterval(pvCountdownInterval);
-      }, 1000);
-
-      pvTimer = setTimeout(() => {
-        dismissPreview();
-      }, 10000);
+      showPreview(currentLevelImage, currentLevelNum);
     });
   }
-  // --- END OF PREVIEW LOGIC ---
 
+  if (pvCloseBtn) {
+    pvCloseBtn.addEventListener('click', hidePreview);
+  }
+
+  if (pvContainer) {
+    pvContainer.addEventListener('click', (e) => {
+      if (e.target === pvContainer) {
+        hidePreview();
+      }
+    });
+  }
+});
+
+  
+  
   const nextLevelBtn = document.getElementById('nextLevelBtn');
   if (nextLevelBtn) {
     nextLevelBtn.onclick = async (e) => {
