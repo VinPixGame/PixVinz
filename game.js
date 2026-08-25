@@ -266,12 +266,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
+
+
+
 document.addEventListener('DOMContentLoaded', () => {
     let levelPreviewTimer = null;
     let levelCountdownInterval = null;
 
     function closeLevelPreviewModal() {
-        const modal = document.getElementById('previewModal');
+        const modal = document.getElementById('gameLevelPreviewModal');
         if (modal) {
             modal.classList.add('hidden');
         }
@@ -279,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (levelCountdownInterval) clearInterval(levelCountdownInterval);
     }
 
-    const closePreviewModalBtn = document.getElementById('closePreviewModalBtn');
+    const closePreviewModalBtn = document.getElementById('closeGameLevelPreviewModalBtn');
     if (closePreviewModalBtn) {
         closePreviewModalBtn.addEventListener('click', () => {
             if (typeof AudioManager !== 'undefined') AudioManager.playClick();
@@ -287,9 +290,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const previewBtn = document.getElementById('previewBtn');
-    if (previewBtn) {
-        previewBtn.addEventListener('click', () => {
+    const gamePreviewBtn = document.getElementById('gamePreviewBtn');
+    if (gamePreviewBtn) {
+        gamePreviewBtn.addEventListener('click', () => {
             if (typeof AudioManager !== 'undefined') AudioManager.playClick();
 
             const previewCost = 5;
@@ -305,13 +308,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const modal = document.getElementById('previewModal');
-            const modalImg = document.getElementById('previewModalImg');
-            const modalTitle = document.getElementById('previewModalTitle');
-            const countdownSpan = document.getElementById('previewCountdownSeconds');
+            const modal = document.getElementById('gameLevelPreviewModal');
+            const modalImg = document.getElementById('gameLevelPreviewModalImg');
+            const modalTitle = document.getElementById('gameLevelPreviewModalTitle');
+            const countdownSpan = document.getElementById('gameLevelPreviewCountdownSeconds');
 
             if (!modal) {
-                console.error("previewModal element not found in HTML!");
+                console.error("gameLevelPreviewModal element not found in HTML!");
                 return;
             }
 
@@ -330,7 +333,6 @@ document.addEventListener('DOMContentLoaded', () => {
             let timeLeft = 10;
             if (countdownSpan) countdownSpan.innerText = timeLeft;
             
-            // Remove the hidden class so the CSS flex display takes over
             modal.classList.remove('hidden');
 
             if (levelPreviewTimer) clearTimeout(levelPreviewTimer);
@@ -350,3 +352,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+
