@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>PixVinz - Isolated Game Test</title>
+  <title>PixVinz - Game</title>
   <link rel="stylesheet" href="style.css">
-  
-  <!-- ISOLATED STYLES FOR PREVIEW -->
+
+  <!-- EMBEDDED PREVIEW STYLES -->
   <style>
     .pv-wrapper {
       position: fixed;
@@ -87,6 +87,7 @@
 </head>
 <body>
   <div class="app-container game-container">
+    <!-- Top Bar -->
     <header class="top-bar">
       <button class="icon-btn" id="backToHome">‹</button>
       <div class="logo-container">
@@ -94,11 +95,13 @@
           <source src="image/logo.webm" type="video/webm">
         </video>
       </div>
-      <div class="coin-badge">🪙 <span id="coinCount">50</span></div>
+      <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
     </header>
 
+    <!-- Level Title -->
     <h2 id="levelTitle" class="centered-level-title">LEVEL <span id="levelDisplay">01</span></h2>
 
+    <!-- Premium Stats Bar -->
     <div class="game-header">
       <div class="premium-stats-bar">
         <div class="stat-badge">
@@ -118,18 +121,19 @@
       </div>
     </div>
 
+    <!-- Puzzle Board -->
     <div class="puzzle-wrapper">
       <div class="puzzle-grid" id="puzzleGrid"></div>
     </div>
 
+    <!-- Game Actions -->
     <div class="game-actions">
-      <!-- ISOLATED PREVIEW BUTTON ID -->
       <button class="btn btn-secondary" id="pv-trigger-btn">🖼️ PREVIEW (🪙5)</button>
       <button class="btn btn-primary" id="shuffleBtn">🔀 SHUFFLE</button>
     </div>
   </div>
 
-  <!-- ISOLATED PREVIEW HTML CONTAINER -->
+  <!-- EMBEDDED PREVIEW MODAL CONTAINER -->
   <div id="pv-container" class="pv-wrapper pv-hidden">
     <div class="pv-card">
       <div class="pv-header">
@@ -143,11 +147,84 @@
     </div>
   </div>
 
-  <!-- ISOLATED EMBEDDED SCRIPT FOR TESTING -->
+  <!-- Victory Modal -->
+  <div id="victoryModal" class="modal-overlay hidden">
+    <canvas id="confettiCanvas"></canvas>
+    <div class="victory-card-pro">
+      <div class="top-crest-badge"><div class="badge-shield">⭐</div></div>
+      <div class="banner-ribbon"><h1 class="victory-title-pro">LEVEL CLEARED!</h1></div>
+      <div class="victory-subtitle-pro">✦ Amazing work! ✦</div>
+      <div class="victory-img-container-pro"><img id="victoryImg" src="" alt="Solved Puzzle"></div>
+      <div class="star-rating-pro" id="victoryStars">
+        <span class="star star-pro active">★</span>
+        <span class="star star-pro active">★</span>
+        <span class="star star-pro active">★</span>
+      </div>
+      <div class="stats-panel-pro">
+        <div class="stat-col"><span class="stat-icon-pro">⏱️</span><span class="stat-label-pro">TIME</span><span class="stat-value-pro" id="vTime">00:00</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat-col"><span class="stat-icon-pro">👣</span><span class="stat-label-pro">MOVES</span><span class="stat-value-pro" id="vMoves">0</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat-col"><span class="stat-icon-pro">🪙</span><span class="stat-label-pro">EARNED</span><span class="stat-value-pro gold-val" id="vCoins">+0</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat-col"><span class="stat-icon-pro">⚡️</span><span class="stat-label-pro">XP GAINED</span><span class="stat-value-pro" id="vXp">+0</span></div>
+      </div>
+      <div class="victory-buttons-pro">
+        <button class="btn-pro btn-home-pro" id="victoryHomeBtn"><span>🏠</span> HOME</button>
+        <button class="btn-pro btn-next-pro" id="nextLevelBtn">NEXT ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="audio.js"></script>
+
+  <!-- Firebase Initialization -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
+      authDomain: "pixvinz2026.firebaseapp.com",
+      projectId: "pixvinz2026",
+      storageBucket: "pixvinz2026.firebasestorage.app",
+      messagingSenderId: "45609077809",
+      appId: "1:45609077809:web:575611e46acda9f64c5910",
+      measurementId: "G-W7FSERE8ZJ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.db = db;
+    window.doc = doc;
+    window.getDoc = getDoc;
+    window.setDoc = setDoc;
+    window.updateDoc = updateDoc;
+    window.getCurrentUser = function() {
+      try {
+        return JSON.parse(localStorage.getItem('loggedInUser'));
+      } catch (e) {
+        return null;
+      }
+    };
+  </script>
+
+  <!-- Player Stats & Main Game Scripts -->
+  <script src="playerstat.js"></script>
+  <script type="module" src="game.js"></script>
+
+  <!-- EMBEDDED PREVIEW SCRIPT -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const currentLevel = 1;
-      const imageSrc = 'image/level1.jpeg'; // Hardcoded test path
+      const urlParams = new URLSearchParams(window.location.search);
+      const currentLevel = parseInt(urlParams.get('level')) || 1;
+
+      function getLevelImageIndex(levelNum) {
+        return ((levelNum - 1) % 55) + 1;
+      }
+      const imageSrc = `image/level${getLevelImageIndex(currentLevel)}.jpeg`;
 
       const container = document.getElementById('pv-container');
       const imgElement = document.getElementById('pv-image');
@@ -166,14 +243,40 @@
       }
 
       if (closeBtn) {
-        closeBtn.addEventListener('click', dismissPreview);
+        closeBtn.addEventListener('click', () => {
+          if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+          dismissPreview();
+        });
       }
 
       if (triggerBtn) {
-        triggerBtn.addEventListener('click', () => {
-          console.log("Isolated Preview clicked!");
+        triggerBtn.addEventListener('click', async () => {
+          if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+
+          const previewCost = 5;
+          let success = true;
+
+          // Deduct coins using playerstat function or fallback
+          if (typeof spendCoins === 'function') {
+            success = await spendCoins(previewCost);
+          } else {
+            let totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
+            if (totalCoins < previewCost) {
+              success = false;
+            } else {
+              localStorage.setItem('totalCoins', totalCoins - previewCost);
+            }
+          }
+
+          if (!success) {
+            alert("Not enough coins! You need 5 coins to preview the image.");
+            return;
+          }
+
+          if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+
           if (imgElement) imgElement.src = imageSrc;
-          if (titleElement) titleElement.innerText = `LEVEL 01 PREVIEW`;
+          if (titleElement) titleElement.innerText = `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
           
           let timeLeft = 10;
           if (countdownSpan) countdownSpan.innerText = timeLeft;
@@ -195,6 +298,5 @@
       }
     });
   </script>
-
 </body>
 </html>
