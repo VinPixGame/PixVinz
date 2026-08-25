@@ -211,78 +211,71 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // =========================================================
-  // LEVEL PREVIEW
-  // Shows the current level image for 10 seconds.
-  // Costs 5 coins per preview.
+   // =========================================================
+  // NORMAL PUZZLE — LEVEL PREVIEW
+  // Costs 5 coins and shows the current level image for 10s
   // =========================================================
 
   let gamePreviewCountdownInterval = null;
 
   window.openGameLevelPreview = function () {
-  if (typeof spendCoins !== 'function') {
-    console.warn('spendCoins() is not available.');
-    return;
-  }
-
-  // Check and deduct 5 coins
-  const previewPurchased = spendCoins(5);
-
-  if (!previewPurchased) {
-    showNotEnoughCoinsPrompt();
-    return;
-  }
-
-  const previewModal = document.getElementById('gameLevelPreviewModal');
-  const previewImg = document.getElementById('gameLevelPreviewModalImg');
-  const previewTitle = document.getElementById('gameLevelPreviewModalTitle');
-  const countdownDisplay = document.getElementById('gameLevelPreviewCountdownSeconds');
-
-  if (!previewModal || !previewImg) {
-    console.error('Preview modal elements were not found.');
-    return;
-  }
-
-  // Current level image
-  previewImg.src = imageSrc;
-
-  // Current level title
-  if (previewTitle) {
-    previewTitle.innerText =
-      `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
-  }
-
-  // Reset countdown
-  let remainingSeconds = 10;
-
-  if (countdownDisplay) {
-    countdownDisplay.innerText = remainingSeconds;
-  }
-
-  // Stop previous countdown
-  clearInterval(gamePreviewCountdownInterval);
-
-  // IMPORTANT:
-  // Remove hidden class and force the modal to display
-  previewModal.classList.remove('hidden');
-
-  previewModal.style.display = 'flex';
-  previewModal.style.visibility = 'visible';
-  previewModal.style.opacity = '1';
-
-  // Start countdown
-  gamePreviewCountdownInterval = setInterval(() => {
-    remainingSeconds--;
-
-    if (countdownDisplay) {
-      countdownDisplay.innerText = remainingSeconds;
+    // Check and deduct 5 coins using the existing coin system
+    if (typeof spendCoins !== 'function') {
+      console.warn('spendCoins() is not available.');
+      return;
     }
 
-    if (remainingSeconds <= 0) {
-      closeGameLevelPreview();
+    if (!spendCoins(5)) {
+      showNotEnoughCoinsPrompt();
+      return;
     }
-  }, 1000);
-};
+
+    const modal = document.getElementById('gameLevelPreviewModal');
+    const previewImg = document.getElementById('gameLevelPreviewModalImg');
+    const title = document.getElementById('gameLevelPreviewModalTitle');
+    const countdown = document.getElementById('gameLevelPreviewCountdownSeconds');
+
+    if (!modal || !previewImg) {
+      console.error('Game level preview modal elements not found.');
+      return;
+    }
+
+    // Show the exact image currently used by this level
+    previewImg.src = imageSrc;
+
+    // Update title to current level
+    if (title) {
+      title.innerText =
+        `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
+    }
+
+    // Reset countdown
+    let secondsLeft = 10;
+
+    if (countdown) {
+      countdown.innerText = secondsLeft;
+    }
+
+    // Clear any previous countdown
+    clearInterval(gamePreviewCountdownInterval);
+
+    // Open modal
+    modal.classList.remove('hidden');
+
+    // Start 10-second countdown
+    gamePreviewCountdownInterval = setInterval(() => {
+      secondsLeft--;
+
+      if (countdown) {
+        countdown.innerText = secondsLeft;
+      }
+
+      // Automatically close at 0
+      if (secondsLeft <= 0) {
+        closeGameLevelPreview();
+      }
+    }, 1000);
+  };
 
 
   // =========================================================
@@ -290,14 +283,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   // =========================================================
 
   function closeGameLevelPreview() {
-    const previewModal = document.getElementById('gameLevelPreviewModal');
+    const modal = document.getElementById('gameLevelPreviewModal');
 
     clearInterval(gamePreviewCountdownInterval);
     gamePreviewCountdownInterval = null;
 
-    if (previewModal) {
-      previewModal.classList.add('hidden');
-      previewModal.style.display = 'none';
+    if (modal) {
+      modal.classList.add('hidden');
     }
   }
 
@@ -307,13 +299,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   // =========================================================
 
   function showNotEnoughCoinsPrompt() {
-    // Prevent duplicate prompts
-    const existingPrompt = document.getElementById('notEnoughCoinsPrompt');
-    if (existingPrompt) {
-      existingPrompt.remove();
+    const existing = document.getElementById('notEnoughCoinsPrompt');
+
+    if (existing) {
+      existing.remove();
     }
 
     const prompt = document.createElement('div');
+
     prompt.id = 'notEnoughCoinsPrompt';
 
     prompt.innerHTML = `
@@ -336,17 +329,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.body.appendChild(prompt);
 
-    const closeBtn = document.getElementById('closeNotEnoughCoinsPrompt');
+    const closeButton =
+      document.getElementById('closeNotEnoughCoinsPrompt');
 
-    if (closeBtn) {
-      closeBtn.addEventListener('click', () => {
+    if (closeButton) {
+      closeButton.addEventListener('click', () => {
         prompt.remove();
       });
     }
 
-    // Also allow clicking outside the popup to close it
-    prompt.addEventListener('click', (e) => {
-      if (e.target === prompt) {
+    // Clicking outside the popup also closes it
+    prompt.addEventListener('click', (event) => {
+      if (event.target === prompt) {
         prompt.remove();
       }
     });
@@ -365,7 +359,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       closeGameLevelPreview();
     });
   }
-
+  
 
   
 
