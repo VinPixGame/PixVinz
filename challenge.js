@@ -95,8 +95,9 @@ let animFrameId = null;
 
 // Initialize DOM elements with a smooth simulated & event-backed loader
 function initBoardDOM() {
- puzzleBoard.innerHTML = '';
- tilesCache = [];
+document.getElementById('challengeTitle').textContent = `Challenge ${currentChallenge}`;
+puzzleBoard.innerHTML = '';
+tilesCache = [];
  const videoSrc = `challenge/challenge${currentChallenge}.webm`;
 
  const loadingPercentEl = document.getElementById('loadingPercent');
