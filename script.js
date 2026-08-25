@@ -575,6 +575,7 @@ if (logoutBtn) {
     if (modalImg) modalImg.src = `image/level${levelNum}.jpeg`;
 
     if (modal) modal.classList.remove('hidden');
+               modal.style.display = 'flex';
   }
 
   function closeImageModal() {
