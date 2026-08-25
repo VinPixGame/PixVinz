@@ -208,7 +208,79 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  
+  // --- WORKING ISOLATED PREVIEW COMPONENT LOGIC ---
+  let pvTimer = null;
+  let pvCountdownInterval = null;
+
+  function dismissPreview() {
+    const container = document.getElementById('pv-container');
+    if (container) container.classList.add('pv-hidden');
+    if (pvTimer) clearTimeout(pvTimer);
+    if (pvCountdownInterval) clearInterval(pvCountdownInterval);
+  }
+
+  const pvCloseBtn = document.getElementById('pv-close-btn');
+  if (pvCloseBtn) {
+    pvCloseBtn.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      dismissPreview();
+    });
+  }
+
+  const pvTriggerBtn = document.getElementById('pv-trigger-btn');
+  if (pvTriggerBtn) {
+    pvTriggerBtn.addEventListener('click', async () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+
+      const previewCost = 5;
+      let success = true;
+
+      // Use spendCoins from playerstat.js with fallback
+      if (typeof spendCoins === 'function') {
+        success = await spendCoins(previewCost);
+      } else {
+        let totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
+        if (totalCoins < previewCost) {
+          success = false;
+        } else {
+          localStorage.setItem('totalCoins', totalCoins - previewCost);
+        }
+      }
+
+      if (!success) {
+        alert("Not enough coins! You need 5 coins to preview the image.");
+        return;
+      }
+
+      if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+
+      const container = document.getElementById('pv-container');
+      const imgElement = document.getElementById('pv-image');
+      const titleElement = document.getElementById('pv-title');
+      const countdownSpan = document.getElementById('pv-countdown');
+
+      if (titleElement) titleElement.innerText = `LEVEL ${currentLevel.toString().padStart(2, '0')} PREVIEW`;
+      if (imgElement) imgElement.src = imageSrc;
+      
+      let timeLeft = 10;
+      if (countdownSpan) countdownSpan.innerText = timeLeft;
+      if (container) container.classList.remove('pv-hidden');
+
+      if (pvTimer) clearTimeout(pvTimer);
+      if (pvCountdownInterval) clearInterval(pvCountdownInterval);
+
+      pvCountdownInterval = setInterval(() => {
+        timeLeft--;
+        if (countdownSpan) countdownSpan.innerText = timeLeft;
+        if (timeLeft <= 0) clearInterval(pvCountdownInterval);
+      }, 1000);
+
+      pvTimer = setTimeout(() => {
+        dismissPreview();
+      }, 10000);
+    });
+  }
+  // --- END OF PREVIEW LOGIC ---
 
   const nextLevelBtn = document.getElementById('nextLevelBtn');
   if (nextLevelBtn) {
