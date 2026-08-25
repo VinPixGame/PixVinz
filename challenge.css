@@ -1,7 +1,10 @@
-html,
-body {
-  background-color: #0d0d0d;
+:root {
+  --bg-color: #0f0c1b;
+  --card-bg: #1a162b;
+  --accent-color: #7928ca;
+  --text-color: #ffffff;
 }
+
 
 /* Challenge Page Specific Styles matched to main app */
 
@@ -25,7 +28,7 @@ body {
 .icon-btn {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
+  color: var(--text-color);
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -69,15 +72,14 @@ body {
 
 .stat-badge-item {
     flex: 1;
-    background: #1a162b;
-    border: 1px solid #7b2cbf; /* Updated to match main purple border */
+    background: var(--card-bg);
+    border: 1px solid #33285c;
     border-radius: 10px;
     padding: 10px 12px;
     display: flex;
     align-items: center;
     gap: 12px;
     box-sizing: border-box;
-    box-shadow: 0 0 10px rgba(123, 44, 191, 0.2); /* Added matching glow */
 }
 
 .stat-icon-symbol {
@@ -99,7 +101,7 @@ body {
 .stat-main-val {
     font-size: 1.05rem;
     font-weight: bold;
-    color: #fff;
+    color: var(--text-color);
 }
 
 /* Puzzle Board Wrapper & Tiles */
@@ -108,12 +110,12 @@ body {
     width: 100%;
     max-width: 360px;
     aspect-ratio: 1 / 1;
-    background: #1a162b;
+    background: var(--card-bg);
     border-radius: 12px;
     padding: 10px;
     box-sizing: border-box;
-    box-shadow: 0 0 20px rgba(123, 44, 191, 0.4); /* Updated to match main glow */
-    border: 2px solid #7b2cbf; /* Updated to match main purple border */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    border: 2px solid #33285c;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -171,10 +173,9 @@ body {
 }
 
 .btn-primary {
-    background: #7928ca;
-    color: #ffffff;
+    background: var(--accent-color);
+    color: var(--text-color);
     box-shadow: 0 4px 12px rgba(121, 40, 202, 0.4);
-    border: 1px solid #7b2cbf; /* Added matching border */
 }
 
 .btn-primary:hover {
@@ -183,8 +184,8 @@ body {
 
 .btn-secondary {
     background: #241e3d;
-    color: #ffffff;
-    border: 1px solid #7b2cbf; /* Updated to match main purple border */
+    color: var(--text-color);
+    border: 1px solid #33285c;
 }
 
 .btn-secondary:hover {
@@ -211,14 +212,14 @@ body {
 }
 
 .win-card {
-    background: #1a162b;
+    background: var(--card-bg);
     padding: 25px;
     border-radius: 16px;
     text-align: center;
-    border: 2px solid #7b2cbf; /* Updated to match main purple border */
+    border: 2px solid var(--accent-color);
     width: 85%;
     max-width: 340px;
-    box-shadow: 0 0 20px rgba(123, 44, 191, 0.4); /* Updated glow */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
     box-sizing: border-box;
 }
 
@@ -226,6 +227,7 @@ body {
 .hidden {
     display: none !important;
 }
+
 
 #confettiCanvas {
   position: fixed;
@@ -236,6 +238,8 @@ body {
   pointer-events: none;
   z-index: 99999;
 }
+
+
 
 /* --- CHALLENGE PREVIEW MODAL --- */
 #challengePreviewModal {
@@ -257,14 +261,14 @@ body {
 }
 
 #challengePreviewModal .win-card {
-  background: #1a162b;
+  background: var(--card-bg);
   padding: 25px;
   border-radius: 16px;
   text-align: center;
-  border: 2px solid #7b2cbf; /* Updated to match main purple border */
+  border: 2px solid var(--accent-color);
   width: 85%;
   max-width: 340px;
-  box-shadow: 0 0 20px rgba(123, 44, 191, 0.4); /* Updated glow */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
   animation: modalPopIn 0.3s ease-out forwards;
 }
 
@@ -283,8 +287,7 @@ body {
   overflow: hidden;
   margin-bottom: 15px;
   background: #000;
-  border: 2px solid #7b2cbf; /* Updated to match main purple border */
-  box-shadow: 0 0 10px rgba(123, 44, 191, 0.3); /* Added glow */
+  border: 1px solid #33285c;
   position: relative;
 }
 
@@ -297,7 +300,7 @@ body {
 
 .challenge-countdown-text {
   font-size: 0.95rem;
-  color: #fff;
+  color: var(--text-color);
   margin-bottom: 15px;
 }
 
@@ -309,9 +312,9 @@ body {
 #closeChallengePreviewBtn {
   width: 100%;
   padding: 12px;
-  background: #7928ca;
+  background: var(--accent-color);
   color: white;
-  border: 1px solid #7b2cbf; /* Added matching border */
+  border: none;
   border-radius: 8px;
   font-weight: bold;
   font-size: 1rem;
