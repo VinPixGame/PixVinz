@@ -254,10 +254,8 @@ function initBoardDOM() {
             isReadyToStart = true;
             setTimeout(() => {
                 if (loadingSpinner) loadingSpinner.style.display = 'none';
-                if (loadingBarFill) loadingBarFill.parentElement.style.display = 'none';
-                if (loadingPercentEl) loadingPercentEl.style.display = 'none';
                 if (startChallengeBtn) startChallengeBtn.classList.remove('hidden');
-            }, 300);
+            }, 200);
         }
     };
 
