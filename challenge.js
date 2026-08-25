@@ -10,15 +10,21 @@ function loadChallengeCoins() {
 
     function getUserKey(keyName) {
         const user = getCurrentUser();
-        if (!user || !user.username) return keyName;
+        if (!user || !user.username) return null; // Return null if no user is logged in
         return `${user.username}_${keyName}`;
+    }
+
+    const user = getCurrentUser();
+    if (!user || !user.username) {
+        // No user logged in, clear coin UI immediately
+        updateChallengeUI(0);
+        return;
     }
 
     const coinKey = getUserKey('totalCoins');
     let totalCoins = parseInt(localStorage.getItem(coinKey)) || 0;
 
-    const user = getCurrentUser();
-    if (user && user.username && window.pixvinzDb) {
+    if (window.pixvinzDb) {
         const { db, doc, getDoc } = window.pixvinzDb;
         getDoc(doc(db, 'players', user.username)).then(userSnap => {
             if (userSnap.exists() && typeof userSnap.data().coins === 'number') {
