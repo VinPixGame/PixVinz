@@ -1492,6 +1492,100 @@ input:checked + .slider:before { transform: translateX(22px); }
     0 0 8px rgba(255, 215, 0, 0.65);
 }
 
+
+/* =========================================================
+   NORMAL LEVEL PREVIEW — COIN WARNING
+   ========================================================= */
+
+#notEnoughCoinsPrompt {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(8, 2, 20, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  z-index: 100000;
+}
+
+.not-enough-coins-card {
+  width: min(88vw, 360px);
+
+  padding: 28px 22px;
+
+  text-align: center;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(55, 22, 91, 0.97),
+      rgba(19, 6, 36, 0.99)
+    );
+
+  border: 2px solid #ffd700;
+  border-radius: 22px;
+
+  box-shadow:
+    0 0 12px rgba(255, 215, 0, 0.6),
+    0 0 35px rgba(255, 215, 0, 0.25);
+
+  color: #fff;
+}
+
+.not-enough-coins-icon {
+  font-size: 42px;
+  margin-bottom: 10px;
+}
+
+.not-enough-coins-title {
+  color: #ffd700;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.not-enough-coins-message {
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+#closeNotEnoughCoinsPrompt {
+  min-width: 100px;
+  padding: 10px 24px;
+
+  border: 1px solid #ffd700;
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #ffdc33 0%,
+      #ffa500 100%
+    );
+
+  color: #000;
+  font-size: 15px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 0 12px rgba(255, 215, 0, 0.35);
+}
+
+
+
 /* =========================================================
    ANIMATIONS
    ========================================================= */
