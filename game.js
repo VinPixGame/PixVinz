@@ -265,7 +265,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 
-let currentLevel = 1; 
+
+
+
 let previewTimer = null;
 let countdownInterval = null;
 
@@ -282,78 +284,53 @@ if (previewBtn) {
         if (typeof AudioManager !== 'undefined') AudioManager.playClick();
 
         const previewCost = 5;
-        let success = true;
 
-        // Check and deduct coins securely without hanging
-        let totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
-        
-        if (typeof spendCoins === 'function') {
-            // If spendCoins is synchronous or handles its own promise safely:
-            try {
-                // If spendCoins returns a Promise, handle it safely or use localStorage fallback if it locks
-                let result = spendCoins(previewCost);
-                if (result instanceof Promise) {
-                    result.then(res => {
-                        if (!res) alert("Not enough coins! You need 5 coins to preview the image.");
-                        else openModalAndStartTimer();
-                    });
-                    return; // exit early for async promise
-                } else if (!result) {
-                    success = false;
-                }
-            } catch (e) {
-                success = false;
-            }
-        } else {
-            if (totalCoins < previewCost) {
-                success = false;
-            } else {
-                localStorage.setItem('totalCoins', totalCoins - previewCost);
-            }
+        // Use playerstat.js spendCoins function which correctly handles usernames & cloud sync
+        if (typeof spendCoins !== 'function') {
+            alert("Error: playerstat.js is not loaded.");
+            return;
         }
+
+        let success = spendCoins(previewCost);
 
         if (!success) {
             alert("Not enough coins! You need 5 coins to preview the image.");
             return;
         }
 
-        openModalAndStartTimer();
-    });
-}
+        // Open modal and start 10s countdown timer
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalPreviewImg');
+        const modalTitle = document.getElementById('modalLevelTitle');
+        const countdownSpan = document.getElementById('countdownSeconds');
 
-function openModalAndStartTimer() {
-    if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+        // Fetch current level safely using playerstat.js or fallback variables
+        let lvl = (typeof getCurrentLevel === 'function' ? getCurrentLevel() : (typeof currentLevel !== 'undefined' ? currentLevel : 1));
+        if (lvl < 1) lvl = 1;
+        if (lvl > 200) lvl = 200;
 
-    const modal = document.getElementById('imageModal');
-    const modalImg = document.getElementById('modalPreviewImg');
-    const modalTitle = document.getElementById('modalLevelTitle');
-    const countdownSpan = document.getElementById('countdownSeconds');
-
-    let lvl = (typeof currentLevel !== 'undefined' ? currentLevel : 1);
-    if (lvl < 1) lvl = 1;
-    if (lvl > 200) lvl = 200;
-
-    if (modalTitle) modalTitle.innerText = `LEVEL ${lvl.toString().padStart(2, '0')} PREVIEW`;
-    if (modalImg) modalImg.src = `image/level${lvl}.jpeg`;
-    
-    let timeLeft = 10;
-    if (countdownSpan) countdownSpan.innerText = timeLeft;
-    if (modal) modal.classList.remove('hidden');
-
-    if (previewTimer) clearTimeout(previewTimer);
-    if (countdownInterval) clearInterval(countdownInterval);
-
-    countdownInterval = setInterval(() => {
-        timeLeft--;
+        if (modalTitle) modalTitle.innerText = `LEVEL ${lvl.toString().padStart(2, '0')} PREVIEW`;
+        if (modalImg) modalImg.src = `image/level${lvl}.jpeg`;
+        
+        let timeLeft = 10;
         if (countdownSpan) countdownSpan.innerText = timeLeft;
-        if (timeLeft <= 0) {
-            clearInterval(countdownInterval);
-        }
-    }, 1000);
+        if (modal) modal.classList.remove('hidden');
 
-    previewTimer = setTimeout(() => {
-        closePreviewModal();
-    }, 10000);
+        if (previewTimer) clearTimeout(previewTimer);
+        if (countdownInterval) clearInterval(countdownInterval);
+
+        countdownInterval = setInterval(() => {
+            timeLeft--;
+            if (countdownSpan) countdownSpan.innerText = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(countdownInterval);
+            }
+        }, 1000);
+
+        previewTimer = setTimeout(() => {
+            closePreviewModal();
+        }, 10000);
+    });
 }
 
 const closePreviewBtn = document.getElementById('closePreviewBtn');
