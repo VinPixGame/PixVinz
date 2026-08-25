@@ -1,9 +1,9 @@
-:root {
-  --bg-color: #0f0c1b;
-  --card-bg: #1a162b;
-  --accent-color: #7928ca;
-  --text-color: #ffffff;
+
+html,
+body {
+  background-color: #0d0d0d;
 }
+
 
 
 /* Challenge Page Specific Styles matched to main app */
