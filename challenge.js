@@ -254,10 +254,19 @@ function initBoardDOM() {
             isReadyToStart = true;
             setTimeout(() => {
                 if (loadingSpinner) loadingSpinner.style.display = 'none';
-                if (startChallengeBtn) startChallengeBtn.classList.remove('hidden');
+                
+                // Hide the loading bar container completely when done
+                const barContainer = document.getElementById('loadingBarContainer');
+                if (barContainer) barContainer.style.display = 'none';
+                
+                if (loadingPercentEl) loadingPercentEl.style.display = 'none';
+                
+                if (startChallengeBtn) {
+                    startChallengeBtn.classList.remove('hidden');
+                    startChallengeBtn.style.display = 'block';
+                }
             }, 200);
         }
-    };
 
     const progressInterval = setInterval(() => {
         if (isReadyToStart) {
