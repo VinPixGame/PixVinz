@@ -312,7 +312,13 @@ function calculateChallengeRewards(timeInSeconds, moves) {
     else if (stars === 2) earnedCoins = 60;
     else earnedCoins = 30;
 
-    let earnedXp = Math.round((timeInSeconds / safeMoves) * 100);
+    // --- UPDATED XP FORMULA (Base 2000 XP) ---
+    const baseXP = 2000;                  
+    const timePenalty = timeInSeconds * 3; // Lose 3 XP per second taken
+    const movePenalty = safeMoves * 15;    // Lose 15 XP per move made
+    
+    // Ensures a minimum floor of 100 XP so finishing always feels rewarding
+    let earnedXp = Math.max(100, baseXP - timePenalty - movePenalty);
 
     return { stars, earnedCoins, earnedXp };
 }
