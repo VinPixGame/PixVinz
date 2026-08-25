@@ -1,0 +1,843 @@
+/* =========================================================
+   PIXVINZ GAME PAGE
+   Matches game.html + game.js
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #fff;
+
+  background:
+    radial-gradient(circle at top, rgba(123, 44, 191, .22), transparent 45%),
+    #090312;
+}
+
+
+/* =========================================================
+   GAME CONTAINER
+   ========================================================= */
+
+.game-container {
+  width: min(100%, 900px);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: auto;
+  padding: 12px 18px 28px;
+
+  background: rgba(15, 5, 27, .72);
+}
+
+
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+
+.top-bar {
+  height: 58px;
+
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.icon-btn {
+  width: 44px;
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(255, 215, 0, .55);
+  border-radius: 13px;
+
+  background: rgba(65, 24, 91, .65);
+  color: #ffd700;
+
+  font-size: 25px;
+  font-weight: bold;
+
+  cursor: pointer;
+}
+
+.icon-btn:active,
+.btn:active,
+.btn-pro:active {
+  transform: scale(.96);
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+}
+
+#logoVideo {
+  width: 120px;
+  max-height: 52px;
+  object-fit: contain;
+}
+
+.coin-badge {
+  min-width: 72px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+
+  padding: 0 10px;
+
+  border: 1px solid rgba(255, 215, 0, .55);
+  border-radius: 13px;
+
+  background: rgba(55, 19, 78, .75);
+  color: #ffd700;
+
+  font-size: 15px;
+  font-weight: bold;
+}
+
+#coinCount {
+  color: #fff;
+}
+
+
+/* =========================================================
+   LEVEL TITLE
+   ========================================================= */
+
+.centered-level-title {
+  margin: 8px 0 12px;
+
+  text-align: center;
+
+  color: #ffd700;
+  font-size: 22px;
+  letter-spacing: 1.5px;
+
+  text-shadow: 0 0 10px rgba(255, 215, 0, .25);
+}
+
+#levelDisplay {
+  color: #fff;
+}
+
+
+/* =========================================================
+   TIME / MOVES
+   ========================================================= */
+
+.game-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.premium-stats-bar {
+  width: min(100%, 430px);
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+
+  padding: 7px;
+
+  border: 1px solid rgba(255, 215, 0, .3);
+  border-radius: 16px;
+
+  background: rgba(38, 13, 57, .65);
+}
+
+.stat-badge {
+  min-height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  border: 1px solid rgba(255, 215, 0, .18);
+  border-radius: 11px;
+
+  background: rgba(15, 5, 27, .65);
+}
+
+.stat-icon {
+  font-size: 18px;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  color: rgba(255, 215, 0, .7);
+  font-size: 8px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.stat-value {
+  color: #fff;
+  font-size: 17px;
+  font-weight: bold;
+}
+
+
+/* =========================================================
+   PUZZLE
+   ========================================================= */
+
+.puzzle-wrapper {
+  width: min(100%, 680px);
+  aspect-ratio: 1;
+
+  margin: auto;
+  padding: 5px;
+
+  border: 2px solid #ffd700;
+  border-radius: 20px;
+
+  background: rgba(40, 13, 58, .7);
+
+  box-shadow:
+    0 0 14px rgba(255, 215, 0, .18),
+    inset 0 0 18px rgba(123, 44, 191, .15);
+}
+
+.puzzle-grid {
+  width: 100%;
+  height: 100%;
+
+  display: grid;
+  gap: 3px;
+
+  overflow: hidden;
+  border-radius: 14px;
+  background: #10051a;
+}
+
+.tile {
+  min-width: 0;
+  min-height: 0;
+
+  background-repeat: no-repeat;
+
+  border: 1px solid rgba(255, 215, 0, .16);
+  border-radius: 4px;
+
+  cursor: pointer;
+
+  transition:
+    transform .12s ease,
+    filter .12s ease,
+    box-shadow .12s ease;
+}
+
+.tile:active {
+  transform: scale(.97);
+}
+
+.tile.selected {
+  border: 2px solid #ffd700;
+
+  filter: brightness(1.15);
+
+  box-shadow:
+    0 0 8px rgba(255, 215, 0, .8),
+    0 0 15px rgba(255, 215, 0, .3);
+}
+
+
+/* =========================================================
+   GAME BUTTONS
+   ========================================================= */
+
+.game-actions {
+  width: min(100%, 680px);
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+
+  margin: 14px auto 0;
+}
+
+.btn {
+  min-height: 52px;
+
+  border-radius: 14px;
+
+  border: 1px solid rgba(255, 215, 0, .55);
+
+  font-size: 13px;
+  font-weight: bold;
+
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background: rgba(70, 25, 96, .8);
+  color: #ffd700;
+}
+
+.btn-primary {
+  background: linear-gradient(
+    135deg,
+    #ffe978,
+    #ffd700,
+    #f0a500
+  );
+
+  color: #18051f;
+}
+
+
+/* =========================================================
+   HIDDEN
+   ========================================================= */
+
+.hidden {
+  display: none !important;
+}
+
+
+/* =========================================================
+   LEVEL PREVIEW MODAL
+   ========================================================= */
+
+.game-level-preview-overlay,
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 15px;
+
+  background: rgba(5, 1, 12, .88);
+
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+
+  z-index: 5000;
+}
+
+.game-level-preview-card {
+  width: min(92vw, 560px);
+
+  padding: 12px;
+
+  border: 2px solid #ffd700;
+  border-radius: 20px;
+
+  background: #160622;
+
+  box-shadow: 0 0 25px rgba(255, 215, 0, .18);
+}
+
+.game-level-preview-header {
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  color: #ffd700;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.game-level-preview-header .icon-btn {
+  width: 36px;
+  height: 36px;
+  font-size: 17px;
+}
+
+.game-level-preview-img-container {
+  overflow: hidden;
+
+  border: 1px solid rgba(255, 215, 0, .35);
+  border-radius: 14px;
+
+  background: #08020f;
+}
+
+#gameLevelPreviewModalImg {
+  display: block;
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+}
+
+.game-level-preview-countdown {
+  padding-top: 10px;
+
+  text-align: center;
+
+  color: rgba(255, 255, 255, .7);
+  font-size: 12px;
+}
+
+#gameLevelPreviewCountdownSeconds {
+  color: #ffd700;
+  font-weight: bold;
+}
+
+
+/* =========================================================
+   VICTORY MODAL
+   ========================================================= */
+
+#confettiCanvas {
+  position: fixed;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  pointer-events: none;
+  z-index: 5001;
+}
+
+.victory-card-pro {
+  width: min(94vw, 600px);
+  max-height: 94vh;
+  overflow-y: auto;
+
+  position: relative;
+  z-index: 5002;
+
+  padding: 18px;
+
+  border: 2px solid #ffd700;
+  border-radius: 24px;
+
+  background:
+    radial-gradient(circle at top, rgba(123, 44, 191, .25), transparent 45%),
+    #13051f;
+
+  box-shadow:
+    0 0 25px rgba(255, 215, 0, .2),
+    0 0 50px rgba(123, 44, 191, .15);
+}
+
+.top-crest-badge {
+  display: flex;
+  justify-content: center;
+
+  margin-top: -42px;
+}
+
+.badge-shield {
+  width: 62px;
+  height: 62px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #32104b;
+  color: #ffd700;
+
+  font-size: 28px;
+
+  border: 2px solid #ffd700;
+  border-radius: 50%;
+}
+
+.victory-title-pro {
+  margin-top: 8px;
+
+  text-align: center;
+
+  color: #ffd700;
+  font-size: clamp(23px, 5vw, 34px);
+  font-weight: 900;
+}
+
+.victory-subtitle-pro {
+  margin-top: 4px;
+
+  text-align: center;
+
+  color: rgba(255, 255, 255, .7);
+  font-size: 12px;
+}
+
+.victory-img-container-pro {
+  width: min(100%, 350px);
+  aspect-ratio: 1;
+
+  margin: 15px auto;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(255, 215, 0, .5);
+  border-radius: 15px;
+}
+
+#victoryImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+/* =========================================================
+   STARS
+   ========================================================= */
+
+.star-rating-pro {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.star-pro {
+  color: rgba(255, 255, 255, .15);
+  font-size: 32px;
+}
+
+.star-pro.active {
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, .55);
+}
+
+
+/* =========================================================
+   VICTORY STATS
+   ========================================================= */
+
+.stats-panel-pro {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+  align-items: center;
+
+  padding: 10px 5px;
+
+  border: 1px solid rgba(255, 215, 0, .2);
+  border-radius: 14px;
+
+  background: rgba(10, 3, 18, .6);
+}
+
+.stat-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.stat-icon-pro {
+  font-size: 16px;
+}
+
+.stat-label-pro {
+  color: rgba(255, 215, 0, .65);
+  font-size: 7px;
+  font-weight: bold;
+}
+
+.stat-value-pro {
+  color: #fff;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.gold-val {
+  color: #ffd700;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 34px;
+  background: rgba(255, 215, 0, .25);
+}
+
+
+/* =========================================================
+   VICTORY BUTTONS
+   ========================================================= */
+
+.victory-buttons-pro {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+
+  margin-top: 14px;
+}
+
+.btn-pro {
+  min-height: 50px;
+
+  border-radius: 13px;
+  border: 1px solid rgba(255, 215, 0, .55);
+
+  font-size: 12px;
+  font-weight: bold;
+
+  cursor: pointer;
+}
+
+.btn-home-pro {
+  background: rgba(70, 25, 96, .8);
+  color: #ffd700;
+}
+
+.btn-next-pro {
+  background: linear-gradient(
+    135deg,
+    #ffe978,
+    #ffd700,
+    #f0a500
+  );
+
+  color: #18051f;
+}
+
+
+/* =========================================================
+   NOT ENOUGH COINS
+   Dynamically created by game.js
+   ========================================================= */
+
+#notEnoughCoinsPrompt {
+  position: fixed;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(5, 1, 12, .88);
+
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+
+  z-index: 10000;
+}
+
+.not-enough-coins-card {
+  width: min(90vw, 380px);
+
+  padding: 25px 20px 20px;
+
+  text-align: center;
+
+  border: 2px solid #ffd700;
+  border-radius: 20px;
+
+  background: #160622;
+
+  box-shadow: 0 0 25px rgba(255, 215, 0, .2);
+}
+
+.not-enough-coins-icon {
+  font-size: 40px;
+}
+
+.not-enough-coins-title {
+  margin-top: 7px;
+
+  color: #ffd700;
+  font-size: 19px;
+  font-weight: 900;
+}
+
+.not-enough-coins-message {
+  margin-top: 7px;
+
+  color: rgba(255, 255, 255, .72);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+#closeNotEnoughCoinsPrompt {
+  width: 100%;
+  min-height: 46px;
+
+  margin-top: 16px;
+
+  border: 0;
+  border-radius: 12px;
+
+  background: linear-gradient(
+    135deg,
+    #ffe978,
+    #ffd700,
+    #f0a500
+  );
+
+  color: #18051f;
+
+  font-weight: 900;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  .game-container {
+    padding: 8px 10px 20px;
+  }
+
+  .top-bar {
+    height: 50px;
+    grid-template-columns: 42px 1fr auto;
+  }
+
+  .icon-btn {
+    width: 39px;
+    height: 39px;
+    border-radius: 11px;
+  }
+
+  #logoVideo {
+    width: 100px;
+  }
+
+  .coin-badge {
+    min-width: 65px;
+    height: 37px;
+    font-size: 13px;
+  }
+
+  .centered-level-title {
+    margin: 5px 0 9px;
+    font-size: 18px;
+  }
+
+  .game-header {
+    margin-bottom: 10px;
+  }
+
+  .premium-stats-bar {
+    max-width: 360px;
+    padding: 6px;
+  }
+
+  .stat-badge {
+    min-height: 47px;
+  }
+
+  .stat-icon {
+    font-size: 16px;
+  }
+
+  .stat-value {
+    font-size: 14px;
+  }
+
+  .puzzle-wrapper {
+    width: 100%;
+    max-width: 430px;
+    padding: 4px;
+    border-radius: 16px;
+  }
+
+  .game-actions {
+    max-width: 430px;
+    margin-top: 10px;
+    gap: 7px;
+  }
+
+  .btn {
+    min-height: 46px;
+    padding: 0 7px;
+    font-size: 10px;
+  }
+
+  .victory-card-pro {
+    padding: 15px;
+  }
+
+  .victory-img-container-pro {
+    width: min(100%, 280px);
+  }
+
+  .star-pro {
+    font-size: 28px;
+  }
+
+  .stat-value-pro {
+    font-size: 11px;
+  }
+
+  .btn-pro {
+    min-height: 45px;
+    font-size: 10px;
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 360px) {
+
+  .game-container {
+    padding-left: 7px;
+    padding-right: 7px;
+  }
+
+  #logoVideo {
+    width: 90px;
+  }
+
+  .coin-badge {
+    min-width: 60px;
+    font-size: 12px;
+  }
+
+  .centered-level-title {
+    font-size: 16px;
+  }
+
+  .stat-badge {
+    min-height: 43px;
+  }
+
+  .stat-label {
+    font-size: 7px;
+  }
+
+  .stat-value {
+    font-size: 13px;
+  }
+
+  .btn {
+    min-height: 43px;
+    font-size: 9px;
+  }
+}
