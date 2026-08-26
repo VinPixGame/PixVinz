@@ -322,11 +322,20 @@ body {
 
 
 /* =========================================================
-   LEVEL PREVIEW MODAL
+   LEVEL PREVIEW POPUP
    ========================================================= */
 
-.game-level-preview-overlay,
-.modal-overlay {
+.preview-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+}
+
+.preview-popup.hidden {
+  display: none;
+}
+
+.preview-overlay {
   position: fixed;
   inset: 0;
 
@@ -334,78 +343,125 @@ body {
   align-items: center;
   justify-content: center;
 
-  padding: 15px;
+  padding: 20px;
 
-  background: rgba(5, 1, 12, .88);
+  background: rgba(8, 2, 20, 0.90);
 
-  backdrop-filter: blur(7px);
-  -webkit-backdrop-filter: blur(7px);
-
-  z-index: 5000;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
-.game-level-preview-card {
-  width: min(92vw, 560px);
+.preview-box {
+  width: min(92vw, 520px);
 
-  padding: 12px;
+  padding: 18px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(55, 22, 91, 0.97),
+      rgba(22, 7, 42, 0.98)
+    );
 
   border: 2px solid #ffd700;
-  border-radius: 20px;
+  border-radius: 24px;
 
-  background: #160622;
-
-  box-shadow: 0 0 25px rgba(255, 215, 0, .18);
+  box-shadow:
+    0 0 12px rgba(255, 215, 0, 0.65),
+    0 0 35px rgba(157, 78, 221, 0.45);
 }
 
-.game-level-preview-header {
-  min-height: 42px;
-
+.preview-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 
+  margin-bottom: 14px;
+
   color: #ffd700;
-  font-size: 15px;
-  font-weight: bold;
+
+  font-size: 1rem;
+  font-weight: 800;
 }
 
-.game-level-preview-header .icon-btn {
-  width: 36px;
-  height: 36px;
-  font-size: 17px;
+#previewCountdown {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;
+  height: 42px;
+
+  border: 1px solid #ffd700;
+  border-radius: 50%;
+
+  background: rgba(255, 215, 0, 0.12);
+
+  color: #ffd700;
+
+  font-size: 1rem;
+  font-weight: 900;
+
+  box-shadow:
+    0 0 10px rgba(255, 215, 0, 0.4);
 }
 
-.game-level-preview-img-container {
+.preview-image-container {
+  width: 100%;
+
+  aspect-ratio: 1 / 1;
+
   overflow: hidden;
 
-  border: 1px solid rgba(255, 215, 0, .35);
-  border-radius: 14px;
+  border: 1px solid rgba(255, 215, 0, 0.7);
+  border-radius: 18px;
 
-  background: #08020f;
+  background: #10051d;
+
+  box-shadow:
+    inset 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
-#gameLevelPreviewModalImg {
+#previewImage {
   display: block;
+
   width: 100%;
-  max-height: 70vh;
+  height: 100%;
+
   object-fit: contain;
 }
 
-.game-level-preview-countdown {
-  padding-top: 10px;
+.preview-close-btn {
+  width: 100%;
 
-  text-align: center;
+  margin-top: 15px;
+  padding: 14px;
 
-  color: rgba(255, 255, 255, .7);
-  font-size: 12px;
+  border: 1px solid #ffd700;
+  border-radius: 14px;
+
+  background: linear-gradient(
+    135deg,
+    #ffd700,
+    #ffae00
+  );
+
+  color: #1b0829;
+
+  font-size: 1rem;
+  font-weight: 900;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 0 15px rgba(255, 215, 0, 0.35);
+
+  transition: transform 0.15s ease;
 }
 
-#gameLevelPreviewCountdownSeconds {
-  color: #ffd700;
-  font-weight: bold;
+.preview-close-btn:active {
+  transform: scale(0.97);
 }
-
-
 /* =========================================================
    VICTORY MODAL
    ========================================================= */
