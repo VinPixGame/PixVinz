@@ -483,8 +483,10 @@ body {
 
 
 
+
+
 /* ==========================================
-   VICTORY MODAL & EFFECTS (Centered Flexbox)
+   VICTORY MODAL & EFFECTS (Larger & Well Proportioned)
    ========================================== */
 
 .modal-overlay {
@@ -507,17 +509,17 @@ body {
 
 .victory-card-pro {
   position: relative;
-  width: 90%;
-  max-width: 360px;
+  width: 92%;
+  max-width: 420px; /* Increased width/height for a taller, larger card */
   background: 
     radial-gradient(circle at center, rgba(88, 28, 135, 0.4) 0%, rgba(18, 6, 36, 0.98) 100%),
     radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
   background-size: 100% 100%, 12px 12px;
   border: 3.5px solid #ffd700;
   border-radius: 32px;
-  padding: 36px 20px 24px;
+  padding: 42px 24px 30px; /* Increased vertical padding for greater height */
   text-align: center;
-  box-shadow: 0 0 30px rgba(157, 78, 221, 0.6), inset 0 0 15px rgba(157, 78, 221, 0.5), 0 20px 40px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 35px rgba(157, 78, 221, 0.6), inset 0 0 15px rgba(157, 78, 221, 0.5), 0 20px 40px rgba(0, 0, 0, 0.8);
   margin: auto;
   animation: popUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -545,13 +547,13 @@ body {
   background: linear-gradient(180deg, #4c1d95 0%, #2e1065 100%);
   border: 2px solid #7c3aed;
   border-radius: 16px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   margin-top: 4px;
 }
 
 .victory-title-pro {
   font-family: 'Impact', 'Segoe UI Black', sans-serif;
-  font-size: 28px;
+  font-size: 32px; /* Increased title size */
   font-weight: 900;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -562,21 +564,21 @@ body {
 }
 
 .victory-subtitle-pro {
-  font-size: 13px;
+  font-size: 14px; /* Slightly larger subtitle */
   font-weight: 700;
   color: #e9d5ff;
-  margin: 8px 0 14px;
+  margin: 10px 0 16px;
   letter-spacing: 1px;
 }
 
 .victory-img-container-pro {
-  width: 190px;
-  height: 190px;
-  margin: 0 auto 14px;
+  width: 230px; /* Significantly increased solved image width */
+  height: 230px; /* Significantly increased solved image height */
+  margin: 0 auto 16px;
   border-radius: 24px;
   border: 3px solid #a855f7;
   overflow: hidden;
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.7), 0 8px 16px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 22px rgba(168, 85, 247, 0.7), 0 8px 16px rgba(0, 0, 0, 0.6);
 }
 
 .victory-img-container-pro img {
@@ -588,12 +590,12 @@ body {
 .star-rating-pro {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 14px;
+  margin-bottom: 18px;
 }
 
 .star-pro {
-  font-size: 38px;
+  font-size: 42px; /* Larger stars */
   color: #3b0764;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
@@ -611,8 +613,8 @@ body {
   background: rgba(15, 5, 29, 0.85);
   border: 1.5px solid rgba(124, 58, 237, 0.5);
   border-radius: 18px;
-  padding: 10px 6px;
-  margin-bottom: 18px;
+  padding: 14px 8px; /* Increased stats panel padding */
+  margin-bottom: 20px;
 }
 
 .stat-col {
@@ -620,20 +622,20 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
 }
 
-.stat-icon-pro { font-size: 16px; }
+.stat-icon-pro { font-size: 19px; /* Larger stats icon */ }
 
 .stat-label-pro {
-  font-size: 10px;
+  font-size: 11px; /* Larger stat labels */
   font-weight: 800;
   color: #c084fc;
   letter-spacing: 1px;
 }
 
 .stat-value-pro {
-  font-size: 16px;
+  font-size: 19px; /* Larger stat values */
   font-weight: 900;
   color: #ffffff;
 }
@@ -642,20 +644,20 @@ body {
 
 .stat-divider {
   width: 1px;
-  height: 32px;
+  height: 38px;
   background: rgba(124, 58, 237, 0.4);
 }
 
 .victory-buttons-pro {
   display: flex;
-  gap: 12px;
+  gap: 14px;
 }
 
 .btn-pro {
   flex: 1;
-  padding: 14px 10px;
+  padding: 16px 12px; /* Taller buttons */
   border-radius: 18px;
-  font-size: 16px;
+  font-size: 18px; /* Larger text for Home and Next */
   font-weight: 900;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -663,7 +665,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .btn-home-pro {
@@ -690,372 +692,3 @@ body {
   z-index: 201;
 }
 
-@keyframes popUp {
-  0% { transform: scale(0.8); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-
-/* =========================================================
-   NOT ENOUGH COINS
-   ========================================================= */
-
-#notEnoughCoinsPrompt {
-  position: fixed;
-  inset: 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 20px;
-
-  background: rgba(5, 1, 12, .88);
-
-  backdrop-filter: blur(7px);
-  -webkit-backdrop-filter: blur(7px);
-
-  z-index: 10000;
-}
-
-.not-enough-coins-card {
-  width: min(90vw, 380px);
-
-  padding: 25px 20px 20px;
-
-  text-align: center;
-
-  border: 2px solid #ffd700;
-  border-radius: 20px;
-
-  background: #160622;
-
-  box-shadow:
-    0 0 25px rgba(255, 215, 0, .2);
-}
-
-.not-enough-coins-icon {
-  font-size: 40px;
-}
-
-.not-enough-coins-title {
-  margin-top: 7px;
-
-  color: #ffd700;
-
-  font-size: 19px;
-  font-weight: 900;
-}
-
-.not-enough-coins-message {
-  margin-top: 7px;
-
-  color: rgba(255, 255, 255, .72);
-
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-#closeNotEnoughCoinsPrompt {
-  width: 100%;
-  min-height: 46px;
-
-  margin-top: 16px;
-
-  border: 0;
-  border-radius: 12px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #ffe978,
-      #ffd700,
-      #f0a500
-    );
-
-  color: #18051f;
-
-  font-weight: 900;
-
-  cursor: pointer;
-}
-
-
-/* =========================================================
-   MOBILE
-   ========================================================= */
-
-@media (max-width: 600px) {
-
-  .game-container {
-    padding: 24px 10px 20px;
-  }
-
-  .top-bar {
-    min-height: 64px;
-    margin-bottom: 16px;
-    padding-top: 6px;
-  }
-
-  .icon-btn,
-  .top-bar .icon-btn#backToHome {
-    width: 39px;
-    height: 39px;
-    min-width: 39px;
-
-    border-radius: 11px;
-  }
-
-  .logo-container {
-    width: 100%;
-  }
-
-  #logoVideo {
-    width: 155px;
-    height: auto;
-  }
-
-  .coin-badge {
-    min-width: 65px;
-    height: 37px;
-
-    padding: 6px 10px;
-
-    font-size: 13px;
-  }
-
-  .centered-level-title {
-    margin: 6px 0 10px;
-
-    font-size: 18px;
-  }
-
-  .game-header {
-    margin-bottom: 10px;
-  }
-
-  .premium-stats-bar {
-    max-width: 380px;
-    padding: 7px;
-  }
-
-  .stat-badge {
-    min-height: 50px;
-  }
-
-  .stat-icon {
-    font-size: 18px;
-  }
-
-  .stat-value {
-    font-size: 16px;
-  }
-
-  .puzzle-wrapper {
-    width: 100%;
-    max-width: 430px;
-
-    margin-top: 8px;
-
-    padding: 4px;
-
-    border-radius: 16px;
-  }
-
-  .game-actions {
-    max-width: 430px;
-
-    margin-top: 12px;
-
-    gap: 9px;
-  }
-
-  .btn {
-    min-height: 56px;
-
-    padding: 0 10px;
-
-    font-size: 15px;
-  }
-
-
-  /* =======================================================
-     MOBILE VICTORY MODAL
-     ======================================================= */
-
-  .modal-overlay {
-    padding: 18px;
-
-    align-items: center;
-    justify-content: center;
-  }
-
-  .victory-card-pro {
-    width: min(92vw, 400px);
-    max-width: 400px;
-
-    max-height: calc(100dvh - 36px);
-
-    margin: 0 auto;
-
-    padding: 34px 15px 20px;
-
-    border-radius: 28px;
-  }
-
-  .top-crest-badge {
-    top: -22px;
-
-    width: 46px;
-    height: 46px;
-  }
-
-  .victory-title-pro {
-    font-size: 25px;
-  }
-
-  .victory-subtitle-pro {
-    font-size: 12px;
-
-    margin-bottom: 12px;
-  }
-
-  .victory-img-container-pro {
-    width: 180px;
-    height: 180px;
-
-    margin-bottom: 12px;
-  }
-
-  .star-rating-pro {
-    gap: 9px;
-
-    margin-bottom: 12px;
-  }
-
-  .star-pro {
-    font-size: 30px;
-  }
-
-  .stats-panel-pro {
-    padding: 9px 4px;
-
-    margin-bottom: 14px;
-  }
-
-  .stat-icon-pro {
-    font-size: 14px;
-  }
-
-  .stat-label-pro {
-    font-size: 8px;
-  }
-
-  .stat-value-pro {
-    font-size: 12px;
-  }
-
-  .stat-divider {
-    height: 28px;
-  }
-
-  .victory-buttons-pro {
-    gap: 8px;
-  }
-
-  .btn-pro {
-    min-height: 45px;
-
-    padding: 11px 7px;
-
-    border-radius: 14px;
-
-    font-size: 11px;
-  }
-}
-
-
-/* =========================================================
-   VERY SMALL PHONES
-   ========================================================= */
-
-@media (max-width: 360px) {
-
-  .game-container {
-    padding-left: 7px;
-    padding-right: 7px;
-  }
-
-  .top-bar {
-    min-height: 60px;
-  }
-
-  #logoVideo {
-    width: 135px;
-    height: auto;
-  }
-
-  .coin-badge {
-    min-width: 60px;
-
-    padding-left: 8px;
-    padding-right: 8px;
-
-    font-size: 12px;
-  }
-
-  .centered-level-title {
-    font-size: 16px;
-  }
-
-  .stat-badge {
-    min-height: 46px;
-  }
-
-  .stat-label {
-    font-size: 8px;
-  }
-
-  .stat-value {
-    font-size: 14px;
-  }
-
-  .btn {
-    min-height: 52px;
-
-    font-size: 13px;
-  }
-
-  .victory-card-pro {
-    width: min(94vw, 360px);
-
-    padding: 32px 10px 17px;
-  }
-
-  .victory-title-pro {
-    font-size: 22px;
-  }
-
-  .victory-img-container-pro {
-    width: 160px;
-    height: 160px;
-  }
-
-  .star-pro {
-    font-size: 27px;
-  }
-
-  .stat-label-pro {
-    font-size: 7px;
-  }
-
-  .stat-value-pro {
-    font-size: 10px;
-  }
-
-  .btn-pro {
-    min-height: 43px;
-
-    font-size: 9px;
-  }
-}
