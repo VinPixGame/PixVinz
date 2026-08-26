@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let selectedTilePos = null;
   let isGameStarted = false; // Prevents instant win evaluation on load
 
-  const imageSrc = `image/level${getLevelImageIndex(currentLevel)}.jpeg`;
+  const imageSrc = `image/level${getLevelImageIndex(currentLevel)}.png`;
 
   function startGameBGM() {
     if (typeof AudioManager !== 'undefined' && AudioManager.musicEnabled) {
