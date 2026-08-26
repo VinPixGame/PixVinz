@@ -1,5 +1,5 @@
 /* =========================================================
-   PIXVINZ GAME PAGE (THEME UPDATED)
+   PIXVINZ GAME PAGE
    ========================================================= */
 
 * {
@@ -22,7 +22,6 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   color: #fff;
 
-  /* Deep purple background matching the menu reference */
   background:
     radial-gradient(circle at top, rgba(123, 44, 191, .3), transparent 50%),
     #130826;
@@ -42,10 +41,11 @@ body {
 
   padding: 32px 18px 28px;
 
-  /* Matching dark purple with subtle purple edge glow */
   background: rgba(22, 10, 38, .85);
-  box-shadow: 0 0 30px rgba(123, 44, 191, 0.2);
+  box-shadow: 0 0 30px rgba(123, 44, 191, 0.25);
 }
+
+
 
 
 /* ==========================================
@@ -81,7 +81,7 @@ body {
 }
 
 .icon-btn {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
   border: 1px solid #ffd700;
   color: #fff;
   width: 44px;
@@ -92,24 +92,27 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 0 10px rgba(157, 78, 221, 0.3);
+  transform: none;
   z-index: 2;
+  box-shadow: 0 0 10px rgba(157, 78, 221, 0.3);
 }
 
 .coin-badge {
-  background: rgba(15, 5, 27, 0.6);
+  background: rgba(0, 0, 0, 0.4);
   border: 1px solid #ffd700;
   padding: 6px 14px;
   border-radius: 20px;
   font-weight: bold;
   color: #ffd700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  box-shadow: 0 0 12px rgba(157, 78, 221, 0.35);
+  transform: none;
   z-index: 2;
+  display: flex;         
+  align-items: center;   
+  justify-content: center; 
+  gap: 6px;             
 }
+
+
 
 
 /* =========================================================
@@ -118,11 +121,16 @@ body {
 
 .centered-level-title {
   margin: 8px 0 12px;
+
   text-align: center;
+
   color: #ffd700;
+
   font-size: 22px;
   letter-spacing: 1.5px;
-  text-shadow: 0 0 10px rgba(255, 215, 0, .25);
+
+  text-shadow:
+    0 0 10px rgba(255, 215, 0, .25);
 }
 
 #levelDisplay {
@@ -137,30 +145,40 @@ body {
 .game-header {
   display: flex;
   justify-content: center;
+
   margin-bottom: 14px;
 }
 
 .premium-stats-bar {
   width: min(100%, 450px);
+
   display: grid;
   grid-template-columns: 1fr 1fr;
+
   gap: 10px;
+
   padding: 8px;
-  border: 1.5px solid rgba(157, 78, 221, 0.6); /* Purple edge glow */
+
+  border: 1.5px solid rgba(157, 78, 221, 0.6);
   border-radius: 16px;
-  background: rgba(28, 12, 48, 0.85);
+
+  background: rgba(38, 13, 57, .85);
   box-shadow: 0 0 15px rgba(157, 78, 221, 0.25);
 }
 
 .stat-badge {
   min-height: 56px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   gap: 9px;
+
   border: 1px solid rgba(255, 215, 0, .18);
   border-radius: 11px;
-  background: rgba(18, 7, 32, 0.8);
+
+  background: rgba(15, 5, 27, .65);
 }
 
 .stat-icon {
@@ -174,57 +192,75 @@ body {
 
 .stat-label {
   color: rgba(255, 215, 0, .7);
+
   font-size: 9px;
   font-weight: bold;
+
   letter-spacing: 1px;
 }
 
 .stat-value {
   color: #fff;
+
   font-size: 19px;
   font-weight: bold;
 }
 
 
 /* =========================================================
-   PUZZLE BOARD (Shadow Purple Update)
+   PUZZLE
    ========================================================= */
 
 .puzzle-wrapper {
   width: min(100%, 680px);
   aspect-ratio: 1;
-  margin: 8px auto 0;
-  padding: 6px;
 
-  /* Shadow purple border with outer glow */
-  border: 2px solid rgba(157, 78, 221, 0.8);
+  margin: 8px auto 0;
+
+  padding: 5px;
+
+  /* Glowing purple border with touch of gold shadow outside */
+  border: 2px solid rgba(157, 78, 221, 0.9);
   border-radius: 20px;
 
-  background: rgba(24, 10, 42, 0.95); /* Shadow purple background */
+  background: rgba(24, 10, 42, 0.95);
 
   box-shadow:
-    0 0 20px rgba(157, 78, 221, 0.4),
-    inset 0 0 25px rgba(12, 4, 22, 0.8);
+    0 0 18px rgba(255, 215, 0, 0.3),
+    0 0 25px rgba(157, 78, 221, 0.45),
+    inset 0 0 20px rgba(12, 4, 22, 0.8);
 }
 
 .puzzle-grid {
   width: 100%;
   height: 100%;
+
   display: grid;
+
   gap: 3px;
+
   overflow: hidden;
+
   border-radius: 14px;
-  background: #130722; /* Deeper shadow purple */
+
+  background: #130722;
 }
 
 .tile {
   min-width: 0;
   min-height: 0;
+
   background-repeat: no-repeat;
+
   border: 1px solid rgba(255, 215, 0, .16);
   border-radius: 4px;
+
   cursor: pointer;
-  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+
+  transition:
+    transform .12s ease,
+    filter .12s ease,
+    box-shadow .12s ease;
 }
 
 .tile:active {
@@ -233,8 +269,12 @@ body {
 
 .tile.selected {
   border: 2px solid #ffd700;
+
   filter: brightness(1.15);
-  box-shadow: 0 0 8px rgba(255, 215, 0, .8), 0 0 15px rgba(255, 215, 0, .3);
+
+  box-shadow:
+    0 0 8px rgba(255, 215, 0, .8),
+    0 0 15px rgba(255, 215, 0, .3);
 }
 
 
@@ -244,30 +284,44 @@ body {
 
 .game-actions {
   width: min(100%, 680px);
+
   display: grid;
   grid-template-columns: 1fr 1fr;
+
   gap: 12px;
+
   margin: 16px auto 0;
 }
 
 .btn {
-  min-height: 64px; /* Taller for larger text */
+  min-height: 64px; /* Taller button for larger text */
+
   border-radius: 14px;
+
   border: 1.5px solid rgba(255, 215, 0, .7);
-  font-size: 18px;    /* Significantly larger text */
+
+  font-size: 19px; /* Larger Shuffle & Preview font size */
   font-weight: 900;
   letter-spacing: 0.5px;
+
   cursor: pointer;
   box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
 }
 
 .btn-secondary {
-  background: rgba(60, 20, 90, 0.9);
+  background: rgba(70, 25, 96, .9);
   color: #ffd700;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #ffe978, #ffd700, #f0a500);
+  background:
+    linear-gradient(
+      135deg,
+      #ffe978,
+      #ffd700,
+      #f0a500
+    );
+
   color: #18051f;
 }
 
@@ -293,6 +347,7 @@ body {
 .preview-popup {
   position: fixed;
   inset: 0;
+
   z-index: 99999;
 }
 
@@ -303,30 +358,48 @@ body {
 .preview-overlay {
   position: fixed;
   inset: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   padding: 20px;
-  background: rgba(10, 3, 24, .92);
+
+  background: rgba(8, 2, 20, .90);
+
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
 
 .preview-box {
   width: min(92vw, 520px);
+
   padding: 18px;
-  background: linear-gradient(145deg, rgba(45, 18, 77, .97), rgba(20, 7, 38, .98));
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(55, 22, 91, .97),
+      rgba(22, 7, 42, .98)
+    );
+
   border: 2px solid #ffd700;
   border-radius: 24px;
-  box-shadow: 0 0 20px rgba(157, 78, 221, 0.6), 0 0 40px rgba(123, 44, 191, .4);
+
+  box-shadow:
+    0 0 15px rgba(255, 215, 0, .65),
+    0 0 35px rgba(157, 78, 221, .45);
 }
 
 .preview-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   margin-bottom: 14px;
+
   color: #ffd700;
+
   font-size: 1rem;
   font-weight: 800;
 }
@@ -334,47 +407,74 @@ body {
 #previewCountdown {
   width: 42px;
   height: 42px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   border: 1px solid #ffd700;
   border-radius: 50%;
+
   background: rgba(255, 215, 0, .12);
+
   color: #ffd700;
+
   font-size: 1rem;
   font-weight: 900;
-  box-shadow: 0 0 10px rgba(255, 215, 0, .4);
+
+  box-shadow:
+    0 0 10px rgba(255, 215, 0, .4);
 }
 
 .preview-image-container {
   width: 100%;
   aspect-ratio: 1 / 1;
+
   overflow: hidden;
+
   border: 1px solid rgba(157, 78, 221, .8);
   border-radius: 18px;
-  background: #130722;
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, .6);
+
+  background: #10051d;
+
+  box-shadow:
+    inset 0 0 20px rgba(0, 0, 0, .5);
 }
 
 #previewImage {
   display: block;
+
   width: 100%;
   height: 100%;
+
   object-fit: contain;
 }
 
 .preview-close-btn {
   width: 100%;
+
   margin-top: 15px;
   padding: 14px;
+
   border: 1px solid #ffd700;
   border-radius: 14px;
-  background: linear-gradient(135deg, #ffd700, #ffae00);
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffd700,
+      #ffae00
+    );
+
   color: #1b0829;
+
   font-size: 1rem;
   font-weight: 900;
+
   cursor: pointer;
-  box-shadow: 0 0 15px rgba(255, 215, 0, .35);
+
+  box-shadow:
+    0 0 15px rgba(255, 215, 0, .35);
 }
 
 .preview-close-btn:active {
@@ -382,8 +482,9 @@ body {
 }
 
 
+
 /* ==========================================
-   VICTORY MODAL & EFFECTS
+   VICTORY MODAL & EFFECTS (Centered Flexbox)
    ========================================== */
 
 .modal-overlay {
@@ -391,7 +492,7 @@ body {
   inset: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(10, 3, 24, 0.92);
+  background: rgba(8, 3, 20, 0.92);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   display: flex;
@@ -409,7 +510,7 @@ body {
   width: 90%;
   max-width: 360px;
   background: 
-    radial-gradient(circle at center, rgba(100, 30, 160, 0.4) 0%, rgba(18, 6, 36, 0.98) 100%),
+    radial-gradient(circle at center, rgba(88, 28, 135, 0.4) 0%, rgba(18, 6, 36, 0.98) 100%),
     radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
   background-size: 100% 100%, 12px 12px;
   border: 3.5px solid #ffd700;
@@ -418,6 +519,7 @@ body {
   text-align: center;
   box-shadow: 0 0 30px rgba(157, 78, 221, 0.6), inset 0 0 15px rgba(157, 78, 221, 0.5), 0 20px 40px rgba(0, 0, 0, 0.8);
   margin: auto;
+  animation: popUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .top-crest-badge {
@@ -440,12 +542,11 @@ body {
 .badge-shield { font-size: 22px; }
 
 .banner-ribbon {
-  background: linear-gradient(180deg, #5b21b6 0%, #3b0764 100%);
-  border: 2px solid #9333ea;
+  background: linear-gradient(180deg, #4c1d95 0%, #2e1065 100%);
+  border: 2px solid #7c3aed;
   border-radius: 16px;
   padding: 8px 12px;
   margin-top: 4px;
-  box-shadow: 0 0 15px rgba(147, 51, 234, 0.4);
 }
 
 .victory-title-pro {
@@ -508,11 +609,10 @@ body {
   align-items: center;
   justify-content: space-around;
   background: rgba(15, 5, 29, 0.85);
-  border: 1.5px solid rgba(157, 78, 221, 0.6);
+  border: 1.5px solid rgba(124, 58, 237, 0.5);
   border-radius: 18px;
   padding: 10px 6px;
   margin-bottom: 18px;
-  box-shadow: 0 0 15px rgba(157, 78, 221, 0.2);
 }
 
 .stat-col {
@@ -543,7 +643,7 @@ body {
 .stat-divider {
   width: 1px;
   height: 32px;
-  background: rgba(157, 78, 221, 0.4);
+  background: rgba(124, 58, 237, 0.4);
 }
 
 .victory-buttons-pro {
@@ -580,6 +680,21 @@ body {
   box-shadow: 0 5px 0 #854d0e, 0 8px 15px rgba(250, 204, 21, 0.4);
 }
 
+#confettiCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 201;
+}
+
+@keyframes popUp {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 
 /* =========================================================
    NOT ENOUGH COINS
@@ -588,24 +703,35 @@ body {
 #notEnoughCoinsPrompt {
   position: fixed;
   inset: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   padding: 20px;
-  background: rgba(10, 3, 24, .9);
+
+  background: rgba(5, 1, 12, .88);
+
   backdrop-filter: blur(7px);
   -webkit-backdrop-filter: blur(7px);
+
   z-index: 10000;
 }
 
 .not-enough-coins-card {
   width: min(90vw, 380px);
+
   padding: 25px 20px 20px;
+
   text-align: center;
+
   border: 2px solid #ffd700;
   border-radius: 20px;
-  background: #18082c;
-  box-shadow: 0 0 25px rgba(157, 78, 221, 0.4);
+
+  background: #160622;
+
+  box-shadow:
+    0 0 25px rgba(255, 215, 0, .2);
 }
 
 .not-enough-coins-icon {
@@ -614,14 +740,18 @@ body {
 
 .not-enough-coins-title {
   margin-top: 7px;
+
   color: #ffd700;
+
   font-size: 19px;
   font-weight: 900;
 }
 
 .not-enough-coins-message {
   margin-top: 7px;
+
   color: rgba(255, 255, 255, .72);
+
   font-size: 12px;
   line-height: 1.5;
 }
@@ -629,12 +759,24 @@ body {
 #closeNotEnoughCoinsPrompt {
   width: 100%;
   min-height: 46px;
+
   margin-top: 16px;
+
   border: 0;
   border-radius: 12px;
-  background: linear-gradient(135deg, #ffe978, #ffd700, #f0a500);
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffe978,
+      #ffd700,
+      #f0a500
+    );
+
   color: #18051f;
+
   font-weight: 900;
+
   cursor: pointer;
 }
 
@@ -660,6 +802,7 @@ body {
     width: 39px;
     height: 39px;
     min-width: 39px;
+
     border-radius: 11px;
   }
 
@@ -675,12 +818,15 @@ body {
   .coin-badge {
     min-width: 65px;
     height: 37px;
+
     padding: 6px 10px;
+
     font-size: 13px;
   }
 
   .centered-level-title {
     margin: 6px 0 10px;
+
     font-size: 18px;
   }
 
@@ -708,25 +854,38 @@ body {
   .puzzle-wrapper {
     width: 100%;
     max-width: 430px;
+
     margin-top: 8px;
+
     padding: 4px;
+
     border-radius: 16px;
   }
 
   .game-actions {
     max-width: 430px;
+
     margin-top: 12px;
+
     gap: 9px;
   }
 
   .btn {
     min-height: 56px;
+
     padding: 0 10px;
-    font-size: 16px; /* Keeping buttons prominent on mobile */
+
+    font-size: 15px;
   }
+
+
+  /* =======================================================
+     MOBILE VICTORY MODAL
+     ======================================================= */
 
   .modal-overlay {
     padding: 18px;
+
     align-items: center;
     justify-content: center;
   }
@@ -734,14 +893,19 @@ body {
   .victory-card-pro {
     width: min(92vw, 400px);
     max-width: 400px;
+
     max-height: calc(100dvh - 36px);
+
     margin: 0 auto;
+
     padding: 34px 15px 20px;
+
     border-radius: 28px;
   }
 
   .top-crest-badge {
     top: -22px;
+
     width: 46px;
     height: 46px;
   }
@@ -752,17 +916,20 @@ body {
 
   .victory-subtitle-pro {
     font-size: 12px;
+
     margin-bottom: 12px;
   }
 
   .victory-img-container-pro {
     width: 180px;
     height: 180px;
+
     margin-bottom: 12px;
   }
 
   .star-rating-pro {
     gap: 9px;
+
     margin-bottom: 12px;
   }
 
@@ -772,6 +939,7 @@ body {
 
   .stats-panel-pro {
     padding: 9px 4px;
+
     margin-bottom: 14px;
   }
 
@@ -797,8 +965,11 @@ body {
 
   .btn-pro {
     min-height: 45px;
+
     padding: 11px 7px;
+
     border-radius: 14px;
+
     font-size: 11px;
   }
 }
@@ -826,8 +997,10 @@ body {
 
   .coin-badge {
     min-width: 60px;
+
     padding-left: 8px;
     padding-right: 8px;
+
     font-size: 12px;
   }
 
@@ -848,12 +1021,14 @@ body {
   }
 
   .btn {
-    min-height: 50px;
-    font-size: 14px;
+    min-height: 52px;
+
+    font-size: 13px;
   }
 
   .victory-card-pro {
     width: min(94vw, 360px);
+
     padding: 32px 10px 17px;
   }
 
@@ -880,6 +1055,7 @@ body {
 
   .btn-pro {
     min-height: 43px;
+
     font-size: 9px;
   }
 }
