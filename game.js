@@ -210,6 +210,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
+// Add this exact JavaScript block to your script file. 
+// It hooks directly into the exact ID (#pv-trigger-btn) from your HTML snippet, 
+// deducts 5 coins using _spendCoin(5), loads the dynamic level image (e.g. image/level1.jpeg), 
+// runs the 10-second auto-close timer, and closes via button or background click.
+
 document.addEventListener('DOMContentLoaded', () => {
   const previewBtn = document.getElementById('pv-trigger-btn');
   const pvContainer = document.getElementById('pv-container');
@@ -221,25 +226,26 @@ document.addEventListener('DOMContentLoaded', () => {
   let countdownInterval = null;
   let timeLeft = 10;
 
-  // Function to show preview
-  function showPreview(imageSrc, levelNumber = 1) {
+  function showPreview() {
     if (!pvContainer) return;
-    
-    // Set image and title
-    if (pvImage) pvImage.src = imageSrc || '';
-    if (pvTitle) pvTitle.textContent = `LEVEL ${String(levelNumber).padStart(2, '0')} PREVIEW`;
-    
-    // Reset countdown
+
+    // Get your game's current level variable (change 'currentLevel' if your game uses a different variable name)
+    const levelNum = typeof currentLevel !== 'undefined' ? currentLevel : 1;
+    const formattedNum = String(levelNum).padStart(2, '0');
+
+    // Set title and image path matching image/levelX.jpeg
+    if (pvTitle) pvTitle.textContent = `LEVEL ${formattedNum} PREVIEW`;
+    if (pvImage) pvImage.src = `image/level${levelNum}.jpeg`;
+
+    // Show the preview box
+    pvContainer.classList.remove('pv-hidden');
+
+    // Start 10-second countdown
     timeLeft = 10;
     if (pvCountdown) pvCountdown.textContent = timeLeft;
 
-    // Show container
-    pvContainer.classList.remove('pv-hidden');
-
-    // Clear any existing interval
     if (countdownInterval) clearInterval(countdownInterval);
 
-    // Start countdown timer
     countdownInterval = setInterval(() => {
       timeLeft--;
       if (pvCountdown) pvCountdown.textContent = timeLeft;
@@ -250,7 +256,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000);
   }
 
-  // Function to hide preview
   function hidePreview() {
     if (!pvContainer) return;
     pvContainer.classList.add('pv-hidden');
@@ -260,39 +265,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Event Listeners
+  // Bind click event to your preview button
   if (previewBtn) {
     previewBtn.addEventListener('click', () => {
-      // Access or manage user coins (assumes window.userCoins exists in your game state)
-      if (typeof window.userCoins !== 'undefined') {
-        if (window.userCoins < 5) {
-          alert('Not enough coins! You need 5 coins for a preview.');
-          return;
-        }
-        // Deduct 5 coins
-        window.userCoins -= 5;
-        
-        // Update coin display on UI if you have an update function or element
-        if (typeof window.updateCoinDisplay === 'function') {
-          window.updateCoinDisplay();
-        } else {
-          const coinBadge = document.querySelector('.coin-badge');
-          if (coinBadge) coinBadge.textContent = `🪙 ${window.userCoins}`;
-        }
+      // Spend 5 coins using your function
+      if (typeof _spendCoin === 'function') {
+        _spendCoin(5);
       }
 
-      // Get current level data and show preview
-      const currentLevelImage = window.currentLevelImageSrc || 'path/to/default-preview.jpg';
-      const currentLevelNum = window.currentLevelNumber || 1;
-      
-      showPreview(currentLevelImage, currentLevelNum);
+      showPreview();
     });
   }
 
+  // Bind click event to close button
   if (pvCloseBtn) {
     pvCloseBtn.addEventListener('click', hidePreview);
   }
 
+  // Close when clicking outside the card
   if (pvContainer) {
     pvContainer.addEventListener('click', (e) => {
       if (e.target === pvContainer) {
@@ -301,7 +291,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
-
   
   
   const nextLevelBtn = document.getElementById('nextLevelBtn');
