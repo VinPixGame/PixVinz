@@ -789,6 +789,18 @@ if (homeBtn) {
             masterVideo.src = '';
         }
 
+        // Stop winmodal video completely so audio/video doesn't overlap/continue playing
+        const winVideoContainer = document.getElementById('winVideoContainer');
+        if (winVideoContainer) {
+            const winVideo = winVideoContainer.querySelector('video');
+            if (winVideo) {
+                winVideo.pause();
+                winVideo.currentTime = 0;
+                winVideo.src = '';
+            }
+            winVideoContainer.innerHTML = '';
+        }
+
         // Clear/hide confetti canvas immediately
         const canvas = document.getElementById('confettiCanvas');
         if (canvas) {
@@ -811,6 +823,18 @@ if (nextChallengeBtn) {
             masterVideo.pause();
             masterVideo.currentTime = 0;
             masterVideo.src = '';
+        }
+
+        // Stop and clear winmodal video completely so its audio/video stops playing and never overlaps
+        const winVideoContainer = document.getElementById('winVideoContainer');
+        if (winVideoContainer) {
+            const winVideo = winVideoContainer.querySelector('video');
+            if (winVideo) {
+                winVideo.pause();
+                winVideo.currentTime = 0;
+                winVideo.src = '';
+            }
+            winVideoContainer.innerHTML = '';
         }
 
         // Clear/hide confetti canvas immediately so it doesn't linger or pop up
