@@ -197,68 +197,53 @@ body {
 
 
 /* =========================================================
-   PUZZLE BOARD WRAPPER & TILES (Bigger Box matching Stats width + 1:1 + Glows)
+   PUZZLE (Fluid Aspect Ratio - Shrinks/Grows cleanly)
    ========================================================= */
 
-.puzzle-board-wrapper {
-  position: relative;
+.puzzle-wrapper {
   width: 100%;
-  max-width: 450px; /* Matches the stats container width exactly */
-  aspect-ratio: 1; /* Strict 1:1 square ratio */
+  max-width: min(70vh, 450px); /* Keeps it square and bounds it to remaining vertical view */
+  aspect-ratio: 1;
   margin: 0 auto;
   padding: 4px;
-  
-  /* Glowing purple border with external gold shadow glow */
-  border: 3px solid #b551ff;
+  border: 2px solid rgba(157, 78, 221, 0.9);
   border-radius: 18px;
   background: rgba(24, 10, 42, 0.95);
   box-shadow:
-    0 0 25px 4px rgba(255, 215, 0, 0.7),   /* Bright Outer Gold Shadow Glow */
-    0 0 35px 6px rgba(157, 78, 221, 0.9),  /* Bright Outer Purple Glow */
+    0 0 18px rgba(255, 215, 0, 0.3),
+    0 0 25px rgba(157, 78, 221, 0.45),
     inset 0 0 20px rgba(12, 4, 22, 0.8);
-    
-  flex-shrink: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box;
-  overflow: hidden;
+  flex-shrink: 1; /* Allows it to gracefully scale down on shorter phones */
 }
 
-.puzzle-board {
-  width: 100% !important;
-  height: 100% !important;
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
-  grid-template-rows: repeat(3, 1fr) !important;
-  gap: 3px !important;
-  overflow: hidden;
-  border-radius: 12px;
-  background: #130722 !important;
-}
-
-.puzzle-tile {
-  position: relative;
-  min-width: 0;
-  min-height: 0;
+.puzzle-grid {
   width: 100%;
   height: 100%;
+  display: grid;
+  gap: 3px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #130722;
+}
+
+.tile {
+  min-width: 0;
+  min-height: 0;
   background-repeat: no-repeat;
   border: 1px solid rgba(255, 215, 0, .16);
   border-radius: 4px;
   cursor: pointer;
-  box-sizing: border-box;
   transition:
     transform .12s ease,
     filter .12s ease,
     box-shadow .12s ease;
 }
 
-.puzzle-tile:active {
+.tile:active {
   transform: scale(.97);
 }
 
-.puzzle-tile.selected {
+.tile.selected {
   border: 2px solid #ffd700;
   filter: brightness(1.15);
   box-shadow:
