@@ -210,87 +210,108 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-// Add this exact JavaScript block to your script file. 
-// It hooks directly into the exact ID (#pv-trigger-btn) from your HTML snippet, 
-// deducts 5 coins using _spendCoin(5), loads the dynamic level image (e.g. image/level1.jpeg), 
-// runs the 10-second auto-close timer, and closes via button or background click.
+  // =========================================================
+  // LEVEL PREVIEW
+  // Cost: 5 coins
+  // Duration: 10 seconds
+  // =========================================================
 
-document.addEventListener('DOMContentLoaded', () => {
   const previewBtn = document.getElementById('pv-trigger-btn');
-  const pvContainer = document.getElementById('pv-container');
-  const pvCloseBtn = document.getElementById('pv-close-btn');
-  const pvCountdown = document.getElementById('pv-countdown');
-  const pvImage = document.getElementById('pv-image');
-  const pvTitle = document.getElementById('pv-title');
+  const previewPopup = document.getElementById('previewPopup');
+  const previewImage = document.getElementById('previewImage');
+  const previewCountdown = document.getElementById('previewCountdown');
+  const previewCloseBtn = document.getElementById('previewCloseBtn');
 
-  let countdownInterval = null;
-  let timeLeft = 10;
+  let previewTimer = null;
+  let previewTimeLeft = 10;
 
-  function showPreview() {
-    if (!pvContainer) return;
+  function closePreview() {
+    clearInterval(previewTimer);
+    previewTimer = null;
 
-    // Get your game's current level variable (change 'currentLevel' if your game uses a different variable name)
-    const levelNum = typeof currentLevel !== 'undefined' ? currentLevel : 1;
-    const formattedNum = String(levelNum).padStart(2, '0');
-
-    // Set title and image path matching image/levelX.jpeg
-    if (pvTitle) pvTitle.textContent = `LEVEL ${formattedNum} PREVIEW`;
-    if (pvImage) pvImage.src = `image/level${levelNum}.jpeg`;
-
-    // Show the preview box
-    pvContainer.classList.remove('pv-hidden');
-
-    // Start 10-second countdown
-    timeLeft = 10;
-    if (pvCountdown) pvCountdown.textContent = timeLeft;
-
-    if (countdownInterval) clearInterval(countdownInterval);
-
-    countdownInterval = setInterval(() => {
-      timeLeft--;
-      if (pvCountdown) pvCountdown.textContent = timeLeft;
-
-      if (timeLeft <= 0) {
-        hidePreview();
-      }
-    }, 1000);
+    previewPopup.classList.add('hidden');
+    previewImage.src = '';
   }
 
-  function hidePreview() {
-    if (!pvContainer) return;
-    pvContainer.classList.add('pv-hidden');
-    if (countdownInterval) {
-      clearInterval(countdownInterval);
-      countdownInterval = null;
-    }
-  }
-
-  // Bind click event to your preview button
   if (previewBtn) {
-    previewBtn.addEventListener('click', () => {
-      // Spend 5 coins using your function
-      if (typeof _spendCoin === 'function') {
-        _spendCoin(5);
+    previewBtn.addEventListener('click', async (e) => {
+
+      e.stopPropagation();
+
+      // Prevent opening another preview while one is active
+      if (!previewPopup.classList.contains('hidden')) {
+        return;
       }
 
-      showPreview();
+      // Make sure totalCoins exists
+      if (typeof totalCoins !== 'number') {
+        console.error('totalCoins is not available.');
+        return;
+      }
+
+      // Not enough coins
+      if (totalCoins < 5) {
+        alert('Not enough coins!');
+        return;
+      }
+
+      // Deduct 5 coins
+      totalCoins -= 5;
+
+      // Update coin display
+      if (typeof updateCoinDisplay === 'function') {
+        updateCoinDisplay();
+      }
+
+      // Save coins to cloud
+      if (typeof saveUserDataToCloud === 'function') {
+        await saveUserDataToCloud();
+      }
+
+      // Show current level image
+      previewImage.src = imageSrc;
+
+      // Reset timer
+      previewTimeLeft = 10;
+      previewCountdown.innerText = previewTimeLeft;
+
+      // Show popup
+      previewPopup.classList.remove('hidden');
+
+      // Start countdown
+      clearInterval(previewTimer);
+
+      previewTimer = setInterval(() => {
+
+        previewTimeLeft--;
+
+        previewCountdown.innerText = previewTimeLeft;
+
+        if (previewTimeLeft <= 0) {
+          closePreview();
+        }
+
+      }, 1000);
     });
   }
 
-  // Bind click event to close button
-  if (pvCloseBtn) {
-    pvCloseBtn.addEventListener('click', hidePreview);
+  if (previewCloseBtn) {
+    previewCloseBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closePreview();
+    });
   }
 
-  // Close when clicking outside the card
-  if (pvContainer) {
-    pvContainer.addEventListener('click', (e) => {
-      if (e.target === pvContainer) {
-        hidePreview();
+  // Prevent clicking the dark background from doing anything
+  if (previewPopup) {
+    previewPopup.addEventListener('click', (e) => {
+      if (e.target === previewPopup) {
+        closePreview();
       }
     });
   }
-});
+
+  
   
   
   const nextLevelBtn = document.getElementById('nextLevelBtn');
