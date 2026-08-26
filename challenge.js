@@ -244,7 +244,7 @@ function initBoardDOM() {
         return;
     }
 
-    const videoSrc = `challenge/challenge${currentChallenge}.webm`;
+    const videoSrc = `challenge/challenge${currentChallenge}.mp4`;
 
     const loadingPercentEl = document.getElementById('loadingPercent');
     const loadingBarFill = document.getElementById('loadingBarFill');
@@ -262,11 +262,13 @@ function initBoardDOM() {
     if (!masterVideo) {
         masterVideo = document.createElement('video');
         masterVideo.loop = true;
-        masterVideo.muted = true;
+        masterVideo.muted = false; // Video unmuted
         masterVideo.playsInline = true;
         masterVideo.setAttribute('playsinline', '');
         masterVideo.style.display = 'none';
         document.body.appendChild(masterVideo);
+    } else {
+        masterVideo.muted = false;
     }
 
     let isReadyToStart = false;
@@ -382,17 +384,8 @@ function startRenderLoop() {
 // Start Challenge Image Button Click Event
 if (startChallengeBtn) {
     startChallengeBtn.addEventListener('click', () => {
+        masterVideo.muted = false;
         masterVideo.play().catch(err => console.log("Video error:", err));
-        
-        const bgm = document.getElementById('challengeBGM');
-        if (bgm) {
-            bgm.currentTime = 0;
-            setTimeout(() => {
-                bgm.play()
-                    .then(() => console.log("BGM playing successfully"))
-                    .catch(err => console.log("BGM play failed:", err));
-            }, 150);
-        }
 
         if (loadingOverlay) loadingOverlay.style.display = 'none';
         challengeStarted = true;
@@ -504,15 +497,6 @@ function endGame() {
     stopTimer();
     isPlaying = false;
     challengeStarted = false;
-    
-    const bgm = document.getElementById('challengeBGM');
-    if (bgm) { bgm.pause(); bgm.currentTime = 0; }
-
-    const victoryAudio = document.getElementById('challengeVictoryBGM');
-    if (victoryAudio) {
-        victoryAudio.currentTime = 0;
-        victoryAudio.play().catch(err => console.log("Victory audio play error:", err));
-    }
 
     finalTime.textContent = timerDisplay.textContent;
     finalMoves.textContent = moves;
@@ -567,10 +551,10 @@ function endGame() {
     if (winVideoContainer) {
         winVideoContainer.innerHTML = '';
         const winVideo = document.createElement('video');
-        winVideo.src = `challenge/challenge${currentChallenge}.webm`;
+        winVideo.src = `challenge/challenge${currentChallenge}.mp4`;
         winVideo.autoplay = true;
         winVideo.loop = true;
-        winVideo.muted = true;
+        winVideo.muted = false; // Win video unmuted
         winVideo.playsInline = true;
         winVideoContainer.appendChild(winVideo);
         winVideo.play().catch(err => console.log("Win video play error:", err));
@@ -705,7 +689,8 @@ if (challengePreviewBtn) {
 
     if (modalTitle) modalTitle.innerText = `CHALLENGE ${String(currentChallenge).padStart(2, '0')} PREVIEW`;
     if (modalVideo) {
-      modalVideo.src = `challenge/challenge${currentChallenge}.webm`;
+      modalVideo.src = `challenge/challenge${currentChallenge}.mp4`;
+      modalVideo.muted = false; // Preview video unmuted
       modalVideo.play().catch(err => console.log("Modal preview video error:", err));
     }
     
@@ -774,12 +759,6 @@ if (homeBtn) {
             canvas.style.display = 'none';
         }
 
-        const bgm = document.getElementById('challengeBGM');
-        if (bgm) { bgm.pause(); bgm.currentTime = 0; }
-        
-        const victoryAudio = document.getElementById('challengeVictoryBGM');
-        if (victoryAudio) { victoryAudio.pause(); victoryAudio.currentTime = 0; }
-        
         winModal.classList.add('hidden');
         winModal.style.display = 'none';
         window.location.href = 'index.html';
@@ -797,12 +776,6 @@ if (nextChallengeBtn) {
             canvas.style.display = 'none';
         }
 
-        const bgm = document.getElementById('challengeBGM');
-        if (bgm) { bgm.pause(); bgm.currentTime = 0; }
-        
-        const victoryAudio = document.getElementById('challengeVictoryBGM');
-        if (victoryAudio) { victoryAudio.pause(); victoryAudio.currentTime = 0; }
-        
         winModal.classList.add('hidden');
         winModal.style.display = 'none';
 
