@@ -226,8 +226,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   let previewTimeLeft = 10;
 
   function closePreview() {
-    clearInterval(previewTimer);
-    previewTimer = null;
+    if (previewTimer) {
+      clearInterval(previewTimer);
+      previewTimer = null;
+    }
 
     previewPopup.classList.add('hidden');
     previewImage.src = '';
@@ -235,54 +237,43 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (previewBtn) {
     previewBtn.addEventListener('click', async (e) => {
-
+      e.preventDefault();
       e.stopPropagation();
 
-      // Prevent opening another preview while one is active
+      // Prevent multiple previews at the same time
       if (!previewPopup.classList.contains('hidden')) {
         return;
       }
 
-      // Make sure totalCoins exists
-      if (typeof totalCoins !== 'number') {
-        console.error('totalCoins is not available.');
+      // Use the existing coin system from playerstat.js
+      if (typeof spendCoins !== 'function') {
+        console.error('spendCoins() is not available.');
         return;
       }
 
+      // Deduct exactly 5 coins
+      const purchaseSuccessful = spendCoins(5);
+
       // Not enough coins
-      if (totalCoins < 5) {
+      if (!purchaseSuccessful) {
         alert('Not enough coins!');
         return;
       }
 
-      // Deduct 5 coins
-      totalCoins -= 5;
-
-      // Update coin display
-      if (typeof updateCoinDisplay === 'function') {
-        updateCoinDisplay();
-      }
-
-      // Save coins to cloud
-      if (typeof saveUserDataToCloud === 'function') {
-        await saveUserDataToCloud();
-      }
-
-      // Show current level image
+      // Show the current level's image
       previewImage.src = imageSrc;
 
-      // Reset timer
+      // Reset countdown
       previewTimeLeft = 10;
       previewCountdown.innerText = previewTimeLeft;
 
-      // Show popup
+      // Open popup
       previewPopup.classList.remove('hidden');
 
-      // Start countdown
+      // Start 10-second countdown
       clearInterval(previewTimer);
 
       previewTimer = setInterval(() => {
-
         previewTimeLeft--;
 
         previewCountdown.innerText = previewTimeLeft;
@@ -290,24 +281,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (previewTimeLeft <= 0) {
           closePreview();
         }
-
       }, 1000);
     });
   }
 
+  // CLOSE button
   if (previewCloseBtn) {
     previewCloseBtn.addEventListener('click', (e) => {
+      e.preventDefault();
       e.stopPropagation();
-      closePreview();
-    });
-  }
 
-  // Prevent clicking the dark background from doing anything
-  if (previewPopup) {
-    previewPopup.addEventListener('click', (e) => {
-      if (e.target === previewPopup) {
-        closePreview();
-      }
+      closePreview();
     });
   }
 
