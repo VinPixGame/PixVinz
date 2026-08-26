@@ -202,7 +202,7 @@ body {
 
 .puzzle-board-wrapper {
   width: 100%;
-  max-width: min(70vh, 450px); /* Keeps it square and bounds it to remaining vertical view */
+  max-width: min(70vh, 450px);
   aspect-ratio: 1;
   margin: 0 auto;
   padding: 4px;
@@ -213,7 +213,7 @@ body {
     0 0 18px rgba(255, 215, 0, 0.3),
     0 0 25px rgba(157, 78, 221, 0.45),
     inset 0 0 20px rgba(12, 4, 22, 0.8);
-  flex-shrink: 1; /* Allows it to gracefully scale down on shorter phones */
+  flex-shrink: 1;
 }
 
 .puzzle-board {
@@ -224,7 +224,6 @@ body {
   overflow: hidden;
   border-radius: 12px;
   background: #130722;
-  /* Grid template columns & rows are handled dynamically via JS per challenge level */
 }
 
 .puzzle-tile {
@@ -234,11 +233,11 @@ body {
   min-width: 0;
   min-height: 0;
   overflow: hidden;
+  box-sizing: border-box; /* Crucial: Keeps borders inside the tile dimensions */
   background-repeat: no-repeat;
   border: 1px solid rgba(255, 215, 0, .16);
   border-radius: 4px;
   cursor: pointer;
-  box-sizing: border-box;
   transition:
     transform .12s ease,
     filter .12s ease,
@@ -256,12 +255,156 @@ body {
 }
 
 .puzzle-tile.selected {
-  border: 2px solid #ffd700;
+  /* Using outline instead of border prevents layout shifts/stretching */
+  outline: 2px solid #ffd700;
+  outline-offset: -2px; 
   filter: brightness(1.15);
   box-shadow:
     0 0 8px rgba(255, 215, 0, .8),
     0 0 15px rgba(255, 215, 0, .3);
+  z-index: 2; /* Keeps selected tile on top of grid gaps */
 }
+
+/* =========================================================
+   CHALLENGE LOADING OVERLAY & PROGRESS BAR
+   ========================================================= */
+
+/* The full container overlay shown while the background video is buffering */
+#challengeLoadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(19, 7, 34, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  border-radius: 12px;
+  gap: 15px;
+}
+
+/* The outer track for the loading bar */
+#loadingBarContainer {
+  width: 70%;
+  max-width: 240px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(157, 78, 221, 0.4);
+  border-radius: 5px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+}
+
+/* The active progress fill bar that grows dynamically */
+#loadingBarFill {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #7928ca, #ff3366, #ffcc00);
+  border-radius: 4px;
+  transition: width 0.15s ease-out;
+  box-shadow: 0 0 8px rgba(255, 51, 102, 0.6);
+}
+
+/* The text displaying the loading percentage (e.g., "45%") */
+#loadingPercent {
+  font-family: monospace;
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffcc00;
+  letter-spacing: 1px;
+  text-shadow: 0 0 6px rgba(255, 204, 0, 0.4);
+}
+
+
+/* =========================================================
+   START CHALLENGE BUTTON & LOADING OVERLAY
+   ========================================================= */
+
+/* The button that appears once the background video is fully loaded */
+#startChallengeBtn {
+  background: linear-gradient(135deg, #7928ca, #ff3366);
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(255, 51, 102, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  z-index: 5;
+}
+
+#startChallengeBtn:hover {
+  transform: scale(1.05);
+  filter: brightness(1.15);
+  box-shadow: 0 6px 20px rgba(255, 51, 102, 0.6);
+}
+
+#startChallengeBtn:active {
+  transform: scale(0.96);
+}
+
+/* Helper utility class to hide elements safely */
+.hidden {
+  display: none !important;
+}
+
+
+/* =========================================================
+   DAILY LOCKOUT PERIOD & COUNTDOWN STYLING
+   ========================================================= */
+
+/* The lock overlay container rendered inside the puzzle board when limit is hit */
+.puzzle-board .lock-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+  text-align: center;
+  padding: 20px;
+  background: rgba(20, 10, 35, 0.95);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  border-radius: 12px;
+  box-sizing: border-box;
+}
+
+.puzzle-board .lock-overlay h2 {
+  color: #ff3366;
+  margin-bottom: 10px;
+  font-size: 22px;
+  text-shadow: 0 0 10px rgba(255, 51, 102, 0.4);
+}
+
+.puzzle-board .lock-overlay p {
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: #ddd;
+}
+
+/* The timer badge displaying hours, minutes, and seconds left */
+#activeLockCountdown {
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffcc00;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 204, 0, 0.3);
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6);
+  letter-spacing: 0.5px;
+}
+
 
 
 /* =========================================================
