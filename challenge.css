@@ -55,7 +55,7 @@ body {
 
 
 /* ==========================================
-   SHARED TOP BAR / HEADER
+   SHARED TOP BAR / HEADER (REVERTED TO ORIGINAL)
    ========================================== */
 
 .top-bar {
@@ -80,7 +80,7 @@ body {
 
 .logo-container video,
 #logoVideo {
-  width: 160px; /* Exact uniform logo video fit width */
+  width: 160px; /* Exact original uniform logo video fit width */
   height: auto;
   object-fit: contain;
 }
@@ -118,7 +118,7 @@ body {
 
 
 /* =========================================================
-   CHALLENGE HEADER & TITLE
+   CHALLENGE HEADER & TITLE (REVERTED TO ORIGINAL)
    ========================================================= */
 
 .challenge-header {
@@ -142,7 +142,7 @@ body {
 
 
 /* =========================================================
-   CHALLENGE STATS (TIME / MOVES) - UNTOUCHED
+   CHALLENGE STATS (TIME / MOVES) (REVERTED TO ORIGINAL)
    ========================================================= */
 
 .challenge-stats {
@@ -209,12 +209,12 @@ body {
   padding: 4px;
   
   /* Glowing purple border with external gold shadow glow */
-  border: 2.5px solid rgba(157, 78, 221, 1);
+  border: 3px solid #b551ff;
   border-radius: 18px;
   background: rgba(24, 10, 42, 0.95);
   box-shadow:
-    0 0 25px rgba(255, 215, 0, 0.45), /* Outside gold glow */
-    0 0 35px rgba(157, 78, 221, 0.7),  /* Outside purple glow */
+    0 0 25px 4px rgba(255, 215, 0, 0.7),   /* Bright Outer Gold Shadow Glow */
+    0 0 35px 6px rgba(157, 78, 221, 0.9),  /* Bright Outer Purple Glow */
     inset 0 0 20px rgba(12, 4, 22, 0.8);
     
   flex-shrink: 1;
@@ -268,7 +268,7 @@ body {
 
 
 /* =========================================================
-   CHALLENGE ACTION BUTTONS (Properly Aligned & Spanned)
+   CHALLENGE ACTION BUTTONS (Adjusted Spacing to Move Closer to Game Container)
    ========================================================= */
 
 .challenge-actions {
