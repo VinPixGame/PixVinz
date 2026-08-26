@@ -45,128 +45,64 @@ body {
 }
 
 
-/* =========================================================
-   TOP BAR
-   ========================================================= */
+
+
+/* ==========================================
+   SHARED TOP BAR / HEADER
+   ========================================== */
 
 .top-bar {
-  width: 100%;
-
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-
   align-items: center;
-
-  min-height: 62px;
-
-  margin-bottom: 14px;
-  padding-top: 4px;
+  width: 100%;
+  margin-bottom: 10px;
+  padding-top: 8px;
 }
 
-.top-bar > *:nth-child(1) {
-  justify-self: start;
-}
-
-.top-bar > *:nth-child(2) {
-  justify-self: center;
-}
-
-.top-bar > *:nth-child(3) {
-  justify-self: end;
-}
-
-
-/* =========================================================
-   BACK BUTTON
-   ========================================================= */
-
-.icon-btn,
-.top-bar .icon-btn#backToHome {
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background:
-    radial-gradient(
-      circle at top,
-      rgba(157, 78, 221, .4) 0%,
-      rgba(35, 16, 64, .8) 100%
-    );
-
-  border: 1.5px solid #ffd700;
-  border-radius: 12px;
-
-  color: #ffd700;
-
-  font-size: 24px;
-  font-weight: bold;
-
-  box-shadow:
-    0 0 10px rgba(255, 215, 0, .3);
-
-  cursor: pointer;
-
-  transform: none;
-}
-
-
-/* =========================================================
-   LOGO
-   ========================================================= */
+.top-bar > *:nth-child(1) { justify-self: start; }
+.top-bar > *:nth-child(2) { justify-self: center; }
+.top-bar > *:nth-child(3) { justify-self: end; }
 
 .logo-container {
-  width: 100%;
-
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 }
 
 .logo-container video,
 #logoVideo {
-  display: block;
-
-  width: 175px;
-  height: 60px;
-
-  max-width: 100%;
-
+  width: 160px;
+  height: auto;
   object-fit: contain;
-
-  margin: 0 auto;
 }
 
-
-/* =========================================================
-   COIN BADGE
-   ========================================================= */
-
-.coin-badge {
-  min-width: 76px;
-  height: 40px;
-
+.icon-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
   display: flex;
-  align-items: center;
   justify-content: center;
-
-  gap: 5px;
-
-  padding: 6px 14px;
-
-  background: rgba(0, 0, 0, .4);
-
-  border: 1px solid #ffd700;
-  border-radius: 20px;
-
-  font-weight: bold;
-  color: #ffd700;
-
+  align-items: center;
   transform: none;
 }
+
+.coin-badge {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid #ffd700;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: bold;
+  color: #ffd700;
+  transform: none;
+}
+
+
 
 
 /* =========================================================
