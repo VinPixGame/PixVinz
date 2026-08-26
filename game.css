@@ -39,7 +39,8 @@ body {
 
   margin: auto;
 
-  padding: 22px 18px 28px;
+  /* Added more top padding to push content downward and give the top bar breathing room */
+  padding: 32px 18px 28px;
 
   background: rgba(15, 5, 27, .72);
 }
@@ -56,8 +57,8 @@ body {
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   width: 100%;
-  margin-bottom: 10px;
-  padding-top: 8px;
+  margin-bottom: 16px;
+  padding-top: 12px;
 }
 
 .top-bar > *:nth-child(1) { justify-self: start; }
@@ -72,7 +73,8 @@ body {
 
 .logo-container video,
 #logoVideo {
-  width: 160px;
+  /* Made the logo bigger to match your preferred layout */
+  width: 190px;
   height: auto;
   object-fit: contain;
 }
@@ -773,20 +775,21 @@ body {
 @media (max-width: 600px) {
 
   .game-container {
-    padding: 16px 10px 20px;
+    /* Increased top padding to push the game container down */
+    padding: 24px 10px 20px;
   }
 
   .top-bar {
-    min-height: 58px;
+    min-height: 64px;
 
     grid-template-columns:
       42px
       1fr
       auto;
 
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 
-    padding-top: 2px;
+    padding-top: 6px;
   }
 
   .icon-btn,
@@ -803,8 +806,9 @@ body {
   }
 
   #logoVideo {
-    width: 120px;
-    height: 52px;
+    /* Increased mobile logo width/height so it's appropriately sized */
+    width: 155px;
+    height: auto;
   }
 
   .coin-badge {
@@ -984,12 +988,12 @@ body {
   }
 
   .top-bar {
-    min-height: 56px;
+    min-height: 60px;
   }
 
   #logoVideo {
-    width: 110px;
-    height: 48px;
+    width: 135px;
+    height: auto;
   }
 
   .coin-badge {
