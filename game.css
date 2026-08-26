@@ -173,7 +173,7 @@ body {
 }
 
 .stat-icon {
-  font-size: 18px;
+  font-size: 24px;
 }
 
 .stat-info {
@@ -184,7 +184,7 @@ body {
 .stat-label {
   color: rgba(255, 215, 0, .7);
 
-  font-size: 8px;
+  font-size: 16px;
   font-weight: bold;
 
   letter-spacing: 1px;
@@ -193,7 +193,7 @@ body {
 .stat-value {
   color: #fff;
 
-  font-size: 17px;
+  font-size: 24px;
   font-weight: bold;
 }
 
@@ -289,7 +289,7 @@ body {
 
   border: 1px solid rgba(255, 215, 0, .55);
 
-  font-size: 13px;
+  font-size: 24px;
   font-weight: bold;
 
   cursor: pointer;
