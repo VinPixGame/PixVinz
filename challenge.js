@@ -49,7 +49,20 @@ document.addEventListener('DOMContentLoaded', () => {
     initBoardDOM();
 });
 
-const gridSize = 3;
+// --- DYNAMIC GRID SIZE FUNCTION ---
+function getGridSizeForChallenge(challengeNum) {
+    if (challengeNum >= 1 && challengeNum <= 3) {
+        return 3;
+    } else if (challengeNum >= 4 && challengeNum <= 9) {
+        return 4;
+    } else if (challengeNum >= 10 && challengeNum <= 21) {
+        return 5;
+    } else {
+        return 6;
+    }
+}
+
+let gridSize = getGridSizeForChallenge(getSavedChallenge());
 
 // --- LOAD SAVED CHALLENGE INSTEAD OF LEVEL ---
 function getSavedChallenge() {
@@ -70,9 +83,23 @@ let secondsElapsed = 0;
 let isPlaying = false;
 let challengeStarted = false;
 
-let boardState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-let winningState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+let boardState = [];
+let winningState = [];
 let selectedTileIndex = null;
+
+function updateGridArraysAndCSS() {
+    gridSize = getGridSizeForChallenge(currentChallenge);
+    const totalTiles = gridSize * gridSize;
+    
+    boardState = Array.from({ length: totalTiles }, (_, i) => i);
+    winningState = Array.from({ length: totalTiles }, (_, i) => i);
+
+    if (puzzleBoard) {
+        puzzleBoard.style.display = 'grid';
+        puzzleBoard.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+        puzzleBoard.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
+    }
+}
 
 const puzzleBoard = document.getElementById('puzzleBoard');
 const moveCountDisplay = document.getElementById('moveCount');
@@ -159,6 +186,8 @@ function recordCompletedChallenge(challengeId) {
 
   // Initialize DOM elements with a smooth simulated & event-backed loader
 function initBoardDOM() {
+    updateGridArraysAndCSS();
+
     // --- CHECK DAILY LOCKOUT STATUS BEFORE RENDERING ---
     const status = checkDailyChallengeStatus();
     const titleEl = document.getElementById('challengeTitle');
@@ -283,7 +312,8 @@ function initBoardDOM() {
     masterVideo.src = videoSrc;
     masterVideo.load();
 
-    for (let currentPosition = 0; currentPosition < 9; currentPosition++) {
+    const totalTilesCount = gridSize * gridSize;
+    for (let currentPosition = 0; currentPosition < totalTilesCount; currentPosition++) {
         const tile = document.createElement('div');
         tile.classList.add('puzzle-tile');
         tile.style.position = 'relative';
@@ -316,8 +346,8 @@ function startRenderLoop() {
         if (masterVideo && masterVideo.readyState >= masterVideo.HAVE_CURRENT_DATA) {
             const vWidth = masterVideo.videoWidth;
             const vHeight = masterVideo.videoHeight;
-            const sliceW = vWidth / 3;
-            const sliceH = vHeight / 3;
+            const sliceW = vWidth / gridSize;
+            const sliceH = vHeight / gridSize;
 
             boardState.forEach((tileIndex, currentPosition) => {
                 const { tile, ctx } = tilesCache[currentPosition];
@@ -328,8 +358,8 @@ function startRenderLoop() {
                     canvas.height = canvas.offsetHeight;
                 }
 
-                const row = Math.floor(tileIndex / 3);
-                const col = tileIndex % 3;
+                const row = Math.floor(tileIndex / gridSize);
+                const col = tileIndex % gridSize;
 
                 ctx.drawImage(
                     masterVideo,
@@ -393,9 +423,10 @@ function handleTileClick(clickedPos) {
 }
 
 function shuffleBoard() {
+    const totalTiles = gridSize * gridSize;
     for (let i = 0; i < 50; i++) {
-        const pos1 = Math.floor(Math.random() * 9);
-        const pos2 = Math.floor(Math.random() * 9);
+        const pos1 = Math.floor(Math.random() * totalTiles);
+        const pos2 = Math.floor(Math.random() * totalTiles);
         [boardState[pos1], boardState[pos2]] = [boardState[pos2], boardState[pos1]];
     }
     
