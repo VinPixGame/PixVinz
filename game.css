@@ -531,421 +531,220 @@ body {
 }
 
 
-/* =========================================================
-   VICTORY MODAL
-   ========================================================= */
+
+/* ==========================================
+   VICTORY MODAL & EFFECTS
+   ========================================== */
 
 .modal-overlay {
   position: fixed;
-
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-
-  width: 100%;
-  height: 100%;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  padding: 20px;
-
-  background: rgba(8, 3, 20, .90);
-
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(8, 3, 20, 0.9);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-
+  display: flex;
+  justify-content: center;
+  align-items: center;
   z-index: 100000;
-
+  padding: 16px;
   overflow-y: auto;
 }
 
-.modal-overlay.hidden {
-  display: none !important;
-}
-
-
-/* =========================================================
-   VICTORY CARD
-   ========================================================= */
+.modal-overlay.hidden { display: none !important; }
 
 .victory-card-pro {
   position: relative;
-
-  width: min(92vw, 430px);
-  max-width: 430px;
-
-  max-height: calc(100vh - 40px);
-  max-height: calc(100dvh - 40px);
-
-  overflow-y: auto;
-
-  flex: 0 0 auto;
-
-  margin: 0 auto;
-
-  padding: 36px 20px 24px;
-
-  text-align: center;
-
-  background:
-    radial-gradient(
-      circle at center,
-      rgba(88, 28, 135, .4) 0%,
-      rgba(18, 6, 36, .98) 100%
-    ),
-    radial-gradient(
-      rgba(255, 255, 255, .1) 1px,
-      transparent 1px
-    );
-
-  background-size:
-    100% 100%,
-    12px 12px;
-
+  width: 90%;
+  max-width: 360px;
+  background: 
+    radial-gradient(circle at center, rgba(88, 28, 135, 0.4) 0%, rgba(18, 6, 36, 0.98) 100%),
+    radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 100% 100%, 12px 12px;
   border: 3.5px solid #ffd700;
   border-radius: 32px;
-
-  box-shadow:
-    0 0 25px rgba(255, 215, 0, .6),
-    inset 0 0 15px rgba(157, 78, 221, .5),
-    0 20px 40px rgba(0, 0, 0, .8);
-
-  animation:
-    popUp .35s cubic-bezier(.175, .885, .32, 1.275);
+  padding: 36px 20px 24px;
+  text-align: center;
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.6), inset 0 0 15px rgba(157, 78, 221, 0.5), 0 20px 40px rgba(0, 0, 0, 0.8);
+  margin: auto;
+  animation: popUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-
-
-/* =========================================================
-   VICTORY BADGE
-   ========================================================= */
 
 .top-crest-badge {
   position: absolute;
-
   top: -24px;
   left: 50%;
-
   transform: translateX(-50%);
-
   width: 48px;
   height: 48px;
-
-  background:
-    linear-gradient(
-      180deg,
-      #ffe066 0%,
-      #ffb700 100%
-    );
-
-  border: 2px solid #fff;
+  background: linear-gradient(180deg, #ffe066 0%, #ffb700 100%);
+  border: 2px solid #ffffff;
   border-radius: 50%;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
-  box-shadow:
-    0 0 15px rgba(255, 215, 0, .8),
-    0 4px 10px rgba(0, 0, 0, .5);
-
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.8), 0 4px 10px rgba(0, 0, 0, 0.5);
   z-index: 10;
 }
 
-.badge-shield {
-  font-size: 22px;
-}
-
-
-/* =========================================================
-   VICTORY BANNER
-   ========================================================= */
+.badge-shield { font-size: 22px; }
 
 .banner-ribbon {
-  background:
-    linear-gradient(
-      180deg,
-      #4c1d95 0%,
-      #2e1065 100%
-    );
-
+  background: linear-gradient(180deg, #4c1d95 0%, #2e1065 100%);
   border: 2px solid #7c3aed;
   border-radius: 16px;
-
   padding: 8px 12px;
-
   margin-top: 4px;
 }
 
 .victory-title-pro {
-  font-family:
-    Impact,
-    'Segoe UI Black',
-    sans-serif;
-
+  font-family: 'Impact', 'Segoe UI Black', sans-serif;
   font-size: 28px;
   font-weight: 900;
-
   letter-spacing: 1.5px;
-
   text-transform: uppercase;
-
-  background:
-    linear-gradient(
-      180deg,
-      #fff 0%,
-      #ffea6b 35%,
-      #ffb700 70%,
-      #d97706 100%
-    );
-
+  background: linear-gradient(180deg, #ffffff 0%, #ffea6b 35%, #ffb700 70%, #d97706 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-
-  filter:
-    drop-shadow(0 3px 0 #451a03);
+  filter: drop-shadow(0px 3px 0px #451a03);
 }
 
 .victory-subtitle-pro {
   font-size: 13px;
   font-weight: 700;
-
   color: #e9d5ff;
-
   margin: 8px 0 14px;
-
   letter-spacing: 1px;
 }
-
-
-/* =========================================================
-   VICTORY IMAGE
-   ========================================================= */
 
 .victory-img-container-pro {
   width: 190px;
   height: 190px;
-
   margin: 0 auto 14px;
-
   border-radius: 24px;
-
   border: 3px solid #a855f7;
-
   overflow: hidden;
-
-  box-shadow:
-    0 0 20px rgba(168, 85, 247, .7),
-    0 8px 16px rgba(0, 0, 0, .6);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.7), 0 8px 16px rgba(0, 0, 0, 0.6);
 }
 
-.victory-img-container-pro img,
-#victoryImg {
-  display: block;
-
+.victory-img-container-pro img {
   width: 100%;
   height: 100%;
-
   object-fit: cover;
 }
 
-
-/* =========================================================
-   STARS
-   ========================================================= */
-
 .star-rating-pro {
   display: flex;
-
   justify-content: center;
-
   gap: 12px;
-
   margin-bottom: 16px;
 }
 
 .star-pro {
   font-size: 38px;
-
   color: #3b0764;
-
-  text-shadow:
-    0 2px 4px rgba(0, 0, 0, .5);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .star-pro.active {
   color: #facc15;
-
-  filter:
-    drop-shadow(0 0 10px rgba(250, 204, 21, .8));
-
+  filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.8));
   transform: scale(1.1);
 }
 
-
-/* =========================================================
-   VICTORY STATS
-   ========================================================= */
-
 .stats-panel-pro {
-  width: 100%;
-
   display: flex;
-
   align-items: center;
   justify-content: space-around;
-
-  background: rgba(15, 5, 29, .85);
-
-  border: 1.5px solid rgba(124, 58, 237, .5);
-
+  background: rgba(15, 5, 29, 0.85);
+  border: 1.5px solid rgba(124, 58, 237, 0.5);
   border-radius: 18px;
-
   padding: 10px 6px;
-
   margin-bottom: 18px;
 }
 
 .stat-col {
   flex: 1;
-
-  min-width: 0;
-
   display: flex;
   flex-direction: column;
-
   align-items: center;
-
   gap: 2px;
 }
 
-.stat-icon-pro {
-  font-size: 16px;
-}
+.stat-icon-pro { font-size: 16px; }
 
 .stat-label-pro {
   font-size: 10px;
   font-weight: 800;
-
   color: #c084fc;
-
   letter-spacing: 1px;
 }
 
 .stat-value-pro {
   font-size: 16px;
   font-weight: 900;
-
-  color: #fff;
+  color: #ffffff;
 }
 
-.gold-val {
-  color: #facc15;
-}
+.gold-val { color: #facc15; }
 
 .stat-divider {
   width: 1px;
   height: 32px;
-
-  flex-shrink: 0;
-
-  background: rgba(124, 58, 237, .4);
+  background: rgba(124, 58, 237, 0.4);
 }
 
-
-/* =========================================================
-   VICTORY BUTTONS
-   ========================================================= */
-
 .victory-buttons-pro {
-  width: 100%;
-
   display: flex;
-
   gap: 12px;
 }
 
 .btn-pro {
   flex: 1;
-
-  min-width: 0;
-
   padding: 14px 10px;
-
   border-radius: 18px;
-
   font-size: 16px;
   font-weight: 900;
-
   letter-spacing: 1px;
-
   text-transform: uppercase;
-
   cursor: pointer;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   gap: 6px;
 }
 
 .btn-home-pro {
-  background:
-    linear-gradient(
-      180deg,
-      #7e22ce 0%,
-      #581c87 100%
-    );
-
+  background: linear-gradient(180deg, #7e22ce 0%, #581c87 100%);
   border: 2px solid #c084fc;
-
-  color: #fff;
-
-  box-shadow:
-    0 5px 0 #3b0764,
-    0 8px 15px rgba(0, 0, 0, .4);
+  color: #ffffff;
+  box-shadow: 0 5px 0 #3b0764, 0 8px 15px rgba(0, 0, 0, 0.4);
 }
 
 .btn-next-pro {
-  background:
-    linear-gradient(
-      180deg,
-      #fde047 0%,
-      #eab308 50%,
-      #ca8a04 100%
-    );
-
-  border: 2px solid #fff;
-
+  background: linear-gradient(180deg, #fde047 0%, #eab308 50%, #ca8a04 100%);
+  border: 2px solid #ffffff;
   color: #1e0a38;
-
-  box-shadow:
-    0 5px 0 #854d0e,
-    0 8px 15px rgba(250, 204, 21, .4);
+  box-shadow: 0 5px 0 #854d0e, 0 8px 15px rgba(250, 204, 21, 0.4);
 }
 
+.hidden { display: none !important; }
 
-/* =========================================================
-   POPUP ANIMATION
-   ========================================================= */
+#confettiCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 201;
+}
 
 @keyframes popUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(.92);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
-
-
 /* =========================================================
    NOT ENOUGH COINS
    ========================================================= */
