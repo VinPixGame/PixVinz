@@ -184,8 +184,15 @@ function recordCompletedChallenge(challengeId) {
 }
 
 
-  // Initialize DOM elements with a smooth simulated & event-backed loader
+	 // Initialize DOM elements with a smooth simulated & event-backed loader
 function initBoardDOM() {
+    // Completely stop/clean up masterVideo if it exists from a previous challenge
+    if (masterVideo) {
+        masterVideo.pause();
+        masterVideo.currentTime = 0;
+        masterVideo.src = '';
+    }
+
     updateGridArraysAndCSS();
 
     // --- CHECK DAILY LOCKOUT STATUS BEFORE RENDERING ---
@@ -498,6 +505,12 @@ function endGame() {
     isPlaying = false;
     challengeStarted = false;
 
+    // Fully stop the main puzzle video so win modal video can play independently without overlap
+    if (masterVideo) {
+        masterVideo.pause();
+        masterVideo.currentTime = 0;
+    }
+
     finalTime.textContent = timerDisplay.textContent;
     finalMoves.textContent = moves;
 
@@ -660,6 +673,11 @@ if (challengePreviewBtn) {
   challengePreviewBtn.addEventListener('click', async () => {
     if (!challengeStarted) return;
 
+    // Pause the main puzzle video so audio/playback doesn't overlap with preview
+    if (masterVideo) {
+        masterVideo.pause();
+    }
+
     const previewCost = 10;
     let success = true;
 
@@ -677,6 +695,10 @@ if (challengePreviewBtn) {
 
     if (!success) {
       alert("Not enough coins! You need 10 coins to preview the challenge.");
+      // Resume main puzzle video if preview fails due to insufficient coins
+      if (masterVideo && challengeStarted) {
+          masterVideo.play().catch(err => console.log("Resume video error:", err));
+      }
       return;
     }
 
@@ -689,7 +711,11 @@ if (challengePreviewBtn) {
 
     if (modalTitle) modalTitle.innerText = `CHALLENGE ${String(currentChallenge).padStart(2, '0')} PREVIEW`;
     if (modalVideo) {
-      modalVideo.src = `challenge/challenge${currentChallenge}.mp4`;
+      // Only set src if it's empty or points to a different challenge, preserving current progress if paused/resumed
+      const expectedSrc = `challenge/challenge${currentChallenge}.mp4`;
+      if (!modalVideo.src.includes(expectedSrc)) {
+          modalVideo.src = expectedSrc;
+      }
       modalVideo.muted = false; // Preview video unmuted
       modalVideo.play().catch(err => console.log("Modal preview video error:", err));
     }
@@ -727,11 +753,16 @@ function closeChallengePreviewModal() {
     modal.style.display = 'none';
   }
   if (modalVideo) {
+    // Pause only to its current playback time instead of resetting, so it resumes on next preview click
     modalVideo.pause();
-    modalVideo.src = '';
   }
   if (challengePreviewTimer) clearTimeout(challengePreviewTimer);
   if (challengeCountdownInterval) clearInterval(challengeCountdownInterval);
+
+  // Resume main puzzle video when preview modal is closed
+  if (masterVideo && challengeStarted) {
+      masterVideo.play().catch(err => console.log("Resume main video error:", err));
+  }
 }
 
 const closeChallengePreviewBtn = document.getElementById('closeChallengePreviewBtn');
@@ -751,6 +782,13 @@ if (challengeShuffleBtn) {
 // --- HOME BUTTON HANDLER ---
 if (homeBtn) {
     homeBtn.addEventListener('click', () => {
+        // Ensure masterVideo is completely stopped/cleared when going home
+        if (masterVideo) {
+            masterVideo.pause();
+            masterVideo.currentTime = 0;
+            masterVideo.src = '';
+        }
+
         // Clear/hide confetti canvas immediately
         const canvas = document.getElementById('confettiCanvas');
         if (canvas) {
@@ -768,6 +806,13 @@ if (homeBtn) {
 // --- NEXT CHALLENGE BUTTON HANDLER ---
 if (nextChallengeBtn) {
     nextChallengeBtn.addEventListener('click', () => {
+        // Fully stop and clear masterVideo so the next puzzle video starts fresh on its own
+        if (masterVideo) {
+            masterVideo.pause();
+            masterVideo.currentTime = 0;
+            masterVideo.src = '';
+        }
+
         // Clear/hide confetti canvas immediately so it doesn't linger or pop up
         const canvas = document.getElementById('confettiCanvas');
         if (canvas) {
