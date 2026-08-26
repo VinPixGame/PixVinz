@@ -258,95 +258,94 @@ body {
   cursor: pointer;
 }
 
-/* ==========================================
-   ISOLATED PREVIEW COMPONENT STYLES
-   ========================================== */
-
+/* Container wrapper that covers the screen */
 .pv-wrapper {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.85);
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 99999;
+  align-items: center;
+  z-index: 9999;
+  opacity: 1;
+  transition: opacity 0.3s ease;
 }
 
-.pv-wrapper.pv-hidden {
+/* Hidden state class used by JavaScript */
+.pv-hidden {
   display: none !important;
+  opacity: 0;
+  pointer-events: none;
 }
 
+/* The popup card box */
 .pv-card {
-  background: #1a0b2e;
-  padding: 20px;
-  border-radius: 16px;
-  border: 2px solid #ffd700;
+  background: #ffffff;
+  border-radius: 12px;
   width: 90%;
-  max-width: 320px;
-  text-align: center;
+  max-width: 400px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  box-sizing: border-box;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-  z-index: 100000;
-  position: relative;
 }
 
+/* Header section with title, timer, and close button */
 .pv-header {
+  background: #2c3e50;
+  color: #ffffff;
+  padding: 12px 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
-  margin-bottom: 12px;
-}
-
-#pv-title {
-  color: #ffd700;
+  font-family: sans-serif;
   font-size: 14px;
   font-weight: bold;
-  letter-spacing: 1px;
 }
 
+/* Timer text styling */
 .pv-timer-text {
-  color: #fff;
   font-size: 12px;
+  font-weight: normal;
+  opacity: 0.85;
 }
 
-#pv-countdown {
-  color: #ffd700;
-  font-weight: bold;
-}
-
+/* Close button style */
 .pv-icon-close {
   background: transparent;
   border: none;
-  color: #fff;
+  color: #ffffff;
   font-size: 16px;
   cursor: pointer;
+  padding: 0 4px;
 }
 
+.pv-icon-close:hover {
+  opacity: 0.7;
+}
+
+/* Image box container */
 .pv-img-box {
   width: 100%;
-  height: 250px;
+  background: #f0f0f0;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 12px;
-  overflow: hidden;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
-#pv-image {
+/* Preview image styling */
+.pv-img-box img {
   width: 100%;
-  height: 100%;
+  height: auto;
+  max-height: 350px;
   object-fit: contain;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
 }
-
 /* ==========================================
    VICTORY MODAL & EFFECTS
    ========================================== */
