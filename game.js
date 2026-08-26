@@ -175,30 +175,51 @@ document.addEventListener('DOMContentLoaded', async () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const particles = Array.from({ length: 70 }, () => ({
+    // Increased particle count for a massive burst
+    const particles = Array.from({ length: 220 }, () => ({
       x: canvas.width / 2,
       y: canvas.height / 2,
-      vx: (Math.random() - 0.5) * 12,
-      vy: (Math.random() - 0.7) * 14,
-      size: Math.random() * 8 + 4,
-      color: ['#ffd700', '#9d4edd', '#ff007f', '#00f0ff', '#ffffff'][Math.floor(Math.random() * 5)]
+      vx: (Math.random() - 0.5) * 22, // Wider horizontal spread
+      vy: (Math.random() - 0.7) * 20, // Higher explosive launch
+      size: Math.random() * 9 + 4,
+      rotation: Math.random() * 360,
+      rotationSpeed: (Math.random() - 0.5) * 10,
+      color: ['#ffd700', '#9d4edd', '#ff007f', '#00f0ff', '#ffffff', '#ff9e00'][Math.floor(Math.random() * 6)]
     }));
+
+    const startTime = Date.now();
+    const minDuration = 2000; // Guaranteed at least 2 seconds
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
       particles.forEach(p => {
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.3;
+        p.vy += 0.4; // Gravity pull
+        p.vx *= 0.98; // Air resistance for natural slowdown
+        
+        ctx.save();
+        ctx.translate(p.x, p.y);
         ctx.fillStyle = p.color;
-        ctx.fillRect(p.x, p.y, p.size, p.size);
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6); // Slightly rectangular confetti shape
+        ctx.restore();
       });
-      if (particles.some(p => p.y < canvas.height)) {
+
+      const elapsed = Date.now() - startTime;
+      const stillVisible = particles.some(p => p.y < canvas.height + 20);
+
+      // Keeps running for at least 2 seconds, and until all particles fall off-screen
+      if (elapsed < minDuration || stillVisible) {
         requestAnimationFrame(draw);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
     }
+    
     draw();
-  }
+}
+
 
   const shuffleBtn = document.getElementById('shuffleBtn');
   if (shuffleBtn) {
