@@ -27,8 +27,8 @@
     </header>
 
     <!-- Header / Title Row -->
-    <div class="challenge-header" style="display: flex; justify-content: center; align-items: center; margin-bottom: 15px; width: 100%;">
-      <h2 id="challengeTitle" class="challenge-title" style="font-size: 1.25rem; font-weight: bold; color: #ffcc00; margin: 0; text-align: center;">Challenge 1</h2>
+    <div class="challenge-header">
+      <h2 id="challengeTitle" class="challenge-title">Challenge 1</h2>
     </div>
     <div class="challenge-stats">
       <div class="stat-badge-item">
@@ -48,38 +48,39 @@
     </div>
 
     <!-- Puzzle Board Wrapper -->
-    <div class="puzzle-board-wrapper" style="width: 100%; max-width: 360px; aspect-ratio: 1 / 1; background: #1a162b; border-radius: 12px; padding: 10px; box-sizing: border-box; box-shadow: 0 8px 16px rgba(0,0,0,0.4); border: 2px solid #33285c; display: flex; justify-content: center; align-items: center; margin: 0 auto; position: relative; overflow: hidden;">
+    <div class="puzzle-board-wrapper">
       
       <!-- Loading & Custom Start Image Button Overlay -->
-      <div id="challengeLoadingOverlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 22, 43, 0.98); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 50; border-radius: 10px; text-align: center; padding: 20px; box-sizing: border-box;">
-        <div id="loadingSpinner" style="font-size: 1.15rem; color: #ffcc00; font-weight: bold; margin-bottom: 15px;">
+      <div id="challengeLoadingOverlay">
+        <div id="loadingSpinner">
           ⏳ Loading Challenge... <span id="loadingPercent">0%</span>
         </div>
         
         <!-- Loading Progress Bar Added Here -->
-        <div id="loadingBarContainer" style="width: 80%; max-width: 200px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-bottom: 15px;">
-          <div id="loadingBarFill" style="width: 0%; height: 100%; background: linear-gradient(90deg, #7928ca, #ff3366); box-shadow: 0 0 12px #7928ca, 0 0 20px #ff3366; transition: width 0.1s ease;"></div>
+        <div id="loadingBarContainer">
+          <div id="loadingBarFill"></div>
         </div>
 
         <!-- Custom Image Start Button -->
-        <button id="startChallengeBtn" class="hidden" style="background: none; border: none; padding: 0; cursor: pointer;">
-          <img src="image/start.png" alt="Start Challenge" style="width: 180px; height: auto; display: block; transition: transform 0.1s ease;" />
+        <button id="startChallengeBtn" class="hidden">
+          <img src="image/start.png" alt="Start Challenge" />
         </button>
       </div>
 
-      <div id="puzzleBoard" class="puzzle-board" style="width: 100%; height: 100%; display: grid !important; grid-template-columns: repeat(3, 1fr) !important; grid-template-rows: repeat(3, 1fr) !important; gap: 3px; background: #000; border-radius: 8px; overflow: hidden;">
+      <div id="puzzleBoard" class="puzzle-board">
         <!-- 9 tiles generated dynamically -->
       </div>
     </div>
 
     <!-- Action Controls -->
-    <div class="challenge-actions" style="display: flex; gap: 10px; width: 100%; margin-top: 20px;">
+    <div class="challenge-actions">
       <button id="previewBtn" class="btn btn-secondary">👁️ Preview</button>
       <button id="shuffleBtn" class="btn btn-primary">🔀 Shuffle</button>
     </div>
   </div>
 
 <canvas id="confettiCanvas"></canvas>
+
   
 <!-- Win Modal Popup -->
 <div id="winModal" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000;">
