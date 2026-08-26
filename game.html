@@ -54,18 +54,33 @@
     </div>
   </div>
 
-<!-- Custom Preview Widget (No modal conflicts) -->
-<div id="pv-container" class="pv-wrapper pv-hidden">
-  <div class="pv-card">
-    <div class="pv-header">
-      <span id="pv-title">LEVEL 01 PREVIEW</span>
-      <span class="pv-timer-text">Auto-closing in <span id="pv-countdown">10</span>s</span>
-      <button id="pv-close-btn" class="pv-icon-close">✕</button>
+<!-- =========================================================
+     PREVIEW POPUP
+     ========================================================= -->
+<div id="previewPopup" class="preview-popup hidden">
+
+  <div class="preview-overlay">
+
+    <div class="preview-box">
+
+      <div class="preview-header">
+        <span>🖼️ LEVEL PREVIEW</span>
+
+        <span id="previewCountdown">10</span>
+      </div>
+
+      <div class="preview-image-container">
+        <img id="previewImage" src="" alt="Level Preview">
+      </div>
+
+      <button id="previewCloseBtn" class="preview-close-btn">
+        CLOSE
+      </button>
+
     </div>
-    <div class="pv-img-box">
-      <img id="pv-image" src="" alt="Level Solution Preview">
-    </div>
+
   </div>
+
 </div>
 
   <!-- Victory Modal -->
