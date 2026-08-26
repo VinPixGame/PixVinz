@@ -142,7 +142,7 @@ body {
 
 
 /* =========================================================
-   CHALLENGE STATS (TIME / MOVES)
+   CHALLENGE STATS (TIME / MOVES) - UNTOUCHED
    ========================================================= */
 
 .challenge-stats {
@@ -197,24 +197,27 @@ body {
 
 
 /* =========================================================
-   PUZZLE BOARD WRAPPER & TILES
+   PUZZLE BOARD WRAPPER & TILES (Bigger Box matching Stats width + 1:1 + Glows)
    ========================================================= */
 
 .puzzle-board-wrapper {
   position: relative;
   width: 100%;
-  max-width: min(70vh, 450px); /* Keeps it square and bounds it to remaining vertical view */
-  aspect-ratio: 1;
+  max-width: 450px; /* Matches the stats container width exactly */
+  aspect-ratio: 1; /* Strict 1:1 square ratio */
   margin: 0 auto;
   padding: 4px;
-  border: 2px solid rgba(157, 78, 221, 0.9);
+  
+  /* Glowing purple border with external gold shadow glow */
+  border: 2.5px solid rgba(157, 78, 221, 1);
   border-radius: 18px;
   background: rgba(24, 10, 42, 0.95);
   box-shadow:
-    0 0 18px rgba(255, 215, 0, 0.3),
-    0 0 25px rgba(157, 78, 221, 0.45),
+    0 0 25px rgba(255, 215, 0, 0.45), /* Outside gold glow */
+    0 0 35px rgba(157, 78, 221, 0.7),  /* Outside purple glow */
     inset 0 0 20px rgba(12, 4, 22, 0.8);
-  flex-shrink: 1; /* Allows it to gracefully scale down on shorter phones */
+    
+  flex-shrink: 1;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -265,12 +268,12 @@ body {
 
 
 /* =========================================================
-   CHALLENGE ACTION BUTTONS
+   CHALLENGE ACTION BUTTONS (Properly Aligned & Spanned)
    ========================================================= */
 
 .challenge-actions {
   width: 100%;
-  max-width: 450px;
+  max-width: 450px; /* Matches stats and puzzle board width */
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
@@ -280,6 +283,7 @@ body {
 }
 
 .btn {
+  width: 100%;
   min-height: 52px;
   border-radius: 14px;
   border: 1.5px solid rgba(255, 215, 0, .7);
@@ -292,6 +296,7 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
+  box-sizing: border-box;
 }
 
 .btn-secondary {
@@ -385,7 +390,6 @@ body {
   justify-content: space-between;
 }
 
-/* Specific styling for Preview Modal to match HTML layout structure cleanly */
 #challengePreviewModal .win-card {
   padding: 22px;
 }
