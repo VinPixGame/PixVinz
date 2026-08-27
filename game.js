@@ -225,7 +225,119 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-     
+       // =========================================================
+  // LEVEL PREVIEW
+  // =========================================================
+
+  const PREVIEW_COST = 5;
+  const PREVIEW_DURATION = 10;
+
+  let previewTimer = null;
+  let previewActive = false;
+
+  const previewButton = document.getElementById('pv-trigger-btn');
+  const previewPopup = document.getElementById('previewPopup');
+  const previewImage = document.getElementById('previewImage');
+  const previewCountdown = document.getElementById('previewCountdown');
+  const previewCloseBtn = document.getElementById('previewCloseBtn');
+
+  function openLevelPreview() {
+    if (!previewButton || !previewPopup || !previewImage || !previewCountdown) {
+      return;
+    }
+
+    if (previewActive) {
+      return;
+    }
+
+    // Deduct 5 coins using the EXISTING coin system
+    if (typeof spendCoins !== 'function') {
+      console.error('spendCoins() is not available.');
+      return;
+    }
+
+    const paymentSuccessful = spendCoins(PREVIEW_COST);
+
+    // Not enough coins — do not open preview
+    if (!paymentSuccessful) {
+      return;
+    }
+
+    // Use the exact same image as the current puzzle
+    previewImage.src = imageSrc;
+    previewImage.alt = `Level ${currentLevel} Preview`;
+
+    previewActive = true;
+
+    clearInterval(previewTimer);
+
+    let secondsLeft = PREVIEW_DURATION;
+    previewCountdown.innerText = secondsLeft;
+
+    // OPEN THE MODAL
+    previewPopup.classList.remove('hidden');
+
+    previewTimer = setInterval(() => {
+      secondsLeft--;
+
+      if (previewCountdown) {
+        previewCountdown.innerText = secondsLeft;
+      }
+
+      if (secondsLeft <= 0) {
+        closeLevelPreview();
+      }
+    }, 1000);
+  }
+
+  function closeLevelPreview() {
+    clearInterval(previewTimer);
+    previewTimer = null;
+    previewActive = false;
+
+    if (previewPopup) {
+      previewPopup.classList.add('hidden');
+    }
+
+    if (previewImage) {
+      previewImage.src = '';
+    }
+  }
+
+  if (previewButton) {
+    previewButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (typeof AudioManager !== 'undefined') {
+        AudioManager.playClick();
+      }
+
+      openLevelPreview();
+    });
+  }
+
+  if (previewCloseBtn) {
+    previewCloseBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (typeof AudioManager !== 'undefined') {
+        AudioManager.playClick();
+      }
+
+      closeLevelPreview();
+    });
+  }
+
+  // Clicking the dark area outside the preview box closes it
+  if (previewPopup) {
+    previewPopup.addEventListener('click', (e) => {
+      if (e.target === previewPopup) {
+        closeLevelPreview();
+      }
+    });
+  }
     
       
 
@@ -276,125 +388,3 @@ document.addEventListener('DOMContentLoaded', async () => {
   isGameStarted = true;
   startTimer();
 });
-/* =========================================================
-   LEVEL PREVIEW
-   Uses current level image + existing spendCoins()
-   ========================================================= */
-
-const PREVIEW_COST = 5;
-const PREVIEW_DURATION = 10;
-
-let previewTimer = null;
-let previewActive = false;
-
-function openLevelPreview() {
-  const previewPopup = document.getElementById('previewPopup');
-  const previewImage = document.getElementById('previewImage');
-  const previewCountdown = document.getElementById('previewCountdown');
-
-  if (!previewPopup || !previewImage || !previewCountdown) return;
-  if (previewActive) return;
-
-  // Use the current level from the game URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const currentLevel = parseInt(urlParams.get('level')) || 1;
-
-  // Use the SAME image logic as the puzzle itself
-  const levelImageIndex = ((currentLevel - 1) % 200) + 1;
-  const previewImageSrc = `image/level${levelImageIndex}.png`;
-
-  // Use the EXISTING coin system from playerstat.js
-  if (typeof spendCoins !== 'function') {
-    console.error('spendCoins() is not available.');
-    return;
-  }
-
-  // Attempt to spend exactly 5 coins.
-  // If the player has fewer than 5, nothing is deducted
-  // and the preview does not open.
-  const paymentSuccessful = spendCoins(PREVIEW_COST);
-
-  if (!paymentSuccessful) {
-    return;
-  }
-
-  // Payment succeeded — now open the preview
-  previewActive = true;
-
-  clearInterval(previewTimer);
-
-  previewImage.src = previewImageSrc;
-  previewImage.alt = `Level ${currentLevel} Preview`;
-
-  let secondsLeft = PREVIEW_DURATION;
-  previewCountdown.innerText = secondsLeft;
-
-  previewPopup.classList.remove('hidden');
-
-  previewTimer = setInterval(() => {
-    secondsLeft--;
-
-    if (previewCountdown) {
-      previewCountdown.innerText = secondsLeft;
-    }
-
-    if (secondsLeft <= 0) {
-      closeLevelPreview();
-    }
-  }, 1000);
-}
-
-function closeLevelPreview() {
-  const previewPopup = document.getElementById('previewPopup');
-  const previewImage = document.getElementById('previewImage');
-
-  clearInterval(previewTimer);
-  previewTimer = null;
-  previewActive = false;
-
-  if (previewPopup) {
-    previewPopup.classList.add('hidden');
-  }
-
-  if (previewImage) {
-    previewImage.src = '';
-  }
-}
-
-const previewButton = document.getElementById('pv-trigger-btn');
-const previewCloseButton = document.getElementById('previewCloseBtn');
-const previewPopup = document.getElementById('previewPopup');
-
-if (previewButton) {
-  previewButton.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (typeof AudioManager !== 'undefined') {
-      AudioManager.playClick();
-    }
-
-    openLevelPreview();
-  });
-}
-
-if (previewCloseButton) {
-  previewCloseButton.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (typeof AudioManager !== 'undefined') {
-      AudioManager.playClick();
-    }
-
-    closeLevelPreview();
-  });
-}
-
-if (previewPopup) {
-  previewPopup.addEventListener('click', (e) => {
-    if (e.target === previewPopup) {
-      closeLevelPreview();
-    }
-  });
-}
