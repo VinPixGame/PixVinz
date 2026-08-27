@@ -226,8 +226,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // =========================================================
-  // LEVEL PREVIEW (Safe Binding)
+  // LEVEL PREVIEW
+  // Costs 5 coins
   // =========================================================
+
   const previewBtn = document.getElementById('pv-trigger-btn');
   const previewPopup = document.getElementById('previewPopup');
   const previewImage = document.getElementById('previewImage');
@@ -235,68 +237,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const previewCloseBtn = document.getElementById('previewCloseBtn');
 
   let previewTimer = null;
-  let previewTimeLeft = 10;
-
-  if (previewBtn) {
-    previewBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (typeof spendCoins !== 'function') {
-        alert('spendCoins() is not available.');
-        return;
-      }
-
-      let purchaseSuccessful = spendCoins(5);
-      if (purchaseSuccessful instanceof Promise) {
-        purchaseSuccessful = await purchaseSuccessful;
-      }
-
-      if (!purchaseSuccessful) {
-        alert('Not enough coins!');
-        return;
-      }
-
-      if (previewImage) {
-        const imageIndex = ((currentLevel - 1) % 200) + 1;
-        previewImage.src = `image/level${imageIndex}.png`;
-      }
-
-      previewTimeLeft = 10;
-      if (previewCountdown) {
-        previewCountdown.innerText = previewTimeLeft;
-      }
-
-      if (previewPopup) {
-        previewPopup.classList.remove('hidden');
-        previewPopup.style.display = 'flex';
-      } else {
-        alert('previewPopup element not found!');
-      }
-
-      clearInterval(previewTimer);
-
-      previewTimer = setInterval(() => {
-        previewTimeLeft--;
-
-        if (previewCountdown) {
-          previewCountdown.innerText = previewTimeLeft;
-        }
-
-        if (previewTimeLeft <= 0) {
-          closePreview();
-        }
-      }, 1000);
-    });
-  }
-
-  if (previewCloseBtn) {
-    previewCloseBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      closePreview();
-    });
-  }
 
   function closePreview() {
     if (previewTimer) {
@@ -304,15 +244,65 @@ document.addEventListener('DOMContentLoaded', async () => {
       previewTimer = null;
     }
 
-    if (previewPopup) {
-      previewPopup.classList.add('hidden');
-      previewPopup.style.display = 'none';
-    }
-    
-    if (previewImage) {
-      previewImage.src = '';
-    }
+    previewPopup.classList.add('hidden');
+    previewPopup.style.display = 'none';
   }
+
+  if (previewBtn && previewPopup && previewImage) {
+    previewBtn.addEventListener('click', () => {
+
+      // Deduct exactly 5 coins.
+      // playerstat.js handles the balance, display,
+      // localStorage, and cloud synchronization.
+      const paid = spendCoins(5);
+
+      // Not enough coins — do nothing.
+      if (!paid) {
+        return;
+      }
+
+      // Show the preview for the CURRENT level.
+      previewImage.src = `image/level${currentLevel}.png`;
+
+      let secondsLeft = 10;
+
+      if (previewCountdown) {
+        previewCountdown.textContent = secondsLeft;
+      }
+
+      previewPopup.classList.remove('hidden');
+      previewPopup.style.display = 'flex';
+
+      if (previewTimer) {
+        clearInterval(previewTimer);
+      }
+
+      previewTimer = setInterval(() => {
+        secondsLeft--;
+
+        if (previewCountdown) {
+          previewCountdown.textContent = secondsLeft;
+        }
+
+        if (secondsLeft <= 0) {
+          closePreview();
+        }
+      }, 1000);
+    });
+  }
+
+  if (previewCloseBtn) {
+    previewCloseBtn.addEventListener('click', closePreview);
+  }
+
+  if (previewPopup) {
+    previewPopup.addEventListener('click', (event) => {
+      if (event.target === previewPopup) {
+        closePreview();
+      }
+    });
+  }
+      
 
   const nextLevelBtn = document.getElementById('nextLevelBtn');
   if (nextLevelBtn) {
