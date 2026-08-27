@@ -313,6 +313,10 @@ function openLevelPreview() {
   }
 
   const currentLevel = getCurrentLevel();
+  const previewTitle = document.getElementById('previewTitle');
+if (previewTitle) {
+  previewTitle.textContent = `👁 LEVEL ${currentLevel} PREVIEW`;
+}
 
   /*
    * =====================================================
