@@ -23,11 +23,6 @@ const auth = getAuth(app);
 window.pixvinzDb = { db, doc, getDoc, setDoc, updateDoc, collection, query, orderBy, limit, getDocs };
 
 
-
-
-
-
-
 // --- DEDICATED LOADING SCREEN SCRIPT ---
 document.addEventListener('DOMContentLoaded', () => {
     const loadingView = document.getElementById('loadingView');
@@ -113,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-  // --- AVATAR LOADER FIX (Account-Specific + Default Fallback) ---
+// --- AVATAR LOADER FIX (Account-Specific + Default Fallback) ---
 document.addEventListener('DOMContentLoaded', () => {
     let currentUsername = '';
     try {
@@ -183,11 +178,11 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${user.username}_${keyName}`;
   }
 
-function updateCoinDisplay() {
+  function updateCoinDisplay() {
     const coinKey = getUserKey('totalCoins');
     const totalCoins = parseInt(localStorage.getItem(coinKey)) || 0;
     
-    // Target all elements displaying the coin count (e.g., in your mainHeader or homeView)
+    // Target all elements displaying the coin count
     document.querySelectorAll('#coinCount, .coin-display, [data-coin-count]').forEach(el => {
       el.textContent = totalCoins;
     });
@@ -198,9 +193,6 @@ function updateCoinDisplay() {
 
   // Run it immediately on load
   updateCoinDisplay();
-
-    
-    
 
   function showView(targetView) {
     Object.values(views).forEach(v => {
@@ -310,23 +302,19 @@ function updateCoinDisplay() {
     });
   }
 
+  document.addEventListener('click', (event) => {
+    if (event.target.closest('#openSettings')) {
+      document.getElementById('profileView')?.classList.add('hidden');
+      document.getElementById('settingsView')?.classList.remove('hidden');
+    }
 
-document.addEventListener('click', (event) => {
-
-  if (event.target.closest('#openSettings')) {
-    document.getElementById('profileView')?.classList.add('hidden');
-    document.getElementById('settingsView')?.classList.remove('hidden');
-  }
-
-  if (event.target.closest('#closeSettingsModal')) {
-    document.getElementById('settingsView')?.classList.add('hidden');
-    document.getElementById('profileView')?.classList.remove('hidden');
-  }
-
-});
+    if (event.target.closest('#closeSettingsModal')) {
+      document.getElementById('settingsView')?.classList.add('hidden');
+      document.getElementById('profileView')?.classList.remove('hidden');
+    }
+  });
     
-    
-
+  const sfxToggle = document.getElementById('sfxToggle');
   if (sfxToggle) {
     sfxToggle.addEventListener('change', (e) => {
       if (typeof AudioManager !== 'undefined') {
@@ -336,6 +324,7 @@ document.addEventListener('click', (event) => {
     });
   }
 
+  const musicToggle = document.getElementById('musicToggle');
   if (musicToggle) {
     musicToggle.addEventListener('change', (e) => {
       if (typeof AudioManager !== 'undefined') {
@@ -348,6 +337,7 @@ document.addEventListener('click', (event) => {
   if (aboutBtn) {
     aboutBtn.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      const aboutModal = document.getElementById('aboutModal');
       if (aboutModal) aboutModal.classList.remove('hidden');
     });
   }
@@ -356,12 +346,13 @@ document.addEventListener('click', (event) => {
   if (closeAboutModal) {
     closeAboutModal.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      const aboutModal = document.getElementById('aboutModal');
       if (aboutModal) aboutModal.classList.add('hidden');
     });
   }
 
-  const logoutBtn = document.getElementById('logoutBtn'); // Make sure this matches your logout button's ID
-if (logoutBtn) {
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
     logoutBtn.addEventListener('click', (e) => {
         e.preventDefault();
         
@@ -372,7 +363,7 @@ if (logoutBtn) {
         // Redirect to the login/register page
         window.location.href = 'auth.html';
     });
-}
+  }
 
   function renderLevels() {
     const grid = document.getElementById('levelsGrid');
@@ -482,7 +473,8 @@ if (logoutBtn) {
       movesElem.innerText = overallFewestMoves !== Infinity ? overallFewestMoves : '--';
     }
   }
-function renderCollectionFolders() {
+
+  function renderCollectionFolders() {
     const folderGrid = document.getElementById('collectionsFolderGrid');
     if (!folderGrid) return;
     folderGrid.innerHTML = '';
@@ -611,18 +603,9 @@ function renderCollectionFolders() {
         closeImageModal();
       }
     });
-        }
+  }
+});
 
-
-
-
-
-
-
-
-    
-
-            
 
 // --- LEADERBOARD LOGIC (Safe DOM Binding, Avatars & Real Players Only) ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -814,7 +797,6 @@ async function loadLeaderboardData() {
     });
 }
     
-    
 window.openPlayerProfile = function(player, rank) {
     const modal = document.getElementById('playerProfileModal');
     if (!modal) return;
@@ -858,7 +840,7 @@ window.openPlayerProfile = function(player, rank) {
             if (crownDiv) {
                 crownDiv.style.display = 'none';
             }
-            avatarImg.style.border = '3px solid #ffd700'; // fallback border or keep default
+            avatarImg.style.border = '3px solid #ffd700';
             avatarImg.style.boxShadow = '0 0 18px rgba(255,215,0,0.7)';
         }
     }
@@ -870,56 +852,48 @@ window.openPlayerProfile = function(player, rank) {
             desc: 'Completed Level 1', 
             icon: 'image/badge1.png', 
             unlocked: playerLevel >= 1, 
-        
         },
         { 
             title: 'Thunderbolt', 
             desc: 'Speed run (20-30) < 1m', 
             icon: 'image/badge2.png', 
             unlocked: player.speedThunder === true || player.speedThunderUnlocked === true, 
-            
         },
         { 
             title: 'Aurelian Vault', 
             desc: 'Reached 500 coins', 
             icon: 'image/badge3.png', 
             unlocked: playerCoins >= 500, 
-            
         },
         { 
             title: 'Celestial Elite', 
             desc: 'Reached Level 50', 
             icon: 'image/badge4.png', 
             unlocked: playerLevel >= 50, 
-            
         },
         { 
             title: 'Grand Sovereign', 
             desc: 'Reached Level 75', 
             icon: 'image/badge5.png', 
             unlocked: playerLevel >= 75, 
-             
         },
         { 
             title: 'Imperial Crown', 
             desc: 'Reached Level 100', 
             icon: 'image/badge6.png', 
             unlocked: playerLevel >= 100, 
-             
         },
         { 
             title: 'Infernal Apex', 
             desc: 'Reached Level 150', 
             icon: 'image/badge7.png', 
             unlocked: playerLevel >= 150, 
-            
         },
         { 
             title: 'Mythical Deity', 
             desc: 'Reached Level 200', 
             icon: 'image/badge8.png', 
             unlocked: playerLevel >= 200, 
-            
         }
     ];
 
@@ -960,7 +934,6 @@ window.openPlayerProfile = function(player, rank) {
     
     modal.style.display = 'flex';
 };
-    
 
 window.closePlayerProfile = function() {
     const modal = document.getElementById('playerProfileModal');
@@ -976,12 +949,6 @@ window.addEventListener('click', (event) => {
     }
 });
 
-            
-    
-        
-
-
-
 
 // --- CONFETTI BACKGROUND EFFECT (Independent) ---
 function initLeaderboardConfetti() {
@@ -991,9 +958,8 @@ function initLeaderboardConfetti() {
         container.id = 'leaderboardConfetti';
         container.className = 'confetti-bg';
         
-        // Push the container down so nothing spawns over the title/header area
         container.style.position = 'absolute';
-        container.style.top = '140px'; // Adjust this value to lower where the confetti starts
+        container.style.top = '140px';
         container.style.left = '0';
         container.style.width = '100%';
         container.style.height = 'calc(100% - 140px)';
@@ -1002,11 +968,10 @@ function initLeaderboardConfetti() {
 
         const lbView = document.getElementById('leaderboardView');
         if (lbView) {
-            // Ensure leaderboard view can hold absolute children properly
             if (window.getComputedStyle(lbView).position === 'static') {
                 lbView.style.position = 'relative';
             }
-            lbView.appendChild(container); // Append instead of prepend so it sits safely below the header
+            lbView.appendChild(container);
         }
     }
     
@@ -1028,7 +993,6 @@ function initLeaderboardConfetti() {
     }
 }
 
-// Automatically runs when the page loads without touching your leaderboard function
 document.addEventListener('DOMContentLoaded', () => {
     initLeaderboardConfetti();
 });
@@ -1044,8 +1008,6 @@ if (window.matchMedia('(display-mode: fullscreen)').matches || window.matchMedia
   }, { once: true });
 }
 
-
-
 document.addEventListener('DOMContentLoaded', () => {
   const navChallenge = document.getElementById('navChallenge');
   if (navChallenge) {
@@ -1054,4 +1016,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
-
