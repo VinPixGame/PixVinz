@@ -754,10 +754,17 @@ if (regPassConfirm) {
 });
 
 
+// ==========================================
+// DOWNLOAD APP — SECTIONS 1–5
+// ==========================================
+
 let deferredPrompt = null;
 
 
-// 1. Check if the app is already running as an installed PWA
+// ==========================================
+// 1. CHECK IF APP IS ALREADY INSTALLED
+// ==========================================
+
 function isAppInstalled() {
 
     return window.matchMedia(
@@ -772,31 +779,46 @@ function isAppInstalled() {
 }
 
 
-// 2. Hide button if already installed, show it if viewed in a browser
-window.addEventListener('DOMContentLoaded', () => {
+// ==========================================
+// 2. SHOW / HIDE DOWNLOAD BUTTONS
+// ==========================================
+
+function updateInstallButtons() {
 
     const installBtns =
         document.querySelectorAll(
-            '#install-app-btn, .install-app-btn-ref'
+            '#install-app-btn, #install-app-btn-ref, .install-app-btn-ref'
         );
 
+    const installed = isAppInstalled();
 
-    if (isAppInstalled()) {
+    installBtns.forEach(btn => {
 
-        installBtns.forEach(
-            btn => btn.style.display = 'none'
-        );
+        if (installed) {
+            btn.style.display = 'none';
+        } else {
+            btn.style.display = 'flex';
+        }
 
-    } else {
+    });
+}
 
-        installBtns.forEach(
-            btn => btn.style.display = 'flex'
-        );
+
+// Run after DOM is ready
+window.addEventListener(
+    'DOMContentLoaded',
+    () => {
+
+        updateInstallButtons();
+
     }
-});
+);
 
 
-// 3. Capture the browser's install event
+// ==========================================
+// 3. CAPTURE BROWSER INSTALL EVENT
+// ==========================================
+
 window.addEventListener(
     'beforeinstallprompt',
     (e) => {
@@ -804,84 +826,114 @@ window.addEventListener(
         e.preventDefault();
 
         deferredPrompt = e;
+
+        // Make sure the buttons are visible
+        // when the browser confirms installation
+        updateInstallButtons();
+
+        console.log(
+            'PixVinz install prompt is ready.'
+        );
     }
 );
 
 
-// 4. Directly trigger the native install window on click
-//    (No alerts!)
+// ==========================================
+// 4. DOWNLOAD APP BUTTON CLICK
+// ==========================================
+
 document.addEventListener(
     'click',
     async (e) => {
 
         const target =
             e.target.closest(
-                '#install-app-btn, .install-app-btn-ref'
+                '#install-app-btn, #install-app-btn-ref, .install-app-btn-ref'
             );
 
+        if (!target) {
+            return;
+        }
 
-        if (target) {
 
-            if (deferredPrompt) {
+        // Already installed
+        if (isAppInstalled()) {
 
-                // This forces the real browser installation popup
-                // to appear immediately
+            updateInstallButtons();
+
+            return;
+        }
+
+
+        // Browser has provided the native install prompt
+        if (deferredPrompt) {
+
+            try {
+
                 deferredPrompt.prompt();
-
 
                 const { outcome } =
                     await deferredPrompt.userChoice;
 
-
                 console.log(
-                    `User response: ${outcome}`
+                    `PixVinz install response: ${outcome}`
                 );
 
 
                 if (outcome === 'accepted') {
 
-                    const installBtns =
-                        document.querySelectorAll(
-                            '#install-app-btn, .install-app-btn-ref'
-                        );
+                    updateInstallButtons();
 
-
-                    installBtns.forEach(
-                        btn =>
-                            btn.style.display = 'none'
-                    );
                 }
 
+            } catch (err) {
 
-                deferredPrompt = null;
-
-            } else {
-
-                // If the browser hasn't generated the event yet,
-                // simply do nothing instead of showing an alert
-                console.log(
-                    'Install prompt not yet available from browser.'
+                console.error(
+                    'PixVinz install prompt error:',
+                    err
                 );
+
             }
+
+
+            // Prompt can only be used once
+            deferredPrompt = null;
+
+        } else {
+
+            /*
+             * The browser has not supplied a native
+             * beforeinstallprompt event yet.
+             *
+             * Keep the button clickable and visible.
+             * Do NOT disable it and do NOT show an alert.
+             */
+
+            console.log(
+                'PixVinz install prompt is not available yet.'
+            );
+
         }
+
     }
 );
 
 
-// 5. Hide buttons if installation finishes
+// ==========================================
+// 5. HIDE BUTTON AFTER INSTALLATION
+// ==========================================
+
 window.addEventListener(
     'appinstalled',
     () => {
 
-        const installBtns =
-            document.querySelectorAll(
-                '#install-app-btn, .install-app-btn-ref'
-            );
+        deferredPrompt = null;
 
+        updateInstallButtons();
 
-        installBtns.forEach(
-            btn =>
-                btn.style.display = 'none'
+        console.log(
+            'PixVinz has been installed.'
         );
+
     }
 );
