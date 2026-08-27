@@ -225,9 +225,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  
-
-          // =========================================================
+  // =========================================================
   // LEVEL PREVIEW
   // Costs 5 coins
   // =========================================================
@@ -246,8 +244,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       previewTimer = null;
     }
 
-    previewPopup.classList.add('hidden');
-    previewPopup.style.setProperty('display', 'none', 'important');
+    if (previewPopup) {
+      previewPopup.classList.add('hidden');
+      previewPopup.style.setProperty('display', 'none', 'important');
+      previewPopup.style.setProperty('visibility', 'hidden', 'important');
+      previewPopup.style.setProperty('opacity', '0', 'important');
+    }
   }
 
   if (previewBtn && previewPopup && previewImage) {
@@ -257,12 +259,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Deduct exactly 5 coins
       const paid = spendCoins(5);
 
-      // Not enough coins
+      // Not enough coins — do not open preview
       if (!paid) {
         return;
       }
 
-      // Current level preview image
+      // Show the CURRENT level preview
       previewImage.src = `image/level${currentLevel}.png`;
 
       // Reset countdown
@@ -272,13 +274,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         previewCountdown.textContent = secondsLeft;
       }
 
-      // Remove hidden class
+      // Remove hidden state
       previewPopup.classList.remove('hidden');
 
-      // FORCE the modal to display
+      // Force modal to become visible
       previewPopup.style.setProperty('display', 'flex', 'important');
+      previewPopup.style.setProperty('visibility', 'visible', 'important');
+      previewPopup.style.setProperty('opacity', '1', 'important');
 
-      // Clear any previous timer
+      // Clear previous timer if one exists
       if (previewTimer) {
         clearInterval(previewTimer);
       }
@@ -300,17 +304,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // Close button
   if (previewCloseBtn) {
     previewCloseBtn.addEventListener('click', closePreview);
   }
 
+  // Close when clicking outside the preview box
   if (previewPopup) {
     previewPopup.addEventListener('click', (event) => {
       if (event.target === previewPopup) {
         closePreview();
       }
     });
-  }
+  }  
+
+
       
 
   const nextLevelBtn = document.getElementById('nextLevelBtn');
