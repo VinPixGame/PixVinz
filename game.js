@@ -246,7 +246,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let previewTimer = null;
   let previewTimeLeft = 10;
 
-  // 1. Trigger Button Handler (Opens preview, checks coins, sets .png source)
+// 1. Trigger Button Handler (Opens preview, checks coins, sets .png source)
   if (previewBtn) {
     previewBtn.addEventListener('click', async (e) => {
       e.preventDefault();
