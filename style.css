@@ -128,6 +128,21 @@ body {
   justify-content: center;
   font-size: 22px;
 }
+
+.modal-content, 
+.collection-modal-content, 
+.popup-content {
+  position: relative;
+}
+
+.modal-content .close-modal-btn, 
+.collection-modal-content .close-modal-btn, 
+.popup-content .close-modal-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+}
+  
 /* ==========================================
    SHARED VIEWS / CARDS / BUTTONS
    ========================================== */
