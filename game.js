@@ -276,136 +276,119 @@ document.addEventListener('DOMContentLoaded', async () => {
   isGameStarted = true;
   startTimer();
 });
+  // =========================================================
+  // LEVEL PREVIEW
+  // Costs 5 coins and shows the current level image
+  // =========================================================
 
-/* =========================================================
-   LEVEL PREVIEW
-   image/level1.png → image/level200.png
-   ========================================================= */
+  const PREVIEW_COST = 5;
+  const PREVIEW_DURATION = 10;
 
-const PREVIEW_COST = 5;
-const PREVIEW_DURATION = 10;
+  let previewTimer = null;
+  let previewActive = false;
 
-let previewTimer = null;
-let previewActive = false;
-
-function getCurrentLevel() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const level = parseInt(urlParams.get('level'), 10);
-
-  if (!Number.isFinite(level)) {
-    return 1;
-  }
-
-  return Math.min(Math.max(level, 1), 200);
-}
-
-function openLevelPreview() {
+  const previewTriggerBtn = document.getElementById('pv-trigger-btn');
   const previewPopup = document.getElementById('previewPopup');
   const previewImage = document.getElementById('previewImage');
   const previewCountdown = document.getElementById('previewCountdown');
+  const previewCloseBtn = document.getElementById('previewCloseBtn');
 
-  if (!previewPopup || !previewImage || !previewCountdown) {
-    return;
-  }
+  function openLevelPreview() {
+    if (!previewPopup || !previewImage || !previewCountdown) return;
 
-  if (previewActive) {
-    return;
-  }
+    // Prevent opening multiple previews at once
+    if (previewActive) return;
 
-  const currentLevel = getCurrentLevel();
+    const totalCoinsKey = getUserKey('totalCoins');
+    const totalCoins = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
 
-  /*
-   * =====================================================
-   * COIN CHECK
-   * =====================================================
-   *
-   * This expects your game to have a global `coins`
-   * variable.
-   *
-   * If your existing game uses a different coin variable,
-   * this is the ONLY part that needs to be connected to it.
-   */
-
-  if (typeof coins !== 'undefined' && coins < PREVIEW_COST) {
-    if (typeof showNotEnoughCoinsPopup === 'function') {
-      showNotEnoughCoinsPopup();
+    // Not enough coins
+    if (totalCoins < PREVIEW_COST) {
+      if (typeof showNotEnoughCoinsPopup === 'function') {
+        showNotEnoughCoinsPopup();
+      } else {
+        alert('Not enough coins!');
+      }
+      return;
     }
 
-    return;
+    // Deduct 5 coins
+    const remainingCoins = totalCoins - PREVIEW_COST;
+    localStorage.setItem(totalCoinsKey, remainingCoins);
+
+    // Immediately update the coin counter on the page
+    updateCoinDisplay();
+
+    // Current level image
+    previewImage.src = `image/level${currentLevel}.jpeg`;
+    previewImage.alt = `Level ${currentLevel} Preview`;
+
+    previewActive = true;
+
+    let secondsLeft = PREVIEW_DURATION;
+    previewCountdown.innerText = secondsLeft;
+
+    previewPopup.classList.remove('hidden');
+
+    clearInterval(previewTimer);
+
+    previewTimer = setInterval(() => {
+      secondsLeft--;
+
+      if (previewCountdown) {
+        previewCountdown.innerText = secondsLeft;
+      }
+
+      if (secondsLeft <= 0) {
+        closeLevelPreview();
+      }
+    }, 1000);
   }
 
-  /*
-   * Deduct the 5 coins only when Preview is actually opened.
-   */
+  function closeLevelPreview() {
+    clearInterval(previewTimer);
+    previewTimer = null;
+    previewActive = false;
 
-  if (typeof coins !== 'undefined') {
-    coins -= PREVIEW_COST;
+    if (previewPopup) {
+      previewPopup.classList.add('hidden');
+    }
 
-    if (typeof updateCoinsDisplay === 'function') {
-      updateCoinsDisplay();
+    if (previewImage) {
+      previewImage.src = '';
     }
   }
 
-  previewActive = true;
+  if (previewTriggerBtn) {
+    previewTriggerBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-  clearInterval(previewTimer);
+      if (typeof AudioManager !== 'undefined') {
+        AudioManager.playClick();
+      }
 
-  previewImage.src = `image/level${currentLevel}.png`;
-  previewImage.alt = `Level ${currentLevel} Preview`;
+      openLevelPreview();
+    });
+  }
 
-  let secondsLeft = PREVIEW_DURATION;
+  if (previewCloseBtn) {
+    previewCloseBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-  previewCountdown.textContent = secondsLeft;
-  previewPopup.classList.remove('hidden');
+      if (typeof AudioManager !== 'undefined') {
+        AudioManager.playClick();
+      }
 
-  previewTimer = setInterval(() => {
-    secondsLeft--;
-
-    previewCountdown.textContent = secondsLeft;
-
-    if (secondsLeft <= 0) {
       closeLevelPreview();
-    }
-  }, 1000);
-}
-
-function closeLevelPreview() {
-  const previewPopup = document.getElementById('previewPopup');
-  const previewImage = document.getElementById('previewImage');
-
-  clearInterval(previewTimer);
-  previewTimer = null;
-
-  previewActive = false;
+    });
+  }
 
   if (previewPopup) {
-    previewPopup.classList.add('hidden');
-  }
-
-  if (previewImage) {
-    previewImage.src = '';
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const previewButton = document.getElementById('pv-trigger-btn');
-  const previewCloseButton = document.getElementById('previewCloseBtn');
-
-  if (previewButton) {
-    previewButton.addEventListener('click', openLevelPreview);
-  }
-
-  if (previewCloseButton) {
-    previewCloseButton.addEventListener('click', closeLevelPreview);
-  }
-
-  const previewPopup = document.getElementById('previewPopup');
-
-  if (previewPopup) {
-    previewPopup.addEventListener('click', (event) => {
-      if (event.target === previewPopup) {
+    previewPopup.addEventListener('click', (e) => {
+      if (e.target === previewPopup) {
         closeLevelPreview();
       }
     });
   }
-});
