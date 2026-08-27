@@ -115,23 +115,40 @@
   </div>
 </div>
 
-<!-- Preview Modal Popup -->
-<div id="challengePreviewModal" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000;">
-  <div class="win-card" style="background: #1a162b; padding: 25px; border-radius: 16px; text-align: center; border: 2px solid #7928ca; width: 85%; max-width: 340px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-    <h3 id="challengeModalTitle" style="color: #ffcc00; font-size: 1.2rem; margin-bottom: 15px;">LEVEL 01 PREVIEW</h3>
-    
-    <!-- Preview Video Container -->
-    <div style="width: 100%; aspect-ratio: 1/1; border-radius: 8px; overflow: hidden; margin-bottom: 15px; background: #000; border: 1px solid #33285c; position: relative;">
-      <video id="challengeModalVideo" autoplay loop playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
+<!-- Challenge Preview Modal Popup -->
+<div id="challengePreviewModal" class="challenge-preview-popup hidden">
+
+  <div class="challenge-preview-overlay">
+
+    <div class="challenge-preview-box">
+
+      <div class="challenge-preview-header">
+        <span id="challengeModalTitle">👁️ CHALLENGE 01 PREVIEW</span>
+
+        <span id="challengeCountdownSeconds">15</span>
+      </div>
+
+      <div class="challenge-preview-video-container">
+        <video
+          id="challengeModalVideo"
+          autoplay
+          loop
+          playsinline
+        ></video>
+      </div>
+
+      <div class="challenge-preview-countdown">
+        Closing in <span id="challengeCountdownText">15</span>s
+      </div>
+
+      <button id="closeChallengePreviewBtn" class="challenge-preview-close-btn">
+        CLOSE
+      </button>
+
     </div>
 
-    <!-- Countdown Timer Display -->
-    <div style="font-size: 0.95rem; color: #fff; margin-bottom: 15px;">
-      Closing in <span id="challengeCountdownSeconds" style="color: #ffcc00; font-weight: bold;">15</span>s
-    </div>
-
-    <button id="closeChallengePreviewBtn" class="btn btn-primary" style="width: 100%; padding: 10px; background: #7928ca; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Close Preview</button>
   </div>
+
 </div>
 
   
