@@ -308,6 +308,7 @@ body {
 }
 
 
+
 /* =========================================================
    LEVEL PREVIEW POPUP
    ========================================================= */
@@ -333,7 +334,6 @@ body {
 }
 
 .preview-overlay {
-  /* Remove duplicate positioning/background since preview-popup handles it now */
   width: 100%;
   display: flex;
   align-items: center;
@@ -420,7 +420,6 @@ body {
 .preview-close-btn:active {
   transform: scale(.97);
 }
-
 
 
 
