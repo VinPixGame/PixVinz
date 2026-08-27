@@ -135,6 +135,15 @@ body {
   position: relative;
 }
 
+/* Create a flex row container for the top section (Level text & X button) */
+.modal-header-row,
+.modal-content > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
 .modal-content .close-modal-btn, 
 .collection-modal-content .close-modal-btn, 
 .popup-content .close-modal-btn {
@@ -624,9 +633,10 @@ body {
 }
 
 #modalLevelTitle {
-  font-weight: bold;
-  font-size: 16px;
+  margin-top: 0;
+  transform: translateY(-4px); /* Adjust this value if it needs to go higher or lower */
 }
+
 
 .modal-image-title {
   text-align: center;
