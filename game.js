@@ -326,24 +326,33 @@ function openLevelPreview() {
    * this is the ONLY part that needs to be connected to it.
    */
 
-  if (typeof spendCoins !== 'function') {
-  console.error('spendCoins() is not available.');
+const totalCoinsKey = getUserKey('totalCoins');
+const coinsBeforePreview = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
+
+if (coinsBeforePreview < PREVIEW_COST) {
   return;
 }
 
-let previewPaymentSuccessful = false;
+let paymentSuccessful = false;
 
 try {
-  previewPaymentSuccessful = spendCoins(PREVIEW_COST);
+  paymentSuccessful = spendCoins(PREVIEW_COST);
 } catch (error) {
-  console.error('Preview coin deduction error:', error);
+  const coinsAfterPreview =
+    parseInt(localStorage.getItem(totalCoinsKey)) || 0;
+
+  if (coinsAfterPreview === coinsBeforePreview - PREVIEW_COST) {
+    paymentSuccessful = true;
+  } else {
+    console.error('Preview coin deduction failed:', error);
+  }
 }
 
-// Only stop if payment actually failed
-if (!previewPaymentSuccessful) {
+if (!paymentSuccessful) {
   return;
 }
-
+  
+  
   previewActive = true;
 
   clearInterval(previewTimer);
