@@ -88,20 +88,21 @@ body {
   transform: translateY(-12px);
 }
 
-..view-header {
+.view-header {
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   width: 100%;
-  margin-bottom: 12px;
+  margin-bottom: 15px;
 }
 
 .view-header .icon-btn,
 .view-header .back-btn {
   position: absolute;
   left: 0;
-  transform: translateY(12px);
+  top: 50%;
+  transform: translateY(-50%);
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -117,10 +118,13 @@ body {
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
 }
 
-.view-header .header-title-group {
+.view-header .header-title-group,
+.view-header h2,
+.view-header h3 {
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 22px; /* Reduces the header title font size */
 }
 /* ==========================================
    SHARED VIEWS / CARDS / BUTTONS
