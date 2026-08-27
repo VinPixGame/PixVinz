@@ -1,4 +1,4 @@
-// game.js - Complete Synchronized Logic with Working Preview Component
+// game.js - Complete Synchronized Logic with Safe Module DOM Bootstrapping
 
 document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let timerInterval = null;
   let tilesState = Array.from({ length: totalTiles }, (_, i) => i);
   let selectedTilePos = null;
-  let isGameStarted = false; // Prevents instant win evaluation on load
+  let isGameStarted = false;
 
   const imageSrc = `image/level${getLevelImageIndex(currentLevel)}.png`;
 
@@ -175,12 +175,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // Increased particle count for a massive burst
     const particles = Array.from({ length: 220 }, () => ({
       x: canvas.width / 2,
       y: canvas.height / 2,
-      vx: (Math.random() - 0.5) * 22, // Wider horizontal spread
-      vy: (Math.random() - 0.7) * 20, // Higher explosive launch
+      vx: (Math.random() - 0.5) * 22,
+      vy: (Math.random() - 0.7) * 20,
       size: Math.random() * 9 + 4,
       rotation: Math.random() * 360,
       rotationSpeed: (Math.random() - 0.5) * 10,
@@ -188,7 +187,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }));
 
     const startTime = Date.now();
-    const minDuration = 2000; // Guaranteed at least 2 seconds
+    const minDuration = 2000;
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -196,30 +195,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       particles.forEach(p => {
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.4; // Gravity pull
-        p.vx *= 0.98; // Air resistance for natural slowdown
+        p.vy += 0.4;
+        p.vx *= 0.98;
         
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.fillStyle = p.color;
-        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6); // Slightly rectangular confetti shape
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
         ctx.restore();
       });
 
       const elapsed = Date.now() - startTime;
       const stillVisible = particles.some(p => p.y < canvas.height + 20);
 
-      // Keeps running for at least 2 seconds, and until all particles fall off-screen
       if (elapsed < minDuration || stillVisible) {
         requestAnimationFrame(draw);
       } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
     }
-    
     draw();
-}
-
+  }
 
   const shuffleBtn = document.getElementById('shuffleBtn');
   if (shuffleBtn) {
@@ -229,14 +225,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-
-
   // =========================================================
-  // LEVEL PREVIEW
-  // Cost: 5 coins
-  // Duration: 10 seconds
+  // LEVEL PREVIEW (Safe Binding)
   // =========================================================
-
   const previewBtn = document.getElementById('pv-trigger-btn');
   const previewPopup = document.getElementById('previewPopup');
   const previewImage = document.getElementById('previewImage');
@@ -246,11 +237,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   let previewTimer = null;
   let previewTimeLeft = 10;
 
-
-
-    
-
-      // 1. Trigger Button Handler (Opens preview, checks coins, sets .png source)
   if (previewBtn) {
     previewBtn.addEventListener('click', async (e) => {
       e.preventDefault();
@@ -304,7 +290,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 2. Close Button Handler
   if (previewCloseBtn) {
     previewCloseBtn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -313,7 +298,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 3. Close Preview Helper Function
   function closePreview() {
     if (previewTimer) {
       clearInterval(previewTimer);
@@ -329,7 +313,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       previewImage.src = '';
     }
   }
-  
+
   const nextLevelBtn = document.getElementById('nextLevelBtn');
   if (nextLevelBtn) {
     nextLevelBtn.onclick = async (e) => {
@@ -373,7 +357,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Initialize board, shuffle properly, then unlock gameplay
   shuffleGrid();
   isGameStarted = true;
   startTimer();
