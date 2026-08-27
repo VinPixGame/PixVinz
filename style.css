@@ -89,76 +89,38 @@ body {
 }
 
 .view-header {
-  display: grid;
-  grid-template-columns: 44px 1fr 44px;
-  align-items: center;
-  width: 100%;
-  margin-bottom: 6px;
-  transform: translateY(12px);
-}
-
-.view-header .icon-btn,
-.view-header .back-btn {
-  grid-column: 1;
-}
-
-.header-title-group {
-  grid-column: 2;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-}
-
-
-/* Perfectly aligned circular gold back button for Levels, Collections, and Leaderboard views */
-.view-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  margin-bottom: 12px;
   position: relative;
-  transform: none;
+  width: 100%;
+  margin-bottom: 15px;
 }
 
 .view-header .icon-btn,
 .view-header .back-btn {
-  background: rgba(20, 10, 35, 0.8);
-  border: 2px solid #ffd700;
-  color: #ffd700;
+  position: absolute;
+  left: 0;
   width: 44px;
   height: 44px;
   border-radius: 50%;
+  background: rgba(20, 10, 35, 0.8);
+  border: 2px solid #ffd700;
+  color: #ffd700;
   font-size: 20px;
   font-weight: bold;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.4), inset 0 0 6px rgba(255, 215, 0, 0.2);
-  transition: all 0.2s ease;
-  transform: none;
-  grid-column: auto;
-  position: absolute;
-  left: 0;
-}
-
-.view-header .icon-btn:hover,
-.view-header .back-btn:hover {
-  background: rgba(255, 215, 0, 0.15);
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 10px rgba(255, 215, 0, 0.4);
-  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
 }
 
 .view-header .header-title-group {
-  width: 100%;
   display: flex;
-  justify-content: center;
   align-items: center;
-  grid-column: auto;
+  justify-content: center;
 }
-
 /* ==========================================
    SHARED VIEWS / CARDS / BUTTONS
    ========================================== */
