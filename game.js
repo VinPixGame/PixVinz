@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     previewBtn.addEventListener('click', async (e) => {
       e.preventDefault();
       e.stopPropagation();
-
+alert("Popup element found? " + !!previewPopup);
       if (previewPopup && !previewPopup.classList.contains('hidden') && previewPopup.style.display !== 'none') {
         return;
       }
