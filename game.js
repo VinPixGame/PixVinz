@@ -252,8 +252,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       previewTimer = null;
     }
 
-    previewPopup.classList.add('hidden');
-    previewImage.src = '';
+    if (previewPopup) {
+      previewPopup.classList.add('hidden');
+      previewPopup.style.display = 'none';
+    }
+    if (previewImage) {
+      previewImage.src = '';
+    }
   }
 
   if (previewBtn) {
@@ -262,7 +267,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       e.stopPropagation();
 
       // Prevent multiple previews at the same time
-      if (!previewPopup.classList.contains('hidden')) {
+      if (previewPopup && !previewPopup.classList.contains('hidden') && previewPopup.style.display !== 'none') {
         return;
       }
 
@@ -281,15 +286,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      // Show the current level's image
-      previewImage.src = imageSrc;
+      // Show the current level's PNG image
+      if (previewImage) {
+        previewImage.src = imageSrc;
+      }
 
       // Reset countdown
       previewTimeLeft = 10;
-      previewCountdown.innerText = previewTimeLeft;
+      if (previewCountdown) {
+        previewCountdown.innerText = previewTimeLeft;
+      }
 
-      // Open popup
-      previewPopup.classList.remove('hidden');
+      // Open popup and force display flex/block to bypass CSS conflicts
+      if (previewPopup) {
+        previewPopup.classList.remove('hidden');
+        previewPopup.style.display = 'flex';
+      }
 
       // Start 10-second countdown
       clearInterval(previewTimer);
@@ -297,7 +309,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       previewTimer = setInterval(() => {
         previewTimeLeft--;
 
-        previewCountdown.innerText = previewTimeLeft;
+        if (previewCountdown) {
+          previewCountdown.innerText = previewTimeLeft;
+        }
 
         if (previewTimeLeft <= 0) {
           closePreview();
@@ -315,7 +329,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       closePreview();
     });
   }
-
   
   
   
