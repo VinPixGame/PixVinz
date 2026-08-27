@@ -1080,6 +1080,7 @@ input:checked + .slider:before { transform: translateX(22px); }
 .modal-overlay.hidden { display: none !important; }
 
 .image-modal-card {
+  position: relative;
   width: 100%;
   max-width: 360px;
   background: radial-gradient(circle at top, #2d1054 0%, #120624 100%);
