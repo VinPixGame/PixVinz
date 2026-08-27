@@ -246,64 +246,46 @@ document.addEventListener('DOMContentLoaded', async () => {
   let previewTimer = null;
   let previewTimeLeft = 10;
 
-  function closePreview() {
-    if (previewTimer) {
-      clearInterval(previewTimer);
-      previewTimer = null;
-    }
-
-    if (previewPopup) {
-      previewPopup.classList.add('hidden');
-      previewPopup.style.display = 'none';
-    }
-    if (previewImage) {
-      previewImage.src = '';
-    }
-  }
-
+  // 1. Trigger Button Handler (Opens preview, checks coins, sets .png source)
   if (previewBtn) {
     previewBtn.addEventListener('click', async (e) => {
       e.preventDefault();
       e.stopPropagation();
 
-      // Prevent multiple previews at the same time
       if (previewPopup && !previewPopup.classList.contains('hidden') && previewPopup.style.display !== 'none') {
         return;
       }
 
-      // Use the existing coin system from playerstat.js
       if (typeof spendCoins !== 'function') {
         console.error('spendCoins() is not available.');
         return;
       }
 
-      // Deduct exactly 5 coins
-      const purchaseSuccessful = spendCoins(5);
+      let purchaseSuccessful = spendCoins(5);
+      if (purchaseSuccessful instanceof Promise) {
+        purchaseSuccessful = await purchaseSuccessful;
+      }
 
-      // Not enough coins
       if (!purchaseSuccessful) {
         alert('Not enough coins!');
         return;
       }
 
-      // Show the current level's PNG image
       if (previewImage) {
-        previewImage.src = imageSrc;
+        const imageIndex = ((currentLevel - 1) % 55) + 1;
+        previewImage.src = `image/level${imageIndex}.png`;
       }
 
-      // Reset countdown
       previewTimeLeft = 10;
       if (previewCountdown) {
         previewCountdown.innerText = previewTimeLeft;
       }
 
-      // Open popup and force display flex/block to bypass CSS conflicts
       if (previewPopup) {
         previewPopup.classList.remove('hidden');
         previewPopup.style.display = 'flex';
       }
 
-      // Start 10-second countdown
       clearInterval(previewTimer);
 
       previewTimer = setInterval(() => {
@@ -320,14 +302,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // CLOSE button
+  // 2. Close Button Handler
   if (previewCloseBtn) {
     previewCloseBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-
       closePreview();
     });
+  }
+
+  // 3. Close Preview Helper Function
+  function closePreview() {
+    if (previewTimer) {
+      clearInterval(previewTimer);
+      previewTimer = null;
+    }
+
+    if (previewPopup) {
+      previewPopup.classList.add('hidden');
+      previewPopup.style.display = 'none';
+    }
+    
+    if (previewImage) {
+      previewImage.src = '';
+    }
   }
   
   
