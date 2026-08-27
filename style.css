@@ -1113,7 +1113,10 @@ input:checked + .slider:before { transform: translateX(22px); }
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%; /* Optional: keeps it a clean circle, or remove for a square */
+  border-radius: 50%;
+  position: absolute;
+  top: 8px;   /* Pulls it closer to the top border */
+  right: 8px;  /* Pulls it closer to the right border */
 }
 
 .modal-img-container {
@@ -1123,6 +1126,7 @@ input:checked + .slider:before { transform: translateX(22px); }
   overflow: hidden;
   border: 2px solid #7b2cbf;
   box-shadow: 0 0 15px rgba(123, 44, 191, 0.4);
+  
 }
 
 .modal-img-container img {
