@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // =========================================================
+    // =========================================================
   // LEVEL PREVIEW
   // Costs 5 coins
   // =========================================================
@@ -246,9 +246,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (previewPopup) {
       previewPopup.classList.add('hidden');
-      previewPopup.style.setProperty('display', 'none', 'important');
-      previewPopup.style.setProperty('visibility', 'hidden', 'important');
-      previewPopup.style.setProperty('opacity', '0', 'important');
+
+      // Hide it directly.
+      previewPopup.style.display = 'none';
     }
   }
 
@@ -256,38 +256,58 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     previewBtn.addEventListener('click', () => {
 
-      // Deduct exactly 5 coins
+      // =====================================================
+      // CHARGE 5 COINS FIRST
+      // =====================================================
+
       const paid = spendCoins(5);
 
-      // Not enough coins — do not open preview
+      // Not enough coins.
       if (!paid) {
         return;
       }
 
-      // Show the CURRENT level preview
+      // =====================================================
+      // CURRENT LEVEL IMAGE
+      // =====================================================
+
       previewImage.src = `image/level${currentLevel}.png`;
 
-      // Reset countdown
+      // =====================================================
+      // RESET COUNTDOWN
+      // =====================================================
+
       let secondsLeft = 10;
 
       if (previewCountdown) {
         previewCountdown.textContent = secondsLeft;
       }
 
-      // Remove hidden state
+      // =====================================================
+      // OPEN PREVIEW MODAL
+      // =====================================================
+
       previewPopup.classList.remove('hidden');
 
-      // Force modal to become visible
-      previewPopup.style.setProperty('display', 'flex', 'important');
-      previewPopup.style.setProperty('visibility', 'visible', 'important');
-      previewPopup.style.setProperty('opacity', '1', 'important');
+      // Remove the inline "display: none" that exists
+      // directly in your HTML.
+      previewPopup.style.removeProperty('display');
 
-      // Clear previous timer if one exists
+      // Force the modal to flex.
+      previewPopup.style.display = 'flex';
+
+      // =====================================================
+      // CLEAR OLD TIMER
+      // =====================================================
+
       if (previewTimer) {
         clearInterval(previewTimer);
       }
 
-      // 10-second countdown
+      // =====================================================
+      // 10 SECOND PREVIEW
+      // =====================================================
+
       previewTimer = setInterval(() => {
 
         secondsLeft--;
@@ -304,20 +324,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Close button
+  // =========================================================
+  // CLOSE BUTTON
+  // =========================================================
+
   if (previewCloseBtn) {
     previewCloseBtn.addEventListener('click', closePreview);
   }
 
-  // Close when clicking outside the preview box
+  // =========================================================
+  // CLICK OUTSIDE PREVIEW BOX TO CLOSE
+  // =========================================================
+
   if (previewPopup) {
     previewPopup.addEventListener('click', (event) => {
+
       if (event.target === previewPopup) {
         closePreview();
       }
-    });
-  }  
 
+    });
+  }
 
       
 
