@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-    // =========================================================
+     // =========================================================
   // LEVEL PREVIEW
   // Costs 5 coins
   // =========================================================
@@ -239,15 +239,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   let previewTimer = null;
 
   function closePreview() {
-    if (previewTimer) {
+    if (previewTimer !== null) {
       clearInterval(previewTimer);
       previewTimer = null;
     }
 
     if (previewPopup) {
       previewPopup.classList.add('hidden');
-
-      // Hide it directly.
       previewPopup.style.display = 'none';
     }
   }
@@ -256,60 +254,47 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     previewBtn.addEventListener('click', () => {
 
-      // =====================================================
-      // CHARGE 5 COINS FIRST
-      // =====================================================
-
+      // -------------------------------------------------------
+      // CHECK AND DEDUCT 5 COINS
+      // -------------------------------------------------------
       const paid = spendCoins(5);
 
-      // Not enough coins.
       if (!paid) {
         return;
       }
 
-      // =====================================================
-      // CURRENT LEVEL IMAGE
-      // =====================================================
+      // -------------------------------------------------------
+      // USE THE SAME 200-LEVEL IMAGE SYSTEM AS THE PUZZLE
+      // -------------------------------------------------------
+      const previewLevel = ((currentLevel - 1) % 200) + 1;
+      previewImage.src = `image/level${previewLevel}.png`;
 
-      previewImage.src = `image/level${currentLevel}.png`;
-
-      // =====================================================
+      // -------------------------------------------------------
       // RESET COUNTDOWN
-      // =====================================================
-
+      // -------------------------------------------------------
       let secondsLeft = 10;
 
       if (previewCountdown) {
-        previewCountdown.textContent = secondsLeft;
+        previewCountdown.textContent = '10';
       }
 
-      // =====================================================
-      // OPEN PREVIEW MODAL
-      // =====================================================
-
+      // -------------------------------------------------------
+      // OPEN POPUP
+      // -------------------------------------------------------
       previewPopup.classList.remove('hidden');
-
-      // Remove the inline "display: none" that exists
-      // directly in your HTML.
-      previewPopup.style.removeProperty('display');
-
-      // Force the modal to flex.
       previewPopup.style.display = 'flex';
 
-      // =====================================================
-      // CLEAR OLD TIMER
-      // =====================================================
-
-      if (previewTimer) {
+      // -------------------------------------------------------
+      // CLEAR ANY PREVIOUS TIMER
+      // -------------------------------------------------------
+      if (previewTimer !== null) {
         clearInterval(previewTimer);
       }
 
-      // =====================================================
+      // -------------------------------------------------------
       // 10 SECOND PREVIEW
-      // =====================================================
-
+      // -------------------------------------------------------
       previewTimer = setInterval(() => {
-
         secondsLeft--;
 
         if (previewCountdown) {
@@ -319,32 +304,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (secondsLeft <= 0) {
           closePreview();
         }
-
       }, 1000);
     });
   }
 
-  // =========================================================
+  // ---------------------------------------------------------
   // CLOSE BUTTON
-  // =========================================================
-
+  // ---------------------------------------------------------
   if (previewCloseBtn) {
-    previewCloseBtn.addEventListener('click', closePreview);
+    previewCloseBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      closePreview();
+    });
   }
 
-  // =========================================================
+  // ---------------------------------------------------------
   // CLICK OUTSIDE PREVIEW BOX TO CLOSE
-  // =========================================================
-
+  // ---------------------------------------------------------
   if (previewPopup) {
     previewPopup.addEventListener('click', (event) => {
-
       if (event.target === previewPopup) {
         closePreview();
       }
-
     });
-  }
+  } 
 
       
 
