@@ -326,25 +326,14 @@ function openLevelPreview() {
    * this is the ONLY part that needs to be connected to it.
    */
 
-  if (typeof coins !== 'undefined' && coins < PREVIEW_COST) {
-    if (typeof showNotEnoughCoinsPopup === 'function') {
-      showNotEnoughCoinsPopup();
-    }
+  if (typeof spendCoins !== 'function') {
+  console.error('spendCoins() is not available.');
+  return;
+}
 
-    return;
-  }
-
-  /*
-   * Deduct the 5 coins only when Preview is actually opened.
-   */
-
-  if (typeof coins !== 'undefined') {
-    coins -= PREVIEW_COST;
-
-    if (typeof updateCoinsDisplay === 'function') {
-      updateCoinsDisplay();
-    }
-  }
+if (!spendCoins(PREVIEW_COST)) {
+  return;
+}
 
   previewActive = true;
 
