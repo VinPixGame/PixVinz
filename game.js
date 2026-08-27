@@ -312,11 +312,10 @@ function openLevelPreview() {
     return;
   }
 
-  const levelNumber = new URLSearchParams(window.location.search).get('level') || '1';
-
-const previewTitle = document.getElementById('previewTitle');
+  const currentLevel = getCurrentLevel();
+  const previewTitle = document.getElementById('previewTitle');
 if (previewTitle) {
-  previewTitle.textContent = `👁 LEVEL ${levelNumber} PREVIEW`;
+  previewTitle.textContent = `👁 LEVEL ${currentLevel} PREVIEW`;
 }
 
   /*
