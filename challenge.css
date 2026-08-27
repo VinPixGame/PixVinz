@@ -688,6 +688,7 @@ body {
   #challengeModalTitle {
     font-size: 0.95rem;
   }
+   
 
   #challengeModalVideo {
     max-height: 62vh;
@@ -695,5 +696,380 @@ body {
 
   .challenge-preview-close-btn {
     padding: 12px;
+  }
+}
+
+/* =========================================================
+   CHALLENGE WIN MODAL
+   Premium Victory Screen Design
+   ========================================================= */
+
+/* Main overlay */
+#winModal {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+
+  background: rgba(8, 3, 20, 0.92) !important;
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+
+  z-index: 100000 !important;
+
+  padding: 16px !important;
+  overflow: hidden;
+}
+
+#winModal.hidden {
+  display: none !important;
+}
+
+
+/* =========================================================
+   CHALLENGE WIN CARD
+   ========================================================= */
+
+#winModal .win-card {
+  position: relative;
+
+  width: 100% !important;
+  max-width: 400px !important;
+  max-height: 90dvh !important;
+
+  box-sizing: border-box;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(88, 28, 135, 0.4) 0%,
+      rgba(18, 6, 36, 0.98) 100%
+    ),
+    radial-gradient(
+      rgba(255, 255, 255, 0.1) 1px,
+      transparent 1px
+    ) !important;
+
+  background-size: 100% 100%, 12px 12px !important;
+
+  border: 3.5px solid #ffd700 !important;
+  border-radius: 28px !important;
+
+  padding: 28px 20px 22px !important;
+
+  text-align: center;
+
+  box-shadow:
+    0 0 35px rgba(157, 78, 221, 0.6),
+    inset 0 0 15px rgba(157, 78, 221, 0.5),
+    0 20px 40px rgba(0, 0, 0, 0.8) !important;
+
+  margin: auto;
+
+  display: flex !important;
+  flex-direction: column;
+  justify-content: space-between;
+
+  animation: challengeWinPopUp 0.35s
+    cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+
+/* =========================================================
+   TITLE
+   ========================================================= */
+
+#winModal .win-card h2 {
+  margin: 0 0 12px !important;
+
+  font-family:
+    'Impact',
+    'Segoe UI Black',
+    sans-serif;
+
+  font-size: 28px !important;
+  font-weight: 900 !important;
+
+  letter-spacing: 1.5px;
+
+  text-transform: uppercase;
+
+  background:
+    linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #ffea6b 35%,
+      #ffb700 70%,
+      #d97706 100%
+    );
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  filter:
+    drop-shadow(0px 3px 0px #451a03);
+}
+
+
+/* =========================================================
+   STAR RATING
+   ========================================================= */
+
+#starContainer {
+  font-size: 36px !important;
+
+  margin-bottom: 10px !important;
+
+  color: #3b0764 !important;
+
+  letter-spacing: 8px !important;
+
+  line-height: 1.1;
+}
+
+
+/* =========================================================
+   SOLVED VIDEO
+   ========================================================= */
+
+#winVideoContainer {
+  width: 240px !important;
+  height: 240px !important;
+
+  aspect-ratio: 1 / 1;
+
+  margin: 0 auto 12px !important;
+
+  border-radius: 20px !important;
+
+  border: 3px solid #a855f7 !important;
+
+  overflow: hidden;
+
+  background: #000 !important;
+
+  box-shadow:
+    0 0 22px rgba(168, 85, 247, 0.7),
+    0 8px 16px rgba(0, 0, 0, 0.6) !important;
+
+  flex-shrink: 0;
+}
+
+#winVideoContainer video {
+  width: 100% !important;
+  height: 100% !important;
+
+  object-fit: cover;
+
+  display: block;
+}
+
+
+/* =========================================================
+   STATS
+   ========================================================= */
+
+#winModal .win-card > div:has(#finalTime) {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-around;
+
+  background: rgba(15, 5, 29, 0.85) !important;
+
+  border: 1.5px solid rgba(124, 58, 237, 0.5);
+
+  border-radius: 16px !important;
+
+  padding: 10px 6px !important;
+
+  margin-bottom: 12px !important;
+
+  font-size: 14px !important;
+
+  color: #fff !important;
+}
+
+
+/* =========================================================
+   REWARDS
+   ========================================================= */
+
+#winModal .win-card > div:has(#earnedCoins) {
+  display: flex !important;
+
+  justify-content: center !important;
+
+  gap: 18px !important;
+
+  margin-bottom: 18px !important;
+
+  font-size: 14px;
+
+  font-weight: 900 !important;
+
+  color: #facc15 !important;
+}
+
+
+/* =========================================================
+   BUTTON CONTAINER
+   ========================================================= */
+
+#winModal .win-card > div:has(#homeBtn) {
+  display: flex !important;
+
+  gap: 12px !important;
+}
+
+
+/* =========================================================
+   HOME BUTTON
+   ========================================================= */
+
+#homeBtn {
+  flex: 1;
+
+  padding: 14px 10px !important;
+
+  border-radius: 16px !important;
+
+  font-size: 16px !important;
+
+  font-weight: 900 !important;
+
+  letter-spacing: 1px;
+
+  text-transform: uppercase;
+
+  background:
+    linear-gradient(
+      180deg,
+      #7e22ce 0%,
+      #581c87 100%
+    ) !important;
+
+  border: 2px solid #c084fc !important;
+
+  color: #ffffff !important;
+
+  box-shadow:
+    0 4px 0 #3b0764,
+    0 6px 12px rgba(0, 0, 0, 0.4) !important;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   NEXT CHALLENGE BUTTON
+   ========================================================= */
+
+#nextChallengeBtn {
+  flex: 1;
+
+  padding: 14px 10px !important;
+
+  border-radius: 16px !important;
+
+  font-size: 16px !important;
+
+  font-weight: 900 !important;
+
+  letter-spacing: 1px;
+
+  text-transform: uppercase;
+
+  background:
+    linear-gradient(
+      180deg,
+      #fde047 0%,
+      #eab308 50%,
+      #ca8a04 100%
+    ) !important;
+
+  border: 2px solid #ffffff !important;
+
+  color: #1e0a38 !important;
+
+  box-shadow:
+    0 4px 0 #854d0e,
+    0 6px 12px rgba(250, 204, 21, 0.4) !important;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   BUTTON PRESS
+   ========================================================= */
+
+#homeBtn:active,
+#nextChallengeBtn:active {
+  transform: translateY(3px);
+
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.5) !important;
+}
+
+
+/* =========================================================
+   POPUP ANIMATION
+   ========================================================= */
+
+@keyframes challengeWinPopUp {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  #winModal {
+    padding: 12px !important;
+  }
+
+  #winModal .win-card {
+    width: 94vw !important;
+
+    padding: 24px 14px 18px !important;
+
+    border-radius: 24px !important;
+  }
+
+  #winModal .win-card h2 {
+    font-size: 23px !important;
+  }
+
+  #starContainer {
+    font-size: 31px !important;
+    letter-spacing: 6px !important;
+  }
+
+  #winVideoContainer {
+    width: min(68vw, 240px) !important;
+    height: min(68vw, 240px) !important;
+  }
+
+  #homeBtn,
+  #nextChallengeBtn {
+    padding: 12px 8px !important;
+    font-size: 14px !important;
   }
 }
