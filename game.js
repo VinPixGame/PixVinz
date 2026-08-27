@@ -248,7 +248,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-    // 1. Trigger Button Handler (Opens preview, checks coins, sets .png source)
+    
+
+      // 1. Trigger Button Handler (Opens preview, checks coins, sets .png source)
   if (previewBtn) {
     previewBtn.addEventListener('click', async (e) => {
       e.preventDefault();
@@ -282,16 +284,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (previewPopup) {
         previewPopup.classList.remove('hidden');
         previewPopup.style.display = 'flex';
-        previewPopup.style.position = 'fixed';
-        previewPopup.style.top = '0';
-        previewPopup.style.left = '0';
-        previewPopup.style.width = '100vw';
-        previewPopup.style.height = '100vh';
-        previewPopup.style.zIndex = '99999';
-        previewPopup.style.backgroundColor = 'rgba(8, 2, 20, 0.90)';
-        previewPopup.style.alignItems = 'center';
-        previewPopup.style.justifyContent = 'center';
-        previewPopup.style.padding = '16px';
+      } else {
+        alert('previewPopup element not found!');
       }
 
       clearInterval(previewTimer);
