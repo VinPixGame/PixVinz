@@ -251,13 +251,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     previewBtn.addEventListener('click', async (e) => {
       e.preventDefault();
       e.stopPropagation();
-alert("Popup element found? " + !!previewPopup);
-      if (previewPopup && !previewPopup.classList.contains('hidden') && previewPopup.style.display !== 'none') {
-        return;
-      }
 
       if (typeof spendCoins !== 'function') {
-        console.error('spendCoins() is not available.');
+        alert('spendCoins() is not available.');
         return;
       }
 
@@ -284,6 +280,8 @@ alert("Popup element found? " + !!previewPopup);
       if (previewPopup) {
         previewPopup.classList.remove('hidden');
         previewPopup.style.display = 'flex';
+      } else {
+        alert('previewPopup element not found!');
       }
 
       clearInterval(previewTimer);
