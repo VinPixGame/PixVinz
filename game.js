@@ -225,111 +225,96 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-     // =========================================================
-  // LEVEL PREVIEW
-  // Costs 5 coins
-  // =========================================================
+     
+    // =========================================================
+// LEVEL PREVIEW
+// Costs 5 coins
+// =========================================================
 
-  const previewBtn = document.getElementById('pv-trigger-btn');
-  const previewPopup = document.getElementById('previewPopup');
-  const previewImage = document.getElementById('previewImage');
-  const previewCountdown = document.getElementById('previewCountdown');
-  const previewCloseBtn = document.getElementById('previewCloseBtn');
+const previewBtn = document.getElementById('pv-trigger-btn');
+const previewPopup = document.getElementById('previewPopup');
+const previewImage = document.getElementById('previewImage');
+const previewCountdown = document.getElementById('previewCountdown');
+const previewCloseBtn = document.getElementById('previewCloseBtn');
 
-  let previewTimer = null;
+let previewTimer = null;
 
-  function closePreview() {
-    if (previewTimer !== null) {
-      clearInterval(previewTimer);
-      previewTimer = null;
-    }
-
-    if (previewPopup) {
-      previewPopup.classList.add('hidden');
-      previewPopup.style.display = 'none';
-    }
+function closePreview() {
+  if (previewTimer) {
+    clearInterval(previewTimer);
+    previewTimer = null;
   }
 
-  if (previewBtn && previewPopup && previewImage) {
+  if (previewPopup) {
+    previewPopup.classList.add('hidden');
+    previewPopup.style.display = 'none';
+  }
+}
 
-    previewBtn.addEventListener('click', () => {
+if (previewBtn && previewPopup && previewImage) {
 
-      // -------------------------------------------------------
-      // CHECK AND DEDUCT 5 COINS
-      // -------------------------------------------------------
-      const paid = spendCoins(5);
+  // MAKE SURE PREVIEW IS HIDDEN WHEN GAME PAGE LOADS
+  closePreview();
 
-      if (!paid) {
-        return;
-      }
+  previewBtn.addEventListener('click', () => {
 
-      // -------------------------------------------------------
-      // USE THE SAME 200-LEVEL IMAGE SYSTEM AS THE PUZZLE
-      // -------------------------------------------------------
-      const previewLevel = ((currentLevel - 1) % 200) + 1;
-      previewImage.src = `image/level${previewLevel}.png`;
+    // Pay 5 coins first
+    const paid = spendCoins(5);
 
-      // -------------------------------------------------------
-      // RESET COUNTDOWN
-      // -------------------------------------------------------
-      let secondsLeft = 10;
+    // Only stop here when the player doesn't have enough coins
+    if (!paid) {
+      return;
+    }
+
+    // Load the CURRENT level image
+    previewImage.src = imageSrc;
+
+    // Reset countdown
+    let secondsLeft = 10;
+
+    if (previewCountdown) {
+      previewCountdown.textContent = secondsLeft;
+    }
+
+    // Clear any previous timer
+    if (previewTimer) {
+      clearInterval(previewTimer);
+    }
+
+    // OPEN PREVIEW
+    previewPopup.classList.remove('hidden');
+    previewPopup.style.display = 'flex';
+
+    // Start 10-second countdown
+    previewTimer = setInterval(() => {
+
+      secondsLeft--;
 
       if (previewCountdown) {
-        previewCountdown.textContent = '10';
+        previewCountdown.textContent = secondsLeft;
       }
 
-      // -------------------------------------------------------
-      // OPEN POPUP
-      // -------------------------------------------------------
-      previewPopup.classList.remove('hidden');
-      previewPopup.style.display = 'flex';
-
-      // -------------------------------------------------------
-      // CLEAR ANY PREVIOUS TIMER
-      // -------------------------------------------------------
-      if (previewTimer !== null) {
-        clearInterval(previewTimer);
-      }
-
-      // -------------------------------------------------------
-      // 10 SECOND PREVIEW
-      // -------------------------------------------------------
-      previewTimer = setInterval(() => {
-        secondsLeft--;
-
-        if (previewCountdown) {
-          previewCountdown.textContent = secondsLeft;
-        }
-
-        if (secondsLeft <= 0) {
-          closePreview();
-        }
-      }, 1000);
-    });
-  }
-
-  // ---------------------------------------------------------
-  // CLOSE BUTTON
-  // ---------------------------------------------------------
-  if (previewCloseBtn) {
-    previewCloseBtn.addEventListener('click', (event) => {
-      event.stopPropagation();
-      closePreview();
-    });
-  }
-
-  // ---------------------------------------------------------
-  // CLICK OUTSIDE PREVIEW BOX TO CLOSE
-  // ---------------------------------------------------------
-  if (previewPopup) {
-    previewPopup.addEventListener('click', (event) => {
-      if (event.target === previewPopup) {
+      if (secondsLeft <= 0) {
         closePreview();
       }
-    });
-  } 
 
-      
+    }, 1000);
+  });
+}
+
+// CLOSE BUTTON
+if (previewCloseBtn) {
+  previewCloseBtn.addEventListener('click', closePreview);
+}
+
+// CLICK OUTSIDE THE PREVIEW BOX
+if (previewPopup) {
+  previewPopup.addEventListener('click', (event) => {
+    if (event.target === previewPopup) {
+      closePreview();
+    }
+  });
+}
 
   const nextLevelBtn = document.getElementById('nextLevelBtn');
   if (nextLevelBtn) {
