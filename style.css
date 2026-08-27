@@ -129,29 +129,9 @@ body {
   font-size: 22px;
 }
 
-.modal-content, 
-.collection-modal-content, 
-.popup-content {
-  position: relative;
-}
 
-/* Create a flex row container for the top section (Level text & X button) */
-.modal-header-row,
-.modal-content > div:first-child {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
 
-.modal-content .close-modal-btn, 
-.collection-modal-content .close-modal-btn, 
-.popup-content .close-modal-btn {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-}
-  
+
 /* ==========================================
    SHARED VIEWS / CARDS / BUTTONS
    ========================================== */
@@ -632,10 +612,7 @@ body {
   margin-bottom: 5px;
 }
 
-#modalLevelTitle {
-  margin-top: 0;
-  transform: translateY(-4px); /* Adjust this value if it needs to go higher or lower */
-}
+
 
 
 .modal-image-title {
@@ -1122,15 +1099,20 @@ input:checked + .slider:before { transform: translateX(22px); }
 
 .image-modal-header span {
   color: #ffd700;
-  font-size: 18px;
+  font-size: 14px;
   font-weight: bold;
   letter-spacing: 1px;
+  transform: translateY(-4px);
 }
 
 .close-modal-btn {
-  width: 36px;
-  height: 36px;
-  font-size: 16px;
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%; /* Optional: keeps it a clean circle, or remove for a square */
 }
 
 .modal-img-container {
