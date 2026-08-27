@@ -754,109 +754,106 @@ if (regPassConfirm) {
 });
 
 
-// ==========================================
-// DOWNLOAD APP — SECTIONS 1–5
-// ==========================================
+
 
 let deferredPrompt = null;
 
 
 // ==========================================
-// 1. CHECK IF APP IS ALREADY INSTALLED
+// DOWNLOAD APP — PWA INSTALLATION
+// LOGIN + CREATE ACCOUNT ONLY
+// ==========================================
+
+const installButtons = () => {
+    return document.querySelectorAll(
+        '#install-app-btn, #install-app-btn-ref'
+    );
+};
+
+
+// ==========================================
+// 1. CHECK IF PIXVINZ IS ALREADY INSTALLED
 // ==========================================
 
 function isAppInstalled() {
 
-    return window.matchMedia(
-        '(display-mode: standalone)'
-    ).matches ||
-
-    window.navigator.standalone === true ||
-
-    document.referrer.includes(
-        'android-app://'
+    return (
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true ||
+        document.referrer.startsWith('android-app://')
     );
 }
 
 
 // ==========================================
-// 2. SHOW / HIDE DOWNLOAD BUTTONS
+// 2. UPDATE BUTTON VISIBILITY
 // ==========================================
 
 function updateInstallButtons() {
 
-    const installBtns =
-        document.querySelectorAll(
-            '#install-app-btn, #install-app-btn-ref, .install-app-btn-ref'
-        );
+    const buttons = installButtons();
 
-    const installed = isAppInstalled();
+    buttons.forEach(button => {
 
-    installBtns.forEach(btn => {
+        if (isAppInstalled()) {
 
-        if (installed) {
-            btn.style.display = 'none';
+            button.style.display = 'none';
+            button.disabled = true;
+
         } else {
-            btn.style.display = 'flex';
+
+            button.style.display = 'flex';
+            button.disabled = false;
+
         }
 
     });
 }
 
 
-// Run after DOM is ready
-window.addEventListener(
-    'DOMContentLoaded',
-    () => {
-
-        updateInstallButtons();
-
-    }
-);
-
-
 // ==========================================
-// 3. CAPTURE BROWSER INSTALL EVENT
+// 3. CAPTURE CHROME'S INSTALL PROMPT
 // ==========================================
 
 window.addEventListener(
     'beforeinstallprompt',
-    (e) => {
+    (event) => {
 
-        e.preventDefault();
+        // Stop Chrome from showing its automatic prompt
+        event.preventDefault();
 
-        deferredPrompt = e;
-
-        // Make sure the buttons are visible
-        // when the browser confirms installation
-        updateInstallButtons();
+        // Save Chrome's installation event
+        deferredPrompt = event;
 
         console.log(
-            'PixVinz install prompt is ready.'
+            'PixVinz: install prompt captured.'
         );
+
+        // Make sure buttons are available
+        updateInstallButtons();
+
     }
 );
 
 
 // ==========================================
-// 4. DOWNLOAD APP BUTTON CLICK
+// 4. DOWNLOAD APP BUTTON
 // ==========================================
 
 document.addEventListener(
     'click',
-    async (e) => {
+    async (event) => {
 
-        const target =
-            e.target.closest(
-                '#install-app-btn, #install-app-btn-ref, .install-app-btn-ref'
-            );
+        const button = event.target.closest(
+            '#install-app-btn, #install-app-btn-ref'
+        );
 
-        if (!target) {
+        if (!button) {
             return;
         }
 
 
-        // Already installed
+        // Never show the button inside the installed app
         if (isAppInstalled()) {
 
             updateInstallButtons();
@@ -865,62 +862,72 @@ document.addEventListener(
         }
 
 
-        // Browser has provided the native install prompt
+        // Chrome has provided the native install prompt
         if (deferredPrompt) {
 
             try {
 
-                deferredPrompt.prompt();
+                const installPrompt = deferredPrompt;
 
-                const { outcome } =
-                    await deferredPrompt.userChoice;
+                // Clear it immediately so it cannot
+                // accidentally be triggered twice
+                deferredPrompt = null;
+
+                await installPrompt.prompt();
+
+                const result =
+                    await installPrompt.userChoice;
 
                 console.log(
-                    `PixVinz install response: ${outcome}`
+                    'PixVinz install result:',
+                    result.outcome
                 );
 
 
-                if (outcome === 'accepted') {
+                if (result.outcome === 'accepted') {
+
+                    installButtons().forEach(
+                        btn => {
+                            btn.style.display = 'none';
+                            btn.disabled = true;
+                        }
+                    );
+
+                } else {
 
                     updateInstallButtons();
 
                 }
 
-            } catch (err) {
+            } catch (error) {
 
                 console.error(
-                    'PixVinz install prompt error:',
-                    err
+                    'PixVinz installation error:',
+                    error
                 );
+
+                updateInstallButtons();
 
             }
 
-
-            // Prompt can only be used once
-            deferredPrompt = null;
-
-        } else {
-
-            /*
-             * The browser has not supplied a native
-             * beforeinstallprompt event yet.
-             *
-             * Keep the button clickable and visible.
-             * Do NOT disable it and do NOT show an alert.
-             */
-
-            console.log(
-                'PixVinz install prompt is not available yet.'
-            );
-
+            return;
         }
+
+
+        // ======================================
+        // CHROME HAS NOT PROVIDED THE PROMPT
+        // ======================================
+
+        console.log(
+            'PixVinz: Chrome has not provided beforeinstallprompt yet.'
+        );
 
     }
 );
 
 
 // ==========================================
-// 5. HIDE BUTTON AFTER INSTALLATION
+// 5. INSTALLATION COMPLETED
 // ==========================================
 
 window.addEventListener(
@@ -929,11 +936,32 @@ window.addEventListener(
 
         deferredPrompt = null;
 
-        updateInstallButtons();
+        installButtons().forEach(
+            button => {
+
+                button.style.display = 'none';
+                button.disabled = true;
+
+            }
+        );
 
         console.log(
-            'PixVinz has been installed.'
+            'PixVinz: App successfully installed.'
         );
+
+    }
+);
+
+
+// ==========================================
+// INITIAL BUTTON STATE
+// ==========================================
+
+document.addEventListener(
+    'DOMContentLoaded',
+    () => {
+
+        updateInstallButtons();
 
     }
 );
