@@ -225,7 +225,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // =========================================================
+  
+
+          // =========================================================
   // LEVEL PREVIEW
   // Costs 5 coins
   // =========================================================
@@ -245,39 +247,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     previewPopup.classList.add('hidden');
-    previewPopup.style.display = 'none';
+    previewPopup.style.setProperty('display', 'none', 'important');
   }
 
   if (previewBtn && previewPopup && previewImage) {
+
     previewBtn.addEventListener('click', () => {
 
-      // Deduct exactly 5 coins.
-      // playerstat.js handles the balance, display,
-      // localStorage, and cloud synchronization.
+      // Deduct exactly 5 coins
       const paid = spendCoins(5);
 
-      // Not enough coins — do nothing.
+      // Not enough coins
       if (!paid) {
         return;
       }
 
-      // Show the preview for the CURRENT level.
+      // Current level preview image
       previewImage.src = `image/level${currentLevel}.png`;
 
+      // Reset countdown
       let secondsLeft = 10;
 
       if (previewCountdown) {
         previewCountdown.textContent = secondsLeft;
       }
 
+      // Remove hidden class
       previewPopup.classList.remove('hidden');
-      previewPopup.style.display = 'flex';
 
+      // FORCE the modal to display
+      previewPopup.style.setProperty('display', 'flex', 'important');
+
+      // Clear any previous timer
       if (previewTimer) {
         clearInterval(previewTimer);
       }
 
+      // 10-second countdown
       previewTimer = setInterval(() => {
+
         secondsLeft--;
 
         if (previewCountdown) {
@@ -287,6 +295,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (secondsLeft <= 0) {
           closePreview();
         }
+
       }, 1000);
     });
   }
