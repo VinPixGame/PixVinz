@@ -331,7 +331,16 @@ function openLevelPreview() {
   return;
 }
 
-if (!spendCoins(PREVIEW_COST)) {
+let previewPaymentSuccessful = false;
+
+try {
+  previewPaymentSuccessful = spendCoins(PREVIEW_COST);
+} catch (error) {
+  console.error('Preview coin deduction error:', error);
+}
+
+// Only stop if payment actually failed
+if (!previewPaymentSuccessful) {
   return;
 }
 
