@@ -755,87 +755,165 @@ if (regPassConfirm) {
 
 
 
-
 // ==========================================
-// TEMPORARY MOBILE INSTALL DIAGNOSTIC
+// PIXVINZ DOWNLOAD APP / PWA INSTALL
 // ==========================================
 
 let deferredPrompt = null;
 
-function showInstallDiagnostic(message) {
+const installButtons = [
+    document.getElementById('install-app-btn'),
+    document.getElementById('install-app-btn-ref')
+].filter(Boolean);
 
-    let box = document.getElementById('installDiagnostic');
 
-    if (!box) {
+// ------------------------------------------
+// CHECK IF PIXVINZ IS ALREADY INSTALLED
+// ------------------------------------------
 
-        box = document.createElement('div');
+function isPixVinzInstalled() {
 
-        box.id = 'installDiagnostic';
-
-        box.style.cssText = `
-            position: fixed;
-            left: 10px;
-            right: 10px;
-            bottom: 10px;
-            z-index: 99999;
-            padding: 14px;
-            border: 2px solid #ffd700;
-            border-radius: 12px;
-            background: #18082d;
-            color: #ffd700;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            font-weight: bold;
-            text-align: center;
-        `;
-
-        document.body.appendChild(box);
-    }
-
-    box.textContent = message;
+    return (
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true
+    );
 }
 
 
-// Page loaded
-window.addEventListener('DOMContentLoaded', () => {
+// ------------------------------------------
+// SHOW / HIDE DOWNLOAD BUTTONS
+// ------------------------------------------
 
-    showInstallDiagnostic(
-        'TEST: Waiting for Chrome install prompt...'
-    );
+function updateInstallButtons() {
+
+    const installed = isPixVinzInstalled();
+
+    installButtons.forEach(button => {
+
+        if (installed) {
+
+            button.style.display = 'none';
+
+        } else if (deferredPrompt) {
+
+            button.style.display = 'flex';
+
+        } else {
+
+            button.style.display = 'none';
+
+        }
+
+    });
+}
+
+
+// ------------------------------------------
+// CHROME / EDGE INSTALL EVENT
+// ------------------------------------------
+
+window.addEventListener('beforeinstallprompt', (event) => {
+
+    // Prevent the browser from showing
+    // its automatic install prompt.
+    event.preventDefault();
+
+    // Save the event so our custom button
+    // can trigger the install prompt later.
+    deferredPrompt = event;
+
+    updateInstallButtons();
 
 });
 
 
-// Chrome provides install prompt
-window.addEventListener(
-    'beforeinstallprompt',
-    (event) => {
+// ------------------------------------------
+// DOWNLOAD APP BUTTON CLICK
+// ------------------------------------------
 
-        event.preventDefault();
+installButtons.forEach(button => {
 
-        deferredPrompt = event;
+    button.addEventListener('click', async () => {
 
-        showInstallDiagnostic(
-            '✅ SUCCESS: Chrome provided the Install App prompt!'
+        // If already installed, do nothing.
+        if (isPixVinzInstalled()) {
+
+            updateInstallButtons();
+
+            return;
+        }
+
+
+        // If Chrome has not provided the
+        // install prompt yet, do nothing.
+        if (!deferredPrompt) {
+
+            return;
+        }
+
+
+        // Show the native browser install prompt.
+        deferredPrompt.prompt();
+
+
+        // Wait for the user's choice.
+        const { outcome } =
+            await deferredPrompt.userChoice;
+
+
+        console.log(
+            'PixVinz install prompt result:',
+            outcome
         );
 
-    }
-);
 
-
-// App installed
-window.addEventListener(
-    'appinstalled',
-    () => {
-
+        // The saved prompt can only be used once.
         deferredPrompt = null;
 
-        showInstallDiagnostic(
-            '✅ APP INSTALLED SUCCESSFULLY'
-        );
+        updateInstallButtons();
 
+    });
+
+});
+
+
+// ------------------------------------------
+// APP INSTALLED
+// ------------------------------------------
+
+window.addEventListener('appinstalled', () => {
+
+    deferredPrompt = null;
+
+    updateInstallButtons();
+
+});
+
+
+// ------------------------------------------
+// INITIAL STATE
+// ------------------------------------------
+
+window.addEventListener('DOMContentLoaded', () => {
+
+    updateInstallButtons();
+
+});
+
+
+// ------------------------------------------
+// STANDALONE MODE CHANGE
+// ------------------------------------------
+
+const standaloneMedia =
+    window.matchMedia('(display-mode: standalone)');
+
+standaloneMedia.addEventListener?.(
+    'change',
+    () => {
+        updateInstallButtons();
     }
 );
 
 
-                    
+    
