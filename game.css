@@ -525,3 +525,13 @@ body {
   pointer-events: none;
   z-index: 201;
 }
+/* =========================================================
+   PREVIEW MODAL VISIBILITY
+   ========================================================= */
+
+.preview-popup.hidden {
+  display: none !important;
+}
+
+
+
