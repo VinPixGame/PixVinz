@@ -225,119 +225,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-       // =========================================================
-  // LEVEL PREVIEW
-  // =========================================================
-
-  const PREVIEW_COST = 5;
-  const PREVIEW_DURATION = 10;
-
-  let previewTimer = null;
-  let previewActive = false;
-
-  const previewButton = document.getElementById('pv-trigger-btn');
-  const previewPopup = document.getElementById('previewPopup');
-  const previewImage = document.getElementById('previewImage');
-  const previewCountdown = document.getElementById('previewCountdown');
-  const previewCloseBtn = document.getElementById('previewCloseBtn');
-
-  function openLevelPreview() {
-    if (!previewButton || !previewPopup || !previewImage || !previewCountdown) {
-      return;
-    }
-
-    if (previewActive) {
-      return;
-    }
-
-    // Deduct 5 coins using the EXISTING coin system
-    if (typeof spendCoins !== 'function') {
-      console.error('spendCoins() is not available.');
-      return;
-    }
-
-    const paymentSuccessful = spendCoins(PREVIEW_COST);
-
-    // Not enough coins — do not open preview
-    if (!paymentSuccessful) {
-      return;
-    }
-
-    // Use the exact same image as the current puzzle
-    previewImage.src = imageSrc;
-    previewImage.alt = `Level ${currentLevel} Preview`;
-
-    previewActive = true;
-
-    clearInterval(previewTimer);
-
-    let secondsLeft = PREVIEW_DURATION;
-    previewCountdown.innerText = secondsLeft;
-
-    // OPEN THE MODAL
-    previewPopup.classList.remove('hidden');
-
-    previewTimer = setInterval(() => {
-      secondsLeft--;
-
-      if (previewCountdown) {
-        previewCountdown.innerText = secondsLeft;
-      }
-
-      if (secondsLeft <= 0) {
-        closeLevelPreview();
-      }
-    }, 1000);
-  }
-
-  function closeLevelPreview() {
-    clearInterval(previewTimer);
-    previewTimer = null;
-    previewActive = false;
-
-    if (previewPopup) {
-      previewPopup.classList.add('hidden');
-    }
-
-    if (previewImage) {
-      previewImage.src = '';
-    }
-  }
-
-  if (previewButton) {
-    previewButton.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (typeof AudioManager !== 'undefined') {
-        AudioManager.playClick();
-      }
-
-      openLevelPreview();
-    });
-  }
-
-  if (previewCloseBtn) {
-    previewCloseBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (typeof AudioManager !== 'undefined') {
-        AudioManager.playClick();
-      }
-
-      closeLevelPreview();
-    });
-  }
-
-  // Clicking the dark area outside the preview box closes it
-  if (previewPopup) {
-    previewPopup.addEventListener('click', (e) => {
-      if (e.target === previewPopup) {
-        closeLevelPreview();
-      }
-    });
-  }
+     
     
       
 
@@ -387,4 +275,137 @@ document.addEventListener('DOMContentLoaded', async () => {
   shuffleGrid();
   isGameStarted = true;
   startTimer();
+});
+
+/* =========================================================
+   LEVEL PREVIEW
+   image/level1.png → image/level200.png
+   ========================================================= */
+
+const PREVIEW_COST = 5;
+const PREVIEW_DURATION = 10;
+
+let previewTimer = null;
+let previewActive = false;
+
+function getCurrentLevel() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const level = parseInt(urlParams.get('level'), 10);
+
+  if (!Number.isFinite(level)) {
+    return 1;
+  }
+
+  return Math.min(Math.max(level, 1), 200);
+}
+
+function openLevelPreview() {
+  const previewPopup = document.getElementById('previewPopup');
+  const previewImage = document.getElementById('previewImage');
+  const previewCountdown = document.getElementById('previewCountdown');
+
+  if (!previewPopup || !previewImage || !previewCountdown) {
+    return;
+  }
+
+  if (previewActive) {
+    return;
+  }
+
+  const currentLevel = getCurrentLevel();
+
+  /*
+   * =====================================================
+   * COIN CHECK
+   * =====================================================
+   *
+   * This expects your game to have a global `coins`
+   * variable.
+   *
+   * If your existing game uses a different coin variable,
+   * this is the ONLY part that needs to be connected to it.
+   */
+
+  if (typeof coins !== 'undefined' && coins < PREVIEW_COST) {
+    if (typeof showNotEnoughCoinsPopup === 'function') {
+      showNotEnoughCoinsPopup();
+    }
+
+    return;
+  }
+
+  /*
+   * Deduct the 5 coins only when Preview is actually opened.
+   */
+
+  if (typeof coins !== 'undefined') {
+    coins -= PREVIEW_COST;
+
+    if (typeof updateCoinsDisplay === 'function') {
+      updateCoinsDisplay();
+    }
+  }
+
+  previewActive = true;
+
+  clearInterval(previewTimer);
+
+  previewImage.src = `image/level${currentLevel}.png`;
+  previewImage.alt = `Level ${currentLevel} Preview`;
+
+  let secondsLeft = PREVIEW_DURATION;
+
+  previewCountdown.textContent = secondsLeft;
+  previewPopup.classList.remove('hidden');
+
+  previewTimer = setInterval(() => {
+    secondsLeft--;
+
+    previewCountdown.textContent = secondsLeft;
+
+    if (secondsLeft <= 0) {
+      closeLevelPreview();
+    }
+  }, 1000);
+}
+
+function closeLevelPreview() {
+  const previewPopup = document.getElementById('previewPopup');
+  const previewImage = document.getElementById('previewImage');
+
+  clearInterval(previewTimer);
+  previewTimer = null;
+
+  previewActive = false;
+
+  if (previewPopup) {
+    previewPopup.classList.add('hidden');
+  }
+
+  if (previewImage) {
+    previewImage.src = '';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const previewButton = document.getElementById('pv-trigger-btn');
+  const previewCloseButton = document.getElementById('previewCloseBtn');
+
+  if (previewButton) {
+    previewButton.addEventListener('click', openLevelPreview);
+  }
+
+  if (previewCloseButton) {
+    previewCloseButton.addEventListener('click', closeLevelPreview);
+  }
+
+  const previewPopup = document.getElementById('previewPopup');
+
+  if (previewPopup) {
+    previewPopup.addEventListener('click', (event) => {
+      if (event.target === previewPopup) {
+        closeLevelPreview();
+      }
+    });
+  }
 });
