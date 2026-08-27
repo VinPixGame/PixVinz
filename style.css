@@ -89,6 +89,7 @@ body {
 }
 
 .view-header {
+.view-header {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -116,7 +117,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+  box-shadow: none;
 }
 
 .view-header .header-title-group,
