@@ -390,7 +390,7 @@ if (logoutBtn) {
       const isSolved = i < currentLevel;
 
       btn.className = `level-btn ${isUnlocked ? 'unlocked' : 'locked'}`;
-      btn.style.setProperty('--level-bg', `url('image/level${i}.jpeg')`);
+      btn.style.setProperty('--level-bg', `url('image/level${i}.png')`);
 
       if (isUnlocked) {
         if (!isSolved) {
@@ -546,7 +546,7 @@ if (logoutBtn) {
 
       if (isUnlocked) {
         item.innerHTML = `
-          <img src="image/level${i}.jpeg" alt="Level ${i}">
+          <img src="image/level${i}.png" alt="Level ${i}">
           <div class="collection-badge">LEVEL ${i.toString().padStart(2, '0')}</div>
         `;
 
@@ -572,7 +572,7 @@ if (logoutBtn) {
     const modalTitle = document.getElementById('modalLevelTitle');
 
     if (modalTitle) modalTitle.innerText = `LEVEL ${levelNum.toString().padStart(2, '0')}`;
-    if (modalImg) modalImg.src = `image/level${levelNum}.jpeg`;
+    if (modalImg) modalImg.src = `image/level${levelNum}.png`;
 
     if (modal) modal.classList.remove('hidden');
                modal.style.display = 'flex';
