@@ -916,4 +916,6 @@ standaloneMedia.addEventListener?.(
 );
 
 
-    
+window.addEventListener('beforeinstallprompt', () => {
+    console.log('🔥 PIXVINZ: beforeinstallprompt FIRED');
+});    
