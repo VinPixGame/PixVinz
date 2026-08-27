@@ -140,18 +140,28 @@ body {
 }
 
 .return-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  font-size: 20px;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
+  background: transparent;
+  border: 2px solid #ffd700;
+  color: #ffd700;
+  padding: 6px 14px;
+  height: auto;
+  width: auto;
+  border-radius: 12px;
+  display: inline-flex;
   align-items: center;
-  transform: translateY(-12px);
+  justify-content: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.return-btn:hover {
+  background: rgba(255, 215, 0, 0.15);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+  transform: scale(1.05);
 }
 
 /* ==========================================
