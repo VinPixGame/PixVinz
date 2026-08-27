@@ -1,9 +1,9 @@
 const collectionData = {
   1: { name: "Golden Gate Bridge", location: "San Francisco, United States", image: "image/level1.png" },
-  2: { name: "", location: "", image: "image/level2.png" },
-  3: { name: "", location: "", image: "image/level3.png" },
-  4: { name: "", location: "", image: "image/level4.png" },
-  5: { name: "", location: "", image: "image/level5.png" },
+  2: { name: "Statue of Liberty", location: "New York City, United States", image: "image/level2.png" },
+  3: { name: "Colosseum", location: "Rome, Italy", image: "image/level3.png" },
+  4: { name: "Leaning Tower of Pisa", location: "Pisa Italy", image: "image/level4.png" },
+  5: { name: "Stonehenge", location: "Amesbury, United Kingdom", image: "image/level5.png" },
   6: { name: "", location: "", image: "image/level6.png" },
   7: { name: "", location: "", image: "image/level7.png" },
   8: { name: "", location: "", image: "image/level8.png" },
