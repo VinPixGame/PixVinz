@@ -85,20 +85,14 @@ function spendCoins(amount) {
     let currentCoins = parseInt(localStorage.getItem(key)) || 0;
 
     if (currentCoins < amount) {
-        return false;
+        return false; 
     }
 
     currentCoins -= amount;
     localStorage.setItem(key, currentCoins);
     updateCoinDisplay();
-
-    // Sync to cloud only if the function exists.
-    if (typeof saveUserDataToCloud === 'function') {
-        saveUserDataToCloud();
-    }
-
-    return true;
-}
+    saveUserDataToCloud(); // Auto-sync to cloud when coins change!
+    return true; 
 } // <-- FIXED: Added closing bracket here!
 
 // Handles victory, saves with profile.js keys, and triggers profile sync if available
