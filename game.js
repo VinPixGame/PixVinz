@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const timerDisplay = document.getElementById('timerDisplay');
 
   function getLevelImageIndex(levelNum) {
-      return ((levelNum - 1) % 55) + 1;
+      return ((levelNum - 1) % 200) + 1;
   }
 
   function getGridSize(level) {
@@ -272,7 +272,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       if (previewImage) {
-        const imageIndex = ((currentLevel - 1) % 55) + 1;
+        const imageIndex = ((currentLevel - 1) % 200) + 1;
         previewImage.src = `image/level${imageIndex}.png`;
       }
 
@@ -329,7 +329,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       previewImage.src = '';
     }
   }
-  
   
   const nextLevelBtn = document.getElementById('nextLevelBtn');
   if (nextLevelBtn) {
