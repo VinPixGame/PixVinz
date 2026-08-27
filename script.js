@@ -482,8 +482,7 @@ if (logoutBtn) {
       movesElem.innerText = overallFewestMoves !== Infinity ? overallFewestMoves : '--';
     }
   }
-
-  function renderCollectionFolders() {
+function renderCollectionFolders() {
     const folderGrid = document.getElementById('collectionsFolderGrid');
     if (!folderGrid) return;
     folderGrid.innerHTML = '';
@@ -567,21 +566,39 @@ if (logoutBtn) {
   }
 
   function openImageModal(levelNum) {
+    const data = (typeof collectionData !== 'undefined') ? collectionData[levelNum] : null;
+
     const modal = document.getElementById('imageModal');
     const modalImg = document.getElementById('modalPreviewImg');
     const modalTitle = document.getElementById('modalLevelTitle');
+    const imageTitle = document.getElementById('modalImageTitle');
+    const locationSubtitle = document.getElementById('modalLocationSubtitle');
 
     if (modalTitle) modalTitle.innerText = `LEVEL ${levelNum.toString().padStart(2, '0')}`;
-    if (modalImg) modalImg.src = `image/level${levelNum}.png`;
+    
+    if (data) {
+      if (imageTitle) imageTitle.innerText = data.name ? `"${data.name}"` : "";
+      if (locationSubtitle) locationSubtitle.innerText = data.location ? `(${data.location})` : "";
+      if (modalImg) modalImg.src = data.image || `image/level${levelNum}.png`;
+    } else {
+      if (imageTitle) imageTitle.innerText = "";
+      if (locationSubtitle) locationSubtitle.innerText = "";
+      if (modalImg) modalImg.src = `image/level${levelNum}.png`;
+    }
 
-    if (modal) modal.classList.remove('hidden');
-               modal.style.display = 'flex';
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.style.display = 'flex';
+    }
   }
 
   function closeImageModal() {
     if (typeof AudioManager !== 'undefined') AudioManager.playClick();
     const modal = document.getElementById('imageModal');
-    if (modal) modal.classList.add('hidden');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.style.display = 'none';
+    }
   }
 
   const closeImgModalBtn = document.getElementById('closeImageModal');
@@ -590,12 +607,11 @@ if (logoutBtn) {
   const imgModal = document.getElementById('imageModal');
   if (imgModal) {
     imgModal.addEventListener('click', (e) => {
-      if (e.target.id === 'imageModal' || e.target.id === 'modalPreviewImg') {
+      if (e.target.id === 'imageModal') {
         closeImageModal();
       }
     });
-  }
-});
+        }
 
 
 
