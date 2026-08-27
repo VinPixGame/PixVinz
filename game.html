@@ -46,31 +46,30 @@
     <div class="puzzle-wrapper">
       <div class="puzzle-grid" id="puzzleGrid"></div>
     </div>
+<!-- Game Actions -->
+<div class="game-actions">
+  <button class="btn btn-secondary" id="pv-trigger-btn">🖼️ PREVIEW (🪙5)</button>
+  <button class="btn btn-primary" id="shuffleBtn">🔀 SHUFFLE</button>
+</div>
+</div>
 
-    <!-- Game Actions -->
-    <div class="game-actions">
-      <button class="btn btn-secondary" id="pv-trigger-btn">🖼️ PREVIEW (🪙5)</button>
-      <button class="btn btn-primary" id="shuffleBtn">🔀 SHUFFLE</button>
-    </div>
-  </div>
+<div id="previewPopup" class="preview-popup hidden">
 
-<div id="previewPopup" class="preview-popup hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 99999; background: rgba(8, 2, 20, 0.90); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); align-items: center; justify-content: center; padding: 16px;">
+  <div class="preview-overlay">
 
-  <div class="preview-overlay" style="width: 100%; display: flex; align-items: center; justify-content: center;">
+    <div class="preview-box">
 
-    <div class="preview-box" style="width: min(92vw, 420px); padding: 18px; background: linear-gradient(145deg, rgba(55, 22, 91, .97), rgba(22, 7, 42, .98)); border: 2px solid #ffd700; border-radius: 24px; box-shadow: 0 0 15px rgba(255, 215, 0, .65), 0 0 35px rgba(157, 78, 221, .45);">
-
-      <div class="preview-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; color: #ffd700; font-size: 1rem; font-weight: 800;">
+      <div class="preview-header">
         <span>🖼️ LEVEL PREVIEW</span>
 
-        <span id="previewCountdown" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border: 1px solid #ffd700; border-radius: 50%; background: rgba(255, 215, 0, .12); color: #ffd700; font-size: 0.95rem; font-weight: 900; box-shadow: 0 0 10px rgba(255, 215, 0, .4);">10</span>
+        <span id="previewCountdown">10</span>
       </div>
 
-      <div class="preview-image-container" style="width: 100%; aspect-ratio: 1 / 1; overflow: hidden; border: 1px solid rgba(157, 78, 221, .8); border-radius: 16px; background: #10051d; box-shadow: inset 0 0 20px rgba(0, 0, 0, .5);">
-        <img id="previewImage" src="" alt="Level Preview" style="display: block; width: 100%; height: 100%; object-fit: contain;">
+      <div class="preview-image-container">
+        <img id="previewImage" src="" alt="Level Preview">
       </div>
 
-      <button id="previewCloseBtn" class="preview-close-btn" style="width: 100%; margin-top: 14px; padding: 12px; border: 1px solid #ffd700; border-radius: 14px; background: linear-gradient(135deg, #ffd700, #ffae00); color: #1b0829; font-size: 1rem; font-weight: 900; cursor: pointer; box-shadow: 0 0 15px rgba(255, 215, 0, .35);">
+      <button id="previewCloseBtn" class="preview-close-btn">
         CLOSE
       </button>
 
@@ -79,6 +78,7 @@
   </div>
 
 </div>
+    
   <!-- Victory Modal -->
   <div id="victoryModal" class="modal-overlay hidden">
     <canvas id="confettiCanvas"></canvas>
