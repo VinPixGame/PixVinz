@@ -1393,4 +1393,56 @@ video {
   .homeView .welcome-header {
     margin-top: 5px;
   }
+
+
+
+
+
+
+  /* ==========================================
+   DESKTOP NORMAL VIEW
+   MOBILE VIEW REMAINS UNCHANGED
+   ========================================== */
+
+@media screen and (min-width: 601px) {
+
+  html,
+  body {
+    width: 100%;
+    min-height: 100vh;
+    background: #0d0d0d;
+  }
+
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .app-container {
+    width: 430px;
+    max-width: 430px;
+    height: 92vh;
+    max-height: 900px;
+    min-height: 650px;
+
+    padding: 16px;
+
+    border-radius: 28px;
+    border: 1px solid rgba(157, 78, 221, 0.35);
+
+    box-shadow:
+      0 0 30px rgba(123, 44, 191, 0.25),
+      0 20px 60px rgba(0, 0, 0, 0.7);
+
+    overflow-y: auto;
+  }
+
+  /* Keep desktop game content centered inside the app */
+  .view {
+    width: 100%;
+  }
+
+}
 }
