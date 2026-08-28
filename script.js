@@ -797,6 +797,7 @@ async function loadLeaderboardData() {
     });
 }
     
+
 window.openPlayerProfile = function(player, rank) {
     const modal = document.getElementById('playerProfileModal');
     if (!modal) return;
@@ -852,48 +853,56 @@ window.openPlayerProfile = function(player, rank) {
             desc: 'Completed Level 1', 
             icon: 'image/badge1.png', 
             unlocked: playerLevel >= 1, 
+            glowColor: '#00ffcc'
         },
         { 
             title: 'Thunderbolt', 
             desc: 'Speed run (20-30) < 1m', 
             icon: 'image/badge2.png', 
             unlocked: player.speedThunder === true || player.speedThunderUnlocked === true, 
+            glowColor: '#00e5ff'
         },
         { 
             title: 'Aurelian Vault', 
             desc: 'Reached 500 coins', 
             icon: 'image/badge3.png', 
             unlocked: playerCoins >= 500, 
+            glowColor: '#ffd700'
         },
         { 
             title: 'Celestial Elite', 
             desc: 'Reached Level 50', 
             icon: 'image/badge4.png', 
             unlocked: playerLevel >= 50, 
+            glowColor: '#ff00aa'
         },
         { 
             title: 'Grand Sovereign', 
             desc: 'Reached Level 75', 
             icon: 'image/badge5.png', 
             unlocked: playerLevel >= 75, 
+            glowColor: '#b000ff'
         },
         { 
             title: 'Imperial Crown', 
             desc: 'Reached Level 100', 
             icon: 'image/badge6.png', 
             unlocked: playerLevel >= 100, 
+            glowColor: '#ff2255'
         },
         { 
             title: 'Infernal Apex', 
             desc: 'Reached Level 150', 
             icon: 'image/badge7.png', 
             unlocked: playerLevel >= 150, 
+            glowColor: '#ff5500'
         },
         { 
             title: 'Mythical Deity', 
             desc: 'Reached Level 200', 
             icon: 'image/badge8.png', 
             unlocked: playerLevel >= 200, 
+            glowColor: '#00ffff'
         }
     ];
 
@@ -922,6 +931,7 @@ window.openPlayerProfile = function(player, rank) {
             padding: 4px;
             opacity: ${isUnlocked ? '1' : '0.35'};
             transition: all 0.3s ease;
+            cursor: pointer;
         `;
 
         badgeElement.innerHTML = `
@@ -929,6 +939,10 @@ window.openPlayerProfile = function(player, rank) {
             <span style="font-weight: 700; font-size: 11px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.3px; line-height: 1.2; margin-bottom: 2px;">${badge.title}</span>
             <span style="font-size: 8px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1.1;">${badge.desc}</span>
         `;
+
+        // Click handler to display enlarged badge popup
+        badgeElement.onclick = () => showBadgeModal(badge.icon, badge.title, badge.desc, badge.glowColor, isUnlocked);
+
         badgesContainer.appendChild(badgeElement);
     });
     
