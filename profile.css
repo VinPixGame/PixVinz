@@ -391,3 +391,56 @@ body:has(#profileView.active) #mainHeader {
     cursor: pointer;
     margin-top: 10px;
 }
+
+
+
+
+
+
+/* Modal backdrop - transparent dark dimming */
+.badge-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.75);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(3px); /* Subtle background blur */
+}
+
+/* Modal content container - pure transparent with no card/box background */
+.badge-modal-content {
+  background: transparent;
+  text-align: center;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.badge-modal-content img {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  margin-bottom: 12px;
+  transition: transform 0.2s ease;
+}
+
+.badge-modal-content h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 5px 0;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.badge-modal-content p {
+  font-size: 14px;
+  color: #cccccc;
+  margin: 0;
+}
