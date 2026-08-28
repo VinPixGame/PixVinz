@@ -1107,16 +1107,16 @@ input:checked + .slider:before { transform: translateX(22px); }
 }
 
 .close-modal-btn {
-  width: 32px;
-  height: 32px;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
   font-size: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  position: absolute;
-  top: 8px;   /* Pulls it closer to the top border */
-  right: 8px;  /* Pulls it closer to the right border */
+  z-index: 10;
 }
 
 .modal-img-container {
