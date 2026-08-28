@@ -395,9 +395,7 @@ body:has(#profileView.active) #mainHeader {
 
 
 
-
-
-/* Modal backdrop - transparent dark dimming */
+/* Modal backdrop - full screen capture */
 .badge-modal {
   display: none;
   position: fixed;
@@ -409,10 +407,11 @@ body:has(#profileView.active) #mainHeader {
   justify-content: center;
   align-items: center;
   z-index: 9999;
-  backdrop-filter: blur(3px); /* Subtle background blur */
+  backdrop-filter: blur(3px);
+  cursor: pointer; /* Indicates the entire screen can be tapped to close */
 }
 
-/* Modal content container - pure transparent with no card/box background */
+/* Modal content container - pure transparent background */
 .badge-modal-content {
   background: transparent;
   text-align: center;
@@ -428,7 +427,6 @@ body:has(#profileView.active) #mainHeader {
   height: 180px;
   object-fit: contain;
   margin-bottom: 12px;
-  transition: transform 0.2s ease;
 }
 
 .badge-modal-content h3 {
@@ -444,3 +442,4 @@ body:has(#profileView.active) #mainHeader {
   color: #cccccc;
   margin: 0;
 }
+
