@@ -854,8 +854,8 @@ input:checked + .slider:before { transform: translateX(22px); }
 
 .about-card .close-about {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 18px;
+  right: 9px;
 }
 
 .about-logo video {
@@ -1109,9 +1109,9 @@ input:checked + .slider:before { transform: translateX(22px); }
 .close-modal-btn {
   position: absolute;
   top: 16px;
-  right: 8px;
-  width: 30px;
-  height: 30px;
+  right: 6px;
+  width: 35px;
+  height: 35px;
   font-size: 14px;
   display: flex;
   align-items: center;
