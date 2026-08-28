@@ -1108,7 +1108,7 @@ input:checked + .slider:before { transform: translateX(22px); }
 
 .close-modal-btn {
   position: absolute;
-  top: 14px;
+  top: 16px;
   right: 8px;
   width: 30px;
   height: 30px;
