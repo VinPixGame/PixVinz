@@ -1099,7 +1099,7 @@ input:checked + .slider:before { transform: translateX(22px); }
 }
 
 .image-modal-header span {
-  color: #ffd700;
+  color: #fff;
   font-size: 14px;
   font-weight: bold;
   letter-spacing: 1px;
