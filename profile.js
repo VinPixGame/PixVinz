@@ -287,6 +287,38 @@ async function loadProfileGlobalRank() {
     }
 }
 
+
+
+// Modal Helper Functions
+function showBadgeModal(icon, title, desc, glowColor, isUnlocked) {
+    const modal = document.getElementById('badgeModal');
+    const modalImg = document.getElementById('modalBadgeImg');
+    const modalTitle = document.getElementById('modalBadgeTitle');
+    const modalDesc = document.getElementById('modalBadgeDesc');
+
+    if (!modal || !modalImg || !modalTitle || !modalDesc) return;
+
+    modalImg.src = icon;
+    modalTitle.innerText = title;
+    modalDesc.innerText = desc;
+
+    // Apply unlock status, grayscale, and color glow to the enlarged badge image
+    if (isUnlocked) {
+        modalImg.style.filter = `drop-shadow(0 0 20px ${glowColor})`;
+        modalTitle.style.color = '#ffffff';
+    } else {
+        modalImg.style.filter = 'grayscale(100%) opacity(0.4)';
+        modalTitle.style.color = '#888888';
+    }
+
+    modal.style.display = 'flex';
+}
+
+function closeBadgeModal() {
+    const modal = document.getElementById('badgeModal');
+    if (modal) modal.style.display = 'none';
+}
+
 // --- UNIFIED DYNAMIC BADGE CHECKER & 3-COLUMN RENDERER ---
 function checkAndUnlockBadges() {
     const badgesContainer = document.getElementById('badgesGrid');
@@ -320,62 +352,14 @@ function checkAndUnlockBadges() {
     }
 
     const allBadges = [
-        { 
-            title: 'Novice Genesis', 
-            desc: 'Completed Level 1', 
-            icon: 'image/badge1.png', 
-            unlocked: playerLevel >= 1, 
-            glowColor: '#00ffcc'
-        },
-        { 
-            title: 'Thunderbolt', 
-            desc: 'Speed run (20-30) < 1m', 
-            icon: 'image/badge2.png', 
-            unlocked: beatSpeedThunder, 
-            glowColor: '#00e5ff'
-        },
-        { 
-            title: 'Aurelian Vault', 
-            desc: 'Reached 500 coins', 
-            icon: 'image/badge3.png', 
-            unlocked: maxCoinsEarned >= 500, 
-            glowColor: '#ffd700'
-        },
-        { 
-            title: 'Celestial Elite', 
-            desc: 'Reached Level 50', 
-            icon: 'image/badge4.png', 
-            unlocked: playerLevel >= 50, 
-            glowColor: '#ff00aa'
-        },
-        { 
-            title: 'Grand Sovereign', 
-            desc: 'Reached Level 75', 
-            icon: 'image/badge5.png', 
-            unlocked: playerLevel >= 75, 
-            glowColor: '#b000ff'
-        },
-        { 
-            title: 'Imperial Crown', 
-            desc: 'Reached Level 100', 
-            icon: 'image/badge6.png', 
-            unlocked: playerLevel >= 100, 
-            glowColor: '#ff2255'
-        },
-        { 
-            title: 'Infernal Apex', 
-            desc: 'Reached Level 150', 
-            icon: 'image/badge7.png', 
-            unlocked: playerLevel >= 150, 
-            glowColor: '#ff5500'
-        },
-        { 
-            title: 'Mythical Deity', 
-            desc: 'Reached Level 200', 
-            icon: 'image/badge8.png', 
-            unlocked: playerLevel >= 200, 
-            glowColor: '#00ffff'
-        }
+        { title: 'Novice Genesis', desc: 'Completed Level 1', icon: 'image/badge1.png', unlocked: playerLevel >= 1, glowColor: '#00ffcc' },
+        { title: 'Thunderbolt', desc: 'Speed run (20-30) < 1m', icon: 'image/badge2.png', unlocked: beatSpeedThunder, glowColor: '#00e5ff' },
+        { title: 'Aurelian Vault', desc: 'Reached 500 coins', icon: 'image/badge3.png', unlocked: maxCoinsEarned >= 500, glowColor: '#ffd700' },
+        { title: 'Celestial Elite', desc: 'Reached Level 50', icon: 'image/badge4.png', unlocked: playerLevel >= 50, glowColor: '#ff00aa' },
+        { title: 'Grand Sovereign', desc: 'Reached Level 75', icon: 'image/badge5.png', unlocked: playerLevel >= 75, glowColor: '#b000ff' },
+        { title: 'Imperial Crown', desc: 'Reached Level 100', icon: 'image/badge6.png', unlocked: playerLevel >= 100, glowColor: '#ff2255' },
+        { title: 'Infernal Apex', desc: 'Reached Level 150', icon: 'image/badge7.png', unlocked: playerLevel >= 150, glowColor: '#ff5500' },
+        { title: 'Mythical Deity', desc: 'Reached Level 200', icon: 'image/badge8.png', unlocked: playerLevel >= 200, glowColor: '#00ffff' }
     ];
 
     badgesContainer.style.display = 'grid';
@@ -398,6 +382,7 @@ function checkAndUnlockBadges() {
             padding: 2px;
             width: 100%;
             box-sizing: border-box;
+            cursor: pointer;
         `;
 
         badgeElement.innerHTML = `
@@ -407,9 +392,14 @@ function checkAndUnlockBadges() {
             <span class="badge-title" style="font-weight: 700; font-size: 9px; color: ${isUnlocked ? '#fff' : '#777'}; line-height: 1.1; margin-bottom: 1px; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${badge.title}</span>
             <span class="badge-desc" style="font-size: 7.5px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1; width: 100%; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;">${badge.desc}</span>
         `;
+
+        // Click handler to display enlarged badge
+        badgeElement.onclick = () => showBadgeModal(badge.icon, badge.title, badge.desc, badge.glowColor, isUnlocked);
+
         badgesContainer.appendChild(badgeElement);
     });
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const avatarLoader = document.getElementById('avatarLoader');
