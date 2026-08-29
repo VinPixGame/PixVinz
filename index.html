@@ -6,13 +6,12 @@
   <title>PixVinz</title>
   
   <link rel="stylesheet" href="style.css">
-  
   <link rel="stylesheet" href="profile.css">
 </head>
 <body>
   <div class="app-container">    
 
-<!-- 1. LOADING SCREEN -->
+    <!-- 1. LOADING SCREEN -->
     <section id="loadingView" class="view active">
       <div class="loading-content">
         <video id="loadingLogo" autoplay loop muted playsinline preload="auto" style="background: transparent;">
@@ -27,7 +26,6 @@
       </div>
     </section>
 
-    
     <!-- Top Header Bar -->
     <header class="top-bar hidden" id="mainHeader">
       <button class="icon-btn" id="profileHeaderBtn" onclick="showView('profileView')" style="background-color: #2a1147; border: 2px solid #9c27b0; overflow: hidden; padding: 0;">
@@ -50,23 +48,20 @@
         <button class="btn btn-primary" id="playBtn">▶ PLAY</button>
       </div>
 
-<!-- Daily Check-in Home Button -->
-<button onclick="openDailyModal()" style="width: 100%; max-width: 320px; margin: -10px auto 2px auto; padding: 10px 20px; background: linear-gradient(135deg, #ff007f, #7928ca); border: 2px solid #ff75a0; border-radius: 16px; color: #fff; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 0 15px rgba(255,117,160,0.4); transition: all 0.2s;">
-    <span>🎁</span> DAILY REWARDS <span id="dailyNotificationBadge" style="background: #ffd700; color: #130f2b; font-size: 10px; padding: 2px 6px; border-radius: 10px; display: none; font-weight: bold;">NEW!</span>
-</button>
-      
+      <!-- Daily Check-in Home Button -->
+      <button onclick="openDailyModal()" style="width: 100%; max-width: 320px; margin: -10px auto 2px auto; padding: 10px 20px; background: linear-gradient(135deg, #ff007f, #7928ca); border: 2px solid #ff75a0; border-radius: 16px; color: #fff; font-weight: 800; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 0 15px rgba(255,117,160,0.4); transition: all 0.2s;">
+        <span>🎁</span> DAILY REWARDS <span id="dailyNotificationBadge" style="background: #ffd700; color: #130f2b; font-size: 10px; padding: 2px 6px; border-radius: 10px; display: none; font-weight: bold;">NEW!</span>
+      </button>
+        
       <!-- Extra Challenge Menu Card -->
-<div class="card menu-card" id="navChallenge">
-  <div class="card-icon">🎬</div>
-  <div class="card-text">
-    <h3>EXTRA CHALLENGE</h3>
-    <p>Solve moving video puzzles</p>
-  </div>
-  <span class="arrow">›</span>
-</div>
-
-
-
+      <div class="card menu-card" id="navChallenge">
+        <div class="card-icon">🎬</div>
+        <div class="card-text">
+          <h3>EXTRA CHALLENGE</h3>
+          <p>Solve moving video puzzles</p>
+        </div>
+        <span class="arrow">›</span>
+      </div>
 
       <div class="card menu-card" id="navLevels">
         <div class="card-icon">🎮</div>
@@ -86,7 +81,7 @@
         <span class="arrow">›</span>
       </div>
 
-      <!-- Leaderboard Menu Card Restored Here -->
+      <!-- Leaderboard Menu Card -->
       <div class="card menu-card" id="navLeaderboard">
         <div class="card-icon">🏆</div>
         <div class="card-text">
@@ -95,19 +90,18 @@
         </div>
         <span class="arrow">›</span>
       </div>    
-    
 
-    <!-- Shop Menu Card -->
-<div class="card menu-card" id="navShop" onclick="showView('shopView')"
-  <div class="card-icon">🛒</div>
-  <div class="card-text">
-    <h3>SHOP</h3>
-    <p>Get coins and power-ups</p>
-  </div>
-  <span class="arrow">›</span>
-</div>
-</section>    
-  
+      <!-- Shop Menu Card -->
+      <div class="card menu-card" id="navShop" onclick="showView('shopView')">
+        <div class="card-icon">🛒</div>
+        <div class="card-text">
+          <h3>SHOP</h3>
+          <p>Get coins and power-ups</p>
+        </div>
+        <span class="arrow">›</span>
+      </div>
+    </section>    
+    
     <!-- LEVELS PAGE VIEW -->
     <section id="levelsView" class="view">
       <div class="view-header">
@@ -178,7 +172,6 @@
       </div>
     </section>
 
-
     <!-- LEADERBOARD PAGE VIEW -->
     <section id="leaderboardView" class="view">
       <div class="view-header">
@@ -208,391 +201,349 @@
       </div>
     </section>
 
-
     <!-- SHOP PAGE VIEW -->
-<section id="shopView" class="view hidden">
-  <div class="view-header">
-    <button type="button" class="icon-btn back-btn" onclick="showView('homeView')">‹</button>
-    <div class="header-title-group">
-      <div class="level-title-wrapper">
-        <span class="diamond-line">◇───</span>
-        <h2>SHOP</h2>
-        <span class="diamond-line">───◇</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- 3-COLUMN GRID CONTENT (6 BOXES) -->
-  <div class="shop-container">
-    <div class="shop-grid">
-
-      <!-- Box 1 -->
-      <div class="shop-card">
-        <div class="shop-card-icon">🪙</div>
-        <div class="shop-card-title">100 Coins</div>
-        <div class="shop-card-desc">Handful of coins</div>
-        <button type="button" class="shop-buy-btn" onclick="buyItem('100 Coins', '$0.99')">$0.99</button>
-      </div>
-
-      <!-- Box 2 -->
-      <div class="shop-card">
-        <div class="shop-card-icon">💰</div>
-        <div class="shop-card-title">500 Coins</div>
-        <div class="shop-card-desc">+50 Bonus</div>
-        <button type="button" class="shop-buy-btn" onclick="buyItem('500 Coins', '$3.99')">$3.99</button>
-      </div>
-
-      <!-- Box 3 -->
-      <div class="shop-card">
-        <div class="shop-card-icon">💎</div>
-        <div class="shop-card-title">1200 Coins</div>
-        <div class="shop-card-desc">+200 Bonus</div>
-        <button type="button" class="shop-buy-btn" onclick="buyItem('1200 Coins', '$7.99')">$7.99</button>
-      </div>
-
-      <!-- Box 4 -->
-      <div class="shop-card">
-        <div class="shop-card-icon">💡</div>
-        <div class="shop-card-title">3x Hints</div>
-        <div class="shop-card-desc">Puzzle clues</div>
-        <button type="button" class="shop-buy-btn" onclick="buyItem('3x Hints', '50 Coins')">🪙 50</button>
-      </div>
-
-      <!-- Box 5 -->
-      <div class="shop-card">
-        <div class="shop-card-icon">⏱️</div>
-        <div class="shop-card-title">Time Freeze</div>
-        <div class="shop-card-desc">+30 Secs</div>
-        <button type="button" class="shop-buy-btn" onclick="buyItem('Time Freeze', '30 Coins')">🪙 30</button>
-      </div>
-
-      <!-- Box 6 -->
-      <div class="shop-card">
-        <div class="shop-card-icon">🎁</div>
-        <div class="shop-card-title">VIP Pass</div>
-        <div class="shop-card-desc">Unlock all</div>
-        <button type="button" class="shop-buy-btn" onclick="buyItem('VIP Pass', '$9.99')">$9.99</button>
-      </div>
-
-    </div>
-  </div>
-</section>
-    
-
-<!-- Player Profile Modal -->
-<div id="playerProfileModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.88); z-index: 1000; justify-content: center; align-items: center; padding: 15px;">
-    <div style="background: linear-gradient(135deg, #130f2b, #090618); border: 2px solid #ffd700; border-radius: 26px; padding: 22px 18px; width: 94%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: center; position: relative; box-shadow: 0 0 35px rgba(255,215,0,0.5), inset 0 0 20px rgba(255,215,0,0.15);">
-        
-        <!-- Top Golden Ornament -->
-        <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 30px; height: 12px; background: linear-gradient(135deg, #ffd700, #ffaa00); clip-path: polygon(50% 0%, 100% 100%, 0% 100%); box-shadow: 0 0 10px #ffd700;"></div>
-
-        <!-- Exit / Close Button -->
-        <button onclick="closePlayerProfile()" style="position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,215,0,0.3); color: #fff; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">✕</button>
-    
-      <!-- Crown & Avatar Wrapper -->
-<div style="position: relative; width: 80px; height: 80px; margin: 12px auto 8px auto; display: flex; align-items: center; justify-content: center;">
-    <div id="profileModalCrown" style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 24px; z-index: 3; display: none;">👑</div>
-    <img id="profileModalAvatar" src="" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; position: relative; z-index: 2;">
-</div>
-        
-        <!-- Display Name -->
-        <h3 id="profileModalName" style="color: #fff; margin: 6px 0 14px 0; font-size: 20px; font-weight: 800; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Player Name</h3>
-        
-        <!-- Stats Container -->
-        <div style="background: rgba(255, 255, 255, 0.03); border-radius: 14px; padding: 10px 14px; margin-bottom: 16px; text-align: left; display: flex; flex-direction: column; gap: 6px; border: 1px solid rgba(255, 215, 0, 0.2); box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
-            <div style="display: flex; justify-content: space-between; align-items: center; color: #ccc; font-size: 13px;">
-                <span>Global Rank:</span>
-                <span id="profileModalRank" style="color: #ffd700; font-weight: 800; text-shadow: 0 0 8px rgba(255,215,0,0.5);">#-- 🏆</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; color: #ccc; font-size: 13px;">
-                <span>Total XP:</span>
-                <span id="profileModalXp" style="color: #00e5ff; font-weight: 800; text-shadow: 0 0 8px rgba(0,229,255,0.5);">0 XP 🔹</span>
-            </div>
-        </div>
-
-        <!-- Badges Header -->
-        <div style="text-align: center; margin-bottom: 10px;">
-            <span style="font-size: 11px; color: #ffd700; font-weight: 800; letter-spacing: 2px; text-shadow: 0 0 8px rgba(255,215,0,0.4);">≡ BADGES ≡</span>
-        </div>
-
-        <!-- Badges 2-Column Grid Container -->
-        <div id="profileModalBadges" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; text-align: left;">
-        </div>
-
-        <!-- Bottom Golden Ornament -->
-        <div style="position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 30px; height: 12px; background: linear-gradient(135deg, #ffaa00, #ffd700); clip-path: polygon(0% 0%, 100% 0%, 50% 100%); box-shadow: 0 0 10px #ffd700;"></div>
-    </div>
-</div>
-
-       <!-- Daily Check-in Modal -->
-<div id="dailyModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.88); z-index: 1000; justify-content: center; align-items: center; padding: 15px;">
-    <div style="background: linear-gradient(135deg, #130f2b, #090618); border: 2px solid #ffd700; border-radius: 26px; padding: 22px 18px; width: 94%; max-width: 420px; text-align: center; position: relative; box-shadow: 0 0 35px rgba(255,215,0,0.5), inset 0 0 20px rgba(255,215,0,0.15);">
-        
-        <!-- Close Button -->
-        <button onclick="closeDailyModal()" style="position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,215,0,0.3); color: #fff; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center;">✕</button>
-        
-        <!-- Header -->
-        <h3 style="color: #ffd700; margin: 6px 0 4px 0; font-size: 22px; font-weight: 800; text-shadow: 0 0 10px rgba(255,215,0,0.6);">📅 DAILY REWARDS</h3>
-        <p style="color: #bbb; font-size: 12px; margin-bottom: 16px;">Log in every day to claim bigger prizes!</p>
-
-        <!-- 7 Days Grid Container -->
-        <div id="dailyRewardsGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 18px;">
-        </div>
-
-        <!-- Claim Button -->
-        <button id="dailyClaimBtn" onclick="claimDailyReward()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #ffd700, #ffaa00); border: none; border-radius: 14px; font-weight: 900; color: #130f2b; font-size: 16px; cursor: pointer; box-shadow: 0 0 18px rgba(255,215,0,0.6); transition: all 0.2s;">CLAIM REWARD</button>
-    </div>
-</div>
-
-
-    
-<!-- PROFILE PAGE VIEW -->
-<section id="profileView" class="view hidden">
-  <div class="profile-container">
-    <!-- Header with Back Button, Centered Title, and Settings Gear -->
-    <div class="profile-header profile-top-bar">
-      <button class="back-btn" onclick="goHome()"><span>←</span>Back</button>
-      <h2 class="profile-title-center">Player Profile</h2>
-      <button id="openSettings" class="profile-settings-btn">⚙️</button>
-    </div>
-
-    
-    <div class="profile-card">
-      <!-- Avatar Display & Upload with Loading State -->
-      <div class="avatar-section">
-        <div class="avatar-wrapper" id="avatarWrapper">
-          <img id="avatar-preview" src="image/avatar.png" alt="Profile Avatar" onerror="this.src='https://via.placeholder.com/120/4a154b/ffffff?text=Avatar'">
-          <div class="avatar-loader" id="avatarLoader">
-            <div class="spinner"></div>
+    <section id="shopView" class="view hidden">
+      <div class="view-header">
+        <button type="button" class="icon-btn back-btn" onclick="showView('homeView')">‹</button>
+        <div class="header-title-group">
+          <div class="level-title-wrapper">
+            <span class="diamond-line">◇───</span>
+            <h2>SHOP</h2>
+            <span class="diamond-line">───◇</span>
           </div>
         </div>
-        <label for="avatar-input" class="upload-btn">Choose Avatar</label>
-        <input type="file" id="avatar-input" accept="image/*" style="display: none;">
-        <span id="avatar-status" style="font-size: 0.75rem; color: #4caf50; font-weight: 600; margin-top: 6px; display: none;">Avatar Updated!</span>
       </div>
 
-      <!-- Player Name Display Row with Small Edit Button -->
-      <div class="profile-info-row">
-        <div class="profile-info-top">
-          <span class="info-subtitle">PLAYER NAME</span>
-          <h3 id="displayPlayerName">Player</h3>
-        </div>
-        <button class="btn-secondary" id="openEditNameModal">Edit</button>
-      </div>
+      <!-- 3-COLUMN GRID CONTENT (6 BOXES) -->
+      <div class="shop-container">
+        <div class="shop-grid">
 
-      <!-- Coins and Level Display -->
-      <div class="profile-stats-badge-row">
-        <span class="coins-display">🪙<span id="profileCoins">0</span></span>
-        <span class="level-display-container">
-          <span class="level-label">Level:</span> 
-          <span id="profileLevel">1</span>
-        </span>
-      </div>
-
-      <!-- XP Progress Bar Section -->
-      <div class="xp-section">
-        <div class="xp-header-row">
-          <span id="displayLevelBadge">
-            <span class="xp-level-sub">LEVEL</span> 
-            <span class="xp-level-num">1</span>
-          </span>
-          <span id="displayXpText">0 / 500 XP</span>
-        </div>
-        <!-- Progress Track -->
-        <div class="xp-track">
-          <div id="displayXpBarFill" class="xp-fill"></div>
-        </div>
-      </div>
-      
-      <!-- Badges Section -->
-      <div class="badges-section">
-        <div class="badges-section-header">
-          <h3>BADGES</h3>
-          <div class="global-rank-indicator">
-            <span class="rank-label">Global Rank</span> : <span class="rank-value" id="profileGlobalRank">#--</span>
+          <!-- Box 1 -->
+          <div class="shop-card">
+            <div class="shop-card-icon">🪙</div>
+            <div class="shop-card-title">100 Coins</div>
+            <div class="shop-card-desc">Handful of coins</div>
+            <button type="button" class="shop-buy-btn" onclick="buyItem('100 Coins', '$0.99')">$0.99</button>
           </div>
+
+          <!-- Box 2 -->
+          <div class="shop-card">
+            <div class="shop-card-icon">💰</div>
+            <div class="shop-card-title">500 Coins</div>
+            <div class="shop-card-desc">+50 Bonus</div>
+            <button type="button" class="shop-buy-btn" onclick="buyItem('500 Coins', '$3.99')">$3.99</button>
+          </div>
+
+          <!-- Box 3 -->
+          <div class="shop-card">
+            <div class="shop-card-icon">💎</div>
+            <div class="shop-card-title">1200 Coins</div>
+            <div class="shop-card-desc">+200 Bonus</div>
+            <button type="button" class="shop-buy-btn" onclick="buyItem('1200 Coins', '$7.99')">$7.99</button>
+          </div>
+
+          <!-- Box 4 -->
+          <div class="shop-card">
+            <div class="shop-card-icon">💡</div>
+            <div class="shop-card-title">3x Hints</div>
+            <div class="shop-card-desc">Puzzle clues</div>
+            <button type="button" class="shop-buy-btn" onclick="buyItem('3x Hints', '50 Coins')">🪙 50</button>
+          </div>
+
+          <!-- Box 5 -->
+          <div class="shop-card">
+            <div class="shop-card-icon">⏱️</div>
+            <div class="shop-card-title">Time Freeze</div>
+            <div class="shop-card-desc">+30 Secs</div>
+            <button type="button" class="shop-buy-btn" onclick="buyItem('Time Freeze', '30 Coins')">🪙 30</button>
+          </div>
+
+          <!-- Box 6 -->
+          <div class="shop-card">
+            <div class="shop-card-icon">🎁</div>
+            <div class="shop-card-title">VIP Pass</div>
+            <div class="shop-card-desc">Unlock all</div>
+            <button type="button" class="shop-buy-btn" onclick="buyItem('VIP Pass', '$9.99')">$9.99</button>
+          </div>
+
         </div>
+      </div>
+    </section>
+
+    <!-- Player Profile Modal -->
+    <div id="playerProfileModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.88); z-index: 1000; justify-content: center; align-items: center; padding: 15px;">
+        <div style="background: linear-gradient(135deg, #130f2b, #090618); border: 2px solid #ffd700; border-radius: 26px; padding: 22px 18px; width: 94%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: center; position: relative; box-shadow: 0 0 35px rgba(255,215,0,0.5), inset 0 0 20px rgba(255,215,0,0.15);">
+            <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 30px; height: 12px; background: linear-gradient(135deg, #ffd700, #ffaa00); clip-path: polygon(50% 0%, 100% 100%, 0% 100%); box-shadow: 0 0 10px #ffd700;"></div>
+            <button onclick="closePlayerProfile()" style="position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,215,0,0.3); color: #fff; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">✕</button>
         
-        <!-- Dynamic 3-Column Badge Grid -->
-        <div class="badges-grid" id="badgesGrid">
-          <!-- Badges will be dynamically injected here by JS -->
+          <div style="position: relative; width: 80px; height: 80px; margin: 12px auto 8px auto; display: flex; align-items: center; justify-content: center;">
+              <div id="profileModalCrown" style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 24px; z-index: 3; display: none;">👑</div>
+              <img id="profileModalAvatar" src="" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; position: relative; z-index: 2;">
+          </div>
+            
+            <h3 id="profileModalName" style="color: #fff; margin: 6px 0 14px 0; font-size: 20px; font-weight: 800; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Player Name</h3>
+            
+            <div style="background: rgba(255, 255, 255, 0.03); border-radius: 14px; padding: 10px 14px; margin-bottom: 16px; text-align: left; display: flex; flex-direction: column; gap: 6px; border: 1px solid rgba(255, 215, 0, 0.2); box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
+                <div style="display: flex; justify-content: space-between; align-items: center; color: #ccc; font-size: 13px;">
+                    <span>Global Rank:</span>
+                    <span id="profileModalRank" style="color: #ffd700; font-weight: 800; text-shadow: 0 0 8px rgba(255,215,0,0.5);">#-- 🏆</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; color: #ccc; font-size: 13px;">
+                    <span>Total XP:</span>
+                    <span id="profileModalXp" style="color: #00e5ff; font-weight: 800; text-shadow: 0 0 8px rgba(0,229,255,0.5);">0 XP 🔹</span>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 10px;">
+                <span style="font-size: 11px; color: #ffd700; font-weight: 800; letter-spacing: 2px; text-shadow: 0 0 8px rgba(255,215,0,0.4);">≡ BADGES ≡</span>
+            </div>
+
+            <div id="profileModalBadges" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; text-align: left;">
+            </div>
+
+            <div style="position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 30px; height: 12px; background: linear-gradient(135deg, #ffaa00, #ffd700); clip-path: polygon(0% 0%, 100% 0%, 50% 100%); box-shadow: 0 0 10px #ffd700;"></div>
         </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- Badge Modal Overlay -->
-<div id="badgeModal" class="badge-modal" onclick="closeBadgeModal()">
-  <div class="badge-modal-content">
-    <img id="modalBadgeImg" src="" alt="Badge Preview">
-    <h3 id="modalBadgeTitle"></h3>
-    <p id="modalBadgeDesc"></p>
-  </div>
-</div>
-    
-
-  
-  <!-- EDIT NAME POPUP MODAL -->
-  <div id="editNameModal" class="modal-overlay hidden">
-    <div class="settings-card">
-      <div class="settings-header">
-        <h3>EDIT PLAYER NAME</h3>
-        <button class="icon-btn close-modal-btn" id="closeEditNameModal">✕</button>
-      </div>
-      
-      <div class="input-group">
-        <input type="text" id="username-input" placeholder="Enter new name..." maxlength="15">
-      </div>
-      <p id="save-status" class="save-status"></p>
-
-      <div class="settings-actions">
-        <button id="save-profile-btn" class="btn btn-primary">Save Name</button>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ENLARGED IMAGE POPUP MODAL -->
-<div id="imageModal" class="modal-overlay hidden">
-  <div class="image-modal-card">
-    
-    <div class="image-modal-header">
-      <span id="modalLevelTitle">LEVEL 01</span>
-      <button class="icon-btn close-modal-btn" id="closeImageModal">✕</button>
     </div>
 
-    <h3 id="modalImageTitle" class="modal-image-title">"Golden Gate Bridge"</h3>
-    <div id="modalLocationSubtitle" class="modal-location-subtitle">San Francisco, United States</div>
+    <!-- Daily Check-in Modal -->
+    <div id="dailyModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.88); z-index: 1000; justify-content: center; align-items: center; padding: 15px;">
+        <div style="background: linear-gradient(135deg, #130f2b, #090618); border: 2px solid #ffd700; border-radius: 26px; padding: 22px 18px; width: 94%; max-width: 420px; text-align: center; position: relative; box-shadow: 0 0 35px rgba(255,215,0,0.5), inset 0 0 20px rgba(255,215,0,0.15);">
+            <button onclick="closeDailyModal()" style="position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,215,0,0.3); color: #fff; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center;">✕</button>
+            
+            <h3 style="color: #ffd700; margin: 6px 0 4px 0; font-size: 22px; font-weight: 800; text-shadow: 0 0 10px rgba(255,215,0,0.6);">📅 DAILY REWARDS</h3>
+            <p style="color: #bbb; font-size: 12px; margin-bottom: 16px;">Log in every day to claim bigger prizes!</p>
 
-    <div class="modal-img-container">
-      <img id="modalPreviewImg" src="" alt="Enlarged Preview">
+            <div id="dailyRewardsGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 18px;">
+            </div>
+
+            <button id="dailyClaimBtn" onclick="claimDailyReward()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #ffd700, #ffaa00); border: none; border-radius: 14px; font-weight: 900; color: #130f2b; font-size: 16px; cursor: pointer; box-shadow: 0 0 18px rgba(255,215,0,0.6); transition: all 0.2s;">CLAIM REWARD</button>
+        </div>
     </div>
 
-  </div>
-</div>
+    <!-- PROFILE PAGE VIEW -->
+    <section id="profileView" class="view hidden">
+      <div class="profile-container">
+        <div class="profile-header profile-top-bar">
+          <button class="back-btn" onclick="goHome()"><span>←</span>Back</button>
+          <h2 class="profile-title-center">Player Profile</h2>
+          <button id="openSettings" class="profile-settings-btn">⚙️</button>
+        </div>
 
+        <div class="profile-card">
+          <div class="avatar-section">
+            <div class="avatar-wrapper" id="avatarWrapper">
+              <img id="avatar-preview" src="image/avatar.png" alt="Profile Avatar" onerror="this.src='https://via.placeholder.com/120/4a154b/ffffff?text=Avatar'">
+              <div class="avatar-loader" id="avatarLoader">
+                <div class="spinner"></div>
+              </div>
+            </div>
+            <label for="avatar-input" class="upload-btn">Choose Avatar</label>
+            <input type="file" id="avatar-input" accept="image/*" style="display: none;">
+            <span id="avatar-status" style="font-size: 0.75rem; color: #4caf50; font-weight: 600; margin-top: 6px; display: none;">Avatar Updated!</span>
+          </div>
+
+          <div class="profile-info-row">
+            <div class="profile-info-top">
+              <span class="info-subtitle">PLAYER NAME</span>
+              <h3 id="displayPlayerName">Player</h3>
+            </div>
+            <button class="btn-secondary" id="openEditNameModal">Edit</button>
+          </div>
+
+          <div class="profile-stats-badge-row">
+            <span class="coins-display">🪙<span id="profileCoins">0</span></span>
+            <span class="level-display-container">
+              <span class="level-label">Level:</span> 
+              <span id="profileLevel">1</span>
+            </span>
+          </div>
+
+          <div class="xp-section">
+            <div class="xp-header-row">
+              <span id="displayLevelBadge">
+                <span class="xp-level-sub">LEVEL</span> 
+                <span class="xp-level-num">1</span>
+              </span>
+              <span id="displayXpText">0 / 500 XP</span>
+            </div>
+            <div class="xp-track">
+              <div id="displayXpBarFill" class="xp-fill"></div>
+            </div>
+          </div>
           
-    
-<!-- SETTINGS VIEW (Full Page View) -->
-<section id="settingsView" class="view hidden">
-  <div class="profile-container">
-    
-      <div class="settings-header">
-  <button class="back-btn" id="closeSettingsModal">
-  <span>←</span>Back
-</button>
-  <h3 class="profile-title-center">SETTINGS</h3>
-  <div></div>
-</div>
+          <div class="badges-section">
+            <div class="badges-section-header">
+              <h3>BADGES</h3>
+              <div class="global-rank-indicator">
+                <span class="rank-label">Global Rank</span> : <span class="rank-value" id="profileGlobalRank">#--</span>
+              </div>
+            </div>
+            
+            <div class="badges-grid" id="badgesGrid">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-      <div class="profile-card">
+    <!-- Badge Modal Overlay -->
+    <div id="badgeModal" class="badge-modal" onclick="closeBadgeModal()">
+      <div class="badge-modal-content">
+        <img id="modalBadgeImg" src="" alt="Badge Preview">
+        <h3 id="modalBadgeTitle"></h3>
+        <p id="modalBadgeDesc"></p>
+      </div>
+    </div>
+
+    <!-- EDIT NAME POPUP MODAL -->
+    <div id="editNameModal" class="modal-overlay hidden">
+      <div class="settings-card">
+        <div class="settings-header">
+          <h3>EDIT PLAYER NAME</h3>
+          <button class="icon-btn close-modal-btn" id="closeEditNameModal">✕</button>
+        </div>
         
-        <div class="setting-item">
-          <span>Sound Effects</span>
-          <label class="switch">
-            <input type="checkbox" id="sfxToggle" checked>
-            <span class="slider round"></span>
-          </label>
+        <div class="input-group">
+          <input type="text" id="username-input" placeholder="Enter new name..." maxlength="15">
         </div>
-
-        <div class="setting-item">
-          <span>Music</span>
-          <label class="switch">
-            <input type="checkbox" id="musicToggle" checked>
-            <span class="slider round"></span>
-          </label>
-        </div>
-
-        <div class="setting-item">
-          <div class="setting-item-label">
-            <span>Shop</span>
-            <span class="coming-soon-text">Coming Soon</span>
-          </div>
-          <div class="setting-value-badge">Locked</div>
-        </div>
-
-        <div class="setting-item">
-          <div class="setting-item-label">
-            <span>Theme</span>
-            <span class="coming-soon-text">Coming Soon</span>
-          </div>
-          <div class="setting-value-badge">Default</div>
-        </div>
-
-        <div class="setting-item">
-          <div class="setting-item-label">
-            <span>Soundtrack</span>
-            <span class="coming-soon-text">Coming Soon</span>
-          </div>
-          <div class="setting-value-badge">Track 1</div>
-        </div>
-
-        <div class="setting-item">
-          <div class="setting-item-label">
-            <span>Terms & Conditions</span>
-            <span class="coming-soon-text">Coming Soon</span>
-          </div>
-          <div class="setting-value-badge">View</div>
-        </div>
+        <p id="save-status" class="save-status"></p>
 
         <div class="settings-actions">
-          <button class="btn btn-secondary" id="aboutBtn">ℹ️ ABOUT</button>
-          <button class="btn btn-danger" id="logoutBtn">🚪 LOG OUT</button>
+          <button id="save-profile-btn" class="btn btn-primary">Save Name</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENLARGED IMAGE POPUP MODAL -->
+    <div id="imageModal" class="modal-overlay hidden">
+      <div class="image-modal-card">
+        <div class="image-modal-header">
+          <span id="modalLevelTitle">LEVEL 01</span>
+          <button class="icon-btn close-modal-btn" id="closeImageModal">✕</button>
         </div>
 
-      </div>
-  </div>
-</section>
+        <h3 id="modalImageTitle" class="modal-image-title">"Golden Gate Bridge"</h3>
+        <div id="modalLocationSubtitle" class="modal-location-subtitle">San Francisco, United States</div>
 
-  <!-- ABOUT MODAL -->
-  <div id="aboutModal" class="modal-overlay hidden">
-    <div class="about-card">
-      <button class="icon-btn close-modal-btn close-about" id="closeAboutModal">✕</button>
-      <div class="about-logo">
-        <video autoplay loop muted playsinline preload="auto" style="background: transparent;">
-          <source src="image/logo.webm" type="video/webm">
-        </video>
+        <div class="modal-img-container">
+          <img id="modalPreviewImg" src="" alt="Enlarged Preview">
+        </div>
       </div>
-      <h2>PixVinz</h2>
-      <p class="about-dev">Developer: **Kuya Vinz**</p>
-      <p class="about-year">© 2026</p>
     </div>
-  </div>
 
+    <!-- SETTINGS VIEW (Full Page View) -->
+    <section id="settingsView" class="view hidden">
+      <div class="profile-container">
+        <div class="settings-header">
+          <button class="back-btn" id="closeSettingsModal">
+            <span>←</span>Back
+          </button>
+          <h3 class="profile-title-center">SETTINGS</h3>
+          <div></div>
+        </div>
 
+        <div class="profile-card">
+          <div class="setting-item">
+            <span>Sound Effects</span>
+            <label class="switch">
+              <input type="checkbox" id="sfxToggle" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
 
-    <!-- Firebase Initialization Module Script -->
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-      import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
-      import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+          <div class="setting-item">
+            <span>Music</span>
+            <label class="switch">
+              <input type="checkbox" id="musicToggle" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
 
-      const firebaseConfig = {
-        apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
-        authDomain: "pixvinz2026.firebaseapp.com",
-        projectId: "pixvinz2026",
-        storageBucket: "pixvinz2026.firebasestorage.app",
-        messagingSenderId: "45609077809",
-        appId: "1:45609077809:web:575611e46acda9f64c5910",
-        measurementId: "G-W7FSERE8ZJ"
-      };
+          <div class="setting-item">
+            <div class="setting-item-label">
+              <span>Shop</span>
+              <span class="coming-soon-text">Coming Soon</span>
+            </div>
+            <div class="setting-value-badge">Locked</div>
+          </div>
 
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const db = getFirestore(app);
+          <div class="setting-item">
+            <div class="setting-item-label">
+              <span>Theme</span>
+              <span class="coming-soon-text">Coming Soon</span>
+            </div>
+            <div class="setting-value-badge">Default</div>
+          </div>
 
-      window.pixvinzDb = { db, doc, getDoc, setDoc };
-      window.pixvinzAuth = { auth, createUserWithEmailAndPassword };
-    
+          <div class="setting-item">
+            <div class="setting-item-label">
+              <span>Soundtrack</span>
+              <span class="coming-soon-text">Coming Soon</span>
+            </div>
+            <div class="setting-value-badge">Track 1</div>
+          </div>
 
-</script>
-<script src="audio.js"></script> 
-<script src="collection.js"></script>
-<script type="module" src="script.js"></script>
-<script src="playerstat.js"></script>
-<script src="profile.js"></script>
-   <script src="challenge.js"></script> 
+          <div class="setting-item">
+            <div class="setting-item-label">
+              <span>Terms & Conditions</span>
+              <span class="coming-soon-text">Coming Soon</span>
+            </div>
+            <div class="setting-value-badge">View</div>
+          </div>
+
+          <div class="settings-actions">
+            <button class="btn btn-secondary" id="aboutBtn">ℹ️ ABOUT</button>
+            <button class="btn btn-danger" id="logoutBtn">🚪 LOG OUT</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT MODAL -->
+    <div id="aboutModal" class="modal-overlay hidden">
+      <div class="about-card">
+        <button class="icon-btn close-modal-btn close-about" id="closeAboutModal">✕</button>
+        <div class="about-logo">
+          <video autoplay loop muted playsinline preload="auto" style="background: transparent;">
+            <source src="image/logo.webm" type="video/webm">
+          </video>
+        </div>
+        <h2>PixVinz</h2>
+        <p class="about-dev">Developer: Kuya Vinz</p>
+        <p class="about-year">© 2026</p>
+      </div>
+    </div>
+
+  </div> <!-- End of .app-container -->
+
+  <!-- Firebase Initialization Module Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
+      authDomain: "pixvinz2026.firebaseapp.com",
+      projectId: "pixvinz2026",
+      storageBucket: "pixvinz2026.firebasestorage.app",
+      messagingSenderId: "45609077809",
+      appId: "1:45609077809:web:575611e46acda9f64c5910",
+      measurementId: "G-W7FSERE8ZJ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    window.pixvinzDb = { db, doc, getDoc, setDoc };
+    window.pixvinzAuth = { auth, createUserWithEmailAndPassword };
+  </script>
+  <script src="audio.js"></script> 
+  <script src="collection.js"></script>
+  <script type="module" src="script.js"></script>
+  <script src="playerstat.js"></script>
+  <script src="profile.js"></script>
+  <script src="challenge.js"></script> 
 </body>
 </html>
