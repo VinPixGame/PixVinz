@@ -1123,13 +1123,12 @@ input:checked + .slider:before { transform: translateX(22px); }
   display: block;
 }
 
-/* Top 3 Rank Frame Overlay inside Modal */
 .modal-rank-frame {
   position: absolute;
-  top: -15px;
-  left: -15px;
-  width: 120px;
-  height: 120px;
+  top: -12px;
+  left: -12px;
+  width: 114px;
+  height: 114px;
   pointer-events: none;
   z-index: 10;
   object-fit: contain;
