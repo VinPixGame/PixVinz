@@ -609,7 +609,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-
 // --- LEADERBOARD LOGIC (Safe DOM Binding, Avatars & Real Players Only) ---
 document.addEventListener('DOMContentLoaded', () => {
     const navLeaderboard = document.getElementById('navLeaderboard');
@@ -654,7 +653,9 @@ async function loadLeaderboardData() {
                     coins: data.coins || 0,
                     xp: data.xp || 0,
                     level: data.level || 1,
-                    avatar: data.avatar || ''
+                    avatar: data.avatar || '',
+                    speedThunder: data.speedThunder || false,
+                    speedThunderUnlocked: data.speedThunderUnlocked || false
                 });
             });
         }
@@ -712,23 +713,11 @@ async function loadLeaderboardData() {
                     <img src="image/rank1.png" alt="#1" style="width: 44px; height: 44px; object-fit: contain;">
                 </div>
             `;
-            avatarHTML = `
-                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;" onclick="openPlayerProfile('${player.username}', 1)">
-                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; position: relative; z-index: 2;">
-                    ${frameOverlayHTML}
-                </div>
-            `;
         } else if (rank === 2) {
             specialStyle = 'background: linear-gradient(135deg, rgba(192, 192, 192, 0.2), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(192, 192, 192, 0.6);';
             rankBadgeHTML = `
                 <div style="min-width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
                     <img src="image/rank2.png" alt="#2" style="width: 44px; height: 44px; object-fit: contain;">
-                </div>
-            `;
-            avatarHTML = `
-                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;" onclick="openPlayerProfile('${player.username}', 2)">
-                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; position: relative; z-index: 2;">
-                    ${frameOverlayHTML}
                 </div>
             `;
         } else if (rank === 3) {
@@ -738,73 +727,19 @@ async function loadLeaderboardData() {
                     <img src="image/rank3.png" alt="#3" style="width: 44px; height: 44px; object-fit: contain;">
                 </div>
             `;
-            avatarHTML = `
-                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;" onclick="openPlayerProfile('${player.username}', 3)">
-                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; position: relative; z-index: 2;">
-                    ${frameOverlayHTML}
-                </div>
-            `;
         } else {
             rankBadgeHTML = `<span style="min-width: 48px; text-align: center; font-weight: bold; font-size: 16px; color: #aaa;">#${rank}</span>`;
-            avatarHTML = `
-                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;" onclick="openPlayerProfile('${player.username}', ${rank})">
-                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid rgba(255,255,255,0.2);">
-                </div>
-            `;
         }
 
-        const row = document.createElement('div');
-        row.className = 'leaderboard-row';
-        row.style.cssText = `display: flex; align-items: center; padding: 10px 14px; border-radius: 12px; margin-bottom: 8px; ${specialStyle || 'background: rgba(255,255,255,0.05);'}`;
-        row.innerHTML = `
-            ${rankBadgeHTML}
-            ${avatarHTML}
-            <div style="flex-grow: 1; display: flex; flex-direction: column;">
-                <span style="font-weight: bold; font-size: 15px; color: #fff;">${player.name}</span>
-                <span style="font-size: 12px; color: #ffd700;">LEVEL ${player.level}</span>
-            </div>
-            <div style="text-align: right;">
-                <div style="font-size: 13px; color: #ffd700; font-weight: bold;">🪙 ${player.coins.toLocaleString()}</div>
-                <div style="font-size: 12px; color: #ff007f; font-weight: bold;">⚡ ${player.xp.toLocaleString()} XP</div>
+        avatarHTML = `
+            <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${rank <= 3 ? 'position: relative; z-index: 2;' : 'border: 2px solid rgba(255,255,255,0.2);'}">
+                ${frameOverlayHTML}
             </div>
         `;
-        listContainer.appendChild(row);
-    });
-}
-// --- PLAYER PROFILE MODAL HANDLER ---
-function openPlayerProfile(username, rank) {
-    const modalAvatarContainer = document.getElementById('profileModalAvatarWrapper');
-    if (!modalAvatarContainer) return;
-
-    let frameOverlayImg = '';
-    if (rank === 1) frameOverlayImg = 'image/1.png';
-    else if (rank === 2) frameOverlayImg = 'image/2.png';
-    else if (rank === 3) frameOverlayImg = 'image/3.png';
-
-    // Set position to relative so the frame absolute position works relative to the container
-    modalAvatarContainer.style.position = 'relative';
-    modalAvatarContainer.style.display = 'inline-block';
-
-    // Remove old overlay frame if one exists from previous profile opens
-    const existingFrame = modalAvatarContainer.querySelector('.modal-rank-frame');
-    if (existingFrame) existingFrame.remove();
-
-    // Inject custom frame image for top 3 players
-    if (frameOverlayImg) {
-        const frameElement = document.createElement('img');
-        frameElement.src = frameOverlayImg;
-        frameElement.className = 'modal-rank-frame';
-        frameElement.style.cssText = 'position: absolute; top: -10px; left: -10px; width: 120px; height: 120px; pointer-events: none; z-index: 4; object-fit: contain;';
-        modalAvatarContainer.appendChild(frameElement);
-    }
-}
-
-
-
 
         const row = document.createElement('div');
-        row.className = `rank-row`;
-        
+        row.className = 'rank-row';
         row.style.cssText = `
             display: flex;
             justify-content: space-between;
@@ -840,10 +775,10 @@ function openPlayerProfile(username, rank) {
             </div>
         `;
 
-        // Attach click listener to the avatar image
-        const avatarImg = row.querySelector('.leaderboard-avatar-img');
-        if (avatarImg) {
-            avatarImg.addEventListener('click', () => {
+        // Attach click listener to open player profile
+        const avatarImgTarget = row.querySelector('.leaderboard-avatar-img');
+        if (avatarImgTarget) {
+            avatarImgTarget.addEventListener('click', () => {
                 if (typeof AudioManager !== 'undefined' && typeof AudioManager.playClick === 'function') {
                     AudioManager.playClick();
                 }
@@ -854,12 +789,12 @@ function openPlayerProfile(username, rank) {
         listContainer.appendChild(row);
     });
 }
-    
+
+// --- UNIFIED PLAYER PROFILE MODAL HANDLER ---
 window.openPlayerProfile = function(player, rank) {
     const modal = document.getElementById('playerProfileModal');
     if (!modal) return;
     
-    // If player is passed as a string (username), handle it gracefully
     if (typeof player === 'string') {
         console.warn("openPlayerProfile expected an object, got string:", player);
         return;
@@ -875,13 +810,15 @@ window.openPlayerProfile = function(player, rank) {
     if (rankEl) rankEl.textContent = `#${rank} 🏆`;
     if (xpEl) xpEl.textContent = `${(player.xp || 0).toLocaleString()} XP 🔹`;
     
+    const playerLevel = player.level || 1;
+    const playerCoins = player.coins || 0;
+
     // Custom Rank Frame Overlay Logic for Top 3 Ranks inside the Modal wrapper
     const avatarWrapper = document.getElementById('profileModalAvatarWrapper');
     if (avatarWrapper) {
         avatarWrapper.style.position = 'relative';
         avatarWrapper.style.display = 'inline-block';
 
-        // Remove any old frame from previous profile views
         const existingFrame = avatarWrapper.querySelector('.modal-rank-frame');
         if (existingFrame) existingFrame.remove();
 
@@ -890,7 +827,6 @@ window.openPlayerProfile = function(player, rank) {
         else if (rank === 2) frameOverlayImg = 'image/2.png';
         else if (rank === 3) frameOverlayImg = 'image/3.png';
 
-        // Inject the custom rank frame if top 3
         if (frameOverlayImg) {
             const frameElement = document.createElement('img');
             frameElement.src = frameOverlayImg;
@@ -900,110 +836,60 @@ window.openPlayerProfile = function(player, rank) {
         }
     }
 
-    // Show the modal
-    modal.style.display = 'flex';
-};
-    
-    // Custom image badge data with unique glow colors
+    // Badge Generation Logic
     const allBadges = [
-        { 
-            title: 'Novice Genesis', 
-            desc: 'Completed Level 1', 
-            icon: 'image/badge1.png', 
-            unlocked: playerLevel >= 1, 
-            glowColor: '#00ffcc'
-        },
-        { 
-            title: 'Thunderbolt', 
-            desc: 'Speed run (20-30) < 1m', 
-            icon: 'image/badge2.png', 
-            unlocked: player.speedThunder === true || player.speedThunderUnlocked === true, 
-            glowColor: '#00e5ff'
-        },
-        { 
-            title: 'Aurelian Vault', 
-            desc: 'Reached 500 coins', 
-            icon: 'image/badge3.png', 
-            unlocked: playerCoins >= 500, 
-            glowColor: '#ffd700'
-        },
-        { 
-            title: 'Celestial Elite', 
-            desc: 'Reached Level 50', 
-            icon: 'image/badge4.png', 
-            unlocked: playerLevel >= 50, 
-            glowColor: '#ff00aa'
-        },
-        { 
-            title: 'Grand Sovereign', 
-            desc: 'Reached Level 75', 
-            icon: 'image/badge5.png', 
-            unlocked: playerLevel >= 75, 
-            glowColor: '#b000ff'
-        },
-        { 
-            title: 'Imperial Crown', 
-            desc: 'Reached Level 100', 
-            icon: 'image/badge6.png', 
-            unlocked: playerLevel >= 100, 
-            glowColor: '#ff2255'
-        },
-        { 
-            title: 'Infernal Apex', 
-            desc: 'Reached Level 150', 
-            icon: 'image/badge7.png', 
-            unlocked: playerLevel >= 150, 
-            glowColor: '#ff5500'
-        },
-        { 
-            title: 'Mythical Deity', 
-            desc: 'Reached Level 200', 
-            icon: 'image/badge8.png', 
-            unlocked: playerLevel >= 200, 
-            glowColor: '#00ffff'
-        }
+        { title: 'Novice Genesis', desc: 'Completed Level 1', icon: 'image/badge1.png', unlocked: playerLevel >= 1, glowColor: '#00ffcc' },
+        { title: 'Thunderbolt', desc: 'Speed run (20-30) < 1m', icon: 'image/badge2.png', unlocked: player.speedThunder === true || player.speedThunderUnlocked === true, glowColor: '#00e5ff' },
+        { title: 'Aurelian Vault', desc: 'Reached 500 coins', icon: 'image/badge3.png', unlocked: playerCoins >= 500, glowColor: '#ffd700' },
+        { title: 'Celestial Elite', desc: 'Reached Level 50', icon: 'image/badge4.png', unlocked: playerLevel >= 50, glowColor: '#ff00aa' },
+        { title: 'Grand Sovereign', desc: 'Reached Level 75', icon: 'image/badge5.png', unlocked: playerLevel >= 75, glowColor: '#b000ff' },
+        { title: 'Imperial Crown', desc: 'Reached Level 100', icon: 'image/badge6.png', unlocked: playerLevel >= 100, glowColor: '#ff2255' },
+        { title: 'Infernal Apex', desc: 'Reached Level 150', icon: 'image/badge7.png', unlocked: playerLevel >= 150, glowColor: '#ff5500' },
+        { title: 'Mythical Deity', desc: 'Reached Level 200', icon: 'image/badge8.png', unlocked: playerLevel >= 200, glowColor: '#00ffff' }
     ];
 
     const badgesContainer = document.getElementById('profileModalBadges');
-    badgesContainer.innerHTML = '';
-    
-    // Set grid to 3 columns per row
-    badgesContainer.style.display = 'grid';
-    badgesContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
-    badgesContainer.style.gap = '12px';
-    badgesContainer.style.alignItems = 'center';
-    badgesContainer.style.justifyItems = 'center';
+    if (badgesContainer) {
+        badgesContainer.innerHTML = '';
+        badgesContainer.style.display = 'grid';
+        badgesContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
+        badgesContainer.style.gap = '12px';
+        badgesContainer.style.alignItems = 'center';
+        badgesContainer.style.justifyItems = 'center';
 
-    allBadges.forEach(badge => {
-        const isUnlocked = badge.unlocked;
+        allBadges.forEach(badge => {
+            const isUnlocked = badge.unlocked;
+            const badgeElement = document.createElement('div');
+            badgeElement.style.cssText = `
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                background: transparent;
+                border: none;
+                box-shadow: none;
+                padding: 4px;
+                opacity: ${isUnlocked ? '1' : '0.35'};
+                transition: all 0.3s ease;
+                cursor: pointer;
+            `;
 
-        const badgeElement = document.createElement('div');
-        badgeElement.style.cssText = `
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            background: transparent;
-            border: none;
-            box-shadow: none;
-            padding: 4px;
-            opacity: ${isUnlocked ? '1' : '0.35'};
-            transition: all 0.3s ease;
-            cursor: pointer;
-        `;
+            badgeElement.innerHTML = `
+                <img src="${badge.icon}" alt="${badge.title}" style="width: 64px; height: 64px; object-fit: contain; margin-bottom: 6px; background: transparent; border: none; box-shadow: none; ${isUnlocked ? '' : 'filter: grayscale(100%);'}">
+                <span style="font-weight: 700; font-size: 11px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.3px; line-height: 1.2; margin-bottom: 2px;">${badge.title}</span>
+                <span style="font-size: 8px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1.1;">${badge.desc}</span>
+            `;
 
-        badgeElement.innerHTML = `
-            <img src="${badge.icon}" alt="${badge.title}" style="width: 64px; height: 64px; object-fit: contain; margin-bottom: 6px; background: transparent; border: none; box-shadow: none; ${isUnlocked ? '' : 'filter: grayscale(100%);'}">
-            <span style="font-weight: 700; font-size: 11px; color: ${isUnlocked ? '#fff' : '#777'}; letter-spacing: 0.3px; line-height: 1.2; margin-bottom: 2px;">${badge.title}</span>
-            <span style="font-size: 8px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1.1;">${badge.desc}</span>
-        `;
+            badgeElement.onclick = () => {
+                if (typeof showBadgeModal === 'function') {
+                    showBadgeModal(badge.icon, badge.title, badge.desc, badge.glowColor, isUnlocked);
+                }
+            };
 
-        // Click handler to display enlarged badge popup
-        badgeElement.onclick = () => showBadgeModal(badge.icon, badge.title, badge.desc, badge.glowColor, isUnlocked);
+            badgesContainer.appendChild(badgeElement);
+        });
+    }
 
-        badgesContainer.appendChild(badgeElement);
-    });
-    
     modal.style.display = 'flex';
 };
 
