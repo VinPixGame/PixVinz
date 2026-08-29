@@ -1125,10 +1125,11 @@ input:checked + .slider:before { transform: translateX(22px); }
 
 .modal-rank-frame {
   position: absolute;
-  top: -12px;
-  left: -12px;
-  width: 114px;
-  height: 114px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 125px; /* Adjust this slightly if you want the border thicker/thinner */
+  height: 125px;
   pointer-events: none;
   z-index: 10;
   object-fit: contain;
