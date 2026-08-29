@@ -1500,27 +1500,43 @@ video {
 }
 
 
-
 /* ==========================================
-   SHOP SECTION STYLES
+   SHOP SECTION STYLES (FIXED)
    ========================================== */
 
-/* Outer Shop Layout Container */
+/* 1. Force the Shop View Container to show and expand */
+#shopView,
+.shopView,
+#shopView.view.active {
+  display: flex !important;
+  flex-direction: column;
+  flex: 1 0 auto;
+  width: 100%;
+  min-height: 100%;
+}
+
+/* 2. Outer Shop Layout Container */
 .shop-container {
   width: 100%;
   max-width: 480px;
   margin: 0 auto;
   padding: 12px;
   box-sizing: border-box;
+  flex: 1;
+  min-height: 200px; /* Prevents height collapse */
   overflow-y: auto;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
-/* 3-Column CSS Grid */
+/* 3. 3-Column CSS Grid */
 .shop-grid {
-  display: grid;
+  display: grid !important;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   width: 100%;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* Individual Item Card */
@@ -1538,6 +1554,7 @@ video {
   transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   position: relative;
   overflow: hidden;
+  min-height: 140px; /* Ensures cards are physically drawn even if empty */
 }
 
 /* Card Hover/Active Effects */
@@ -1610,7 +1627,7 @@ video {
 /* Small Screen Responsiveness */
 @media (max-width: 360px) {
   .shop-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr) !important;
     gap: 10px;
   }
-}
+  }
