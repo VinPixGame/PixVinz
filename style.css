@@ -1125,15 +1125,18 @@ input:checked + .slider:before { transform: translateX(22px); }
 
 .modal-rank-frame {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 125px; /* Adjust this slightly if you want the border thicker/thinner */
-  height: 125px;
+  top: -15px;
+  left: -15px;
+  right: -15px;
+  bottom: -15px;
+  width: auto;
+  height: auto;
+  max-width: none;
   pointer-events: none;
   z-index: 10;
   object-fit: contain;
 }
+
 
 /* Player Name */
 .modal-player-name,
