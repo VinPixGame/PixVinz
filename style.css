@@ -1059,6 +1059,32 @@ input:checked + .slider:before { transform: translateX(22px); }
 }
 
 /* ==========================================
+   ADDED: Custom Rank Frame Overlay Helper
+   ========================================== */
+.leaderboard-avatar-img,
+#modalPlayerAvatar {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+#modalAvatarContainer,
+.modal-avatar-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.modal-rank-frame {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 120px;
+  height: 120px;
+  pointer-events: none;
+  z-index: 4;
+  object-fit: contain;
+}
+
+/* ==========================================
    MODALS
    ========================================== */
 
