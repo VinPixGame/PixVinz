@@ -172,34 +172,36 @@
       </div>
     </section>
 
-    <!-- LEADERBOARD PAGE VIEW -->
-    <section id="leaderboardView" class="view">
-      <div class="view-header">
-        <button class="icon-btn back-btn">‹</button>
-        <div class="header-title-group">
-          <div class="level-title-wrapper">
-            <span class="diamond-line">◇───</span>
-            <h2>LEADERBOARD</h2>
-            <span class="diamond-line">───◇</span>
-          </div>
+ <!-- LEADERBOARD PAGE VIEW -->
+<section id="leaderboardView" class="view">
+  <div class="view-header">
+    <button class="icon-btn back-btn">‹</button>
+    <div class="header-title-group">
+      <div class="level-title-wrapper">
+        <span class="diamond-line">◇───</span>
+        <h2>LEADERBOARD</h2>
+        <span class="diamond-line">───◇</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Current User Rank Summary Card -->
+  <div class="overall-best-card" id="globalRankSummaryCard">
+    <div class="best-stat-item">
+      <div class="stat-text-group">
+        <span class="stat-title">YOUR GLOBAL RANK</span>
+        <div class="stat-val-row">
+          <span id="userRankDisplay">#--</span>
         </div>
       </div>
-      <!-- Current User Rank Summary Card -->
-      <div class="overall-best-card" id="globalRankSummaryCard" style="margin: 15px auto;">
-        <div class="best-stat-item" style="justify-content: center; text-align: center; width: 100%;">
-          <div class="stat-text-group" style="width: 100%;">
-            <span class="stat-title">YOUR GLOBAL RANK</span>
-            <div class="stat-val-row" style="justify-content: center; display: flex; width: 100%;">
-              <span id="userRankDisplay" style="color: #ffd700; text-align: center; display: block; width: 100%;">#--</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- Leaderboard List Container -->
-      <div class="levels-scroll-container">
-        <div id="leaderboardList" style="display: flex; flex-direction: column; gap: 8px; padding: 5px 0 20px 0;"></div>
-      </div>
-    </section>
+    </div>
+  </div>
+
+  <!-- Leaderboard List Container -->
+  <div class="levels-scroll-container">
+    <div id="leaderboardList"></div>
+  </div>
+</section>
 
     <!-- SHOP PAGE VIEW -->
     <section id="shopView" class="view">
@@ -260,37 +262,38 @@
       </div>
     </section>
 
-    <!-- Player Profile Modal -->
-    <div id="playerProfileModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.88); z-index: 1000; justify-content: center; align-items: center; padding: 15px;">
-      <div style="background: linear-gradient(135deg, #130f2b, #090618); border: 2px solid #ffd700; border-radius: 26px; padding: 22px 18px; width: 94%; max-width: 400px; max-height: 90vh; overflow-y: auto; text-align: center; position: relative; box-shadow: 0 0 35px rgba(255,215,0,0.5), inset 0 0 20px rgba(255,215,0,0.15);">
-        
-        <!-- Top Golden Ornament -->
-        <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 30px; height: 12px; background: linear-gradient(135deg, #ffd700, #ffaa00); clip-path: polygon(50% 0%, 100% 100%, 0% 100%); box-shadow: 0 0 10px #ffd700;"></div>
+<!-- Player Profile Modal -->
+<div id="playerProfileModal" class="profile-modal-overlay">
+  <div class="profile-modal-card">
+    
+    <!-- Top Golden Ornament -->
+    <div class="modal-top-ornament"></div>
 
-        <!-- Exit / Close Button -->
-        <button onclick="closePlayerProfile()" style="position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,215,0,0.3); color: #fff; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">✕</button>
-        
-        <!-- Crown & Avatar Wrapper -->
-        <div style="position: relative; width: 80px; height: 80px; margin: 12px auto 8px auto; display: flex; align-items: center; justify-content: center;">
-          <div id="profileModalCrown" style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 24px; z-index: 3; display: none;">👑</div>
-          <img id="profileModalAvatar" src="" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; position: relative; z-index: 2;">
-        </div>
-        
-        <!-- Display Name -->
-        <h3 id="profileModalName" style="color: #fff; margin: 6px 0 14px 0; font-size: 20px; font-weight: 800; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Player Name</h3>
-        
-        <!-- Stats Container -->
-        <div style="background: rgba(255, 255, 255, 0.03); border-radius: 14px; padding: 10px 14px; margin-bottom: 16px; text-align: left; display: flex; flex-direction: column; gap: 6px; border: 1px solid rgba(255, 215, 0, 0.2); box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
-          <div style="display: flex; justify-content: space-between; align-items: center; color: #ccc; font-size: 13px;">
-            <span>Global Rank:</span>
-            <span id="profileModalRank" style="color: #ffd700; font-weight: 800; text-shadow: 0 0 8px rgba(255,215,0,0.5);">#-- 🏆</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; color: #ccc; font-size: 13px;">
-            <span>Total XP:</span>
-            <span id="profileModalXp" style="color: #00e5ff; font-weight: 800; text-shadow: 0 0 8px rgba(0,229,255,0.5);">0 XP 🔹</span>
-          </div>
-        </div>
+    <!-- Exit / Close Button -->
+    <button class="modal-close-btn" onclick="closePlayerProfile()">✕</button>
+    
+    <!-- Avatar Container Wrapper (Rank Frame Overlays Here) -->
+    <div id="profileModalAvatarWrapper" class="modal-avatar-wrapper">
+      <img id="profileModalAvatar" src="" alt="Avatar" class="modal-avatar-img">
+    </div>
+    
+    <!-- Display Name -->
+    <h3 id="profileModalName" class="modal-player-name">Player Name</h3>
+    
+    <!-- Stats Container -->
+    <div class="modal-stats-container">
+      <div class="modal-stat-row">
+        <span>Global Rank:</span>
+        <span id="profileModalRank" class="modal-rank-val">#-- 🏆</span>
+      </div>
+      <div class="modal-stat-row">
+        <span>Total XP:</span>
+        <span id="profileModalXp" class="modal-xp-val">0 XP 🔹</span>
+      </div>
+    </div>
 
+  </div>
+</div>
         <!-- Badges Header -->
         <div style="text-align: center; margin-bottom: 10px;">
           <span style="font-size: 11px; color: #ffd700; font-weight: 800; letter-spacing: 2px; text-shadow: 0 0 8px rgba(255,215,0,0.4);">≡ BADGES ≡</span>
