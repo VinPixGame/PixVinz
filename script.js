@@ -1035,27 +1035,48 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// Function to handle switching views (including the Shop)
-function showView(viewId) {
-  // Hide all view sections
+// --- SHOP & VIEW SWITCHING LOGIC ---
+
+// Safe internal view switching function
+function navigateToView(targetId) {
   const views = document.querySelectorAll('.view');
-  views.forEach(view => {
-    view.classList.remove('active');
-    view.classList.add('hidden');
-  });
-
-  // Show the requested view
-  const targetView = document.getElementById(viewId);
-  if (targetView) {
-    targetView.classList.remove('hidden');
-    targetView.classList.add('active');
-  }
-}
-
-// Function to handle buying shop items
-function buyItem(itemName, price) {
-  console.log(`Attempting to purchase: ${itemName} for ${price}`);
   
-  // Example purchase logic
-  alert(`Thank you for selecting ${itemName} (${price})! Purchase processing coming soon.`);
+  views.forEach(view => {
+    if (view.id === targetId) {
+      view.classList.remove('hidden');
+      view.classList.add('active');
+    } else {
+      view.classList.remove('active');
+      view.classList.add('hidden');
+    }
+  });
 }
+
+// Bind events when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Open Shop when clicking Nav Card
+  const navShop = document.getElementById('navShop');
+  if (navShop) {
+    navShop.addEventListener('click', () => {
+      navigateToView('shopView');
+    });
+  }
+
+  // 2. Back button inside Shop View
+  const shopBackBtn = document.querySelector('#shopView .back-btn');
+  if (shopBackBtn) {
+    shopBackBtn.addEventListener('click', () => {
+      navigateToView('homeView');
+    });
+  }
+
+  // 3. Handle Buy Button Clicks
+  const buyButtons = document.querySelectorAll('.shop-buy-btn');
+  buyButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const card = e.target.closest('.shop-card');
+      const title = card ? card.querySelector('.shop-card-title')?.innerText : 'Item';
+      alert(`You clicked buy on: ${title}`);
+    });
+  });
+});
