@@ -262,10 +262,10 @@ body {
 
 #levelsView .view-header,
 #levelsView .overall-best-card,
-#collectionsView .view-header {
+#collectionsView .view-header,
+#shopView .view-header {
   flex-shrink: 0;
 }
-
 #collectionsView .view-header {
   grid-template-columns: 44px 1fr 44px;
   align-items: center;
@@ -1649,19 +1649,6 @@ video {
   }
 }
 
-
-/* Ensure the shop view takes up full space when active */
-#shopView.active {
-  display: flex !important;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-}
-
-/* Force hidden views to remain completely hidden */
-#shopView.hidden {
-  display: none !important;
-}
 
 
 .shop-banner-img {
