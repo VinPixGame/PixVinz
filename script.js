@@ -189,7 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
-  // Expose it globally so other views/scripts can trigger it
  // Expose it globally so other views/scripts can trigger it
   window.updateCoinDisplay = updateCoinDisplay;
 
@@ -200,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
     Object.values(views).forEach(v => {
       if (v) {
         v.classList.remove('active');
-        v.classList.remove('hidden'); // Fixes views staying hidden after returning from shop
+        v.classList.remove('hidden'); // Clears hidden overrides
       }
     });
 
@@ -209,10 +208,14 @@ document.addEventListener('DOMContentLoaded', () => {
       views[targetView].classList.remove('hidden'); // Ensures target view is visible
     }
 
-    // Included 'leaderboard' here alongside 'shop'
     if (['home', 'levels', 'collections', 'profileView', 'shop', 'leaderboard'].includes(targetView)) {
       if (mainHeader) mainHeader.classList.remove('hidden');
       if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+      
+      // Auto-resume background music when returning to main screens
+      if (typeof playMainBGM === 'function') {
+        playMainBGM();
+      }
     } else {
       if (mainHeader) mainHeader.classList.add('hidden');
     }
