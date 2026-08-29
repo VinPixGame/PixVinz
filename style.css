@@ -251,7 +251,8 @@ body {
    ========================================== */
 
 #levelsView.view.active,
-#collectionsView.view.active {
+#collectionsView.view.active,
+#shopView.view.active {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -1506,13 +1507,7 @@ video {
    ========================================== */
 
 /* Main Container Scroll Alignment */
-#shopView {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
-  box-sizing: border-box;
-}
+
 
 .shop-container {
   flex: 1;
