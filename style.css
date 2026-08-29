@@ -1662,3 +1662,12 @@ video {
 #shopView.hidden {
   display: none !important;
 }
+
+
+.shop-banner-img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
