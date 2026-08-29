@@ -771,10 +771,9 @@ async function loadLeaderboardData() {
         listContainer.appendChild(row);
     });
 }
-
 // --- PLAYER PROFILE MODAL HANDLER ---
 function openPlayerProfile(username, rank) {
-    const modalAvatarContainer = document.getElementById('modalAvatarContainer');
+    const modalAvatarContainer = document.getElementById('profileModalAvatarWrapper');
     if (!modalAvatarContainer) return;
 
     let frameOverlayImg = '';
@@ -856,54 +855,54 @@ function openPlayerProfile(username, rank) {
     });
 }
     
-
 window.openPlayerProfile = function(player, rank) {
     const modal = document.getElementById('playerProfileModal');
     if (!modal) return;
     
-    document.getElementById('profileModalAvatar').src = player.avatar ? player.avatar : 'image/avatar.png';
-    document.getElementById('profileModalName').textContent = player.name;
-    document.getElementById('profileModalRank').textContent = `#${rank} 🏆`;
-    document.getElementById('profileModalXp').textContent = `${player.xp.toLocaleString()} XP 🔹`;
-    
-    const playerLevel = player.level || 1;
-    const playerCoins = player.coins || 0;
+    // If player is passed as a string (username), handle it gracefully
+    if (typeof player === 'string') {
+        console.warn("openPlayerProfile expected an object, got string:", player);
+        return;
+    }
 
-    // Dynamic Crown & Border Logic for Top 3 vs Rank 4+
-    const avatarImg = document.getElementById('profileModalAvatar');
-    const crownDiv = document.getElementById('profileModalCrown');
+    const avatarEl = document.getElementById('profileModalAvatar');
+    const nameEl = document.getElementById('profileModalName');
+    const rankEl = document.getElementById('profileModalRank');
+    const xpEl = document.getElementById('profileModalXp');
+
+    if (avatarEl) avatarEl.src = player.avatar ? player.avatar : 'image/avatar.png';
+    if (nameEl) nameEl.textContent = player.name || player.username || 'Player';
+    if (rankEl) rankEl.textContent = `#${rank} 🏆`;
+    if (xpEl) xpEl.textContent = `${(player.xp || 0).toLocaleString()} XP 🔹`;
     
-    if (avatarImg) {
-        if (rank === 1) {
-            if (crownDiv) {
-                crownDiv.style.display = 'block';
-                crownDiv.style.filter = 'drop-shadow(0 0 8px #ffd700)';
-            }
-            avatarImg.style.border = '3px solid #ffd700';
-            avatarImg.style.boxShadow = '0 0 18px rgba(255,215,0,0.7)';
-        } else if (rank === 2) {
-            if (crownDiv) {
-                crownDiv.style.display = 'block';
-                crownDiv.style.filter = 'drop-shadow(0 0 8px #c0c0c0) brightness(1.3)';
-            }
-            avatarImg.style.border = '3px solid #00e5ff';
-            avatarImg.style.boxShadow = '0 0 18px rgba(0,229,255,0.7)';
-        } else if (rank === 3) {
-            if (crownDiv) {
-                crownDiv.style.display = 'block';
-                crownDiv.style.filter = 'drop-shadow(0 0 8px #cd7f32) sepia(1) hue-rotate(10deg)';
-            }
-            avatarImg.style.border = '3px solid #ff9933';
-            avatarImg.style.boxShadow = '0 0 18px rgba(255,153,51,0.7)';
-        } else {
-            // Rank 4 and below: Hide crown and clear special styling
-            if (crownDiv) {
-                crownDiv.style.display = 'none';
-            }
-            avatarImg.style.border = '3px solid #ffd700';
-            avatarImg.style.boxShadow = '0 0 18px rgba(255,215,0,0.7)';
+    // Custom Rank Frame Overlay Logic for Top 3 Ranks inside the Modal wrapper
+    const avatarWrapper = document.getElementById('profileModalAvatarWrapper');
+    if (avatarWrapper) {
+        avatarWrapper.style.position = 'relative';
+        avatarWrapper.style.display = 'inline-block';
+
+        // Remove any old frame from previous profile views
+        const existingFrame = avatarWrapper.querySelector('.modal-rank-frame');
+        if (existingFrame) existingFrame.remove();
+
+        let frameOverlayImg = '';
+        if (rank === 1) frameOverlayImg = 'image/1.png';
+        else if (rank === 2) frameOverlayImg = 'image/2.png';
+        else if (rank === 3) frameOverlayImg = 'image/3.png';
+
+        // Inject the custom rank frame if top 3
+        if (frameOverlayImg) {
+            const frameElement = document.createElement('img');
+            frameElement.src = frameOverlayImg;
+            frameElement.className = 'modal-rank-frame';
+            frameElement.style.cssText = 'position: absolute; top: -10px; left: -10px; width: 120px; height: 120px; pointer-events: none; z-index: 4; object-fit: contain;';
+            avatarWrapper.appendChild(frameElement);
         }
     }
+
+    // Show the modal
+    modal.style.display = 'flex';
+};
     
     // Custom image badge data with unique glow colors
     const allBadges = [
