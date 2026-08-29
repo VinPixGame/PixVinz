@@ -1501,89 +1501,116 @@ video {
 
 
 
-/* Ensure the shop view fills the screen and displays its content */
-#shopView {
-  width: 100%;
-  min-height: 100vh;
-  box-sizing: border-box;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-}
+/* ==========================================
+   SHOP SECTION STYLES
+   ========================================== */
 
-/* Ensure view is visible when active or not hidden */
-#shopView:not(.hidden) {
-  display: flex !important;
-}
-
-/* Container for shop content */
+/* Outer Shop Layout Container */
 .shop-container {
-  flex: 1;
   width: 100%;
-  max-width: 600px;
+  max-width: 480px;
   margin: 0 auto;
+  padding: 12px;
+  box-sizing: border-box;
   overflow-y: auto;
-  padding-bottom: 20px;
 }
 
-/* 3-Column Grid Layout */
+/* 3-Column CSS Grid */
 .shop-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  padding: 10px 0;
+  width: 100%;
 }
 
-/* Shop Card Styling */
+/* Individual Item Card */
 .shop-card {
-  background: linear-gradient(135deg, rgba(42, 17, 71, 0.8), rgba(20, 8, 38, 0.9));
-  border: 1px solid rgba(156, 39, 176, 0.5);
-  border-radius: 14px;
-  padding: 12px 8px;
+  background: linear-gradient(145deg, rgba(30, 15, 55, 0.9), rgba(15, 5, 30, 0.95));
+  border: 1.5px solid rgba(156, 39, 176, 0.4);
+  border-radius: 16px;
+  padding: 14px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   text-align: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(156, 39, 176, 0.15);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
+/* Card Hover/Active Effects */
+.shop-card:hover {
+  transform: translateY(-3px);
+  border-color: #00f2fe;
+  box-shadow: 0 6px 20px rgba(0, 242, 254, 0.3), inset 0 0 12px rgba(0, 242, 254, 0.2);
+}
+
+.shop-card:active {
+  transform: scale(0.97);
+}
+
+/* Icon */
 .shop-card-icon {
-  font-size: 2rem;
-  margin-bottom: 4px;
+  font-size: 2.2rem;
+  margin-bottom: 6px;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
+  line-height: 1;
 }
 
+/* Title */
 .shop-card-title {
-  color: #fff;
+  color: #ffffff;
   font-size: 0.85rem;
-  font-weight: 700;
-  margin-bottom: 2px;
+  font-weight: 800;
+  margin-bottom: 3px;
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
+/* Description */
 .shop-card-desc {
   color: #b3a0d0;
-  font-size: 0.7rem;
-  margin-bottom: 8px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  line-height: 1.1;
 }
 
+/* Buy Button */
 .shop-buy-btn {
   width: 100%;
-  padding: 6px 0;
+  padding: 8px 0;
   background: linear-gradient(135deg, #ffd700, #ffaa00);
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   color: #130f2b;
-  font-weight: 800;
-  font-size: 0.75rem;
+  font-weight: 900;
+  font-size: 0.8rem;
   cursor: pointer;
+  letter-spacing: 0.5px;
+  box-shadow: 0 3px 8px rgba(255, 215, 0, 0.3);
+  transition: filter 0.2s ease, transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 }
 
-/* Mobile responsive tweak */
+.shop-buy-btn:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.5);
+}
+
+.shop-buy-btn:active {
+  transform: scale(0.95);
+}
+
+/* Small Screen Responsiveness */
 @media (max-width: 360px) {
   .shop-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
 }
-
-
-
