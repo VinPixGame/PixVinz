@@ -608,6 +608,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+
+
 // --- LEADERBOARD LOGIC (Safe DOM Binding, Avatars & Real Players Only) ---
 document.addEventListener('DOMContentLoaded', () => {
     const navLeaderboard = document.getElementById('navLeaderboard');
@@ -689,61 +691,117 @@ async function loadLeaderboardData() {
         const rank = index + 1;
         let rankBadgeHTML = '';
         let specialStyle = '';
-        let frameStyle = 'border: 2px solid rgba(255,255,255,0.2);';
         let avatarHTML = '';
 
         const avatarSrc = player.avatar ? player.avatar : 'image/avatar.png';
 
+        // Custom Border Frame Overlays for Top 3 Ranks
+        let frameOverlayImg = '';
+        if (rank === 1) frameOverlayImg = 'image/1.png';
+        else if (rank === 2) frameOverlayImg = 'image/2.png';
+        else if (rank === 3) frameOverlayImg = 'image/3.png';
+
+        const frameOverlayHTML = frameOverlayImg 
+            ? `<img src="${frameOverlayImg}" alt="Rank ${rank} Frame" style="position: absolute; top: -7px; left: -7px; width: 62px; height: 62px; pointer-events: none; z-index: 4; object-fit: contain;">`
+            : '';
+
         if (rank === 1) {
             specialStyle = 'background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(255, 215, 0, 0.6);';
-            frameStyle = 'border: 3px solid #ffd700;';
             rankBadgeHTML = `
                 <div style="min-width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
                     <img src="image/rank1.png" alt="#1" style="width: 44px; height: 44px; object-fit: contain;">
                 </div>
             `;
             avatarHTML = `
-                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                    <span style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 18px; z-index: 3; filter: drop-shadow(0 0 6px #ffd700);">👑</span>
-                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${frameStyle} position: relative; z-index: 2;">
+                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;" onclick="openPlayerProfile('${player.username}', 1)">
+                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; position: relative; z-index: 2;">
+                    ${frameOverlayHTML}
                 </div>
             `;
         } else if (rank === 2) {
             specialStyle = 'background: linear-gradient(135deg, rgba(192, 192, 192, 0.2), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(192, 192, 192, 0.6);';
-            frameStyle = 'border: 3px solid #00e5ff;';
             rankBadgeHTML = `
                 <div style="min-width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
                     <img src="image/rank2.png" alt="#2" style="width: 44px; height: 44px; object-fit: contain;">
                 </div>
             `;
             avatarHTML = `
-                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                    <span style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 18px; z-index: 3; filter: drop-shadow(0 0 6px #c0c0c0) brightness(1.3);">👑</span>
-                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${frameStyle} position: relative; z-index: 2;">
+                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;" onclick="openPlayerProfile('${player.username}', 2)">
+                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; position: relative; z-index: 2;">
+                    ${frameOverlayHTML}
                 </div>
             `;
         } else if (rank === 3) {
             specialStyle = 'background: linear-gradient(135deg, rgba(205, 127, 50, 0.2), rgba(20, 20, 20, 0.95)); border: 1px solid rgba(205, 127, 50, 0.6);';
-            frameStyle = 'border: 3px solid #ff9933;';
             rankBadgeHTML = `
                 <div style="min-width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
                     <img src="image/rank3.png" alt="#3" style="width: 44px; height: 44px; object-fit: contain;">
                 </div>
             `;
             avatarHTML = `
-                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                    <span style="position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 18px; z-index: 3; filter: drop-shadow(0 0 6px #cd7f32) sepia(1) hue-rotate(10deg);">👑</span>
-                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${frameStyle} position: relative; z-index: 2;">
+                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;" onclick="openPlayerProfile('${player.username}', 3)">
+                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; position: relative; z-index: 2;">
+                    ${frameOverlayHTML}
                 </div>
             `;
         } else {
             rankBadgeHTML = `<span style="min-width: 48px; text-align: center; font-weight: bold; font-size: 16px; color: #aaa;">#${rank}</span>`;
             avatarHTML = `
-                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; ${frameStyle}">
+                <div style="position: relative; width: 48px; height: 48px; margin: 0 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;" onclick="openPlayerProfile('${player.username}', ${rank})">
+                    <img src="${avatarSrc}" alt="${player.name}" class="leaderboard-avatar-img" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid rgba(255,255,255,0.2);">
                 </div>
             `;
         }
+
+        const row = document.createElement('div');
+        row.className = 'leaderboard-row';
+        row.style.cssText = `display: flex; align-items: center; padding: 10px 14px; border-radius: 12px; margin-bottom: 8px; ${specialStyle || 'background: rgba(255,255,255,0.05);'}`;
+        row.innerHTML = `
+            ${rankBadgeHTML}
+            ${avatarHTML}
+            <div style="flex-grow: 1; display: flex; flex-direction: column;">
+                <span style="font-weight: bold; font-size: 15px; color: #fff;">${player.name}</span>
+                <span style="font-size: 12px; color: #ffd700;">LEVEL ${player.level}</span>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 13px; color: #ffd700; font-weight: bold;">🪙 ${player.coins.toLocaleString()}</div>
+                <div style="font-size: 12px; color: #ff007f; font-weight: bold;">⚡ ${player.xp.toLocaleString()} XP</div>
+            </div>
+        `;
+        listContainer.appendChild(row);
+    });
+}
+
+// --- PLAYER PROFILE MODAL HANDLER ---
+function openPlayerProfile(username, rank) {
+    const modalAvatarContainer = document.getElementById('modalAvatarContainer');
+    if (!modalAvatarContainer) return;
+
+    let frameOverlayImg = '';
+    if (rank === 1) frameOverlayImg = 'image/1.png';
+    else if (rank === 2) frameOverlayImg = 'image/2.png';
+    else if (rank === 3) frameOverlayImg = 'image/3.png';
+
+    // Set position to relative so the frame absolute position works relative to the container
+    modalAvatarContainer.style.position = 'relative';
+    modalAvatarContainer.style.display = 'inline-block';
+
+    // Remove old overlay frame if one exists from previous profile opens
+    const existingFrame = modalAvatarContainer.querySelector('.modal-rank-frame');
+    if (existingFrame) existingFrame.remove();
+
+    // Inject custom frame image for top 3 players
+    if (frameOverlayImg) {
+        const frameElement = document.createElement('img');
+        frameElement.src = frameOverlayImg;
+        frameElement.className = 'modal-rank-frame';
+        frameElement.style.cssText = 'position: absolute; top: -10px; left: -10px; width: 120px; height: 120px; pointer-events: none; z-index: 4; object-fit: contain;';
+        modalAvatarContainer.appendChild(frameElement);
+    }
+}
+
+
+
 
         const row = document.createElement('div');
         row.className = `rank-row`;
