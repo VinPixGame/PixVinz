@@ -159,7 +159,8 @@ document.addEventListener('DOMContentLoaded', () => {
     collections: document.getElementById('collectionsView'),
     challenge: document.getElementById('challengeView'),
     leaderboard: document.getElementById('leaderboardView'),
-    profileView: document.getElementById('profileView')
+    profileView: document.getElementById('profileView'),
+    shop: document.getElementById('shopView')
   };
 
   const mainHeader = document.getElementById('mainHeader');
@@ -189,6 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   // Expose it globally so other views/scripts can trigger it
+ // Expose it globally so other views/scripts can trigger it
   window.updateCoinDisplay = updateCoinDisplay;
 
   // Run it immediately on load
@@ -196,14 +198,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function showView(targetView) {
     Object.values(views).forEach(v => {
-      if (v) v.classList.remove('active');
+      if (v) {
+        v.classList.remove('active');
+        v.classList.remove('hidden'); // Fixes views staying hidden after returning from shop
+      }
     });
 
     if (views[targetView]) {
       views[targetView].classList.add('active');
+      views[targetView].classList.remove('hidden'); // Ensures target view is visible
     }
 
-    if (['home', 'levels', 'collections', 'profileView'].includes(targetView)) {
+    // Included 'leaderboard' here alongside 'shop'
+    if (['home', 'levels', 'collections', 'profileView', 'shop', 'leaderboard'].includes(targetView)) {
       if (mainHeader) mainHeader.classList.remove('hidden');
       if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
     } else {
@@ -218,15 +225,6 @@ document.addEventListener('DOMContentLoaded', () => {
       AudioManager.playMain();
     }
   }
-
-  document.addEventListener('click', () => {
-    const user = getCurrentUser();
-    if (user && typeof AudioManager !== 'undefined' && AudioManager.musicEnabled) {
-      if (!AudioManager.bgmMain || AudioManager.bgmMain.paused) {
-        playMainBGM();
-      }
-    }
-  });
 
   const profileHeaderImg = document.getElementById('profileHeaderImg');
   const profileIconFallback = document.getElementById('profileIconFallback');
@@ -1034,23 +1032,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-
 // --- SHOP & VIEW SWITCHING LOGIC ---
-
-// Safe internal view switching function
-function navigateToView(targetId) {
-  const views = document.querySelectorAll('.view');
-  
-  views.forEach(view => {
-    if (view.id === targetId) {
-      view.classList.remove('hidden');
-      view.classList.add('active');
-    } else {
-      view.classList.remove('active');
-      view.classList.add('hidden');
-    }
-  });
-}
 
 // Bind events when the page loads
 document.addEventListener('DOMContentLoaded', () => {
@@ -1058,7 +1040,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const navShop = document.getElementById('navShop');
   if (navShop) {
     navShop.addEventListener('click', () => {
-      navigateToView('shopView');
+      showView('shop'); // Uses your main app's routing system
     });
   }
 
@@ -1066,7 +1048,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const shopBackBtn = document.querySelector('#shopView .back-btn');
   if (shopBackBtn) {
     shopBackBtn.addEventListener('click', () => {
-      navigateToView('homeView');
+      showView('home'); // Uses your main app's routing system
     });
   }
 
