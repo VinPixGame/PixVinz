@@ -2,7 +2,7 @@ name: Build Web APK
 
 on:
   push:
-    branches: [ apk-testing-PixVinz ]
+    branches: [ Sample  ]
   workflow_dispatch:
 
 jobs:
