@@ -57,6 +57,7 @@ jobs:
             sed -i '/<widget /a \    <icon src="res/icon/android/icon.png" />' config.xml
           fi
 
+
           cordova build android --debug
 
       - name: Rename and Prepare APK
