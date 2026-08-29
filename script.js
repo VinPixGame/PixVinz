@@ -1022,6 +1022,9 @@ if (window.matchMedia('(display-mode: fullscreen)').matches || window.matchMedia
   }, { once: true });
 }
 
+
+
+
 document.addEventListener('DOMContentLoaded', () => {
   const navChallenge = document.getElementById('navChallenge');
   if (navChallenge) {
@@ -1030,3 +1033,29 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+
+// Function to handle switching views (including the Shop)
+function showView(viewId) {
+  // Hide all view sections
+  const views = document.querySelectorAll('.view');
+  views.forEach(view => {
+    view.classList.remove('active');
+    view.classList.add('hidden');
+  });
+
+  // Show the requested view
+  const targetView = document.getElementById(viewId);
+  if (targetView) {
+    targetView.classList.remove('hidden');
+    targetView.classList.add('active');
+  }
+}
+
+// Function to handle buying shop items
+function buyItem(itemName, price) {
+  console.log(`Attempting to purchase: ${itemName} for ${price}`);
+  
+  // Example purchase logic
+  alert(`Thank you for selecting ${itemName} (${price})! Purchase processing coming soon.`);
+}
