@@ -183,8 +183,41 @@ function recordCompletedChallenge(challengeId) {
     }
 }
 
+// --- UNLOCK CHALLENGE WITH COINS ---
+async function unlockNextChallengeWithCoins() {
+    const unlockCost = 100;
+    let success = false;
 
-	 // Initialize DOM elements with a smooth simulated & event-backed loader
+    if (typeof spendCoins === 'function') {
+        success = await spendCoins(unlockCost);
+    } else {
+        const coinKey = getUserKey('totalCoins');
+        let totalCoins = parseInt(localStorage.getItem(coinKey)) || 0;
+        if (totalCoins >= unlockCost) {
+            localStorage.setItem(coinKey, totalCoins - unlockCost);
+            success = true;
+        }
+    }
+
+    if (!success) {
+        alert("Not enough coins! You need 🪙 100 to unlock the next challenge.");
+        return;
+    }
+
+    // Reset daily lock and counter
+    const dailyCountKey = getUserKey('challenge_daily_count');
+    const lockTimerKey = getUserKey('challenge_lock_expiry');
+    localStorage.removeItem(lockTimerKey);
+    localStorage.setItem(dailyCountKey, '0');
+
+    // Update Coin Display UI
+    loadChallengeCoins();
+
+    // Re-initialize board to display normal game setup
+    initBoardDOM();
+}
+
+// Initialize DOM elements with a smooth simulated & event-backed loader
 function initBoardDOM() {
     // Completely stop/clean up masterVideo if it exists from a previous challenge
     if (masterVideo) {
@@ -218,14 +251,22 @@ function initBoardDOM() {
         if (startChallengeBtn) startChallengeBtn.classList.add('hidden');
         challengeStarted = false;
 
-        // Render a clean lock overlay message with countdown right inside the board
+        // Render lock overlay message, countdown, and unlock button directly inside board
         puzzleBoard.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; color: #fff; text-align: center; padding: 20px; background: rgba(20, 10, 35, 0.95); position: absolute; top: 0; left: 0; z-index: 10; border-radius: 12px;">
                 <h2 style="color: #ff3366; margin-bottom: 10px; font-size: 22px;">🔒 Daily Limit Reached</h2>
                 <p style="margin-bottom: 15px; font-size: 14px; color: #ddd;">You have completed your 3 challenges for this cycle.</p>
-                <div id="activeLockCountdown" style="font-size: 16px; font-weight: bold; color: #ffcc00; background: rgba(0,0,0,0.4); padding: 10px 15px; border-radius: 8px;">Calculating timer...</div>
+                <div id="activeLockCountdown" style="font-size: 15px; font-weight: bold; color: #ffcc00; background: rgba(0,0,0,0.4); padding: 10px 15px; border-radius: 8px; margin-bottom: 18px;">Calculating timer...</div>
+                <button id="unlockChallengeBtn" style="background: linear-gradient(135deg, #ffcc00, #ff9900); color: #000; border: none; padding: 12px 20px; font-size: 15px; font-weight: bold; border-radius: 25px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 204, 0, 0.4); transition: transform 0.2s, filter 0.2s;">
+                    Unlock Next Challenge (🪙 100)
+                </button>
             </div>
         `;
+
+        const unlockBtn = document.getElementById('unlockChallengeBtn');
+        if (unlockBtn) {
+            unlockBtn.addEventListener('click', unlockNextChallengeWithCoins);
+        }
 
         // Live countdown interval updater
         const updateCountdownUI = () => {
@@ -589,7 +630,6 @@ function startConfetti() {
     canvas.style.height = '100vh';
     canvas.style.zIndex = '99999';
     canvas.style.pointerEvents = 'none';
-    // ------------------------------------------------
 
     const videoContainer = document.getElementById('winVideoContainer');
     
@@ -711,7 +751,6 @@ if (challengePreviewBtn) {
 
     if (modalTitle) modalTitle.innerText = `CHALLENGE ${String(currentChallenge).padStart(2, '0')} PREVIEW`;
     if (modalVideo) {
-      // Only set src if it's empty or points to a different challenge, preserving current progress if paused/resumed
       const expectedSrc = `challenge/challenge${currentChallenge}.mp4`;
       if (!modalVideo.src.includes(expectedSrc)) {
           modalVideo.src = expectedSrc;
@@ -753,7 +792,6 @@ function closeChallengePreviewModal() {
     modal.style.display = 'none';
   }
   if (modalVideo) {
-    // Pause only to its current playback time instead of resetting, so it resumes on next preview click
     modalVideo.pause();
   }
   if (challengePreviewTimer) clearTimeout(challengePreviewTimer);
@@ -782,14 +820,12 @@ if (challengeShuffleBtn) {
 // --- HOME BUTTON HANDLER ---
 if (homeBtn) {
     homeBtn.addEventListener('click', () => {
-        // Ensure masterVideo is completely stopped/cleared when going home
         if (masterVideo) {
             masterVideo.pause();
             masterVideo.currentTime = 0;
             masterVideo.src = '';
         }
 
-        // Stop winmodal video completely so audio/video doesn't overlap/continue playing
         const winVideoContainer = document.getElementById('winVideoContainer');
         if (winVideoContainer) {
             const winVideo = winVideoContainer.querySelector('video');
@@ -801,7 +837,6 @@ if (homeBtn) {
             winVideoContainer.innerHTML = '';
         }
 
-        // Clear/hide confetti canvas immediately
         const canvas = document.getElementById('confettiCanvas');
         if (canvas) {
             const ctx = canvas.getContext('2d');
@@ -818,14 +853,12 @@ if (homeBtn) {
 // --- NEXT CHALLENGE BUTTON HANDLER ---
 if (nextChallengeBtn) {
     nextChallengeBtn.addEventListener('click', () => {
-        // Fully stop and clear masterVideo so the next puzzle video starts fresh on its own
         if (masterVideo) {
             masterVideo.pause();
             masterVideo.currentTime = 0;
             masterVideo.src = '';
         }
 
-        // Stop and clear winmodal video completely so its audio/video stops playing and never overlaps
         const winVideoContainer = document.getElementById('winVideoContainer');
         if (winVideoContainer) {
             const winVideo = winVideoContainer.querySelector('video');
@@ -837,7 +870,6 @@ if (nextChallengeBtn) {
             winVideoContainer.innerHTML = '';
         }
 
-        // Clear/hide confetti canvas immediately so it doesn't linger or pop up
         const canvas = document.getElementById('confettiCanvas');
         if (canvas) {
             const ctx = canvas.getContext('2d');
@@ -848,7 +880,6 @@ if (nextChallengeBtn) {
         winModal.classList.add('hidden');
         winModal.style.display = 'none';
 
-        // Advance to the next challenge up to 100 max
         if (currentChallenge < 100) {
             currentChallenge++;
         } else {
@@ -857,13 +888,11 @@ if (nextChallengeBtn) {
             return;
         }
 
-        // Save progress to localStorage
         const user = JSON.parse(localStorage.getItem('loggedInUser'));
         if (user && user.username) {
             localStorage.setItem(`${user.username}_currentChallenge`, currentChallenge);
         }
 
-        // Re-initialize the puzzle board for the next challenge
         initBoardDOM();
     });
 }
