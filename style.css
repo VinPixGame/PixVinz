@@ -1500,30 +1500,44 @@ video {
 }
 
 
-/* ==========================================
-   SHOP GRID & CARDS ONLY
-   ========================================== */
 
-/* Main Shop Content Container */
-.shop-container {
-  padding: 0 16px 24px 16px;
-  max-width: 480px;
-  margin: 0 auto;
+/* Ensure the shop view fills the screen and displays its content */
+#shopView {
+  width: 100%;
+  min-height: 100vh;
   box-sizing: border-box;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure view is visible when active or not hidden */
+#shopView:not(.hidden) {
+  display: flex !important;
+}
+
+/* Container for shop content */
+.shop-container {
+  flex: 1;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  overflow-y: auto;
+  padding-bottom: 20px;
 }
 
 /* 3-Column Grid Layout */
 .shop-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-top: 16px;
+  gap: 12px;
+  padding: 10px 0;
 }
 
-/* Shop Card Box */
+/* Shop Card Styling */
 .shop-card {
-  background: rgba(20, 10, 35, 0.75);
-  border: 1px solid rgba(255, 215, 0, 0.25);
+  background: linear-gradient(135deg, rgba(42, 17, 71, 0.8), rgba(20, 8, 38, 0.9));
+  border: 1px solid rgba(156, 39, 176, 0.5);
   border-radius: 14px;
   padding: 12px 8px;
   display: flex;
@@ -1531,44 +1545,45 @@ video {
   align-items: center;
   justify-content: space-between;
   text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-/* Card Elements */
 .shop-card-icon {
-  font-size: 28px;
+  font-size: 2rem;
   margin-bottom: 4px;
 }
 
 .shop-card-title {
-  font-size: 12px;
+  color: #fff;
+  font-size: 0.85rem;
   font-weight: 700;
-  color: #ffffff;
-  margin: 2px 0;
+  margin-bottom: 2px;
 }
 
 .shop-card-desc {
-  font-size: 10px;
-  color: #a090b8;
+  color: #b3a0d0;
+  font-size: 0.7rem;
   margin-bottom: 8px;
 }
 
-/* Buy Button */
 .shop-buy-btn {
   width: 100%;
-  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  padding: 6px 0;
+  background: linear-gradient(135deg, #ffd700, #ffaa00);
   border: none;
   border-radius: 8px;
   color: #130f2b;
   font-weight: 800;
-  font-size: 11px;
-  padding: 8px 0;
+  font-size: 0.75rem;
   cursor: pointer;
-  box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
 }
 
-.shop-buy-btn:active {
-  transform: scale(0.95);
+/* Mobile responsive tweak */
+@media (max-width: 360px) {
+  .shop-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
+
+
+
