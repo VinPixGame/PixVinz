@@ -5,175 +5,95 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>PixVinz - Shop</title>
   <link rel="stylesheet" href="style.css" />
-  <style>
-    /* Shop-Specific Styles */
-    .shop-container {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      padding: 0 16px 24px 16px;
-      max-width: 480px;
-      margin: 0 auto;
-    }
-
-    .shop-section-title {
-      font-size: 14px;
-      font-weight: 800;
-      color: #8a7b9c;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      margin: 12px 0 4px 4px;
-    }
-
-    .shop-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: rgba(20, 10, 35, 0.75);
-      border: 1px solid rgba(255, 215, 0, 0.25);
-      border-radius: 16px;
-      padding: 14px 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      backdrop-filter: blur(8px);
-      transition: transform 0.2s, border-color 0.2s;
-    }
-
-    .shop-card:active {
-      transform: scale(0.98);
-      border-color: #ffd700;
-    }
-
-    .shop-item-info {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .shop-item-icon {
-      font-size: 30px;
-      width: 44px;
-      height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 12px;
-    }
-
-    .shop-item-details h3 {
-      margin: 0;
-      font-size: 16px;
-      color: #ffffff;
-      font-weight: 700;
-    }
-
-    .shop-item-details p {
-      margin: 2px 0 0 0;
-      font-size: 12px;
-      color: #a090b8;
-    }
-
-    .buy-btn {
-      background: linear-gradient(135deg, #ffd700, #ff8c00);
-      border: none;
-      border-radius: 12px;
-      color: #130f2b;
-      font-weight: 800;
-      font-size: 14px;
-      padding: 10px 16px;
-      cursor: pointer;
-      box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      white-space: nowrap;
-    }
-
-    .buy-btn:active {
-      filter: brightness(1.2);
-    }
-  </style>
 </head>
 <body>
 
-  <!-- VIEW HEADER -->
-  <div class="view-header">
-    <button class="icon-btn back-btn" onclick="window.location.href='index.html'">‹</button>
-    <div class="level-title-wrapper">
-      <h2>SHOP</h2>
+  <!-- Top Header Bar -->
+  <header class="top-bar" id="mainHeader">
+    <button class="icon-btn" id="profileHeaderBtn" onclick="window.location.href='index.html'">
+      <span id="profileIconFallback">👤</span>
+      <img id="profileHeaderImg" src="" alt="Avatar">
+    </button>
+    <div class="logo-container">
+      <video id="logoVideo" autoplay loop muted playsinline preload="auto">
+        <source src="image/logo.webm" type="video/webm">
+      </video>
     </div>
-  </div>
+    <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
+  </header>
 
-  <!-- SHOP CONTENT CONTAINER -->
-  <div class="shop-container">
-
-    <!-- COIN PACKS -->
-    <div class="shop-section-title">Coin Packs</div>
-
-    <div class="shop-card">
-      <div class="shop-item-info">
-        <div class="shop-item-icon">🪙</div>
-        <div class="shop-item-details">
-          <h3>100 Coins</h3>
-          <p>Handful of coins</p>
+  <!-- SHOP PAGE VIEW -->
+  <section id="shopView" class="view">
+    <div class="view-header">
+      <button class="icon-btn back-btn" onclick="window.location.href='index.html'">‹</button>
+      <div class="header-title-group">
+        <div class="level-title-wrapper">
+          <span class="diamond-line">◇───</span>
+          <h2>SHOP</h2>
+          <span class="diamond-line">───◇</span>
         </div>
       </div>
-      <button class="buy-btn" onclick="buyItem('100 Coins', '$0.99')">$0.99</button>
     </div>
 
-    <div class="shop-card">
-      <div class="shop-item-info">
-        <div class="shop-item-icon">💰</div>
-        <div class="shop-item-details">
-          <h3>500 Coins</h3>
-          <p>Stack of coins (+50 bonus)</p>
+    <!-- 3-COLUMN GRID CONTENT (6 BOXES) -->
+    <div class="shop-container">
+      <div class="shop-grid">
+
+        <!-- Box 1 -->
+        <div class="shop-card">
+          <div class="shop-card-icon">🪙</div>
+          <div class="shop-card-title">100 Coins</div>
+          <div class="shop-card-desc">Handful of coins</div>
+          <button class="shop-buy-btn" onclick="buyItem('100 Coins', '$0.99')">$0.99</button>
         </div>
-      </div>
-      <button class="buy-btn" onclick="buyItem('500 Coins', '$3.99')">$3.99</button>
-    </div>
 
-    <div class="shop-card">
-      <div class="shop-item-info">
-        <div class="shop-item-icon">💎</div>
-        <div class="shop-item-details">
-          <h3>1,200 Coins</h3>
-          <p>Chest of coins (+200 bonus)</p>
+        <!-- Box 2 -->
+        <div class="shop-card">
+          <div class="shop-card-icon">💰</div>
+          <div class="shop-card-title">500 Coins</div>
+          <div class="shop-card-desc">+50 Bonus</div>
+          <button class="shop-buy-btn" onclick="buyItem('500 Coins', '$3.99')">$3.99</button>
         </div>
-      </div>
-      <button class="buy-btn" onclick="buyItem('1,200 Coins', '$7.99')">$7.99</button>
-    </div>
 
-    <!-- POWER-UPS -->
-    <div class="shop-section-title">Power-Ups</div>
-
-    <div class="shop-card">
-      <div class="shop-item-info">
-        <div class="shop-item-icon">💡</div>
-        <div class="shop-item-details">
-          <h3>3x Hints</h3>
-          <p>Reveal puzzle clues</p>
+        <!-- Box 3 -->
+        <div class="shop-card">
+          <div class="shop-card-icon">💎</div>
+          <div class="shop-card-title">1200 Coins</div>
+          <div class="shop-card-desc">+200 Bonus</div>
+          <button class="shop-buy-btn" onclick="buyItem('1200 Coins', '$7.99')">$7.99</button>
         </div>
-      </div>
-      <button class="buy-btn" onclick="buyItem('3x Hints', '50 Coins')">🪙 50</button>
-    </div>
 
-    <div class="shop-card">
-      <div class="shop-item-info">
-        <div class="shop-item-icon">⏱️</div>
-        <div class="shop-item-details">
-          <h3>Time Freeze</h3>
-          <p>Add +30s in challenges</p>
+        <!-- Box 4 -->
+        <div class="shop-card">
+          <div class="shop-card-icon">💡</div>
+          <div class="shop-card-title">3x Hints</div>
+          <div class="shop-card-desc">Puzzle clues</div>
+          <button class="shop-buy-btn" onclick="buyItem('3x Hints', '50 Coins')">🪙 50</button>
         </div>
-      </div>
-      <button class="buy-btn" onclick="buyItem('Time Freeze', '30 Coins')">🪙 30</button>
-    </div>
 
-  </div>
+        <!-- Box 5 -->
+        <div class="shop-card">
+          <div class="shop-card-icon">⏱️</div>
+          <div class="shop-card-title">Time Freeze</div>
+          <div class="shop-card-desc">+30 Secs</div>
+          <button class="shop-buy-btn" onclick="buyItem('Time Freeze', '30 Coins')">🪙 30</button>
+        </div>
+
+        <!-- Box 6 -->
+        <div class="shop-card">
+          <div class="shop-card-icon">🎁</div>
+          <div class="shop-card-title">VIP Pass</div>
+          <div class="shop-card-desc">Unlock all</div>
+          <button class="shop-buy-btn" onclick="buyItem('VIP Pass', '$9.99')">$9.99</button>
+        </div>
+
+      </div>
+    </div>
+  </section>
 
   <script>
     function buyItem(itemName, price) {
-      alert(`You selected: ${itemName} for ${price}!`);
-      // Add your purchase handling / API integration logic here
+      alert(`Selected: ${itemName} for ${price}`);
     }
   </script>
 </body>
