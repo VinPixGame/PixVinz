@@ -1099,17 +1099,13 @@ input:checked + .slider:before { transform: translateX(22px); }
   box-shadow: 0 0 12px #ffd700;
 }
 
-/* Avatar Wrapper & Image Matching (Locks layout so it doesn't overflow) */
 .modal-avatar-wrapper,
 #profileModalAvatarWrapper {
   position: relative;
   width: 90px;
   height: 90px;
   margin: 10px auto 12px auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  display: block;
 }
 
 .modal-avatar-img,
@@ -1125,15 +1121,13 @@ input:checked + .slider:before { transform: translateX(22px); }
 
 .modal-rank-frame {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: -15px;
+  left: -15px;
   width: 120px;
   height: 120px;
   pointer-events: none;
   z-index: 10;
   object-fit: contain;
-}
 }
 
 
