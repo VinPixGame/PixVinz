@@ -1501,10 +1501,10 @@ video {
 
 
 /* ==========================================
-   SHOP VIEW STYLES
+   SHOP GRID & CARDS ONLY
    ========================================== */
 
-/* Main Container Layout */
+/* Main Shop Content Container */
 .shop-container {
   padding: 0 16px 24px 16px;
   max-width: 480px;
@@ -1520,7 +1520,7 @@ video {
   margin-top: 16px;
 }
 
-/* Shop Card Styling */
+/* Shop Card Box */
 .shop-card {
   background: rgba(20, 10, 35, 0.75);
   border: 1px solid rgba(255, 215, 0, 0.25);
@@ -1534,11 +1534,6 @@ video {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  transition: transform 0.2s ease, border-color 0.2s ease;
-}
-
-.shop-card:hover {
-  border-color: rgba(255, 215, 0, 0.6);
 }
 
 /* Card Elements */
@@ -1560,7 +1555,7 @@ video {
   margin-bottom: 8px;
 }
 
-/* Purchase Buttons */
+/* Buy Button */
 .shop-buy-btn {
   width: 100%;
   background: linear-gradient(135deg, #ffd700, #ff8c00);
@@ -1572,10 +1567,8 @@ video {
   padding: 8px 0;
   cursor: pointer;
   box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
-  transition: transform 0.1s ease, filter 0.2s ease;
 }
 
 .shop-buy-btn:active {
   transform: scale(0.95);
-  filter: brightness(1.2);
 }
