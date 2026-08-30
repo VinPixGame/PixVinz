@@ -145,8 +145,6 @@ if (regUser && indicator && requirement) {
 
 
 
-    
-
 // ==========================================
 // PASSWORD VALIDATION
 // ==========================================
@@ -478,6 +476,9 @@ if (regPassConfirm) {
             );
 
 
+            // CLEAR OLD LOCAL SESSION DATA TO PREVENT CROSS-CONTAMINATION
+            localStorage.clear();
+
             localStorage.setItem(
                 'loggedInUser',
                 JSON.stringify(newUserData)
@@ -657,6 +658,9 @@ if (regPassConfirm) {
                     };
 
 
+                    // CLEAR PREVIOUS USER CACHE COMPLETELY FIRST
+                    localStorage.clear();
+
                     localStorage.setItem(
                         'loggedInUser',
                         JSON.stringify(
@@ -752,171 +756,3 @@ if (regPassConfirm) {
         }
     });
 });
-
-
-
-// ==========================================
-// PIXVINZ DOWNLOAD APP / PWA INSTALL
-// ==========================================
-
-let deferredPrompt = null;
-
-const installButtons = [
-    document.getElementById('install-app-btn'),
-    document.getElementById('install-app-btn-ref')
-].filter(Boolean);
-
-
-// ==========================================
-// CHECK INSTALLED STATE
-// ==========================================
-
-function isPixVinzInstalled() {
-    return (
-        window.matchMedia('(display-mode: standalone)').matches ||
-        window.navigator.standalone === true
-    );
-}
-
-
-// ==========================================
-// UPDATE BUTTONS
-// ==========================================
-
-function updateInstallButtons() {
-
-    installButtons.forEach(button => {
-
-        button.style.display =
-            isPixVinzInstalled() ? 'none' : 'flex';
-
-    });
-
-}
-
-
-// ==========================================
-// CHROME INSTALL EVENT
-// ==========================================
-
-window.addEventListener('beforeinstallprompt', event => {
-
-    event.preventDefault();
-
-    deferredPrompt = event;
-
-    updateInstallButtons();
-
-});
-
-
-// ==========================================
-// DOWNLOAD APP BUTTON
-// ==========================================
-
-installButtons.forEach(button => {
-
-    button.addEventListener('click', async () => {
-
-        // Already installed
-        if (isPixVinzInstalled()) {
-
-            updateInstallButtons();
-
-            return;
-        }
-
-
-        // Chrome supplied the native install prompt
-        if (deferredPrompt) {
-
-            try {
-
-                await deferredPrompt.prompt();
-
-                const result =
-                    await deferredPrompt.userChoice;
-
-                console.log(
-                    'PixVinz install:',
-                    result.outcome
-                );
-
-                deferredPrompt = null;
-
-                if (result.outcome === 'accepted') {
-                    updateInstallButtons();
-                }
-
-            } catch (error) {
-
-                console.error(
-                    'PixVinz installation error:',
-                    error
-                );
-
-            }
-
-            return;
-        }
-
-
-        // ======================================
-        // FALLBACK
-        // ======================================
-        //
-        // Chrome has not exposed the
-        // beforeinstallprompt event.
-        //
-        // We cannot programmatically open
-        // Chrome's native Install dialog.
-        //
-        // Tell the user exactly where it is.
-        //
-
-        alert(
-            'To install PixVinz, tap Chrome ⋮ and choose "Install app".'
-        );
-
-    });
-
-});
-
-
-// ==========================================
-// APP INSTALLED
-// ==========================================
-
-window.addEventListener('appinstalled', () => {
-
-    deferredPrompt = null;
-
-    updateInstallButtons();
-
-});
-
-
-// ==========================================
-// INITIAL STATE
-// ==========================================
-
-updateInstallButtons();
-
-
-// ==========================================
-// STANDALONE MODE CHANGE
-// ==========================================
-
-const standaloneMedia =
-    window.matchMedia('(display-mode: standalone)');
-
-if (standaloneMedia.addEventListener) {
-
-    standaloneMedia.addEventListener(
-        'change',
-        updateInstallButtons
-    );
-}
-
-
-                
