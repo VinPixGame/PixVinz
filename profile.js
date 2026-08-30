@@ -21,7 +21,7 @@ function goHome() {
     localStorage.setItem('skipLoading', 'true');
     
     if (typeof showView === 'function') {
-        showView('home');     
+        showView('home');    
         fetchUserDataFromFirestore();
     } else {
         const homeViewElement = document.getElementById('homeView') || window.parent.document.getElementById('homeView');
@@ -236,15 +236,38 @@ function updateXpProgress() {
     updateProfileStats();
 }
 
+function applyProfileRankFrame(rank) {
+    const frameImg = document.getElementById('profileRankFrame');
+    if (!frameImg) return;
+
+    if (rank === 1) {
+        frameImg.src = 'image/1.png';
+        frameImg.style.display = 'block';
+    } else if (rank === 2) {
+        frameImg.src = 'image/2.png';
+        frameImg.style.display = 'block';
+    } else if (rank === 3) {
+        frameImg.src = 'image/3.png';
+        frameImg.style.display = 'block';
+    } else {
+        frameImg.src = '';
+        frameImg.style.display = 'none';
+    }
+}
+
 async function loadProfileGlobalRank() {
     const rankValueEl = document.getElementById('profileGlobalRank') || document.querySelector('.global-rank-indicator .rank-value') || document.getElementById('displayGlobalRank');
-    if (!rankValueEl) return;
+    if (!rankValueEl) {
+        applyProfileRankFrame(null);
+        return;
+    }
 
     rankValueEl.textContent = '#--';
 
     const currentUsername = getCurrentUsername();
     if (!currentUsername) {
         rankValueEl.textContent = 'Unranked';
+        applyProfileRankFrame(null);
         return;
     }
 
@@ -271,12 +294,15 @@ async function loadProfileGlobalRank() {
             });
 
             rankValueEl.textContent = foundRank !== null ? `#${foundRank}` : 'Unranked';
+            applyProfileRankFrame(foundRank);
         } else {
             rankValueEl.textContent = 'Unranked';
+            applyProfileRankFrame(null);
         }
     } catch (err) {
         console.warn("Could not fetch global rank for profile:", err);
         rankValueEl.textContent = 'Unranked';
+        applyProfileRankFrame(null);
     }
 }
 
@@ -767,20 +793,17 @@ window.claimDailyReward = async function() {
         if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
     }
 
-    // Accumulate Bonus XP
     const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
     const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp';
     let bonusXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
     bonusXp += reward.xp;
     localStorage.setItem(xpStoreKey, bonusXp);
 
-    // Update daily state
     dailyState.streak = nextStreak;
     dailyState.lastClaimDate = today;
     dailyState.lastClaimTimestamp = nowTime;
     localStorage.setItem(storageKey, JSON.stringify(dailyState));
 
-    // Refresh UI & Sync Cloud
     updateXpProgress();
     checkDailyRewardStatus();
     renderDailyGrid();
