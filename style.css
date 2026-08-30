@@ -1177,7 +1177,13 @@ input:checked + .slider:before { transform: translateX(22px); }
 
 .modal-stat-row span:last-child {
   font-weight: bold;
-  color: #ffd700;
+  color: #00f0ff;
+  text-shadow: none;
+}
+
+.modal-xp-val {
+  color: #00f0ff;
+  text-shadow: none;
 }
 
 /* Badges Grid Container */
@@ -1223,10 +1229,6 @@ input:checked + .slider:before { transform: translateX(22px); }
 }
 
 
-.modal-xp-val {
-  color: #00f0ff;
-  text-shadow: 0 0 10px rgba(0, 240, 255, 0.8), 0 0 20px rgba(0, 240, 255, 0.5);
-}
 
 
 
