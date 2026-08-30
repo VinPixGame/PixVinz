@@ -238,16 +238,38 @@ function updateXpProgress() {
     updateProfileStats();
 }
 
-// --- LOAD & DISPLAY GLOBAL RANK ON PROFILE ---
+function applyProfileRankFrame(rank) {
+    const frameImg = document.getElementById('profileRankFrame');
+    if (!frameImg) return;
+
+    if (rank === 1) {
+        frameImg.src = 'image/1.png';
+        frameImg.style.display = 'block';
+    } else if (rank === 2) {
+        frameImg.src = 'image/2.png';
+        frameImg.style.display = 'block';
+    } else if (rank === 3) {
+        frameImg.src = 'image/3.png';
+        frameImg.style.display = 'block';
+    } else {
+        frameImg.src = '';
+        frameImg.style.display = 'none';
+    }
+}
+
 async function loadProfileGlobalRank() {
     const rankValueEl = document.getElementById('profileGlobalRank') || document.querySelector('.global-rank-indicator .rank-value') || document.getElementById('displayGlobalRank');
-    if (!rankValueEl) return;
+    if (!rankValueEl) {
+        applyProfileRankFrame(null);
+        return;
+    }
 
     rankValueEl.textContent = '#--';
 
     const currentUsername = getCurrentUsername();
     if (!currentUsername) {
         rankValueEl.textContent = 'Unranked';
+        applyProfileRankFrame(null);
         return;
     }
 
@@ -273,19 +295,25 @@ async function loadProfileGlobalRank() {
                 currentIndex++;
             });
 
-            if (foundRank !== null) {
-                rankValueEl.textContent = `#${foundRank}`;
-            } else {
-                rankValueEl.textContent = 'Unranked';
-            }
+            rankValueEl.textContent = foundRank !== null ? `#${foundRank}` : 'Unranked';
+            applyProfileRankFrame(foundRank);
         } else {
             rankValueEl.textContent = 'Unranked';
+            applyProfileRankFrame(null);
         }
     } catch (err) {
         console.warn("Could not fetch global rank for profile:", err);
         rankValueEl.textContent = 'Unranked';
+        applyProfileRankFrame(null);
     }
 }
+
+
+
+
+
+        
+
 
 
 
