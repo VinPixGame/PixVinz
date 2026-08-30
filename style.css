@@ -1012,7 +1012,6 @@ input:checked + .slider:before { transform: translateX(22px); }
   font-weight: 700;
   color: #00f2fe;
 }
-
 #globalRankSummaryCard {
   position: relative;
   display: flex;
@@ -1020,12 +1019,17 @@ input:checked + .slider:before { transform: translateX(22px); }
   align-items: center;
   justify-content: center;
   text-align: center;
+  width: 90% !important;
+  max-width: 380px !important;
+  margin: 0 auto 15px auto !important;
+  box-sizing: border-box !important;
 }
 
 #userRankDisplay {
   text-align: center !important;
   display: block !important;
   width: 100% !important;
+  margin: 0 auto !important;
 }
 
 /* ==========================================
