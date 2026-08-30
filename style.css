@@ -1178,13 +1178,18 @@ input:checked + .slider:before { transform: translateX(22px); }
 
 .modal-stat-row span:last-child {
   font-weight: bold;
-  color: #00f0ff;
+  color: #ffd700;
   text-shadow: none;
 }
 
+#profileModalRank {
+  color: #ffd700 !important;
+}
+
+#profileModalXp,
 .modal-xp-val {
-  color: #00f0ff;
-  text-shadow: none;
+  color: #00f0ff !important;
+  text-shadow: none !important;
 }
 
 /* Badges Grid Container */
