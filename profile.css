@@ -127,59 +127,6 @@ body:has(#profileView.active) #mainHeader {
     border-radius: 50%;
 }
 
-
-@property --angle {
-    syntax: "<angle>";
-    initial-value: 53deg;
-    inherits: false;
-}
-
-@keyframes glowing-border {
-    from {
-        --angle: 53deg;
-    }
-    to {
-        --angle: 413deg;
-    }
-}
-
-@keyframes blur-effect {
-    from {
-        filter: blur(15px);
-    }
-    to {
-        filter: blur(14px);
-    }
-}
-
-/* The Container Wrapper that holds the moving glow */
-.rank-frame-container {
-    position: relative;
-    width: 142px;
-    height: 142px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.rank-frame-container::before,
-.rank-frame-container::after {
-    content: "";
-    position: absolute;
-    inset: -4px; /* Controls how far the glow extends outside your frame */
-    border-radius: 50%; /* Change to 0 if your frame is square */
-    z-index: 4;
-    background: conic-gradient(from var(--angle), #0c63e7, #060c21, #d11149, #060c21, #0c63e7);
-    animation: glowing-border 3.5s linear infinite;
-}
-
-.rank-frame-container::after {
-    z-index: 3;
-    filter: blur(15px);
-    animation: glowing-border 3.5s linear infinite, blur-effect 3.5s linear infinite;
-}
-
-/* Your exact frame CSS preserved */
 #profileRankFrame {
     position: absolute !important;
     top: 50% !important;
