@@ -336,24 +336,19 @@
         <div class="profile-card">
           <!-- Avatar Display & Upload with Loading State -->
           <div class="avatar-section">
-  <div class="avatar-wrapper" id="avatarWrapper">
-    
-    <div class="rank-frame-container">
-      <img id="avatar-preview" src="image/avatar.png" alt="Profile Avatar" onerror="this.src='https://via.placeholder.com/120/4a154b/ffffff?text=Avatar'">
-      
-      <img id="profileRankFrame" src="" alt="" style="display: none;">
-      
-      <div class="avatar-loader" id="avatarLoader">
-        <div class="spinner"></div>
-      </div>
-    </div>
+            <div class="avatar-wrapper" id="avatarWrapper" style="position: relative;">
+              <img id="avatar-preview" src="image/avatar.png" alt="Profile Avatar" onerror="this.src='https://via.placeholder.com/120/4a154b/ffffff?text=Avatar'">
+              <!-- Custom Rank Frame Overlay -->
+              <img id="profileRankFrame" src="" alt="" style="display: none; position: absolute; pointer-events: none; z-index: 5;">
+              <div class="avatar-loader" id="avatarLoader">
+                <div class="spinner"></div>
+              </div>
+            </div>
+            <label for="avatar-input" class="upload-btn">Choose Avatar</label>
+            <input type="file" id="avatar-input" accept="image/*" style="display: none;">
+            <span id="avatar-status" style="font-size: 0.75rem; color: #4caf50; font-weight: 600; margin-top: 6px; display: none;">Avatar Updated!</span>
+          </div>
 
-    <label for="avatar-input" class="upload-btn">Choose Avatar</label>
-    <input type="file" id="avatar-input" accept="image/*" style="display: none;">
-    <span id="avatar-status" style="display: none;">Avatar Updated!</span>
-
-  </div>
-</div>
           <!-- Player Name Display Row with Small Edit Button -->
           <div class="profile-info-row">
             <div class="profile-info-top">
