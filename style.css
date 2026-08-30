@@ -1102,16 +1102,16 @@ input:checked + .slider:before { transform: translateX(22px); }
 .modal-avatar-wrapper,
 #profileModalAvatarWrapper {
   position: relative;
-  width: 90px;
-  height: 90px;
+  width: 100px;
+  height: 100px;
   margin: 10px auto 12px auto;
   display: block;
 }
 
 .modal-avatar-img,
 #profileModalAvatar {
-  width: 90px !important;
-  height: 90px !important;
+  width: 100px !important;
+  height: 100px !important;
   border-radius: 50% !important;
   object-fit: cover !important;
   position: relative;
@@ -1121,10 +1121,10 @@ input:checked + .slider:before { transform: translateX(22px); }
 
 .modal-rank-frame {
   position: absolute;
-  top: -15px;
-  left: -15px;
-  width: 120px;
-  height: 120px;
+  top: 10px;
+  left: 12px;
+  width: 140px;
+  height: 140px;
   pointer-events: none;
   z-index: 10;
   object-fit: contain;
@@ -1137,7 +1137,7 @@ input:checked + .slider:before { transform: translateX(22px); }
   font-size: 20px;
   font-weight: bold;
   color: #fff;
-  margin: 4px 0 10px 0;
+  margin: 4px 0 6px 0;
   text-align: center;
   letter-spacing: 0.5px;
 }
@@ -1148,8 +1148,8 @@ input:checked + .slider:before { transform: translateX(22px); }
   background: rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  padding: 10px 14px;
-  margin-bottom: 14px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
   box-sizing: border-box;
 }
 
