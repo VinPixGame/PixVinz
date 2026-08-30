@@ -1123,8 +1123,8 @@ input:checked + .slider:before { transform: translateX(22px); }
   position: absolute;
   top: -15px !important; 
   left: 12px;
-  width: 160px;
-  height: 160px;
+  width: 200px;
+  height: 200px;
   pointer-events: none;
   z-index: 10;
   object-fit: contain;
@@ -1136,7 +1136,7 @@ input:checked + .slider:before { transform: translateX(22px); }
 #profileModalName {
   font-size: 20px;
   font-weight: bold;
-  color: #fff;
+  color: #ffd700;
   margin: 4px 0 6px 0;
   text-align: center;
   letter-spacing: 0.5px;
