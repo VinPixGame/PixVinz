@@ -1102,8 +1102,8 @@ input:checked + .slider:before { transform: translateX(22px); }
 .modal-avatar-wrapper,
 #profileModalAvatarWrapper {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 90px;
+  height: 90px;
   margin: 10px auto 12px auto;
   display: block;
 }
@@ -1123,8 +1123,8 @@ input:checked + .slider:before { transform: translateX(22px); }
   position: absolute;
   top: -15px !important; 
   left: 12px;
-  width: 200px;
-  height: 200px;
+  width: 220px;
+  height: 220px;
   pointer-events: none;
   z-index: 10;
   object-fit: contain;
@@ -1179,8 +1179,8 @@ input:checked + .slider:before { transform: translateX(22px); }
 
 .badge-card img,
 .badge-img {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   object-fit: contain;
   display: block;
   margin: 0 auto 6px;
