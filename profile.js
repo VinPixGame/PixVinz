@@ -33,6 +33,8 @@ function goHome() {
     }
 }
 
+
+
 // --- SAFE CLOUD SYNC ---
 window.saveUserDataToCloud = async function() {
     try {
@@ -87,37 +89,42 @@ async function fetchUserDataFromFirestore() {
             const userDocRef = doc(db, "players", username);
             const userSnap = await getDoc(userDocRef);
 
+            const localLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+            const localCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
+            const localAvatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
+
             if (userSnap.exists()) {
                 const cloudData = userSnap.data();
                 const currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
 
-                // Firestore-first: prioritize cloud values directly, fallback to local if cloud fields are missing
-                const finalLevel = cloudData.level !== undefined ? cloudData.level : (parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1);
-                const finalCoins = cloudData.coins !== undefined ? cloudData.coins : (parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0);
-                const finalAvatar = cloudData.avatar !== undefined ? cloudData.avatar : (localStorage.getItem(getUserKey('vinpix_avatar')) || '');
+                // Use Math.max to prevent rolling back progress if cloud is slightly stale
+                const finalLevel = cloudData.level !== undefined ? Math.max(cloudData.level, localLevel) : localLevel;
+                const finalCoins = cloudData.coins !== undefined ? Math.max(cloudData.coins, localCoins) : localCoins;
+                const finalAvatar = cloudData.avatar !== undefined ? cloudData.avatar : localAvatar;
                 
-                // Calculate or take XP directly from Firestore
                 let finalXp = cloudData.xp;
                 if (finalXp === undefined) {
-                    const localLevelCheck = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
-                    const puzzlesSolved = Math.max(0, localLevelCheck - 1);
+                    const puzzlesSolved = Math.max(0, finalLevel - 1);
                     finalXp = calculateLevelAndXp(puzzlesSolved).currentXp;
+                } else {
+                    const localXp = calculateLevelAndXp(Math.max(0, localLevel - 1)).currentXp;
+                    finalXp = Math.max(cloudData.xp, localXp);
                 }
 
                 const updatedUser = {
                     ...currentUser,
                     username: cloudData.username || currentUser.username,
                     displayName: cloudData.displayName || currentUser.displayName,
-                    coins: finalCoins,
-                    xp: finalXp,
                     level: finalLevel,
+                    xp: finalXp,
+                    coins: finalCoins,
                     avatar: finalAvatar,
                     dailyRewardState: cloudData.dailyRewardState || currentUser.dailyRewardState
                 };
 
                 localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
 
-                // Sync stats to local storage keys
+                // Sync stats to local storage keys safely
                 const prefix = username + '_';
                 localStorage.setItem(prefix + 'totalCoins', finalCoins);
                 localStorage.setItem(prefix + 'currentLevel', finalLevel);
@@ -136,13 +143,16 @@ async function fetchUserDataFromFirestore() {
                 if (typeof updateProfileStats === 'function') updateProfileStats();
                 if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
 
-                console.log("Profile successfully fetched and prioritized from Firestore!");
+                console.log("Profile successfully fetched and protected with Math.max sync!");
             }
         }
     } catch (err) {
         console.error("Failed to fetch data from Firestore, falling back to local storage:", err);
     }
 }
+
+
+
 
 function applyAvatarToUI(avatarData) {
     const avatarLoader = document.getElementById('avatarLoader');
