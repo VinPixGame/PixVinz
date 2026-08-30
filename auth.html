@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="auth.css">
     <link rel="manifest" href="/PixVinz/manifest.json">
     <meta name="theme-color" content="#121212">
-    
 </head>
 <body>
     <div class="app-container">
@@ -220,48 +219,25 @@
 </div>
 
     <!-- Firebase Initialization Module Script -->
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-      import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
-      import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+    <script type="module" src="firebase.js"></script>
 
-      const firebaseConfig = {
-        apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
-        authDomain: "pixvinz2026.firebaseapp.com",
-        projectId: "pixvinz2026",
-        storageBucket: "pixvinz2026.firebasestorage.app",
-        messagingSenderId: "45609077809",
-        appId: "1:45609077809:web:575611e46acda9f64c5910",
-        measurementId: "G-W7FSERE8ZJ"
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const db = getFirestore(app);
-
-      window.pixvinzDb = { db, doc, getDoc, setDoc };
-      window.pixvinzAuth = { auth, createUserWithEmailAndPassword };
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/PixVinz/sw.js')
+                .then(() => {
+                    console.log('PixVinz service worker registered.');
+                })
+                .catch(error => {
+                    console.error(
+                        'PixVinz service worker registration failed:',
+                        error
+                    );
+                });
+        });
+    }
     </script>
 
-<script>
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/PixVinz/sw.js')
-            .then(() => {
-                console.log('PixVinz service worker registered.');
-            })
-            .catch(error => {
-                console.error(
-                    'PixVinz service worker registration failed:',
-                    error
-                );
-            });
-    });
-}
-</script>
-
-
-    
     <script src="auth.js"></script>
 </body>
 </html>
