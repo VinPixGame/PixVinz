@@ -54,29 +54,20 @@
 </div>
 
 <div id="previewPopup" class="preview-popup hidden">
-
   <div class="preview-overlay">
-
     <div class="preview-box">
-
       <div class="preview-header">
         <span id="previewTitle">👁 LEVEL PREVIEW</span>
-
         <span id="previewCountdown">10</span>
       </div>
-
       <div class="preview-image-container">
-        <img id="previewImage" src="" alt="Level Preview">
+        <img id="previewImage" alt="Level Preview">
       </div>
-
       <button id="previewCloseBtn" class="preview-close-btn">
         CLOSE
       </button>
-
     </div>
-
   </div>
-
 </div>
     
   <!-- Victory Modal -->
@@ -94,7 +85,7 @@
       <div class="victory-subtitle-pro">✦ Amazing work! ✦</div>
 
       <div class="victory-img-container-pro">
-        <img id="victoryImg" src="" alt="Solved Puzzle">
+        <img id="victoryImg" alt="Solved Puzzle">
       </div>
 
       <div class="star-rating-pro" id="victoryStars">
@@ -142,40 +133,24 @@
     
   <script src="audio.js"></script>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+  <script type="module">
+    import { db, doc, getDoc, setDoc, updateDoc } from "./firebase.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
-    authDomain: "pixvinz2026.firebaseapp.com",
-    projectId: "pixvinz2026",
-    storageBucket: "pixvinz2026.firebasestorage.app",
-    messagingSenderId: "45609077809",
-    appId: "1:45609077809:web:575611e46acda9f64c5910",
-    measurementId: "G-W7FSERE8ZJ"
-  };
+    window.pixvinzDb = { db, doc, getDoc, setDoc, updateDoc };
+    window.db = db;
+    window.doc = doc;
+    window.getDoc = getDoc;
+    window.setDoc = setDoc;
+    window.updateDoc = updateDoc;
+    window.getCurrentUser = function() {
+      try {
+        return JSON.parse(localStorage.getItem('loggedInUser'));
+      } catch (e) {
+        return null;
+      }
+    };
+  </script>
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  // EXPOSE GLOBALLY SO playerstat.js CAN ACCESS THEM WITHOUT CRASHING
-  window.db = db;
-  window.doc = doc;
-  window.getDoc = getDoc;
-  window.setDoc = setDoc;
-  window.updateDoc = updateDoc;
-  window.getCurrentUser = function() {
-    try {
-      return JSON.parse(localStorage.getItem('loggedInUser'));
-    } catch (e) {
-      return null;
-    }
-  };
-</script>
-
-<!-- Player Stats & Main Game Scripts -->
   <script src="playerstat.js"></script>
   <script type="module" src="game.js"></script>
 
