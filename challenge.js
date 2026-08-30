@@ -436,16 +436,22 @@ if (startChallengeBtn) {
         masterVideo.play().catch(err => console.log("Video error:", err));
 
         if (loadingOverlay) loadingOverlay.style.display = 'none';
+
         challengeStarted = true;
+
+        // Shuffle the puzzle first
         shuffleBoard();
 
-        // Start the timer immediately upon clicking start
-        if (!isPlaying && secondsElapsed === 0) {
-            startTimer();
-            isPlaying = true;
-        }
+        // Start timer immediately when Start is clicked
+        secondsElapsed = 0;
+        timerDisplay.textContent = "00:00";
+
+        stopTimer();
+        startTimer();
+        isPlaying = true;
     });
 }
+
     if (selectedTileIndex === null) {
         selectedTileIndex = clickedPos;
     } else if (selectedTileIndex === clickedPos) {
