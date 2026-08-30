@@ -1121,10 +1121,10 @@ input:checked + .slider:before { transform: translateX(22px); }
 
 .modal-rank-frame {
   position: absolute;
-  top: -16px !important; 
+  top: -15px !important; 
   left: 12px;
-  width: 150px;
-  height: 150px;
+  width: 160px;
+  height: 160px;
   pointer-events: none;
   z-index: 10;
   object-fit: contain;
@@ -1179,8 +1179,8 @@ input:checked + .slider:before { transform: translateX(22px); }
 
 .badge-card img,
 .badge-img {
-  width: 38px;
-  height: 38px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
   display: block;
   margin: 0 auto 6px;
