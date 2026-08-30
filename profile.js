@@ -60,6 +60,10 @@ window.saveUserDataToCloud = async function() {
         const dailyDataStr = localStorage.getItem(dailyStorageKey);
         const dailyRewardState = dailyDataStr ? JSON.parse(dailyDataStr) : { streak: 0, lastClaimDate: "" };
 
+        // --- CHALLENGE DATA ---
+        const challengeDataStr = localStorage.getItem(getUserKey('challenge'));
+        const challengeData = challengeDataStr ? JSON.parse(challengeDataStr) : {};
+
         const userDocRef = doc(db, "players", username);
         await setDoc(userDocRef, {
             username: username,
@@ -69,6 +73,7 @@ window.saveUserDataToCloud = async function() {
             coins: totalCoins,
             avatar: avatar,
             dailyRewardState: dailyRewardState,
+            challenge: challengeData,
             lastUpdated: new Date()
         }, { merge: true });
         
@@ -101,7 +106,8 @@ async function fetchUserDataFromFirestore() {
                     xp: cloudData.xp !== undefined ? cloudData.xp : (currentUser.xp || 0),
                     coins: cloudData.coins !== undefined ? cloudData.coins : (currentUser.coins || 0),
                     avatar: cloudData.avatar || currentUser.avatar || '',
-                    dailyRewardState: cloudData.dailyRewardState || currentUser.dailyRewardState
+                    dailyRewardState: cloudData.dailyRewardState || currentUser.dailyRewardState,
+                    challenge: cloudData.challenge || currentUser.challenge || {}
                 };
 
                 // Save fresh data back to local storage
@@ -112,6 +118,11 @@ async function fetchUserDataFromFirestore() {
                 if (cloudData.coins !== undefined) localStorage.setItem(prefix + 'totalCoins', cloudData.coins);
                 if (cloudData.level !== undefined) localStorage.setItem(prefix + 'currentLevel', cloudData.level);
                 if (cloudData.avatar) localStorage.setItem(prefix + 'vinpix_avatar', cloudData.avatar);
+
+                // Sync challenge data down to local storage
+                if (cloudData.challenge !== undefined) {
+                    localStorage.setItem(prefix + 'challenge', JSON.stringify(cloudData.challenge));
+                }
 
                 // Sync daily reward state down to local storage key
                 if (cloudData.dailyRewardState) {
@@ -754,160 +765,159 @@ function renderDailyGrid() {
     if (claimBtn) {
         if (dailyCountdownInterval) {
             clearInterval(dailyCountdownInterval);
-dailyCountdownInterval = null;
-        }
+            dailyCountdownInterval = null;
+        }
 
-        claimBtn.style.pointerEvents = 'auto';
+        claimBtn.style.pointerEvents = 'auto';
 
-        if (lockedOut && dailyState.lastClaimTimestamp) {
-            claimBtn.style.background = 'rgba(255,255,255,0.1)';
-            claimBtn.style.color = '#ffd700';
-            claimBtn.style.cursor = 'not-allowed';
-            claimBtn.disabled = true;
+        if (lockedOut && dailyState.lastClaimTimestamp) {
+            claimBtn.style.background = 'rgba(255,255,255,0.1)';
+            claimBtn.style.color = '#ffd700';
+            claimBtn.style.cursor = 'not-allowed';
+            claimBtn.disabled = true;
 
-            const updateTimerDisplay = () => {
-                const currentTime = Date.now();
-                const targetTime = dailyState.lastClaimTimestamp + (24 * 60 * 60 * 1000);
-                const diff = targetTime - currentTime;
+            const updateTimerDisplay = () => {
+                const currentTime = Date.now();
+                const targetTime = dailyState.lastClaimTimestamp + (24 * 60 * 60 * 1000);
+                const diff = targetTime - currentTime;
 
-                if (diff <= 0) {
-                    claimBtn.textContent = `CLAIM DAY ${currentDayIndex} REWARD`;
-                    claimBtn.disabled = false;
-                    claimBtn.style.cursor = 'pointer';
-                    renderDailyGrid();
-                    return;
-                }
+                if (diff <= 0) {
+                    claimBtn.textContent = `CLAIM DAY ${currentDayIndex} REWARD`;
+                    claimBtn.disabled = false;
+                    claimBtn.style.cursor = 'pointer';
+                    renderDailyGrid();
+                    return;
+                }
 
-                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-                const minutes = Math.floor((diff / 1000 / 60) % 60);
-                const seconds = Math.floor((diff / 1000) % 60);
+                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const minutes = Math.floor((diff / 1000 / 60) % 60);
+                const seconds = Math.floor((diff / 1000) % 60);
 
-                const pad = (n) => String(n).padStart(2, '0');
-                claimBtn.textContent = `NEXT CLAIM IN: ${pad(hours)}:${pad(minutes)}:${pad(seconds)} ⏳`;
-            };
+                const pad = (n) => String(n).padStart(2, '0');
+                claimBtn.textContent = `NEXT CLAIM IN: ${pad(hours)}:${pad(minutes)}:${pad(seconds)} ⏳`;
+            };
 
-            updateTimerDisplay();
-            dailyCountdownInterval = setInterval(updateTimerDisplay, 1000);
-        } else {
-            claimBtn.textContent = `CLAIM DAY ${currentDayIndex} REWARD`;
-            claimBtn.style.background = 'linear-gradient(135deg, #ffd700, #ffaa00)';
-            claimBtn.style.color = '#130f2b';
-            claimBtn.style.cursor = 'pointer';
-            claimBtn.disabled = false;
-        }
-    }
+            updateTimerDisplay();
+            dailyCountdownInterval = setInterval(updateTimerDisplay, 1000);
+        } else {
+            claimBtn.textContent = `CLAIM DAY ${currentDayIndex} REWARD`;
+            claimBtn.style.background = 'linear-gradient(135deg, #ffd700, #ffaa00)';
+            claimBtn.style.color = '#130f2b';
+            claimBtn.style.cursor = 'pointer';
+            claimBtn.disabled = false;
+        }
+    }
 }
 
 window.claimDailyReward = async function() {
-    const storageKey = getDailyStorageKey();
-    let dailyState = JSON.parse(localStorage.getItem(storageKey) || '{"streak": 0, "lastClaimDate": "", "lastClaimTimestamp": 0}');
-    const today = getTodayDateString();
-    
-    const nowTime = Date.now();
-    if (dailyState.lastClaimDate === today || (dailyState.lastClaimTimestamp && nowTime - dailyState.lastClaimTimestamp < 24 * 60 * 60 * 1000)) {
-        return;
-    }
+    const storageKey = getDailyStorageKey();
+    let dailyState = JSON.parse(localStorage.getItem(storageKey) || '{"streak": 0, "lastClaimDate": "", "lastClaimTimestamp": 0}');
+    const today = getTodayDateString();
+    
+    const nowTime = Date.now();
+    if (dailyState.lastClaimDate === today || (dailyState.lastClaimTimestamp && nowTime - dailyState.lastClaimTimestamp < 24 * 60 * 60 * 1000)) {
+        return;
+    }
 
-    let nextStreak = dailyState.streak + 1;
-    if (nextStreak > 7) nextStreak = 1;
+    let nextStreak = dailyState.streak + 1;
+    if (nextStreak > 7) nextStreak = 1;
 
-    const reward = dailyRewardsData[nextStreak - 1];
+    const reward = dailyRewardsData[nextStreak - 1];
 
-    if (typeof earnCoins === 'function') {
-        earnCoins(reward.coins);
-    } else {
-        const coinKey = typeof getUserKey === 'function' ? getUserKey('totalCoins') : 'totalCoins';
-        let totalCoins = (parseInt(localStorage.getItem(coinKey)) || 0) + reward.coins;
-        localStorage.setItem(coinKey, totalCoins);
-        if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
-    }
+    if (typeof earnCoins === 'function') {
+        earnCoins(reward.coins);
+    } else {
+        const coinKey = typeof getUserKey === 'function' ? getUserKey('totalCoins') : 'totalCoins';
+        let totalCoins = (parseInt(localStorage.getItem(coinKey)) || 0) + reward.coins;
+        localStorage.setItem(coinKey, totalCoins);
+        if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+    }
 
-    try {
-        const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
-        const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp';
-        let bonusXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
-        bonusXp += reward.xp;
-        localStorage.setItem(xpStoreKey, bonusXp);
-    } catch (e) {}
+    try {
+        const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
+        const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp';
+        let bonusXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
+        bonusXp += reward.xp;
+        localStorage.setItem(xpStoreKey, bonusXp);
+    } catch (e) {}
 
-    dailyState.streak = nextStreak;
-    dailyState.lastClaimDate = today;
-    dailyState.lastClaimTimestamp = nowTime;
-    localStorage.setItem(storageKey, JSON.stringify(dailyState));
+    dailyState.streak = nextStreak;
+    dailyState.lastClaimDate = today;
+    dailyState.lastClaimTimestamp = nowTime;
+    localStorage.setItem(storageKey, JSON.stringify(dailyState));
 
-    renderDailyGrid();
-    checkDailyRewardStatus();
+    renderDailyGrid();
+    checkDailyRewardStatus();
 
-    if (typeof updateXpProgress === 'function') updateXpProgress();
-    if (typeof updateProfileUI === 'function') updateProfileUI();
-    
-    if (typeof saveUserDataToCloud === 'function') {
-        saveUserDataToCloud();
-    }
+    if (typeof updateXpProgress === 'function') updateXpProgress();
+    if (typeof updateProfileUI === 'function') updateProfileUI();
+    
+    if (typeof saveUserDataToCloud === 'function') {
+        saveUserDataToCloud();
+    }
 
-    try {
-        const rewardAudio = new Audio('sounds/reward.mp3');
-        rewardAudio.volume = 0.6;
-        rewardAudio.play().catch(e => console.log("Audio play blocked:", e));
-    } catch (e) {}
+    try {
+        const rewardAudio = new Audio('sounds/reward.mp3');
+        rewardAudio.volume = 0.6;
+        rewardAudio.play().catch(e => console.log("Audio play blocked:", e));
+    } catch (e) {}
 
-    showRewardToast(`🎉 Claimed Day ${nextStreak}! +${reward.coins} Coins & +${reward.xp} XP`);
+    showRewardToast(`🎉 Claimed Day ${nextStreak}! +${reward.coins} Coins & +${reward.xp} XP`);
 };
 
 function showRewardToast(message) {
-    const existingToast = document.getElementById('customRewardToast');
-    if (existingToast) existingToast.remove();
+    const existingToast = document.getElementById('customRewardToast');
+    if (existingToast) existingToast.remove();
 
-    const dailyButton = document.querySelector("button[onclick='openDailyModal()']");
-    if (!dailyButton) return;
+    const dailyButton = document.querySelector("button[onclick='openDailyModal()']");
+    if (!dailyButton) return;
 
-    const parentContainer = dailyButton.parentElement;
-    if (parentContainer) {
-        parentContainer.style.position = 'relative';
-    }
-
-    const toast = document.createElement('div');
-    toast.id = 'customRewardToast';
-    toast.style.cssText = `
-        position: absolute;
-        bottom: 100%;
-        left: 50%;
-        transform: translateX(-50%) translateY(10px);
-        margin-bottom: 12px;
-        background: linear-gradient(135deg, #130f2b, #2b1055);
-        border: 2px solid #ffd700;
-        color: #fff;
-        padding: 10px 20px;
-        border-radius: 14px;
-        font-weight: 700;
-        font-size: 13px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 15px rgba(255,215,0,0.4);
-        z-index: 99999;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        opacity: 0;
-        white-space: nowrap;
-        pointer-events: none;
-        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-    `;
-
-    toast.innerHTML = `
-        <span style="font-size: 18px;">🎁</span>
-        <span>${message}</span>
-    `;
-
-    dailyButton.before(toast);
-
-    setTimeout(() => {
-        toast.style.transform = 'translateX(-50%) translateY(0)';
-        toast.style.opacity = '1';
-    }, 10);
-
-    setTimeout(() => {
-        toast.style.transform = 'translateX(-50%) translateY(10px)';
-        toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    const parentContainer = dailyButton.parentElement;
+    if (parentContainer) {
+        parentContainer.style.position = 'relative';
     }
-            
+
+    const toast = document.createElement('div');
+    toast.id = 'customRewardToast';
+    toast.style.cssText = `
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%) translateY(10px);
+        margin-bottom: 12px;
+        background: linear-gradient(135deg, #130f2b, #2b1055);
+        border: 2px solid #ffd700;
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 13px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 15px rgba(255,215,0,0.4);
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        opacity: 0;
+        white-space: nowrap;
+        pointer-events: none;
+        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    `;
+
+    toast.innerHTML = `
+        <span style="font-size: 18px;">🎁</span>
+        <span>${message}</span>
+    `;
+
+    dailyButton.before(toast);
+
+    setTimeout(() => {
+        toast.style.transform = 'translateX(-50%) translateY(0)';
+        toast.style.opacity = '1';
+    }, 10);
+
+    setTimeout(() => {
+        toast.style.transform = 'translateX(-50%) translateY(10px)';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
