@@ -438,15 +438,14 @@ if (startChallengeBtn) {
         if (loadingOverlay) loadingOverlay.style.display = 'none';
         challengeStarted = true;
         shuffleBoard();
+
+        // Start the timer immediately upon clicking start
+        if (!isPlaying && secondsElapsed === 0) {
+            startTimer();
+            isPlaying = true;
+        }
     });
 }
-
-function handleTileClick(clickedPos) {
-    if (!isPlaying && secondsElapsed === 0) {
-        startTimer();
-        isPlaying = true;
-    }
-
     if (selectedTileIndex === null) {
         selectedTileIndex = clickedPos;
     } else if (selectedTileIndex === clickedPos) {
