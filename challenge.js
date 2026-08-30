@@ -446,6 +446,8 @@ if (startChallengeBtn) {
         }
     });
 }
+
+function handleTileClick(clickedPos) {
     if (selectedTileIndex === null) {
         selectedTileIndex = clickedPos;
     } else if (selectedTileIndex === clickedPos) {
@@ -584,6 +586,23 @@ function endGame() {
         let currentXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
         currentXp += finalXp;
         localStorage.setItem(xpStoreKey, currentXp);
+
+        // --- FIREBASE CLOUD SYNC INTEGRATION ---
+        if (window.pixvinzDb) {
+            const { db, doc, setDoc } = window.pixvinzDb;
+            if (currentUsername) {
+                const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
+                const savedChallenge = parseInt(localStorage.getItem(getUserKey('currentChallenge'))) || currentChallenge;
+                
+                setDoc(doc(db, 'players', currentUsername), {
+                    coins: totalCoins,
+                    currentChallenge: savedChallenge,
+                    bonusXp: currentXp,
+                    lastUpdated: new Date().toISOString()
+                }, { merge: true }).catch(err => console.warn("Challenge cloud save warning:", err));
+            }
+        }
+        // ----------------------------------------
 
         if (typeof saveUserDataToCloud === 'function') {
             saveUserDataToCloud();
