@@ -143,8 +143,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const vMoves = document.getElementById('vMoves');
       if (vMoves) vMoves.innerText = moves;
 
+      const earnedCoins = stars * 5;
       const vCoins = document.getElementById('vCoins');
-      if (vCoins) vCoins.innerText = `+${stars * 5}`;
+      if (vCoins) vCoins.innerText = `+${earnedCoins}`;
 
       let tier = Math.floor((currentLevel - 1) / 10);
       let xpGained = (tier + 1) * 100;
@@ -160,22 +161,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       const currentMoves = moves;
       const currentTimeStr = timerDisplay ? timerDisplay.innerText : "00:00";
 
-      // --- FIX: Force level progression update & immediate cloud sync ---
+      // --- FIX: Sync Level, Coins, and User Profile Data for profile.js & Firestore ---
       const levelKey = typeof getUserKey === 'function' ? getUserKey('currentLevel') : 'currentLevel';
-      const savedLevel = parseInt(localStorage.getItem(levelKey)) || currentLevel;
+      const coinKey = typeof getUserKey === 'function' ? getUserKey('totalCoins') : 'totalCoins';
       
-      if (currentLevel >= savedLevel) {
-        const nextLvl = currentLevel + 1;
-        localStorage.setItem(levelKey, nextLvl);
-        
-        try {
-          const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
-          if (userObj) {
-            userObj.level = nextLvl;
-            localStorage.setItem('loggedInUser', JSON.stringify(userObj));
-          }
-        } catch (e) {}
-      }
+      const savedLevel = parseInt(localStorage.getItem(levelKey)) || currentLevel;
+      const nextLvl = currentLevel >= savedLevel ? currentLevel + 1 : savedLevel;
+      localStorage.setItem(levelKey, nextLvl);
+
+      const currentCoins = parseInt(localStorage.getItem(coinKey)) || 0;
+      const newTotalCoins = currentCoins + earnedCoins;
+      localStorage.setItem(coinKey, newTotalCoins);
+
+      try {
+        const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (userObj) {
+          userObj.level = nextLvl;
+          userObj.coins = newTotalCoins;
+          localStorage.setItem('loggedInUser', JSON.stringify(userObj));
+        }
+      } catch (e) {}
+      // ------------------------------------------------------------------------------
 
       if (typeof handleLevelVictory === 'function') {
         handleLevelVictory(currentLevel, stars, currentMoves, currentTimeStr);
@@ -184,7 +190,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (typeof saveUserDataToCloud === 'function') {
         saveUserDataToCloud();
       }
-      // -----------------------------------------------------------------
 
       startConfetti();
     }
