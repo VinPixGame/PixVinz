@@ -160,14 +160,35 @@ document.addEventListener('DOMContentLoaded', async () => {
       const currentMoves = moves;
       const currentTimeStr = timerDisplay ? timerDisplay.innerText : "00:00";
 
+      // --- FIX: Force level progression update & immediate cloud sync ---
+      const levelKey = typeof getUserKey === 'function' ? getUserKey('currentLevel') : 'currentLevel';
+      const savedLevel = parseInt(localStorage.getItem(levelKey)) || currentLevel;
+      
+      if (currentLevel >= savedLevel) {
+        const nextLvl = currentLevel + 1;
+        localStorage.setItem(levelKey, nextLvl);
+        
+        try {
+          const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
+          if (userObj) {
+            userObj.level = nextLvl;
+            localStorage.setItem('loggedInUser', JSON.stringify(userObj));
+          }
+        } catch (e) {}
+      }
+
       if (typeof handleLevelVictory === 'function') {
         handleLevelVictory(currentLevel, stars, currentMoves, currentTimeStr);
       }
 
+      if (typeof saveUserDataToCloud === 'function') {
+        saveUserDataToCloud();
+      }
+      // -----------------------------------------------------------------
+
       startConfetti();
     }
   }
-
   function startConfetti() {
     const canvas = document.getElementById('confettiCanvas');
     if (!canvas) return;
