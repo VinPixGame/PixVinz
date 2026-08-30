@@ -308,24 +308,14 @@ body {
   position: relative;
 }
 
-#globalRankSummaryCard {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+.overall-best-card#globalRankSummaryCard {
   width: 90% !important;
   max-width: 380px !important;
-  margin: 25px auto 15px auto !important;
-  box-sizing: border-box !important;
-  background: radial-gradient(circle at top, rgba(45, 16, 84, 0.9) 0%, rgba(18, 6, 36, 0.95) 100%) !important;
-  border: 1.5px solid #7b2cbf !important;
-  border-radius: 18px !important;
-  padding: 14px 10px 12px !important;
-  box-shadow: 0 0 15px rgba(123, 44, 191, 0.3), inset 0 0 10px rgba(0, 0, 0, 0.5) !important;
+  margin: 25px auto 14px auto !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
 }
-
 #globalRankSummaryCard::before {
   content: "🏆";
   position: absolute;
