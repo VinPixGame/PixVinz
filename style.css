@@ -1121,7 +1121,7 @@ input:checked + .slider:before { transform: translateX(22px); }
 
 .modal-rank-frame {
   position: absolute;
-  top: 10px;
+  top: 0px;
   left: 12px;
   width: 140px;
   height: 140px;
