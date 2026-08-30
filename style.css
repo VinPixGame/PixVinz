@@ -1019,6 +1019,10 @@ input:checked + .slider:before { transform: translateX(22px); }
   align-items: center;
   justify-content: center;
   text-align: center;
+  width: 90%;
+  max-width: 400px; /* Adjust this to match your leaderboard item width */
+  margin: 0 auto 15px auto;
+  box-sizing: border-box;
 }
 
 #userRankDisplay {
