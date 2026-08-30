@@ -365,7 +365,6 @@
               <span class="level-label">Level:</span> 
               <span id="profileLevel">1</span>
             </span>
-
           </div>
 
           <!-- XP Progress Bar Section -->
@@ -531,8 +530,29 @@
 
   </div> <!-- End .app-container -->
 
-  <!-- Firebase Initialization Module Script linked to centralized firebase.js -->
-  <script type="module" src="firebase.js"></script>
+  <!-- Firebase Initialization Module Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
+      authDomain: "pixvinz2026.firebaseapp.com",
+      projectId: "pixvinz2026",
+      storageBucket: "pixvinz2026.firebasestorage.app",
+      messagingSenderId: "45609077809",
+      appId: "1:45609077809:web:575611e46acda9f64c5910",
+      measurementId: "G-W7FSERE8ZJ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    window.pixvinzDb = { db, doc, getDoc, setDoc };
+    window.pixvinzAuth = { auth, createUserWithEmailAndPassword };
+  </script>
   <script src="audio.js"></script> 
   <script src="collection.js"></script>
   <script type="module" src="script.js"></script>
