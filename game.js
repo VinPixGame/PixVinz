@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const timerDisplay = document.getElementById('timerDisplay');
 
   function getLevelImageIndex(levelNum) {
-    return ((levelNum - 1) % 200) + 1;
+      return ((levelNum - 1) % 200) + 1;
   }
 
   function getGridSize(level) {
@@ -225,6 +225,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+     
+    
+      
+
   const nextLevelBtn = document.getElementById('nextLevelBtn');
   if (nextLevelBtn) {
     nextLevelBtn.onclick = async (e) => {
@@ -295,13 +299,6 @@ function getCurrentLevel() {
   return Math.min(Math.max(level, 1), 200);
 }
 
-function safeGetUserKey(key) {
-  if (typeof getUserKey === 'function') return getUserKey(key);
-  const user = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
-  const prefix = user.username ? `${user.username}_` : '';
-  return `${prefix}${key}`;
-}
-
 function openLevelPreview() {
   const previewPopup = document.getElementById('previewPopup');
   const previewImage = document.getElementById('previewImage');
@@ -317,37 +314,49 @@ function openLevelPreview() {
 
   const currentLevel = getCurrentLevel();
   const previewTitle = document.getElementById('previewTitle');
-  if (previewTitle) {
-    previewTitle.textContent = `👁 LEVEL ${currentLevel} PREVIEW`;
-  }
+if (previewTitle) {
+  previewTitle.textContent = `👁 LEVEL ${currentLevel} PREVIEW`;
+}
 
-  const totalCoinsKey = safeGetUserKey('totalCoins');
-  const coinsBeforePreview = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
+  /*
+   * =====================================================
+   * COIN CHECK
+   * =====================================================
+   *
+   * This expects your game to have a global `coins`
+   * variable.
+   *
+   * If your existing game uses a different coin variable,
+   * this is the ONLY part that needs to be connected to it.
+   */
 
-  if (coinsBeforePreview < PREVIEW_COST) {
-    alert('Not enough coins for preview!');
-    return;
-  }
+const totalCoinsKey = getUserKey('totalCoins');
+const coinsBeforePreview = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
 
-  let paymentSuccessful = false;
+if (coinsBeforePreview < PREVIEW_COST) {
+  return;
+}
 
-  if (typeof spendCoins === 'function') {
-    paymentSuccessful = spendCoins(PREVIEW_COST);
-  } else {
-    // Manual fallback deduction if spendCoins isn't globally available
-    const newCoins = coinsBeforePreview - PREVIEW_COST;
-    localStorage.setItem(totalCoinsKey, newCoins);
+let paymentSuccessful = false;
+
+try {
+  paymentSuccessful = spendCoins(PREVIEW_COST);
+} catch (error) {
+  const coinsAfterPreview =
+    parseInt(localStorage.getItem(totalCoinsKey)) || 0;
+
+  if (coinsAfterPreview === coinsBeforePreview - PREVIEW_COST) {
     paymentSuccessful = true;
+  } else {
+    console.error('Preview coin deduction failed:', error);
   }
+}
 
-  if (!paymentSuccessful) {
-    return;
-  }
-
-  if (typeof updateCoinDisplay === 'function') {
-    updateCoinDisplay();
-  }
-    
+if (!paymentSuccessful) {
+  return;
+}
+  
+  
   previewActive = true;
 
   clearInterval(previewTimer);
