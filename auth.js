@@ -504,6 +504,11 @@ if (regPassConfirm) {
             );
 
             localStorage.setItem(
+                prefix + 'xp',
+                newUserData.xp
+            );
+
+            localStorage.setItem(
                 prefix + 'vinpix_avatar',
                 newUserData.avatar
             );
@@ -689,6 +694,12 @@ if (regPassConfirm) {
                     localStorage.setItem(
                         prefix + 'currentLevel',
                         freshUserData.level
+                    );
+
+
+                    localStorage.setItem(
+                        prefix + 'xp',
+                        freshUserData.xp
                     );
 
 
