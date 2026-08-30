@@ -61,9 +61,8 @@ window.saveUserDataToCloud = async function() {
         const dailyRewardState = dailyDataStr ? JSON.parse(dailyDataStr) : { streak: 0, lastClaimDate: "" };
 
         // --- CHALLENGE DATA ---
-        const challengeDataStr = localStorage.getItem(getUserKey('challenge'));
-        const challengeData = challengeDataStr ? JSON.parse(challengeDataStr) : {};
-
+        // --- CHALLENGE DATA ---
+    const currentChallengeVal = parseInt(localStorage.getItem(getUserKey('currentChallenge'))) || 1;
         const userDocRef = doc(db, "players", username);
         await setDoc(userDocRef, {
             username: username,
@@ -73,7 +72,7 @@ window.saveUserDataToCloud = async function() {
             coins: totalCoins,
             avatar: avatar,
             dailyRewardState: dailyRewardState,
-            challenge: challengeData,
+            challenge: currentChallengeVal,
             lastUpdated: new Date()
         }, { merge: true });
         
@@ -120,9 +119,10 @@ async function fetchUserDataFromFirestore() {
                 if (cloudData.avatar) localStorage.setItem(prefix + 'vinpix_avatar', cloudData.avatar);
 
                 // Sync challenge data down to local storage
-                if (cloudData.challenge !== undefined) {
-                    localStorage.setItem(prefix + 'challenge', JSON.stringify(cloudData.challenge));
-                }
+                // Sync challenge data down to local storage
+    if (cloudData.challenge !== undefined) {
+        localStorage.setItem(prefix + 'currentChallenge', cloudData.challenge);
+    }
 
                 // Sync daily reward state down to local storage key
                 if (cloudData.dailyRewardState) {
