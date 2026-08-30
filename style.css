@@ -1145,8 +1145,8 @@ input:checked + .slider:before { transform: translateX(22px); }
 #profileModalName {
   font-size: 20px;
   font-weight: bold;
-  color: #ffd700;
-  margin: 4px 0 6px 0;
+  color: #ffff;
+  margin: 4px 0 8px 0;
   text-align: center;
   letter-spacing: 0.5px;
 }
