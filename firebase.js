@@ -1,5 +1,6 @@
 // --- FIREBASE CONFIGURATION & INITIALIZATION ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js";
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
@@ -15,10 +16,12 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
+const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Make database tools globally accessible for your other script files
+// Make database and auth tools globally accessible for your scripts
 window.pixvinzDb = { db, doc, getDoc, setDoc };
+window.pixvinzAuth = { auth, createUserWithEmailAndPassword };
 
 // --- GLOBAL CLOUD SYNC FUNCTIONS ---
 
@@ -27,7 +30,6 @@ window.saveUserDataToCloud = async function() {
         const user = JSON.parse(localStorage.getItem('loggedInUser'));
         if (!user || !user.username) return;
 
-        // Gather all localStorage keys tied to this user, plus explicit game stats
         const userData = {};
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
@@ -46,14 +48,13 @@ window.saveUserDataToCloud = async function() {
             }
         }
 
-        // Save safely to Firestore under a 'players' collection
         await setDoc(doc(db, 'players', user.username), {
             username: user.username,
             data: userData,
             lastUpdated: new Date().toISOString()
         }, { merge: true });
 
-        console.log("Player progress (challenge, level, xp, coins, avatar) successfully synced to cloud.");
+        console.log("Player progress successfully synced to cloud.");
     } catch (error) {
         console.error("Cloud sync failed:", error);
     }
@@ -65,7 +66,6 @@ window.loadUserDataFromCloud = async function(username) {
         if (userSnap.exists()) {
             const cloudData = userSnap.data().data;
             if (cloudData) {
-                // Restore all keys back into localStorage so cross-device sync works seamlessly
                 for (const [key, value] of Object.entries(cloudData)) {
                     localStorage.setItem(key, value);
                 }
