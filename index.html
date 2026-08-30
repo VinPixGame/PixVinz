@@ -336,8 +336,10 @@
         <div class="profile-card">
           <!-- Avatar Display & Upload with Loading State -->
           <div class="avatar-section">
-            <div class="avatar-wrapper" id="avatarWrapper">
+            <div class="avatar-wrapper" id="avatarWrapper" style="position: relative;">
               <img id="avatar-preview" src="image/avatar.png" alt="Profile Avatar" onerror="this.src='https://via.placeholder.com/120/4a154b/ffffff?text=Avatar'">
+              <!-- Custom Rank Frame Overlay -->
+              <img id="profileRankFrame" src="" alt="" style="display: none; position: absolute; pointer-events: none; z-index: 5;">
               <div class="avatar-loader" id="avatarLoader">
                 <div class="spinner"></div>
               </div>
