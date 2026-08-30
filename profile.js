@@ -91,21 +91,27 @@ async function fetchUserDataFromFirestore() {
                 const cloudData = userSnap.data();
                 const currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
 
-                // Retain local progress if local is higher than cloud
-                const localLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
-                const localCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
-
-                const finalLevel = Math.max(localLevel, cloudData.level || 1);
-                const finalCoins = Math.max(localCoins, cloudData.coins || 0);
+                // Firestore-first: prioritize cloud values directly, fallback to local if cloud fields are missing
+                const finalLevel = cloudData.level !== undefined ? cloudData.level : (parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1);
+                const finalCoins = cloudData.coins !== undefined ? cloudData.coins : (parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0);
+                const finalAvatar = cloudData.avatar !== undefined ? cloudData.avatar : (localStorage.getItem(getUserKey('vinpix_avatar')) || '');
+                
+                // Calculate or take XP directly from Firestore
+                let finalXp = cloudData.xp;
+                if (finalXp === undefined) {
+                    const localLevelCheck = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+                    const puzzlesSolved = Math.max(0, localLevelCheck - 1);
+                    finalXp = calculateLevelAndXp(puzzlesSolved).currentXp;
+                }
 
                 const updatedUser = {
                     ...currentUser,
                     username: cloudData.username || currentUser.username,
                     displayName: cloudData.displayName || currentUser.displayName,
                     coins: finalCoins,
-                    xp: cloudData.xp !== undefined ? cloudData.xp : (currentUser.xp || 0),
+                    xp: finalXp,
                     level: finalLevel,
-                    avatar: cloudData.avatar || currentUser.avatar || '',
+                    avatar: finalAvatar,
                     dailyRewardState: cloudData.dailyRewardState || currentUser.dailyRewardState
                 };
 
@@ -115,7 +121,7 @@ async function fetchUserDataFromFirestore() {
                 const prefix = username + '_';
                 localStorage.setItem(prefix + 'totalCoins', finalCoins);
                 localStorage.setItem(prefix + 'currentLevel', finalLevel);
-                if (cloudData.avatar) localStorage.setItem(prefix + 'vinpix_avatar', cloudData.avatar);
+                if (finalAvatar) localStorage.setItem(prefix + 'vinpix_avatar', finalAvatar);
 
                 if (cloudData.dailyRewardState) {
                     const dailyStorageKey = `pixvinz_daily_${username}`;
@@ -130,11 +136,11 @@ async function fetchUserDataFromFirestore() {
                 if (typeof updateProfileStats === 'function') updateProfileStats();
                 if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
 
-                console.log("Profile successfully synced from Firestore!");
+                console.log("Profile successfully fetched and prioritized from Firestore!");
             }
         }
     } catch (err) {
-        console.error("Failed to fetch data from Firestore:", err);
+        console.error("Failed to fetch data from Firestore, falling back to local storage:", err);
     }
 }
 
@@ -412,9 +418,12 @@ function checkAndUnlockBadges() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const avatarLoader = document.getElementById('avatarLoader');
-    if (avatarLoader) avatarLoader.style.display = 'none';
+    if (avatarLoader) avatarLoader.style.display = 'flex';
+
+    // Fetch from Firestore FIRST before rendering UI/Local data elements
+    await fetchUserDataFromFirestore();
 
     let initialName = '';
     try {
@@ -447,7 +456,8 @@ document.addEventListener('DOMContentLoaded', () => {
     updateProfileStats();
     checkAndUnlockBadges();
     loadProfileGlobalRank();
-    saveUserDataToCloud();
+    
+    if (avatarLoader) avatarLoader.style.display = 'none';
 });
 
 // --- EDIT NAME MODAL HANDLERS ---
@@ -796,23 +806,19 @@ window.claimDailyReward = async function() {
     const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
     const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp';
     let bonusXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
-    bonusXp += reward.xp;
-    localStorage.setItem(xpStoreKey, bonusXp);
+    localStorage.setItem(xpStoreKey, bonusXp + reward.xp);
 
     dailyState.streak = nextStreak;
     dailyState.lastClaimDate = today;
     dailyState.lastClaimTimestamp = nowTime;
     localStorage.setItem(storageKey, JSON.stringify(dailyState));
 
-    updateXpProgress();
-    checkDailyRewardStatus();
     renderDailyGrid();
+    checkDailyRewardStatus();
+    updateXpProgress();
+    updateProfileStats();
 
-    try {
+    if (typeof saveUserDataToCloud === 'function') {
         await saveUserDataToCloud();
-    } catch (e) {}
-
-    setTimeout(() => {
-        closeDailyModal();
-    }, 1200);
+    }
 };
