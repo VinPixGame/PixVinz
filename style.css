@@ -1105,19 +1105,23 @@ input:checked + .slider:before { transform: translateX(22px); }
   width: 100px;
   height: 100px;
   margin: 10px auto 12px auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
 }
 
-/* Profile picture */
+/* Profile picture — SIZE UNCHANGED */
 .modal-avatar-img,
 #profileModalAvatar {
   width: 72px !important;
   height: 72px !important;
   border-radius: 50% !important;
   object-fit: cover !important;
-  position: relative;
+  position: absolute !important;
+
+  /* MOVE THE IMAGE ONLY */
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+
   z-index: 2;
   display: block;
 }
