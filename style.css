@@ -308,6 +308,26 @@ body {
   position: relative;
 }
 
+.overall-best-card::before,
+#globalRankSummaryCard::before {
+  content: "🏆";
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+  filter: drop-shadow(0 0 8px #ffcc00) drop-shadow(0 0 16px #ff9900);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  z-index: 10;
+  }
+
 
 .stat-circle-icon {
   width: 38px;
@@ -1000,17 +1020,12 @@ input:checked + .slider:before { transform: translateX(22px); }
   align-items: center;
   justify-content: center;
   text-align: center;
-  width: 90% !important;
-  max-width: 380px !important;
-  margin: 0 auto 15px auto !important;
-  box-sizing: border-box !important;
 }
 
 #userRankDisplay {
   text-align: center !important;
   display: block !important;
   width: 100% !important;
-  margin: 0 auto !important;
 }
 
 /* ==========================================
