@@ -143,9 +143,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const vMoves = document.getElementById('vMoves');
       if (vMoves) vMoves.innerText = moves;
 
-      const earnedCoins = stars * 5;
       const vCoins = document.getElementById('vCoins');
-      if (vCoins) vCoins.innerText = `+${earnedCoins}`;
+      if (vCoins) vCoins.innerText = `+${stars * 5}`;
 
       let tier = Math.floor((currentLevel - 1) / 10);
       let xpGained = (tier + 1) * 100;
@@ -161,39 +160,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       const currentMoves = moves;
       const currentTimeStr = timerDisplay ? timerDisplay.innerText : "00:00";
 
-      // --- FIX: Sync Level, Coins, and User Profile Data for profile.js & Firestore ---
-      const levelKey = typeof getUserKey === 'function' ? getUserKey('currentLevel') : 'currentLevel';
-      const coinKey = typeof getUserKey === 'function' ? getUserKey('totalCoins') : 'totalCoins';
-      
-      const savedLevel = parseInt(localStorage.getItem(levelKey)) || currentLevel;
-      const nextLvl = currentLevel >= savedLevel ? currentLevel + 1 : savedLevel;
-      localStorage.setItem(levelKey, nextLvl);
-
-      const currentCoins = parseInt(localStorage.getItem(coinKey)) || 0;
-      const newTotalCoins = currentCoins + earnedCoins;
-      localStorage.setItem(coinKey, newTotalCoins);
-
-      try {
-        const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
-        if (userObj) {
-          userObj.level = nextLvl;
-          userObj.coins = newTotalCoins;
-          localStorage.setItem('loggedInUser', JSON.stringify(userObj));
-        }
-      } catch (e) {}
-      // ------------------------------------------------------------------------------
-
       if (typeof handleLevelVictory === 'function') {
         handleLevelVictory(currentLevel, stars, currentMoves, currentTimeStr);
-      }
-
-      if (typeof saveUserDataToCloud === 'function') {
-        saveUserDataToCloud();
       }
 
       startConfetti();
     }
   }
+
   function startConfetti() {
     const canvas = document.getElementById('confettiCanvas');
     if (!canvas) return;
@@ -250,6 +224,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       shuffleGrid();
     });
   }
+
+     
+    
+      
 
   const nextLevelBtn = document.getElementById('nextLevelBtn');
   if (nextLevelBtn) {
@@ -336,35 +314,48 @@ function openLevelPreview() {
 
   const currentLevel = getCurrentLevel();
   const previewTitle = document.getElementById('previewTitle');
-  if (previewTitle) {
-    previewTitle.textContent = `👁 LEVEL ${currentLevel} PREVIEW`;
+if (previewTitle) {
+  previewTitle.textContent = `👁 LEVEL ${currentLevel} PREVIEW`;
+}
+
+  /*
+   * =====================================================
+   * COIN CHECK
+   * =====================================================
+   *
+   * This expects your game to have a global `coins`
+   * variable.
+   *
+   * If your existing game uses a different coin variable,
+   * this is the ONLY part that needs to be connected to it.
+   */
+
+const totalCoinsKey = getUserKey('totalCoins');
+const coinsBeforePreview = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
+
+if (coinsBeforePreview < PREVIEW_COST) {
+  return;
+}
+
+let paymentSuccessful = false;
+
+try {
+  paymentSuccessful = spendCoins(PREVIEW_COST);
+} catch (error) {
+  const coinsAfterPreview =
+    parseInt(localStorage.getItem(totalCoinsKey)) || 0;
+
+  if (coinsAfterPreview === coinsBeforePreview - PREVIEW_COST) {
+    paymentSuccessful = true;
+  } else {
+    console.error('Preview coin deduction failed:', error);
   }
+}
 
-  const totalCoinsKey = getUserKey('totalCoins');
-  const coinsBeforePreview = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
-
-  if (coinsBeforePreview < PREVIEW_COST) {
-    return;
-  }
-
-  let paymentSuccessful = false;
-
-  try {
-    paymentSuccessful = spendCoins(PREVIEW_COST);
-  } catch (error) {
-    const coinsAfterPreview =
-      parseInt(localStorage.getItem(totalCoinsKey)) || 0;
-
-    if (coinsAfterPreview === coinsBeforePreview - PREVIEW_COST) {
-      paymentSuccessful = true;
-    } else {
-      console.error('Preview coin deduction failed:', error);
-    }
-  }
-
-  if (!paymentSuccessful) {
-    return;
-  }
+if (!paymentSuccessful) {
+  return;
+}
+  
   
   previewActive = true;
 
@@ -378,7 +369,7 @@ function openLevelPreview() {
   previewCountdown.textContent = secondsLeft;
   previewPopup.classList.remove('hidden');
 
-  previewTimer = setInterval(async () => {
+  previewTimer = setInterval(() => {
     secondsLeft--;
 
     previewCountdown.textContent = secondsLeft;
@@ -404,11 +395,6 @@ function closeLevelPreview() {
 
   if (previewImage) {
     previewImage.src = '';
-  }
-  
-  // Ensure cloud sync happens when preview closes or coin balance changes
-  if (typeof saveUserDataToCloud === 'function') {
-    saveUserDataToCloud();
   }
 }
 
