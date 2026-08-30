@@ -1,183 +1,422 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>PixVinz - Game</title>
-  <link rel="stylesheet" href="game.css">  
-</head>
-<body>
-  <div class="app-container game-container">
-  <!-- Top Bar (Logo remains completely untouched here) -->
-    <header class="top-bar">
-      <button class="icon-btn" id="backToHome">‹</button>
-      <div class="logo-container">
-        <video id="logoVideo" autoplay loop muted playsinline preload="auto" style="background: transparent;">
-          <source src="image/logo.webm" type="video/webm">
-        </video>
-      </div>
-      <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
-    </header>
+// game.js - Complete Synchronized Logic with Safe Module DOM Bootstrapping
 
-    <!-- Level Title positioned in the middle gap -->
-    <h2 id="levelTitle" class="centered-level-title">LEVEL <span id="levelDisplay">01</span></h2>
+document.addEventListener('DOMContentLoaded', async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentLevel = parseInt(urlParams.get('level')) || 1;
 
-    <!-- Premium Stats Bar (Timer & Moves) -->
-    <div class="game-header">
-      <div class="premium-stats-bar">
-        <div class="stat-badge">
-          <span class="stat-icon">⏱️</span>
-          <div class="stat-info">
-            <span class="stat-label">TIME</span>
-            <span class="stat-value" id="timerDisplay">00:00</span>
-          </div>
-        </div>
-        <div class="stat-badge">
-          <span class="stat-icon">🔄</span>
-          <div class="stat-info">
-            <span class="stat-label">MOVES</span>
-            <span class="stat-value" id="movesDisplay">0</span>
-          </div>
-        </div>
-      </div>
-    </div>
+  const levelDisplay = document.getElementById('levelDisplay');
+  if (levelDisplay) {
+    levelDisplay.innerText = currentLevel.toString().padStart(2, '0');
+  }
 
-    <!-- 3x3 TAP-TO-SWAP BOARD -->
-    <div class="puzzle-wrapper">
-      <div class="puzzle-grid" id="puzzleGrid"></div>
-    </div>
-<!-- Game Actions -->
-<div class="game-actions">
-  <button class="btn btn-secondary" id="pv-trigger-btn">👁 PREVIEW (-🪙5)</button>
-  <button class="btn btn-primary" id="shuffleBtn">🔀 SHUFFLE</button>
-</div>
-</div>
+  // Fetch cloud/local data and update coin display from playerstat.js
+  if (typeof fetchUserDataFromFirestore === 'function') {
+    await fetchUserDataFromFirestore();
+  }
+  if (typeof updateCoinDisplay === 'function') {
+    updateCoinDisplay();
+  }
 
-<div id="previewPopup" class="preview-popup hidden">
+  const grid = document.getElementById('puzzleGrid');
+  const movesDisplay = document.getElementById('movesDisplay');
+  const timerDisplay = document.getElementById('timerDisplay');
 
-  <div class="preview-overlay">
+  function getLevelImageIndex(levelNum) {
+      return ((levelNum - 1) % 200) + 1;
+  }
 
-    <div class="preview-box">
+  function getGridSize(level) {
+    if (level <= 10) return 3;
+    if (level <= 30) return 4;
+    if (level <= 60) return 5;
+    if (level <= 100) return 6;
+    if (level <= 150) return 7;
+    return 8;
+  }
 
-      <div class="preview-header">
-        <span id="previewTitle">👁 LEVEL PREVIEW</span>
+  const gridSize = getGridSize(currentLevel);
+  const totalTiles = gridSize * gridSize;
 
-        <span id="previewCountdown">10</span>
-      </div>
+  let moves = 0;
+  let seconds = 0;
+  let timerInterval = null;
+  let tilesState = Array.from({ length: totalTiles }, (_, i) => i);
+  let selectedTilePos = null;
+  let isGameStarted = false;
 
-      <div class="preview-image-container">
-        <img id="previewImage" src="" alt="Level Preview">
-      </div>
+  const imageSrc = `image/level${getLevelImageIndex(currentLevel)}.png`;
 
-      <button id="previewCloseBtn" class="preview-close-btn">
-        CLOSE
-      </button>
-
-    </div>
-
-  </div>
-
-</div>
-    
-  <!-- Victory Modal -->
-  <div id="victoryModal" class="modal-overlay hidden">
-    <canvas id="confettiCanvas"></canvas>
-
-    <div class="victory-card-pro">
-      <div class="top-crest-badge">
-        <div class="badge-shield">⭐</div>
-      </div>
-
-      <div class="banner-ribbon">
-        <h1 class="victory-title-pro">LEVEL CLEARED!</h1>
-      </div>
-      <div class="victory-subtitle-pro">✦ Amazing work! ✦</div>
-
-      <div class="victory-img-container-pro">
-        <img id="victoryImg" src="" alt="Solved Puzzle">
-      </div>
-
-      <div class="star-rating-pro" id="victoryStars">
-        <span class="star star-pro active">★</span>
-        <span class="star star-pro active">★</span>
-        <span class="star star-pro active">★</span>
-      </div>
-
-      <div class="stats-panel-pro">
-        <div class="stat-col">
-          <span class="stat-icon-pro">⏱️</span>
-          <span class="stat-label-pro">TIME</span>
-          <span class="stat-value-pro" id="vTime">00:00</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat-col">
-          <span class="stat-icon-pro">👣</span>
-          <span class="stat-label-pro">MOVES</span>
-          <span class="stat-value-pro" id="vMoves">0</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat-col">
-          <span class="stat-icon-pro">🪙</span>
-          <span class="stat-label-pro">EARNED</span>
-          <span class="stat-value-pro gold-val" id="vCoins">+0</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat-col">
-          <span class="stat-icon-pro">⚡️</span>
-          <span class="stat-label-pro">XP GAINED</span>
-          <span class="stat-value-pro" id="vXp">+0</span>
-        </div>
-      </div>
-
-      <div class="victory-buttons-pro">
-        <button class="btn-pro btn-home-pro" id="victoryHomeBtn">
-          <span>🏠</span> HOME
-        </button>
-        <button class="btn-pro btn-next-pro" id="nextLevelBtn">
-          NEXT ▶
-        </button>
-      </div>
-    </div>
-  </div>
-    
-  <script src="audio.js"></script>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
-    authDomain: "pixvinz2026.firebaseapp.com",
-    projectId: "pixvinz2026",
-    storageBucket: "pixvinz2026.firebasestorage.app",
-    messagingSenderId: "45609077809",
-    appId: "1:45609077809:web:575611e46acda9f64c5910",
-    measurementId: "G-W7FSERE8ZJ"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  // EXPOSE GLOBALLY SO playerstat.js CAN ACCESS THEM WITHOUT CRASHING
-  window.db = db;
-  window.doc = doc;
-  window.getDoc = getDoc;
-  window.setDoc = setDoc;
-  window.updateDoc = updateDoc;
-  window.getCurrentUser = function() {
-    try {
-      return JSON.parse(localStorage.getItem('loggedInUser'));
-    } catch (e) {
-      return null;
+  function startGameBGM() {
+    if (typeof AudioManager !== 'undefined' && AudioManager.musicEnabled) {
+      AudioManager.playGame();
     }
-  };
-</script>
+  }
+  document.body.addEventListener('click', startGameBGM, { once: true });
 
-<!-- Player Stats & Main Game Scripts -->
-  <script src="playerstat.js"></script>
-  <script type="module" src="game.js"></script>
+  function startTimer() {
+    clearInterval(timerInterval);
+    seconds = 0;
+    timerInterval = setInterval(() => {
+      seconds++;
+      const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+      const secs = (seconds % 60).toString().padStart(2, '0');
+      if (timerDisplay) timerDisplay.innerText = `${mins}:${secs}`;
+    }, 1000);
+  }
 
-</body> 
-</html>
+  function renderGrid() {
+    if (!grid) return;
+    grid.innerHTML = '';
+    grid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+    grid.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
+
+    const percentStep = 100 / (gridSize - 1);
+
+    tilesState.forEach((tileIdx, currentPos) => {
+      const tile = document.createElement('div');
+      tile.className = 'tile';
+      
+      if (selectedTilePos === currentPos) {
+        tile.classList.add('selected');
+      }
+
+      tile.style.backgroundImage = `url('${imageSrc}')`;
+      tile.style.backgroundSize = `${gridSize * 100}% ${gridSize * 100}%`;
+
+      const row = Math.floor(tileIdx / gridSize);
+      const col = tileIdx % gridSize;
+      tile.style.backgroundPosition = `${col * percentStep}% ${row * percentStep}%`;
+
+      tile.addEventListener('click', () => handleTileClick(currentPos));
+      grid.appendChild(tile);
+    });
+  }
+
+  function handleTileClick(pos) {
+    if (!isGameStarted) return;
+    if (typeof AudioManager !== 'undefined') AudioManager.playSelect();
+
+    if (selectedTilePos === null) {
+      selectedTilePos = pos;
+      renderGrid();
+    } else if (selectedTilePos === pos) {
+      selectedTilePos = null;
+      renderGrid();
+    } else {
+      [tilesState[selectedTilePos], tilesState[pos]] = [tilesState[pos], tilesState[selectedTilePos]];
+      selectedTilePos = null;
+      moves++;
+      if (movesDisplay) movesDisplay.innerText = moves;
+      renderGrid();
+      checkWin();
+    }
+  }
+
+  function shuffleGrid() {
+    const tileCount = tilesState.length;
+    for (let i = 0; i < tileCount * 5; i++) {
+      const idx1 = Math.floor(Math.random() * tileCount);
+      const idx2 = Math.floor(Math.random() * tileCount);
+      [tilesState[idx1], tilesState[idx2]] = [tilesState[idx2], tilesState[idx1]];
+    }
+    selectedTilePos = null;
+    renderGrid();
+  }
+
+  function checkWin() {
+    if (!isGameStarted) return;
+    const isSolved = tilesState.every((val, idx) => val === idx);
+    if (isSolved) {
+      clearInterval(timerInterval);
+      if (typeof AudioManager !== 'undefined') AudioManager.playVictory(currentLevel);
+
+      let stars = 1;
+      if (moves <= gridSize * 5) stars = 3;
+      else if (moves <= gridSize * 8) stars = 2;
+
+      const victoryImg = document.getElementById('victoryImg');
+      if (victoryImg) victoryImg.src = imageSrc;
+
+      const vTime = document.getElementById('vTime');
+      if (vTime && timerDisplay) vTime.innerText = timerDisplay.innerText;
+
+      const vMoves = document.getElementById('vMoves');
+      if (vMoves) vMoves.innerText = moves;
+
+      const vCoins = document.getElementById('vCoins');
+      if (vCoins) vCoins.innerText = `+${stars * 5}`;
+
+      let tier = Math.floor((currentLevel - 1) / 10);
+      let xpGained = (tier + 1) * 100;
+      const vXp = document.getElementById('vXp');
+      if (vXp) vXp.innerText = `+${xpGained}`;
+
+      const starNodes = document.querySelectorAll('#victoryStars .star');
+      starNodes.forEach((star, index) => {
+        if (index < stars) star.classList.add('active');
+        else star.classList.remove('active');
+      });
+
+      const currentMoves = moves;
+      const currentTimeStr = timerDisplay ? timerDisplay.innerText : "00:00";
+
+      if (typeof handleLevelVictory === 'function') {
+        handleLevelVictory(currentLevel, stars, currentMoves, currentTimeStr);
+      }
+
+      startConfetti();
+    }
+  }
+
+  function startConfetti() {
+    const canvas = document.getElementById('confettiCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = Array.from({ length: 220 }, () => ({
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      vx: (Math.random() - 0.5) * 22,
+      vy: (Math.random() - 0.7) * 20,
+      size: Math.random() * 9 + 4,
+      rotation: Math.random() * 360,
+      rotationSpeed: (Math.random() - 0.5) * 10,
+      color: ['#ffd700', '#9d4edd', '#ff007f', '#00f0ff', '#ffffff', '#ff9e00'][Math.floor(Math.random() * 6)]
+    }));
+
+    const startTime = Date.now();
+    const minDuration = 2000;
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.4;
+        p.vx *= 0.98;
+        
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+        ctx.restore();
+      });
+
+      const elapsed = Date.now() - startTime;
+      const stillVisible = particles.some(p => p.y < canvas.height + 20);
+
+      if (elapsed < minDuration || stillVisible) {
+        requestAnimationFrame(draw);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+    draw();
+  }
+
+  const shuffleBtn = document.getElementById('shuffleBtn');
+  if (shuffleBtn) {
+    shuffleBtn.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playShuffle();
+      shuffleGrid();
+    });
+  }
+
+     
+    
+      
+
+  const nextLevelBtn = document.getElementById('nextLevelBtn');
+  if (nextLevelBtn) {
+    nextLevelBtn.onclick = async (e) => {
+      e.stopPropagation();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      
+      if (typeof saveUserDataToCloud === 'function') {
+        await saveUserDataToCloud();
+      }
+
+      window.location.href = `game.html?level=${currentLevel + 1}`;
+    };
+  }
+
+  const victoryHomeBtn = document.getElementById('victoryHomeBtn');
+  if (victoryHomeBtn) {
+    victoryHomeBtn.onclick = async (e) => {
+      e.stopPropagation();
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      localStorage.setItem('skipLoading', 'true');
+      
+      if (typeof saveUserDataToCloud === 'function') {
+        await saveUserDataToCloud();
+      }
+
+      window.location.href = 'index.html';
+    };
+  }
+
+  const backToHome = document.getElementById('backToHome');
+  if (backToHome) {
+    backToHome.addEventListener('click', async () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      localStorage.setItem('skipLoading', 'true');
+      
+      if (typeof saveUserDataToCloud === 'function') {
+        await saveUserDataToCloud();
+      }
+
+      window.location.href = 'index.html';
+    });
+  }
+
+  shuffleGrid();
+  isGameStarted = true;
+  startTimer();
+});
+
+/* =========================================================
+   LEVEL PREVIEW
+   image/level1.png → image/level200.png
+   ========================================================= */
+
+const PREVIEW_COST = 5;
+const PREVIEW_DURATION = 10;
+
+let previewTimer = null;
+let previewActive = false;
+
+function getCurrentLevel() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const level = parseInt(urlParams.get('level'), 10);
+
+  if (!Number.isFinite(level)) {
+    return 1;
+  }
+
+  return Math.min(Math.max(level, 1), 200);
+}
+
+function openLevelPreview() {
+  const previewPopup = document.getElementById('previewPopup');
+  const previewImage = document.getElementById('previewImage');
+  const previewCountdown = document.getElementById('previewCountdown');
+
+  if (!previewPopup || !previewImage || !previewCountdown) {
+    return;
+  }
+
+  if (previewActive) {
+    return;
+  }
+
+  const currentLevel = getCurrentLevel();
+  const previewTitle = document.getElementById('previewTitle');
+if (previewTitle) {
+  previewTitle.textContent = `👁 LEVEL ${currentLevel} PREVIEW`;
+}
+
+  /*
+   * =====================================================
+   * COIN CHECK
+   * =====================================================
+   *
+   * This expects your game to have a global `coins`
+   * variable.
+   *
+   * If your existing game uses a different coin variable,
+   * this is the ONLY part that needs to be connected to it.
+   */
+
+const totalCoinsKey = getUserKey('totalCoins');
+const coinsBeforePreview = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
+
+if (coinsBeforePreview < PREVIEW_COST) {
+  return;
+}
+
+let paymentSuccessful = false;
+
+try {
+  paymentSuccessful = spendCoins(PREVIEW_COST);
+} catch (error) {
+  const coinsAfterPreview =
+    parseInt(localStorage.getItem(totalCoinsKey)) || 0;
+
+  if (coinsAfterPreview === coinsBeforePreview - PREVIEW_COST) {
+    paymentSuccessful = true;
+  } else {
+    console.error('Preview coin deduction failed:', error);
+  }
+}
+
+if (!paymentSuccessful) {
+  return;
+}
+  
+  
+  previewActive = true;
+
+  clearInterval(previewTimer);
+
+  previewImage.src = `image/level${currentLevel}.png`;
+  previewImage.alt = `Level ${currentLevel} Preview`;
+
+  let secondsLeft = PREVIEW_DURATION;
+
+  previewCountdown.textContent = secondsLeft;
+  previewPopup.classList.remove('hidden');
+
+  previewTimer = setInterval(() => {
+    secondsLeft--;
+
+    previewCountdown.textContent = secondsLeft;
+
+    if (secondsLeft <= 0) {
+      closeLevelPreview();
+    }
+  }, 1000);
+}
+
+function closeLevelPreview() {
+  const previewPopup = document.getElementById('previewPopup');
+  const previewImage = document.getElementById('previewImage');
+
+  clearInterval(previewTimer);
+  previewTimer = null;
+
+  previewActive = false;
+
+  if (previewPopup) {
+    previewPopup.classList.add('hidden');
+  }
+
+  if (previewImage) {
+    previewImage.src = '';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const previewButton = document.getElementById('pv-trigger-btn');
+  const previewCloseButton = document.getElementById('previewCloseBtn');
+
+  if (previewButton) {
+    previewButton.addEventListener('click', openLevelPreview);
+  }
+
+  if (previewCloseButton) {
+    previewCloseButton.addEventListener('click', closeLevelPreview);
+  }
+
+  const previewPopup = document.getElementById('previewPopup');
+
+  if (previewPopup) {
+    previewPopup.addEventListener('click', (event) => {
+      if (event.target === previewPopup) {
+        closeLevelPreview();
+      }
+    });
+  }
+});
