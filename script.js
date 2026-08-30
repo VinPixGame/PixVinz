@@ -1,40 +1,71 @@
+// --- FIREBASE INITIALIZATION & DATABASE BRIDGE ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
+import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
+    authDomain: "pixvinz2026.firebaseapp.com",
+    projectId: "pixvinz2026",
+    storageBucket: "pixvinz2026.firebasestorage.app",
+    messagingSenderId: "45609077809",
+    appId: "1:45609077809:web:575611e46acda9f64c5910",
+    measurementId: "G-W7FSERE8ZJ"
+};
+
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// Expose Firestore database tools globally so UI scripts can use them
+window.pixvinzDb = { db, doc, getDoc, setDoc, updateDoc, collection, query, orderBy, limit, getDocs };
+
+
 // --- DEDICATED LOADING SCREEN SCRIPT ---
 document.addEventListener('DOMContentLoaded', () => {
     const loadingView = document.getElementById('loadingView');
     if (!loadingView) return;
 
+    // 1. Check if user is already logged in (handles page refresh) OR coming from auth.html
     const skipLoading = localStorage.getItem('skipLoading') === 'true';
     const storedUser = localStorage.getItem('loggedInUser');
 
     if (skipLoading || storedUser) {
+        // Clear the flag if it was set
         localStorage.removeItem('skipLoading');
         
         if (storedUser) {
+            // Instantly skip loader, go straight to homeView, and show the top bar
             loadingView.classList.remove('active');
             const homeView = document.getElementById('homeView');
             const mainHeader = document.getElementById('mainHeader');
             
             if (homeView) homeView.classList.add('active');
-            if (mainHeader) mainHeader.classList.remove('hidden');
+            if (mainHeader) mainHeader.classList.remove('hidden'); // Ensures the top bar appears!
             
             if (typeof playMainBGM === 'function') playMainBGM();
-            return;
+            return; // Stop the script here so the timer never runs
         } else {
             window.location.href = 'auth.html';
             return;
         }
     }
 
+    // 2. Play the logo video explicitly (Only runs for cold visits when NOT logged in)
     const logoVideo = document.getElementById('loadingLogo');
     if (logoVideo) {
         logoVideo.play().catch(err => console.log("Video play prevented:", err));
     }
 
+    // 3. Grab elements for normal timer
     const percentageElem = document.getElementById('loadingPercentage');
     const barFillElem = document.getElementById('loadingBarFill');
 
+    // 4. Animation and Timer logic (6 seconds total)
     const startTime = Date.now();
-    const minLoadingTime = 6000;
+    const minLoadingTime = 6000; // 6 seconds
 
     function updateProgress() {
         const elapsedTime = Date.now() - startTime;
@@ -43,12 +74,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (percent < 1) percent = 1;
         if (percent > 100) percent = 100;
 
+        // Update DOM
         if (percentageElem) percentageElem.innerText = `${percent}%`;
         if (barFillElem) barFillElem.style.width = `${percent}%`;
 
         if (elapsedTime < minLoadingTime) {
+            // Keep looping every 50ms for smooth progress
             setTimeout(updateProgress, 50);
         } else {
+            // Finished! Ensure 100% and transition
             if (percentageElem) percentageElem.innerText = '100%';
             if (barFillElem) barFillElem.style.width = '100%';
 
@@ -61,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const mainHeader = document.getElementById('mainHeader');
                     
                     if (homeView) homeView.classList.add('active');
-                    if (mainHeader) mainHeader.classList.remove('hidden');
+                    if (mainHeader) mainHeader.classList.remove('hidden'); // Shows top bar on normal load too
                 } else {
                     window.location.href = 'auth.html';
                 }
@@ -69,47 +103,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Kick off the progress bar loop
     updateProgress();
 });
 
 
-// --- CLOUD USER SYNC & AVATAR LOADER ---
-document.addEventListener('DOMContentLoaded', async () => {
+// --- AVATAR LOADER FIX (Account-Specific + Default Fallback) ---
+document.addEventListener('DOMContentLoaded', () => {
     let currentUsername = '';
     try {
         const user = JSON.parse(localStorage.getItem('loggedInUser'));
         if (user && user.username) currentUsername = user.username;
     } catch (e) {}
 
-    if (currentUsername && window.pixvinzDb) {
-        try {
-            const { db, doc, getDoc } = window.pixvinzDb;
-            const userDocRef = doc(db, 'players', currentUsername);
-            const userSnap = await getDoc(userDocRef);
-            
-            if (userSnap.exists()) {
-                const cloudData = userSnap.data();
-                window.cloudUserData = cloudData;
-                
-                const nameEl = document.getElementById('userDisplayName');
-                if (nameEl && cloudData.displayName) {
-                    nameEl.innerText = cloudData.displayName;
-                }
-
-                updateCoinDisplay(cloudData.coins || 0);
-            }
-        } catch (err) {
-            console.error("Failed to fetch cloud user profile:", err);
-        }
-    }
-
     const avatarImg = document.getElementById('profileHeaderImg');
     const fallbackIcon = document.getElementById('profileIconFallback');
 
     if (avatarImg && fallbackIcon) {
-        const cloudAvatar = window.cloudUserData?.avatar;
-        if (cloudAvatar) {
-            avatarImg.src = cloudAvatar;
+        const userCustomAvatar = currentUsername ? localStorage.getItem(`${currentUsername}_vinpix_avatar`) : null;
+        
+        if (userCustomAvatar) {
+            avatarImg.src = userCustomAvatar;
             avatarImg.style.display = 'block';
             fallbackIcon.style.display = 'none';
         } else {
@@ -121,38 +135,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 
-// --- CLOUD DATA HELPER FUNCTIONS ---
-function updateCoinDisplay(amount) {
-    document.querySelectorAll('#coinCount, .coin-display, [data-coin-count]').forEach(el => {
-        el.textContent = amount;
-    });
-}
-window.updateCoinDisplay = updateCoinDisplay;
-
-async function saveCloudUserData(updates) {
-    let currentUsername = '';
+// Populate the user's display name on the home page view
+const loggedInUser = localStorage.getItem('loggedInUser');
+if (loggedInUser) {
     try {
-        const user = JSON.parse(localStorage.getItem('loggedInUser'));
-        if (user && user.username) currentUsername = user.username;
-    } catch (e) {}
-
-    if (!currentUsername || !window.pixvinzDb) return;
-
-    try {
-        const { db, doc, updateDoc } = window.pixvinzDb;
-        const userDocRef = doc(db, 'players', currentUsername);
-        await updateDoc(userDocRef, updates);
-        if (window.cloudUserData) {
-            Object.assign(window.cloudUserData, updates);
+        const user = JSON.parse(loggedInUser);
+        const nameEl = document.getElementById('userDisplayName');
+        if (nameEl && user.displayName) {
+            nameEl.innerText = user.displayName;
         }
     } catch (err) {
-        console.warn("Could not push update to cloud:", err);
+        console.error("Could not load display name:", err);
     }
 }
-window.saveCloudUserData = saveCloudUserData;
 
-
-// --- MAIN APP ROUTING & VIEW LOGIC ---
 document.addEventListener('DOMContentLoaded', () => {
   const views = {
     loading: document.getElementById('loadingView'),
@@ -169,25 +165,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const mainHeader = document.getElementById('mainHeader');
 
+  function getCurrentUser() {
+    try {
+      return JSON.parse(localStorage.getItem('loggedInUser'));
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function getUserKey(keyName) {
+    const user = getCurrentUser();
+    if (!user || !user.username) return keyName;
+    return `${user.username}_${keyName}`;
+  }
+
+  function updateCoinDisplay() {
+    const coinKey = getUserKey('totalCoins');
+    const totalCoins = parseInt(localStorage.getItem(coinKey)) || 0;
+    
+    // Target all elements displaying the coin count
+    document.querySelectorAll('#coinCount, .coin-display, [data-coin-count]').forEach(el => {
+      el.textContent = totalCoins;
+    });
+  }
+  
+ // Expose it globally so other views/scripts can trigger it
+  window.updateCoinDisplay = updateCoinDisplay;
+
+  // Run it immediately on load
+  updateCoinDisplay();
+
   function showView(targetView) {
     Object.values(views).forEach(v => {
       if (v) {
         v.classList.remove('active');
-        v.classList.remove('hidden');
+        v.classList.remove('hidden'); // Clears hidden overrides
       }
     });
 
     if (views[targetView]) {
       views[targetView].classList.add('active');
-      views[targetView].classList.remove('hidden');
+      views[targetView].classList.remove('hidden'); // Ensures target view is visible
     }
 
     if (['home', 'levels', 'collections', 'profileView', 'shop', 'leaderboard'].includes(targetView)) {
       if (mainHeader) mainHeader.classList.remove('hidden');
-      if (window.cloudUserData && typeof window.cloudUserData.coins !== 'undefined') {
-          updateCoinDisplay(window.cloudUserData.coins);
-      }
+      if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
       
+      // Auto-resume background music when returning to main screens
       if (typeof playMainBGM === 'function') {
         playMainBGM();
       }
@@ -216,6 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   e.preventDefault();
                   if (typeof AudioManager !== 'undefined') AudioManager.playClick();
                   
+                  // Refresh stats right before showing the view!
                   if (typeof updateXpProgress === 'function') updateXpProgress();
                   if (typeof updateProfileStats === 'function') updateProfileStats();
                   if (typeof checkAndUnlockBadges === 'function') checkAndUnlockBadges();
@@ -231,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (playBtn) {
     playBtn.addEventListener('click', () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
-      const currentLevel = window.cloudUserData?.level || 1;
+      const currentLevel = (typeof getCurrentLevel === 'function') ? getCurrentLevel() : 1;
       window.location.href = `game.html?level=${currentLevel}`;
     });
   }
@@ -330,8 +356,12 @@ document.addEventListener('DOMContentLoaded', () => {
   if (logoutBtn) {
     logoutBtn.addEventListener('click', (e) => {
         e.preventDefault();
+        
+        // Clear the session data
         localStorage.removeItem('loggedInUser');
         localStorage.removeItem('skipLoading');
+        
+        // Redirect to the login/register page
         window.location.href = 'auth.html';
     });
   }
@@ -341,7 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!grid) return;
     grid.innerHTML = '';
 
-    const currentLevel = window.cloudUserData?.level || 1;
+    const currentLevel = (typeof getCurrentLevel === 'function') ? getCurrentLevel() : 1;
 
     let overallBestTimeSeconds = Infinity;
     let overallFewestMoves = Infinity;
@@ -361,13 +391,14 @@ document.addEventListener('DOMContentLoaded', () => {
           btn.classList.add('solved-bg');
         }
 
-        const levelStats = window.cloudUserData?.levelStats?.[i] || {};
-        let moves = levelStats.moves;
-        let timeStr = levelStats.time;
+        let moves = localStorage.getItem(getUserKey(`levelMoves_${i}`));
+        let timeStr = localStorage.getItem(getUserKey(`levelTime_${i}`));
 
         if (isSolved) {
           const gSize = i <= 10 ? 3 : i <= 30 ? 4 : i <= 60 ? 5 : i <= 100 ? 6 : i <= 150 ? 7 : 8;
-          if (!moves) moves = gSize * 6;
+          if (!moves) {
+            moves = gSize * 6;
+          }
           if (!timeStr || timeStr === '--:--') {
             const estSec = gSize * 15;
             const m = Math.floor(estSec / 60).toString().padStart(2, '0');
@@ -378,13 +409,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (moves) {
           const parsedMoves = parseInt(moves);
-          if (parsedMoves < overallFewestMoves) overallFewestMoves = parsedMoves;
+          if (parsedMoves < overallFewestMoves) {
+            overallFewestMoves = parsedMoves;
+          }
         }
         if (timeStr && timeStr !== '--:--') {
           const parts = timeStr.split(':');
           if (parts.length === 2) {
             const totalSec = parseInt(parts[0]) * 60 + parseInt(parts[1]);
-            if (totalSec < overallBestTimeSeconds) overallBestTimeSeconds = totalSec;
+            if (totalSec < overallBestTimeSeconds) {
+              overallBestTimeSeconds = totalSec;
+            }
           }
         }
 
@@ -494,7 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('collectionsGrid');
     if (!grid) return;
     grid.innerHTML = '';
-    const currentLevel = window.cloudUserData?.level || 1;
+    const currentLevel = (typeof getCurrentLevel === 'function') ? getCurrentLevel() : 1;
 
     for (let i = start; i <= end; i++) {
       const isUnlocked = i < currentLevel;
@@ -573,7 +608,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// --- LEADERBOARD & PROFILE MODAL LOGIC ---
+
+// --- LEADERBOARD LOGIC (Safe DOM Binding, Avatars & Real Players Only) ---
 document.addEventListener('DOMContentLoaded', () => {
     const navLeaderboard = document.getElementById('navLeaderboard');
     if (navLeaderboard) {
@@ -599,6 +635,9 @@ async function loadLeaderboardData() {
         const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
         if (userObj && userObj.username) currentUsername = userObj.username;
     } catch (e) {}
+    if (!currentUsername) {
+        currentUsername = localStorage.getItem('vinpix_username') || '';
+    }
 
     try {
         if (window.pixvinzDb) {
@@ -657,6 +696,7 @@ async function loadLeaderboardData() {
 
         const avatarSrc = player.avatar ? player.avatar : 'image/avatar.png';
 
+        // Custom Border Frame Overlays for Top 3 Ranks
         let frameOverlayImg = '';
         if (rank === 1) frameOverlayImg = 'image/1.png';
         else if (rank === 2) frameOverlayImg = 'image/2.png';
@@ -735,16 +775,20 @@ async function loadLeaderboardData() {
             </div>
         `;
 
-        row.addEventListener('click', () => {
-            if (typeof openPlayerProfile === 'function') {
+        // Attach click listener to open player profile
+        const avatarImgTarget = row.querySelector('.leaderboard-avatar-img');
+        if (avatarImgTarget) {
+            avatarImgTarget.addEventListener('click', () => {
+                if (typeof AudioManager !== 'undefined' && typeof AudioManager.playClick === 'function') {
+                    AudioManager.playClick();
+                }
                 openPlayerProfile(player, rank);
-            }
-        });
+            });
+        }
 
         listContainer.appendChild(row);
     });
 }
-
 
 // --- UNIFIED PLAYER PROFILE MODAL HANDLER ---
 window.openPlayerProfile = function(player, rank) {
@@ -769,6 +813,7 @@ window.openPlayerProfile = function(player, rank) {
     const playerLevel = player.level || 1;
     const playerCoins = player.coins || 0;
 
+    // Custom Rank Frame Overlay Logic for Top 3 Ranks inside the Modal wrapper
     const avatarWrapper = document.getElementById('profileModalAvatarWrapper');
     if (avatarWrapper) {
         avatarWrapper.style.position = 'relative';
@@ -791,6 +836,7 @@ window.openPlayerProfile = function(player, rank) {
         }
     }
 
+    // Badge Generation Logic
     const allBadges = [
         { title: 'Novice Genesis', desc: 'Completed Level 1', icon: 'image/badge1.png', unlocked: playerLevel >= 1, glowColor: '#00ffcc' },
         { title: 'Thunderbolt', desc: 'Speed run (20-30) < 1m', icon: 'image/badge2.png', unlocked: player.speedThunder === true || player.speedThunderUnlocked === true, glowColor: '#00e5ff' },
@@ -862,7 +908,7 @@ window.addEventListener('click', (event) => {
 });
 
 
-// --- CONFETTI BACKGROUND EFFECT ---
+// --- CONFETTI BACKGROUND EFFECT (Independent) ---
 function initLeaderboardConfetti() {
     let container = document.getElementById('leaderboardConfetti');
     if (!container) {
@@ -909,8 +955,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initLeaderboardConfetti();
 });
 
-
-// --- FULLSCREEN TRIGGER ---
+// Force full-screen API if supported and running standalone
 if (window.matchMedia('(display-mode: fullscreen)').matches || window.matchMedia('(display-mode: standalone)').matches) {
   document.addEventListener('click', () => {
     if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
@@ -922,7 +967,8 @@ if (window.matchMedia('(display-mode: fullscreen)').matches || window.matchMedia
 }
 
 
-// --- CHALLENGE & SHOP VIEW HANDLERS ---
+
+
 document.addEventListener('DOMContentLoaded', () => {
   const navChallenge = document.getElementById('navChallenge');
   if (navChallenge) {
@@ -930,21 +976,29 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.href = 'challenge.html';
     });
   }
+});
 
+// --- SHOP & VIEW SWITCHING LOGIC ---
+
+// Bind events when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Open Shop when clicking Nav Card
   const navShop = document.getElementById('navShop');
   if (navShop) {
     navShop.addEventListener('click', () => {
-      showView('shop');
+      showView('shop'); // Uses your main app's routing system
     });
   }
 
+  // 2. Back button inside Shop View
   const shopBackBtn = document.querySelector('#shopView .back-btn');
   if (shopBackBtn) {
     shopBackBtn.addEventListener('click', () => {
-      showView('home');
+      showView('home'); // Uses your main app's routing system
     });
   }
 
+  // 3. Handle Buy Button Clicks
   const buyButtons = document.querySelectorAll('.shop-buy-btn');
   buyButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
