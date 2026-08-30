@@ -14,15 +14,16 @@ function getCurrentUsername() {
 
 function getUserKey(keyName) {
     const username = getCurrentUsername();
-    return username ? `${username}_${keyName}` : keyName;
+    return `${username}_${keyName}`;
 }
 
 function goHome() {
     localStorage.setItem('skipLoading', 'true');
     
     if (typeof showView === 'function') {
-        showView('home');    
-        fetchUserDataFromFirestore();
+        showView('home');     
+    fetchUserDataFromFirestore();
+        
     } else {
         const homeViewElement = document.getElementById('homeView') || window.parent.document.getElementById('homeView');
         if (homeViewElement && typeof window.parent.showView === 'function') {
@@ -32,8 +33,6 @@ function goHome() {
         }
     }
 }
-
-
 
 // --- SAFE CLOUD SYNC ---
 window.saveUserDataToCloud = async function() {
@@ -59,7 +58,7 @@ window.saveUserDataToCloud = async function() {
 
         const dailyStorageKey = getDailyStorageKey();
         const dailyDataStr = localStorage.getItem(dailyStorageKey);
-        const dailyRewardState = dailyDataStr ? JSON.parse(dailyDataStr) : { streak: 0, lastClaimDate: "", lastClaimTimestamp: 0 };
+        const dailyRewardState = dailyDataStr ? JSON.parse(dailyDataStr) : { streak: 0, lastClaimDate: "" };
 
         const userDocRef = doc(db, "players", username);
         await setDoc(userDocRef, {
@@ -89,47 +88,32 @@ async function fetchUserDataFromFirestore() {
             const userDocRef = doc(db, "players", username);
             const userSnap = await getDoc(userDocRef);
 
-            const localLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
-            const localCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
-            const localAvatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
-
             if (userSnap.exists()) {
                 const cloudData = userSnap.data();
                 const currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
 
-                // Use Math.max to prevent rolling back progress if cloud is slightly stale
-                const finalLevel = cloudData.level !== undefined ? Math.max(cloudData.level, localLevel) : localLevel;
-                const finalCoins = cloudData.coins !== undefined ? Math.max(cloudData.coins, localCoins) : localCoins;
-                const finalAvatar = cloudData.avatar !== undefined ? cloudData.avatar : localAvatar;
-                
-                let finalXp = cloudData.xp;
-                if (finalXp === undefined) {
-                    const puzzlesSolved = Math.max(0, finalLevel - 1);
-                    finalXp = calculateLevelAndXp(puzzlesSolved).currentXp;
-                } else {
-                    const localXp = calculateLevelAndXp(Math.max(0, localLevel - 1)).currentXp;
-                    finalXp = Math.max(cloudData.xp, localXp);
-                }
-
+                // Merge cloud data with local session
                 const updatedUser = {
                     ...currentUser,
                     username: cloudData.username || currentUser.username,
                     displayName: cloudData.displayName || currentUser.displayName,
-                    level: finalLevel,
-                    xp: finalXp,
-                    coins: finalCoins,
-                    avatar: finalAvatar,
+                    coins: cloudData.coins !== undefined ? cloudData.coins : (currentUser.coins || 0),
+                    xp: cloudData.xp !== undefined ? cloudData.xp : (currentUser.xp || 0),
+                    level: cloudData.level !== undefined ? cloudData.level : (currentUser.level || 1),
+                    avatar: cloudData.avatar || currentUser.avatar || '',
                     dailyRewardState: cloudData.dailyRewardState || currentUser.dailyRewardState
                 };
 
+                // Save fresh data back to local storage
                 localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
 
-                // Sync stats to local storage keys safely
+                // Sync stats to local storage keys used by playerstat.js
                 const prefix = username + '_';
-                localStorage.setItem(prefix + 'totalCoins', finalCoins);
-                localStorage.setItem(prefix + 'currentLevel', finalLevel);
-                if (finalAvatar) localStorage.setItem(prefix + 'vinpix_avatar', finalAvatar);
+                if (cloudData.coins !== undefined) localStorage.setItem(prefix + 'totalCoins', cloudData.coins);
+                if (cloudData.level !== undefined) localStorage.setItem(prefix + 'currentLevel', cloudData.level);
+                if (cloudData.avatar) localStorage.setItem(prefix + 'vinpix_avatar', cloudData.avatar);
 
+                // Sync daily reward state down to local storage key
                 if (cloudData.dailyRewardState) {
                     const dailyStorageKey = `pixvinz_daily_${username}`;
                     localStorage.setItem(dailyStorageKey, JSON.stringify(cloudData.dailyRewardState));
@@ -139,18 +123,18 @@ async function fetchUserDataFromFirestore() {
                     }
                 }
 
+                // Instantly update the screen so the user sees correct stats
                 if (typeof updateXpProgress === 'function') updateXpProgress();
                 if (typeof updateProfileStats === 'function') updateProfileStats();
                 if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
 
-                console.log("Profile successfully fetched and protected with Math.max sync!");
+                console.log("Profile successfully synced from Firestore players collection!");
             }
         }
     } catch (err) {
-        console.error("Failed to fetch data from Firestore, falling back to local storage:", err);
+        console.error("Failed to fetch data from Firestore:", err);
     }
 }
-
 
 
 
@@ -191,12 +175,13 @@ function calculateLevelAndXp(totalPuzzlesSolved) {
         totalXpEarned += xpPerPuzzle;
     }
 
+    // Add any stored bonus XP (e.g. from daily rewards)
     const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
     const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp';
     let bonusXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
     totalXpEarned += bonusXp;
 
-    let currentLevel = 1; 
+    let currentLevel = 3; 
     let cumulativeXpRequired = 1500;
     let accumulated = 0;
     
@@ -221,6 +206,7 @@ function calculateLevelAndXp(totalPuzzlesSolved) {
     };
 }
 
+// --- UPDATE COINS AND LEVEL UI STATS ---
 function updateProfileStats() {
     const prefix = getCurrentUsername() ? getCurrentUsername() + '_' : '';
     const totalCoins = parseInt(localStorage.getItem(prefix + 'totalCoins')) || 0;
@@ -252,38 +238,16 @@ function updateXpProgress() {
     updateProfileStats();
 }
 
-function applyProfileRankFrame(rank) {
-    const frameImg = document.getElementById('profileRankFrame');
-    if (!frameImg) return;
-
-    if (rank === 1) {
-        frameImg.src = 'image/1.png';
-        frameImg.style.display = 'block';
-    } else if (rank === 2) {
-        frameImg.src = 'image/2.png';
-        frameImg.style.display = 'block';
-    } else if (rank === 3) {
-        frameImg.src = 'image/3.png';
-        frameImg.style.display = 'block';
-    } else {
-        frameImg.src = '';
-        frameImg.style.display = 'none';
-    }
-}
-
+// --- LOAD & DISPLAY GLOBAL RANK ON PROFILE ---
 async function loadProfileGlobalRank() {
     const rankValueEl = document.getElementById('profileGlobalRank') || document.querySelector('.global-rank-indicator .rank-value') || document.getElementById('displayGlobalRank');
-    if (!rankValueEl) {
-        applyProfileRankFrame(null);
-        return;
-    }
+    if (!rankValueEl) return;
 
     rankValueEl.textContent = '#--';
 
     const currentUsername = getCurrentUsername();
     if (!currentUsername) {
         rankValueEl.textContent = 'Unranked';
-        applyProfileRankFrame(null);
         return;
     }
 
@@ -309,19 +273,23 @@ async function loadProfileGlobalRank() {
                 currentIndex++;
             });
 
-            rankValueEl.textContent = foundRank !== null ? `#${foundRank}` : 'Unranked';
-            applyProfileRankFrame(foundRank);
+            if (foundRank !== null) {
+                rankValueEl.textContent = `#${foundRank}`;
+            } else {
+                rankValueEl.textContent = 'Unranked';
+            }
         } else {
             rankValueEl.textContent = 'Unranked';
-            applyProfileRankFrame(null);
         }
     } catch (err) {
         console.warn("Could not fetch global rank for profile:", err);
         rankValueEl.textContent = 'Unranked';
-        applyProfileRankFrame(null);
     }
 }
 
+
+
+// Modal Helper Functions
 function showBadgeModal(icon, title, desc, glowColor, isUnlocked) {
     const modal = document.getElementById('badgeModal');
     const modalImg = document.getElementById('modalBadgeImg');
@@ -334,6 +302,7 @@ function showBadgeModal(icon, title, desc, glowColor, isUnlocked) {
     modalTitle.innerText = title;
     modalDesc.innerText = desc;
 
+    // Apply unlock status, grayscale, and color glow to the enlarged badge image
     if (isUnlocked) {
         modalImg.style.filter = `drop-shadow(0 0 20px ${glowColor})`;
         modalTitle.style.color = '#ffffff';
@@ -350,6 +319,7 @@ function closeBadgeModal() {
     if (modal) modal.style.display = 'none';
 }
 
+// --- UNIFIED DYNAMIC BADGE CHECKER & 3-COLUMN RENDERER ---
 function checkAndUnlockBadges() {
     const badgesContainer = document.getElementById('badgesGrid');
     if (!badgesContainer) return;
@@ -423,17 +393,17 @@ function checkAndUnlockBadges() {
             <span class="badge-desc" style="font-size: 7.5px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1; width: 100%; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;">${badge.desc}</span>
         `;
 
+        // Click handler to display enlarged badge
         badgeElement.onclick = () => showBadgeModal(badge.icon, badge.title, badge.desc, badge.glowColor, isUnlocked);
+
         badgesContainer.appendChild(badgeElement);
     });
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-    const avatarLoader = document.getElementById('avatarLoader');
-    if (avatarLoader) avatarLoader.style.display = 'flex';
 
-    // Fetch from Firestore FIRST before rendering UI/Local data elements
-    await fetchUserDataFromFirestore();
+document.addEventListener('DOMContentLoaded', () => {
+    const avatarLoader = document.getElementById('avatarLoader');
+    if (avatarLoader) avatarLoader.style.display = 'none';
 
     let initialName = '';
     try {
@@ -466,8 +436,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateProfileStats();
     checkAndUnlockBadges();
     loadProfileGlobalRank();
-    
-    if (avatarLoader) avatarLoader.style.display = 'none';
+    saveUserDataToCloud();
 });
 
 // --- EDIT NAME MODAL HANDLERS ---
@@ -597,7 +566,10 @@ if (saveProfileBtn) {
     });
 }    
 
-// --- 7-DAY DAILY CHECK-IN LOGIC ---
+
+
+
+// --- 7-DAY DAILY CHECK-IN LOGIC (USER-TIED & SECURE) ---
 const dailyRewardsData = [
     { day: 1, coins: 15, xp: 50, label: '15 🪙' },
     { day: 2, coins: 30, xp: 100, label: '30 🪙' },
@@ -638,8 +610,10 @@ function checkDailyRewardStatus() {
             localStorage.setItem(storageKey, JSON.stringify(dailyState));
         }
 
-        if (badge) {
-            badge.style.display = (dailyState.lastClaimDate !== today) ? 'inline-block' : 'none';
+        if (dailyState.lastClaimDate !== today) {
+            if (badge) badge.style.display = 'inline-block';
+        } else {
+            if (badge) badge.style.display = 'none';
         }
     } catch (e) {}
 }
@@ -649,6 +623,7 @@ window.openDailyModal = function() {
         AudioManager.playClick();
     }
     
+    // Render real-time calendar graphic header dynamically in the modal
     const now = new Date();
     const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
     const monthStr = months[now.getMonth()];
@@ -694,6 +669,7 @@ function renderDailyGrid() {
     }
 
     const hasClaimedToday = dailyState.lastClaimDate === today;
+    
     const nowTime = Date.now();
     const timeSinceLastClaim = dailyState.lastClaimTimestamp ? nowTime - dailyState.lastClaimTimestamp : Infinity;
     const isUnder24Hours = dailyState.lastClaimTimestamp && (timeSinceLastClaim < 24 * 60 * 60 * 1000);
@@ -702,6 +678,7 @@ function renderDailyGrid() {
     const currentDayIndex = lockedOut ? dailyState.streak : (dailyState.streak + 1 > 7 ? 1 : dailyState.streak + 1);
 
     dailyRewardsData.forEach((item) => {
+        const isCompleted = item.day <= dailyState.streak && !lockedOut;
         const isCurrent = item.day === currentDayIndex && !lockedOut;
 
         let boxBg = 'rgba(255,255,255,0.03)';
@@ -813,10 +790,13 @@ window.claimDailyReward = async function() {
         if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
     }
 
-    const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
-    const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp';
-    let bonusXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
-    localStorage.setItem(xpStoreKey, bonusXp + reward.xp);
+    try {
+        const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
+        const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp';
+        let bonusXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
+        bonusXp += reward.xp;
+        localStorage.setItem(xpStoreKey, bonusXp);
+    } catch (e) {}
 
     dailyState.streak = nextStreak;
     dailyState.lastClaimDate = today;
@@ -825,10 +805,77 @@ window.claimDailyReward = async function() {
 
     renderDailyGrid();
     checkDailyRewardStatus();
-    updateXpProgress();
-    updateProfileStats();
 
+    if (typeof updateXpProgress === 'function') updateXpProgress();
+    if (typeof updateProfileUI === 'function') updateProfileUI();
+    
     if (typeof saveUserDataToCloud === 'function') {
-        await saveUserDataToCloud();
+        saveUserDataToCloud();
     }
+
+    try {
+        const rewardAudio = new Audio('sounds/reward.mp3');
+        rewardAudio.volume = 0.6;
+        rewardAudio.play().catch(e => console.log("Audio play blocked:", e));
+    } catch (e) {}
+
+    showRewardToast(`🎉 Claimed Day ${nextStreak}! +${reward.coins} Coins & +${reward.xp} XP`);
 };
+
+function showRewardToast(message) {
+    const existingToast = document.getElementById('customRewardToast');
+    if (existingToast) existingToast.remove();
+
+    const dailyButton = document.querySelector("button[onclick='openDailyModal()']");
+    if (!dailyButton) return;
+
+    const parentContainer = dailyButton.parentElement;
+    if (parentContainer) {
+        parentContainer.style.position = 'relative';
+    }
+
+    const toast = document.createElement('div');
+    toast.id = 'customRewardToast';
+    toast.style.cssText = `
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%) translateY(10px);
+        margin-bottom: 12px;
+        background: linear-gradient(135deg, #130f2b, #2b1055);
+        border: 2px solid #ffd700;
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 13px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 15px rgba(255,215,0,0.4);
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        opacity: 0;
+        white-space: nowrap;
+        pointer-events: none;
+        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    `;
+
+    toast.innerHTML = `
+        <span style="font-size: 18px;">🎁</span>
+        <span>${message}</span>
+    `;
+
+    dailyButton.before(toast);
+
+    setTimeout(() => {
+        toast.style.transform = 'translateX(-50%) translateY(0)';
+        toast.style.opacity = '1';
+    }, 10);
+
+    setTimeout(() => {
+        toast.style.transform = 'translateX(-50%) translateY(10px)';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
