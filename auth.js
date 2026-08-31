@@ -769,35 +769,72 @@ if (regPassConfirm) {
 });
 
 
+/* =========================================================
+   PIXVINZ DOWNLOAD APP + SERVICE WORKER
+   ========================================================= */
 
-let deferredPrompt;
+let deferredPrompt = null;
 
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-});
+const installButtons = document.querySelectorAll("#install-app-btn");
 
-document.addEventListener('click', async (e) => {
-  const installBtn = e.target.closest('.install-btn-trigger');
-  if (!installBtn) return;
-
-  if (!deferredPrompt) {
-    alert("To install PixVinz, tap your browser's menu (three dots) and select 'Add to Home Screen'.");
-    return;
-  }
-
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  console.log(`User response to the install prompt: ${outcome}`);
-  deferredPrompt = null;
-});
-
-
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/PixVinz/sw.js')
-      .then((reg) => console.log('Service Worker registered:', reg.scope))
-      .catch((err) => console.log('Service Worker failed:', err));
-  });
+/* Register Service Worker */
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/PixVinz/sw.js")
+            .then(() => {
+                console.log("Service Worker registered.");
+            })
+            .catch((error) => {
+                console.error("Service Worker registration failed:", error);
+            });
+    });
 }
+
+/* Capture install prompt */
+window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredPrompt = event;
+
+    installButtons.forEach(button => {
+        button.style.display = "block";
+        button.disabled = false;
+    });
+});
+
+/* Download / Install App */
+installButtons.forEach(button => {
+    button.addEventListener("click", async () => {
+
+        if (
+            window.matchMedia("(display-mode: standalone)").matches ||
+            window.navigator.standalone === true
+        ) {
+            return;
+        }
+
+        if (!deferredPrompt) {
+            alert("Tap your browser menu ⋮ and select 'Add to Home screen' or 'Install app'.");
+            return;
+        }
+
+        deferredPrompt.prompt();
+
+        const choice = await deferredPrompt.userChoice;
+
+        if (choice.outcome === "accepted") {
+            console.log("PixVinz installation accepted.");
+        }
+
+        deferredPrompt = null;
+    });
+});
+
+/* Installation completed */
+window.addEventListener("appinstalled", () => {
+    deferredPrompt = null;
+
+    installButtons.forEach(button => {
+        button.textContent = "✅ APP INSTALLED";
+        button.disabled = true;
+    });
+});
