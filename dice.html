@@ -8,22 +8,22 @@
         html, body {
             height: 100%;
             overflow: hidden;
-        }
-
-        body {
             background-color: #0f172a;
             color: #f8fafc;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             -webkit-tap-highlight-color: transparent;
             box-sizing: border-box;
         }
 
-        /* Top Header Bar - UNTOUCHED & RESTORED MARGIN */
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Top Header Bar - Fixed */
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -33,10 +33,11 @@
             position: relative;
             flex-shrink: 0;
             padding: 12px 15px;
-            background: transparent;
+            background: #0f172a;
             box-sizing: border-box;
             border-bottom: none;
-            margin-top: 1.5cm;
+            margin-top: 1cm;
+            z-index: 50;
         }
 
         .top-bar > *:nth-child(1) { position: absolute; left: 15px; }
@@ -103,20 +104,22 @@
             gap: 6px;
         }
 
-        /* External Title Area - RESTORED ORIGINAL SPACING */
+        /* External Title Area - Fixed */
         .external-title-area {
             width: 100%;
             max-width: 440px;
             padding: 0 15px;
             box-sizing: border-box;
             text-align: center;
-            margin-top: 1.8cm;
-            margin-bottom: 22px;
+            margin-top: 6px;
+            margin-bottom: 14px;
             flex-shrink: 0;
+            background: #0f172a;
+            z-index: 40;
         }
 
         .external-title {
-            margin: 0 0 6px 0;
+            margin: 0 0 4px 0;
             color: #fbbf24;
             font-size: 21px;
             font-weight: 800;
@@ -129,17 +132,21 @@
             margin: 0;
         }
 
-        /* Main Game Layout */
+        /* Main Game Layout - Scrollable Area */
         .game-container {
             width: 100%;
             max-width: 450px;
-            padding: 0 15px;
+            padding: 0 15px 30px 15px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             flex-grow: 1;
-            justify-content: flex-start;
-            margin-bottom: 1cm;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .game-container::-webkit-scrollbar {
+            display: none;
         }
 
         .card {
@@ -513,6 +520,7 @@
 </head>
 <body>
 
+    <!-- Header - Fixed -->
     <header class="top-bar">
       <button class="icon-btn" onclick="playSound('click'); window.location.href='index.html'">←</button>
       <div class="logo-container">
@@ -523,11 +531,13 @@
       <div class="coin-badge">🪙 <span id="coinCount">950.00</span></div>
     </header>
 
+    <!-- External Title Area - Fixed (6px spacing from top bar) -->
     <div class="external-title-area">
         <h2 class="external-title">🎯 PROVABLY FAIR DICE</h2>
         <p class="external-subtitle">Slide to adjust odds & hit roll!</p>
     </div>
 
+    <!-- Game Container - Independently Scrollable -->
     <div class="game-container">
         <div class="card">
             
@@ -583,6 +593,7 @@
                 </div>
             </div>
 
+            <!-- Auto-Roll Specific Config Panel -->
             <div class="auto-controls" id="autoControls">
                 <div class="auto-row">
                     <div class="auto-input-box">
@@ -617,6 +628,7 @@
 
             <button class="btn-bet" id="betBtn" onclick="playSound('click'); handleMainButtonClick()">ROLL</button>
 
+            <!-- Mode Switcher Tabs (Bottom Navigation) -->
             <div class="mode-tabs">
                 <button class="mode-tab active" id="manualTab" onclick="switchMode('manual')">Manual</button>
                 <button class="mode-tab" id="autoTab" onclick="switchMode('auto')">Auto</button>
