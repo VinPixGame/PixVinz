@@ -21,57 +21,80 @@
 
         /* Top Header Bar Matching Puzzle Layout Completely */
         .top-bar {
-            width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            width: 100%;
+            position: relative;
+            flex-shrink: 0;
             padding: 12px 20px;
             background: #1e293b;
             box-sizing: border-box;
             border-bottom: 2px solid #334155;
         }
-        .icon-btn {
-            width: 42px;
-            height: 42px;
+
+        .top-bar > *:nth-child(1) { position: absolute; left: 20px; }
+        .top-bar > *:nth-child(2) { width: 100%; display: flex; justify-content: center; }
+        .top-bar > *:nth-child(3) { position: absolute; right: 20px; }
+
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 40px;
+        }
+
+        .logo-container video,
+        #logoVideo {
+            width: 160px;
+            height: auto;
+            object-fit: contain;
+            background: transparent;
+        }
+
+        .btn-back {
+            background: rgba(20, 10, 35, 0.8);
+            border: 2px solid #ffd700;
+            color: #ffd700;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            background-color: #1e293b;
-            border: 2px solid #fbbf24;
-            overflow: hidden;
-            padding: 0;
-            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #fbbf24;
-            font-size: 18px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.4), inset 0 0 6px rgba(255, 215, 0, 0.2);
+            transition: all 0.2s ease;
+            padding: 0;
             outline: none;
-            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .icon-btn:active {
+
+        .btn-back:hover {
+            background: rgba(255, 215, 0, 0.15);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 10px rgba(255, 215, 0, 0.4);
+            transform: scale(1.05);
+        }
+
+        .btn-back:active {
             transform: scale(0.85);
         }
 
-        .logo-container {
-            height: 40px;
+        .coin-badge {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid #ffd700;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            color: #ffd700;
+            z-index: 2;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-        .logo-container video, .logo-container img {
-            height: 100%;
-            background: transparent;
-        }
-        .coin-badge {
-            background: #1e293b;
-            padding: 6px 14px;
-            border-radius: 20px;
-            border: 2px solid #fbbf24;
-            font-weight: bold;
-            font-size: 14px;
-            color: #fbbf24;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            gap: 6px;
         }
 
         /* Main Game Layout - Compact for Mobile */
@@ -382,24 +405,7 @@
             cursor: not-allowed;
         }
 
-        .btn-back {
-            background: transparent;
-            border: 2px solid #64748b;
-            color: #94a3b8;
-            margin-top: 8px;
-            padding: 8px;
-            width: 100%;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 13px;
-            cursor: pointer;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
-            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .btn-back:active {
-            transform: scale(0.95);
-        }
+        
     </style>
 </head>
 <body>
@@ -692,7 +698,6 @@
             currentCoins -= betAmount;
             document.getElementById('coinCount').innerText = currentCoins;
 
-            // Added 0.2s analytical delay pause for suspense & realistic pacing
             setTimeout(() => {
                 let threshold = parseFloat(document.getElementById('rollOverVal').innerText);
                 let multiplier = parseFloat(document.getElementById('multiplierVal').innerText);
