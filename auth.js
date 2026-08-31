@@ -769,3 +769,26 @@ if (regPassConfirm) {
 });
 
 
+
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+
+document.addEventListener('click', async (e) => {
+  const installBtn = e.target.closest('#install-app-btn');
+  if (!installBtn) return;
+
+  if (!deferredPrompt) {
+    alert("App installation prompt is not ready yet. You can also install it via your browser's menu ('Add to Home Screen').");
+    return;
+  }
+
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  console.log(`User response to the install prompt: ${outcome}`);
+  deferredPrompt = null;
+});
+
