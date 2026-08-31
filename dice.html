@@ -2,9 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PixVinz - Crypto Dice Deluxe</title>
     <style>
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
         body {
             background-color: #0f172a;
             color: #f8fafc;
@@ -14,9 +19,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
-            overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
         }
 
         /* Top Header Bar - UNTOUCHED */
@@ -28,11 +32,11 @@
             max-width: 440px;
             position: relative;
             flex-shrink: 0;
-            padding: 12px 15px;
+            padding: 8px 15px;
             background: transparent;
             box-sizing: border-box;
             border-bottom: none;
-            margin-top: 1.5cm;
+            margin-top: 1cm;
         }
 
         .top-bar > *:nth-child(1) { position: absolute; left: 15px; }
@@ -44,12 +48,12 @@
             justify-content: center;
             align-items: center;
             width: 100%;
-            height: 40px;
+            height: 36px;
         }
 
         .logo-container video,
         #logoVideo {
-            width: 160px;
+            width: 150px;
             height: auto;
             object-fit: contain;
             background: transparent;
@@ -59,13 +63,13 @@
             background: rgba(20, 10, 35, 0.8);
             border: 2px solid #ffd700;
             color: #ffd700;
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 0 10px rgba(255, 215, 0, 0.4), inset 0 0 6px rgba(255, 215, 0, 0.2);
@@ -87,10 +91,10 @@
         .coin-badge {
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid #ffd700;
-            padding: 5px 12px;
+            padding: 4px 10px;
             border-radius: 20px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
             color: #ffd700;
             z-index: 2;
             display: flex;
@@ -106,21 +110,22 @@
             padding: 0 15px;
             box-sizing: border-box;
             text-align: center;
-            margin-top: 1.8cm;
-            margin-bottom: 22px;
+            margin-top: 0.5cm;
+            margin-bottom: 10px;
+            flex-shrink: 0;
         }
 
         .external-title {
-            margin: 0 0 6px 0;
+            margin: 0 0 4px 0;
             color: #fbbf24;
-            font-size: 21px;
+            font-size: 19px;
             font-weight: 800;
             letter-spacing: 0.5px;
         }
 
         .external-subtitle {
             color: #94a3b8;
-            font-size: 13px;
+            font-size: 12px;
             margin: 0;
         }
 
@@ -132,25 +137,29 @@
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            margin-bottom: 3cm;
+            flex-grow: 1;
+            justify-content: center;
+            margin-bottom: 1cm;
         }
 
         .card {
             background: #1e293b;
             border: 2px solid #334155;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.4);
+            border-radius: 18px;
+            padding: 14px 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         /* Recent History Bar - 6 recent results */
         .history-bar {
             display: flex;
             justify-content: flex-end;
-            gap: 8px;
-            margin-bottom: 14px;
+            gap: 6px;
+            margin-bottom: 2px;
             overflow-x: auto;
             padding-bottom: 2px;
             scrollbar-width: none;
@@ -161,9 +170,9 @@
         .history-pill {
             background: #0f172a;
             border: 1px solid #334155;
-            padding: 5px 10px;
-            border-radius: 10px;
-            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 11px;
             font-weight: 700;
             white-space: nowrap;
         }
@@ -180,22 +189,22 @@
 
         /* Slider Section */
         .slider-section {
-            margin: 40px 0 24px 0;
+            margin: 32px 0 16px 0;
             position: relative;
         }
 
         .floating-cube-indicator {
             position: absolute;
-            top: -36px;
+            top: -34px;
             left: 50%;
             transform: translateX(-50%);
             background: #f8fafc;
             color: #0f172a;
             font-weight: 900;
-            font-size: 13px;
-            padding: 4px 10px;
-            border-radius: 7px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
             border: 2px solid #cbd5e1;
             transition: left 0.3s cubic-bezier(0.15, 0.85, 0.35, 1.2);
             white-space: nowrap;
@@ -208,8 +217,8 @@
             bottom: -5px;
             left: 50%;
             transform: translateX(-50%) rotate(45deg);
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             background: #f8fafc;
             border-right: 2px solid #cbd5e1;
             border-bottom: 2px solid #cbd5e1;
@@ -236,15 +245,15 @@
         .slider-labels {
             display: flex;
             justify-content: space-between;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             color: #94a3b8;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .track-container {
             position: relative;
-            height: 32px;
+            height: 28px;
             display: flex;
             align-items: center;
         }
@@ -252,9 +261,9 @@
         .slider-track {
             position: absolute;
             width: 100%;
-            height: 14px;
+            height: 12px;
             background: #22c55e;
-            border-radius: 7px;
+            border-radius: 6px;
             overflow: hidden;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
         }
@@ -265,13 +274,13 @@
             left: 0;
             width: 47%;
             background: #ef4444;
-            border-radius: 7px 0 0 7px;
+            border-radius: 6px 0 0 6px;
         }
 
         .range-input {
             position: absolute;
             width: 100%;
-            height: 32px;
+            height: 28px;
             background: transparent;
             appearance: none;
             cursor: pointer;
@@ -282,12 +291,12 @@
 
         .range-input::-webkit-slider-thumb {
             appearance: none;
-            width: 24px;
-            height: 36px;
+            width: 22px;
+            height: 32px;
             background: #3b82f6;
             border: 2px solid #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+            border-radius: 7px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
             cursor: pointer;
             transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
@@ -300,15 +309,15 @@
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 14px;
+            gap: 8px;
+            margin-bottom: 2px;
         }
 
         .stat-box {
             background: #0f172a;
             border: 2px solid #334155;
-            border-radius: 12px;
-            padding: 11px 6px;
+            border-radius: 10px;
+            padding: 9px 4px;
             text-align: center;
             cursor: pointer;
             transition: border-color 0.2s, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -321,15 +330,15 @@
         }
 
         .stat-label {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 700;
             color: #94a3b8;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             text-transform: uppercase;
         }
 
         .stat-value {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 800;
             color: #f8fafc;
         }
@@ -338,12 +347,12 @@
         .input-group {
             background: #0f172a;
             border: 2px solid #334155;
-            border-radius: 14px;
-            padding: 10px 14px;
+            border-radius: 12px;
+            padding: 8px 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 10px;
+            margin-bottom: 2px;
         }
 
         .input-left {
@@ -351,36 +360,36 @@
         }
 
         .input-label {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 700;
             color: #94a3b8;
             text-transform: uppercase;
-            margin-bottom: 2px;
+            margin-bottom: 1px;
         }
 
         .bet-input {
             background: transparent;
             border: none;
             color: #f8fafc;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 800;
-            width: 120px;
+            width: 110px;
             outline: none;
         }
 
         .quick-actions {
             display: flex;
-            gap: 6px;
+            gap: 5px;
         }
 
         .quick-btn {
             background: #1e293b;
             border: 1px solid #475569;
             color: #cbd5e1;
-            padding: 6px 10px;
-            font-size: 12px;
+            padding: 5px 9px;
+            font-size: 11px;
             font-weight: 700;
-            border-radius: 8px;
+            border-radius: 7px;
             cursor: pointer;
             outline: none;
             -webkit-tap-highlight-color: transparent;
@@ -395,21 +404,21 @@
         .auto-controls {
             display: none;
             flex-direction: column;
-            gap: 10px;
-            margin-bottom: 10px;
+            gap: 8px;
+            margin-bottom: 2px;
         }
 
         .auto-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 8px;
         }
 
         .auto-input-box {
             background: #0f172a;
             border: 2px solid #334155;
-            border-radius: 12px;
-            padding: 8px 12px;
+            border-radius: 10px;
+            padding: 6px 10px;
             text-align: left;
         }
 
@@ -417,7 +426,7 @@
             background: transparent;
             border: none;
             color: #f8fafc;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 800;
             width: 100%;
             outline: none;
@@ -425,14 +434,14 @@
 
         /* Centered Disappearing Error Message */
         .error-msg-container {
-            height: 18px;
-            margin-bottom: 8px;
+            height: 14px;
+            margin-bottom: 2px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .error-msg {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
             color: #ef4444;
             opacity: 0;
@@ -445,15 +454,15 @@
         /* Action Buttons */
         .btn-bet {
             width: 100%;
-            padding: 16px;
+            padding: 13px;
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             border: 2px solid #60a5fa;
-            border-radius: 14px;
+            border-radius: 12px;
             color: #fff;
             font-weight: 800;
-            font-size: 16px;
+            font-size: 15px;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
             outline: none;
             -webkit-tap-highlight-color: transparent;
             transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -468,7 +477,7 @@
         .btn-bet.stop-auto {
             background: linear-gradient(135deg, #ef4444, #b91c1c);
             border-color: #f87171;
-            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
         }
 
         /* Mode Switcher Tabs - Bottom Navigation */
@@ -476,9 +485,9 @@
             display: flex;
             background: #0f172a;
             border: 2px solid #334155;
-            border-radius: 14px;
-            padding: 4px;
-            margin-top: 12px;
+            border-radius: 12px;
+            padding: 3px;
+            margin-top: 6px;
         }
 
         .mode-tab {
@@ -486,10 +495,10 @@
             background: transparent;
             border: none;
             color: #94a3b8;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 800;
-            padding: 10px 0;
-            border-radius: 10px;
+            padding: 8px 0;
+            border-radius: 9px;
             cursor: pointer;
             transition: all 0.2s ease;
             outline: none;
@@ -498,7 +507,7 @@
         .mode-tab.active {
             background: #334155;
             color: #f8fafc;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
     </style>
 </head>
@@ -568,7 +577,7 @@
                     <div class="input-label">Bet Amount</div>
                     <input type="number" id="betAmountInput" class="bet-input" value="10">
                 </div>
-                <div class="quick-actions" id="manualQuickActions">
+                <div class="quick-actions">
                     <button class="quick-btn" onclick="playSound('click'); halveBet()">½</button>
                     <button class="quick-btn" onclick="playSound('click'); doubleBet()">2×</button>
                 </div>
@@ -601,7 +610,7 @@
                 <div class="error-msg" id="errorMsg">Not enough balance</div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding: 0 4px; font-size: 13px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; padding: 0 4px; font-size: 12px;">
                 <span style="color: #94a3b8; font-weight: 700;">Profit on Win:</span>
                 <span style="color: #4ade80; font-weight: 800;" id="profitVal">8.70 Coins</span>
             </div>
@@ -698,20 +707,17 @@
             let manualTab = document.getElementById('manualTab');
             let autoTab = document.getElementById('autoTab');
             let autoControls = document.getElementById('autoControls');
-            let manualQuickActions = document.getElementById('manualQuickActions');
             let betBtn = document.getElementById('betBtn');
 
             if (mode === 'manual') {
                 manualTab.classList.add('active');
                 autoTab.classList.remove('active');
                 autoControls.style.display = 'none';
-                manualQuickActions.style.display = 'flex';
                 betBtn.innerText = "ROLL";
             } else {
                 autoTab.classList.add('active');
                 manualTab.classList.remove('active');
                 autoControls.style.display = 'flex';
-                manualQuickActions.style.display = 'none';
                 betBtn.innerText = "START AUTO ROLL";
             }
         }
@@ -752,14 +758,14 @@
                 successTrack.style.left = 'unset';
                 successTrack.style.right = '0';
                 successTrack.style.width = (100 - threshold) + '%';
-                successTrack.style.borderRadius = '0 7px 7px 0';
+                successTrack.style.borderRadius = '0 6px 6px 0';
             } else {
                 trackBg.style.background = '#ef4444';
                 successTrack.style.background = '#22c55e';
                 successTrack.style.right = 'unset';
                 successTrack.style.left = '0';
                 successTrack.style.width = threshold + '%';
-                successTrack.style.borderRadius = '7px 0 0 7px';
+                successTrack.style.borderRadius = '6px 0 0 6px';
             }
 
             updateProfit();
