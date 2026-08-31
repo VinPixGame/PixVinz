@@ -778,11 +778,11 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 
 document.addEventListener('click', async (e) => {
-  const installBtn = e.target.closest('#install-app-btn');
+  const installBtn = e.target.closest('.install-btn-trigger');
   if (!installBtn) return;
 
   if (!deferredPrompt) {
-    alert("App installation prompt is not ready yet. You can also install it via your browser's menu ('Add to Home Screen').");
+    alert("To install PixVinz, tap your browser's menu (three dots) and select 'Add to Home Screen'.");
     return;
   }
 
@@ -791,7 +791,6 @@ document.addEventListener('click', async (e) => {
   console.log(`User response to the install prompt: ${outcome}`);
   deferredPrompt = null;
 });
-
 
 
 
