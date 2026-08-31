@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixVinz - Dice Game</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Specific inline layout styles for the dice page wrapper and board */
+        body {
+            background-color: #130f2b;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .dice-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 80px; /* Leaves room for the fixed top header bar */
+        }
+        .card {
+            background: rgba(30, 20, 60, 0.85);
+            border: 2px solid #9c27b0;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(156, 39, 176, 0.3);
+            text-align: center;
+        }
+        .dice-display {
+            font-size: 64px;
+            margin: 15px 0;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-game {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            border: 2px solid #4facfe;
+            border-radius: 16px;
+            color: #fff;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0,198,255,0.4);
+            transition: all 0.2s;
+        }
+        .btn-game:active {
+            transform: scale(0.98);
+        }
+        .back-btn {
+            background: transparent;
+            border: 2px solid #ff75a0;
+            color: #ff75a0;
+            margin-top: 10px;
+        }
+        input[type="number"] {
+            width: 80%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #9c27b0;
+            background: #1a0b2e;
+            color: #fff;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="top-bar" id="mainHeader" style="position: fixed; top: 0; width: 100%; max-width: 480px; display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: #1a0b2e; z-index: 1000; box-sizing: border-box; border-bottom: 2px solid #2a1147;">
+      <button class="icon-btn" id="profileHeaderBtn" onclick="window.location.href='index.html'" style="width: 40px; height: 40px; border-radius: 50%; background-color: #2a1147; border: 2px solid #9c27b0; overflow: hidden; padding: 0; cursor: pointer;">
+        <span id="profileIconFallback">👤</span>
+        <img id="profileHeaderImg" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+      </button>
+      <div class="logo-container" style="height: 35px;">
+        <video id="logoVideo" autoplay loop muted playsinline preload="auto" style="height: 100%; background: transparent;">
+          <source src="image/logo.webm" type="video/webm">
+        </video>
+      </div>
+      <div class="coin-badge" style="background: #2a1147; padding: 6px 12px; border-radius: 20px; border: 2px solid #ffd700; font-weight: bold; font-size: 14px;">🪙 <span id="coinCount">0</span></div>
+    </header>
+
+    <div class="dice-container">
+        <div class="card">
+            <h2>🎲 LUCKY DICE</h2>
+            <p style="color: #b19cd9; font-size: 14px;">Roll a 4, 5, or 6 to double your bet!</p>
+            
+            <div class="dice-display" id="diceBox">🎲</div>
+            
+            <label for="betAmount" style="display:block; margin-bottom: 8px; font-weight: bold;">Enter Your Bet:</label>
+            <input type="number" id="betAmount" value="10" min="1" max="100">
+            
+            <button class="btn-game" id="rollBtn" onclick="rollDice()">ROLL DICE</button>
+            <button class="btn-game back-btn" onclick="window.location.href='index.html'">← BACK TO HOME</button>
+        </div>
+    </div>
+
+    <script>
+        // Load player coin balance on start
+        let currentCoins = parseInt(localStorage.getItem('pixvinz_coins')) || 950;
+        document.getElementById('coinCount').innerText = currentCoins;
+
+        function rollDice() {
+            const betInput = document.getElementById('betAmount');
+            const bet = parseInt(betInput.value);
+            const diceBox = document.getElementById('diceBox');
+            const rollBtn = document.getElementById('rollBtn');
+
+            if (isNaN(bet) || bet <= 0) {
+                alert("Please enter a valid bet amount!");
+                return;
+            }
+
+            if (bet > currentCoins) {
+                alert("You don't have enough coins for this bet!");
+                return;
+            }
+
+            rollBtn.disabled = true;
+            diceBox.innerText = "🎲...";
+
+            setTimeout(() => {
+                // Generate random dice roll from 1 to 6
+                const roll = Math.floor(Math.random() * 6) + 1;
+                const diceFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+                diceBox.innerText = diceFaces[roll - 1];
+
+                if (roll >= 4) {
+                    // Win condition: double the bet
+                    currentCoins += bet;
+                    alert(`🎉 You rolled a ${roll}! You won ${bet} coins!`);
+                } else {
+                    // Loss condition: lose the bet
+                    currentCoins -= bet;
+                    alert(`😢 You rolled a ${roll}. You lost ${bet} coins.`);
+                }
+
+                // Update UI and LocalStorage
+                document.getElementById('coinCount').innerText = currentCoins;
+                localStorage.setItem('pixvinz_coins', currentCoins);
+                rollBtn.disabled = false;
+            }, 600);
+        }
+    </script>
+</body>
+</html>
