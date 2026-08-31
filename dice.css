@@ -1,0 +1,511 @@
+html, body {
+    height: 100%;
+    overflow: hidden;
+    background-color: #0f172a;
+    color: #f8fafc;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Top Header Bar - Fixed with 1.5cm top margin */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 440px;
+    position: relative;
+    flex-shrink: 0;
+    padding: 12px 15px;
+    background: #0f172a;
+    box-sizing: border-box;
+    border-bottom: none;
+    margin-top: 1.5cm;
+    z-index: 50;
+}
+
+.top-bar > *:nth-child(1) { position: absolute; left: 15px; }
+.top-bar > *:nth-child(2) { width: 100%; display: flex; justify-content: center; }
+.top-bar > *:nth-child(3) { position: absolute; right: 15px; }
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 40px;
+}
+
+.logo-container video,
+#logoVideo {
+    width: 160px;
+    height: auto;
+    object-fit: contain;
+    background: transparent;
+}
+
+.icon-btn {
+    background: rgba(20, 10, 35, 0.8);
+    border: 2px solid #ffd700;
+    color: #ffd700;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4), inset 0 0 6px rgba(255, 215, 0, 0.2);
+    transition: all 0.2s ease;
+    padding: 0;
+    outline: none;
+}
+
+.icon-btn:hover {
+    background: rgba(255, 215, 0, 0.15);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 10px rgba(255, 215, 0, 0.4);
+    transform: scale(1.05);
+}
+
+.icon-btn:active {
+    transform: scale(0.85);
+}
+
+.coin-badge {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid #ffd700;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 14px;
+    color: #ffd700;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+/* External Title Area - Fixed with 1.8cm margin below header */
+.external-title-area {
+    width: 100%;
+    max-width: 440px;
+    padding: 0 15px;
+    box-sizing: border-box;
+    text-align: center;
+    margin-top: 1.8cm;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+    background: #0f172a;
+    z-index: 40;
+}
+
+.external-title {
+    margin: 0 0 4px 0;
+    color: #fbbf24;
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.external-subtitle {
+    color: #94a3b8;
+    font-size: 13px;
+    margin: 0;
+}
+
+/* Main Game Layout - Scrollable Area */
+.game-container {
+    width: 100%;
+    max-width: 450px;
+    padding: 0 15px 30px 15px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.game-container::-webkit-scrollbar {
+    display: none;
+}
+
+.card {
+    background: #1e293b;
+    border: 2px solid #334155;
+    border-radius: 20px;
+    padding: 16px 20px;
+    box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Recent History Bar - 6 recent results */
+.history-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 6px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+}
+.history-bar::-webkit-scrollbar {
+    display: none;
+}
+.history-pill {
+    background: #0f172a;
+    border: 1px solid #334155;
+    padding: 5px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.history-pill.win {
+    background: rgba(34, 197, 94, 0.2);
+    border-color: #22c55e;
+    color: #4ade80;
+}
+.history-pill.lose {
+    background: #0f172a;
+    border-color: #334155;
+    color: #94a3b8;
+}
+
+/* Slider Section */
+.slider-section {
+    margin: 32px 0 16px 0;
+    position: relative;
+}
+
+.floating-cube-indicator {
+    position: absolute;
+    top: -36px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #f8fafc;
+    color: #0f172a;
+    font-weight: 900;
+    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: 7px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    border: 2px solid #cbd5e1;
+    transition: left 0.3s cubic-bezier(0.15, 0.85, 0.35, 1.2);
+    white-space: nowrap;
+    z-index: 20;
+    display: none;
+}
+.floating-cube-indicator::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 8px;
+    height: 8px;
+    background: #f8fafc;
+    border-right: 2px solid #cbd5e1;
+    border-bottom: 2px solid #cbd5e1;
+}
+.floating-cube-indicator.win {
+    background: #22c55e;
+    color: #fff;
+    border-color: #86efac;
+}
+.floating-cube-indicator.win::after {
+    background: #22c55e;
+    border-color: #86efac;
+}
+.floating-cube-indicator.lose {
+    background: #ef4444;
+    color: #fff;
+    border-color: #fca5a5;
+}
+.floating-cube-indicator.lose::after {
+    background: #ef4444;
+    border-color: #fca5a5;
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 700;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+
+.track-container {
+    position: relative;
+    height: 32px;
+    display: flex;
+    align-items: center;
+}
+
+.slider-track {
+    position: absolute;
+    width: 100%;
+    height: 14px;
+    background: #22c55e;
+    border-radius: 7px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.slider-track-fill {
+    position: absolute;
+    height: 100%;
+    left: 0;
+    width: 47%;
+    background: #ef4444;
+    border-radius: 7px 0 0 7px;
+}
+
+.range-input {
+    position: absolute;
+    width: 100%;
+    height: 32px;
+    background: transparent;
+    appearance: none;
+    cursor: pointer;
+    z-index: 10;
+    margin: 0;
+    outline: none;
+}
+
+.range-input::-webkit-slider-thumb {
+    appearance: none;
+    width: 24px;
+    height: 36px;
+    background: #3b82f6;
+    border: 2px solid #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+    cursor: pointer;
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.range-input::-webkit-slider-thumb:active {
+    transform: scale(1.2);
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.stat-box {
+    background: #0f172a;
+    border: 2px solid #334155;
+    border-radius: 12px;
+    padding: 9px 6px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.stat-box:active {
+    transform: scale(0.92);
+}
+.stat-box.interactive:hover {
+    border-color: #6366f1;
+}
+
+.stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #94a3b8;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+}
+
+.stat-value {
+    font-size: 15px;
+    font-weight: 800;
+    color: #f8fafc;
+}
+
+/* Bet Amount Input Container */
+.input-group {
+    background: #0f172a;
+    border: 2px solid #334155;
+    border-radius: 14px;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.input-left {
+    text-align: left;
+}
+
+.input-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+
+.bet-input {
+    background: transparent;
+    border: none;
+    color: #f8fafc;
+    font-size: 18px;
+    font-weight: 800;
+    width: 120px;
+    outline: none;
+}
+
+.quick-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.quick-btn {
+    background: #1e293b;
+    border: 1px solid #475569;
+    color: #cbd5e1;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s;
+}
+.quick-btn:active {
+    transform: scale(0.85);
+    background: #475569;
+}
+
+/* Auto Bet Specific Controls */
+.auto-controls {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.auto-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.auto-input-box {
+    background: #0f172a;
+    border: 2px solid #334155;
+    border-radius: 12px;
+    padding: 6px 12px;
+    text-align: left;
+}
+
+.auto-input {
+    background: transparent;
+    border: none;
+    color: #f8fafc;
+    font-size: 15px;
+    font-weight: 800;
+    width: 100%;
+    outline: none;
+}
+
+/* Centered Disappearing Error Message */
+.error-msg-container {
+    height: 16px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.error-msg {
+    font-size: 12px;
+    font-weight: 700;
+    color: #ef4444;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.error-msg.show {
+    opacity: 1;
+}
+
+/* Action Buttons */
+.btn-bet {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border: 2px solid #60a5fa;
+    border-radius: 14px;
+    color: #fff;
+    font-weight: 800;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.btn-bet:active {
+    transform: scale(0.95);
+}
+.btn-bet:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+.btn-bet.stop-auto {
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    border-color: #f87171;
+    box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+}
+
+/* Mode Switcher Tabs - Bottom Navigation */
+.mode-tabs {
+    display: flex;
+    background: #0f172a;
+    border: 2px solid #334155;
+    border-radius: 14px;
+    padding: 3px;
+    margin-top: 10px;
+}
+
+.mode-tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 10px 0;
+    border-radius: 11px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.mode-tab.active {
+    background: #334155;
+    color: #f8fafc;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
