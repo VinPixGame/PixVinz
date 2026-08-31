@@ -769,67 +769,37 @@ if (regPassConfirm) {
 });
 
 
-/* =========================================================
-   PIXVINZ DOWNLOAD APP + SERVICE WORKER
-   ========================================================= */
-
 let deferredPrompt = null;
 
 const installButtons = document.querySelectorAll("#install-app-btn");
 
-/* Register Service Worker */
-if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/PixVinz/sw.js")
-            .then(() => {
-                console.log("Service Worker registered.");
-            })
-            .catch((error) => {
-                console.error("Service Worker registration failed:", error);
-            });
-    });
-}
-
-/* Capture install prompt */
 window.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
     deferredPrompt = event;
 
     installButtons.forEach(button => {
         button.style.display = "block";
-        button.disabled = false;
     });
 });
 
-/* Download / Install App */
 installButtons.forEach(button => {
     button.addEventListener("click", async () => {
 
-        if (
-            window.matchMedia("(display-mode: standalone)").matches ||
-            window.navigator.standalone === true
-        ) {
-            return;
-        }
-
         if (!deferredPrompt) {
-            alert("Tap your browser menu ⋮ and select 'Add to Home screen' or 'Install app'.");
+            console.log("Install prompt unavailable.");
             return;
         }
 
         deferredPrompt.prompt();
 
-        const choice = await deferredPrompt.userChoice;
+        const { outcome } = await deferredPrompt.userChoice;
 
-        if (choice.outcome === "accepted") {
-            console.log("PixVinz installation accepted.");
-        }
+        console.log("Install:", outcome);
 
         deferredPrompt = null;
     });
 });
 
-/* Installation completed */
 window.addEventListener("appinstalled", () => {
     deferredPrompt = null;
 
@@ -838,3 +808,17 @@ window.addEventListener("appinstalled", () => {
         button.disabled = true;
     });
 });
+
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/PixVinz/sw.js", {
+            scope: "/PixVinz/"
+        })
+        .then(registration => {
+            console.log("PixVinz SW registered:", registration.scope);
+        })
+        .catch(error => {
+            console.error("SW registration failed:", error);
+        });
+    });
+}
