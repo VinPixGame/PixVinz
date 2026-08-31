@@ -83,42 +83,51 @@
             text-align: center;
         }
 
-        /* Dice Arena & Real Spin Animation */
+        /* 3D Dice Arena */
         .dice-arena {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin: 15px 0;
-            perspective: 600px;
+            gap: 25px;
+            margin: 25px 0 15px 0;
+            height: 70px;
+            perspective: 800px;
         }
-        .dice {
-            width: 60px;
-            height: 60px;
+
+        /* True 3D Cube Structure */
+        .dice-cube {
+            width: 50px;
+            height: 50px;
+            position: relative;
+            transform-style: preserve-3d;
+            transform: rotateX(0deg) rotateY(0deg);
+            transition: transform 1s cubic-bezier(0.15, 0.85, 0.35, 1.2);
+        }
+
+        .dice-face {
+            position: absolute;
+            width: 50px;
+            height: 50px;
             background: #fff;
-            border-radius: 12px;
+            border: 2px solid #dcd6f7;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            border: 3px solid #ff75a0;
-            position: relative;
-            overflow: hidden;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.2);
         }
-        .dice img {
-            width: 40px;
-            height: 40px;
+        .dice-face img {
+            width: 32px;
+            height: 32px;
             object-fit: contain;
         }
-        @keyframes spinDice {
-            0% { transform: rotateX(0deg) rotateY(0deg) scale(1); }
-            25% { transform: rotateX(180deg) rotateY(90deg) scale(1.1); }
-            50% { transform: rotateX(360deg) rotateY(180deg) scale(0.9); }
-            75% { transform: rotateX(540deg) rotateY(270deg) scale(1.1); }
-            100% { transform: rotateX(720deg) rotateY(360deg) scale(1); }
-        }
-        .dice.spinning {
-            animation: spinDice 0.6s infinite linear;
-        }
+
+        /* Positioning the 6 faces of the 3D cube */
+        .dice-face.front  { transform: rotateY(0deg) translateZ(25px); }
+        .dice-face.back   { transform: rotateY(180deg) translateZ(25px); }
+        .dice-face.right  { transform: rotateY(90deg) translateZ(25px); }
+        .dice-face.left   { transform: rotateY(-90deg) translateZ(25px); }
+        .dice-face.top    { transform: rotateX(90deg) translateZ(25px); }
+        .dice-face.bottom { transform: rotateX(-90deg) translateZ(25px); }
 
         /* Betting Controls */
         .section-title {
@@ -165,11 +174,6 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 8px;
-        }
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
         }
         .grid-4 {
             display: grid;
@@ -321,13 +325,37 @@
     <div class="game-container">
         <div class="card">
             <h2 style="margin: 0 0 5px 0; color: #ffd700;">🎲 DELUXE SIC BO</h2>
-            <p style="color: #b19cd9; font-size: 12px; margin: 0;">Tap chips to select value, then tap multiple bets!</p>
+            <p style="color: #b19cd9; font-size: 12px; margin: 0;">Tap chips to select value, then place multiple bets!</p>
             
-            <!-- 3 Dice Display with Real Dice Image Icons -->
+            <!-- True 3D Dice Display -->
             <div class="dice-arena">
-                <div class="dice" id="dice1"><img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Dice-1.svg" alt="dice 1"></div>
-                <div class="dice" id="dice2"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2c/Dice-2.svg" alt="dice 2"></div>
-                <div class="dice" id="dice3"><img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/Dice-3.svg" alt="dice 3"></div>
+                <!-- Cube 1 -->
+                <div class="dice-cube" id="cube1">
+                    <div class="dice-face front"><img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Dice-1.svg"></div>
+                    <div class="dice-face back"><img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Dice-6.svg"></div>
+                    <div class="dice-face right"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2c/Dice-2.svg"></div>
+                    <div class="dice-face left"><img src="https://upload.wikimedia.org/wikipedia/commons/8/8d/Dice-5.svg"></div>
+                    <div class="dice-face top"><img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/Dice-3.svg"></div>
+                    <div class="dice-face bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Dice-4.svg"></div>
+                </div>
+                <!-- Cube 2 -->
+                <div class="dice-cube" id="cube2">
+                    <div class="dice-face front"><img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Dice-1.svg"></div>
+                    <div class="dice-face back"><img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Dice-6.svg"></div>
+                    <div class="dice-face right"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2c/Dice-2.svg"></div>
+                    <div class="dice-face left"><img src="https://upload.wikimedia.org/wikipedia/commons/8/8d/Dice-5.svg"></div>
+                    <div class="dice-face top"><img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/Dice-3.svg"></div>
+                    <div class="dice-face bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Dice-4.svg"></div>
+                </div>
+                <!-- Cube 3 -->
+                <div class="dice-cube" id="cube3">
+                    <div class="dice-face front"><img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Dice-1.svg"></div>
+                    <div class="dice-face back"><img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Dice-6.svg"></div>
+                    <div class="dice-face right"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2c/Dice-2.svg"></div>
+                    <div class="dice-face left"><img src="https://upload.wikimedia.org/wikipedia/commons/8/8d/Dice-5.svg"></div>
+                    <div class="dice-face top"><img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/Dice-3.svg"></div>
+                    <div class="dice-face bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Dice-4.svg"></div>
+                </div>
             </div>
 
             <!-- Coin Chips Selection -->
@@ -394,16 +422,17 @@
         document.getElementById('coinCount').innerText = currentCoins;
 
         let currentChipValue = 5;
-        let activeBets = {}; // Tracks bets placed on each option key
+        let activeBets = {};
 
-        const diceImages = [
-            "https://upload.wikimedia.org/wikipedia/commons/1/1b/Dice-1.svg",
-            "https://upload.wikimedia.org/wikipedia/commons/2/2c/Dice-2.svg",
-            "https://upload.wikimedia.org/wikipedia/commons/b/b8/Dice-3.svg",
-            "https://upload.wikimedia.org/wikipedia/commons/2/2f/Dice-4.svg",
-            "https://upload.wikimedia.org/wikipedia/commons/8/8d/Dice-5.svg",
-            "https://upload.wikimedia.org/wikipedia/commons/5/55/Dice-6.svg"
-        ];
+        // Rotation angles corresponding to each face for the 3D cube
+        const faceRotations = {
+            1: { x: 0, y: 0 },       // Front
+            2: { x: 0, y: -90 },     // Right
+            3: { x: -90, y: 0 },     // Top
+            4: { x: 90, y: 0 },      // Bottom
+            5: { x: 0, y: 90 },      // Left
+            6: { x: 0, y: 180 }      // Back
+        };
 
         function selectChip(amount, element) {
             document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
@@ -422,7 +451,6 @@
                 return;
             }
 
-            // Deduct temporarily from display balance or track staked amount
             currentCoins -= currentChipValue;
             document.getElementById('coinCount').innerText = currentCoins;
 
@@ -449,40 +477,31 @@
             const rollBtn = document.getElementById('rollBtn');
             rollBtn.disabled = true;
 
-            const d1El = document.getElementById('dice1');
-            const d2El = document.getElementById('dice2');
-            const d3El = document.getElementById('dice3');
+            const c1 = document.getElementById('cube1');
+            const c2 = document.getElementById('cube2');
+            const c3 = document.getElementById('cube3');
 
-            d1El.classList.add('spinning');
-            d2El.classList.add('spinning');
-            d3El.classList.add('spinning');
+            // Add wild spinning rotations (multiple full 360 degree turns + final angle)
+            const r1 = Math.floor(Math.random() * 6) + 1;
+            const r2 = Math.floor(Math.random() * 6) + 1;
+            const r3 = Math.floor(Math.random() * 6) + 1;
 
-            let spinInterval = setInterval(() => {
-                d1El.querySelector('img').src = diceImages[Math.floor(Math.random() * 6)];
-                d2El.querySelector('img').src = diceImages[Math.floor(Math.random() * 6)];
-                d3El.querySelector('img').src = diceImages[Math.floor(Math.random() * 6)];
-            }, 80);
+            const finalRot1 = faceRotations[r1];
+            const finalRot2 = faceRotations[r2];
+            const finalRot3 = faceRotations[r3];
+
+            // Spin multiple full loops (e.g. 1080deg) plus the target face alignment
+            c1.style.transform = `rotateX(${360 * 3 + finalRot1.x}deg) rotateY(${360 * 3 + finalRot1.y}deg)`;
+            c2.style.transform = `rotateX(${360 * 3 + finalRot2.x}deg) rotateY(${360 * 3 + finalRot2.y}deg)`;
+            c3.style.transform = `rotateX(${360 * 3 + finalRot3.x}deg) rotateY(${360 * 3 + finalRot3.y}deg)`;
 
             setTimeout(() => {
-                clearInterval(spinInterval);
-                d1El.classList.remove('spinning');
-                d2El.classList.remove('spinning');
-                d3El.classList.remove('spinning');
-
-                const d1 = Math.floor(Math.random() * 6) + 1;
-                const d2 = Math.floor(Math.random() * 6) + 1;
-                const d3 = Math.floor(Math.random() * 6) + 1;
-
-                d1El.querySelector('img').src = diceImages[d1 - 1];
-                d2El.querySelector('img').src = diceImages[d2 - 1];
-                d3El.querySelector('img').src = diceImages[d3 - 1];
-
-                const sum = d1 + d2 + d3;
-                const isTriple = (d1 === d2 && d2 === d3);
-                const isDouble = (d1 === d2 || d2 === d3 || d1 === d3);
+                const sum = r1 + r2 + r3;
+                const isTriple = (r1 === r2 && r2 === r3);
+                const isDouble = (r1 === r2 || r2 === r3 || r1 === r3);
 
                 let totalWon = 0;
-                let breakdownHTML = `Roll Result: <b>${sum}</b> (${d1}, ${d2}, ${d3})<br><br><b>Bet Breakdown:</b><br>`;
+                let breakdownHTML = `Roll Result: <b>${sum}</b> (${r1}, ${r2}, ${r3})<br><br><b>Bet Breakdown:</b><br>`;
 
                 for (let type in activeBets) {
                     let betAmount = activeBets[type];
@@ -509,7 +528,7 @@
                     }
 
                     if (won) {
-                        let payout = betAmount * (multiplier + 1); // returns stake + winnings
+                        let payout = betAmount * (multiplier + 1);
                         totalWon += payout;
                         breakdownHTML += `- ${type.toUpperCase()}: Won +${betAmount * multiplier} coins<br>`;
                     } else {
@@ -548,7 +567,7 @@
 
                 document.getElementById('resultModal').classList.add('active');
                 rollBtn.disabled = false;
-            }, 800);
+            }, 1000);
         }
 
         function closeModal() {
