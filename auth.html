@@ -243,22 +243,7 @@
       window.pixvinzAuth = { auth, createUserWithEmailAndPassword };
     </script>
 
-<script>
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/PixVinz/sw.js')
-            .then(() => {
-                console.log('PixVinz service worker registered.');
-            })
-            .catch(error => {
-                console.error(
-                    'PixVinz service worker registration failed:',
-                    error
-                );
-            });
-    });
-}
-</script>
+
 
 
     
