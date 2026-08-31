@@ -1080,9 +1080,8 @@ button.back:hover,
 
 
 
-  /* ==========================================
-   DESKTOP NORMAL VIEW
-   MOBILE VIEW REMAINS UNCHANGED
+/* ==========================================
+   DESKTOP NORMAL VIEW (Matched to homeView & Game Page)
    ========================================== */
 
 @media screen and (min-width: 601px) {
@@ -1100,28 +1099,33 @@ button.back:hover,
     overflow-y: auto;
   }
 
-
+  .challenge-container,
   .app-container {
-    max-width: 480px;
+    width: 100%;
+    max-width: none;
     height: auto;
-    min-height: 100dvh;
-    margin: 0 auto;
-    padding: 16px;
-    border-radius: 24px;
-    border: 2px solid rgba(157, 78, 221, 0.4);
-    box-shadow: 0 0 40px rgba(123, 44, 191, 0.3);
+    min-height: 100vh;
+
+    margin: 0;
+    padding: 24px;
+
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+
+    overflow-x: hidden;
+    overflow-y: visible;
+    
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    gap: 8px;
+    justify-content: flex-start;
+    gap: 20px;
   }
 
-  .puzzle-board-wrapper {
-    max-width: min(42vh, 380px);
-  }
-
-  .challenge-stats,
+  /* Keeps headers, logos, and action bars locked to their natural size on desktop */
+  .top-bar, 
+  .challenge-header, 
   .challenge-actions {
-    max-width: 380px;
+    flex-shrink: 0 !important;
   }
 }
