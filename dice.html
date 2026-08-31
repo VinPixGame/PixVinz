@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PixVinz - Deluxe Sic Bo Dice</title>
+    <title>PixVinz - Crypto Dice</title>
     <style>
         body {
-            background-color: #130f2b;
-            color: #fff;
+            background-color: #0f172a;
+            color: #f8fafc;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
@@ -27,17 +27,17 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 15px;
-            background: #1a0b2e;
+            background: #1e293b;
             z-index: 1000;
             box-sizing: border-box;
-            border-bottom: 2px solid #2a1147;
+            border-bottom: 2px solid #334155;
         }
         .icon-btn {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background-color: #2a1147;
-            border: 2px solid #9c27b0;
+            background-color: #334155;
+            border: 2px solid #6366f1;
             overflow: hidden;
             padding: 0;
             cursor: pointer;
@@ -54,12 +54,13 @@
             background: transparent;
         }
         .coin-badge {
-            background: #2a1147;
+            background: #334155;
             padding: 6px 12px;
             border-radius: 20px;
-            border: 2px solid #ffd700;
+            border: 2px solid #fbbf24;
             font-weight: bold;
             font-size: 14px;
+            color: #fbbf24;
         }
 
         /* Main Game Layout */
@@ -75,169 +76,191 @@
             margin-bottom: 30px;
         }
         .card {
-            background: rgba(30, 20, 60, 0.9);
-            border: 2px solid #9c27b0;
+            background: #1e293b;
+            border: 2px solid #334155;
             border-radius: 20px;
-            padding: 15px;
-            box-shadow: 0 0 20px rgba(156, 39, 176, 0.3);
+            padding: 20px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
             text-align: center;
         }
 
-        /* 3D Dice Arena */
-        .dice-arena {
-            display: flex;
-            justify-content: center;
-            gap: 25px;
-            margin: 25px 0 15px 0;
-            height: 70px;
-            perspective: 800px;
-        }
-
-        /* True 3D Cube Structure */
-        .dice-cube {
-            width: 50px;
-            height: 50px;
+        /* Stake Style Slider Arena */
+        .slider-section {
+            margin: 20px 0 30px 0;
             position: relative;
-            transform-style: preserve-3d;
-            transform: rotateX(0deg) rotateY(0deg);
-            transition: transform 1s cubic-bezier(0.15, 0.85, 0.35, 1.2);
+        }
+        
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 700;
+            color: #94a3b8;
+            margin-bottom: 10px;
         }
 
-        .dice-face {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background: #fff;
-            border: 2px solid #dcd6f7;
-            border-radius: 8px;
+        .track-container {
+            position: relative;
+            height: 32px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            box-shadow: inset 0 0 8px rgba(0,0,0,0.2);
         }
-        .dice-face img {
-            width: 32px;
+
+        .slider-track {
+            position: absolute;
+            width: 100%;
+            height: 14px;
+            background: #ef4444; /* Red for roll under */
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .slider-track-success {
+            position: absolute;
+            height: 100%;
+            right: 0;
+            width: 53%;
+            background: #22c55e; /* Green for roll over win zone */
+            border-radius: 0 8px 8px 0;
+        }
+
+        .range-input {
+            position: absolute;
+            width: 100%;
             height: 32px;
-            object-fit: contain;
+            background: transparent;
+            appearance: none;
+            cursor: pointer;
+            z-index: 10;
+            margin: 0;
         }
 
-        /* Positioning the 6 faces of the 3D cube */
-        .dice-face.front  { transform: rotateY(0deg) translateZ(25px); }
-        .dice-face.back   { transform: rotateY(180deg) translateZ(25px); }
-        .dice-face.right  { transform: rotateY(90deg) translateZ(25px); }
-        .dice-face.left   { transform: rotateY(-90deg) translateZ(25px); }
-        .dice-face.top    { transform: rotateX(90deg) translateZ(25px); }
-        .dice-face.bottom { transform: rotateX(-90deg) translateZ(25px); }
+        .range-input::-webkit-slider-thumb {
+            appearance: none;
+            width: 24px;
+            height: 36px;
+            background: #3b82f6;
+            border: 3px solid #ffffff;
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
 
-        /* Betting Controls */
-        .section-title {
-            font-size: 13px;
-            color: #ff75a0;
-            margin: 10px 0 5px 0;
+        .range-input::-webkit-slider-thumb:active {
+            transform: scale(1.15);
+        }
+
+        /* Stats Grid (Multiplier, Roll Over, Win Chance) */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 12px;
+            padding: 10px 5px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #94a3b8;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 15px;
             font-weight: 800;
-            letter-spacing: 1px;
+            color: #f8fafc;
+        }
+
+        /* Bet Amount Section */
+        .input-group {
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 14px;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .input-left {
             text-align: left;
         }
 
-        /* Coin Chip Selector */
-        .chip-container {
-            display: flex;
-            justify-content: space-between;
-            gap: 6px;
-            margin-bottom: 10px;
-        }
-        .chip {
-            background: #2a1147;
-            border: 2px solid #9c27b0;
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: bold;
-            color: #ffd700;
-            cursor: pointer;
-            transition: all 0.2s;
-            flex-shrink: 0;
-        }
-        .chip.active {
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
-            color: #130f2b;
-            border-color: #fff;
-            transform: scale(1.1);
+        .input-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
         }
 
-        /* Grid Options */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
+        .bet-input {
+            background: transparent;
+            border: none;
+            color: #f8fafc;
+            font-size: 18px;
+            font-weight: 800;
+            width: 120px;
+            outline: none;
         }
-        .grid-4 {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
+
+        .quick-actions {
+            display: flex;
             gap: 6px;
         }
 
-        .bet-option {
-            background: #2a1147;
-            border: 2px solid #6b21a8;
-            border-radius: 10px;
-            padding: 10px 4px;
-            color: #fff;
+        .quick-btn {
+            background: #1e293b;
+            border: 1px solid #475569;
+            color: #cbd5e1;
+            padding: 6px 10px;
             font-size: 12px;
-            font-weight: bold;
+            font-weight: 700;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-            position: relative;
-        }
-        .bet-option span {
-            display: block;
-            font-size: 10px;
-            color: #b19cd9;
-            margin-top: 2px;
-        }
-        .bet-option.selected {
-            background: linear-gradient(135deg, #ff007f, #7928ca);
-            border-color: #ffd700;
+            transition: background 0.2s;
         }
 
-        /* Placed chip badge on options */
-        .placed-chip {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            background: #ffd700;
-            color: #130f2b;
-            font-size: 10px;
-            font-weight: 900;
-            padding: 2px 6px;
-            border-radius: 10px;
-            border: 1px solid #fff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            display: none;
+        .quick-btn:hover {
+            background: #334155;
         }
 
-        .btn-roll {
+        /* Main Bet Button */
+        .btn-bet {
             width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #00c6ff, #0072ff);
-            border: 2px solid #4facfe;
-            border-radius: 16px;
+            padding: 16px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border: 2px solid #60a5fa;
+            border-radius: 14px;
             color: #fff;
             font-weight: 800;
             font-size: 16px;
             cursor: pointer;
-            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            transition: transform 0.1s, filter 0.2s;
         }
+
+        .btn-bet:active {
+            transform: scale(0.98);
+        }
+
         .btn-back {
             background: transparent;
-            border: 2px solid #ff75a0;
-            color: #ff75a0;
-            margin-top: 8px;
+            border: 2px solid #64748b;
+            color: #94a3b8;
+            margin-top: 10px;
             padding: 10px;
             width: 100%;
             border-radius: 12px;
@@ -245,63 +268,24 @@
             cursor: pointer;
         }
 
-        /* Custom Result Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .modal-content {
-            background: linear-gradient(135deg, #1f1147, #2d1254);
-            border: 3px solid #ffd700;
-            border-radius: 24px;
-            width: 85%;
-            max-width: 340px;
-            padding: 25px 20px;
-            text-align: center;
-            transform: scale(0.8);
-            transition: transform 0.3s ease;
-        }
-        .modal-overlay.active .modal-content {
-            transform: scale(1);
-        }
-        .modal-title {
-            font-size: 24px;
-            font-weight: 900;
-            margin-bottom: 10px;
-        }
-        .modal-title.win { color: #00ffcc; }
-        .modal-title.lose { color: #ff4757; }
-        .modal-details {
-            font-size: 14px;
-            color: #dcd6f7;
-            margin: 15px 0;
-            line-height: 1.6;
-            text-align: left;
-        }
-        .modal-btn {
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
-            border: none;
-            color: #130f2b;
-            font-weight: 900;
-            padding: 10px 25px;
-            border-radius: 12px;
+        /* Result Popup Banner inside UI or Modal */
+        .result-display {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 800;
             font-size: 15px;
-            cursor: pointer;
+            display: none;
+        }
+        .result-display.win {
+            background: rgba(34, 197, 94, 0.15);
+            border: 2px solid #22c55e;
+            color: #4ade80;
+        }
+        .result-display.lose {
+            background: rgba(239, 68, 68, 0.15);
+            border: 2px solid #ef4444;
+            color: #f87171;
         }
     </style>
 </head>
@@ -318,102 +302,73 @@
           <source src="image/logo.webm" type="video/webm">
         </video>
       </div>
-      <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
+      <div class="coin-badge">🪙 <span id="coinCount">950</span></div>
     </header>
 
     <!-- Game Container -->
     <div class="game-container">
         <div class="card">
-            <h2 style="margin: 0 0 5px 0; color: #ffd700;">🎲 DELUXE SIC BO</h2>
-            <p style="color: #b19cd9; font-size: 12px; margin: 0;">Tap chips to select value, then place multiple bets!</p>
+            <h2 style="margin: 0 0 5px 0; color: #fbbf24;">🎯 PIXVINZ DICE</h2>
+            <p style="color: #94a3b8; font-size: 12px; margin: 0 0 15px 0;">Slide to pick your target & roll higher to win!</p>
             
-            <!-- True 3D Dice Display -->
-            <div class="dice-arena">
-                <!-- Cube 1 -->
-                <div class="dice-cube" id="cube1">
-                    <div class="dice-face front"><img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Dice-1.svg"></div>
-                    <div class="dice-face back"><img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Dice-6.svg"></div>
-                    <div class="dice-face right"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2c/Dice-2.svg"></div>
-                    <div class="dice-face left"><img src="https://upload.wikimedia.org/wikipedia/commons/8/8d/Dice-5.svg"></div>
-                    <div class="dice-face top"><img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/Dice-3.svg"></div>
-                    <div class="dice-face bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Dice-4.svg"></div>
+            <!-- Stake Style Slider Section -->
+            <div class="slider-section">
+                <div class="slider-labels">
+                    <span>0</span>
+                    <span>25</span>
+                    <span>50</span>
+                    <span>75</span>
+                    <span>100</span>
                 </div>
-                <!-- Cube 2 -->
-                <div class="dice-cube" id="cube2">
-                    <div class="dice-face front"><img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Dice-1.svg"></div>
-                    <div class="dice-face back"><img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Dice-6.svg"></div>
-                    <div class="dice-face right"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2c/Dice-2.svg"></div>
-                    <div class="dice-face left"><img src="https://upload.wikimedia.org/wikipedia/commons/8/8d/Dice-5.svg"></div>
-                    <div class="dice-face top"><img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/Dice-3.svg"></div>
-                    <div class="dice-face bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Dice-4.svg"></div>
-                </div>
-                <!-- Cube 3 -->
-                <div class="dice-cube" id="cube3">
-                    <div class="dice-face front"><img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Dice-1.svg"></div>
-                    <div class="dice-face back"><img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Dice-6.svg"></div>
-                    <div class="dice-face right"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2c/Dice-2.svg"></div>
-                    <div class="dice-face left"><img src="https://upload.wikimedia.org/wikipedia/commons/8/8d/Dice-5.svg"></div>
-                    <div class="dice-face top"><img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/Dice-3.svg"></div>
-                    <div class="dice-face bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Dice-4.svg"></div>
+                <div class="track-container">
+                    <div class="slider-track">
+                        <div class="slider-track-success" id="successTrack"></div>
+                    </div>
+                    <input type="range" min="2" max="98" value="47" class="range-input" id="rollSlider" oninput="updateSlider(this.value)">
                 </div>
             </div>
 
-            <!-- Coin Chips Selection -->
-            <div class="section-title">CHOOSE COIN CHIP</div>
-            <div class="chip-container">
-                <div class="chip active" onclick="selectChip(5, this)">5</div>
-                <div class="chip" onclick="selectChip(10, this)">10</div>
-                <div class="chip" onclick="selectChip(20, this)">20</div>
-                <div class="chip" onclick="selectChip(50, this)">50</div>
-                <div class="chip" onclick="selectChip(100, this)">100</div>
-                <div class="chip" onclick="selectChip(500, this)">500</div>
+            <!-- Stats Bar -->
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">Multiplier</div>
+                    <div class="stat-value" id="multiplierVal">1.87x</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Roll Over</div>
+                    <div class="stat-value" id="rollOverVal">47.00</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Win Chance</div>
+                    <div class="stat-value" id="winChanceVal">53.00%</div>
+                </div>
             </div>
 
-            <!-- Big / Small Bets -->
-            <div class="section-title">HIGH / LOW (1:1)</div>
-            <div class="grid-2">
-                <div class="bet-option" onclick="toggleBet('small', this)">SMALL (4-10)<span>Pays 1:1</span><div class="placed-chip">0</div></div>
-                <div class="bet-option" onclick="toggleBet('big', this)">BIG (11-17)<span>Pays 1:1</span><div class="placed-chip">0</div></div>
+            <!-- Bet Amount Input -->
+            <div class="input-group">
+                <div class="input-left">
+                    <div class="input-label">Bet Amount</div>
+                    <input type="number" id="betAmountInput" class="bet-input" value="10">
+                </div>
+                <div class="quick-actions">
+                    <button class="quick-btn" onclick="halveBet()">½</button>
+                    <button class="quick-btn" onclick="doubleBet()">2×</button>
+                </div>
             </div>
 
-            <!-- Specials: Any Double / Triple -->
-            <div class="section-title">SPECIAL BETS</div>
-            <div class="grid-2">
-                <div class="bet-option" onclick="toggleBet('double', this)">ANY DOUBLE<span>Pays 7x</span><div class="placed-chip">0</div></div>
-                <div class="bet-option" onclick="toggleBet('triple', this)">ANY TRIPLE<span>Pays 30x</span><div class="placed-chip">0</div></div>
+            <!-- Profit on Win -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 5px; font-size: 13px;">
+                <span style="color: #94a3b8; font-weight: 700;">Profit on Win:</span>
+                <span style="color: #4ade80; font-weight: 800;" id="profitVal">8.70 Coins</span>
             </div>
 
-            <!-- Specific Sums 3 to 17 -->
-            <div class="section-title">SPECIFIC TOTAL SUM</div>
-            <div class="grid-4">
-                <div class="bet-option" onclick="toggleBet('sum_3', this)">3 <span>20x</span><div class="placed-chip">0</div></div>
-                <div class="bet-option" onclick="toggleBet('sum_4', this)">4 <span>15x</span><div class="placed-chip">0</div></div>
-                <div class="bet-option" onclick="toggleBet('sum_5', this)">5 <span>10x</span><div class="placed-chip">0</div></div>
-                <div class="bet-option" onclick="toggleBet('sum_6', this)">6 <span>9x</span><div class="placed-chip">0</div></div>
-                <div class="bet-option" onclick="toggleBet('sum_7', this)">7 <span>8x</span><div class="placed-chip">0</div></div>
-                <div class="bet-option" onclick="toggleBet('sum_8', this)">8 <span>7x</span><div class="placed-chip">0</div></div>
-                <div class="bet-option" onclick="toggleBet('sum_9', this)">9 <span>6x</span><div class="placed-chip">0</div></div>
-                <div class="bet-option" onclick="toggleBet('sum_10', this)">10 <span>5x</span><div class="placed-chip">0</div></div>
-                <div class="bet-option" onclick="toggleBet('sum_11', this)">11 <span>6x</span><div class="placed-chip">0</div></div>
-                <div class="bet-option" onclick="toggleBet('sum_12', this)">12 <span>7x</span><div class="placed-chip">0</div></div>
-                <div class="bet-option" onclick="toggleBet('sum_13', this)">13 <span>8x</span><div class="placed-chip">0</div></div>
-                <div class="bet-option" onclick="toggleBet('sum_14', this)">14 <span>9x</span><div class="placed-chip">0</div></div>
-                <div class="bet-option" onclick="toggleBet('sum_15', this)">15 <span>10x</span><div class="placed-chip">0</div></div>
-                <div class="bet-option" onclick="toggleBet('sum_16', this)">16 <span>15x</span><div class="placed-chip">0</div></div>
-                <div class="bet-option" onclick="toggleBet('sum_17', this)">17 <span>20x</span><div class="placed-chip">0</div></div>
-            </div>
+            <!-- Bet Action Button -->
+            <button class="btn-bet" id="betBtn" onclick="executeRoll()">BET</button>
 
-            <button class="btn-roll" id="rollBtn" onclick="executeRoll()">ROLL 3 DICES</button>
+            <!-- Result Feedback Banner -->
+            <div class="result-display" id="resultBanner"></div>
+
             <button class="btn-back" onclick="window.location.href='index.html'">← BACK TO HOME</button>
-        </div>
-    </div>
-
-    <!-- Result Popup Modal -->
-    <div class="modal-overlay" id="resultModal">
-        <div class="modal-content">
-            <div class="modal-title" id="modalTitle">YOU WON!</div>
-            <div class="modal-details" id="modalDetails"></div>
-            <button class="modal-btn" onclick="closeModal()">AWESOME!</button>
         </div>
     </div>
 
@@ -421,158 +376,86 @@
         let currentCoins = parseInt(localStorage.getItem('pixvinz_coins')) || 950;
         document.getElementById('coinCount').innerText = currentCoins;
 
-        let currentChipValue = 5;
-        let activeBets = {};
+        function updateSlider(val) {
+            let rollOver = parseFloat(val);
+            let winChance = 100 - rollOver;
+            // House edge calculation standard to crypto dice (e.g., 1%)
+            let multiplier = (99 / winChance).toFixed(4);
 
-        // Rotation angles corresponding to each face for the 3D cube
-        const faceRotations = {
-            1: { x: 0, y: 0 },       // Front
-            2: { x: 0, y: -90 },     // Right
-            3: { x: -90, y: 0 },     // Top
-            4: { x: 90, y: 0 },      // Bottom
-            5: { x: 0, y: 90 },      // Left
-            6: { x: 0, y: 180 }      // Back
-        };
+            document.getElementById('rollOverVal').innerText = rollOver.toFixed(2);
+            document.getElementById('winChanceVal').innerText = winChance.toFixed(2) + '%';
+            document.getElementById('multiplierVal').innerText = multiplier + 'x';
 
-        function selectChip(amount, element) {
-            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-            element.classList.add('active');
-            currentChipValue = amount;
+            // Adjust green success track width dynamically
+            document.getElementById('successTrack').style.width = winChance + '%';
+
+            updateProfit();
         }
 
-        function toggleBet(type, element) {
-            let totalNeeded = currentChipValue;
-            if (activeBets[type]) {
-                totalNeeded += activeBets[type];
-            }
+        function updateProfit() {
+            let bet = parseFloat(document.getElementById('betAmountInput').value) || 0;
+            let mult = parseFloat(document.getElementById('multiplierVal').innerText);
+            let profit = (bet * mult) - bet;
+            document.getElementById('profitVal').innerText = profit.toFixed(2) + ' Coins';
+        }
 
-            if (totalNeeded > currentCoins) {
-                alert("Not enough coins to place this bet!");
-                return;
-            }
+        document.getElementById('betAmountInput').addEventListener('input', updateProfit);
 
-            currentCoins -= currentChipValue;
-            document.getElementById('coinCount').innerText = currentCoins;
+        function halveBet() {
+            let input = document.getElementById('betAmountInput');
+            let val = Math.max(1, Math.floor(parseFloat(input.value) / 2));
+            input.value = val;
+            updateProfit();
+        }
 
-            if (!activeBets[type]) activeBets[type] = 0;
-            activeBets[type] += currentChipValue;
-
-            element.classList.add('selected');
-            let badge = element.querySelector('.placed-chip');
-            badge.innerText = activeBets[type];
-            badge.style.display = 'block';
+        function doubleBet() {
+            let input = document.getElementById('betAmountInput');
+            let val = Math.floor(parseFloat(input.value) * 2);
+            input.value = val;
+            updateProfit();
         }
 
         function executeRoll() {
-            let totalStaked = 0;
-            for (let key in activeBets) {
-                totalStaked += activeBets[key];
+            let betAmount = parseFloat(document.getElementById('betAmountInput').value);
+            if (isNaN(betAmount) || betAmount <= 0) {
+                alert("Please enter a valid bet amount!");
+                return;
             }
-
-            if (totalStaked === 0) {
-                alert("Please place at least one bet first!");
+            if (betAmount > currentCoins) {
+                alert("Not enough coins!");
                 return;
             }
 
-            const rollBtn = document.getElementById('rollBtn');
-            rollBtn.disabled = true;
+            currentCoins -= betAmount;
+            document.getElementById('coinCount').innerText = currentCoins;
 
-            const c1 = document.getElementById('cube1');
-            const c2 = document.getElementById('cube2');
-            const c3 = document.getElementById('cube3');
+            let rollOver = parseFloat(document.getElementById('rollOverVal').innerText);
+            let multiplier = parseFloat(document.getElementById('multiplierVal').innerText);
 
-            // Add wild spinning rotations (multiple full 360 degree turns + final angle)
-            const r1 = Math.floor(Math.random() * 6) + 1;
-            const r2 = Math.floor(Math.random() * 6) + 1;
-            const r3 = Math.floor(Math.random() * 6) + 1;
+            // Generate random roll between 0.00 and 100.00
+            let rolledNum = Math.random() * 100;
+            let isWin = rolledNum > rollOver;
 
-            const finalRot1 = faceRotations[r1];
-            const finalRot2 = faceRotations[r2];
-            const finalRot3 = faceRotations[r3];
+            let banner = document.getElementById('resultBanner');
+            banner.style.display = 'block';
 
-            // Spin multiple full loops (e.g. 1080deg) plus the target face alignment
-            c1.style.transform = `rotateX(${360 * 3 + finalRot1.x}deg) rotateY(${360 * 3 + finalRot1.y}deg)`;
-            c2.style.transform = `rotateX(${360 * 3 + finalRot2.x}deg) rotateY(${360 * 3 + finalRot2.y}deg)`;
-            c3.style.transform = `rotateX(${360 * 3 + finalRot3.x}deg) rotateY(${360 * 3 + finalRot3.y}deg)`;
+            if (isWin) {
+                let payout = betAmount * multiplier;
+                let profit = payout - betAmount;
+                currentCoins += payout;
+                banner.className = "result-display win";
+                banner.innerHTML = `🎉 Rolled ${rolledNum.toFixed(2)} — YOU WON +${profit.toFixed(2)} Coins!`;
+            } else {
+                banner.className = "result-display lose";
+                banner.innerHTML = `💥 Rolled ${rolledNum.toFixed(2)} — You Lost ${betAmount} Coins`;
+            }
 
-            setTimeout(() => {
-                const sum = r1 + r2 + r3;
-                const isTriple = (r1 === r2 && r2 === r3);
-                const isDouble = (r1 === r2 || r2 === r3 || r1 === r3);
-
-                let totalWon = 0;
-                let breakdownHTML = `Roll Result: <b>${sum}</b> (${r1}, ${r2}, ${r3})<br><br><b>Bet Breakdown:</b><br>`;
-
-                for (let type in activeBets) {
-                    let betAmount = activeBets[type];
-                    let won = false;
-                    let multiplier = 0;
-
-                    if (type === 'small' && sum >= 4 && sum <= 10 && !isTriple) { won = true; multiplier = 1; }
-                    else if (type === 'big' && sum >= 11 && sum <= 17 && !isTriple) { won = true; multiplier = 1; }
-                    else if (type === 'triple' && isTriple) { won = true; multiplier = 30; }
-                    else if (type === 'double' && isDouble && !isTriple) { won = true; multiplier = 7; }
-                    else if (type.startsWith('sum_')) {
-                        let targetSum = parseInt(type.split('_')[1]);
-                        if (sum === targetSum) {
-                            won = true;
-                            if (targetSum === 3 || targetSum === 17) multiplier = 20;
-                            else if (targetSum === 4 || targetSum === 16) multiplier = 15;
-                            else if (targetSum === 5 || targetSum === 15) multiplier = 10;
-                            else if (targetSum === 6 || targetSum === 14) multiplier = 9;
-                            else if (targetSum === 7 || targetSum === 13) multiplier = 8;
-                            else if (targetSum === 8 || targetSum === 12) multiplier = 7;
-                            else if (targetSum === 9 || targetSum === 11) multiplier = 6;
-                            else if (targetSum === 10) multiplier = 5;
-                        }
-                    }
-
-                    if (won) {
-                        let payout = betAmount * (multiplier + 1);
-                        totalWon += payout;
-                        breakdownHTML += `- ${type.toUpperCase()}: Won +${betAmount * multiplier} coins<br>`;
-                    } else {
-                        breakdownHTML += `- ${type.toUpperCase()}: Lost -${betAmount} coins<br>`;
-                    }
-                }
-
-                currentCoins += totalWon;
-                let netChange = totalWon - totalStaked;
-
-                const modalTitle = document.getElementById('modalTitle');
-                const modalDetails = document.getElementById('modalDetails');
-
-                if (netChange >= 0) {
-                    modalTitle.className = "modal-title win";
-                    modalTitle.innerText = "🎉 YOU WON!";
-                } else {
-                    modalTitle.className = "modal-title lose";
-                    modalTitle.innerText = "😢 YOU LOST";
-                }
-
-                breakdownHTML += `<br><b>Total Staked:</b> ${totalStaked} Coins<br>`;
-                breakdownHTML += `<b>Net Result:</b> <span style="color:${netChange >= 0 ? '#00ffcc':'#ff4757'}">${netChange >= 0 ? '+' : ''}${netChange} Coins</span>`;
-
-                modalDetails.innerHTML = breakdownHTML;
-
-                document.getElementById('coinCount').innerText = currentCoins;
-                localStorage.setItem('pixvinz_coins', currentCoins);
-
-                // Reset board bets
-                activeBets = {};
-                document.querySelectorAll('.bet-option').forEach(el => {
-                    el.classList.remove('selected');
-                    el.querySelector('.placed-chip').style.display = 'none';
-                });
-
-                document.getElementById('resultModal').classList.add('active');
-                rollBtn.disabled = false;
-            }, 1000);
+            document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
+            localStorage.setItem('pixvinz_coins', currentCoins);
         }
 
-        function closeModal() {
-            document.getElementById('resultModal').classList.remove('active');
-        }
+        // Initialize calculations on load
+        updateSlider(47);
     </script>
 </body>
 </html>
