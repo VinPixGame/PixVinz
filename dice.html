@@ -19,7 +19,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Top Header Bar */
+        /* Top Header Bar - UNTOUCHED */
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -106,51 +106,51 @@
             padding: 0 15px;
             box-sizing: border-box;
             text-align: center;
-            margin-top: 2cm;
-            margin-bottom: 20px;
+            margin-top: 1.8cm;
+            margin-bottom: 22px;
         }
 
         .external-title {
-            margin: 0 0 4px 0;
+            margin: 0 0 6px 0;
             color: #fbbf24;
-            font-size: 18px;
+            font-size: 21px;
             font-weight: 800;
             letter-spacing: 0.5px;
         }
 
         .external-subtitle {
             color: #94a3b8;
-            font-size: 11px;
+            font-size: 13px;
             margin: 0;
         }
 
         /* Main Game Layout */
         .game-container {
             width: 100%;
-            max-width: 440px;
+            max-width: 450px;
             padding: 0 15px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
             margin-bottom: 3cm;
         }
 
         .card {
             background: #1e293b;
             border: 2px solid #334155;
-            border-radius: 18px;
-            padding: 15px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.4);
             text-align: center;
         }
 
-        /* Recent History Bar */
+        /* Recent History Bar - 6 recent results */
         .history-bar {
             display: flex;
             justify-content: flex-end;
-            gap: 6px;
-            margin-bottom: 10px;
+            gap: 8px;
+            margin-bottom: 14px;
             overflow-x: auto;
             padding-bottom: 2px;
             scrollbar-width: none;
@@ -161,9 +161,9 @@
         .history-pill {
             background: #0f172a;
             border: 1px solid #334155;
-            padding: 4px 8px;
+            padding: 5px 10px;
             border-radius: 10px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             white-space: nowrap;
         }
@@ -180,21 +180,21 @@
 
         /* Slider Section */
         .slider-section {
-            margin: 30px 0 20px 0;
+            margin: 40px 0 24px 0;
             position: relative;
         }
 
         .floating-cube-indicator {
             position: absolute;
-            top: -40px;
+            top: -36px;
             left: 50%;
             transform: translateX(-50%);
             background: #f8fafc;
             color: #0f172a;
             font-weight: 900;
-            font-size: 12px;
-            padding: 3px 8px;
-            border-radius: 6px;
+            font-size: 13px;
+            padding: 4px 10px;
+            border-radius: 7px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             border: 2px solid #cbd5e1;
             transition: left 0.3s cubic-bezier(0.15, 0.85, 0.35, 1.2);
@@ -236,15 +236,15 @@
         .slider-labels {
             display: flex;
             justify-content: space-between;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 700;
             color: #94a3b8;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .track-container {
             position: relative;
-            height: 28px;
+            height: 32px;
             display: flex;
             align-items: center;
         }
@@ -252,9 +252,9 @@
         .slider-track {
             position: absolute;
             width: 100%;
-            height: 12px;
+            height: 14px;
             background: #22c55e;
-            border-radius: 6px;
+            border-radius: 7px;
             overflow: hidden;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
         }
@@ -265,13 +265,13 @@
             left: 0;
             width: 47%;
             background: #ef4444;
-            border-radius: 6px 0 0 6px;
+            border-radius: 7px 0 0 7px;
         }
 
         .range-input {
             position: absolute;
             width: 100%;
-            height: 28px;
+            height: 32px;
             background: transparent;
             appearance: none;
             cursor: pointer;
@@ -282,11 +282,11 @@
 
         .range-input::-webkit-slider-thumb {
             appearance: none;
-            width: 22px;
-            height: 32px;
+            width: 24px;
+            height: 36px;
             background: #3b82f6;
             border: 2px solid #ffffff;
-            border-radius: 6px;
+            border-radius: 8px;
             box-shadow: 0 3px 8px rgba(0,0,0,0.4);
             cursor: pointer;
             transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -300,15 +300,15 @@
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 12px;
+            gap: 10px;
+            margin-bottom: 14px;
         }
 
         .stat-box {
             background: #0f172a;
             border: 2px solid #334155;
-            border-radius: 10px;
-            padding: 8px 4px;
+            border-radius: 12px;
+            padding: 11px 6px;
             text-align: center;
             cursor: pointer;
             transition: border-color 0.2s, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -321,15 +321,15 @@
         }
 
         .stat-label {
-            font-size: 9px;
+            font-size: 10px;
             font-weight: 700;
             color: #94a3b8;
-            margin-bottom: 3px;
+            margin-bottom: 4px;
             text-transform: uppercase;
         }
 
         .stat-value {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 800;
             color: #f8fafc;
         }
@@ -338,8 +338,8 @@
         .input-group {
             background: #0f172a;
             border: 2px solid #334155;
-            border-radius: 12px;
-            padding: 8px 12px;
+            border-radius: 14px;
+            padding: 10px 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -351,35 +351,36 @@
         }
 
         .input-label {
-            font-size: 9px;
+            font-size: 10px;
             font-weight: 700;
             color: #94a3b8;
             text-transform: uppercase;
+            margin-bottom: 2px;
         }
 
         .bet-input {
             background: transparent;
             border: none;
             color: #f8fafc;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 800;
-            width: 110px;
+            width: 120px;
             outline: none;
         }
 
         .quick-actions {
             display: flex;
-            gap: 5px;
+            gap: 6px;
         }
 
         .quick-btn {
             background: #1e293b;
             border: 1px solid #475569;
             color: #cbd5e1;
-            padding: 5px 8px;
-            font-size: 11px;
+            padding: 6px 10px;
+            font-size: 12px;
             font-weight: 700;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             outline: none;
             -webkit-tap-highlight-color: transparent;
@@ -390,16 +391,48 @@
             background: #475569;
         }
 
+        /* Auto Bet Specific Controls */
+        .auto-controls {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .auto-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .auto-input-box {
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 12px;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        .auto-input {
+            background: transparent;
+            border: none;
+            color: #f8fafc;
+            font-size: 15px;
+            font-weight: 800;
+            width: 100%;
+            outline: none;
+        }
+
         /* Centered Disappearing Error Message */
         .error-msg-container {
-            height: 16px;
-            margin-bottom: 6px;
+            height: 18px;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .error-msg {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             color: #ef4444;
             opacity: 0;
@@ -412,15 +445,15 @@
         /* Action Buttons */
         .btn-bet {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             border: 2px solid #60a5fa;
-            border-radius: 12px;
+            border-radius: 14px;
             color: #fff;
             font-weight: 800;
-            font-size: 15px;
+            font-size: 16px;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
             outline: none;
             -webkit-tap-highlight-color: transparent;
             transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -431,6 +464,41 @@
         .btn-bet:disabled {
             opacity: 0.7;
             cursor: not-allowed;
+        }
+        .btn-bet.stop-auto {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            border-color: #f87171;
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Mode Switcher Tabs - Bottom Navigation */
+        .mode-tabs {
+            display: flex;
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 14px;
+            padding: 4px;
+            margin-top: 12px;
+        }
+
+        .mode-tab {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 800;
+            padding: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .mode-tab.active {
+            background: #334155;
+            color: #f8fafc;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
     </style>
 </head>
@@ -455,8 +523,6 @@
         <div class="card">
             
             <div class="history-bar" id="historyBar">
-                <div class="history-pill">53.20</div>
-                <div class="history-pill win">88.41</div>
                 <div class="history-pill">12.50</div>
                 <div class="history-pill win">74.12</div>
                 <div class="history-pill">45.00</div>
@@ -487,7 +553,7 @@
                     <div class="stat-label">Multiplier</div>
                     <div class="stat-value" id="multiplierVal">1.87x</div>
                 </div>
-                <div class="stat-box interactive" onclick="playSound('click'); toggleMode()">
+                <div class="stat-box interactive" onclick="playSound('click'); toggleRollMode()">
                     <div class="stat-label" id="modeLabel">Roll Over 🔄</div>
                     <div class="stat-value" id="rollOverVal">47.00</div>
                 </div>
@@ -502,9 +568,32 @@
                     <div class="input-label">Bet Amount</div>
                     <input type="number" id="betAmountInput" class="bet-input" value="10">
                 </div>
-                <div class="quick-actions">
+                <div class="quick-actions" id="manualQuickActions">
                     <button class="quick-btn" onclick="playSound('click'); halveBet()">½</button>
                     <button class="quick-btn" onclick="playSound('click'); doubleBet()">2×</button>
+                </div>
+            </div>
+
+            <div class="auto-controls" id="autoControls">
+                <div class="auto-row">
+                    <div class="auto-input-box">
+                        <div class="input-label">Number of Rolls</div>
+                        <input type="number" id="autoRollsInput" class="auto-input" value="10">
+                    </div>
+                    <div class="auto-input-box">
+                        <div class="input-label">On Win (%)</div>
+                        <input type="number" id="onWinInput" class="auto-input" value="0">
+                    </div>
+                </div>
+                <div class="auto-row">
+                    <div class="auto-input-box">
+                        <div class="input-label">On Loss (%)</div>
+                        <input type="number" id="onLossInput" class="auto-input" value="0">
+                    </div>
+                    <div class="auto-input-box">
+                        <div class="input-label">Speed (ms)</div>
+                        <input type="number" id="autoSpeedInput" class="auto-input" value="400">
+                    </div>
                 </div>
             </div>
 
@@ -512,12 +601,17 @@
                 <div class="error-msg" id="errorMsg">Not enough balance</div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px; font-size: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding: 0 4px; font-size: 13px;">
                 <span style="color: #94a3b8; font-weight: 700;">Profit on Win:</span>
                 <span style="color: #4ade80; font-weight: 800;" id="profitVal">8.70 Coins</span>
             </div>
 
-            <button class="btn-bet" id="betBtn" onclick="playSound('click'); executeRoll()">ROLL</button>
+            <button class="btn-bet" id="betBtn" onclick="playSound('click'); handleMainButtonClick()">ROLL</button>
+
+            <div class="mode-tabs">
+                <button class="mode-tab active" id="manualTab" onclick="switchMode('manual')">Manual</button>
+                <button class="mode-tab" id="autoTab" onclick="switchMode('auto')">Auto</button>
+            </div>
         </div>
     </div>
 
@@ -525,10 +619,14 @@
         let currentCoins = parseFloat(localStorage.getItem('pixvinz_coins')) || 950.00;
         document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
 
-        let recentHistory = [53.20, 88.41, 12.50, 74.12, 45.00, 91.05, 30.22, 65.80];
+        let recentHistory = [12.50, 74.12, 45.00, 91.05, 30.22, 65.80];
         let isRollOver = true; 
         let lastSliderSoundVal = 47;
         let isRolling = false;
+        let gameMode = 'manual'; // 'manual' or 'auto'
+        let isAutoRunning = false;
+        let autoInterval = null;
+        let rollsRemaining = 0;
 
         let audioCtx = null;
         function initAudio() {
@@ -594,7 +692,31 @@
             }
         }
 
-        function toggleMode() {
+        function switchMode(mode) {
+            if (isAutoRunning) return;
+            gameMode = mode;
+            let manualTab = document.getElementById('manualTab');
+            let autoTab = document.getElementById('autoTab');
+            let autoControls = document.getElementById('autoControls');
+            let manualQuickActions = document.getElementById('manualQuickActions');
+            let betBtn = document.getElementById('betBtn');
+
+            if (mode === 'manual') {
+                manualTab.classList.add('active');
+                autoTab.classList.remove('active');
+                autoControls.style.display = 'none';
+                manualQuickActions.style.display = 'flex';
+                betBtn.innerText = "ROLL";
+            } else {
+                autoTab.classList.add('active');
+                manualTab.classList.remove('active');
+                autoControls.style.display = 'flex';
+                manualQuickActions.style.display = 'none';
+                betBtn.innerText = "START AUTO ROLL";
+            }
+        }
+
+        function toggleRollMode() {
             isRollOver = !isRollOver;
             document.getElementById('modeLabel').innerText = isRollOver ? "Roll Over 🔄" : "Roll Under 🔄";
             updateSlider(document.getElementById('rollSlider').value);
@@ -630,14 +752,14 @@
                 successTrack.style.left = 'unset';
                 successTrack.style.right = '0';
                 successTrack.style.width = (100 - threshold) + '%';
-                successTrack.style.borderRadius = '0 6px 6px 0';
+                successTrack.style.borderRadius = '0 7px 7px 0';
             } else {
                 trackBg.style.background = '#ef4444';
                 successTrack.style.background = '#22c55e';
                 successTrack.style.right = 'unset';
                 successTrack.style.left = '0';
                 successTrack.style.width = threshold + '%';
-                successTrack.style.borderRadius = '6px 0 0 6px';
+                successTrack.style.borderRadius = '7px 0 0 7px';
             }
 
             updateProfit();
@@ -652,8 +774,9 @@
 
         document.getElementById('betAmountInput').addEventListener('input', updateProfit);
 
-        function showNotEnoughBalanceError() {
+        function showNotEnoughBalanceError(customText = "Not enough balance") {
             let errEl = document.getElementById('errorMsg');
+            errEl.innerText = customText;
             errEl.classList.add('show');
             setTimeout(() => {
                 errEl.classList.remove('show');
@@ -687,7 +810,7 @@
 
         function renderHistory(latestRoll) {
             recentHistory.push(latestRoll);
-            if (recentHistory.length > 8) {
+            if (recentHistory.length > 6) {
                 recentHistory.shift();
             }
 
@@ -707,7 +830,19 @@
             });
         }
 
-        function executeRoll() {
+        function handleMainButtonClick() {
+            if (gameMode === 'manual') {
+                executeManualRoll();
+            } else {
+                if (!isAutoRunning) {
+                    startAutoRoll();
+                } else {
+                    stopAutoRoll();
+                }
+            }
+        }
+
+        function executeManualRoll() {
             if (isRolling) return;
 
             let betAmount = parseFloat(document.getElementById('betAmountInput').value);
@@ -755,6 +890,90 @@
                 betBtn.disabled = false;
                 isRolling = false;
             }, 300);
+        }
+
+        function startAutoRoll() {
+            let betAmount = parseFloat(document.getElementById('betAmountInput').value);
+            if (isNaN(betAmount) || betAmount <= 0 || betAmount > currentCoins) {
+                showNotEnoughBalanceError();
+                return;
+            }
+
+            rollsRemaining = parseInt(document.getElementById('autoRollsInput').value) || 10;
+            let speed = parseInt(document.getElementById('autoSpeedInput').value) || 400;
+
+            isAutoRunning = true;
+            let betBtn = document.getElementById('betBtn');
+            betBtn.classList.add('stop-auto');
+            betBtn.innerText = `STOP AUTO (${rollsRemaining})`;
+
+            autoInterval = setInterval(() => {
+                if (rollsRemaining <= 0 || currentCoins < betAmount) {
+                    stopAutoRoll();
+                    if (currentCoins < betAmount) showNotEnoughBalanceError("Stopped: Low balance");
+                    return;
+                }
+
+                rollsRemaining--;
+                betBtn.innerText = `STOP AUTO (${rollsRemaining})`;
+
+                currentCoins -= betAmount;
+                document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
+
+                let threshold = parseFloat(document.getElementById('rollOverVal').innerText);
+                let multiplier = parseFloat(document.getElementById('multiplierVal').innerText);
+
+                let rolledNum = Math.random() * 100;
+                let isWin = isRollOver ? (rolledNum > threshold) : (rolledNum < threshold);
+
+                let cube = document.getElementById('floatingCube');
+                cube.style.display = 'block';
+                cube.style.left = rolledNum + '%';
+                cube.innerText = rolledNum.toFixed(2);
+
+                let onWinPct = parseFloat(document.getElementById('onWinInput').value) || 0;
+                let onLossPct = parseFloat(document.getElementById('onLossInput').value) || 0;
+
+                if (isWin) {
+                    cube.className = "floating-cube-indicator win";
+                    let payout = betAmount * multiplier;
+                    currentCoins += payout;
+                    playSound('win');
+                    if (onWinPct !== 0) {
+                        betAmount = betAmount * (1 + (onWinPct / 100));
+                    }
+                } else {
+                    cube.className = "floating-cube-indicator lose";
+                    playSound('lose');
+                    if (onLossPct !== 0) {
+                        betAmount = betAmount * (1 + (onLossPct / 100));
+                    }
+                }
+
+                if (betAmount < 0.01) betAmount = 0.01;
+                if (betAmount > currentCoins && currentCoins > 0) {
+                    betAmount = currentCoins;
+                }
+                document.getElementById('betAmountInput').value = betAmount.toFixed(2);
+                updateProfit();
+
+                document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
+                localStorage.setItem('pixvinz_coins', currentCoins);
+
+                renderHistory(rolledNum);
+
+                if (rollsRemaining <= 0) {
+                    stopAutoRoll();
+                }
+            }, speed);
+        }
+
+        function stopAutoRoll() {
+            clearInterval(autoInterval);
+            isAutoRunning = false;
+            let betBtn = document.getElementById('betBtn');
+            betBtn.classList.remove('stop-auto');
+            betBtn.innerText = "START AUTO ROLL";
         }
 
         updateSlider(47);
