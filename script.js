@@ -350,30 +350,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const logoutBtn = document.getElementById('logoutBtn');
-if (logoutBtn) {
-    logoutBtn.addEventListener('click', async (e) => {
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', (e) => {
         e.preventDefault();
         
-        // 1. Clear local storage flags
+        // Clear the session data
         localStorage.removeItem('loggedInUser');
         localStorage.removeItem('skipLoading');
         
-        // 2. Sign out from Firebase Auth so it drops the session token
-        try {
-            if (window.pixvinzAuth && window.pixvinzAuth.auth) {
-                const { signOut } = await import("https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js");
-                await signOut(window.pixvinzAuth.auth);
-            }
-        } catch (err) {
-            console.error("Firebase signout error:", err);
-        }
-        
-        // 3. Redirect to auth page
+        // Redirect to the login/register page
         window.location.href = 'auth.html';
     });
-}
+  }
 
-    
   function renderLevels() {
     const grid = document.getElementById('levelsGrid');
     if (!grid) return;
