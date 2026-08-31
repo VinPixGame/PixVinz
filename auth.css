@@ -55,7 +55,6 @@ body {
 }
 
 
-
 /* =========================================
    AUTH VIEW
    ========================================= */
@@ -70,14 +69,13 @@ body {
     flex: 1;
 
     flex-direction: column;
-    justify-content: center; /* Centers everything vertically on screen */
+    justify-content: center;
     align-items: center;
 
     gap: 16px;
 
-    /* Added top padding so elements never hug the absolute screen edge */
     padding:
-        clamp(32px, 6vh, 48px)
+        clamp(24px, 4vh, 48px)
         clamp(16px, 4vw, 32px);
 }
 
@@ -104,8 +102,7 @@ body {
 
     padding: 14px 22px;
 
-    /* Adds breathing room below the install button before your auth card */
-    margin: 0 0 16px;
+    margin: 0 0 2px;
 
     background:
         linear-gradient(
@@ -141,6 +138,30 @@ body {
         border-color 0.2s ease,
         background 0.2s ease;
 }
+
+.glass-install-btn:hover {
+    background:
+        linear-gradient(
+            135deg,
+            rgba(123, 44, 191, 0.58),
+            rgba(255, 193, 7, 0.16)
+        );
+
+    border-color: #ffd700;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 0 12px rgba(255, 215, 0, 0.30),
+        0 0 30px rgba(255, 193, 7, 0.18),
+        0 0 45px rgba(123, 44, 191, 0.24),
+        inset 0 0 18px rgba(255, 215, 0, 0.06);
+}
+
+.glass-install-btn:active {
+    transform: scale(0.98);
+}
+
 
 /* =========================================
    MAIN AUTH CARD
