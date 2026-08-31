@@ -1,11 +1,19 @@
-self.addEventListener('install', (e) => {
-  self.skipWaiting();
+const CACHE_NAME = "pixvinz-v1";
+
+self.addEventListener("install", event => {
+    self.skipWaiting();
 });
 
-self.addEventListener('activate', (e) => {
-  e.clients.claim();
+self.addEventListener("activate", event => {
+    event.waitUntil(
+        self.clients.claim()
+    );
 });
 
-self.addEventListener('fetch', (e) => {
-  e.respondWith(fetch(e.request));
+self.addEventListener("fetch", event => {
+    event.respondWith(
+        fetch(event.request).catch(() => {
+            return caches.match(event.request);
+        })
+    );
 });
