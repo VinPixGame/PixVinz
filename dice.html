@@ -15,6 +15,7 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
         }
 
         /* Top Header Bar */
@@ -45,7 +46,13 @@
             align-items: center;
             justify-content: center;
             color: #fff;
+            outline: none;
+            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
+        .icon-btn:active {
+            transform: scale(0.88);
+        }
+
         .logo-container {
             height: 35px;
         }
@@ -84,7 +91,7 @@
             text-align: center;
         }
 
-        /* Recent History Bar (Top of Card) */
+        /* Recent History Bar */
         .history-bar {
             display: flex;
             justify-content: flex-end;
@@ -118,13 +125,12 @@
             color: #94a3b8;
         }
 
-        /* Stake Style Slider Section with Floating Cube */
+        /* Slider Section with Floating Cube Indicator */
         .slider-section {
             margin: 35px 0 30px 0;
             position: relative;
         }
 
-        /* Floating Hex/Cube Result Indicator */
         .floating-cube-indicator {
             position: absolute;
             top: -42px;
@@ -218,6 +224,11 @@
             cursor: pointer;
             z-index: 10;
             margin: 0;
+            outline: none;
+        }
+
+        .range-input:focus {
+            outline: none;
         }
 
         .range-input::-webkit-slider-thumb {
@@ -229,7 +240,11 @@
             border-radius: 6px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.4);
             cursor: pointer;
-            transition: transform 0.1s;
+            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .range-input::-webkit-slider-thumb:active {
+            transform: scale(1.2);
         }
 
         /* Stats Grid */
@@ -300,6 +315,7 @@
             gap: 6px;
         }
 
+        /* Bouncy Clickable Action Buttons */
         .quick-btn {
             background: #1e293b;
             border: 1px solid #475569;
@@ -309,12 +325,20 @@
             font-weight: 700;
             border-radius: 8px;
             cursor: pointer;
+            outline: none;
+            box-shadow: none;
+            -webkit-tap-highlight-color: transparent;
+            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s;
         }
         .quick-btn:hover {
             background: #334155;
         }
+        .quick-btn:active {
+            transform: scale(0.85);
+            background: #475569;
+        }
 
-        /* Main Bet Button */
+        /* Main Bouncy Bet Button */
         .btn-bet {
             width: 100%;
             padding: 16px;
@@ -326,11 +350,15 @@
             font-size: 16px;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .btn-bet:active {
-            transform: scale(0.98);
+            transform: scale(0.95);
         }
 
+        /* Bouncy Back Button */
         .btn-back {
             background: transparent;
             border: 2px solid #64748b;
@@ -341,14 +369,19 @@
             border-radius: 12px;
             font-weight: bold;
             cursor: pointer;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .btn-back:active {
+            transform: scale(0.95);
         }
     </style>
 </head>
 <body>
 
-    <!-- Top Header Bar -->
     <header class="top-bar" id="mainHeader">
-      <button class="icon-btn" id="profileHeaderBtn" onclick="window.location.href='index.html'">
+      <button class="icon-btn" id="profileHeaderBtn" onclick="playSound('click'); window.location.href='index.html'">
         <span id="profileIconFallback">👤</span>
         <img id="profileHeaderImg" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; display: none;">
       </button>
@@ -360,11 +393,9 @@
       <div class="coin-badge">🪙 <span id="coinCount">950</span></div>
     </header>
 
-    <!-- Game Container -->
     <div class="game-container">
         <div class="card">
             
-            <!-- Recent 8 Results Rolling History Bar -->
             <div class="history-bar" id="historyBar">
                 <div class="history-pill">53.20</div>
                 <div class="history-pill win">88.41</div>
@@ -379,7 +410,6 @@
             <h2 style="margin: 0 0 5px 0; color: #fbbf24;">🎯 PROVABLY FAIR DICE</h2>
             <p style="color: #94a3b8; font-size: 12px; margin: 0 0 15px 0;">Slide to adjust odds & hit roll!</p>
             
-            <!-- Slider Section with Floating Hex Cube Indicator -->
             <div class="slider-section">
                 <div class="floating-cube-indicator" id="floatingCube">53.00</div>
                 <div class="slider-labels">
@@ -397,7 +427,6 @@
                 </div>
             </div>
 
-            <!-- Stats Bar -->
             <div class="stats-grid">
                 <div class="stat-box">
                     <div class="stat-label">Multiplier</div>
@@ -413,28 +442,25 @@
                 </div>
             </div>
 
-            <!-- Bet Amount Input -->
             <div class="input-group">
                 <div class="input-left">
                     <div class="input-label">Bet Amount</div>
                     <input type="number" id="betAmountInput" class="bet-input" value="10">
                 </div>
                 <div class="quick-actions">
-                    <button class="quick-btn" onclick="halveBet()">½</button>
-                    <button class="quick-btn" onclick="doubleBet()">2×</button>
+                    <button class="quick-btn" onclick="playSound('click'); halveBet()">½</button>
+                    <button class="quick-btn" onclick="playSound('click'); doubleBet()">2×</button>
                 </div>
             </div>
 
-            <!-- Profit on Win -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 5px; font-size: 13px;">
                 <span style="color: #94a3b8; font-weight: 700;">Profit on Win:</span>
                 <span style="color: #4ade80; font-weight: 800;" id="profitVal">8.70 Coins</span>
             </div>
 
-            <!-- Bet Action Button -->
-            <button class="btn-bet" id="betBtn" onclick="executeRoll()">BET</button>
+            <button class="btn-bet" id="betBtn" onclick="playSound('click'); executeRoll()">BET</button>
 
-            <button class="btn-back" onclick="window.location.href='index.html'">← BACK TO HOME</button>
+            <button class="btn-back" onclick="playSound('click'); window.location.href='index.html'">← BACK TO HOME</button>
         </div>
     </div>
 
@@ -443,6 +469,65 @@
         document.getElementById('coinCount').innerText = currentCoins;
 
         let recentHistory = [53.20, 88.41, 12.50, 74.12, 45.00, 91.05, 30.22, 65.80];
+
+        // Web Audio API Sound Synthesizer Engine
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            try {
+                initAudio();
+                if (!audioCtx) return;
+
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                let now = audioCtx.currentTime;
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(150, now + 0.05);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } 
+                else if (type === 'win') {
+                    // Upward celebratory chime chord
+                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, index) => {
+                        let o = audioCtx.createOscillator();
+                        let g = audioCtx.createGain();
+                        o.connect(g);
+                        g.connect(audioCtx.destination);
+                        o.type = 'triangle';
+                        o.frequency.setValueAtTime(freq, now + index * 0.08);
+                        g.gain.setValueAtTime(0.2, now + index * 0.08);
+                        g.gain.exponentialRampToValueAtTime(0.001, now + index * 0.08 + 0.3);
+                        o.start(now + index * 0.08);
+                        o.stop(now + index * 0.08 + 0.3);
+                    });
+                } 
+                else if (type === 'lose') {
+                    // Low descending thud tone
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.exponentialRampToValueAtTime(70, now + 0.2);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                }
+            } catch (e) {
+                console.log("Audio not supported or blocked by browser gesture rules.");
+            }
+        }
 
         function updateSlider(val) {
             let rollOver = parseFloat(val);
@@ -491,7 +576,6 @@
             recentHistory.forEach((roll, idx) => {
                 let pill = document.createElement('div');
                 pill.className = 'history-pill';
-                // Highlight winning thresholds for historical context (mocked win state or stored flags)
                 let rollOverCurrent = parseFloat(document.getElementById('rollOverVal').innerText);
                 if (roll > rollOverCurrent) {
                     pill.classList.add('win');
@@ -518,14 +602,11 @@
             let rollOver = parseFloat(document.getElementById('rollOverVal').innerText);
             let multiplier = parseFloat(document.getElementById('multiplierVal').innerText);
 
-            // Generate random roll
             let rolledNum = Math.random() * 100;
             let isWin = rolledNum > rollOver;
 
-            // Animate Floating Cube Indicator to position
             let cube = document.getElementById('floatingCube');
             cube.style.display = 'block';
-            // Position percentage along the slider track (2 to 98 bounds)
             let percentage = rolledNum; 
             cube.style.left = percentage + '%';
             cube.innerText = rolledNum.toFixed(2);
@@ -534,8 +615,10 @@
                 cube.className = "floating-cube-indicator win";
                 let payout = betAmount * multiplier;
                 currentCoins += payout;
+                playSound('win');
             } else {
                 cube.className = "floating-cube-indicator lose";
+                playSound('lose');
             }
 
             document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
