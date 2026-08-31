@@ -95,16 +95,19 @@
             width: 60px;
             height: 60px;
             background: #fff;
-            color: #130f2b;
-            font-size: 36px;
-            font-weight: bold;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             border: 3px solid #ff75a0;
-            transition: transform 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .dice img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
         }
         @keyframes spinDice {
             0% { transform: rotateX(0deg) rotateY(0deg) scale(1); }
@@ -155,30 +158,8 @@
             color: #130f2b;
             border-color: #fff;
             transform: scale(1.1);
-            box-shadow: 0 0 10px rgba(255,215,0,0.6);
         }
 
-        .bet-input-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: #1a0b2e;
-            border: 2px solid #9c27b0;
-            border-radius: 12px;
-            padding: 8px 12px;
-            margin-bottom: 10px;
-        }
-        .bet-input-container input {
-            background: transparent;
-            border: none;
-            color: #ffd700;
-            font-size: 18px;
-            font-weight: bold;
-            width: 100px;
-            text-align: right;
-            outline: none;
-        }
-        
         /* Grid Options */
         .grid-2 {
             display: grid;
@@ -200,13 +181,14 @@
             background: #2a1147;
             border: 2px solid #6b21a8;
             border-radius: 10px;
-            padding: 8px 4px;
+            padding: 10px 4px;
             color: #fff;
             font-size: 12px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s;
             text-align: center;
+            position: relative;
         }
         .bet-option span {
             display: block;
@@ -217,7 +199,22 @@
         .bet-option.selected {
             background: linear-gradient(135deg, #ff007f, #7928ca);
             border-color: #ffd700;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Placed chip badge on options */
+        .placed-chip {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #ffd700;
+            color: #130f2b;
+            font-size: 10px;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 1px solid #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            display: none;
         }
 
         .btn-roll {
@@ -230,7 +227,6 @@
             font-weight: 800;
             font-size: 16px;
             cursor: pointer;
-            box-shadow: 0 0 15px rgba(0,198,255,0.4);
             margin-top: 10px;
         }
         .btn-back {
@@ -273,7 +269,6 @@
             max-width: 340px;
             padding: 25px 20px;
             text-align: center;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
             transform: scale(0.8);
             transition: transform 0.3s ease;
         }
@@ -285,13 +280,14 @@
             font-weight: 900;
             margin-bottom: 10px;
         }
-        .modal-title.win { color: #00ffcc; text-shadow: 0 0 10px rgba(0,255,204,0.5); }
-        .modal-title.lose { color: #ff4757; text-shadow: 0 0 10px rgba(255,71,87,0.5); }
+        .modal-title.win { color: #00ffcc; }
+        .modal-title.lose { color: #ff4757; }
         .modal-details {
             font-size: 14px;
             color: #dcd6f7;
             margin: 15px 0;
             line-height: 1.6;
+            text-align: left;
         }
         .modal-btn {
             background: linear-gradient(135deg, #ffd700, #ff8c00);
@@ -302,7 +298,6 @@
             border-radius: 12px;
             font-size: 15px;
             cursor: pointer;
-            box-shadow: 0 0 10px rgba(255,215,0,0.4);
         }
     </style>
 </head>
@@ -326,13 +321,13 @@
     <div class="game-container">
         <div class="card">
             <h2 style="margin: 0 0 5px 0; color: #ffd700;">🎲 DELUXE SIC BO</h2>
-            <p style="color: #b19cd9; font-size: 12px; margin: 0;">Select a coin chip, pick your bet, and roll!</p>
+            <p style="color: #b19cd9; font-size: 12px; margin: 0;">Tap chips to select value, then tap multiple bets!</p>
             
-            <!-- 3 Dice Display -->
+            <!-- 3 Dice Display with Real Dice Image Icons -->
             <div class="dice-arena">
-                <div class="dice" id="dice1">⚀</div>
-                <div class="dice" id="dice2">⚁</div>
-                <div class="dice" id="dice3">⚂</div>
+                <div class="dice" id="dice1"><img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Dice-1.svg" alt="dice 1"></div>
+                <div class="dice" id="dice2"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2c/Dice-2.svg" alt="dice 2"></div>
+                <div class="dice" id="dice3"><img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/Dice-3.svg" alt="dice 3"></div>
             </div>
 
             <!-- Coin Chips Selection -->
@@ -346,45 +341,38 @@
                 <div class="chip" onclick="selectChip(500, this)">500</div>
             </div>
 
-            <!-- Bet Amount Display / Input -->
-            <div class="section-title">STAKE AMOUNT</div>
-            <div class="bet-input-container">
-                <span style="font-size: 13px; color: #b19cd9;">Coins:</span>
-                <input type="number" id="betAmount" value="5" min="5">
-            </div>
-
             <!-- Big / Small Bets -->
             <div class="section-title">HIGH / LOW (1:1)</div>
             <div class="grid-2">
-                <div class="bet-option" onclick="selectBet('small', this)">SMALL (4-10)<span>Pays 1:1</span></div>
-                <div class="bet-option" onclick="selectBet('big', this)">BIG (11-17)<span>Pays 1:1</span></div>
+                <div class="bet-option" onclick="toggleBet('small', this)">SMALL (4-10)<span>Pays 1:1</span><div class="placed-chip">0</div></div>
+                <div class="bet-option" onclick="toggleBet('big', this)">BIG (11-17)<span>Pays 1:1</span><div class="placed-chip">0</div></div>
             </div>
 
             <!-- Specials: Any Double / Triple -->
             <div class="section-title">SPECIAL BETS</div>
             <div class="grid-2">
-                <div class="bet-option" onclick="selectBet('double', this)">ANY DOUBLE<span>Pays 7x</span></div>
-                <div class="bet-option" onclick="selectBet('triple', this)">ANY TRIPLE<span>Pays 30x</span></div>
+                <div class="bet-option" onclick="toggleBet('double', this)">ANY DOUBLE<span>Pays 7x</span><div class="placed-chip">0</div></div>
+                <div class="bet-option" onclick="toggleBet('triple', this)">ANY TRIPLE<span>Pays 30x</span><div class="placed-chip">0</div></div>
             </div>
 
             <!-- Specific Sums 3 to 17 -->
             <div class="section-title">SPECIFIC TOTAL SUM</div>
             <div class="grid-4">
-                <div class="bet-option" onclick="selectBet('sum_3', this)">3 <span>20x</span></div>
-                <div class="bet-option" onclick="selectBet('sum_4', this)">4 <span>15x</span></div>
-                <div class="bet-option" onclick="selectBet('sum_5', this)">5 <span>10x</span></div>
-                <div class="bet-option" onclick="selectBet('sum_6', this)">6 <span>9x</span></div>
-                <div class="bet-option" onclick="selectBet('sum_7', this)">7 <span>8x</span></div>
-                <div class="bet-option" onclick="selectBet('sum_8', this)">8 <span>7x</span></div>
-                <div class="bet-option" onclick="selectBet('sum_9', this)">9 <span>6x</span></div>
-                <div class="bet-option" onclick="selectBet('sum_10', this)">10 <span>5x</span></div>
-                <div class="bet-option" onclick="selectBet('sum_11', this)">11 <span>6x</span></div>
-                <div class="bet-option" onclick="selectBet('sum_12', this)">12 <span>7x</span></div>
-                <div class="bet-option" onclick="selectBet('sum_13', this)">13 <span>8x</span></div>
-                <div class="bet-option" onclick="selectBet('sum_14', this)">14 <span>9x</span></div>
-                <div class="bet-option" onclick="selectBet('sum_15', this)">15 <span>10x</span></div>
-                <div class="bet-option" onclick="selectBet('sum_16', this)">16 <span>15x</span></div>
-                <div class="bet-option" onclick="selectBet('sum_17', this)">17 <span>20x</span></div>
+                <div class="bet-option" onclick="toggleBet('sum_3', this)">3 <span>20x</span><div class="placed-chip">0</div></div>
+                <div class="bet-option" onclick="toggleBet('sum_4', this)">4 <span>15x</span><div class="placed-chip">0</div></div>
+                <div class="bet-option" onclick="toggleBet('sum_5', this)">5 <span>10x</span><div class="placed-chip">0</div></div>
+                <div class="bet-option" onclick="toggleBet('sum_6', this)">6 <span>9x</span><div class="placed-chip">0</div></div>
+                <div class="bet-option" onclick="toggleBet('sum_7', this)">7 <span>8x</span><div class="placed-chip">0</div></div>
+                <div class="bet-option" onclick="toggleBet('sum_8', this)">8 <span>7x</span><div class="placed-chip">0</div></div>
+                <div class="bet-option" onclick="toggleBet('sum_9', this)">9 <span>6x</span><div class="placed-chip">0</div></div>
+                <div class="bet-option" onclick="toggleBet('sum_10', this)">10 <span>5x</span><div class="placed-chip">0</div></div>
+                <div class="bet-option" onclick="toggleBet('sum_11', this)">11 <span>6x</span><div class="placed-chip">0</div></div>
+                <div class="bet-option" onclick="toggleBet('sum_12', this)">12 <span>7x</span><div class="placed-chip">0</div></div>
+                <div class="bet-option" onclick="toggleBet('sum_13', this)">13 <span>8x</span><div class="placed-chip">0</div></div>
+                <div class="bet-option" onclick="toggleBet('sum_14', this)">14 <span>9x</span><div class="placed-chip">0</div></div>
+                <div class="bet-option" onclick="toggleBet('sum_15', this)">15 <span>10x</span><div class="placed-chip">0</div></div>
+                <div class="bet-option" onclick="toggleBet('sum_16', this)">16 <span>15x</span><div class="placed-chip">0</div></div>
+                <div class="bet-option" onclick="toggleBet('sum_17', this)">17 <span>20x</span><div class="placed-chip">0</div></div>
             </div>
 
             <button class="btn-roll" id="rollBtn" onclick="executeRoll()">ROLL 3 DICES</button>
@@ -396,57 +384,71 @@
     <div class="modal-overlay" id="resultModal">
         <div class="modal-content">
             <div class="modal-title" id="modalTitle">YOU WON!</div>
-            <div class="modal-details" id="modalDetails">
-                Dice Result: ⚁ ⚃ ⚄ (Sum: 10)<br>
-                Total Won: +50 Coins
-            </div>
+            <div class="modal-details" id="modalDetails"></div>
             <button class="modal-btn" onclick="closeModal()">AWESOME!</button>
         </div>
     </div>
 
     <script>
-        // Load Player Balance
         let currentCoins = parseInt(localStorage.getItem('pixvinz_coins')) || 950;
         document.getElementById('coinCount').innerText = currentCoins;
 
-        let selectedBetType = null;
-        const diceFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+        let currentChipValue = 5;
+        let activeBets = {}; // Tracks bets placed on each option key
+
+        const diceImages = [
+            "https://upload.wikimedia.org/wikipedia/commons/1/1b/Dice-1.svg",
+            "https://upload.wikimedia.org/wikipedia/commons/2/2c/Dice-2.svg",
+            "https://upload.wikimedia.org/wikipedia/commons/b/b8/Dice-3.svg",
+            "https://upload.wikimedia.org/wikipedia/commons/2/2f/Dice-4.svg",
+            "https://upload.wikimedia.org/wikipedia/commons/8/8d/Dice-5.svg",
+            "https://upload.wikimedia.org/wikipedia/commons/5/55/Dice-6.svg"
+        ];
 
         function selectChip(amount, element) {
             document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
             element.classList.add('active');
-            document.getElementById('betAmount').value = amount;
+            currentChipValue = amount;
         }
 
-        function selectBet(type, element) {
-            document.querySelectorAll('.bet-option').forEach(el => el.classList.remove('selected'));
+        function toggleBet(type, element) {
+            let totalNeeded = currentChipValue;
+            if (activeBets[type]) {
+                totalNeeded += activeBets[type];
+            }
+
+            if (totalNeeded > currentCoins) {
+                alert("Not enough coins to place this bet!");
+                return;
+            }
+
+            // Deduct temporarily from display balance or track staked amount
+            currentCoins -= currentChipValue;
+            document.getElementById('coinCount').innerText = currentCoins;
+
+            if (!activeBets[type]) activeBets[type] = 0;
+            activeBets[type] += currentChipValue;
+
             element.classList.add('selected');
-            selectedBetType = type;
+            let badge = element.querySelector('.placed-chip');
+            badge.innerText = activeBets[type];
+            badge.style.display = 'block';
         }
 
         function executeRoll() {
-            if (!selectedBetType) {
-                alert("Please select a bet type first!");
-                return;
+            let totalStaked = 0;
+            for (let key in activeBets) {
+                totalStaked += activeBets[key];
             }
 
-            const betInput = document.getElementById('betAmount');
-            const bet = parseInt(betInput.value);
-
-            if (isNaN(bet) || bet < 5) {
-                alert("Minimum bet amount is 5 coins!");
-                return;
-            }
-
-            if (bet > currentCoins) {
-                alert("You don't have enough coins for this bet!");
+            if (totalStaked === 0) {
+                alert("Please place at least one bet first!");
                 return;
             }
 
             const rollBtn = document.getElementById('rollBtn');
             rollBtn.disabled = true;
 
-            // Start spinning animation on all 3 dices
             const d1El = document.getElementById('dice1');
             const d2El = document.getElementById('dice2');
             const d3El = document.getElementById('dice3');
@@ -456,9 +458,9 @@
             d3El.classList.add('spinning');
 
             let spinInterval = setInterval(() => {
-                d1El.innerText = diceFaces[Math.floor(Math.random() * 6)];
-                d2El.innerText = diceFaces[Math.floor(Math.random() * 6)];
-                d3El.innerText = diceFaces[Math.floor(Math.random() * 6)];
+                d1El.querySelector('img').src = diceImages[Math.floor(Math.random() * 6)];
+                d2El.querySelector('img').src = diceImages[Math.floor(Math.random() * 6)];
+                d3El.querySelector('img').src = diceImages[Math.floor(Math.random() * 6)];
             }, 80);
 
             setTimeout(() => {
@@ -467,70 +469,83 @@
                 d2El.classList.remove('spinning');
                 d3El.classList.remove('spinning');
 
-                // Fair random rolls (1 to 6)
                 const d1 = Math.floor(Math.random() * 6) + 1;
                 const d2 = Math.floor(Math.random() * 6) + 1;
                 const d3 = Math.floor(Math.random() * 6) + 1;
 
-                d1El.innerText = diceFaces[d1 - 1];
-                d2El.innerText = diceFaces[d2 - 1];
-                d3El.innerText = diceFaces[d3 - 1];
+                d1El.querySelector('img').src = diceImages[d1 - 1];
+                d2El.querySelector('img').src = diceImages[d2 - 1];
+                d3El.querySelector('img').src = diceImages[d3 - 1];
 
                 const sum = d1 + d2 + d3;
                 const isTriple = (d1 === d2 && d2 === d3);
                 const isDouble = (d1 === d2 || d2 === d3 || d1 === d3);
 
-                let won = false;
-                let multiplier = 0;
+                let totalWon = 0;
+                let breakdownHTML = `Roll Result: <b>${sum}</b> (${d1}, ${d2}, ${d3})<br><br><b>Bet Breakdown:</b><br>`;
 
-                // Evaluate Fair Win Conditions & Multipliers
-                if (selectedBetType === 'small') {
-                    if (sum >= 4 && sum <= 10 && !isTriple) { won = true; multiplier = 1; }
-                } else if (selectedBetType === 'big') {
-                    if (sum >= 11 && sum <= 17 && !isTriple) { won = true; multiplier = 1; }
-                } else if (selectedBetType === 'triple') {
-                    if (isTriple) { won = true; multiplier = 30; }
-                } else if (selectedBetType === 'double') {
-                    if (isDouble && !isTriple) { won = true; multiplier = 7; }
-                } else if (selectedBetType.startsWith('sum_')) {
-                    const targetSum = parseInt(selectedBetType.split('_')[1]);
-                    if (sum === targetSum) {
-                        won = true;
-                        if (targetSum === 3 || targetSum === 17) multiplier = 20;
-                        else if (targetSum === 4 || targetSum === 16) multiplier = 15;
-                        else if (targetSum === 5 || targetSum === 15) multiplier = 10;
-                        else if (targetSum === 6 || targetSum === 14) multiplier = 9;
-                        else if (targetSum === 7 || targetSum === 13) multiplier = 8;
-                        else if (targetSum === 8 || targetSum === 12) multiplier = 7;
-                        else if (targetSum === 9 || targetSum === 11) multiplier = 6;
-                        else if (targetSum === 10) multiplier = 5;
+                for (let type in activeBets) {
+                    let betAmount = activeBets[type];
+                    let won = false;
+                    let multiplier = 0;
+
+                    if (type === 'small' && sum >= 4 && sum <= 10 && !isTriple) { won = true; multiplier = 1; }
+                    else if (type === 'big' && sum >= 11 && sum <= 17 && !isTriple) { won = true; multiplier = 1; }
+                    else if (type === 'triple' && isTriple) { won = true; multiplier = 30; }
+                    else if (type === 'double' && isDouble && !isTriple) { won = true; multiplier = 7; }
+                    else if (type.startsWith('sum_')) {
+                        let targetSum = parseInt(type.split('_')[1]);
+                        if (sum === targetSum) {
+                            won = true;
+                            if (targetSum === 3 || targetSum === 17) multiplier = 20;
+                            else if (targetSum === 4 || targetSum === 16) multiplier = 15;
+                            else if (targetSum === 5 || targetSum === 15) multiplier = 10;
+                            else if (targetSum === 6 || targetSum === 14) multiplier = 9;
+                            else if (targetSum === 7 || targetSum === 13) multiplier = 8;
+                            else if (targetSum === 8 || targetSum === 12) multiplier = 7;
+                            else if (targetSum === 9 || targetSum === 11) multiplier = 6;
+                            else if (targetSum === 10) multiplier = 5;
+                        }
+                    }
+
+                    if (won) {
+                        let payout = betAmount * (multiplier + 1); // returns stake + winnings
+                        totalWon += payout;
+                        breakdownHTML += `- ${type.toUpperCase()}: Won +${betAmount * multiplier} coins<br>`;
+                    } else {
+                        breakdownHTML += `- ${type.toUpperCase()}: Lost -${betAmount} coins<br>`;
                     }
                 }
 
-                let profitOrLoss = 0;
+                currentCoins += totalWon;
+                let netChange = totalWon - totalStaked;
+
                 const modalTitle = document.getElementById('modalTitle');
                 const modalDetails = document.getElementById('modalDetails');
 
-                if (won) {
-                    profitOrLoss = bet * multiplier;
-                    currentCoins += profitOrLoss;
+                if (netChange >= 0) {
                     modalTitle.className = "modal-title win";
                     modalTitle.innerText = "🎉 YOU WON!";
-                    modalDetails.innerHTML = `Roll: ${diceFaces[d1-1]} ${diceFaces[d2-1]} ${diceFaces[d3-1]} (Sum: <b>${sum}</b>)<br>Payout Multiplier: <b>${multiplier}x</b><br><span style="color: #00ffcc;">Won Total: +${profitOrLoss} Coins</span>`;
                 } else {
-                    profitOrLoss = bet;
-                    currentCoins -= bet;
                     modalTitle.className = "modal-title lose";
                     modalTitle.innerText = "😢 YOU LOST";
-                    modalDetails.innerHTML = `Roll: ${diceFaces[d1-1]} ${diceFaces[d2-1]} ${diceFaces[d3-1]} (Sum: <b>${sum}</b>)<br><span style="color: #ff4757;">Lost Total: -${profitOrLoss} Coins</span>`;
                 }
 
-                if (currentCoins < 0) currentCoins = 0;
+                breakdownHTML += `<br><b>Total Staked:</b> ${totalStaked} Coins<br>`;
+                breakdownHTML += `<b>Net Result:</b> <span style="color:${netChange >= 0 ? '#00ffcc':'#ff4757'}">${netChange >= 0 ? '+' : ''}${netChange} Coins</span>`;
+
+                modalDetails.innerHTML = breakdownHTML;
 
                 document.getElementById('coinCount').innerText = currentCoins;
                 localStorage.setItem('pixvinz_coins', currentCoins);
 
-                // Open gorgeous modal
+                // Reset board bets
+                activeBets = {};
+                document.querySelectorAll('.bet-option').forEach(el => {
+                    el.classList.remove('selected');
+                    el.querySelector('.placed-chip').style.display = 'none';
+                });
+
                 document.getElementById('resultModal').classList.add('active');
                 rollBtn.disabled = false;
             }, 800);
