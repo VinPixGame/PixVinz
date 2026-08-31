@@ -19,7 +19,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Top Header Bar Matching Puzzle Layout */
+        /* Top Header Bar Matching Puzzle Layout Completely */
         .top-bar {
             width: 100%;
             display: flex;
@@ -202,7 +202,7 @@
             position: absolute;
             width: 100%;
             height: 12px;
-            background: #22c55e; /* Default over track background */
+            background: #22c55e;
             border-radius: 6px;
             overflow: hidden;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
@@ -213,7 +213,7 @@
             height: 100%;
             left: 0;
             width: 47%;
-            background: #ef4444; /* Default over fill background */
+            background: #ef4444;
             border-radius: 6px 0 0 6px;
         }
 
@@ -283,12 +283,7 @@
             color: #f8fafc;
         }
 
-        /* Bet Amount Input & Error Message */
-        .input-group-container {
-            margin-bottom: 12px;
-            position: relative;
-        }
-
+        /* Bet Amount Input Container */
         .input-group {
             background: #0f172a;
             border: 2px solid #334155;
@@ -297,6 +292,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            margin-bottom: 10px;
         }
 
         .input-left {
@@ -343,17 +339,20 @@
             background: #475569;
         }
 
-        /* Disappearing Error Message */
+        /* Centered Disappearing Error Message */
+        .error-msg-container {
+            height: 16px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
         .error-msg {
-            position: absolute;
-            bottom: -18px;
-            left: 10px;
             font-size: 11px;
             font-weight: 700;
             color: #ef4444;
             opacity: 0;
             transition: opacity 0.3s ease;
-            pointer-events: none;
         }
         .error-msg.show {
             opacity: 1;
@@ -378,6 +377,10 @@
         .btn-bet:active {
             transform: scale(0.95);
         }
+        .btn-bet:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
 
         .btn-back {
             background: transparent;
@@ -401,7 +404,6 @@
 </head>
 <body>
 
-    <!-- Top Header Bar -->
     <header class="top-bar">
       <button class="icon-btn" onclick="playSound('click'); window.location.href='index.html'">←</button>
       <div class="logo-container">
@@ -412,11 +414,9 @@
       <div class="coin-badge">🪙 <span id="coinCount">950</span></div>
     </header>
 
-    <!-- Game Container -->
     <div class="game-container">
         <div class="card">
             
-            <!-- Recent 8 Results Rolling History Bar -->
             <div class="history-bar" id="historyBar">
                 <div class="history-pill">53.20</div>
                 <div class="history-pill win">88.41</div>
@@ -431,7 +431,6 @@
             <h2 style="margin: 0 0 3px 0; color: #fbbf24; font-size: 18px;">🎯 PROVABLY FAIR DICE</h2>
             <p style="color: #94a3b8; font-size: 11px; margin: 0 0 10px 0;">Slide to adjust odds & hit roll!</p>
             
-            <!-- Slider Section -->
             <div class="slider-section">
                 <div class="floating-cube-indicator" id="floatingCube">53.00</div>
                 <div class="slider-labels">
@@ -449,7 +448,6 @@
                 </div>
             </div>
 
-            <!-- Stats Bar -->
             <div class="stats-grid">
                 <div class="stat-box">
                     <div class="stat-label">Multiplier</div>
@@ -465,28 +463,26 @@
                 </div>
             </div>
 
-            <!-- Bet Amount Input with Disappearing Error -->
-            <div class="input-group-container">
-                <div class="input-group">
-                    <div class="input-left">
-                        <div class="input-label">Bet Amount</div>
-                        <input type="number" id="betAmountInput" class="bet-input" value="10">
-                    </div>
-                    <div class="quick-actions">
-                        <button class="quick-btn" onclick="playSound('click'); halveBet()">½</button>
-                        <button class="quick-btn" onclick="playSound('click'); doubleBet()">2×</button>
-                    </div>
+            <div class="input-group">
+                <div class="input-left">
+                    <div class="input-label">Bet Amount</div>
+                    <input type="number" id="betAmountInput" class="bet-input" value="10">
                 </div>
+                <div class="quick-actions">
+                    <button class="quick-btn" onclick="playSound('click'); halveBet()">½</button>
+                    <button class="quick-btn" onclick="playSound('click'); doubleBet()">2×</button>
+                </div>
+            </div>
+
+            <div class="error-msg-container">
                 <div class="error-msg" id="errorMsg">Not enough balance</div>
             </div>
 
-            <!-- Profit on Win -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px; font-size: 12px;">
                 <span style="color: #94a3b8; font-weight: 700;">Profit on Win:</span>
                 <span style="color: #4ade80; font-weight: 800;" id="profitVal">8.70 Coins</span>
             </div>
 
-            <!-- Bet Action Button -->
             <button class="btn-bet" id="betBtn" onclick="playSound('click'); executeRoll()">BET</button>
 
             <button class="btn-back" onclick="playSound('click'); window.location.href='index.html'">← BACK TO HOME</button>
@@ -498,10 +494,10 @@
         document.getElementById('coinCount').innerText = currentCoins;
 
         let recentHistory = [53.20, 88.41, 12.50, 74.12, 45.00, 91.05, 30.22, 65.80];
-        let isRollOver = true; // true = Roll Over, false = Roll Under
+        let isRollOver = true; 
         let lastSliderSoundVal = 47;
+        let isRolling = false;
 
-        // Web Audio API Sound Synthesizer Engine
         let audioCtx = null;
         function initAudio() {
             if (!audioCtx) {
@@ -518,7 +514,6 @@
                 let gain = audioCtx.createGain();
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
-
                 let now = audioCtx.currentTime;
 
                 if (type === 'click') {
@@ -531,7 +526,6 @@
                     osc.stop(now + 0.05);
                 } 
                 else if (type === 'slide') {
-                    // Soft tick sound while dragging slider
                     osc.type = 'triangle';
                     osc.frequency.setValueAtTime(300, now);
                     osc.frequency.exponentialRampToValueAtTime(120, now + 0.02);
@@ -564,7 +558,7 @@
                     osc.stop(now + 0.2);
                 }
             } catch (e) {
-                console.log("Audio context blocked or not supported.");
+                console.log("Audio blocked.");
             }
         }
 
@@ -599,7 +593,6 @@
             let successTrack = document.getElementById('successTrack');
 
             if (isRollOver) {
-                // Green on right, Red on left
                 trackBg.style.background = '#ef4444';
                 successTrack.style.background = '#22c55e';
                 successTrack.style.left = 'unset';
@@ -607,7 +600,6 @@
                 successTrack.style.width = (100 - threshold) + '%';
                 successTrack.style.borderRadius = '0 6px 6px 0';
             } else {
-                // Green on left, Red on right (Roll Under)
                 trackBg.style.background = '#ef4444';
                 successTrack.style.background = '#22c55e';
                 successTrack.style.right = 'unset';
@@ -652,7 +644,7 @@
                 if (currentCoins <= 0) {
                     input.value = 0;
                 } else {
-                    input.value = currentCoins; // Set to total balance if exceeding
+                    input.value = currentCoins;
                 }
                 showNotEnoughBalanceError();
             } else {
@@ -684,44 +676,54 @@
         }
 
         function executeRoll() {
+            if (isRolling) return;
+
             let betAmount = parseFloat(document.getElementById('betAmountInput').value);
-            if (isNaN(betAmount) || betAmount <= 0) {
+            if (isNaN(betAmount) || betAmount <= 0 || betAmount > currentCoins) {
                 showNotEnoughBalanceError();
                 return;
             }
-            if (betAmount > currentCoins) {
-                showNotEnoughBalanceError();
-                return;
-            }
+
+            isRolling = true;
+            let betBtn = document.getElementById('betBtn');
+            betBtn.innerText = "ROLLING...";
+            betBtn.disabled = true;
 
             currentCoins -= betAmount;
             document.getElementById('coinCount').innerText = currentCoins;
 
-            let threshold = parseFloat(document.getElementById('rollOverVal').innerText);
-            let multiplier = parseFloat(document.getElementById('multiplierVal').innerText);
+            // Added 0.2s analytical delay pause for suspense & realistic pacing
+            setTimeout(() => {
+                let threshold = parseFloat(document.getElementById('rollOverVal').innerText);
+                let multiplier = parseFloat(document.getElementById('multiplierVal').innerText);
 
-            let rolledNum = Math.random() * 100;
-            let isWin = isRollOver ? (rolledNum > threshold) : (rolledNum < threshold);
+                let rolledNum = Math.random() * 100;
+                let isWin = isRollOver ? (rolledNum > threshold) : (rolledNum < threshold);
 
-            let cube = document.getElementById('floatingCube');
-            cube.style.display = 'block';
-            cube.style.left = rolledNum + '%';
-            cube.innerText = rolledNum.toFixed(2);
+                let cube = document.getElementById('floatingCube');
+                cube.style.display = 'block';
+                cube.style.left = rolledNum + '%';
+                cube.innerText = rolledNum.toFixed(2);
 
-            if (isWin) {
-                cube.className = "floating-cube-indicator win";
-                let payout = betAmount * multiplier;
-                currentCoins += payout;
-                playSound('win');
-            } else {
-                cube.className = "floating-cube-indicator lose";
-                playSound('lose');
-            }
+                if (isWin) {
+                    cube.className = "floating-cube-indicator win";
+                    let payout = betAmount * multiplier;
+                    currentCoins += payout;
+                    playSound('win');
+                } else {
+                    cube.className = "floating-cube-indicator lose";
+                    playSound('lose');
+                }
 
-            document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
-            localStorage.setItem('pixvinz_coins', currentCoins);
+                document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
+                localStorage.setItem('pixvinz_coins', currentCoins);
 
-            renderHistory(rolledNum);
+                renderHistory(rolledNum);
+
+                betBtn.innerText = "BET";
+                betBtn.disabled = false;
+                isRolling = false;
+            }, 200);
         }
 
         updateSlider(47);
