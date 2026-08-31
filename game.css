@@ -678,35 +678,52 @@ body {
 
 
 
+/* ==========================================
+   DESKTOP NORMAL VIEW (Matched to homeView)
+   ========================================== */
+
 @media screen and (min-width: 601px) {
+
   html,
   body {
-    width: 100% !important;
-    height: 100% !important;
-    min-height: 100vh !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    background: #130826 !important;
+    width: 100%;
+    min-height: 100%;
+    background: #0d0d0d;
   }
 
   body {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
+    display: block;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
-  .game-container, 
-  .app-container {
-    width: 100% !important;
-    max-width: 480px !important;
-    height: 100vh !important;
-    height: 100dvh !important;
-    margin: 0 auto !important;
-    border-radius: 0 !important;
-    box-shadow: 0 0 30px rgba(123, 44, 191, 0.3) !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
-    overflow: hidden !important;
+  .game-container {
+    width: 100%;
+    max-width: none;
+    height: auto;
+    min-height: 100vh;
+
+    margin: 0;
+    padding: 24px;
+
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+
+    overflow-x: hidden;
+    overflow-y: visible;
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 20px;
+  }
+
+  /* Keeps headers, logos, and action bars locked to their natural size on desktop */
+  .top-bar, 
+  .centered-level-title, 
+  .game-header, 
+  .game-actions {
+    flex-shrink: 0 !important;
   }
 }
