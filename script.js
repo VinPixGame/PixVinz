@@ -1,8 +1,8 @@
-// --- FIREBASE INITIALIZATION & DATABASE BRIDGE ---
+// --- UNIVERSAL FIRESTORE DATA FETCHER & AUTH LISTENER ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
 import { getFirestore, doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
@@ -19,92 +19,89 @@ const analytics = getAnalytics(app);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Expose Firestore database tools globally so UI scripts can use them
 window.pixvinzDb = { db, doc, getDoc, setDoc, updateDoc, collection, query, orderBy, limit, getDocs };
 
-
-// --- DEDICATED LOADING SCREEN SCRIPT ---
 document.addEventListener('DOMContentLoaded', () => {
     const loadingView = document.getElementById('loadingView');
-    if (!loadingView) return;
-
-    // 1. Check if user is already logged in (handles page refresh) OR coming from auth.html
-    const skipLoading = localStorage.getItem('skipLoading') === 'true';
-    const storedUser = localStorage.getItem('loggedInUser');
-
-    if (skipLoading || storedUser) {
-        // Clear the flag if it was set
-        localStorage.removeItem('skipLoading');
-        
-        if (storedUser) {
-            // Instantly skip loader, go straight to homeView, and show the top bar
-            loadingView.classList.remove('active');
-            const homeView = document.getElementById('homeView');
-            const mainHeader = document.getElementById('mainHeader');
-            
-            if (homeView) homeView.classList.add('active');
-            if (mainHeader) mainHeader.classList.remove('hidden'); // Ensures the top bar appears!
-            
-            if (typeof playMainBGM === 'function') playMainBGM();
-            return; // Stop the script here so the timer never runs
-        } else {
-            window.location.href = 'auth.html';
-            return;
-        }
-    }
-
-    // 2. Play the logo video explicitly (Only runs for cold visits when NOT logged in)
     const logoVideo = document.getElementById('loadingLogo');
+    const percentageElem = document.getElementById('loadingPercentage');
+    const barFillElem = document.getElementById('loadingBarFill');
+
     if (logoVideo) {
         logoVideo.play().catch(err => console.log("Video play prevented:", err));
     }
 
-    // 3. Grab elements for normal timer
-    const percentageElem = document.getElementById('loadingPercentage');
-    const barFillElem = document.getElementById('loadingBarFill');
-
-    // 4. Animation and Timer logic (6 seconds total)
+    let percent = 1;
+    const minLoadingTime = 2000; // 2 seconds minimum for a smooth visual experience
     const startTime = Date.now();
-    const minLoadingTime = 6000; // 6 seconds
+    let authChecked = false;
+    let firestoreDataFetched = false;
 
-    function updateProgress() {
-        const elapsedTime = Date.now() - startTime;
-        let percent = Math.floor((elapsedTime / minLoadingTime) * 100);
+    function updateProgressUI() {
+        if (percent < 100 && (!authChecked || !firestoreDataFetched)) {
+            percent = Math.min(percent + 2, 90); // Smoothly climb up to 90% while waiting
+            if (percentageElem) percentageElem.innerText = `${percent}%`;
+            if (barFillElem) barFillElem.style.width = `${percent}%`;
+            setTimeout(updateProgressUI, 30);
+        }
+    }
 
-        if (percent < 1) percent = 1;
-        if (percent > 100) percent = 100;
+    updateProgressUI();
 
-        // Update DOM
-        if (percentageElem) percentageElem.innerText = `${percent}%`;
-        if (barFillElem) barFillElem.style.width = `${percent}%`;
+    // Listen for Firebase Auth state (fires instantly on app open if session exists)
+    onAuthStateChanged(auth, async (user) => {
+        authChecked = true;
 
-        if (elapsedTime < minLoadingTime) {
-            // Keep looping every 50ms for smooth progress
-            setTimeout(updateProgress, 50);
+        if (user) {
+            // User is signed in! Fetch their fresh data from Firestore right now.
+            try {
+                const userDocRef = doc(db, "users", user.uid); // or user.email depending on your DB structure
+                const userSnap = await getDoc(userDocRef);
+                
+                if (userSnap.exists()) {
+                    localStorage.setItem('userDataCache', JSON.stringify(userSnap.data()));
+                    localStorage.setItem('loggedInUser', user.uid);
+                }
+            } catch (err) {
+                console.error("Error refreshing data from Firestore:", err);
+            }
+
+            firestoreDataFetched = true;
+            completeLoadingAndTransition(true);
         } else {
-            // Finished! Ensure 100% and transition
+            // No user signed in, redirect to auth page
+            firestoreDataFetched = true;
+            completeLoadingAndTransition(false);
+        }
+    });
+
+    function completeLoadingAndTransition(isLoggedIn) {
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+
+        setTimeout(() => {
             if (percentageElem) percentageElem.innerText = '100%';
             if (barFillElem) barFillElem.style.width = '100%';
 
             setTimeout(() => {
-                const finalStoredUser = localStorage.getItem('loggedInUser');
-                
-                if (finalStoredUser) {
-                    loadingView.classList.remove('active');
+                if (loadingView) loadingView.classList.remove('active');
+
+                if (isLoggedIn) {
                     const homeView = document.getElementById('homeView');
                     const mainHeader = document.getElementById('mainHeader');
                     
                     if (homeView) homeView.classList.add('active');
-                    if (mainHeader) mainHeader.classList.remove('hidden'); // Shows top bar on normal load too
+                    if (mainHeader) mainHeader.classList.remove('hidden');
+                    
+                    if (typeof playMainBGM === 'function') playMainBGM();
                 } else {
                     window.location.href = 'auth.html';
                 }
             }, 200);
-        }
+        }, remainingTime);
     }
-
-    // Kick off the progress bar loop
-    updateProgress();
+// Kick off the progress bar loop right here at the bottom
+    updateProgressUI();
 });
 
 
