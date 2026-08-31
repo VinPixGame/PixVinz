@@ -19,24 +19,25 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Top Header Bar Pushed Down */
+        /* Top Header Bar - Clean with background removed */
         .top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             width: 100%;
+            max-width: 440px;
             position: relative;
             flex-shrink: 0;
-            padding: 12px 20px;
-            background: #1e293b;
+            padding: 12px 15px;
+            background: transparent;
             box-sizing: border-box;
-            border-bottom: 2px solid #334155;
-            margin-top: 2cm; /* Pushed down by 2cm */
+            border-bottom: none;
+            margin-top: 2cm;
         }
 
-        .top-bar > *:nth-child(1) { position: absolute; left: 20px; }
+        .top-bar > *:nth-child(1) { position: absolute; left: 15px; }
         .top-bar > *:nth-child(2) { width: 100%; display: flex; justify-content: center; }
-        .top-bar > *:nth-child(3) { position: absolute; right: 20px; }
+        .top-bar > *:nth-child(3) { position: absolute; right: 15px; }
 
         .logo-container {
             display: flex;
@@ -98,17 +99,41 @@
             gap: 6px;
         }
 
-        /* Main Game Layout - Centered with bottom margin */
+        /* External Title Area Outside Container */
+        .external-title-area {
+            width: 100%;
+            max-width: 440px;
+            padding: 0 15px;
+            box-sizing: border-box;
+            text-align: center;
+            margin-top: 15px;
+            margin-bottom: 12px;
+        }
+
+        .external-title {
+            margin: 0 0 3px 0;
+            color: #fbbf24;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .external-subtitle {
+            color: #94a3b8;
+            font-size: 11px;
+            margin: 0;
+        }
+
+        /* Main Game Layout - Moved further downward and centered */
         .game-container {
             width: 100%;
             max-width: 440px;
-            padding: 10px 15px;
+            padding: 0 15px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            margin-top: 15px;
-            margin-bottom: 3cm; /* Pushed upward from the bottom with generous spacing */
+            margin-bottom: 3cm;
         }
 
         .card {
@@ -421,6 +446,11 @@
       <div class="coin-badge">🪙 <span id="coinCount">950</span></div>
     </header>
 
+    <div class="external-title-area">
+        <h2 class="external-title">🎯 PROVABLY FAIR DICE</h2>
+        <p class="external-subtitle">Slide to adjust odds & hit roll!</p>
+    </div>
+
     <div class="game-container">
         <div class="card">
             
@@ -434,9 +464,6 @@
                 <div class="history-pill">30.22</div>
                 <div class="history-pill win">65.80</div>
             </div>
-
-            <h2 style="margin: 0 0 3px 0; color: #fbbf24; font-size: 18px;">🎯 PROVABLY FAIR DICE</h2>
-            <p style="color: #94a3b8; font-size: 11px; margin: 0 0 10px 0;">Slide to adjust odds & hit roll!</p>
             
             <div class="slider-section">
                 <div class="floating-cube-indicator" id="floatingCube">53.00</div>
