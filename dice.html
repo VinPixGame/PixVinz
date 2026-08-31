@@ -32,7 +32,7 @@
             background: transparent;
             box-sizing: border-box;
             border-bottom: none;
-            margin-top: 1.5cm; /* Balanced top spacing */
+            margin-top: 1.5cm;
         }
 
         .top-bar > *:nth-child(1) { position: absolute; left: 15px; }
@@ -99,15 +99,15 @@
             gap: 6px;
         }
 
-        /* External Title Area - Safely pushed 2cm below top bar with clear margins */
+        /* External Title Area */
         .external-title-area {
             width: 100%;
             max-width: 440px;
             padding: 0 15px;
             box-sizing: border-box;
             text-align: center;
-            margin-top: 2cm; /* Exactly 2cm gap from top bar to title */
-            margin-bottom: 20px; /* Healthy spacing between title and game container */
+            margin-top: 2cm;
+            margin-bottom: 20px;
         }
 
         .external-title {
@@ -124,7 +124,7 @@
             margin: 0;
         }
 
-        /* Main Game Layout - Well spaced and centered */
+        /* Main Game Layout */
         .game-container {
             width: 100%;
             max-width: 440px;
@@ -443,7 +443,7 @@
           <source src="image/logo.webm" type="video/webm">
         </video>
       </div>
-      <div class="coin-badge">🪙 <span id="coinCount">950</span></div>
+      <div class="coin-badge">🪙 <span id="coinCount">950.00</span></div>
     </header>
 
     <div class="external-title-area">
@@ -517,13 +517,13 @@
                 <span style="color: #4ade80; font-weight: 800;" id="profitVal">8.70 Coins</span>
             </div>
 
-            <button class="btn-bet" id="betBtn" onclick="playSound('click'); executeRoll()">BET</button>
+            <button class="btn-bet" id="betBtn" onclick="playSound('click'); executeRoll()">ROLL</button>
         </div>
     </div>
 
     <script>
-        let currentCoins = parseInt(localStorage.getItem('pixvinz_coins')) || 950;
-        document.getElementById('coinCount').innerText = currentCoins;
+        let currentCoins = parseFloat(localStorage.getItem('pixvinz_coins')) || 950.00;
+        document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
 
         let recentHistory = [53.20, 88.41, 12.50, 74.12, 45.00, 91.05, 30.22, 65.80];
         let isRollOver = true; 
@@ -722,7 +722,7 @@
             betBtn.disabled = true;
 
             currentCoins -= betAmount;
-            document.getElementById('coinCount').innerText = currentCoins;
+            document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
 
             setTimeout(() => {
                 let threshold = parseFloat(document.getElementById('rollOverVal').innerText);
@@ -751,10 +751,10 @@
 
                 renderHistory(rolledNum);
 
-                betBtn.innerText = "BET";
+                betBtn.innerText = "ROLL";
                 betBtn.disabled = false;
                 isRolling = false;
-            }, 200);
+            }, 300);
         }
 
         updateSlider(47);
