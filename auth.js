@@ -769,44 +769,46 @@ if (regPassConfirm) {
 });
 
 
-// --- PWA INSTALL PROMPT HANDLER ---
-let deferredPrompt;
-const installBtns = [
-    document.getElementById('install-app-btn'),
-    document.getElementById('install-app-btn-ref')
-];
+// --- PWA INSTALL PROMPT HANDLER (BROWSER ONLY) ---
+if (!window.cordova) {
+    let deferredPrompt;
+    const installBtns = [
+        document.getElementById('install-app-btn'),
+        document.getElementById('install-app-btn-ref')
+    ];
 
-// Hide buttons by default until browser says it's installable
-installBtns.forEach(btn => {
-    if (btn) btn.style.display = 'none';
-});
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    
-    // Reveal the download buttons on both login and register views
+    // Hide buttons by default until browser says it's installable
     installBtns.forEach(btn => {
-        if (btn) btn.style.display = 'block';
+        if (btn) btn.style.display = 'none';
     });
-});
 
-installBtns.forEach(btn => {
-    if (!btn) return;
-    
-    btn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
         
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        
-        if (outcome === 'accepted') {
-            console.log('User installed the PWA');
-        }
-        
-        deferredPrompt = null;
-        installBtns.forEach(b => {
-            if (b) b.style.display = 'none';
+        // Reveal the download buttons on both login and register views
+        installBtns.forEach(btn => {
+            if (btn) btn.style.display = 'block';
         });
     });
-});
+
+    installBtns.forEach(btn => {
+        if (!btn) return;
+        
+        btn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                console.log('User installed the PWA');
+            }
+            
+            deferredPrompt = null;
+            installBtns.forEach(b => {
+                if (b) b.style.display = 'none';
+            });
+        });
+    });
+}
