@@ -15,78 +15,81 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Top Header Bar */
+        /* Top Header Bar Matching Puzzle Layout */
         .top-bar {
-            position: fixed;
-            top: 0;
             width: 100%;
-            max-width: 480px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 15px;
+            padding: 12px 20px;
             background: #1e293b;
-            z-index: 1000;
             box-sizing: border-box;
             border-bottom: 2px solid #334155;
         }
         .icon-btn {
-            width: 40px;
-            height: 40px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
-            background-color: #334155;
-            border: 2px solid #6366f1;
+            background-color: #1e293b;
+            border: 2px solid #fbbf24;
             overflow: hidden;
             padding: 0;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #fff;
+            color: #fbbf24;
+            font-size: 18px;
             outline: none;
             transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .icon-btn:active {
-            transform: scale(0.88);
+            transform: scale(0.85);
         }
 
         .logo-container {
-            height: 35px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .logo-container video {
+        .logo-container video, .logo-container img {
             height: 100%;
             background: transparent;
         }
         .coin-badge {
-            background: #334155;
-            padding: 6px 12px;
+            background: #1e293b;
+            padding: 6px 14px;
             border-radius: 20px;
             border: 2px solid #fbbf24;
             font-weight: bold;
             font-size: 14px;
             color: #fbbf24;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        /* Main Game Layout */
+        /* Main Game Layout - Compact for Mobile */
         .game-container {
             width: 100%;
             max-width: 440px;
-            padding: 15px;
+            padding: 10px 15px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            margin-top: 75px;
-            margin-bottom: 30px;
+            gap: 10px;
+            margin-top: 5px;
         }
         .card {
             background: #1e293b;
             border: 2px solid #334155;
-            border-radius: 20px;
-            padding: 20px;
+            border-radius: 18px;
+            padding: 15px;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
             text-align: center;
         }
@@ -96,9 +99,9 @@
             display: flex;
             justify-content: flex-end;
             gap: 6px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             overflow-x: auto;
-            padding-bottom: 4px;
+            padding-bottom: 2px;
             scrollbar-width: none;
         }
         .history-bar::-webkit-scrollbar {
@@ -107,12 +110,11 @@
         .history-pill {
             background: #0f172a;
             border: 1px solid #334155;
-            padding: 5px 10px;
-            border-radius: 12px;
+            padding: 4px 8px;
+            border-radius: 10px;
             font-size: 11px;
             font-weight: 700;
             white-space: nowrap;
-            transition: all 0.3s ease;
         }
         .history-pill.win {
             background: rgba(34, 197, 94, 0.2);
@@ -125,26 +127,26 @@
             color: #94a3b8;
         }
 
-        /* Slider Section with Floating Cube Indicator */
+        /* Slider Section */
         .slider-section {
-            margin: 35px 0 30px 0;
+            margin: 30px 0 20px 0;
             position: relative;
         }
 
         .floating-cube-indicator {
             position: absolute;
-            top: -42px;
+            top: -40px;
             left: 50%;
             transform: translateX(-50%);
             background: #f8fafc;
             color: #0f172a;
             font-weight: 900;
             font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 8px;
+            padding: 3px 8px;
+            border-radius: 6px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             border: 2px solid #cbd5e1;
-            transition: left 0.4s cubic-bezier(0.15, 0.85, 0.35, 1.2);
+            transition: left 0.3s cubic-bezier(0.15, 0.85, 0.35, 1.2);
             white-space: nowrap;
             z-index: 20;
             display: none;
@@ -152,11 +154,11 @@
         .floating-cube-indicator::after {
             content: '';
             position: absolute;
-            bottom: -6px;
+            bottom: -5px;
             left: 50%;
             transform: translateX(-50%) rotate(45deg);
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             background: #f8fafc;
             border-right: 2px solid #cbd5e1;
             border-bottom: 2px solid #cbd5e1;
@@ -183,15 +185,15 @@
         .slider-labels {
             display: flex;
             justify-content: space-between;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             color: #94a3b8;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .track-container {
             position: relative;
-            height: 32px;
+            height: 28px;
             display: flex;
             align-items: center;
         }
@@ -199,26 +201,26 @@
         .slider-track {
             position: absolute;
             width: 100%;
-            height: 14px;
-            background: #ef4444;
-            border-radius: 8px;
+            height: 12px;
+            background: #22c55e; /* Default over track background */
+            border-radius: 6px;
             overflow: hidden;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
         }
 
-        .slider-track-success {
+        .slider-track-fill {
             position: absolute;
             height: 100%;
-            right: 0;
-            width: 53%;
-            background: #22c55e;
-            border-radius: 0 8px 8px 0;
+            left: 0;
+            width: 47%;
+            background: #ef4444; /* Default over fill background */
+            border-radius: 6px 0 0 6px;
         }
 
         .range-input {
             position: absolute;
             width: 100%;
-            height: 32px;
+            height: 28px;
             background: transparent;
             appearance: none;
             cursor: pointer;
@@ -227,18 +229,14 @@
             outline: none;
         }
 
-        .range-input:focus {
-            outline: none;
-        }
-
         .range-input::-webkit-slider-thumb {
             appearance: none;
-            width: 24px;
-            height: 36px;
+            width: 22px;
+            height: 32px;
             background: #3b82f6;
-            border: 3px solid #ffffff;
+            border: 2px solid #ffffff;
             border-radius: 6px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.4);
             cursor: pointer;
             transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
@@ -251,42 +249,54 @@
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
         .stat-box {
             background: #0f172a;
             border: 2px solid #334155;
-            border-radius: 12px;
-            padding: 10px 5px;
+            border-radius: 10px;
+            padding: 8px 4px;
             text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .stat-box:active {
+            transform: scale(0.92);
+        }
+        .stat-box.interactive:hover {
+            border-color: #6366f1;
         }
 
         .stat-label {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 700;
             color: #94a3b8;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             text-transform: uppercase;
         }
 
         .stat-value {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 800;
             color: #f8fafc;
         }
 
-        /* Bet Amount Input */
+        /* Bet Amount Input & Error Message */
+        .input-group-container {
+            margin-bottom: 12px;
+            position: relative;
+        }
+
         .input-group {
             background: #0f172a;
             border: 2px solid #334155;
-            border-radius: 14px;
-            padding: 10px 15px;
+            border-radius: 12px;
+            padding: 8px 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 15px;
         }
 
         .input-left {
@@ -294,7 +304,7 @@
         }
 
         .input-label {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 700;
             color: #94a3b8;
             text-transform: uppercase;
@@ -304,52 +314,63 @@
             background: transparent;
             border: none;
             color: #f8fafc;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 800;
-            width: 120px;
+            width: 110px;
             outline: none;
         }
 
         .quick-actions {
             display: flex;
-            gap: 6px;
+            gap: 5px;
         }
 
-        /* Bouncy Clickable Action Buttons */
         .quick-btn {
             background: #1e293b;
             border: 1px solid #475569;
             color: #cbd5e1;
-            padding: 6px 10px;
-            font-size: 12px;
+            padding: 5px 8px;
+            font-size: 11px;
             font-weight: 700;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             outline: none;
-            box-shadow: none;
             -webkit-tap-highlight-color: transparent;
             transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s;
-        }
-        .quick-btn:hover {
-            background: #334155;
         }
         .quick-btn:active {
             transform: scale(0.85);
             background: #475569;
         }
 
-        /* Main Bouncy Bet Button */
+        /* Disappearing Error Message */
+        .error-msg {
+            position: absolute;
+            bottom: -18px;
+            left: 10px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #ef4444;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .error-msg.show {
+            opacity: 1;
+        }
+
+        /* Action Buttons */
         .btn-bet {
             width: 100%;
-            padding: 16px;
+            padding: 14px;
             background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             border: 2px solid #60a5fa;
-            border-radius: 14px;
+            border-radius: 12px;
             color: #fff;
             font-weight: 800;
-            font-size: 16px;
+            font-size: 15px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
             outline: none;
             -webkit-tap-highlight-color: transparent;
             transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -358,16 +379,16 @@
             transform: scale(0.95);
         }
 
-        /* Bouncy Back Button */
         .btn-back {
             background: transparent;
             border: 2px solid #64748b;
             color: #94a3b8;
-            margin-top: 10px;
-            padding: 10px;
+            margin-top: 8px;
+            padding: 8px;
             width: 100%;
-            border-radius: 12px;
+            border-radius: 10px;
             font-weight: bold;
+            font-size: 13px;
             cursor: pointer;
             outline: none;
             -webkit-tap-highlight-color: transparent;
@@ -380,11 +401,9 @@
 </head>
 <body>
 
-    <header class="top-bar" id="mainHeader">
-      <button class="icon-btn" id="profileHeaderBtn" onclick="playSound('click'); window.location.href='index.html'">
-        <span id="profileIconFallback">👤</span>
-        <img id="profileHeaderImg" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; display: none;">
-      </button>
+    <!-- Top Header Bar -->
+    <header class="top-bar">
+      <button class="icon-btn" onclick="playSound('click'); window.location.href='index.html'">←</button>
       <div class="logo-container">
         <video id="logoVideo" autoplay loop muted playsinline preload="auto">
           <source src="image/logo.webm" type="video/webm">
@@ -393,9 +412,11 @@
       <div class="coin-badge">🪙 <span id="coinCount">950</span></div>
     </header>
 
+    <!-- Game Container -->
     <div class="game-container">
         <div class="card">
             
+            <!-- Recent 8 Results Rolling History Bar -->
             <div class="history-bar" id="historyBar">
                 <div class="history-pill">53.20</div>
                 <div class="history-pill win">88.41</div>
@@ -407,9 +428,10 @@
                 <div class="history-pill win">65.80</div>
             </div>
 
-            <h2 style="margin: 0 0 5px 0; color: #fbbf24;">🎯 PROVABLY FAIR DICE</h2>
-            <p style="color: #94a3b8; font-size: 12px; margin: 0 0 15px 0;">Slide to adjust odds & hit roll!</p>
+            <h2 style="margin: 0 0 3px 0; color: #fbbf24; font-size: 18px;">🎯 PROVABLY FAIR DICE</h2>
+            <p style="color: #94a3b8; font-size: 11px; margin: 0 0 10px 0;">Slide to adjust odds & hit roll!</p>
             
+            <!-- Slider Section -->
             <div class="slider-section">
                 <div class="floating-cube-indicator" id="floatingCube">53.00</div>
                 <div class="slider-labels">
@@ -420,20 +442,21 @@
                     <span>100</span>
                 </div>
                 <div class="track-container">
-                    <div class="slider-track">
-                        <div class="slider-track-success" id="successTrack"></div>
+                    <div class="slider-track" id="sliderTrackBg">
+                        <div class="slider-track-fill" id="successTrack"></div>
                     </div>
-                    <input type="range" min="2" max="98" value="47" class="range-input" id="rollSlider" oninput="updateSlider(this.value)">
+                    <input type="range" min="2" max="98" value="47" class="range-input" id="rollSlider" oninput="onSliderDrag(this.value)">
                 </div>
             </div>
 
+            <!-- Stats Bar -->
             <div class="stats-grid">
                 <div class="stat-box">
                     <div class="stat-label">Multiplier</div>
                     <div class="stat-value" id="multiplierVal">1.87x</div>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-label">Roll Over</div>
+                <div class="stat-box interactive" onclick="playSound('click'); toggleMode()">
+                    <div class="stat-label" id="modeLabel">Roll Over 🔄</div>
                     <div class="stat-value" id="rollOverVal">47.00</div>
                 </div>
                 <div class="stat-box">
@@ -442,22 +465,28 @@
                 </div>
             </div>
 
-            <div class="input-group">
-                <div class="input-left">
-                    <div class="input-label">Bet Amount</div>
-                    <input type="number" id="betAmountInput" class="bet-input" value="10">
+            <!-- Bet Amount Input with Disappearing Error -->
+            <div class="input-group-container">
+                <div class="input-group">
+                    <div class="input-left">
+                        <div class="input-label">Bet Amount</div>
+                        <input type="number" id="betAmountInput" class="bet-input" value="10">
+                    </div>
+                    <div class="quick-actions">
+                        <button class="quick-btn" onclick="playSound('click'); halveBet()">½</button>
+                        <button class="quick-btn" onclick="playSound('click'); doubleBet()">2×</button>
+                    </div>
                 </div>
-                <div class="quick-actions">
-                    <button class="quick-btn" onclick="playSound('click'); halveBet()">½</button>
-                    <button class="quick-btn" onclick="playSound('click'); doubleBet()">2×</button>
-                </div>
+                <div class="error-msg" id="errorMsg">Not enough balance</div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 5px; font-size: 13px;">
+            <!-- Profit on Win -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px; font-size: 12px;">
                 <span style="color: #94a3b8; font-weight: 700;">Profit on Win:</span>
                 <span style="color: #4ade80; font-weight: 800;" id="profitVal">8.70 Coins</span>
             </div>
 
+            <!-- Bet Action Button -->
             <button class="btn-bet" id="betBtn" onclick="playSound('click'); executeRoll()">BET</button>
 
             <button class="btn-back" onclick="playSound('click'); window.location.href='index.html'">← BACK TO HOME</button>
@@ -469,6 +498,8 @@
         document.getElementById('coinCount').innerText = currentCoins;
 
         let recentHistory = [53.20, 88.41, 12.50, 74.12, 45.00, 91.05, 30.22, 65.80];
+        let isRollOver = true; // true = Roll Over, false = Roll Under
+        let lastSliderSoundVal = 47;
 
         // Web Audio API Sound Synthesizer Engine
         let audioCtx = null;
@@ -499,8 +530,17 @@
                     osc.start(now);
                     osc.stop(now + 0.05);
                 } 
+                else if (type === 'slide') {
+                    // Soft tick sound while dragging slider
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(120, now + 0.02);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.linearRampToValueAtTime(0.001, now + 0.02);
+                    osc.start(now);
+                    osc.stop(now + 0.02);
+                }
                 else if (type === 'win') {
-                    // Upward celebratory chime chord
                     [523.25, 659.25, 783.99, 1046.50].forEach((freq, index) => {
                         let o = audioCtx.createOscillator();
                         let g = audioCtx.createGain();
@@ -515,7 +555,6 @@
                     });
                 } 
                 else if (type === 'lose') {
-                    // Low descending thud tone
                     osc.type = 'sawtooth';
                     osc.frequency.setValueAtTime(180, now);
                     osc.frequency.exponentialRampToValueAtTime(70, now + 0.2);
@@ -525,20 +564,58 @@
                     osc.stop(now + 0.2);
                 }
             } catch (e) {
-                console.log("Audio not supported or blocked by browser gesture rules.");
+                console.log("Audio context blocked or not supported.");
             }
         }
 
+        function toggleMode() {
+            isRollOver = !isRollOver;
+            document.getElementById('modeLabel').innerText = isRollOver ? "Roll Over 🔄" : "Roll Under 🔄";
+            updateSlider(document.getElementById('rollSlider').value);
+        }
+
+        function onSliderDrag(val) {
+            let numVal = parseInt(val);
+            if (Math.abs(numVal - lastSliderSoundVal) >= 2) {
+                playSound('slide');
+                lastSliderSoundVal = numVal;
+            }
+            updateSlider(val);
+        }
+
         function updateSlider(val) {
-            let rollOver = parseFloat(val);
-            let winChance = 100 - rollOver;
+            let threshold = parseFloat(val);
+            let winChance = isRollOver ? (100 - threshold) : threshold;
+            if (winChance < 1) winChance = 1;
+            if (winChance > 98) winChance = 98;
+
             let multiplier = (99 / winChance).toFixed(4);
 
-            document.getElementById('rollOverVal').innerText = rollOver.toFixed(2);
+            document.getElementById('rollOverVal').innerText = threshold.toFixed(2);
             document.getElementById('winChanceVal').innerText = winChance.toFixed(2) + '%';
             document.getElementById('multiplierVal').innerText = multiplier + 'x';
 
-            document.getElementById('successTrack').style.width = winChance + '%';
+            let trackBg = document.getElementById('sliderTrackBg');
+            let successTrack = document.getElementById('successTrack');
+
+            if (isRollOver) {
+                // Green on right, Red on left
+                trackBg.style.background = '#ef4444';
+                successTrack.style.background = '#22c55e';
+                successTrack.style.left = 'unset';
+                successTrack.style.right = '0';
+                successTrack.style.width = (100 - threshold) + '%';
+                successTrack.style.borderRadius = '0 6px 6px 0';
+            } else {
+                // Green on left, Red on right (Roll Under)
+                trackBg.style.background = '#ef4444';
+                successTrack.style.background = '#22c55e';
+                successTrack.style.right = 'unset';
+                successTrack.style.left = '0';
+                successTrack.style.width = threshold + '%';
+                successTrack.style.borderRadius = '6px 0 0 6px';
+            }
+
             updateProfit();
         }
 
@@ -551,6 +628,14 @@
 
         document.getElementById('betAmountInput').addEventListener('input', updateProfit);
 
+        function showNotEnoughBalanceError() {
+            let errEl = document.getElementById('errorMsg');
+            errEl.classList.add('show');
+            setTimeout(() => {
+                errEl.classList.remove('show');
+            }, 2000);
+        }
+
         function halveBet() {
             let input = document.getElementById('betAmountInput');
             let val = Math.max(1, Math.floor(parseFloat(input.value) / 2));
@@ -560,12 +645,23 @@
 
         function doubleBet() {
             let input = document.getElementById('betAmountInput');
-            let val = Math.floor(parseFloat(input.value) * 2);
-            input.value = val;
+            let currentBet = parseFloat(input.value) || 0;
+            let doubled = currentBet * 2;
+
+            if (doubled > currentCoins) {
+                if (currentCoins <= 0) {
+                    input.value = 0;
+                } else {
+                    input.value = currentCoins; // Set to total balance if exceeding
+                }
+                showNotEnoughBalanceError();
+            } else {
+                input.value = doubled;
+            }
             updateProfit();
         }
 
-        function renderHistory(latestRoll, isWin) {
+        function renderHistory(latestRoll) {
             recentHistory.push(latestRoll);
             if (recentHistory.length > 8) {
                 recentHistory.shift();
@@ -573,11 +669,13 @@
 
             let bar = document.getElementById('historyBar');
             bar.innerHTML = '';
-            recentHistory.forEach((roll, idx) => {
+            let threshold = parseFloat(document.getElementById('rollOverVal').innerText);
+
+            recentHistory.forEach((roll) => {
                 let pill = document.createElement('div');
                 pill.className = 'history-pill';
-                let rollOverCurrent = parseFloat(document.getElementById('rollOverVal').innerText);
-                if (roll > rollOverCurrent) {
+                let won = isRollOver ? (roll > threshold) : (roll < threshold);
+                if (won) {
                     pill.classList.add('win');
                 }
                 pill.innerText = roll.toFixed(2);
@@ -588,27 +686,26 @@
         function executeRoll() {
             let betAmount = parseFloat(document.getElementById('betAmountInput').value);
             if (isNaN(betAmount) || betAmount <= 0) {
-                alert("Please enter a valid bet amount!");
+                showNotEnoughBalanceError();
                 return;
             }
             if (betAmount > currentCoins) {
-                alert("Not enough coins!");
+                showNotEnoughBalanceError();
                 return;
             }
 
             currentCoins -= betAmount;
             document.getElementById('coinCount').innerText = currentCoins;
 
-            let rollOver = parseFloat(document.getElementById('rollOverVal').innerText);
+            let threshold = parseFloat(document.getElementById('rollOverVal').innerText);
             let multiplier = parseFloat(document.getElementById('multiplierVal').innerText);
 
             let rolledNum = Math.random() * 100;
-            let isWin = rolledNum > rollOver;
+            let isWin = isRollOver ? (rolledNum > threshold) : (rolledNum < threshold);
 
             let cube = document.getElementById('floatingCube');
             cube.style.display = 'block';
-            let percentage = rolledNum; 
-            cube.style.left = percentage + '%';
+            cube.style.left = rolledNum + '%';
             cube.innerText = rolledNum.toFixed(2);
 
             if (isWin) {
@@ -624,7 +721,7 @@
             document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
             localStorage.setItem('pixvinz_coins', currentCoins);
 
-            renderHistory(rolledNum, isWin);
+            renderHistory(rolledNum);
         }
 
         updateSlider(47);
