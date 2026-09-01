@@ -1,5 +1,5 @@
-let currentCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
-document.getElementById('coinCount').innerText = currentCoins;
+let currentCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 950;
+document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
 
 let recentHistory = [12.50, 74.12, 45.00, 91.05, 30.22, 65.80];
 let isRollOver = true; 
