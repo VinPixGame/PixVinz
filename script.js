@@ -1002,9 +1002,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const buyButtons = document.querySelectorAll('.shop-buy-btn');
   buyButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const card = e.target.closest('.shop-card');
-      const title = card ? card.querySelector('.shop-card-title')?.innerText : 'Item';
-      alert(`Buying is not yet available`);
+      const modal = document.getElementById('shopModal');
+      if (modal) {
+        modal.style.display = 'flex';
+      }
     });
   });
 });
+
+// Close modal helper function (kept in global scope)
+function closeShopModal() {
+  const modal = document.getElementById('shopModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
