@@ -273,14 +273,20 @@ if (typeof window.saveUserDataToCloud === 'function') {
 }
 
 function startAutoRoll() {
-    let betAmount = parseFloat(document.getElementById('betAmountInput').value);
-    if (isNaN(betAmount) || betAmount <= 0 || betAmount > currentCoins) {
+    let initialBetAmount = parseFloat(document.getElementById('betAmountInput').value);
+    if (isNaN(initialBetAmount) || initialBetAmount <= 0 || initialBetAmount > currentCoins) {
         showNotEnoughBalanceError();
         return;
     }
 
     rollsRemaining = parseInt(document.getElementById('autoRollsInput').value) || 10;
     let speed = parseInt(document.getElementById('autoSpeedInput').value) || 400;
+    let stopOnWinVal = parseFloat(document.getElementById('stopOnWinInput').value) || 0;
+    let stopOnLossVal = parseFloat(document.getElementById('stopOnLossInput').value) || 0;
+    let resetOnWinChecked = document.getElementById('resetOnWinCheck').checked;
+    
+    let baseBetAmount = initialBetAmount;
+    let sessionProfit = 0;
 
     isAutoRunning = true;
     let betBtn = document.getElementById('betBtn');
@@ -288,16 +294,18 @@ function startAutoRoll() {
     betBtn.innerText = `STOP AUTO (${rollsRemaining})`;
 
     autoInterval = setInterval(() => {
-        if (rollsRemaining <= 0 || currentCoins < betAmount) {
+        let currentBet = parseFloat(document.getElementById('betAmountInput').value);
+
+        if (rollsRemaining <= 0 || currentCoins < currentBet) {
             stopAutoRoll();
-            if (currentCoins < betAmount) showNotEnoughBalanceError("Stopped: Low balance");
+            if (currentCoins < currentBet) showNotEnoughBalanceError("Stopped: Low balance");
             return;
         }
 
         rollsRemaining--;
         betBtn.innerText = `STOP AUTO (${rollsRemaining})`;
 
-        currentCoins -= betAmount;
+        currentCoins -= currentBet;
         document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
 
         let threshold = parseFloat(document.getElementById('rollOverVal').innerText);
@@ -316,25 +324,31 @@ function startAutoRoll() {
 
         if (isWin) {
             cube.className = "floating-cube-indicator win";
-            let payout = betAmount * multiplier;
+            let payout = currentBet * multiplier;
+            let netRoundProfit = payout - currentBet;
+            sessionProfit += netRoundProfit;
             currentCoins += payout;
             playSound('win');
-            if (onWinPct !== 0) {
-                betAmount = betAmount * (1 + (onWinPct / 100));
+
+            if (resetOnWinChecked) {
+                currentBet = baseBetAmount;
+            } else if (onWinPct !== 0) {
+                currentBet = currentBet * (1 + (onWinPct / 100));
             }
         } else {
             cube.className = "floating-cube-indicator lose";
+            sessionProfit -= currentBet;
             playSound('lose');
             if (onLossPct !== 0) {
-                betAmount = betAmount * (1 + (onLossPct / 100));
+                currentBet = currentBet * (1 + (onLossPct / 100));
             }
         }
 
-        if (betAmount < 0.01) betAmount = 0.01;
-        if (betAmount > currentCoins && currentCoins > 0) {
-            betAmount = currentCoins;
+        if (currentBet < 0.01) currentBet = 0.01;
+        if (currentBet > currentCoins && currentCoins > 0) {
+            currentBet = currentCoins;
         }
-        document.getElementById('betAmountInput').value = betAmount.toFixed(2);
+        document.getElementById('betAmountInput').value = currentBet.toFixed(2);
         updateProfit();
 
         document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
@@ -344,6 +358,18 @@ if (typeof window.saveUserDataToCloud === 'function') {
 }
 
         renderHistory(rolledNum);
+
+        if (stopOnWinVal > 0 && sessionProfit >= stopOnWinVal) {
+            stopAutoRoll();
+            showNotEnoughBalanceError("Stopped: Stop on Win reached");
+            return;
+        }
+
+        if (stopOnLossVal > 0 && sessionProfit <= -stopOnLossVal) {
+            stopAutoRoll();
+            showNotEnoughBalanceError("Stopped: Stop on Loss reached");
+            return;
+        }
 
         if (rollsRemaining <= 0) {
             stopAutoRoll();
