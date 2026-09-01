@@ -160,7 +160,8 @@ document.addEventListener('DOMContentLoaded', () => {
     challenge: document.getElementById('challengeView'),
     leaderboard: document.getElementById('leaderboardView'),
     profileView: document.getElementById('profileView'),
-    shop: document.getElementById('shopView')
+    shop: document.getElementById('shopView'),
+    moreGames: document.getElementById('moreGamesView')
   };
 
   const mainHeader = document.getElementById('mainHeader');
