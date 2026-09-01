@@ -149,7 +149,10 @@
         </div>
 
         <div class="chat-input-area">
-            <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off">
+            <div class="chat-input-wrapper" style="position: relative;">
+                <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off">
+                <div id="chatMentionDropdown" class="mention-dropdown" style="display: none; position: absolute; bottom: 100%; left: 0; background: #222; border: 1px solid #444; max-height: 120px; overflow-y: auto; width: 150px; z-index: 10;"></div>
+            </div>
             <button id="chatSendBtn">Send</button>
         </div>
     </div>
