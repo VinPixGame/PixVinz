@@ -1021,3 +1021,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+views.moreGames = document.getElementById('moreGamesView');
+
