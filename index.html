@@ -122,14 +122,32 @@
     <div class="chat-header">
         <div class="chat-title">
             <span>Global Chat</span>
-            <span class="online-indicator">● 3 online</span>
+            <span class="online-indicator">● 1 online</span>
         </div>
         <div class="chat-controls">
+            <button id="chatSoundBtn" title="Toggle Sound">🔊</button>
             <button id="chatToggleBtn">−</button>
         </div>
     </div>
+    
     <div id="chatBody" class="chat-body">
         <div id="chatMessages"></div>
+        
+        <!-- Scroll to bottom notification button -->
+        <button id="scrollToBottomBtn" class="scroll-bottom-btn hidden">New Messages ↓</button>
+        
+        <!-- Typing Indicator -->
+        <div id="typingIndicator" class="typing-indicator"></div>
+
+        <!-- Quick Emojis -->
+        <div class="emoji-bar">
+            <button class="emoji-btn" data-emoji="👍">👍</button>
+            <button class="emoji-btn" data-emoji="😂">😂</button>
+            <button class="emoji-btn" data-emoji="🔥">🔥</button>
+            <button class="emoji-btn" data-emoji="❤️">❤️</button>
+            <button class="emoji-btn" data-emoji="🎮">🎮</button>
+        </div>
+
         <div class="chat-input-area">
             <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off">
             <button id="chatSendBtn">Send</button>
