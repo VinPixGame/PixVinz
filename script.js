@@ -1020,3 +1020,82 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+
+
+
+
+
+import { collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+// --- FLOATING CHATBOX LOGIC ---
+
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Minimize / Maximize Toggle
+    const chatContainer = document.getElementById('floatingChat');
+    const chatToggleBtn = document.getElementById('chatToggleBtn');
+
+    if (chatContainer && chatToggleBtn) {
+        chatToggleBtn.addEventListener('click', () => {
+            chatContainer.classList.toggle('minimized');
+            chatToggleBtn.textContent = chatContainer.classList.contains('minimized') ? '+' : '−';
+        });
+    }
+
+    // 2. Firebase Chat Functionality
+    const db = window.pixvinzDb ? window.pixvinzDb.db : null;
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const chatSendBtn = document.getElementById('chatSendBtn');
+
+    if (!db || !chatMessages || !chatInput || !chatSendBtn) return;
+
+    // Use player's display name if available, otherwise generate a temporary one
+    const playerNameEl = document.getElementById('userDisplayName');
+    const playerName = (playerNameEl && playerNameEl.textContent.trim()) ? playerNameEl.textContent.trim() : ("Player_" + Math.floor(Math.random() * 9000 + 1000));
+
+    // Send Message Function
+    async function sendMessage() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        try {
+            await addDoc(collection(db, "global-chat"), {
+                name: playerName,
+                text: text,
+                createdAt: serverTimestamp()
+            });
+            chatInput.value = '';
+        } catch (error) {
+            console.error("Error sending message:", error);
+        }
+    }
+
+    chatSendBtn.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    // Real-time listener to automatically load and update messages
+    const q = query(collection(db, "global-chat"), orderBy("createdAt", "asc"), limit(50));
+    onSnapshot(q, (snapshot) => {
+        chatMessages.innerHTML = '';
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chat-message';
+            
+            const userSpan = document.createElement('span');
+            userSpan.className = 'user';
+            userSpan.textContent = `${data.name || 'Anonymous'}:`;
+            
+            const textNode = document.createTextNode(` ${data.text || ''}`);
+            
+            msgDiv.appendChild(userSpan);
+            msgDiv.appendChild(textNode);
+            chatMessages.appendChild(msgDiv);
+        });
+        // Auto-scroll to the latest message
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+});
