@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js";
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
@@ -29,16 +29,63 @@ function getChatDisplayName() {
 const chatWidget = document.getElementById('chatWidget');
 const chatIconBtn = document.getElementById('chatIconBtn');
 const chatToggleBtn = document.getElementById('chatToggleBtn');
+const chatSoundBtn = document.getElementById('chatSoundBtn');
 const chatMessages = document.getElementById('chatMessages');
 const chatInput = document.getElementById('chatInput');
 const chatSendBtn = document.getElementById('chatSendBtn');
+const scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
+const typingIndicator = document.getElementById('typingIndicator');
 
-// Start collapsed (showing only the icon)
+// --- SOUND SETTINGS ---
+let isMuted = localStorage.getItem('chat_muted') === 'true';
+updateSoundButtonIcon();
+
+chatSoundBtn.addEventListener('click', () => {
+    isMuted = !isMuted;
+    localStorage.setItem('chat_muted', isMuted);
+    updateSoundButtonIcon();
+});
+
+function updateSoundButtonIcon() {
+    chatSoundBtn.textContent = isMuted ? '🔇' : '🔊';
+}
+
+function playPopSound() {
+    if (isMuted) return;
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.08);
+    } catch (e) {}
+}
+
+// --- PROFANITY FILTER ---
+const badWords = ['badword1', 'badword2', 'spamword']; // Expandable word list
+function filterProfanity(text) {
+    let filtered = text;
+    badWords.forEach(word => {
+        const regex = new RegExp(word, 'gi');
+        filtered = filtered.replace(regex, '*'.repeat(word.length));
+    });
+    return filtered;
+}
+
+// Toggle Widget State
 chatWidget.classList.add('collapsed');
 
 chatIconBtn.addEventListener('click', () => {
     chatWidget.classList.remove('collapsed');
     chatInput.focus();
+    scrollToBottom();
 });
 
 chatToggleBtn.addEventListener('click', () => {
@@ -48,16 +95,19 @@ chatToggleBtn.addEventListener('click', () => {
 // Send Message Logic
 async function sendMessage() {
     const playerName = getChatDisplayName();
-    const text = chatInput.value.trim();
-    if (!text) return;
+    const rawText = chatInput.value.trim();
+    if (!rawText) return;
+
+    const cleanText = filterProfanity(rawText);
 
     try {
         await addDoc(collection(db, "global-chat"), {
             name: playerName,
-            text: text,
+            text: cleanText,
             timestamp: serverTimestamp()
         });
         chatInput.value = '';
+        updateTypingStatus(false);
         chatInput.focus();
     } catch (error) {
         console.error("Error sending message: ", error);
@@ -72,47 +122,81 @@ chatInput.addEventListener('keydown', (e) => {
     }
 });
 
-// --- REAL-TIME ONLINE PRESENCE TRACKING ---
+// --- QUICK EMOJIS ---
+document.querySelectorAll('.emoji-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        chatInput.value += btn.getAttribute('data-emoji');
+        chatInput.focus();
+    });
+});
+
+// --- REAL-TIME ONLINE & TYPING PRESENCE ---
 const sessionId = 'session_' + Math.random().toString(36).substring(2);
 const presenceRef = doc(db, "chat-presence", sessionId);
+let typingTimeout = null;
 
-async function updatePresence() {
+async function updatePresence(isTyping = false) {
     try {
-        await setDoc(presenceRef, { lastSeen: serverTimestamp() });
+        await setDoc(presenceRef, { 
+            lastSeen: serverTimestamp(),
+            name: getChatDisplayName(),
+            isTyping: isTyping 
+        }, { merge: true });
     } catch (e) {}
 }
 
-updatePresence();
-const presenceInterval = setInterval(updatePresence, 30000); // Heartbeat every 30s
+updatePresence(false);
+const presenceInterval = setInterval(() => updatePresence(false), 30000);
+
+chatInput.addEventListener('input', () => {
+    updatePresence(true);
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+        updatePresence(false);
+    }, 2000);
+});
 
 window.addEventListener('beforeunload', () => {
     deleteDoc(presenceRef).catch(() => {});
 });
 
-// Listen to active users in presence collection
+// Listen to active users and typing indicators
 const onlineIndicatorEl = document.querySelector('.online-indicator');
 const presenceQuery = query(collection(db, "chat-presence"));
 onSnapshot(presenceQuery, (snapshot) => {
     let activeCount = 0;
+    const typingUsers = [];
     const now = Date.now();
+
     snapshot.forEach((dSnap) => {
         const data = dSnap.data();
         if (data.lastSeen) {
             const seenTime = data.lastSeen.toMillis ? data.lastSeen.toMillis() : now;
-            // Consider online if active within last 60 seconds
             if (now - seenTime < 60000) {
                 activeCount++;
+                if (data.isTyping && data.name && data.name !== getChatDisplayName()) {
+                    typingUsers.push(data.name);
+                }
             }
         } else {
             activeCount++;
         }
     });
+
     if (onlineIndicatorEl) {
         onlineIndicatorEl.innerHTML = `● ${Math.max(1, activeCount)} online`;
     }
+
+    if (typingIndicator) {
+        if (typingUsers.length > 0) {
+            typingIndicator.textContent = `${typingUsers.join(', ')} ${typingUsers.length === 1 ? 'is' : 'are'} typing...`;
+        } else {
+            typingIndicator.textContent = '';
+        }
+    }
 });
 
-// Helper for consistent player colors
+// Helpers for colors and timestamps
 function getPlayerColorClass(name) {
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
@@ -122,7 +206,6 @@ function getPlayerColorClass(name) {
     return `color-${colorIndex}`;
 }
 
-// Helper to format timestamp into "11:46 pm"
 function formatMessageTime(timestamp) {
     if (!timestamp) return 'Just now';
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -135,8 +218,29 @@ function formatMessageTime(timestamp) {
     return `${hours}:${formattedMinutes} ${ampm}`;
 }
 
+// Scroll Handling
+let isUserScrolledUp = false;
+
+chatMessages.addEventListener('scroll', () => {
+    const threshold = 30;
+    const isAtBottom = chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight <= threshold;
+    isUserScrolledUp = !isAtBottom;
+    if (isAtBottom) {
+        scrollToBottomBtn.classList.add('hidden');
+    }
+});
+
+function scrollToBottom() {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    scrollToBottomBtn.classList.add('hidden');
+    isUserScrolledUp = false;
+}
+
+scrollToBottomBtn.addEventListener('click', scrollToBottom);
+
 // Real-time message listener
 const q = query(collection(db, "global-chat"), orderBy("timestamp", "asc"));
+let initialLoad = true;
 
 onSnapshot(q, (snapshot) => {
     chatMessages.innerHTML = '';
@@ -149,7 +253,6 @@ onSnapshot(q, (snapshot) => {
         
         const senderName = data.name || 'Anonymous';
         
-        // Header container for Name and Time stamp
         const headerSpan = document.createElement('div');
         headerSpan.style.display = 'flex';
         headerSpan.style.alignItems = 'baseline';
@@ -182,6 +285,16 @@ onSnapshot(q, (snapshot) => {
         messageDiv.appendChild(textDiv);
         chatMessages.appendChild(messageDiv);
     });
-    
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    if (initialLoad) {
+        scrollToBottom();
+        initialLoad = false;
+    } else {
+        if (isUserScrolledUp) {
+            scrollToBottomBtn.classList.remove('hidden');
+        } else {
+            scrollToBottom();
+            playPopSound();
+        }
+    }
 });
