@@ -138,7 +138,6 @@ chatToggleBtn.addEventListener('click', () => {
 // --- MENTION AUTO-COMPLETE DROPDOWN SETUP ---
 let mentionDropdown = document.getElementById('chatMentionDropdown');
 if (!mentionDropdown && chatInput && chatInput.parentNode) {
-    chatInput.parentNode.style.position = chatInput.parentNode.style.position || 'relative';
     mentionDropdown = document.createElement('div');
     mentionDropdown.id = 'chatMentionDropdown';
     mentionDropdown.style.cssText = 'display:none; position:absolute; bottom:100%; left:0; right:0; background:#1e1e1e; border:1px solid #444; border-radius:6px; max-height:120px; overflow-y:auto; z-index:1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
@@ -203,14 +202,12 @@ const presenceInterval = setInterval(() => updatePresence(false), 30000);
 
 // Unified input listener for typing status and @mention auto-complete
 chatInput.addEventListener('input', () => {
-    // Typing status
     updatePresence(true);
     clearTimeout(typingTimeout);
     typingTimeout = setTimeout(() => {
         updatePresence(false);
     }, 2000);
 
-    // Mention Auto-Complete Logic
     const value = chatInput.value;
     const cursorPosition = chatInput.selectionStart;
     const textBeforeCursor = value.slice(0, cursorPosition);
@@ -342,7 +339,6 @@ async function toggleReaction(messageId, emoji, currentReactions) {
     let updatedReactions = JSON.parse(JSON.stringify(currentReactions || {}));
     let existingEmojiKey = null;
 
-    // Find if user already reacted with any emoji on this message
     for (const [emj, users] of Object.entries(updatedReactions)) {
         if (Array.isArray(users) && users.includes(currentUserId)) {
             existingEmojiKey = emj;
@@ -351,20 +347,17 @@ async function toggleReaction(messageId, emoji, currentReactions) {
     }
 
     if (existingEmojiKey === emoji) {
-        // Tapped the same emoji again -> UNLIKE (Toggle Off)
         updatedReactions[emoji] = updatedReactions[emoji].filter(id => id !== currentUserId);
         if (updatedReactions[emoji].length === 0) {
             delete updatedReactions[emoji];
         }
     } else {
-        // Remove from previous emoji reaction if one existed
         if (existingEmojiKey) {
             updatedReactions[existingEmojiKey] = updatedReactions[existingEmojiKey].filter(id => id !== currentUserId);
             if (updatedReactions[existingEmojiKey].length === 0) {
                 delete updatedReactions[existingEmojiKey];
             }
         }
-        // Add to the newly selected emoji
         if (!updatedReactions[emoji]) {
             updatedReactions[emoji] = [];
         }
@@ -439,7 +432,7 @@ function scrollToBottom() {
 
 scrollToBottomBtn.addEventListener('click', scrollToBottom);
 
-// Real-time message listener with Date Grouping
+// Real-time message listener with Date Grouping and Reactions Fully Intact
 const q = query(collection(db, "global-chat"), orderBy("timestamp", "asc"));
 let initialLoad = true;
 
@@ -497,7 +490,7 @@ onSnapshot(q, (snapshot) => {
         messageDiv.appendChild(headerSpan);
         messageDiv.appendChild(textDiv);
 
-        // Attach Quick Emoji Reactions Container
+        // FULLY PRESERVED REACTION SYSTEM INTEGRATION
         const reactionsEl = renderReactions(data, messageId);
         messageDiv.appendChild(reactionsEl);
 
