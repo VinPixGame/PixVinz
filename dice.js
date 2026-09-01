@@ -1,3 +1,6 @@
+let currentCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
+document.getElementById('coinCount').innerText = currentCoins;
+
 let recentHistory = [12.50, 74.12, 45.00, 91.05, 30.22, 65.80];
 let isRollOver = true; 
 let lastSliderSoundVal = 47;
@@ -221,8 +224,9 @@ function handleMainButtonClick() {
 function executeManualRoll() {
     if (isRolling) return;
 
-    let betAmount = parseInt(document.getElementById('betAmountInput').value);
-    if (isNaN(betAmount) || betAmount <= 0) {
+    let betAmount = parseFloat(document.getElementById('betAmountInput').value);
+    let currentCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
+    if (isNaN(betAmount) || betAmount <= 0 || betAmount > currentCoins) {
         showNotEnoughBalanceError();
         return;
     }
@@ -251,7 +255,7 @@ function executeManualRoll() {
 
         if (isWin) {
             cube.className = "floating-cube-indicator win";
-            let payout = Math.round(betAmount * multiplier);
+            let payout = betAmount * multiplier;
             earnCoins(payout);
             playSound('win');
         } else {
@@ -268,7 +272,7 @@ function executeManualRoll() {
 }
 
 function startAutoRoll() {
-    let betAmount = parseInt(document.getElementById('betAmountInput').value);
+    let betAmount = parseFloat(document.getElementById('betAmountInput').value);
     let currentCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
     if (isNaN(betAmount) || betAmount <= 0 || betAmount > currentCoins) {
         showNotEnoughBalanceError();
@@ -316,26 +320,26 @@ function startAutoRoll() {
 
         if (isWin) {
             cube.className = "floating-cube-indicator win";
-            let payout = Math.round(betAmount * multiplier);
+            let payout = betAmount * multiplier;
             earnCoins(payout);
             playSound('win');
             if (onWinPct !== 0) {
-                betAmount = Math.round(betAmount * (1 + (onWinPct / 100)));
+                betAmount = betAmount * (1 + (onWinPct / 100));
             }
         } else {
             cube.className = "floating-cube-indicator lose";
             playSound('lose');
             if (onLossPct !== 0) {
-                betAmount = Math.round(betAmount * (1 + (onLossPct / 100)));
+                betAmount = betAmount * (1 + (onLossPct / 100));
             }
         }
 
         let currentCoinsAfter = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
-        if (betAmount < 1) betAmount = 1;
+        if (betAmount < 0.01) betAmount = 0.01;
         if (betAmount > currentCoinsAfter && currentCoinsAfter > 0) {
             betAmount = currentCoinsAfter;
         }
-        document.getElementById('betAmountInput').value = betAmount;
+        document.getElementById('betAmountInput').value = betAmount.toFixed(2);
         updateProfit();
 
         renderHistory(rolledNum);
