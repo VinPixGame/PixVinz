@@ -69,15 +69,40 @@ function playPopSound() {
 }
 
 // --- PROFANITY FILTER ---
-const badWords = ['badword1', 'badword2', 'spamword']; // Expandable word list
+const badWords = ['fuck you', 'shit', 'bitch', 'whore', 'mother fucker', 'idiot', 'peasant', 'patay gutom', 'putang ina mo', 'puki ng ina mo', 'vagina', 'pussy', 'dick', 'titi', 'kiki', 'pukengkeng', 'suck', 'sucks', 'sucking', 'sucked', 'fucked', 'fucking', 'kantot', 'iyot', 'iyutan', 'kantutan', 'kantotan', 'kantowtan', 'dede', 'suso', 'chupa', 'chupain', 'subo mo to', 'isubo mo to', 'pepe', 'kain pepe', 'kain puke', 'bayag', 'asshole', 'ashole', 'assholle', 'fuck your ass', 'suck my dick', 'I will kill you', 'kill', 'suicide', 'rape', 'nipple', 'mipple', 'nnipple', 'ffuck', 'fffuck', 'ffffuckkk', 'fuckkk', 'damnit', 'gago', 'sira ulo', 'tarantado', 'tangna mo', ]; 
+
 function filterProfanity(text) {
+    // 1. Normalize text to strip accents (e.g., 'fùck' becomes 'fuck')
+    const normalizedText = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     let filtered = text;
-    badWords.forEach(word => {
-        const regex = new RegExp(word, 'gi');
-        filtered = filtered.replace(regex, '*'.repeat(word.length));
+
+    // 2. Automatically mask email addresses (e.g., player@gmail.com)
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/gi;
+    filtered = filtered.replace(emailRegex, (match) => '*'.repeat(match.length));
+    
+    badWords.forEach(phrase => {
+        // Split multi-word phrases so spaces between words become optional
+        const words = phrase.split(/\s+/);
+        const escapedWords = words.map(word => 
+            word.split('').map(char => char.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')).join('[\\s\\W]*')
+        );
+        
+        // Allow zero or more spaces/symbols between words (catches 'fuckyou' and 'fuck you')
+        const pattern = escapedWords.join('[\\s\\W]*');
+        const regex = new RegExp(pattern, 'gi');
+        
+        // Find matches in normalized text and mask the equivalent length in original text
+        let match;
+        while ((match = regex.exec(normalizedText)) !== null) {
+            const matchLen = match[0].length;
+            const dynamicRegex = new RegExp(pattern, 'gi');
+            filtered = filtered.replace(dynamicRegex, (m) => '*'.repeat(m.length));
+        }
     });
+
     return filtered;
 }
+
 
 // Toggle Widget State
 chatWidget.classList.add('collapsed');
@@ -107,7 +132,7 @@ async function sendMessage() {
             timestamp: serverTimestamp()
         });
         chatInput.value = '';
-        updateTypingStatus(false);
+        updatePresence(false);
         chatInput.focus();
     } catch (error) {
         console.error("Error sending message: ", error);
@@ -196,7 +221,7 @@ onSnapshot(presenceQuery, (snapshot) => {
     }
 });
 
-// Helpers for colors and timestamps
+// Helpers for colors, timestamps, and date headers
 function getPlayerColorClass(name) {
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
@@ -216,6 +241,24 @@ function formatMessageTime(timestamp) {
     hours = hours ? hours : 12; 
     const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
     return `${hours}:${formattedMinutes} ${ampm}`;
+}
+
+function formatDateHeader(timestamp) {
+    if (!timestamp) return 'Today';
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const today = new Date();
+    
+    if (date.toDateString() === today.toDateString()) {
+        return 'Today';
+    }
+    
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+    if (date.toDateString() === yesterday.toDateString()) {
+        return 'Yesterday';
+    }
+    
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 // Scroll Handling
@@ -238,16 +281,28 @@ function scrollToBottom() {
 
 scrollToBottomBtn.addEventListener('click', scrollToBottom);
 
-// Real-time message listener
+// Real-time message listener with Date Grouping
 const q = query(collection(db, "global-chat"), orderBy("timestamp", "asc"));
 let initialLoad = true;
 
 onSnapshot(q, (snapshot) => {
     chatMessages.innerHTML = '';
     const myCurrentName = getChatDisplayName();
+    let lastRenderedDate = '';
 
     snapshot.forEach((docSnap) => {
         const data = docSnap.data();
+        
+        // Check and insert date divider if day changed
+        const msgDateStr = formatDateHeader(data.timestamp);
+        if (msgDateStr !== lastRenderedDate) {
+            lastRenderedDate = msgDateStr;
+            const dividerDiv = document.createElement('div');
+            dividerDiv.className = 'chat-date-divider';
+            dividerDiv.innerHTML = `<span>${msgDateStr}</span>`;
+            chatMessages.appendChild(dividerDiv);
+        }
+
         const messageDiv = document.createElement('div');
         messageDiv.className = 'chat-message';
         
