@@ -1,4 +1,4 @@
-let currentCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 950;
+let currentCoins = parseFloat(localStorage.getItem('pixvinz_coins')) || 950.00;
 document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
 
 let recentHistory = [12.50, 74.12, 45.00, 91.05, 30.22, 65.80];
@@ -170,7 +170,6 @@ function halveBet() {
 
 function doubleBet() {
     let input = document.getElementById('betAmountInput');
-    let currentCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
     let currentBet = parseFloat(input.value) || 0;
     let doubled = currentBet * 2;
 
@@ -225,13 +224,7 @@ function executeManualRoll() {
     if (isRolling) return;
 
     let betAmount = parseFloat(document.getElementById('betAmountInput').value);
-    let currentCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
     if (isNaN(betAmount) || betAmount <= 0 || betAmount > currentCoins) {
-        showNotEnoughBalanceError();
-        return;
-    }
-
-    if (!spendCoins(betAmount)) {
         showNotEnoughBalanceError();
         return;
     }
@@ -240,6 +233,9 @@ function executeManualRoll() {
     let betBtn = document.getElementById('betBtn');
     betBtn.innerText = "ROLLING...";
     betBtn.disabled = true;
+
+    currentCoins -= betAmount;
+    document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
 
     setTimeout(() => {
         let threshold = parseFloat(document.getElementById('rollOverVal').innerText);
@@ -256,12 +252,15 @@ function executeManualRoll() {
         if (isWin) {
             cube.className = "floating-cube-indicator win";
             let payout = betAmount * multiplier;
-            earnCoins(payout);
+            currentCoins += payout;
             playSound('win');
         } else {
             cube.className = "floating-cube-indicator lose";
             playSound('lose');
         }
+
+        document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
+        localStorage.setItem('pixvinz_coins', currentCoins);
 
         renderHistory(rolledNum);
 
@@ -273,7 +272,6 @@ function executeManualRoll() {
 
 function startAutoRoll() {
     let betAmount = parseFloat(document.getElementById('betAmountInput').value);
-    let currentCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
     if (isNaN(betAmount) || betAmount <= 0 || betAmount > currentCoins) {
         showNotEnoughBalanceError();
         return;
@@ -288,7 +286,6 @@ function startAutoRoll() {
     betBtn.innerText = `STOP AUTO (${rollsRemaining})`;
 
     autoInterval = setInterval(() => {
-        let currentCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
         if (rollsRemaining <= 0 || currentCoins < betAmount) {
             stopAutoRoll();
             if (currentCoins < betAmount) showNotEnoughBalanceError("Stopped: Low balance");
@@ -298,11 +295,8 @@ function startAutoRoll() {
         rollsRemaining--;
         betBtn.innerText = `STOP AUTO (${rollsRemaining})`;
 
-        if (!spendCoins(betAmount)) {
-            stopAutoRoll();
-            showNotEnoughBalanceError("Stopped: Low balance");
-            return;
-        }
+        currentCoins -= betAmount;
+        document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
 
         let threshold = parseFloat(document.getElementById('rollOverVal').innerText);
         let multiplier = parseFloat(document.getElementById('multiplierVal').innerText);
@@ -321,7 +315,7 @@ function startAutoRoll() {
         if (isWin) {
             cube.className = "floating-cube-indicator win";
             let payout = betAmount * multiplier;
-            earnCoins(payout);
+            currentCoins += payout;
             playSound('win');
             if (onWinPct !== 0) {
                 betAmount = betAmount * (1 + (onWinPct / 100));
@@ -334,13 +328,15 @@ function startAutoRoll() {
             }
         }
 
-        let currentCoinsAfter = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
         if (betAmount < 0.01) betAmount = 0.01;
-        if (betAmount > currentCoinsAfter && currentCoinsAfter > 0) {
-            betAmount = currentCoinsAfter;
+        if (betAmount > currentCoins && currentCoins > 0) {
+            betAmount = currentCoins;
         }
         document.getElementById('betAmountInput').value = betAmount.toFixed(2);
         updateProfit();
+
+        document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
+        localStorage.setItem('pixvinz_coins', currentCoins);
 
         renderHistory(rolledNum);
 
