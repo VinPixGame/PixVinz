@@ -1004,7 +1004,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', (e) => {
       const card = e.target.closest('.shop-card');
       const title = card ? card.querySelector('.shop-card-title')?.innerText : 'Item';
-      alert(`You clicked buy on: ${title}`);
+      alert(`Buying is not yet available`);
     });
   });
 });
