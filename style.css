@@ -1821,6 +1821,62 @@ video {
   box-shadow: 0 0 6px rgba(255, 215, 0, 0.3);
 }
 
+
+/* Add this at the bottom of your shop.css */
+.shop-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 8, 28, 0.85);
+    backdrop-filter: blur(4px);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.shop-modal-card {
+    background: linear-gradient(145deg, rgba(28, 15, 48, 0.98), rgba(15, 8, 28, 0.98));
+    border: 1.5px solid #ffd700;
+    border-radius: 18px;
+    padding: 20px;
+    width: 80%;
+    max-width: 280px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(255, 215, 0, 0.15);
+}
+
+.shop-modal-title {
+    color: #ffd700;
+    font-size: 1rem;
+    font-weight: 900;
+    margin: 0 0 6px 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.shop-modal-text {
+    color: #b0a4ce;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin: 0 0 16px 0;
+}
+
+.shop-modal-btn {
+    width: 100%;
+    padding: 9px 4px;
+    background: linear-gradient(135deg, #ffd700, #ffaa00);
+    border: none;
+    border-radius: 12px;
+    color: #130f2b;
+    font-weight: 900;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+
 /* ==========================================
    RESPONSIVE ADJUSTMENTS FOR SMALL SCREENS
    ========================================== */
