@@ -54,7 +54,7 @@ body {
 }
 
 .icon-btn {
-    background: rgba(20, 10, 35, 0.8);
+    background: rgba(30, 20, 50, 0.9);
     border: 2px solid #ffd700;
     color: #ffd700;
     width: 44px;
@@ -66,15 +66,15 @@ body {
     font-size: 20px;
     font-weight: bold;
     cursor: pointer;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4), inset 0 0 6px rgba(255, 215, 0, 0.2);
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.3), inset 0 0 8px rgba(147, 51, 234, 0.4);
     transition: all 0.2s ease;
     padding: 0;
     outline: none;
 }
 
 .icon-btn:hover {
-    background: rgba(255, 215, 0, 0.15);
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 10px rgba(255, 215, 0, 0.4);
+    background: rgba(147, 51, 234, 0.25);
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.6), inset 0 0 10px rgba(255, 215, 0, 0.3);
     transform: scale(1.05);
 }
 
@@ -83,7 +83,7 @@ body {
 }
 
 .coin-badge {
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(20, 10, 35, 0.8);
     border: 1px solid #ffd700;
     padding: 5px 12px;
     border-radius: 20px;
@@ -95,6 +95,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 6px;
+    box-shadow: 0 0 10px rgba(147, 51, 234, 0.3);
 }
 
 /* External Title Area - Fixed with 1.8cm margin below header */
@@ -113,14 +114,15 @@ body {
 
 .external-title {
     margin: 0 0 4px 0;
-    color: #fbbf24;
+    color: #ffd700;
     font-size: 21px;
     font-weight: 800;
     letter-spacing: 0.5px;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
 }
 
 .external-subtitle {
-    color: #94a3b8;
+    color: #d8b4fe;
     font-size: 13px;
     margin: 0;
 }
@@ -143,11 +145,11 @@ body {
 }
 
 .card {
-    background: #1e293b;
-    border: 2px solid #334155;
+    background: linear-gradient(145deg, #181028, #11091d);
+    border: 2px solid #581c87;
     border-radius: 20px;
     padding: 16px 20px;
-    box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 12px 30px -5px rgba(15, 5, 30, 0.8), inset 0 0 20px rgba(88, 28, 135, 0.2);
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -198,14 +200,14 @@ body {
     top: -36px;
     left: 50%;
     transform: translateX(-50%);
-    background: #f8fafc;
-    color: #0f172a;
+    background: #2e1065;
+    color: #ffd700;
     font-weight: 900;
     font-size: 13px;
     padding: 4px 10px;
     border-radius: 7px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    border: 2px solid #cbd5e1;
+    border: 2px solid #ffd700;
     transition: left 0.3s cubic-bezier(0.15, 0.85, 0.35, 1.2);
     white-space: nowrap;
     z-index: 20;
@@ -219,18 +221,19 @@ body {
     transform: translateX(-50%) rotate(45deg);
     width: 8px;
     height: 8px;
-    background: #f8fafc;
-    border-right: 2px solid #cbd5e1;
-    border-bottom: 2px solid #cbd5e1;
+    background: #2e1065;
+    border-right: 2px solid #ffd700;
+    border-bottom: 2px solid #ffd700;
 }
 .floating-cube-indicator.win {
-    background: #22c55e;
-    color: #fff;
-    border-color: #86efac;
+    background: #2e1065;
+    color: #ffd700;
+    border-color: #ffd700;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 .floating-cube-indicator.win::after {
-    background: #22c55e;
-    border-color: #86efac;
+    background: #2e1065;
+    border-color: #ffd700;
 }
 .floating-cube-indicator.lose {
     background: #ef4444;
@@ -247,7 +250,7 @@ body {
     justify-content: space-between;
     font-size: 13px;
     font-weight: 700;
-    color: #94a3b8;
+    color: #d8b4fe;
     margin-bottom: 8px;
 }
 
@@ -262,10 +265,10 @@ body {
     position: absolute;
     width: 100%;
     height: 14px;
-    background: #22c55e;
+    background: linear-gradient(90deg, #ffd700, #b45309);
     border-radius: 7px;
     overflow: hidden;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.4), 0 0 10px rgba(255, 215, 0, 0.2);
 }
 
 .slider-track-fill {
@@ -293,10 +296,10 @@ body {
     appearance: none;
     width: 24px;
     height: 36px;
-    background: #3b82f6;
-    border: 2px solid #ffffff;
+    background: linear-gradient(135deg, #a855f7, #6b21a8);
+    border: 2px solid #ffd700;
     border-radius: 8px;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+    box-shadow: 0 4px 12px rgba(107, 33, 168, 0.6), 0 0 8px rgba(255, 215, 0, 0.4);
     cursor: pointer;
     transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -314,25 +317,27 @@ body {
 }
 
 .stat-box {
-    background: #0f172a;
-    border: 2px solid #334155;
+    background: #11091d;
+    border: 2px solid #581c87;
     border-radius: 12px;
     padding: 9px 6px;
     text-align: center;
     cursor: pointer;
     transition: border-color 0.2s, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: inset 0 0 8px rgba(88, 28, 135, 0.15);
 }
 .stat-box:active {
     transform: scale(0.92);
 }
 .stat-box.interactive:hover {
-    border-color: #6366f1;
+    border-color: #ffd700;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.2), inset 0 0 8px rgba(88, 28, 135, 0.3);
 }
 
 .stat-label {
     font-size: 10px;
     font-weight: 700;
-    color: #94a3b8;
+    color: #d8b4fe;
     margin-bottom: 3px;
     text-transform: uppercase;
 }
@@ -345,14 +350,15 @@ body {
 
 /* Bet Amount Input Container */
 .input-group {
-    background: #0f172a;
-    border: 2px solid #334155;
+    background: #11091d;
+    border: 2px solid #581c87;
     border-radius: 14px;
     padding: 8px 14px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 8px;
+    box-shadow: inset 0 0 10px rgba(88, 28, 135, 0.2);
 }
 
 .input-left {
@@ -362,7 +368,7 @@ body {
 .input-label {
     font-size: 10px;
     font-weight: 700;
-    color: #94a3b8;
+    color: #d8b4fe;
     text-transform: uppercase;
     margin-bottom: 2px;
 }
@@ -383,9 +389,9 @@ body {
 }
 
 .quick-btn {
-    background: #1e293b;
-    border: 1px solid #475569;
-    color: #cbd5e1;
+    background: #1e1b4b;
+    border: 1px solid #7e22ce;
+    color: #e9d5ff;
     padding: 6px 10px;
     font-size: 12px;
     font-weight: 700;
@@ -397,7 +403,7 @@ body {
 }
 .quick-btn:active {
     transform: scale(0.85);
-    background: #475569;
+    background: #7e22ce;
 }
 
 /* Auto Bet Specific Controls */
@@ -415,11 +421,12 @@ body {
 }
 
 .auto-input-box {
-    background: #0f172a;
-    border: 2px solid #334155;
+    background: #11091d;
+    border: 2px solid #581c87;
     border-radius: 12px;
     padding: 6px 12px;
     text-align: left;
+    box-shadow: inset 0 0 8px rgba(88, 28, 135, 0.15);
 }
 
 .auto-input {
@@ -455,17 +462,18 @@ body {
 .btn-bet {
     width: 100%;
     padding: 15px;
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-    border: 2px solid #60a5fa;
+    background: linear-gradient(135deg, #7e22ce, #581c87);
+    border: 2px solid #ffd700;
     border-radius: 14px;
-    color: #fff;
+    color: #ffd700;
     font-weight: 800;
     font-size: 16px;
     cursor: pointer;
-    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 5px 20px rgba(126, 34, 206, 0.6), 0 0 12px rgba(255, 215, 0, 0.4);
     outline: none;
     -webkit-tap-highlight-color: transparent;
     transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
 }
 .btn-bet:active {
     transform: scale(0.95);
@@ -478,23 +486,26 @@ body {
     background: linear-gradient(135deg, #ef4444, #b91c1c);
     border-color: #f87171;
     box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+    color: #fff;
+    text-shadow: none;
 }
 
 /* Mode Switcher Tabs - Bottom Navigation */
 .mode-tabs {
     display: flex;
-    background: #0f172a;
-    border: 2px solid #334155;
+    background: #11091d;
+    border: 2px solid #581c87;
     border-radius: 14px;
     padding: 3px;
     margin-top: 10px;
+    box-shadow: inset 0 0 10px rgba(88, 28, 135, 0.2);
 }
 
 .mode-tab {
     flex: 1;
     background: transparent;
     border: none;
-    color: #94a3b8;
+    color: #d8b4fe;
     font-size: 13px;
     font-weight: 800;
     padding: 10px 0;
@@ -505,7 +516,8 @@ body {
 }
 
 .mode-tab.active {
-    background: #334155;
-    color: #f8fafc;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    background: linear-gradient(135deg, #7e22ce, #581c87);
+    color: #ffd700;
+    box-shadow: 0 2px 8px rgba(126, 34, 206, 0.4);
+    text-shadow: 0 0 6px rgba(255, 215, 0, 0.3);
 }
