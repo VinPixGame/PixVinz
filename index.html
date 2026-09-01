@@ -7,6 +7,7 @@
   
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="profile.css">
+  <link rel="stylesheet" href="chat.css">
 </head>
 <body>
   <div class="app-container">    
@@ -110,10 +111,28 @@
         </div>
         <span class="arrow">›</span>
       </div>
-
-<button id="chatToggleBtn" onclick="window.location.href='chat.html'" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 10px 15px; border-radius: 50%; background: #007bff; color: #fff; border: none; font-size: 18px; cursor: pointer;">💬</button>
       
+<!-- GLOBAL CHAT -->
+<div id="chatWidget" class="chat-wrapper">
+    <div class="chat-header">
+        <div class="chat-title">
+            <span>Global Chat</span>
+            <span class="online-indicator">● 3 online</span>
+        </div>
+        <div class="chat-controls">
+            <button id="chatToggleBtn">−</button>
+        </div>
+    </div>
+    <div id="chatBody" class="chat-body">
+        <div id="chatMessages"></div>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off">
+            <button id="chatSendBtn">Send</button>
+        </div>
+    </div>
+</div>
     </section> 
+    
 
     <!-- LEVELS PAGE VIEW -->
     <section id="levelsView" class="view">
