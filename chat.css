@@ -1,4 +1,4 @@
-/* Floating Trigger Icon */
+/* Floating Trigger Icon - Ensure clickability */
 .chat-icon-trigger {
     position: fixed;
     bottom: 20px;
@@ -14,7 +14,8 @@
     font-size: 24px;
     color: #ffd700;
     cursor: pointer;
-    z-index: 9998;
+    z-index: 99998;
+    pointer-events: auto !important;
     transition: transform 0.2s, filter 0.2s;
 }
 
@@ -32,21 +33,22 @@
     max-width: calc(100vw - 30px);
     height: 400px;
     max-height: calc(100vh - 40px);
-    z-index: 9999;
+    z-index: 99999;
     background: #120e1f;
     border: 1px solid #4a2875;
     border-radius: 12px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    pointer-events: auto; /* Ensure contents are clickable by default */
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-/* When collapsed, hide the chat box completely and show the icon */
+/* When collapsed, hide the chat box completely and disable its clicks */
 .chat-wrapper.collapsed {
     opacity: 0;
     transform: translateY(20px);
-    pointer-events: none;
+    pointer-events: none !important;
 }
 
 .chat-header {
