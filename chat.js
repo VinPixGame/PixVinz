@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js";
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc, deleteDoc, updateDoc, limit } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
@@ -432,11 +432,38 @@ function scrollToBottom() {
 
 scrollToBottomBtn.addEventListener('click', scrollToBottom);
 
-// Real-time message listener with Date Grouping and Reactions Fully Intact
-const q = query(collection(db, "global-chat"), orderBy("timestamp", "asc"));
+// --- REAL LOADING SPINNER & OPTIMIZED 50-MESSAGE QUERY ---
+const q = query(
+    collection(db, "global-chat"), 
+    orderBy("timestamp", "asc"),
+    limit(50)
+);
+
 let initialLoad = true;
 
+const loadingEl = document.createElement('div');
+loadingEl.id = 'chatLoadingIndicator';
+loadingEl.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 8px; color: rgba(255,255,255,0.6); font-size: 13px; z-index: 20;';
+loadingEl.innerHTML = `
+    <div style="width: 24px; height: 24px; border: 3px solid rgba(123, 44, 191, 0.3); border-top-color: #7b2cbf; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+    <span>Loading messages...</span>
+`;
+
+if (!document.getElementById('chatSpinnerStyle')) {
+    const spinnerStyle = document.createElement('style');
+    spinnerStyle.id = 'chatSpinnerStyle';
+    spinnerStyle.textContent = `@keyframes spin { to { transform: rotate(360deg); } }`;
+    document.head.appendChild(spinnerStyle);
+}
+
+chatMessages.style.position = 'relative';
+chatMessages.appendChild(loadingEl);
+
 onSnapshot(q, (snapshot) => {
+    if (loadingEl && loadingEl.parentNode) {
+        loadingEl.remove();
+    }
+
     chatMessages.innerHTML = '';
     const myCurrentName = getChatDisplayName();
     let lastRenderedDate = '';
