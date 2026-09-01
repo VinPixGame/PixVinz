@@ -272,6 +272,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+
+const navMoreGames = document.getElementById('navMoreGames');
+  if (navMoreGames) {
+    navMoreGames.addEventListener('click', () => {
+      if (typeof AudioManager !== 'undefined') AudioManager.playClick();
+      showView('moreGames');
+    });
+  }
+    
   const navCollections = document.getElementById('navCollections');
   if (navCollections) {
     navCollections.addEventListener('click', () => {
@@ -1022,5 +1031,4 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-views.moreGames = document.getElementById('moreGamesView');
 
