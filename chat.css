@@ -257,3 +257,13 @@
     font-weight: 500;
 }
 
+/* Mention Dropdown styling */
+#chatMentionDropdown div:hover {
+    background: #333 !important;
+}
+
+/* Scroll button hidden helper used by chat.js */
+#scrollToBottomBtn.hidden {
+    display: none !important;
+}
+
