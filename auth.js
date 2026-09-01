@@ -647,7 +647,7 @@ if (regPassConfirm) {
                             userData.avatar || "",
 
                         coins:
-                            userData.coins ?? 0,
+                            userData.coins ?? 0.00,
 
                         level:
                             userData.level ?? 1,
@@ -700,6 +700,11 @@ if (regPassConfirm) {
                     localStorage.setItem(
                         prefix + 'xp',
                         freshUserData.xp
+                    );
+
+                    localStorage.setItem(
+                        prefix + 'currentChallenge',
+                        freshUserData.challenge
                     );
 
 
