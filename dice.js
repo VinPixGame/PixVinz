@@ -259,7 +259,10 @@ function executeManualRoll() {
         }
 
         document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
-        localStorage.setItem('pixvinz_coins', currentCoins);
+        localStorage.setItem(getUserKey('totalCoins'), currentCoins);
+if (typeof window.saveUserDataToCloud === 'function') {
+    window.saveUserDataToCloud();
+}
 
         renderHistory(rolledNum);
 
@@ -335,7 +338,10 @@ function startAutoRoll() {
         updateProfit();
 
         document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
-        localStorage.setItem('pixvinz_coins', currentCoins);
+        localStorage.setItem(getUserKey('totalCoins'), currentCoins);
+if (typeof window.saveUserDataToCloud === 'function') {
+    window.saveUserDataToCloud();
+}
 
         renderHistory(rolledNum);
 
