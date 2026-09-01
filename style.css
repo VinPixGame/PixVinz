@@ -251,8 +251,10 @@ body {
    ========================================== */
 
 #levelsView.view.active,
+#levelsView.view.active,
 #collectionsView.view.active,
-#shopView.view.active {
+#shopView.view.active,
+#moreGamesView.view.active {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -263,7 +265,8 @@ body {
 #levelsView .view-header,
 #levelsView .overall-best-card,
 #collectionsView .view-header,
-#shopView .view-header {
+#shopView .view-header,
+#moreGamesView .view-header {
   flex-shrink: 0;
 }
 #collectionsView .view-header {
@@ -2079,10 +2082,7 @@ video {
   transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-.game-card:hover:not([style*="not-allowed"]) {
-  transform: translateY(-3px);
-  border-color: #9d4edd;
-}
+
 
 .game-card-img {
   padding: 0;
