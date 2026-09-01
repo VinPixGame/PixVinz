@@ -1008,12 +1008,15 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
-});
 
-// Close modal helper function (kept in global scope)
-function closeShopModal() {
-  const modal = document.getElementById('shopModal');
-  if (modal) {
-    modal.style.display = 'none';
+  // 4. Close modal when clicking OK
+  const closeBtn = document.querySelector('.shop-modal-btn');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      const modal = document.getElementById('shopModal');
+      if (modal) {
+        modal.style.display = 'none';
+      }
+    });
   }
-}
+});
