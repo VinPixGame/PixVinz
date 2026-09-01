@@ -647,7 +647,7 @@ if (regPassConfirm) {
                             userData.avatar || "",
 
                         coins:
-                            userData.coins ?? 0.00,
+                            userData.coins ?? 0,
 
                         level:
                             userData.level ?? 1,
