@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js";
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc, deleteDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
@@ -69,32 +69,26 @@ function playPopSound() {
 }
 
 // --- PROFANITY FILTER ---
-const badWords = ['fuck you', 'shit', 'bitch', 'whore', 'mother fucker', 'idiot', 'peasant', 'patay gutom', 'putang ina mo', 'puki ng ina mo', 'vagina', 'pussy', 'dick', 'titi', 'kiki', 'pukengkeng', 'suck', 'sucks', 'sucking', 'sucked', 'fucked', 'fucking', 'kantot', 'iyot', 'iyutan', 'kantutan', 'kantotan', 'kantowtan', 'dede', 'suso', 'chupa', 'chupain', 'subo mo to', 'isubo mo to', 'pepe', 'kain pepe', 'kain puke', 'bayag', 'asshole', 'ashole', 'assholle', 'fuck your ass', 'suck my dick', 'I will kill you', 'kill', 'suicide', 'rape', 'nipple', 'mipple', 'nnipple', 'ffuck', 'fffuck', 'ffffuckkk', 'fuckkk', 'damnit', 'gago', 'sira ulo', 'tarantado', 'tangna mo', ]; 
+const badWords = ['fuck you', 'shit', 'bitch', 'whore', 'mother fucker', 'idiot', 'peasant', 'patay gutom', 'putang ina mo', 'puki ng ina mo', 'vagina', 'pussy', 'dick', 'titi', 'kiki', 'pukengkeng', 'suck', 'sucks', 'sucking', 'sucked', 'fucked', 'fucking', 'kantot', 'iyot', 'iyutan', 'kantutan', 'kantotan', 'kantowtan', 'dede', 'suso', 'chupa', 'chupain', 'subo mo to', 'isubo mo to', 'pepe', 'kain pepe', 'kain puke', 'bayag', 'asshole', 'ashole', 'assholle', 'fuck your ass', 'suck my dick', 'I will kill you', 'kill', 'suicide', 'rape', 'nipple', 'mipple', 'nnipple', 'ffuck', 'fffuck', 'ffffuckkk', 'fuckkk', 'damnit', 'gago', 'sira ulo', 'tarantado', 'tangna mo']; 
 
 function filterProfanity(text) {
-    // 1. Normalize text to strip accents (e.g., 'fùck' becomes 'fuck')
     const normalizedText = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     let filtered = text;
 
-    // 2. Automatically mask email addresses (e.g., player@gmail.com)
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/gi;
     filtered = filtered.replace(emailRegex, (match) => '*'.repeat(match.length));
     
     badWords.forEach(phrase => {
-        // Split multi-word phrases so spaces between words become optional
         const words = phrase.split(/\s+/);
         const escapedWords = words.map(word => 
             word.split('').map(char => char.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')).join('[\\s\\W]*')
         );
         
-        // Allow zero or more spaces/symbols between words (catches 'fuckyou' and 'fuck you')
         const pattern = escapedWords.join('[\\s\\W]*');
         const regex = new RegExp(pattern, 'gi');
         
-        // Find matches in normalized text and mask the equivalent length in original text
         let match;
         while ((match = regex.exec(normalizedText)) !== null) {
-            const matchLen = match[0].length;
             const dynamicRegex = new RegExp(pattern, 'gi');
             filtered = filtered.replace(dynamicRegex, (m) => '*'.repeat(m.length));
         }
@@ -103,6 +97,30 @@ function filterProfanity(text) {
     return filtered;
 }
 
+// --- RATE LIMITING & ANTI-SPAM VARIABLES ---
+let lastMessageTime = 0;
+let lastMessageContent = '';
+const COOLDOWN_MS = 1500;
+const MAX_LENGTH = 250;
+
+function canSendMessage(text) {
+    const trimmed = text.trim();
+    if (trimmed.length === 0) return false;
+    if (trimmed.length > MAX_LENGTH) {
+        alert(`Message exceeds the ${MAX_LENGTH} character limit.`);
+        return false;
+    }
+    const now = Date.now();
+    if (now - lastMessageTime < COOLDOWN_MS) {
+        console.warn("Rate limit hit: slow down.");
+        return false;
+    }
+    if (trimmed === lastMessageContent) {
+        console.warn("Duplicate message blocked.");
+        return false;
+    }
+    return true;
+}
 
 // Toggle Widget State
 chatWidget.classList.add('collapsed');
@@ -117,11 +135,25 @@ chatToggleBtn.addEventListener('click', () => {
     chatWidget.classList.add('collapsed');
 });
 
+// --- MENTION AUTO-COMPLETE DROPDOWN SETUP ---
+let mentionDropdown = document.getElementById('chatMentionDropdown');
+if (!mentionDropdown && chatInput && chatInput.parentNode) {
+    chatInput.parentNode.style.position = chatInput.parentNode.style.position || 'relative';
+    mentionDropdown = document.createElement('div');
+    mentionDropdown.id = 'chatMentionDropdown';
+    mentionDropdown.style.cssText = 'display:none; position:absolute; bottom:100%; left:0; right:0; background:#1e1e1e; border:1px solid #444; border-radius:6px; max-height:120px; overflow-y:auto; z-index:1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
+    chatInput.parentNode.appendChild(mentionDropdown);
+}
+
+function hideMentionDropdown() {
+    if (mentionDropdown) mentionDropdown.style.display = 'none';
+}
+
 // Send Message Logic
 async function sendMessage() {
     const playerName = getChatDisplayName();
     const rawText = chatInput.value.trim();
-    if (!rawText) return;
+    if (!canSendMessage(rawText)) return;
 
     const cleanText = filterProfanity(rawText);
 
@@ -129,9 +161,13 @@ async function sendMessage() {
         await addDoc(collection(db, "global-chat"), {
             name: playerName,
             text: cleanText,
-            timestamp: serverTimestamp()
+            timestamp: serverTimestamp(),
+            reactions: {}
         });
+        lastMessageTime = Date.now();
+        lastMessageContent = rawText;
         chatInput.value = '';
+        hideMentionDropdown();
         updatePresence(false);
         chatInput.focus();
     } catch (error) {
@@ -173,12 +209,54 @@ async function updatePresence(isTyping = false) {
 updatePresence(false);
 const presenceInterval = setInterval(() => updatePresence(false), 30000);
 
+// Unified input listener for typing status and @mention auto-complete
 chatInput.addEventListener('input', () => {
+    // Typing status
     updatePresence(true);
     clearTimeout(typingTimeout);
     typingTimeout = setTimeout(() => {
         updatePresence(false);
     }, 2000);
+
+    // Mention Auto-Complete Logic
+    const value = chatInput.value;
+    const cursorPosition = chatInput.selectionStart;
+    const textBeforeCursor = value.slice(0, cursorPosition);
+    const match = textBeforeCursor.match(/@([a-zA-Z0-9_]*)$/);
+
+    if (match && mentionDropdown) {
+        const queryStr = match[1].toLowerCase();
+        const activeUsers = window.activeChatUsers || [getChatDisplayName()];
+        const filteredUsers = activeUsers.filter(u => u.toLowerCase().startsWith(queryStr) && u !== getChatDisplayName());
+
+        if (filteredUsers.length > 0) {
+            mentionDropdown.innerHTML = '';
+            filteredUsers.forEach(username => {
+                const item = document.createElement('div');
+                item.style.padding = '8px 12px';
+                item.style.cursor = 'pointer';
+                item.style.color = '#fff';
+                item.style.fontSize = '12px';
+                item.textContent = `@${username}`;
+                
+                item.addEventListener('mouseover', () => item.style.background = '#333');
+                item.addEventListener('mouseout', () => item.style.background = 'transparent');
+
+                item.addEventListener('click', () => {
+                    const before = value.slice(0, match.index);
+                    const after = value.slice(cursorPosition);
+                    chatInput.value = `${before}@${username} ${after}`;
+                    hideMentionDropdown();
+                    chatInput.focus();
+                });
+                
+                mentionDropdown.appendChild(item);
+            });
+            mentionDropdown.style.display = 'block';
+            return;
+        }
+    }
+    hideMentionDropdown();
 });
 
 window.addEventListener('beforeunload', () => {
@@ -191,6 +269,7 @@ const presenceQuery = query(collection(db, "chat-presence"));
 onSnapshot(presenceQuery, (snapshot) => {
     let activeCount = 0;
     const typingUsers = [];
+    const activeNamesSet = new Set();
     const now = Date.now();
 
     snapshot.forEach((dSnap) => {
@@ -199,14 +278,18 @@ onSnapshot(presenceQuery, (snapshot) => {
             const seenTime = data.lastSeen.toMillis ? data.lastSeen.toMillis() : now;
             if (now - seenTime < 60000) {
                 activeCount++;
+                if (data.name) activeNamesSet.add(data.name);
                 if (data.isTyping && data.name && data.name !== getChatDisplayName()) {
                     typingUsers.push(data.name);
                 }
             }
         } else {
             activeCount++;
+            if (data.name) activeNamesSet.add(data.name);
         }
     });
+
+    window.activeChatUsers = Array.from(activeNamesSet);
 
     if (onlineIndicatorEl) {
         onlineIndicatorEl.innerHTML = `● ${Math.max(1, activeCount)} online`;
@@ -261,6 +344,60 @@ function formatDateHeader(timestamp) {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+// --- QUICK EMOJI REACTIONS HELPERS ---
+async function toggleReaction(messageId, emoji) {
+    const userId = getChatDisplayName();
+    const messageRef = doc(db, "global-chat", messageId);
+    const fieldPath = `reactions.${emoji}`;
+    try {
+        await updateDoc(messageRef, {
+            [fieldPath]: arrayUnion(userId)
+        });
+    } catch (error) {
+        console.error("Error updating reaction:", error);
+    }
+}
+
+function renderReactions(messageData, messageId) {
+    const reactionsContainer = document.createElement('div');
+    reactionsContainer.className = 'message-reactions';
+    reactionsContainer.style.display = 'flex';
+    reactionsContainer.style.gap = '6px';
+    reactionsContainer.style.marginTop = '6px';
+    reactionsContainer.style.flexWrap = 'wrap';
+
+    const emojis = ['👍', '😂', '🔥', '❤️'];
+    const currentUserId = getChatDisplayName();
+
+    emojis.forEach(emoji => {
+        const usersWhoReacted = messageData.reactions?.[emoji] || [];
+        const count = usersWhoReacted.length;
+        const hasReacted = usersWhoReacted.includes(currentUserId);
+
+        const badge = document.createElement('button');
+        badge.type = 'button';
+        badge.style.background = hasReacted ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)';
+        badge.style.border = '1px solid rgba(255,255,255,0.1)';
+        badge.style.borderRadius = '10px';
+        badge.style.padding = '2px 6px';
+        badge.style.color = '#fff';
+        badge.style.fontSize = '11px';
+        badge.style.cursor = 'pointer';
+        badge.style.display = 'inline-flex';
+        badge.style.alignItems = 'center';
+        badge.style.gap = '3px';
+        badge.textContent = `${emoji} ${count > 0 ? count : ''}`;
+
+        badge.addEventListener('click', () => {
+            toggleReaction(messageId, emoji);
+        });
+
+        reactionsContainer.appendChild(badge);
+    });
+
+    return reactionsContainer;
+}
+
 // Scroll Handling
 let isUserScrolledUp = false;
 
@@ -292,8 +429,8 @@ onSnapshot(q, (snapshot) => {
 
     snapshot.forEach((docSnap) => {
         const data = docSnap.data();
+        const messageId = docSnap.id;
         
-        // Check and insert date divider if day changed
         const msgDateStr = formatDateHeader(data.timestamp);
         if (msgDateStr !== lastRenderedDate) {
             lastRenderedDate = msgDateStr;
@@ -338,6 +475,11 @@ onSnapshot(q, (snapshot) => {
 
         messageDiv.appendChild(headerSpan);
         messageDiv.appendChild(textDiv);
+
+        // Attach Quick Emoji Reactions Container
+        const reactionsEl = renderReactions(data, messageId);
+        messageDiv.appendChild(reactionsEl);
+
         chatMessages.appendChild(messageDiv);
     });
 
