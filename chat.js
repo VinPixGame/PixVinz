@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js";
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc, deleteDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
@@ -183,14 +183,6 @@ chatInput.addEventListener('keydown', (e) => {
     }
 });
 
-// --- QUICK EMOJIS ---
-document.querySelectorAll('.emoji-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        chatInput.value += btn.getAttribute('data-emoji');
-        chatInput.focus();
-    });
-});
-
 // --- REAL-TIME ONLINE & TYPING PRESENCE ---
 const sessionId = 'session_' + Math.random().toString(36).substring(2);
 const presenceRef = doc(db, "chat-presence", sessionId);
@@ -344,15 +336,44 @@ function formatDateHeader(timestamp) {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-// --- QUICK EMOJI REACTIONS HELPERS ---
-async function toggleReaction(messageId, emoji) {
-    const userId = getChatDisplayName();
-    const messageRef = doc(db, "global-chat", messageId);
-    const fieldPath = `reactions.${emoji}`;
+// --- EXCLUSIVE SINGLE-EMOJI REACTION LOGIC ---
+async function toggleReaction(messageId, emoji, currentReactions) {
+    const currentUserId = getChatDisplayName();
+    let updatedReactions = JSON.parse(JSON.stringify(currentReactions || {}));
+    let existingEmojiKey = null;
+
+    // Find if user already reacted with any emoji on this message
+    for (const [emj, users] of Object.entries(updatedReactions)) {
+        if (Array.isArray(users) && users.includes(currentUserId)) {
+            existingEmojiKey = emj;
+            break;
+        }
+    }
+
+    if (existingEmojiKey === emoji) {
+        // Tapped the same emoji again -> UNLIKE (Toggle Off)
+        updatedReactions[emoji] = updatedReactions[emoji].filter(id => id !== currentUserId);
+        if (updatedReactions[emoji].length === 0) {
+            delete updatedReactions[emoji];
+        }
+    } else {
+        // Remove from previous emoji reaction if one existed
+        if (existingEmojiKey) {
+            updatedReactions[existingEmojiKey] = updatedReactions[existingEmojiKey].filter(id => id !== currentUserId);
+            if (updatedReactions[existingEmojiKey].length === 0) {
+                delete updatedReactions[existingEmojiKey];
+            }
+        }
+        // Add to the newly selected emoji
+        if (!updatedReactions[emoji]) {
+            updatedReactions[emoji] = [];
+        }
+        updatedReactions[emoji].push(currentUserId);
+    }
+
     try {
-        await updateDoc(messageRef, {
-            [fieldPath]: arrayUnion(userId)
-        });
+        const messageRef = doc(db, "global-chat", messageId);
+        await updateDoc(messageRef, { reactions: updatedReactions });
     } catch (error) {
         console.error("Error updating reaction:", error);
     }
@@ -389,7 +410,7 @@ function renderReactions(messageData, messageId) {
         badge.textContent = `${emoji} ${count > 0 ? count : ''}`;
 
         badge.addEventListener('click', () => {
-            toggleReaction(messageId, emoji);
+            toggleReaction(messageId, emoji, messageData.reactions);
         });
 
         reactionsContainer.appendChild(badge);
