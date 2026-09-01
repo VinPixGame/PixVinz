@@ -29,9 +29,9 @@
     position: fixed;
     bottom: 20px;
     right: 20px;
-    width: 360px; /* Increased width */
+    width: 380px; /* Expanded width to fill space */
     max-width: calc(100vw - 30px);
-    height: 520px; /* Increased height */
+    height: 540px; /* Slightly taller */
     max-height: calc(100vh - 40px);
     z-index: 99999;
     background: #120e1f;
@@ -73,6 +73,7 @@
 .chat-controls {
     display: flex;
     gap: 8px;
+    align-items: center;
 }
 
 .chat-controls button {
@@ -81,13 +82,20 @@
     color: #fff;
     cursor: pointer;
     font-size: 16px;
-    padding: 2px 6px;
+    padding: 4px 8px;
     border-radius: 4px;
     transition: background 0.2s;
 }
 
 .chat-controls button:hover {
     background: rgba(255, 255, 255, 0.1);
+}
+
+/* Enlarged Minimize Button */
+.minimize-btn {
+    font-size: 20px !important;
+    font-weight: bold;
+    padding: 2px 10px !important;
 }
 
 /* Chat Body */
@@ -132,7 +140,7 @@
 /* Scroll to Bottom Button */
 .scroll-bottom-btn {
     position: absolute;
-    bottom: 90px;
+    bottom: 75px;
     left: 50%;
     transform: translateX(-50%);
     background: #7b2cbf;
@@ -148,7 +156,7 @@
 }
 
 .scroll-bottom-btn.hidden {
-    display: none;
+    display: none !important;
 }
 
 /* Typing Indicator */
@@ -160,48 +168,27 @@
     font-style: italic;
 }
 
-/* Emoji Bar */
-.emoji-bar {
-    display: flex;
-    gap: 6px;
-    padding: 6px 12px;
-    background: #171026;
-    border-top: 1px solid #2d1b4e;
-}
-
-.emoji-btn {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    font-size: 15px;
-    padding: 2px 4px;
-    border-radius: 4px;
-    transition: transform 0.1s;
-}
-
-.emoji-btn:hover {
-    transform: scale(1.2);
-    background: rgba(255,255,255,0.05);
-}
-
-/* Chat Input Area */
+/* Taller & Wider Chat Input Area (Emoji bar removed) */
 .chat-input-area {
     display: flex;
-    padding: 10px;
+    padding: 12px 14px;
     background: #150e24;
     border-top: 1px solid #361f5c;
-    gap: 8px;
+    gap: 10px;
+    align-items: center;
 }
 
 .chat-input-area input {
-    flex: 1;
+    width: 100%;
+    height: 44px; /* Increased height */
     background: #0d0917;
     border: 1px solid #4a2875;
-    border-radius: 6px;
-    padding: 8px 10px;
+    border-radius: 8px;
+    padding: 0 12px;
     color: #fff;
-    font-size: 13px;
+    font-size: 14px;
     outline: none;
+    transition: border-color 0.2s;
 }
 
 .chat-input-area input:focus {
@@ -209,14 +196,17 @@
 }
 
 .chat-input-area button {
+    height: 44px; /* Matched height */
     background: #7b2cbf;
     color: #fff;
     border: none;
-    border-radius: 6px;
-    padding: 0 14px;
+    border-radius: 8px;
+    padding: 0 18px;
     font-weight: 600;
+    font-size: 14px;
     cursor: pointer;
     transition: background 0.2s;
+    white-space: nowrap;
 }
 
 .chat-input-area button:hover {
@@ -261,9 +251,3 @@
 #chatMentionDropdown div:hover {
     background: #333 !important;
 }
-
-/* Scroll button hidden helper used by chat.js */
-#scrollToBottomBtn.hidden {
-    display: none !important;
-}
-
