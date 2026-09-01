@@ -57,10 +57,10 @@
           <span>🎁</span> DAILY REWARD <span id="dailyNotificationBadge" style="background: #ffd700; color: #130f2b; font-size: 9px; padding: 2px 5px; border-radius: 10px; display: none; font-weight: bold;">NEW!</span>
         </button>
 
-        <!-- Dice Game Button -->
-        <button onclick="window.location.href='dice.html'" style="flex: 1; padding: 14px 10px; background: linear-gradient(135deg, #00c6ff, #0072ff); border: 2px solid #4facfe; border-radius: 16px; color: #fff; font-weight: 800; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 0 12px rgba(0,198,255,0.4); transition: all 0.2s; white-space: nowrap;">
-          <span>🎲</span> DICE GAME
-        </button>
+        <!-- More Games Button -->
+        <button id="moreGamesNavBtn" class="nav-game-btn">
+    <span class="btn-icon">🎮</span> More Games
+</button>
         
       </div>
       
@@ -154,6 +154,37 @@
     </section> 
     
 
+<!-- MORE GAMES PAGE VIEW -->
+    <section id="moreGamesView" class="view" style="display: none;">
+      <div class="view-header">
+        <button type="button" class="icon-btn back-btn" onclick="showView('homeView')">‹</button>
+        <div class="header-title-group">
+          <div class="level-title-wrapper">
+            <span class="diamond-line">◇───</span>
+            <h2>MORE GAMES</h2>
+            <span class="diamond-line">───◇</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRID CONTENT -->
+      <div class="game-scroll-container">
+        <div class="game-grid">
+          <!-- Game Card: Dice Game -->
+          <div class="game-card game-card-img" onclick="location.href='dice.html'" style="cursor: pointer;">
+            <img src="image/dicegame.png" alt="Dice Game" class="game-banner-img">
+          </div>
+
+          <!-- Game Card: Coin Pusher (Placeholder for later) -->
+          <div class="game-card game-card-img" style="opacity: 0.5; cursor: not-allowed;">
+            <img src="image/coin_pusher_icon.png" alt="Coin Pusher Coming Soon" class="game-banner-img">
+          </div>
+        </div>
+      </div>
+    </section>
+    
+
+    
     <!-- LEVELS PAGE VIEW -->
     <section id="levelsView" class="view">
       <div class="view-header">
