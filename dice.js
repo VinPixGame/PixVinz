@@ -1,6 +1,5 @@
-let currentCoins = parseFloat(localStorage.getItem('pixvinz_coins')) || 950.00;
+let currentCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) ||0;
 document.getElementById('coinCount').innerText = currentCoins.toFixed(2);
-
 let recentHistory = [12.50, 74.12, 45.00, 91.05, 30.22, 65.80];
 let isRollOver = true; 
 let lastSliderSoundVal = 47;
