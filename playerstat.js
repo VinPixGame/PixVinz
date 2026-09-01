@@ -55,10 +55,14 @@ async function fetchUserDataFromFirestore() {
                     }
                 }
                 
-                // Keep the highest coin balance
+                // Keep the highest coin balance or sync local up if local is ahead
                 const cloudCoins = cloudData.coins || 0;
                 if (cloudCoins > localCoins) {
                     localStorage.setItem(getUserKey('totalCoins'), cloudCoins);
+                } else if (localCoins > cloudCoins) {
+                    if (typeof saveUserDataToCloud === 'function') {
+                        await saveUserDataToCloud();
+                    }
                 }
             }
         }
@@ -93,7 +97,7 @@ function spendCoins(amount) {
     updateCoinDisplay();
     saveUserDataToCloud(); // Auto-sync to cloud when coins change!
     return true; 
-} // <-- FIXED: Added closing bracket here!
+} 
 
 // Handles victory, saves with profile.js keys, and triggers profile sync if available
 async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeStr) {
@@ -131,11 +135,11 @@ async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeSt
 
     // Trigger profile.js cloud sync function if it exists
     if (typeof saveUserDataToCloud === 'function') {
-         saveUserDataToCloud();
+         await saveUserDataToCloud();
     }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
     updateCoinDisplay();
-  await   fetchUserDataFromFirestore();
+    await fetchUserDataFromFirestore();
 });
