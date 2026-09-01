@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Global Chat</title>
+    <link rel="stylesheet" href="chat.css">
+</head>
+<body>
+
+    <div class="chat-wrapper" id="chatWrapper">
+        <div class="chat-header">
+            <div class="chat-title">
+                <span>Global Chat</span>
+                <span class="online-indicator" id="onlineIndicator">● <span id="onlineCount">1</span> online</span>
+            </div>
+            <div class="chat-controls">
+                <button id="minimizeBtn">−</button>
+            </div>
+        </div>
+
+        <div class="chat-body" id="chatBody">
+            <div id="chatMessages"></div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off" />
+                <button id="chatSendBtn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="chat.js"></script>
+</body>
+</html>
