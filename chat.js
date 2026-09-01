@@ -73,7 +73,7 @@ chatInput.addEventListener('keydown', (e) => {
 });
 
 // --- REAL-TIME ONLINE PRESENCE TRACKING ---
-const sessionId = 'session_' + Math.random().toString(36.substring(2));
+const sessionId = 'session_' + Math.random().toString(36).substring(2);
 const presenceRef = doc(db, "chat-presence", sessionId);
 
 async function updatePresence() {
