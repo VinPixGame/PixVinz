@@ -127,20 +127,19 @@ function updateSlider(val) {
 
     if (isRollOver) {
         trackBg.style.background = '#ef4444';
-        successTrack.style.background = '#22c55e';
+        successTrack.style.background = 'linear-gradient(135deg, #ffd700, #b45309)';
         successTrack.style.left = 'unset';
         successTrack.style.right = '0';
         successTrack.style.width = (100 - threshold) + '%';
         successTrack.style.borderRadius = '0 7px 7px 0';
     } else {
         trackBg.style.background = '#ef4444';
-        successTrack.style.background = '#22c55e';
+        successTrack.style.background = 'linear-gradient(135deg, #ffd700, #b45309)';
         successTrack.style.right = 'unset';
         successTrack.style.left = '0';
         successTrack.style.width = threshold + '%';
         successTrack.style.borderRadius = '7px 0 0 7px';
     }
-
     updateProfit();
 }
 
