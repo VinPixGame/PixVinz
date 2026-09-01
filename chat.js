@@ -16,40 +16,40 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const db = getFirestore(app);
 
-// Pull the true display name using your profile's session logic
 function getChatDisplayName() {
     try {
         const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
-        if (userObj && userObj.displayName) {
-            return userObj.displayName;
-        }
-        if (userObj && userObj.username) {
-            return userObj.username;
-        }
+        if (userObj && userObj.displayName) return userObj.displayName;
+        if (userObj && userObj.username) return userObj.username;
     } catch (e) {}
-    
     return localStorage.getItem('vinpix_username') || "Player_" + Math.floor(Math.random() * 9000 + 1000);
 }
 
-let playerName = getChatDisplayName();
-
-const chatBody = document.getElementById('chatBody');
+// DOM Elements
+const chatWidget = document.getElementById('chatWidget');
+const chatIconBtn = document.getElementById('chatIconBtn');
 const chatToggleBtn = document.getElementById('chatToggleBtn');
 const chatMessages = document.getElementById('chatMessages');
 const chatInput = document.getElementById('chatInput');
 const chatSendBtn = document.getElementById('chatSendBtn');
 
-let isCollapsed = false;
-chatToggleBtn.addEventListener('click', () => {
-    isCollapsed = !isCollapsed;
-    chatBody.classList.toggle('collapsed', isCollapsed);
-    chatToggleBtn.textContent = isCollapsed ? '+' : '−';
+// Start collapsed (showing only the icon)
+chatWidget.classList.add('collapsed');
+
+// Open chat when clicking the floating icon
+chatIconBtn.addEventListener('click', () => {
+    chatWidget.classList.remove('collapsed');
+    chatInput.focus();
 });
 
+// Close chat back to icon when clicking '-'
+chatToggleBtn.addEventListener('click', () => {
+    chatWidget.classList.add('collapsed');
+});
+
+// Send Message Logic
 async function sendMessage() {
-    // Refresh name in case they updated it in profile settings
-    playerName = getChatDisplayName();
-    
+    const playerName = getChatDisplayName();
     const text = chatInput.value.trim();
     if (!text) return;
 
@@ -60,18 +60,21 @@ async function sendMessage() {
             timestamp: serverTimestamp()
         });
         chatInput.value = '';
+        chatInput.focus();
     } catch (error) {
         console.error("Error sending message: ", error);
     }
 }
 
 chatSendBtn.addEventListener('click', sendMessage);
-chatInput.addEventListener('keypress', (e) => {
+chatInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
+        e.preventDefault();
         sendMessage();
     }
 });
 
+// Real-time listener
 const q = query(collection(db, "global-chat"), orderBy("timestamp", "asc"));
 
 onSnapshot(q, (snapshot) => {
