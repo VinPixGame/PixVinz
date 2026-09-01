@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
       views[targetView].classList.remove('hidden'); // Ensures target view is visible
     }
 
-    if (['home', 'levels', 'collections', 'profileView', 'shop', 'leaderboard'].includes(targetView)) {
+    if (['home', 'levels', 'collections', 'profileView', 'shop', 'leaderboard', 'moreGames'].includes(targetView)) {
       if (mainHeader) mainHeader.classList.remove('hidden');
       if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
       
