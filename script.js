@@ -20,7 +20,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // Expose Firestore database tools globally so UI scripts can use them
-window.pixvinzDb = { db, doc, getDoc, setDoc, updateDoc, collection, query, orderBy, limit, getDocs };
+window.pixvinzDb = { db, doc, getDoc, setDoc, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp };
 
 
 // --- DEDICATED LOADING SCREEN SCRIPT ---
