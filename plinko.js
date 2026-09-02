@@ -183,6 +183,41 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+// Inside updatePhysics(), right after clearing the canvas and before drawing pegs, add:
+
+    const w = canvas.width;
+    const h = canvas.height;
+    
+    // --- Running Marquee Lights around the Boarder ---
+    const lightSpacing = 16; // Distance between each light bulb
+    const bulbRadius = 3;
+    const time = Date.now() * 0.005; // Speed of the chase effect
+    const offset = Math.floor(time) % 2; // Alternating state
+
+    // Perimeter coordinates
+    let lightIndex = 0;
+    
+    // Top Edge
+    for (let x = 10; x < w - 10; x += lightSpacing) {
+      drawMarqueeBulb(x, 8, lightIndex + offset);
+      lightIndex++;
+    }
+    // Right Edge
+    for (let y = 8; y < h - 8; y += lightSpacing) {
+      drawMarqueeBulb(w - 8, y, lightIndex + offset);
+      lightIndex++;
+    }
+    // Bottom Edge
+    for (let x = w - 10; x > 10; x -= lightSpacing) {
+      drawMarqueeBulb(x, h - 8, lightIndex + offset);
+      lightIndex++;
+    }
+    // Left Edge
+    for (let y = h - 8; y > 8; y -= lightSpacing) {
+      drawMarqueeBulb(8, y, lightIndex + offset);
+      lightIndex++;
+    }
+    
     // Draw Slots at Bottom
     const slotWidth = w / multipliers.length;
     const slotY = h - 45;
@@ -284,6 +319,22 @@ document.addEventListener('DOMContentLoaded', () => {
   requestAnimationFrame(updatePhysics);
 });
 
+
+function drawMarqueeBulb(x, y, index) {
+    // Alternate between rich amber gold and deep neon purple
+    const isGold = index % 2 === 0;
+    const bulbColor = isGold ? '#ffaa00' : '#b026ff';
+    const glowColor = isGold ? '#ffd700' : '#da70d6';
+
+    ctx.save();
+    ctx.shadowColor = glowColor;
+    ctx.shadowBlur = 6;
+    ctx.fillStyle = bulbColor;
+    ctx.beginPath();
+    ctx.arc(x, y, bulbRadius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
 
 
 // Add difficulty management logic in plinko.js
