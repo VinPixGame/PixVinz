@@ -2070,20 +2070,19 @@ video {
 }
 
 .game-card {
-  border: 2px solid rgba(0, 198, 255, 0.6);
+  border: 2px solid #ffd700;
   border-radius: 18px;
-  background: linear-gradient(135deg, rgba(30, 30, 45, 0.9), rgba(15, 15, 25, 0.95));
-  box-shadow: 0 0 25px 5px rgba(0, 198, 255, 0.35);
+  background: linear-gradient(135deg, rgba(45, 20, 65, 0.9), rgba(20, 10, 35, 0.95));
+  box-shadow: 0 0 40px rgba(147, 51, 234, 0.25), 0 0 15px rgba(147, 51, 234, 0.15);
   transition: all 0.3s ease;
   overflow: hidden;
 }
 
 .game-card:hover {
-  border-color: rgba(0, 198, 255, 1);
-  box-shadow: 0 0 35px 8px rgba(0, 198, 255, 0.65);
+  border-color: #ffea75;
+  box-shadow: 0 0 50px rgba(168, 85, 247, 0.4), 0 0 20px rgba(168, 85, 247, 0.25);
   transform: translateY(-3px);
 }
-
 
 .game-card-img {
   padding: 0;
@@ -2096,5 +2095,5 @@ video {
   display: block;
   object-fit: cover;
   border-radius: 11px;
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.35));
 }
-
