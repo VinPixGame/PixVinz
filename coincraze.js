@@ -1,4 +1,4 @@
-/* coincraze.js - Fast Coin-Pusher Physics, Edge Collisions, Domino Momentum */
+/* coincraze.js - FAST PHYSICS, BIG COINS, XP BONUS, NO LAG */
 document.addEventListener('DOMContentLoaded', () => {
   let coinKey = 'totalCoins';
 
@@ -6,11 +6,31 @@ document.addEventListener('DOMContentLoaded', () => {
     coinKey = getUserKey('totalCoins');
   } else {
     const currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
-    const username = currentUser.username || localStorage.getItem('vinpix_username') || 'default';
+    const username =
+      currentUser.username ||
+      localStorage.getItem('vinpix_username') ||
+      'default';
+
     coinKey = `${username}_totalCoins`;
   }
 
   let coinCount = parseFloat(localStorage.getItem(coinKey)) || 0;
+
+  let xpKey = 'totalXP';
+
+  if (typeof getUserKey === 'function') {
+    xpKey = getUserKey('totalXP');
+  } else {
+    const currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
+    const username =
+      currentUser.username ||
+      localStorage.getItem('vinpix_username') ||
+      'default';
+
+    xpKey = `${username}_totalXP`;
+  }
+
+  let xpCount = parseFloat(localStorage.getItem(xpKey)) || 0;
 
   const coinCountEl = document.getElementById('coinCount');
   const playArea = document.getElementById('playArea');
@@ -21,7 +41,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const pusherContainer = document.getElementById('pusherContainer');
   const backBtn = document.getElementById('backBtn');
 
-  const DROP_COST = 5.00;
+  if (!playArea) return;
+
+  const DROP_COST = 5;
+  const NORMAL_COIN_SIZE = 40;
+  const XP_SIZE = 58;
+  const NORMAL_COIN_RADIUS = NORMAL_COIN_SIZE * 0.46;
+  const XP_RADIUS = XP_SIZE * 0.44;
+  const XP_REWARD = 200;
 
   let shakeEnergy = 0;
   let activeItems = [];
@@ -30,18 +57,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function getAudioContext() {
     if (!audioCtx) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (AudioContext) audioCtx = new AudioContext();
+      const AudioContext =
+        window.AudioContext ||
+        window.webkitAudioContext;
+
+      if (AudioContext) {
+        audioCtx = new AudioContext();
+      }
     }
+
     return audioCtx;
   }
 
   window.playSound = function(type) {
     try {
       const ctx = getAudioContext();
+
       if (!ctx) return;
 
-      if (ctx.state === 'suspended') ctx.resume();
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
 
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -63,8 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       else if (type === 'drop') {
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(420, now);
-        osc.frequency.exponentialRampToValueAtTime(140, now + 0.07);
+        osc.frequency.setValueAtTime(480, now);
+        osc.frequency.exponentialRampToValueAtTime(120, now + 0.08);
         gain.gain.setValueAtTime(0.16, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
         osc.start(now);
@@ -108,32 +144,25 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem(coinKey, coinCount);
   }
 
-  updateBalanceDisplay();
-
-  const storageItemsKey = `coincraze_active_items_${coinKey}`;
-  const savedItemsJson = localStorage.getItem(storageItemsKey);
-
-  if (savedItemsJson) {
-    try {
-      const parsedItems = JSON.parse(savedItemsJson);
-
-      parsedItems.forEach(itemData => {
-        spawnItem(
-          itemData.x,
-          itemData.y,
-          itemData.type,
-          itemData.value,
-          itemData.sizeClass,
-          false,
-          itemData.state || 'resting'
-        );
-      });
-    } catch (e) {
-      initPreloadedItems();
-    }
-  } else {
-    initPreloadedItems();
+  function updateXP() {
+    localStorage.setItem(xpKey, xpCount);
   }
+
+  updateBalanceDisplay();
+  updateXP();
+
+  const storageItemsKey =
+    `coincraze_active_items_${coinKey}`;
+
+  const spendingKey =
+    `coincraze_spending_${coinKey}`;
+
+  let spendingProgress =
+    parseFloat(localStorage.getItem(spendingKey)) || 0;
+
+  /* =========================================================
+     SAVE / LOAD
+     ========================================================= */
 
   function saveGameState() {
     const stateData = activeItems
@@ -141,42 +170,96 @@ document.addEventListener('DOMContentLoaded', () => {
       .map(item => ({
         x: item.x,
         y: item.y,
+        vx: 0,
+        vy: 0,
         type: item.type,
         value: item.value,
         sizeClass: item.sizeClass,
-        state: item.state === 'falling' ? 'resting' : item.state
+        state: 'resting'
       }));
 
-    localStorage.setItem(storageItemsKey, JSON.stringify(stateData));
+    try {
+      localStorage.setItem(
+        storageItemsKey,
+        JSON.stringify(stateData)
+      );
+    } catch (e) {}
+  }
+
+  const savedItemsJson =
+    localStorage.getItem(storageItemsKey);
+
+  if (savedItemsJson) {
+    try {
+      const parsedItems =
+        JSON.parse(savedItemsJson);
+
+      if (Array.isArray(parsedItems) &&
+          parsedItems.length > 0) {
+
+        parsedItems.forEach(itemData => {
+          spawnItem(
+            Number(itemData.x) || 20,
+            Number(itemData.y) || 20,
+            itemData.type || 'coin',
+            Number(itemData.value) || 5,
+            itemData.sizeClass || 'medium',
+            false,
+            'resting'
+          );
+        });
+      } else {
+        initPreloadedItems();
+      }
+    } catch (e) {
+      initPreloadedItems();
+    }
+  } else {
+    initPreloadedItems();
   }
 
   function initPreloadedItems() {
-    const playWidth = playArea.clientWidth;
-    const playHeight = playArea.clientHeight;
+    const width = playArea.clientWidth;
+    const height = playArea.clientHeight;
+
+    const radius = NORMAL_COIN_RADIUS;
+
+    /*
+      Start the existing pile in the lower section.
+      Coins are placed without overlapping.
+    */
 
     for (let i = 0; i < 24; i++) {
-      const radius = 11;
-
-      let x;
-      let y;
+      let x = radius;
+      let y = height * 0.48;
       let valid = false;
 
-      for (let attempt = 0; attempt < 50 && !valid; attempt++) {
-        x = radius + Math.random() * Math.max(1, playWidth - radius * 2);
-        y = playHeight * 0.28 + Math.random() * (playHeight * 0.50);
+      for (let attempt = 0; attempt < 80; attempt++) {
+        x =
+          radius +
+          Math.random() *
+          Math.max(1, width - radius * 2);
+
+        y =
+          height * 0.58 +
+          Math.random() *
+          (height * 0.22);
 
         valid = true;
 
         for (const other of activeItems) {
           const dx = x - other.x;
           const dy = y - other.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
+          const d =
+            Math.sqrt(dx * dx + dy * dy);
 
-          if (dist < 21) {
+          if (d < radius + other.radius + 1) {
             valid = false;
             break;
           }
         }
+
+        if (valid) break;
       }
 
       spawnItem(
@@ -193,15 +276,22 @@ document.addEventListener('DOMContentLoaded', () => {
     saveGameState();
   }
 
+  /* =========================================================
+     SHAKE ENERGY
+     ========================================================= */
+
   function addShakeEnergy(amount) {
-    shakeEnergy = Math.min(100, shakeEnergy + amount);
+    shakeEnergy =
+      Math.min(100, shakeEnergy + amount);
 
     if (shakeBarFill) {
-      shakeBarFill.style.width = `${shakeEnergy}%`;
+      shakeBarFill.style.width =
+        `${shakeEnergy}%`;
     }
 
     if (shakeBtn) {
-      shakeBtn.textContent = `⚡ SHAKE (${Math.floor(shakeEnergy)}%)`;
+      shakeBtn.textContent =
+        `⚡ SHAKE (${Math.floor(shakeEnergy)}%)`;
 
       if (shakeEnergy >= 100) {
         shakeBtn.removeAttribute('disabled');
@@ -217,24 +307,31 @@ document.addEventListener('DOMContentLoaded', () => {
   let pusherZ = 0;
   let pusherDirection = 1;
 
-  const pusherSpeed = 3.8;
-  const maxPushDistance = 26;
+  const PUSHER_SPEED = 4.8;
+  const MAX_PUSH_DISTANCE = 30;
 
   let lastTime = performance.now();
-  let saveTimer = 0;
+  let saveClock = 0;
 
   function updatePusher(now) {
-    let dt = (now - lastTime) / 16.6667;
+    let dt =
+      (now - lastTime) / 16.6666667;
+
     lastTime = now;
 
-    if (!isFinite(dt)) dt = 1;
+    if (!isFinite(dt)) {
+      dt = 1;
+    }
 
-    dt = Math.min(dt, 2);
+    dt = Math.min(dt, 1.5);
 
-    pusherZ += pusherSpeed * pusherDirection * dt;
+    pusherZ +=
+      PUSHER_SPEED *
+      pusherDirection *
+      dt;
 
-    if (pusherZ >= maxPushDistance) {
-      pusherZ = maxPushDistance;
+    if (pusherZ >= MAX_PUSH_DISTANCE) {
+      pusherZ = MAX_PUSH_DISTANCE;
       pusherDirection = -1;
     }
 
@@ -248,15 +345,33 @@ document.addEventListener('DOMContentLoaded', () => {
         `translateX(-50%) translateY(${pusherZ}px)`;
     }
 
-    const width = playArea.clientWidth;
-    const height = playArea.clientHeight;
+    /*
+      Use small physics steps.
+      This prevents fast coins from tunneling
+      through each other.
+    */
 
-    updatePhysics(dt, width, height);
+    const subSteps = 2;
+    const stepDt = dt / subSteps;
 
-    saveTimer += dt;
+    for (let s = 0; s < subSteps; s++) {
+      updatePhysics(
+        stepDt,
+        playArea.clientWidth,
+        playArea.clientHeight
+      );
+    }
 
-    if (saveTimer > 30) {
-      saveTimer = 0;
+    saveClock += dt;
+
+    /*
+      NEVER save every frame.
+      Saving localStorage continuously causes
+      unnecessary mobile lag.
+    */
+
+    if (saveClock >= 90) {
+      saveClock = 0;
       saveGameState();
     }
 
@@ -266,281 +381,427 @@ document.addEventListener('DOMContentLoaded', () => {
   requestAnimationFrame(updatePusher);
 
   /* =========================================================
-     PHYSICS ENGINE
+     PHYSICS
      ========================================================= */
 
   function updatePhysics(dt, width, height) {
-    const coins = activeItems.filter(
-      item => item.state === 'resting' || item.state === 'falling'
+    const items = activeItems.filter(
+      item =>
+        item.state === 'resting' ||
+        item.state === 'falling'
     );
 
     /*
-      First update falling coins.
-      Falling coins are deliberately FAST.
+      FAST FALLING COINS / XP
     */
 
-    for (const item of coins) {
-      if (item.state === 'falling') {
-        item.vy += 1.25 * dt;
+    for (const item of items) {
+      if (item.state !== 'falling') continue;
 
-        if (item.vy > 24) {
-          item.vy = 24;
-        }
+      item.vy +=
+        (item.type === 'xp' ? 1.35 : 1.55) * dt;
 
-        item.x += item.vx * dt;
-        item.y += item.vy * dt;
+      if (item.vy > 26) {
+        item.vy = 26;
+      }
 
-        if (item.x < item.radius) {
-          item.x = item.radius;
-          item.vx = Math.abs(item.vx) * 0.35;
-        }
+      item.x += item.vx * dt;
+      item.y += item.vy * dt;
 
-        if (item.x > width - item.radius) {
-          item.x = width - item.radius;
-          item.vx = -Math.abs(item.vx) * 0.35;
-        }
+      if (item.x < item.radius) {
+        item.x = item.radius;
+        item.vx =
+          Math.abs(item.vx) * 0.35;
+      }
+
+      if (item.x > width - item.radius) {
+        item.x = width - item.radius;
+        item.vx =
+          -Math.abs(item.vx) * 0.35;
+      }
+
+      /*
+        The coin becomes active as soon as
+        it reaches the playfield.
+      */
+
+      const entryY =
+        Math.max(
+          item.radius + 2,
+          height * 0.12
+        );
+
+      if (item.y >= entryY) {
+        item.state = 'resting';
 
         /*
-          Once the coin reaches the main playfield,
-          immediately convert it into a physical coin.
+          Keep forward momentum.
         */
 
-        const landingY = height * 0.12;
-
-        if (item.y >= landingY) {
-          item.state = 'resting';
-
-          /*
-            Give the newly dropped coin forward momentum.
-            This lets it enter the pile instead of simply stopping.
-          */
-          item.vy = 1.5;
-        }
-
-        renderItem(item);
+        item.vy *= 0.45;
+        item.vy += 1.5;
       }
+
+      renderItem(item);
     }
 
     /*
-      Pusher contact.
-      The pusher transfers actual velocity into the coins.
+      PUSHER CONTACT
     */
 
-    const plateY = height * 0.14 + pusherZ + 18;
+    const plateCenterY =
+      height * 0.14 +
+      pusherZ +
+      18;
+
+    const plateBottomY =
+      plateCenterY + 18;
 
     if (pusherDirection > 0) {
-      for (const item of coins) {
+      for (const item of items) {
         if (item.state !== 'resting') continue;
 
-        const verticalDistance =
-          Math.abs((item.y + item.radius) - plateY);
+        /*
+          Contact zone immediately below
+          the moving pusher.
+        */
 
-        if (verticalDistance < 22) {
-          const force =
-            pusherSpeed * 0.85 * dt;
+        const distance =
+          Math.abs(
+            item.y - plateBottomY
+          );
 
-          item.vy += force;
+        if (distance <
+            item.radius + 10) {
 
           /*
-            Tiny sideways variation prevents the pile
-            from becoming perfectly artificial.
+            Strong forward impulse.
+            This is velocity, not fake position movement.
           */
-          item.vx += (Math.random() - 0.5) * 0.025;
+
+          item.vy +=
+            PUSHER_SPEED *
+            0.95 *
+            dt;
+
+          /*
+            Slight random lateral impulse
+            keeps the pile organic.
+          */
+
+          item.vx +=
+            (Math.random() - 0.5) *
+            0.035;
         }
       }
     }
 
     /*
-      EDGE-TO-EDGE CIRCULAR COIN COLLISIONS.
-      
-      This is the important part.
+      SPATIAL HASH
 
-      Each coin is treated as a real circle.
-      When their edges touch/overlap, the collision normal
-      transfers velocity from the moving coin into the next coin.
-      
-      This produces:
-      
-      coin A -> coin B -> coin C -> coin D
-      
-      instead of simply moving every coin independently.
+      Instead of checking every coin against
+      every other coin, only nearby coins are checked.
+
+      This is important for mobile performance.
+    */
+
+    const cellSize = NORMAL_COIN_SIZE + 8;
+    const grid = new Map();
+
+    function gridKey(gx, gy) {
+      return `${gx},${gy}`;
+    }
+
+    for (const item of items) {
+      if (item.state !== 'resting') continue;
+
+      const gx =
+        Math.floor(item.x / cellSize);
+
+      const gy =
+        Math.floor(item.y / cellSize);
+
+      const key = gridKey(gx, gy);
+
+      let bucket = grid.get(key);
+
+      if (!bucket) {
+        bucket = [];
+        grid.set(key, bucket);
+      }
+
+      bucket.push(item);
+    }
+
+    /*
+      MULTIPLE COLLISION PASSES
+
+      This allows:
+      A -> B -> C -> D
+
+      to propagate during the same frame.
     */
 
     for (let pass = 0; pass < 3; pass++) {
-      for (let i = 0; i < coins.length; i++) {
-        const a = coins[i];
-
+      for (const a of items) {
         if (a.state !== 'resting') continue;
 
-        for (let j = i + 1; j < coins.length; j++) {
-          const b = coins[j];
+        const agx =
+          Math.floor(a.x / cellSize);
 
-          if (b.state !== 'resting') continue;
+        const agy =
+          Math.floor(a.y / cellSize);
 
-          let dx = b.x - a.x;
-          let dy = b.y - a.y;
+        for (let gx = agx - 1; gx <= agx + 1; gx++) {
+          for (let gy = agy - 1; gy <= agy + 1; gy++) {
 
-          let distanceSq = dx * dx + dy * dy;
+            const bucket =
+              grid.get(gridKey(gx, gy));
 
-          if (distanceSq === 0) {
-            dx = 0.01;
-            dy = 0;
-            distanceSq = 0.0001;
-          }
+            if (!bucket) continue;
 
-          const distance = Math.sqrt(distanceSq);
-          const minDistance = a.radius + b.radius;
+            for (const b of bucket) {
+              if (a === b) continue;
+              if (b.state !== 'resting') continue;
 
-          /*
-            Coins only interact when their circular edges
-            touch or overlap.
-          */
+              /*
+                Avoid processing the same pair
+                twice in the same pass.
+              */
 
-          if (distance < minDistance) {
-            const nx = dx / distance;
-            const ny = dy / distance;
+              if (a.id > b.id) continue;
 
-            const overlap = minDistance - distance;
+              let dx = b.x - a.x;
+              let dy = b.y - a.y;
 
-            /*
-              Separate the coins first.
-              This prevents them from visually merging.
-            */
+              let distanceSq =
+                dx * dx + dy * dy;
 
-            const separation = overlap * 0.52;
+              if (distanceSq < 0.000001) {
+                dx = 0.01;
+                dy = 0;
+                distanceSq = 0.0001;
+              }
 
-            a.x -= nx * separation;
-            a.y -= ny * separation;
+              const distance =
+                Math.sqrt(distanceSq);
 
-            b.x += nx * separation;
-            b.y += ny * separation;
+              /*
+                ROUND EDGE COLLISION
 
-            /*
-              Relative velocity along collision normal.
-            */
+                The square image itself does NOT
+                define the collision.
 
-            const rvx = b.vx - a.vx;
-            const rvy = b.vy - a.vy;
+                Only the circular radius does.
+              */
 
-            const velocityAlongNormal =
-              rvx * nx + rvy * ny;
+              const minimumDistance =
+                a.radius + b.radius;
 
-            /*
-              If they are already moving apart,
-              don't apply another collision impulse.
-            */
+              if (distance >= minimumDistance) {
+                continue;
+              }
 
-            if (velocityAlongNormal < 0) {
-              const restitution = 0.18;
+              const nx =
+                dx / distance;
 
-              const impulse =
-                -(1 + restitution) *
-                velocityAlongNormal /
-                2;
+              const ny =
+                dy / distance;
 
-              const impulseX = impulse * nx;
-              const impulseY = impulse * ny;
+              const overlap =
+                minimumDistance - distance;
 
-              a.vx -= impulseX;
-              a.vy -= impulseY;
+              /*
+                Separate both coins equally.
+                This prevents visual penetration.
+              */
 
-              b.vx += impulseX;
-              b.vy += impulseY;
+              const correction =
+                overlap * 0.51;
+
+              a.x -= nx * correction;
+              a.y -= ny * correction;
+
+              b.x += nx * correction;
+              b.y += ny * correction;
+
+              /*
+                RELATIVE VELOCITY
+
+                This is what creates the domino effect.
+              */
+
+              const rvx =
+                b.vx - a.vx;
+
+              const rvy =
+                b.vy - a.vy;
+
+              const normalVelocity =
+                rvx * nx +
+                rvy * ny;
+
+              /*
+                Only collide if moving toward
+                each other.
+              */
+
+              if (normalVelocity < 0) {
+                /*
+                  Low bounce = heavy arcade coin.
+                */
+
+                const restitution = 0.12;
+
+                const impulse =
+                  -(1 + restitution) *
+                  normalVelocity /
+                  2;
+
+                const ix =
+                  impulse * nx;
+
+                const iy =
+                  impulse * ny;
+
+                a.vx -= ix;
+                a.vy -= iy;
+
+                b.vx += ix;
+                b.vy += iy;
+              }
+
+              /*
+                EDGE FRICTION
+
+                Transfers sideways movement
+                when coins hit at an angle.
+              */
+
+              const tx = -ny;
+              const ty = nx;
+
+              const tangentVelocity =
+                rvx * tx +
+                rvy * ty;
+
+              const friction =
+                tangentVelocity * 0.045;
+
+              a.vx += friction * tx;
+              a.vy += friction * ty;
+
+              b.vx -= friction * tx;
+              b.vy -= friction * ty;
+
+              /*
+                Tiny collision damping keeps the
+                pile stable without making it sluggish.
+              */
+
+              a.vx *= 0.997;
+              a.vy *= 0.997;
+
+              b.vx *= 0.997;
+              b.vy *= 0.997;
             }
-
-            /*
-              Friction through the touching edges.
-              This lets angled collisions transfer sideways
-              movement naturally.
-            */
-
-            const tx = -ny;
-            const ty = nx;
-
-            const tangentVelocity =
-              rvx * tx + rvy * ty;
-
-            const friction =
-              tangentVelocity * 0.035;
-
-            a.vx += friction * tx;
-            a.vy += friction * ty;
-
-            b.vx -= friction * tx;
-            b.vy -= friction * ty;
           }
         }
       }
     }
 
     /*
-      Apply movement and friction.
+      MOVE RESTING ITEMS
     */
 
-    for (const item of coins) {
+    for (const item of items) {
       if (item.state !== 'resting') continue;
-
-      /*
-        Movement.
-      */
 
       item.x += item.vx * dt;
       item.y += item.vy * dt;
 
       /*
-        Ground friction.
-        Kept LOW so coins continue pushing each other.
+        VERY LOW friction.
+        Coins keep their momentum and continue
+        pushing neighboring coins.
       */
 
-      item.vx *= Math.pow(0.91, dt);
-      item.vy *= Math.pow(0.94, dt);
+      item.vx *=
+        Math.pow(0.965, dt);
+
+      item.vy *=
+        Math.pow(0.975, dt);
 
       /*
-        Maximum velocity.
-        Prevents runaway physics while retaining
-        the fast arcade feeling.
+        Stop microscopic movement.
       */
 
-      const maxVelocity = 18;
+      if (Math.abs(item.vx) < 0.012) {
+        item.vx = 0;
+      }
 
-      item.vx = Math.max(
-        -maxVelocity,
-        Math.min(maxVelocity, item.vx)
-      );
-
-      item.vy = Math.max(
-        -maxVelocity,
-        Math.min(maxVelocity, item.vy)
-      );
+      if (Math.abs(item.vy) < 0.012) {
+        item.vy = 0;
+      }
 
       /*
-        Side walls.
+        Velocity safety limit.
+      */
+
+      const maxVelocity = 22;
+
+      item.vx =
+        Math.max(
+          -maxVelocity,
+          Math.min(maxVelocity, item.vx)
+        );
+
+      item.vy =
+        Math.max(
+          -maxVelocity,
+          Math.min(maxVelocity, item.vy)
+        );
+
+      /*
+        LEFT WALL
       */
 
       if (item.x < item.radius) {
         item.x = item.radius;
-        item.vx = Math.abs(item.vx) * 0.42;
-      }
-
-      if (item.x > width - item.radius) {
-        item.x = width - item.radius;
-        item.vx = -Math.abs(item.vx) * 0.42;
+        item.vx =
+          Math.abs(item.vx) * 0.42;
       }
 
       /*
-        Back/top boundary.
+        RIGHT WALL
+      */
+
+      if (item.x > width - item.radius) {
+        item.x =
+          width - item.radius;
+
+        item.vx =
+          -Math.abs(item.vx) * 0.42;
+      }
+
+      /*
+        TOP WALL
       */
 
       if (item.y < item.radius) {
         item.y = item.radius;
-        item.vy = Math.abs(item.vy) * 0.25;
+        item.vy =
+          Math.abs(item.vy) * 0.20;
       }
 
       /*
-        Front payout edge.
+        PAYOUT EDGE
       */
 
-      if (item.y >= height - item.radius * 0.55) {
+      if (
+        item.y >=
+        height - item.radius * 0.55
+      ) {
         triggerPayout(item);
         continue;
       }
@@ -549,20 +810,56 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  /* =========================================================
+     RENDER ITEM
+     ========================================================= */
+
   function renderItem(item) {
-    item.element.style.left = `${item.x}px`;
-    item.element.style.top = `${item.y}px`;
+    /*
+      x/y represent the CENTER of the item.
+      This makes circular collision geometry
+      match the visual coin exactly.
+    */
+
+    item.element.style.left =
+      `${item.x - item.radius}px`;
+
+    item.element.style.top =
+      `${item.y - item.radius}px`;
+
+    item.element.style.width =
+      `${item.size}px`;
+
+    item.element.style.height =
+      `${item.size}px`;
+
+    item.element.style.minWidth =
+      `${item.size}px`;
+
+    item.element.style.minHeight =
+      `${item.size}px`;
+
+    item.element.style.maxWidth =
+      `${item.size}px`;
+
+    item.element.style.maxHeight =
+      `${item.size}px`;
+
+    item.element.style.zIndex =
+      item.type === 'xp' ? '20' : '10';
   }
 
   /* =========================================================
-     FAST DROP
+     DROP COIN
      ========================================================= */
 
   if (dropCoinBtn) {
     dropCoinBtn.addEventListener('click', () => {
       if (coinCount < DROP_COST) {
         playSound('error');
-        alert('Not enough coins! Check your balance.');
+        alert(
+          'Not enough coins! Check your balance.'
+        );
         return;
       }
 
@@ -571,23 +868,39 @@ document.addEventListener('DOMContentLoaded', () => {
       coinCount -= DROP_COST;
       updateBalanceDisplay();
 
+      /*
+        Track every coin spent.
+      */
+
+      spendingProgress += DROP_COST;
+
+      while (spendingProgress >= 200) {
+        spendingProgress -= 200;
+        spawnBonusXP();
+      }
+
+      localStorage.setItem(
+        spendingKey,
+        spendingProgress
+      );
+
       addShakeEnergy(6);
 
-      const playWidth = playArea.clientWidth;
+      const width =
+        playArea.clientWidth;
 
       const randomX =
-        14 + Math.random() *
-        Math.max(1, playWidth - 28);
-
-      /*
-        Very fast initial velocity.
-        The coin immediately becomes part of the
-        physics simulation.
-      */
+        NORMAL_COIN_RADIUS +
+        Math.random() *
+        Math.max(
+          1,
+          width -
+          NORMAL_COIN_RADIUS * 2
+        );
 
       spawnItem(
         randomX,
-        2,
+        NORMAL_COIN_RADIUS + 2,
         'coin',
         5,
         'medium',
@@ -598,43 +911,73 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* =========================================================
-     BONUS DIAMOND
+     XP TIMER - EVERY 3 MINUTES
      ========================================================= */
 
-  const DIAMOND_TIMER_KEY =
-    `coincraze_last_diamond_${coinKey}`;
+  const XP_TIMER_KEY =
+    `coincraze_last_xp_${coinKey}`;
 
-  setInterval(() => {
+  function checkXPTimer() {
     const now = Date.now();
 
-    const lastDiamondTime =
+    const lastXP =
       parseInt(
-        localStorage.getItem(DIAMOND_TIMER_KEY)
-      ) || 0;
+        localStorage.getItem(XP_TIMER_KEY)
+      ) || now;
 
-    if (now - lastDiamondTime >= 180000) {
+    /*
+      First visit starts the timer.
+    */
+
+    if (!localStorage.getItem(XP_TIMER_KEY)) {
       localStorage.setItem(
-        DIAMOND_TIMER_KEY,
+        XP_TIMER_KEY,
         now.toString()
       );
 
-      spawnBonusDiamond();
+      return;
     }
-  }, 10000);
 
-  function spawnBonusDiamond() {
-    const playWidth = playArea.clientWidth;
+    if (now - lastXP >= 180000) {
+      localStorage.setItem(
+        XP_TIMER_KEY,
+        now.toString()
+      );
+
+      spawnBonusXP();
+    }
+  }
+
+  checkXPTimer();
+
+  setInterval(
+    checkXPTimer,
+    5000
+  );
+
+  /* =========================================================
+     XP BONUS
+     ========================================================= */
+
+  function spawnBonusXP() {
+    const width =
+      playArea.clientWidth;
 
     const randomX =
-      14 + Math.random() *
-      Math.max(1, playWidth - 28);
+      XP_RADIUS +
+      Math.random() *
+      Math.max(
+        1,
+        width -
+        XP_RADIUS * 2
+      );
 
     spawnItem(
       randomX,
-      2,
-      'diamond',
-      100,
-      'large',
+      XP_RADIUS + 2,
+      'xp',
+      XP_REWARD,
+      'xp',
       true,
       'falling'
     );
@@ -653,22 +996,28 @@ document.addEventListener('DOMContentLoaded', () => {
       playSound('win');
 
       if (pusherContainer) {
-        pusherContainer.classList.add('shake-anim');
+        pusherContainer.classList.add(
+          'shake-anim'
+        );
 
         setTimeout(() => {
-          pusherContainer.classList.remove('shake-anim');
+          pusherContainer.classList.remove(
+            'shake-anim'
+          );
         }, 300);
       }
 
       /*
-        Real shake impulse instead of simply moving
-        every coin downward.
+        Actual physical shake impulse.
       */
 
       activeItems.forEach(item => {
         if (item.state === 'resting') {
-          item.vx += (Math.random() - 0.5) * 5;
-          item.vy += Math.random() * 5 + 2;
+          item.vx +=
+            (Math.random() - 0.5) * 7;
+
+          item.vy +=
+            Math.random() * 6 + 3;
         }
       });
 
@@ -680,9 +1029,17 @@ document.addEventListener('DOMContentLoaded', () => {
         shakeBarFill.style.width = '0%';
       }
 
-      shakeBtn.textContent = '⚡ SHAKE (0%)';
-      shakeBtn.setAttribute('disabled', 'true');
-      shakeBtn.classList.remove('ready');
+      shakeBtn.textContent =
+        '⚡ SHAKE (0%)';
+
+      shakeBtn.setAttribute(
+        'disabled',
+        'true'
+      );
+
+      shakeBtn.classList.remove(
+        'ready'
+      );
     });
   }
 
@@ -699,40 +1056,84 @@ document.addEventListener('DOMContentLoaded', () => {
     isFalling,
     initialState
   ) {
-    const itemEl = document.createElement('div');
+    const itemEl =
+      document.createElement('div');
 
-    if (type === 'diamond') {
+    let size;
+    let radius;
+
+    if (type === 'xp') {
+      size = XP_SIZE;
+      radius = XP_RADIUS;
+
       itemEl.className =
-        `pusher-item diamond ${sizeClass}`;
+        'pusher-item xp-bonus';
+
+      itemEl.style.backgroundImage =
+        "url('image/xp.png')";
+
+      itemEl.style.backgroundSize =
+        'contain';
+
+      itemEl.style.backgroundRepeat =
+        'no-repeat';
+
+      itemEl.style.backgroundPosition =
+        'center';
+
+      itemEl.style.fontSize = '0';
+    }
+
+    else if (type === 'diamond') {
+      size = 52;
+      radius = 23;
+
+      itemEl.className =
+        'pusher-item diamond large';
 
       itemEl.textContent = '💎';
-    } else {
+    }
+
+    else {
+      size = NORMAL_COIN_SIZE;
+      radius = NORMAL_COIN_RADIUS;
+
       itemEl.className =
-        `pusher-item coin ${sizeClass}`;
+        'pusher-item coin medium';
 
       itemEl.style.backgroundImage =
         "url('image/coin.png')";
+
+      itemEl.style.backgroundSize =
+        'contain';
+
+      itemEl.style.backgroundRepeat =
+        'no-repeat';
+
+      itemEl.style.backgroundPosition =
+        'center';
+
+      itemEl.style.border = '0';
+      itemEl.style.padding = '0';
+      itemEl.style.margin = '0';
     }
+
+    itemEl.style.position = 'absolute';
+    itemEl.style.width = `${size}px`;
+    itemEl.style.height = `${size}px`;
+    itemEl.style.minWidth = `${size}px`;
+    itemEl.style.minHeight = `${size}px`;
+    itemEl.style.maxWidth = `${size}px`;
+    itemEl.style.maxHeight = `${size}px`;
+    itemEl.style.pointerEvents = 'none';
 
     playArea.appendChild(itemEl);
 
-    /*
-      Coin radius is based on the physical coin size.
-      Medium coins = 11px radius.
-    */
-
-    let radius = 11;
-
-    if (sizeClass === 'small') {
-      radius = 8;
-    }
-
-    else if (sizeClass === 'large') {
-      radius = 14;
-    }
-
     const itemData = {
       element: itemEl,
+
+      id:
+        `${Date.now()}_${Math.random()}`,
 
       x: startX,
       y: startY,
@@ -740,6 +1141,7 @@ document.addEventListener('DOMContentLoaded', () => {
       vx: 0,
       vy: 0,
 
+      size: size,
       radius: radius,
 
       type: type,
@@ -748,17 +1150,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
       state:
         initialState ||
-        (isFalling ? 'falling' : 'resting')
+        (isFalling
+          ? 'falling'
+          : 'resting')
     };
 
     /*
-      Fast falling velocity.
+      Fast initial drop.
     */
 
     if (isFalling) {
-      itemData.vy = 10;
+      itemData.vy =
+        type === 'xp'
+          ? 13
+          : 15;
+
       itemData.vx =
-        (Math.random() - 0.5) * 0.8;
+        (Math.random() - 0.5) * 1.2;
     }
 
     activeItems.push(itemData);
@@ -771,26 +1179,54 @@ document.addEventListener('DOMContentLoaded', () => {
      ========================================================= */
 
   function triggerPayout(itemData) {
-    if (itemData.state === 'payout') return;
+    if (
+      itemData.state === 'payout'
+    ) {
+      return;
+    }
 
     itemData.state = 'payout';
 
-    itemData.element.classList.add('payout');
-
-    coinCount += itemData.value;
-
-    updateBalanceDisplay();
-
-    playSound('win');
-
-    showFloatingScore(
-      itemData.x,
-      playArea.clientHeight - 18,
-      itemData.value
+    itemData.element.classList.add(
+      'payout'
     );
 
+    if (itemData.type === 'xp') {
+      xpCount += itemData.value;
+      updateXP();
+
+      playSound('win');
+
+      showFloatingScore(
+        itemData.x,
+        Math.max(
+          20,
+          itemData.y - 10
+        ),
+        `+${itemData.value} XP`
+      );
+    }
+
+    else {
+      coinCount += itemData.value;
+      updateBalanceDisplay();
+
+      playSound('win');
+
+      showFloatingScore(
+        itemData.x,
+        Math.max(
+          20,
+          itemData.y - 10
+        ),
+        `+${itemData.value}`
+      );
+    }
+
     setTimeout(() => {
-      itemData.element.remove();
+      if (itemData.element) {
+        itemData.element.remove();
+      }
 
       activeItems =
         activeItems.filter(
@@ -802,10 +1238,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* =========================================================
-     FLOATING SCORE
+     FLOATING WIN INDICATOR
      ========================================================= */
 
-  function showFloatingScore(x, y, value) {
+  function showFloatingScore(
+    x,
+    y,
+    value
+  ) {
     const floatText =
       document.createElement('div');
 
@@ -813,7 +1253,19 @@ document.addEventListener('DOMContentLoaded', () => {
       'floating-score';
 
     floatText.textContent =
-      `+${value}`;
+      value;
+
+    /*
+      Force the reward indicator above:
+      coins
+      XP
+      frame
+      pusher
+      and other game objects.
+    */
+
+    floatText.style.position =
+      'absolute';
 
     floatText.style.left =
       `${x}px`;
@@ -821,10 +1273,63 @@ document.addEventListener('DOMContentLoaded', () => {
     floatText.style.top =
       `${y}px`;
 
-    playArea.appendChild(floatText);
+    floatText.style.zIndex =
+      '999999';
+
+    floatText.style.pointerEvents =
+      'none';
+
+    floatText.style.transform =
+      'translate(-50%, -50%)';
+
+    floatText.style.whiteSpace =
+      'nowrap';
+
+    floatText.style.visibility =
+      'visible';
+
+    playArea.appendChild(
+      floatText
+    );
+
+    /*
+      Move it upward while keeping it
+      above the complete playfield.
+    */
+
+    requestAnimationFrame(() => {
+      floatText.style.transition =
+        'transform 0.4s ease-out, opacity 0.4s ease-out';
+
+      floatText.style.transform =
+        'translate(-50%, -80%)';
+
+      floatText.style.opacity =
+        '0';
+    });
 
     setTimeout(() => {
-      floatText.remove();
-    }, 400);
+      if (floatText) {
+        floatText.remove();
+      }
+    }, 450);
   }
+
+  /*
+    Save when leaving the page.
+  */
+
+  window.addEventListener(
+    'beforeunload',
+    saveGameState
+  );
+
+  document.addEventListener(
+    'visibilitychange',
+    () => {
+      if (document.hidden) {
+        saveGameState();
+      }
+    }
+  );
 });
