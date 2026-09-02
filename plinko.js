@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Draw Pegs
     for (let r = 0; r < rows; r++) {
       const pegsInRow = r + 3;
-      const rowWidth = (pegsInRow - 1) * colSpacing;
+      const rowWidth = (pegsInRow - 1) * colSpacing * 1.25;
       const startX = (w - rowWidth) / 2;
       const y = startYGrid + r * rowHeight;
 
