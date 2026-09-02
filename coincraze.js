@@ -1,11 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Matches your main app's key generator function
-  function getUserKey(key) {
-    const currentUser = localStorage.getItem('pixvinz_current_user') || 'default';
-    return `${currentUser}_${key}`;
+  // Use the exact same key lookup as profile.js
+  let coinKey = 'totalCoins';
+  if (typeof getUserKey === 'function') {
+    coinKey = getUserKey('totalCoins');
+  } else {
+    const currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
+    const username = currentUser.username || localStorage.getItem('vinpix_username') || 'default';
+    coinKey = `${username}_totalCoins`;
   }
 
-  const coinKey = getUserKey('totalCoins');
   let coinCount = parseFloat(localStorage.getItem(coinKey)) || 0;
   
   const coinCountEl = document.getElementById('coinCount');
@@ -18,13 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const DROP_COST = 5.00;
   let shakeEnergy = 0;
-
   let activeCoins = [];
 
   updateBalanceDisplay();
 
   function updateBalanceDisplay() {
-    coinCountEl.textContent = coinCount.toFixed(2);
+    if (coinCountEl) coinCountEl.textContent = coinCount.toFixed(2);
     localStorage.setItem(coinKey, coinCount);
   }
   // 1. PRE-LOAD COINS & DIAMONDS ON THE PUSHER PLATE
