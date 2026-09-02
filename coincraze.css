@@ -1,4 +1,4 @@
-/* coincraze.css - Red Table Playfield, Strict Screen Fit, Unchanged Top Bar */
+/* coincraze.css - Reverted Top Bar (100% Untouched) + 3D Playfield & Screen Fit */
 
 body {
   background-color: #0d0614;
@@ -13,7 +13,7 @@ body {
 }
 
 /* ==========================================
-   SHARED TOP BAR / HEADER (UNTOUCHED)
+   SHARED TOP BAR / HEADER (RESTORED 100% UNTOUCHED)
    ========================================== */
 
 .top-bar {
@@ -68,7 +68,7 @@ body {
 }
 
 /* ==========================================
-   GAME CONTAINER & SCREEN FIT (~2cm Bottom Margin)
+   GAME CONTAINER & SCREEN FIT (Guaranteed Drop Button Visibility)
    ========================================== */
 
 .game-wrapper {
@@ -78,17 +78,17 @@ body {
   justify-content: center;
   flex-grow: 1;
   width: 100%;
-  margin-top: 4px;
-  margin-bottom: 20px; /* ~2cm bottom clearance */
+  margin-top: 0;
+  margin-bottom: 12px; 
   overflow: hidden;
 }
 
 .coin-pusher-container {
   position: relative;
   width: 100%;
-  max-width: 350px;
+  max-width: 320px;
   height: 100%;
-  max-height: calc(100vh - 95px);
+  max-height: calc(100vh - 90px);
   aspect-ratio: 9 / 16;
   margin: 0 auto;
 }
@@ -99,10 +99,10 @@ body {
 
 @keyframes screenShake {
   0% { transform: translate(0, 0); }
-  20% { transform: translate(-5px, 3px); }
-  40% { transform: translate(5px, -3px); }
-  60% { transform: translate(-3px, -2px); }
-  80% { transform: translate(3px, 2px); }
+  20% { transform: translate(-4px, 2px); }
+  40% { transform: translate(4px, -2px); }
+  60% { transform: translate(-2px, -1px); }
+  80% { transform: translate(2px, 1px); }
   100% { transform: translate(0, 0); }
 }
 
@@ -117,35 +117,38 @@ body {
   z-index: 5;
 }
 
-/* RED TABLE PLAYFIELD */
+/* 3D SMALLER RED TABLE PLAYFIELD */
 .game-play-area {
   position: absolute;
-  top: 14%;
-  left: 10.5%;
-  right: 10.5%;
-  bottom: 14%;
-  background: linear-gradient(180deg, #b31414 0%, #8a0d0d 50%, #5e0505 100%);
-  border-left: 5px solid #3d0303;
-  border-right: 5px solid #3d0303;
-  border-bottom: 8px solid #2b0202;
-  border-radius: 8px;
+  top: 24%;
+  left: 17%;
+  right: 17%;
+  bottom: 18%;
+  background: linear-gradient(180deg, #991111 0%, #6e0808 50%, #400202 100%);
+  border-left: 5px solid #210101;
+  border-right: 5px solid #210101;
+  border-bottom: 8px solid #140000;
+  border-radius: 6px;
   overflow: hidden;
   z-index: 2;
-  box-shadow: inset 0 15px 25px rgba(0, 0, 0, 0.8), inset 0 -5px 10px rgba(0, 0, 0, 0.7);
+  box-shadow: inset 0 10px 18px rgba(0, 0, 0, 0.85), inset 0 -4px 8px rgba(0, 0, 0, 0.7);
 }
 
-/* Mechanical Pusher Plate */
+/* PREMIUM 3D MECHANICAL PUSHER PLATE */
 .pusher-plate {
   position: absolute;
-  top: 30%;
+  top: 22%;
   left: 50%;
   transform: translateX(-50%);
-  width: 82%;
-  height: 55px;
-  background: linear-gradient(135deg, #c59b27 0%, #e6ca65 50%, #99750f 100%);
-  border: 2px solid #fff8dc;
-  border-radius: 5px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.9), inset 0 2px 3px rgba(255, 255, 255, 0.6);
+  width: 76%;
+  height: 42px;
+  background: linear-gradient(135deg, #e6ca65 0%, #c59b27 40%, #85630b 100%);
+  border-top: 2px solid #fff8dc;
+  border-left: 2px solid #e6ca65;
+  border-right: 2px solid #85630b;
+  border-bottom: 4px solid #4a3605;
+  border-radius: 4px;
+  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.9), inset 0 2px 3px rgba(255, 255, 255, 0.7);
   z-index: 1; 
 }
 
@@ -153,10 +156,10 @@ body {
   content: '';
   position: absolute;
   top: 3px;
-  left: 8px;
-  right: 8px;
+  left: 6px;
+  right: 6px;
   height: 2px;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.6);
   border-radius: 1px;
 }
 
@@ -168,59 +171,60 @@ body {
   background-position: center;
   z-index: 3;
   user-select: none;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.7));
+  will-change: transform, top, left;
+  filter: drop-shadow(0 3px 5px rgba(0,0,0,0.7));
 }
 
-.pusher-item.coin.small { width: 22px; height: 22px; }
-.pusher-item.coin.medium { width: 30px; height: 30px; }
-.pusher-item.coin.large { width: 38px; height: 38px; }
+.pusher-item.coin.small { width: 18px; height: 18px; }
+.pusher-item.coin.medium { width: 24px; height: 24px; }
+.pusher-item.coin.large { width: 32px; height: 32px; }
 
-/* Diamond fallback/bonus emoji size */
 .pusher-item.diamond {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 34px;
-  width: 38px;
-  height: 38px;
+  font-size: 26px;
+  width: 30px;
+  height: 30px;
   background: none;
-  filter: drop-shadow(0 5px 8px rgba(0,0,0,0.9));
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.85));
 }
 
 .pusher-item.payout {
-  animation: itemWin 0.4s forwards ease-in-out;
+  animation: itemWin 0.35s forwards ease-in-out;
 }
 
 @keyframes itemWin {
   0% { transform: scale(1); filter: brightness(1); }
-  50% { transform: scale(1.4); filter: brightness(2); }
-  100% { transform: translateY(40px) scale(0.2); opacity: 0; }
+  50% { transform: scale(1.3); filter: brightness(1.8); }
+  100% { transform: translateY(30px) scale(0.2); opacity: 0; }
 }
 
 .floating-score {
   position: absolute;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #00ff66;
-  text-shadow: 0 0 6px rgba(0, 255, 102, 0.8), 0 1px 2px rgba(0,0,0,0.9);
+  text-shadow: 0 0 5px rgba(0, 255, 102, 0.8), 0 1px 2px rgba(0,0,0,0.9);
   pointer-events: none;
   z-index: 9999;
-  animation: floatUp 0.6s forwards ease-out;
+  animation: floatUp 0.5s forwards ease-out;
 }
 
 @keyframes floatUp {
   0% { transform: translateY(0) scale(0.9); opacity: 1; }
-  100% { transform: translateY(-35px) scale(1.1); opacity: 0; }
+  100% { transform: translateY(-25px) scale(1.1); opacity: 0; }
 }
 
+/* CONTROL DECK FULLY VISIBLE INSIDE VIEWPORT */
 .drop-control-deck {
   position: absolute;
   bottom: 2%;
-  left: 7%;
-  right: 7%;
+  left: 5%;
+  right: 5%;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
   z-index: 8;
 }
 
@@ -230,15 +234,15 @@ body {
   align-items: center;
   background: rgba(15, 5, 25, 0.95);
   padding: 4px 8px;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid rgba(255, 215, 0, 0.4);
 }
 
 .shake-bar-container {
   flex-grow: 1;
-  height: 8px;
+  height: 6px;
   background: rgba(0, 0, 0, 0.8);
-  border-radius: 4px;
+  border-radius: 3px;
   overflow: hidden;
   border: 1px solid rgba(255, 215, 0, 0.3);
 }
@@ -253,11 +257,11 @@ body {
 .shake-btn {
   background: #251608;
   color: #665544;
-  border: 2px solid #443322;
-  padding: 4px 8px;
-  font-size: 0.7rem;
+  border: 1px solid #443322;
+  padding: 3px 6px;
+  font-size: 0.65rem;
   font-weight: bold;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: not-allowed;
   white-space: nowrap;
 }
@@ -265,28 +269,28 @@ body {
 .shake-btn.ready {
   background: linear-gradient(to bottom, #ff4400, #aa1100);
   color: #fff;
-  border: 2px solid #ffcc00;
+  border: 1px solid #ffcc00;
   cursor: pointer;
-  box-shadow: 0 0 8px rgba(255, 68, 0, 0.9);
+  box-shadow: 0 0 6px rgba(255, 68, 0, 0.9);
   animation: pulseShake 1.2s infinite alternate;
 }
 
 @keyframes pulseShake {
   0% { transform: scale(1); }
-  100% { transform: scale(1.05); }
+  100% { transform: scale(1.04); }
 }
 
 .drop-btn {
   background: linear-gradient(to bottom, #ffd700, #cc9900);
   color: #1a082c;
   border: 2px solid #fff;
-  padding: 9px;
-  font-size: 0.9rem;
+  padding: 8px;
+  font-size: 0.85rem;
   font-weight: bold;
-  border-radius: 16px;
+  border-radius: 14px;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), 0 0 8px rgba(255, 215, 0, 0.6);
-  transition: all 0.1s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5), 0 0 6px rgba(255, 215, 0, 0.6);
+  transition: transform 0.1s ease;
 }
 
 .drop-btn:active {
