@@ -1,108 +1,126 @@
-/* plinko.css - Premium Mobile Arcade Edition */
+/* ==========================================
+   EXACT SHARED STYLES SUPPLIED BY USER
+   ========================================== */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
 }
 
 body {
-  background: radial-gradient(circle at center, #1b143f 0%, #090614 100%);
+  font-family: Arial, Helvetica, sans-serif;
   color: #fff;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  height: 100vh;
-  width: 100vw;
+  background:
+    radial-gradient(circle at top, rgba(123, 44, 191, .3), transparent 50%),
+    #130826;
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
-  position: fixed;
 }
 
-.arcade-cabinet {
-  width: 100%;
-  max-width: 480px;
-  height: 100vh;
-  max-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: linear-gradient(135deg, #151032, #06040e);
-  border-left: 3px solid #00f2fe;
-  border-right: 3px solid #00f2fe;
-  box-shadow: 0 0 40px rgba(0, 242, 254, 0.25);
-  position: relative;
-  overflow: hidden;
-}
-
-/* Top Header Bar */
 .top-bar {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
-  background: rgba(0, 0, 0, 0.5);
-  border-bottom: 2px solid rgba(0, 242, 254, 0.3);
-  z-index: 10;
-  height: 60px;
+  align-items: center;
+  width: 100%;
+  position: relative;
   flex-shrink: 0;
+  padding: 10px 16px;
+}
+
+.top-bar > *:nth-child(1) { position: absolute; left: 16px; }
+.top-bar > *:nth-child(2) { width: 100%; display: flex; justify-content: center; }
+.top-bar > *:nth-child(3) { position: absolute; right: 16px; }
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.logo-container video,
+#logoVideo {
+  width: 160px;
+  height: auto;
+  object-fit: contain;
 }
 
 .icon-btn {
-  background: #2a1147;
-  border: 2px solid #9c27b0;
-  color: #fff;
-  width: 38px;
-  height: 38px;
+  background: rgba(20, 10, 35, 0.8);
+  border: 2px solid #ffd700;
+  color: #ffd700;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 20px;
+  font-weight: bold;
   cursor: pointer;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.4), inset 0 0 6px rgba(255, 215, 0, 0.2);
   transition: all 0.2s ease;
-  box-shadow: 0 0 10px rgba(156, 39, 176, 0.4);
 }
 
 .icon-btn:hover {
-  background: #9c27b0;
+  background: rgba(255, 215, 0, 0.15);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 10px rgba(255, 215, 0, 0.4);
   transform: scale(1.05);
 }
 
-.logo-container {
-  width: 160px;
-  height: 40px;
+.coin-badge {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid #ffd700;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 14px;
+  color: #ffd700;
+  z-index: 2;
+  display: flex;          
+  align-items: center;    
+  justify-content: center; 
+  gap: 6px;              
+}
+
+/* ==========================================
+   PLINKO SPECIFIC LAYOUT (PREMIUM ARCADE)
+   ========================================== */
+
+.arcade-cabinet {
+  width: 100%;
+  max-width: 480px;
+  height: 100%;
+  max-height: 100dvh;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  background: linear-gradient(180deg, rgba(20, 10, 35, 0.6) 0%, rgba(8, 4, 18, 0.95) 100%);
+  position: relative;
   overflow: hidden;
 }
 
-.logo-container video {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.coin-badge {
-  background: rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(0, 242, 254, 0.4);
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.95rem;
-  font-weight: bold;
-  color: #00f2fe;
-  box-shadow: inset 0 0 8px rgba(0, 242, 254, 0.2);
-}
-
-/* Plinko Arena Board */
+/* Plinko Arena Board - 2cm (~75px) clear spacing from top bar */
 .plinko-arena {
   flex: 1;
   position: relative;
-  margin: 10px 14px;
-  background: #0d0a1f;
-  border-radius: 14px;
-  border: 2px solid rgba(255, 8, 68, 0.5);
-  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.9), 0 0 15px rgba(255, 8, 68, 0.3);
+  margin: 75px 16px 12px 16px;
+  background: rgba(10, 5, 22, 0.85);
+  border-radius: 16px;
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(123, 44, 191, 0.2);
   overflow: hidden;
   display: flex;
   justify-content: center;
@@ -117,12 +135,12 @@ canvas {
 
 /* Control Deck */
 .control-deck {
-  padding: 14px 20px 20px 20px;
-  background: rgba(20, 15, 40, 0.9);
-  border-top: 2px solid rgba(0, 242, 254, 0.3);
+  padding: 14px 20px 24px 20px;
+  background: rgba(15, 8, 28, 0.95);
+  border-top: 2px solid rgba(255, 215, 0, 0.2);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   flex-shrink: 0;
 }
 
@@ -130,63 +148,66 @@ canvas {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(0, 0, 0, 0.5);
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.4);
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 215, 0, 0.15);
 }
 
 .bet-label {
   font-size: 0.85rem;
-  color: #aaa;
+  color: #b8a2e0;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
+  font-weight: bold;
 }
 
 .bet-controls {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
 }
 
 .bet-btn {
-  background: #2c2557;
-  color: #fff;
-  border: 1px solid rgba(0, 242, 254, 0.3);
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
+  background: rgba(42, 17, 71, 0.8);
+  color: #ffd700;
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 1.1rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .bet-btn:hover {
-  background: #00f2fe;
-  color: #0b091a;
+  background: #ffd700;
+  color: #130826;
+  transform: scale(1.05);
 }
 
 #currentBetVal {
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: bold;
   color: #ffd700;
-  min-width: 40px;
+  min-width: 45px;
   text-align: center;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
 }
 
 .drop-btn {
-  background: linear-gradient(135deg, #ff0844, #ffb199);
-  color: #fff;
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  color: #130826;
   border: none;
-  padding: 14px;
-  font-size: 1.1rem;
-  font-weight: bold;
-  border-radius: 10px;
+  padding: 16px;
+  font-size: 1.15rem;
+  font-weight: 900;
+  border-radius: 12px;
   cursor: pointer;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
-  box-shadow: 0 4px 15px rgba(255, 8, 68, 0.4);
+  letter-spacing: 2px;
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
   transition: transform 0.1s ease, filter 0.2s ease;
 }
 
