@@ -1,4 +1,4 @@
-/* coincraze.js - Behind-Pusher Dropping, Edge-to-Edge Domino Physics, Exact Layout Fix */
+/* coincraze.js - High-Speed Zero-Lag Physics, Independent Pusher, Correct Drop Behind */
 document.addEventListener('DOMContentLoaded', () => {
   let coinKey = 'totalCoins';
   if (typeof getUserKey === 'function') {
@@ -48,35 +48,35 @@ document.addEventListener('DOMContentLoaded', () => {
       if (type === 'click') {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(600, now);
-        osc.frequency.exponentialRampToValueAtTime(800, now + 0.04);
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
+        osc.frequency.exponentialRampToValueAtTime(800, now + 0.03);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
         osc.start(now);
-        osc.stop(now + 0.04);
+        osc.stop(now + 0.03);
       } else if (type === 'drop') {
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(350, now);
-        osc.frequency.exponentialRampToValueAtTime(160, now + 0.1);
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.frequency.exponentialRampToValueAtTime(160, now + 0.08);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
         osc.start(now);
-        osc.stop(now + 0.1);
+        osc.stop(now + 0.08);
       } else if (type === 'win') {
         osc.type = 'square';
         osc.frequency.setValueAtTime(440, now);
-        osc.frequency.setValueAtTime(659.25, now + 0.06);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-        osc.start(now);
-        osc.stop(now + 0.2);
-      } else if (type === 'error') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(150, now);
-        osc.frequency.setValueAtTime(90, now + 0.08);
-        gain.gain.setValueAtTime(0.2, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.05);
+        gain.gain.setValueAtTime(0.12, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
         osc.start(now);
         osc.stop(now + 0.15);
+      } else if (type === 'error') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.setValueAtTime(90, now + 0.06);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
       }
     } catch (e) {}
   };
@@ -122,9 +122,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const playWidth = playArea.clientWidth;
     const playHeight = playArea.clientHeight;
     
-    for (let i = 0; i < 22; i++) {
-      const rx = Math.random() * (playWidth - 28) + 4;
-      const ry = playHeight * 0.28 + Math.random() * (playHeight * 0.58);
+    for (let i = 0; i < 24; i++) {
+      const rx = Math.random() * (playWidth - 30) + 4;
+      const ry = playHeight * 0.25 + Math.random() * (playHeight * 0.60);
       spawnItem(rx, ry, 'coin', 5, 'medium', false, 'resting');
     }
     saveGameState();
@@ -148,8 +148,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let pusherZ = 0;
   let pusherDirection = 1;
-  const pusherSpeed = 1.1;
-  const maxPushDistance = 28;
+  const pusherSpeed = 1.6; // High-speed smooth mechanical movement
+  const maxPushDistance = 26;
 
   function updatePusher() {
     pusherZ += pusherSpeed * pusherDirection;
@@ -159,48 +159,47 @@ document.addEventListener('DOMContentLoaded', () => {
     pusherPlate.style.transform = `translateX(-50%) translateY(${pusherZ}px)`;
 
     const playAreaHeight = playArea.clientHeight;
+    const playWidth = playArea.clientWidth;
     let stateChanged = false;
 
-    // Omnidirectional domino physics loop across all edges
+    // Fast-paced collision loop: coins stay grounded on floor, plate only pushes forward
     activeItems.forEach(item => {
       if (item.state === 'resting') {
         let pushForceX = 0;
         let pushForceY = 0;
 
-        // 1. Pusher plate collision
+        // Pusher plate forward mechanical push (ONLY pushes downwards/forward on the floor, zero lifting)
         if (pusherDirection > 0) {
-          const itemRadius = 12;
-          const plateCenterY = (playAreaHeight * 0.18) + pusherZ + 20;
-          const plateTopY = plateCenterY - 20;
-          const plateBottomY = plateCenterY + 20;
+          const plateCenterY = (playAreaHeight * 0.14) + pusherZ + 18;
+          const plateTopY = plateCenterY - 18;
+          const plateBottomY = plateCenterY + 18;
           
-          if (item.y + itemRadius >= plateTopY && item.y - itemRadius <= plateBottomY) {
-            pushForceY += pusherSpeed * 1.05;
+          if (item.y + 12 >= plateTopY && item.y - 12 <= plateBottomY) {
+            pushForceY += pusherSpeed * 1.2; // Push forward toward screen bottom
           }
         }
 
-        // 2. Neighboring coin domino chain collision (edge-to-edge push in all directions)
+        // Neighboring coin collision (domino spread)
         activeItems.forEach(other => {
           if (other !== item && other.state === 'resting') {
             const dx = item.x - other.x;
             const dy = item.y - other.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            const minDist = 22; // collision radius threshold
+            const minDist = 21;
 
             if (dist < minDist && dist > 0) {
               const overlap = minDist - dist;
               const angle = Math.atan2(dy, dx);
-              pushForceX += Math.cos(angle) * overlap * 0.45;
-              pushForceY += Math.sin(angle) * overlap * 0.45;
+              pushForceX += Math.cos(angle) * overlap * 0.5;
+              pushForceY += Math.sin(angle) * overlap * 0.5;
             }
           }
         });
 
-        if (Math.abs(pushForceX) > 0.04 || Math.abs(pushForceY) > 0.04) {
+        if (Math.abs(pushForceX) > 0.03 || Math.abs(pushForceY) > 0.03) {
           item.x += pushForceX;
           item.y += pushForceY;
           
-          const playWidth = playArea.clientWidth;
           item.x = Math.max(2, Math.min(playWidth - 26, item.x));
 
           item.element.style.left = `${item.x}px`;
@@ -208,8 +207,8 @@ document.addEventListener('DOMContentLoaded', () => {
           stateChanged = true;
         }
 
-        // Payout edge trigger at the bottom tray
-        if (item.y >= playAreaHeight - 22) {
+        // Drop-off edge payout at the bottom 3D tray edge
+        if (item.y >= playAreaHeight - 20) {
           triggerPayout(item);
           stateChanged = true;
         }
@@ -225,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   requestAnimationFrame(updatePusher);
 
-  // Manual Coin Drop: Spawns strictly behind the pusher plate at the top back slot
+  // Fast-paced Drop: Instantly drops coin behind the pusher plate at the top back slot
   dropCoinBtn.addEventListener('click', () => {
     if (coinCount < DROP_COST) {
       playSound('error');
@@ -241,8 +240,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const playWidth = playArea.clientWidth;
     const randomX = Math.random() * (playWidth - 28) + 4;
     
-    // Spawns safely behind the pusher plate (top back tray area)
-    spawnItem(randomX, 3, 'coin', 5, 'medium', true, 'falling');
+    // Spawns instantly and securely behind the pusher plate
+    spawnItem(randomX, 2, 'coin', 5, 'medium', true, 'falling');
   });
 
   const DIAMOND_TIMER_KEY = `coincraze_last_diamond_${coinKey}`;
@@ -258,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function spawnBonusDiamond() {
     const playWidth = playArea.clientWidth;
     const randomX = Math.random() * (playWidth - 28) + 4;
-    spawnItem(randomX, 3, 'diamond', 100, 'large', true, 'falling');
+    spawnItem(randomX, 2, 'diamond', 100, 'large', true, 'falling');
     playSound('win');
   }
 
@@ -267,11 +266,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     playSound('win');
     pusherContainer.classList.add('shake-anim');
-    setTimeout(() => pusherContainer.classList.remove('shake-anim'), 400);
+    setTimeout(() => pusherContainer.classList.remove('shake-anim'), 300);
 
     activeItems.forEach(item => {
       if (item.state === 'resting') {
-        item.y += Math.random() * 14 + 4;
+        item.y += Math.random() * 16 + 6;
         item.element.style.top = `${item.y}px`;
       }
     });
@@ -313,13 +312,13 @@ document.addEventListener('DOMContentLoaded', () => {
     activeItems.push(itemData);
 
     if (isFalling) {
-      let velocityY = 1.5;
-      const targetY = playArea.clientHeight * 0.15; // Lands precisely in the upper slot behind the pusher plate
+      let velocityY = 3.5; // High-speed drop velocity (zero lag)
+      const targetY = playArea.clientHeight * 0.11; // Lands cleanly in the top back slot behind the pusher
 
       function fall() {
         if (itemData.state === 'falling') {
           if (itemData.y < targetY) {
-            velocityY += 0.9;
+            velocityY += 1.8;
             itemData.y += velocityY;
             itemData.element.style.top = `${itemData.y}px`;
             requestAnimationFrame(fall);
@@ -344,13 +343,13 @@ document.addEventListener('DOMContentLoaded', () => {
     updateBalanceDisplay();
 
     playSound('win');
-    showFloatingScore(itemData.x, playArea.clientHeight - 20, itemData.value);
+    showFloatingScore(itemData.x, playArea.clientHeight - 18, itemData.value);
 
     setTimeout(() => {
       itemData.element.remove();
       activeItems = activeItems.filter(i => i !== itemData);
       saveGameState();
-    }, 350);
+    }, 250);
   }
 
   function showFloatingScore(x, y, value) {
@@ -363,6 +362,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setTimeout(() => {
       floatText.remove();
-    }, 500);
+    }, 400);
   }
 });
