@@ -172,17 +172,27 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch(e) {}
   }
 
-  function drawMarqueeBulb(x, y, index) {
-    const isGold = index % 2 === 0;
+  function drawMarqueeBulb(x, y, colorType) {
+    if (colorType === 0) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(50, 30, 70, 0.4)';
+      ctx.beginPath();
+      ctx.arc(x, y, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      return;
+    }
+
+    const isGold = colorType === 1;
     const bulbColor = isGold ? '#ffaa00' : '#b026ff';
     const glowColor = isGold ? '#ffd700' : '#da70d6';
 
     ctx.save();
     ctx.shadowColor = glowColor;
-    ctx.shadowBlur = 6;
+    ctx.shadowBlur = 10;
     ctx.fillStyle = bulbColor;
     ctx.beginPath();
-    ctx.arc(x, y, 3, 0, Math.PI * 2);
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   }
@@ -198,21 +208,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const w = canvas.width;
     const h = canvas.height;
 
-    // Running Marquee Lights around the Boarder
-    const lightSpacing = 16;
-    const time = Date.now() * 0.005;
-    const offset = Math.floor(time) % 2;
-    let lightIndex = 0;
+    // Running Marquee Train Effect (Outside Boarder / Larger Bulbs)
+    const lightSpacing = 18; 
+    let perimeterCoords = [];
+    
+    for (let x = 12; x < w - 12; x += lightSpacing) perimeterCoords.push({x: x, y: 10});
+    for (let y = 10; y < h - 10; y += lightSpacing) perimeterCoords.push({x: w - 10, y: y});
+    for (let x = w - 12; x > 12; x -= lightSpacing) perimeterCoords.push({x: x, y: h - 10});
+    for (let y = h - 10; y > 10; y -= lightSpacing) perimeterCoords.push({x: 10, y: y});
 
-    for (let x = 10; x < w - 10; x += lightSpacing) { drawMarqueeBulb(x, 8, lightIndex + offset); lightIndex++; }
-    for (let y = 8; y < h - 8; y += lightSpacing) { drawMarqueeBulb(w - 8, y, lightIndex + offset); lightIndex++; }
-    for (let x = w - 10; x > 10; x -= lightSpacing) { drawMarqueeBulb(x, h - 8, lightIndex + offset); lightIndex++; }
-    for (let y = h - 8; y > 8; y -= lightSpacing) { drawMarqueeBulb(8, y, lightIndex + offset); lightIndex++; }
+    const totalBulbs = perimeterCoords.length;
+    const speed = 0.008; 
+    const shift = Math.floor(Date.now() * speed) % totalBulbs;
+    const trainLength = 6; 
 
-    const startYGrid = 35;
-    const rowHeight = (h - 100) / rows;
-    const colSpacing = w / (rows + 3.2);
-
+    for (let i = 0; i < totalBulbs; i++) {
+      let distanceFromHead = (i - shift + totalBulbs) % totalBulbs;
+      let state = 0; 
+      if (distanceFromHead < trainLength) {
+        state = (distanceFromHead % 2 === 0) ? 1 : 2;
+      }
+      drawMarqueeBulb(perimeterCoords[i].x, perimeterCoords[i].y, state);
+    }
+   
+    const startYGrid = 45; // Moved down slightly to clear top marquee lights
+    const rowHeight = (h - 110) / rows;
+    const colSpacing = (w - 40) / (rows + 3.2); // Inset slightly for margins
+    
     // Draw Pegs
     for (let r = 0; r < rows; r++) {
       const pegsInRow = r + 3;
