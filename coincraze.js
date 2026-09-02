@@ -1,4 +1,4 @@
-/* coincraze.js - SLOW PUSHER, CONTROLLED DROP, SINGLE GATED PAYOUT */
+/* coincraze.js - 3D TWO-TIER COIN PUSHER */
 document.addEventListener('DOMContentLoaded', () => {
   let coinKey = 'totalCoins';
 
@@ -6,11 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     coinKey = getUserKey('totalCoins');
   } else {
     const currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
-    const username =
-      currentUser.username ||
-      localStorage.getItem('vinpix_username') ||
-      'default';
-
+    const username = currentUser.username || localStorage.getItem('vinpix_username') || 'default';
     coinKey = `${username}_totalCoins`;
   }
 
@@ -22,11 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     xpKey = getUserKey('totalXP');
   } else {
     const currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
-    const username =
-      currentUser.username ||
-      localStorage.getItem('vinpix_username') ||
-      'default';
-
+    const username = currentUser.username || localStorage.getItem('vinpix_username') || 'default';
     xpKey = `${username}_totalXP`;
   }
 
@@ -52,20 +44,77 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let shakeEnergy = 0;
   let activeItems = [];
-
   let audioCtx = null;
 
   /* =========================================================
-     SINGLE EXIT / GATE
+     TWO-TIER DIMENSIONS
      ========================================================= */
 
-  const EXIT_WIDTH = 74;
-  const GATE_HEIGHT = 9;
-  const GATE_OPEN_TIME = 1150;
-  const GATE_CLOSED_TIME = 1650;
+  const upperTop = 0.16;
+  const upperHeight = 0.28;
+  const lowerTop = 0.45;
+  const lowerHeight = 0.45;
+
+  const EXIT_WIDTH = 76;
+  const GATE_HEIGHT = 10;
 
   let gateOpen = false;
   let gateTimer = null;
+
+  /* =========================================================
+     CREATE LOWER DECK
+     ========================================================= */
+
+  const lowerDeck = document.createElement('div');
+  lowerDeck.className = 'lower-deck';
+
+  const lowerFloor = document.createElement('div');
+  lowerFloor.className = 'lower-deck-floor';
+
+  const lowerFront = document.createElement('div');
+  lowerFront.className = 'lower-deck-front';
+
+  lowerDeck.appendChild(lowerFloor);
+  lowerDeck.appendChild(lowerFront);
+
+  playArea.insertBefore(
+    lowerDeck,
+    pusherPlate
+  );
+
+  /* =========================================================
+     CREATE UPPER DECK
+     ========================================================= */
+
+  const upperDeck = document.createElement('div');
+  upperDeck.className = 'upper-deck';
+
+  const upperFloor = document.createElement('div');
+  upperFloor.className = 'upper-deck-floor';
+
+  const upperFront = document.createElement('div');
+  upperFront.className = 'upper-deck-front';
+
+  upperDeck.appendChild(upperFloor);
+  upperDeck.appendChild(upperFront);
+
+  playArea.insertBefore(
+    upperDeck,
+    pusherPlate
+  );
+
+  /* =========================================================
+     SINGLE CENTER PAYOUT HOLE
+     ========================================================= */
+
+  const exitHole = document.createElement('div');
+  exitHole.className = 'coin-exit-hole';
+
+  const exitInner = document.createElement('div');
+  exitInner.className = 'coin-exit-inner';
+
+  exitHole.appendChild(exitInner);
+  playArea.appendChild(exitHole);
 
   const gate = document.createElement('div');
   gate.className = 'coin-exit-gate';
@@ -76,9 +125,30 @@ document.addEventListener('DOMContentLoaded', () => {
   gate.appendChild(gateGlow);
   playArea.appendChild(gate);
 
-  function positionGate() {
+  function positionMechanicalParts() {
     const width = playArea.clientWidth;
     const height = playArea.clientHeight;
+
+    lowerDeck.style.top =
+      `${height * lowerTop}px`;
+
+    lowerDeck.style.height =
+      `${height * lowerHeight}px`;
+
+    upperDeck.style.top =
+      `${height * upperTop}px`;
+
+    upperDeck.style.height =
+      `${height * upperHeight}px`;
+
+    exitHole.style.left =
+      `${(width - EXIT_WIDTH) / 2}px`;
+
+    exitHole.style.width =
+      `${EXIT_WIDTH}px`;
+
+    exitHole.style.bottom =
+      '0px';
 
     gate.style.left =
       `${(width - EXIT_WIDTH) / 2}px`;
@@ -89,26 +159,32 @@ document.addEventListener('DOMContentLoaded', () => {
     gate.style.height =
       `${GATE_HEIGHT}px`;
 
-    gate.style.bottom = '0px';
-
-    gate.dataset.exitCenter =
-      String(width / 2);
-
-    gate.dataset.exitTop =
-      String(height - GATE_HEIGHT);
+    gate.style.bottom =
+      '0px';
   }
+
+  positionMechanicalParts();
+
+  window.addEventListener(
+    'resize',
+    positionMechanicalParts
+  );
+
+  /* =========================================================
+     GATE
+     ========================================================= */
 
   function setGateState(open) {
     gateOpen = open;
 
     gate.classList.toggle(
       'gate-open',
-      gateOpen
+      open
     );
 
     gate.classList.toggle(
       'gate-closed',
-      !gateOpen
+      !open
     );
   }
 
@@ -127,24 +203,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         gateTimer = setTimeout(
           cycle,
-          GATE_CLOSED_TIME
+          1500
         );
-      }, GATE_OPEN_TIME);
+      }, 1100);
     }
 
     gateTimer = setTimeout(
       cycle,
-      GATE_CLOSED_TIME
+      1500
     );
   }
 
-  positionGate();
   startGateCycle();
-
-  window.addEventListener(
-    'resize',
-    positionGate
-  );
 
   /* =========================================================
      AUDIO
@@ -167,7 +237,6 @@ document.addEventListener('DOMContentLoaded', () => {
   window.playSound = function(type) {
     try {
       const ctx = getAudioContext();
-
       if (!ctx) return;
 
       if (ctx.state === 'suspended') {
@@ -273,18 +342,22 @@ document.addEventListener('DOMContentLoaded', () => {
      ========================================================= */
 
   function saveGameState() {
-    const stateData = activeItems
-      .filter(item => item.state !== 'payout')
-      .map(item => ({
-        x: item.x,
-        y: item.y,
-        vx: 0,
-        vy: 0,
-        type: item.type,
-        value: item.value,
-        sizeClass: item.sizeClass,
-        state: 'resting'
-      }));
+    const stateData =
+      activeItems
+        .filter(item =>
+          item.state !== 'payout'
+        )
+        .map(item => ({
+          x: item.x,
+          y: item.y,
+          vx: 0,
+          vy: 0,
+          type: item.type,
+          value: item.value,
+          sizeClass: item.sizeClass,
+          deck: item.deck,
+          state: 'resting'
+        }));
 
     try {
       localStorage.setItem(
@@ -295,26 +368,31 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const savedItemsJson =
-    localStorage.getItem(storageItemsKey);
+    localStorage.getItem(
+      storageItemsKey
+    );
 
   if (savedItemsJson) {
     try {
-      const parsedItems =
-        JSON.parse(savedItemsJson);
+      const parsed =
+        JSON.parse(
+          savedItemsJson
+        );
 
       if (
-        Array.isArray(parsedItems) &&
-        parsedItems.length > 0
+        Array.isArray(parsed) &&
+        parsed.length
       ) {
-        parsedItems.forEach(itemData => {
+        parsed.forEach(data => {
           spawnItem(
-            Number(itemData.x) || 20,
-            Number(itemData.y) || 20,
-            itemData.type || 'coin',
-            Number(itemData.value) || 5,
-            itemData.sizeClass || 'medium',
+            Number(data.x) || 20,
+            Number(data.y) || 20,
+            data.type || 'coin',
+            Number(data.value) || 5,
+            data.sizeClass || 'medium',
             false,
-            'resting'
+            'resting',
+            data.deck || 'lower'
           );
         });
       } else {
@@ -328,32 +406,44 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function initPreloadedItems() {
-    const width = playArea.clientWidth;
-    const height = playArea.clientHeight;
-    const radius = NORMAL_COIN_RADIUS;
+    const width =
+      playArea.clientWidth;
+
+    const height =
+      playArea.clientHeight;
+
+    const radius =
+      NORMAL_COIN_RADIUS;
 
     for (let i = 0; i < 24; i++) {
       let x = radius;
-      let y = height * 0.48;
+      let y = height * 0.60;
       let valid = false;
 
-      for (let attempt = 0; attempt < 80; attempt++) {
+      for (
+        let attempt = 0;
+        attempt < 100;
+        attempt++
+      ) {
         x =
           radius +
           Math.random() *
           Math.max(
             1,
-            width - radius * 2
+            width -
+            radius * 2
           );
 
         y =
-          height * 0.58 +
+          height * 0.55 +
           Math.random() *
-          (height * 0.22);
+          height * 0.22;
 
         valid = true;
 
-        for (const other of activeItems) {
+        for (
+          const other of activeItems
+        ) {
           const dx =
             x - other.x;
 
@@ -387,7 +477,8 @@ document.addEventListener('DOMContentLoaded', () => {
         5,
         'medium',
         false,
-        'resting'
+        'resting',
+        'lower'
       );
     }
 
@@ -395,7 +486,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* =========================================================
-     SHAKE ENERGY
+     SHAKE
      ========================================================= */
 
   function addShakeEnergy(amount) {
@@ -427,16 +518,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* =========================================================
-     SLOW PUSHER
+     PUSHER MOVEMENT
      ========================================================= */
 
   let pusherZ = 0;
   let pusherDirection = 1;
 
-  const PUSHER_SPEED = 1.75;
+  const PUSHER_SPEED = 1.45;
   const MAX_PUSH_DISTANCE = 30;
 
-  let lastTime = performance.now();
+  let lastTime =
+    performance.now();
+
   let saveClock = 0;
 
   function updatePusher(now) {
@@ -478,8 +571,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const subSteps = 3;
-    const stepDt =
-      dt / subSteps;
 
     for (
       let s = 0;
@@ -487,7 +578,7 @@ document.addEventListener('DOMContentLoaded', () => {
       s++
     ) {
       updatePhysics(
-        stepDt,
+        dt / subSteps,
         playArea.clientWidth,
         playArea.clientHeight
       );
@@ -522,8 +613,21 @@ document.addEventListener('DOMContentLoaded', () => {
       activeItems.filter(
         item =>
           item.state === 'resting' ||
-          item.state === 'falling'
+          item.state === 'falling' ||
+          item.state === 'transition'
       );
+
+    const upperBottom =
+      height *
+      (upperTop + upperHeight);
+
+    const lowerBottom =
+      height *
+      (lowerTop + lowerHeight);
+
+    const lowerSurface =
+      lowerBottom -
+      12;
 
     const exitCenter =
       width / 2;
@@ -531,27 +635,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const exitHalf =
       EXIT_WIDTH / 2;
 
-    const bottomY =
-      height;
-
     /* =====================================================
-       FALLING ITEMS
+       FALLING / TRANSITION
        ===================================================== */
 
     for (const item of items) {
       if (
-        item.state !== 'falling'
+        item.state !== 'falling' &&
+        item.state !== 'transition'
       ) {
         continue;
       }
 
       item.vy +=
         (item.type === 'xp'
-          ? 0.85
-          : 0.95) * dt;
+          ? 0.8
+          : 0.9) * dt;
 
-      if (item.vy > 18) {
-        item.vy = 18;
+      if (item.vy > 15) {
+        item.vy = 15;
       }
 
       item.x +=
@@ -560,8 +662,6 @@ document.addEventListener('DOMContentLoaded', () => {
       item.y +=
         item.vy * dt;
 
-      /* SIDE WALLS */
-
       if (
         item.x <
         item.radius
@@ -569,10 +669,7 @@ document.addEventListener('DOMContentLoaded', () => {
         item.x =
           item.radius;
 
-        item.vx =
-          Math.abs(
-            item.vx
-          ) * 0.2;
+        item.vx *= -0.2;
       }
 
       if (
@@ -584,79 +681,156 @@ document.addEventListener('DOMContentLoaded', () => {
           width -
           item.radius;
 
-        item.vx =
-          -Math.abs(
-            item.vx
-          ) * 0.2;
+        item.vx *= -0.2;
       }
 
       /*
-        Do NOT immediately turn a falling coin
-        into a resting coin just because it entered.
-        It must actually land on something.
+        Upper deck edge:
+        falling items pass through the front
+        and land on the lower deck.
       */
 
       if (
         item.y >=
-        height * 0.14
+        upperBottom
       ) {
         item.state =
-          'resting';
+          'transition';
 
-        item.vy *= 0.25;
+        if (
+          item.y >=
+          lowerTop * height -
+          item.radius
+        ) {
+          item.state =
+            'resting';
+
+          item.deck =
+            'lower';
+
+          item.y =
+            Math.min(
+              item.y,
+              lowerSurface -
+              item.radius
+            );
+
+          item.vy *= 0.12;
+        }
       }
 
       renderItem(item);
     }
 
     /* =====================================================
-       PUSHER CONTACT
+       UPPER DECK
        ===================================================== */
 
-    const plateCenterY =
-      height * 0.14 +
-      pusherZ +
-      18;
+    for (const item of items) {
+      if (
+        item.state !== 'resting' ||
+        item.deck !== 'upper'
+      ) {
+        continue;
+      }
 
-    const plateBottomY =
-      plateCenterY + 18;
+      const upperFloor =
+        height *
+        upperTop +
+        height *
+        upperHeight -
+        14;
 
-    if (
-      pusherDirection > 0
-    ) {
-      for (const item of items) {
-        if (
-          item.state !==
-          'resting'
-        ) {
-          continue;
+      const movingFront =
+        upperFloor +
+        pusherZ;
+
+      /*
+        Upper deck is a raised tray.
+        Coins are supported by its floor.
+      */
+
+      if (
+        item.y +
+        item.radius >=
+        upperFloor
+      ) {
+        item.y =
+          upperFloor -
+          item.radius;
+
+        if (item.vy > 0) {
+          item.vy *= -0.08;
         }
 
+        item.vy *= 0.9;
+      }
+
+      /*
+        Slow gravity while resting on upper deck.
+      */
+
+      item.vy +=
+        0.12 * dt;
+
+      /*
+        Pusher physically moves coins
+        toward the front of the upper deck.
+      */
+
+      if (
+        pusherDirection > 0
+      ) {
         const distance =
           Math.abs(
             item.y -
-            plateBottomY
+            movingFront
           );
 
         if (
           distance <
-          item.radius + 10
+          item.radius + 12
         ) {
           item.vy +=
             PUSHER_SPEED *
-            0.75 *
+            0.65 *
             dt;
-
-          item.vx +=
-            (Math.random() - 0.5) *
-            0.018;
         }
       }
+
+      /*
+        Coins reaching the upper front
+        fall to the lower deck.
+      */
+
+      if (
+        item.y >
+        upperFloor -
+        item.radius * 0.35
+      ) {
+        item.state =
+          'falling';
+
+        item.deck =
+          'transition';
+
+        item.vy =
+          2.5;
+      }
+
+      renderItem(item);
     }
 
     /* =====================================================
-       SPATIAL HASH
+       LOWER DECK COLLISIONS
        ===================================================== */
+
+    const lowerItems =
+      items.filter(
+        item =>
+          item.state === 'resting' &&
+          item.deck !== 'upper'
+      );
 
     const cellSize =
       NORMAL_COIN_SIZE + 8;
@@ -665,20 +839,15 @@ document.addEventListener('DOMContentLoaded', () => {
       new Map();
 
     function gridKey(
-      gx,
-      gy
+      x,
+      y
     ) {
-      return `${gx},${gy}`;
+      return `${x},${y}`;
     }
 
-    for (const item of items) {
-      if (
-        item.state !==
-        'resting'
-      ) {
-        continue;
-      }
-
+    for (
+      const item of lowerItems
+    ) {
       const gx =
         Math.floor(
           item.x /
@@ -697,37 +866,26 @@ document.addEventListener('DOMContentLoaded', () => {
           gy
         );
 
-      let bucket =
-        grid.get(key);
-
-      if (!bucket) {
-        bucket = [];
+      if (!grid.has(key)) {
         grid.set(
           key,
-          bucket
+          []
         );
       }
 
-      bucket.push(item);
+      grid.get(key).push(
+        item
+      );
     }
-
-    /* =====================================================
-       COIN COLLISIONS
-       ===================================================== */
 
     for (
       let pass = 0;
       pass < 3;
       pass++
     ) {
-      for (const a of items) {
-        if (
-          a.state !==
-          'resting'
-        ) {
-          continue;
-        }
-
+      for (
+        const a of lowerItems
+      ) {
         const agx =
           Math.floor(
             a.x /
@@ -766,21 +924,12 @@ document.addEventListener('DOMContentLoaded', () => {
               continue;
             }
 
-            for (const b of bucket) {
-              if (a === b) {
-                continue;
-              }
-
+            for (
+              const b of bucket
+            ) {
               if (
-                b.state !==
-                'resting'
-              ) {
-                continue;
-              }
-
-              if (
-                a.id >
-                b.id
+                a === b ||
+                a.id > b.id
               ) {
                 continue;
               }
@@ -791,45 +940,40 @@ document.addEventListener('DOMContentLoaded', () => {
               let dy =
                 b.y - a.y;
 
-              let distanceSq =
+              let d2 =
                 dx * dx +
                 dy * dy;
 
               if (
-                distanceSq <
+                d2 <
                 0.000001
               ) {
                 dx = 0.01;
                 dy = 0;
-                distanceSq =
-                  0.0001;
+                d2 = 0.0001;
               }
 
-              const distance =
-                Math.sqrt(
-                  distanceSq
-                );
+              const d =
+                Math.sqrt(d2);
 
-              const minimumDistance =
+              const minD =
                 a.radius +
                 b.radius;
 
               if (
-                distance >=
-                minimumDistance
+                d >= minD
               ) {
                 continue;
               }
 
               const nx =
-                dx / distance;
+                dx / d;
 
               const ny =
-                dy / distance;
+                dy / d;
 
               const overlap =
-                minimumDistance -
-                distance;
+                minD - d;
 
               const correction =
                 overlap * 0.51;
@@ -847,12 +991,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 ny * correction;
 
               const rvx =
-                b.vx -
-                a.vx;
+                b.vx - a.vx;
 
               const rvy =
-                b.vy -
-                a.vy;
+                b.vy - a.vy;
 
               const normalVelocity =
                 rvx * nx +
@@ -870,44 +1012,18 @@ document.addEventListener('DOMContentLoaded', () => {
                   normalVelocity /
                   2;
 
-                const ix =
+                a.vx -=
                   impulse * nx;
 
-                const iy =
+                a.vy -=
                   impulse * ny;
 
-                a.vx -= ix;
-                a.vy -= iy;
+                b.vx +=
+                  impulse * nx;
 
-                b.vx += ix;
-                b.vy += iy;
+                b.vy +=
+                  impulse * ny;
               }
-
-              const tx =
-                -ny;
-
-              const ty =
-                nx;
-
-              const tangentVelocity =
-                rvx * tx +
-                rvy * ty;
-
-              const friction =
-                tangentVelocity *
-                0.035;
-
-              a.vx +=
-                friction * tx;
-
-              a.vy +=
-                friction * ty;
-
-              b.vx -=
-                friction * tx;
-
-              b.vy -=
-                friction * ty;
 
               a.vx *= 0.998;
               a.vy *= 0.998;
@@ -921,16 +1037,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* =====================================================
-       MOVE RESTING ITEMS
+       LOWER DECK MOVEMENT
        ===================================================== */
 
-    for (const item of items) {
-      if (
-        item.state !==
-        'resting'
-      ) {
-        continue;
-      }
+    for (
+      const item of lowerItems
+    ) {
+      item.vy +=
+        0.10 * dt;
 
       item.x +=
         item.vx * dt;
@@ -940,13 +1054,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       item.vx *=
         Math.pow(
-          0.972,
+          0.968,
           dt
         );
 
       item.vy *=
         Math.pow(
-          0.982,
+          0.978,
           dt
         );
 
@@ -964,28 +1078,7 @@ document.addEventListener('DOMContentLoaded', () => {
         item.vy = 0;
       }
 
-      const maxVelocity =
-        14;
-
-      item.vx =
-        Math.max(
-          -maxVelocity,
-          Math.min(
-            maxVelocity,
-            item.vx
-          )
-        );
-
-      item.vy =
-        Math.max(
-          -maxVelocity,
-          Math.min(
-            maxVelocity,
-            item.vy
-          )
-        );
-
-      /* LEFT WALL */
+      /* SIDE WALLS */
 
       if (
         item.x <
@@ -997,10 +1090,8 @@ document.addEventListener('DOMContentLoaded', () => {
         item.vx =
           Math.abs(
             item.vx
-          ) * 0.35;
+          ) * 0.3;
       }
-
-      /* RIGHT WALL */
 
       if (
         item.x >
@@ -1014,31 +1105,14 @@ document.addEventListener('DOMContentLoaded', () => {
         item.vx =
           -Math.abs(
             item.vx
-          ) * 0.35;
+          ) * 0.3;
       }
 
-      /* TOP WALL */
+      /*
+        LOWER FLOOR
 
-      if (
-        item.y <
-        item.radius
-      ) {
-        item.y =
-          item.radius;
-
-        item.vy =
-          Math.abs(
-            item.vy
-          ) * 0.15;
-      }
-
-      /* ===================================================
-         BOTTOM FLOOR + SINGLE EXIT
-         =================================================== */
-
-      const itemBottom =
-        item.y +
-        item.radius;
+        The center hole is the ONLY opening.
+      */
 
       const insideExit =
         Math.abs(
@@ -1046,17 +1120,16 @@ document.addEventListener('DOMContentLoaded', () => {
           exitCenter
         ) <=
         exitHalf -
-        item.radius * 0.15;
+        item.radius * 0.1;
+
+      const bottomLimit =
+        height -
+        item.radius;
 
       if (
-        itemBottom >=
-        bottomY
+        item.y >
+        bottomLimit
       ) {
-        /*
-          ONLY the center opening is allowed
-          to become a payout.
-        */
-
         if (
           insideExit &&
           gateOpen
@@ -1066,18 +1139,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         /*
-          Closed gate OR outside the hole:
-          solid bottom floor.
+          Solid floor everywhere except
+          the center hole.
         */
 
         item.y =
-          height -
-          item.radius;
-
-        /*
-          Stop downward motion instead of
-          allowing the coin to escape.
-        */
+          bottomLimit;
 
         if (
           item.vy > 0
@@ -1088,12 +1155,37 @@ document.addEventListener('DOMContentLoaded', () => {
         item.vx *= 0.94;
       }
 
+      /*
+        LOWER PUSH EFFECT
+
+        The moving upper mechanism transfers
+        pressure onto the lower coin field.
+      */
+
+      if (
+        pusherDirection > 0
+      ) {
+        const pressureZone =
+          height *
+          0.57;
+
+        if (
+          item.y >
+          pressureZone
+        ) {
+          item.vy +=
+            PUSHER_SPEED *
+            0.28 *
+            dt;
+        }
+      }
+
       renderItem(item);
     }
   }
 
   /* =========================================================
-     RENDER ITEM
+     RENDER
      ========================================================= */
 
   function renderItem(item) {
@@ -1123,8 +1215,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     item.element.style.zIndex =
       item.type === 'xp'
-        ? '20'
-        : '10';
+        ? '30'
+        : '20';
   }
 
   /* =========================================================
@@ -1184,8 +1276,7 @@ document.addEventListener('DOMContentLoaded', () => {
           Math.max(
             1,
             width -
-            NORMAL_COIN_RADIUS *
-            2
+            NORMAL_COIN_RADIUS * 2
           );
 
         spawnItem(
@@ -1195,7 +1286,8 @@ document.addEventListener('DOMContentLoaded', () => {
           5,
           'medium',
           true,
-          'falling'
+          'falling',
+          'upper'
         );
       }
     );
@@ -1253,7 +1345,7 @@ document.addEventListener('DOMContentLoaded', () => {
   );
 
   /* =========================================================
-     XP BONUS
+     XP
      ========================================================= */
 
   function spawnBonusXP() {
@@ -1276,7 +1368,8 @@ document.addEventListener('DOMContentLoaded', () => {
       XP_REWARD,
       'xp',
       true,
-      'falling'
+      'falling',
+      'upper'
     );
 
     playSound('win');
@@ -1353,7 +1446,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* =========================================================
-     SPAWN ITEM
+     SPAWN
      ========================================================= */
 
   function spawnItem(
@@ -1363,7 +1456,8 @@ document.addEventListener('DOMContentLoaded', () => {
     value,
     sizeClass,
     isFalling,
-    initialState
+    initialState,
+    deck
   ) {
     const itemEl =
       document.createElement(
@@ -1382,11 +1476,6 @@ document.addEventListener('DOMContentLoaded', () => {
       itemEl.className =
         'pusher-item xp-bonus';
 
-      /*
-        Use an actual IMG element so xp.png
-        renders reliably on mobile browsers.
-      */
-
       const xpImg =
         document.createElement(
           'img'
@@ -1397,7 +1486,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       xpImg.alt = '';
 
-      xpImg.draggable = false;
+      xpImg.draggable =
+        false;
 
       xpImg.style.width =
         '100%';
@@ -1446,7 +1536,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "url('image/coin.png')";
 
       itemEl.style.backgroundSize =
-        'contain';
+        '100% 100%';
 
       itemEl.style.backgroundRepeat =
         'no-repeat';
@@ -1504,12 +1594,15 @@ document.addEventListener('DOMContentLoaded', () => {
       vx: 0,
       vy: 0,
 
-      size: size,
-      radius: radius,
+      size,
+      radius,
 
-      type: type,
-      value: value,
-      sizeClass: sizeClass,
+      type,
+      value,
+      sizeClass,
+
+      deck:
+        deck || 'lower',
 
       state:
         initialState ||
@@ -1523,12 +1616,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isFalling) {
       itemData.vy =
         type === 'xp'
-          ? 9
-          : 10;
+          ? 8
+          : 9;
 
       itemData.vx =
         (Math.random() - 0.5) *
-        0.7;
+        0.6;
     }
 
     activeItems.push(
@@ -1610,8 +1703,7 @@ document.addEventListener('DOMContentLoaded', () => {
       activeItems =
         activeItems.filter(
           item =>
-            item !==
-            itemData
+            item !== itemData
         );
 
       saveGameState();
@@ -1619,7 +1711,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* =========================================================
-     FLOATING WIN
+     FLOATING SCORE
      ========================================================= */
 
   function showFloatingScore(
@@ -1659,9 +1751,6 @@ document.addEventListener('DOMContentLoaded', () => {
     floatText.style.whiteSpace =
       'nowrap';
 
-    floatText.style.visibility =
-      'visible';
-
     playArea.appendChild(
       floatText
     );
@@ -1680,15 +1769,9 @@ document.addEventListener('DOMContentLoaded', () => {
     );
 
     setTimeout(() => {
-      if (floatText) {
-        floatText.remove();
-      }
+      floatText.remove();
     }, 450);
   }
-
-  /* =========================================================
-     SAVE
-     ========================================================= */
 
   window.addEventListener(
     'beforeunload',
