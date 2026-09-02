@@ -197,9 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.restore();
   }
 
-
-
-function updatePhysics() {
+  function updatePhysics() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     const config = difficultyConfigs[currentDifficulty];
@@ -233,10 +231,9 @@ function updatePhysics() {
       drawMarqueeBulb(perimeterCoords[i].x, perimeterCoords[i].y, state);
     }
    
-    const startYGrid = 45; 
+    const startYGrid = 45; // Moved down slightly to clear top marquee lights
     const rowHeight = (h - 110) / rows;
-    const baseColSpacing = (w - 28) / (rows + 3.2);
-    const colSpacing = baseColSpacing * 1.25;
+    const colSpacing = (w - 40) / (rows + 3.2); // Inset slightly for margins
     
     // Draw Pegs
     for (let r = 0; r < rows; r++) {
@@ -354,3 +351,6 @@ function updatePhysics() {
 
     requestAnimationFrame(updatePhysics);
   }
+
+  requestAnimationFrame(updatePhysics);
+});
