@@ -199,7 +199,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-
 function updatePhysics() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -237,7 +236,7 @@ function updatePhysics() {
     const startYGrid = 45; 
     const rowHeight = (h - 110) / rows;
     const baseColSpacing = (w - 28) / (rows + 3.2);
-    const colSpacing = baseColSpacing * 1.25; // Shared globally for this frame
+    const colSpacing = baseColSpacing * 1.25;
     
     // Draw Pegs
     for (let r = 0; r < rows; r++) {
@@ -355,5 +354,3 @@ function updatePhysics() {
 
     requestAnimationFrame(updatePhysics);
   }
-  
-                          
