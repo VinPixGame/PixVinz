@@ -233,12 +233,13 @@ document.addEventListener('DOMContentLoaded', () => {
    
     const startYGrid = 45; // Moved down slightly to clear top marquee lights
     const rowHeight = (h - 110) / rows;
-    const colSpacing = (w - 40) / (rows + 3.2); // Inset slightly for margins
+    const baseColSpacing = (w - 28) / (rows + 3.2);
     
     // Draw Pegs
     for (let r = 0; r < rows; r++) {
       const pegsInRow = r + 3;
-      const rowWidth = (pegsInRow - 1) * colSpacing * 1.25;
+      const colSpacing = baseColSpacing * 1.25;
+      const rowWidth = (pegsInRow - 1) * colSpacing;
       const startX = (w - rowWidth) / 2;
       const y = startYGrid + r * rowHeight;
 
