@@ -1,3 +1,4 @@
+/* coincraze.js */
 document.addEventListener('DOMContentLoaded', () => {
   let coinKey = 'totalCoins';
   if (typeof getUserKey === 'function') {
@@ -49,34 +50,34 @@ document.addEventListener('DOMContentLoaded', () => {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(600, now);
         osc.frequency.exponentialRampToValueAtTime(800, now + 0.04);
-        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.setValueAtTime(0.1, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
         osc.start(now);
         osc.stop(now + 0.04);
       } else if (type === 'drop') {
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(350, now);
-        osc.frequency.exponentialRampToValueAtTime(160, now + 0.12);
-        gain.gain.setValueAtTime(0.25, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+        osc.frequency.exponentialRampToValueAtTime(160, now + 0.1);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
         osc.start(now);
-        osc.stop(now + 0.12);
+        osc.stop(now + 0.1);
       } else if (type === 'win') {
         osc.type = 'square';
         osc.frequency.setValueAtTime(440, now);
         osc.frequency.setValueAtTime(659.25, now + 0.06);
-        gain.gain.setValueAtTime(0.18, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
         osc.start(now);
-        osc.stop(now + 0.25);
+        osc.stop(now + 0.2);
       } else if (type === 'error') {
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(150, now);
-        osc.frequency.setValueAtTime(90, now + 0.1);
+        osc.frequency.setValueAtTime(90, now + 0.08);
         gain.gain.setValueAtTime(0.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
         osc.start(now);
-        osc.stop(now + 0.18);
+        osc.stop(now + 0.15);
       }
     } catch (e) {}
   };
@@ -122,18 +123,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const playWidth = playArea.clientWidth;
     const playHeight = playArea.clientHeight;
     
-    // Preload pile of standard coins below the pusher plate
-    for (let i = 0; i < 40; i++) {
-      const rx = Math.random() * (playWidth - 40) + 20;
-      const ry = playHeight * 0.52 + Math.random() * (playHeight * 0.38);
-      
-      let sizeClass = 'medium';
-      let value = 15;
-      const rand = Math.random();
-      if (rand > 0.7) { sizeClass = 'large'; value = 25; }
-      else if (rand < 0.3) { sizeClass = 'small'; value = 10; }
-
-      spawnItem(rx, ry, 'coin', value, sizeClass, false, 'resting');
+    // Initial pile of standard 5-value coins
+    for (let i = 0; i < 38; i++) {
+      const rx = Math.random() * (playWidth - 35) + 15;
+      const ry = playHeight * 0.50 + Math.random() * (playHeight * 0.38);
+      spawnItem(rx, ry, 'coin', 5, 'medium', false, 'resting');
     }
     saveGameState();
   }
@@ -154,11 +148,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Fast Pusher Mechanism with Real Physics Collision
+  // Pusher Mechanism with True Static Physics (Coins stay completely frozen unless touched by pusher or colliding coins)
   let pusherZ = 0;
   let pusherDirection = 1;
-  const pusherSpeed = 1.6; // Much faster speed
-  const maxPushDistance = 50;
+  const pusherSpeed = 1.4;
+  const maxPushDistance = 45;
 
   function updatePusher() {
     pusherZ += pusherSpeed * pusherDirection;
@@ -168,35 +162,40 @@ document.addEventListener('DOMContentLoaded', () => {
     pusherPlate.style.transform = `translateX(-50%) translateY(${pusherZ}px)`;
 
     const playAreaHeight = playArea.clientHeight;
-    const pusherEdgeY = (playAreaHeight * 0.34) + pusherZ + 60; // Front edge of moving pusher plate
+    const pusherFrontEdgeY = (playAreaHeight * 0.32) + pusherZ + 55;
     let stateChanged = false;
 
     activeItems.forEach(item => {
       if (item.state === 'resting') {
-        // Real physics: Coins below/touching the pusher plate only move when struck by the moving pusher
-        if (pusherDirection > 0 && item.y <= pusherEdgeY + 8 && item.y >= pusherEdgeY - 14) {
-          item.y += pusherSpeed * 1.2;
-          item.element.style.top = `${item.y}px`;
-          stateChanged = true;
+        let moved = false;
+
+        // 1. Check if physical pusher plate strikes the coin from behind
+        if (pusherDirection > 0 && item.y >= pusherFrontEdgeY - 8 && item.y <= pusherFrontEdgeY + 6) {
+          item.y += pusherSpeed;
+          moved = true;
         }
 
-        // Check chain collisions with neighboring items
+        // 2. Check collision transfer from other moving/colliding coins
         activeItems.forEach(other => {
           if (other !== item && other.state === 'resting') {
             const dx = item.x - other.x;
             const dy = item.y - other.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 28 && other.y > item.y) {
-              // Push forward slightly if pressed by another coin
-              item.y += 0.15;
-              item.element.style.top = `${item.y}px`;
-              stateChanged = true;
+            // If another coin is pressing closely behind it towards the front edge
+            if (dist < 26 && other.y > item.y && other.y - item.y < 22) {
+              item.y += 0.2;
+              moved = true;
             }
           }
         });
 
-        // Payout line trigger
-        if (item.y >= playAreaHeight - 40) {
+        if (moved) {
+          item.element.style.top = `${item.y}px`;
+          stateChanged = true;
+        }
+
+        // Payout edge check
+        if (item.y >= playAreaHeight - 35) {
           triggerPayout(item);
           stateChanged = true;
         }
@@ -212,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   requestAnimationFrame(updatePusher);
 
-  // Manual Coin Drop: COINS ONLY (No Diamonds)
+  // Manual Coin Drop: Exactly ONE size, value = 5 coins! No diamonds on manual drop.
   dropCoinBtn.addEventListener('click', () => {
     if (coinCount < DROP_COST) {
       playSound('error');
@@ -226,15 +225,10 @@ document.addEventListener('DOMContentLoaded', () => {
     addShakeEnergy(6);
 
     const playWidth = playArea.clientWidth;
-    const randomX = Math.random() * (playWidth - 40) + 20;
+    const randomX = Math.random() * (playWidth - 35) + 15;
     
-    let sizeClass = 'medium';
-    let value = 15;
-    const rand = Math.random();
-    if (rand > 0.75) { sizeClass = 'large'; value = 25; }
-    else if (rand < 0.3) { sizeClass = 'small'; value = 10; }
-
-    spawnItem(randomX, 10, 'coin', value, sizeClass, true, 'falling');
+    // Always standard coin, 5 value
+    spawnItem(randomX, 10, 'coin', 5, 'medium', true, 'falling');
   });
 
   // 3-Minute Automated Rare Diamond Bonus Drop Timer
@@ -242,8 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(() => {
     const now = Date.now();
     const lastDiamondTime = parseInt(localStorage.getItem(DIAMOND_TIMER_KEY)) || 0;
-    // 3 minutes = 180,000 ms
-    if (now - lastDiamondTime >= 180000) {
+    if (now - lastDiamondTime >= 180000) { // 3 minutes
       localStorage.setItem(DIAMOND_TIMER_KEY, now.toString());
       spawnBonusDiamond();
     }
@@ -251,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function spawnBonusDiamond() {
     const playWidth = playArea.clientWidth;
-    const randomX = Math.random() * (playWidth - 40) + 20;
+    const randomX = Math.random() * (playWidth - 35) + 15;
     spawnItem(randomX, 10, 'diamond', 100, 'large', true, 'falling');
     playSound('win');
   }
@@ -265,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     activeItems.forEach(item => {
       if (item.state === 'resting') {
-        item.y += Math.random() * 22 + 8;
+        item.y += Math.random() * 18 + 6;
         item.element.style.top = `${item.y}px`;
       }
     });
@@ -283,13 +276,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const itemEl = document.createElement('div');
     itemEl.className = `pusher-item ${sizeClass}`;
     itemEl.textContent = type === 'diamond' ? '💎' : '🪙';
-    itemEl.style.left = `${startX - 15}px`;
+    itemEl.style.left = `${startX - 14}px`;
     itemEl.style.top = `${startY}px`;
     playArea.appendChild(itemEl);
 
     const itemData = {
       element: itemEl,
-      x: startX - 15,
+      x: startX - 14,
       y: startY,
       type: type,
       value: value,
@@ -301,12 +294,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (isFalling) {
       let velocityY = 2;
-      const targetY = playArea.clientHeight * 0.48; // Fast drop landing safely behind pile
+      const targetY = playArea.clientHeight * 0.46; // Lands securely behind the pile
 
       function fall() {
         if (itemData.state === 'falling') {
           if (itemData.y < targetY) {
-            velocityY += 1.2; // Snappy fast drop speed
+            velocityY += 1.2;
             itemData.y += velocityY;
             itemData.element.style.top = `${itemData.y}px`;
             requestAnimationFrame(fall);
@@ -327,17 +320,17 @@ document.addEventListener('DOMContentLoaded', () => {
     itemData.state = 'payout';
 
     itemData.element.classList.add('payout');
-    coinCount += itemData.value;
+    coinCount += itemData.value; // Gives exact value (5 for standard coin)
     updateBalanceDisplay();
 
     playSound('win');
-    showFloatingScore(itemData.x, playArea.clientHeight - 35, itemData.value);
+    showFloatingScore(itemData.x, playArea.clientHeight - 30, itemData.value);
 
     setTimeout(() => {
       itemData.element.remove();
       activeItems = activeItems.filter(i => i !== itemData);
       saveGameState();
-    }, 500);
+    }, 400);
   }
 
   function showFloatingScore(x, y, value) {
@@ -350,6 +343,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setTimeout(() => {
       floatText.remove();
-    }, 700);
+    }, 600);
   }
 });
