@@ -1,4 +1,4 @@
-/* coincraze.css - 2cm Side Gaps, Full Screen Fit, Untouched Top Bar, Perfect Behind-Pusher Drop */
+/* coincraze.css - 3D Playfield Tray, Symmetric Control Deck, Zero-Lag Physics */
 
 body {
   background-color: #0d0614;
@@ -86,24 +86,23 @@ body {
 
 .coin-pusher-container {
   position: relative;
-  width: calc(100% - 40px); /* Exactly 20px (approx 2cm) gap on each side */
+  width: calc(100% - 40px); /* Exactly 2cm gap on each side */
   max-width: 480px;
   height: 100%;
-  max-height: calc(100vh - 68px); /* Sized perfectly to keep top bar close and control deck fully visible */
+  max-height: calc(100vh - 68px);
   aspect-ratio: 9 / 16;
   margin: 0 auto;
 }
 
 .coin-pusher-container.shake-anim {
-  animation: screenShake 0.4s ease-in-out;
+  animation: screenShake 0.3s ease-in-out;
 }
 
 @keyframes screenShake {
   0% { transform: translate(0, 0); }
-  20% { transform: translate(-4px, 2px); }
-  40% { transform: translate(4px, -2px); }
-  60% { transform: translate(-2px, -1px); }
-  80% { transform: translate(2px, 1px); }
+  25% { transform: translate(-4px, 3px); }
+  50% { transform: translate(4px, -3px); }
+  75% { transform: translate(-2px, 1px); }
   100% { transform: translate(0, 0); }
 }
 
@@ -113,43 +112,45 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: fill; /* Stretches cleanly to fill the 2cm-padded container */
+  object-fit: fill;
   pointer-events: none;
   z-index: 5;
 }
 
-/* RED TABLE PLAYFIELD ALIGNED WITH CABINET BED */
+/* 3D RAISED RED PLAYFIELD TRAY (Left, Right, Bottom Visible Edges) */
 .game-play-area {
   position: absolute;
-  top: 25.5%;
-  left: 11%;
-  right: 11%;
+  top: 21%;
+  left: 10%;
+  right: 10%;
   bottom: 15%;
-  background: linear-gradient(180deg, #991111 0%, #6e0808 50%, #400202 100%);
-  border-left: 4px solid #210101;
-  border-right: 4px solid #210101;
-  border-bottom: 6px solid #140000;
-  border-radius: 4px;
+  background: linear-gradient(180deg, #8a0c0c 0%, #5e0505 50%, #380101 100%);
+  /* Heavy 3D raised borders giving physical depth on left, right, and bottom */
+  border-left: 6px solid #4a0404;
+  border-right: 6px solid #2b0101;
+  border-bottom: 8px solid #1a0000;
+  border-top: 3px solid rgba(0, 0, 0, 0.6);
+  border-radius: 6px;
   overflow: hidden;
   z-index: 2;
-  box-shadow: inset 0 10px 18px rgba(0, 0, 0, 0.85), inset 0 -4px 8px rgba(0, 0, 0, 0.7);
+  box-shadow: inset 0 8px 16px rgba(0, 0, 0, 0.9), 0 6px 12px rgba(0, 0, 0, 0.7);
 }
 
 /* 3D MECHANICAL PUSHER PLATE */
 .pusher-plate {
   position: absolute;
-  top: 18%;
+  top: 14%;
   left: 50%;
   transform: translateX(-50%);
-  width: 82%;
-  height: 40px;
-  background: linear-gradient(135deg, #e6ca65 0%, #c59b27 40%, #85630b 100%);
-  border-top: 2px solid #fff8dc;
-  border-left: 2px solid #e6ca65;
+  width: 84%;
+  height: 38px;
+  background: linear-gradient(135deg, #f3e08b 0%, #d4af37 40%, #99710f 100%);
+  border-top: 2px solid #fffdf0;
+  border-left: 2px solid #dfbd43;
   border-right: 2px solid #85630b;
-  border-bottom: 4px solid #4a3605;
+  border-bottom: 4px solid #523c05;
   border-radius: 4px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.9), inset 0 2px 3px rgba(255, 255, 255, 0.7);
+  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.85), inset 0 2px 4px rgba(255, 255, 255, 0.7);
   z-index: 1; 
 }
 
@@ -192,7 +193,7 @@ body {
 }
 
 .pusher-item.payout {
-  animation: itemWin 0.35s forwards ease-in-out;
+  animation: itemWin 0.25s forwards ease-in-out;
 }
 
 @keyframes itemWin {
@@ -203,13 +204,13 @@ body {
 
 .floating-score {
   position: absolute;
-  font-size: 0.8rem;
-  font-weight: 700;
+  font-size: 0.85rem;
+  font-weight: 800;
   color: #00ff66;
-  text-shadow: 0 0 5px rgba(0, 255, 102, 0.8), 0 1px 2px rgba(0,0,0,0.9);
+  text-shadow: 0 0 6px rgba(0, 255, 102, 0.9), 0 1px 2px rgba(0,0,0,0.9);
   pointer-events: none;
   z-index: 9999;
-  animation: floatUp 0.5s forwards ease-out;
+  animation: floatUp 0.4s forwards ease-out;
 }
 
 @keyframes floatUp {
@@ -217,31 +218,34 @@ body {
   100% { transform: translateY(-25px) scale(1.1); opacity: 0; }
 }
 
-/* CONTROL DECK FULLY VISIBLE INSIDE VIEWPORT */
+/* SYMMETRIC BOTTOM CONTROL DECK (Shake Left / Drop Right) */
 .drop-control-deck {
   position: absolute;
   bottom: 2%;
   left: 4%;
   right: 4%;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  align-items: center;
   z-index: 8;
 }
 
 .shake-panel {
   display: flex;
-  gap: 6px;
-  align-items: center;
+  flex-direction: column;
+  gap: 3px;
   background: rgba(15, 5, 25, 0.95);
-  padding: 3px 6px;
-  border-radius: 6px;
+  padding: 6px 8px;
+  border-radius: 10px;
   border: 1px solid rgba(255, 215, 0, 0.4);
+  height: 100%;
+  justify-content: center;
 }
 
 .shake-bar-container {
-  flex-grow: 1;
-  height: 5px;
+  width: 100%;
+  height: 6px;
   background: rgba(0, 0, 0, 0.8);
   border-radius: 3px;
   overflow: hidden;
@@ -252,19 +256,20 @@ body {
   height: 100%;
   width: 0%;
   background: linear-gradient(90deg, #ff8800, #ffcc00);
-  transition: width 0.3s ease;
+  transition: width 0.2s ease;
 }
 
 .shake-btn {
   background: #251608;
   color: #665544;
   border: 1px solid #443322;
-  padding: 2px 6px;
-  font-size: 0.6rem;
+  padding: 6px;
+  font-size: 0.7rem;
   font-weight: bold;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: not-allowed;
-  white-space: nowrap;
+  width: 100%;
+  text-align: center;
 }
 
 .shake-btn.ready {
@@ -272,26 +277,31 @@ body {
   color: #fff;
   border: 1px solid #ffcc00;
   cursor: pointer;
-  box-shadow: 0 0 6px rgba(255, 68, 0, 0.9);
-  animation: pulseShake 1.2s infinite alternate;
+  box-shadow: 0 0 8px rgba(255, 68, 0, 0.9);
+  animation: pulseShake 1s infinite alternate;
 }
 
 @keyframes pulseShake {
   0% { transform: scale(1); }
-  100% { transform: scale(1.04); }
+  100% { transform: scale(1.03); }
 }
 
 .drop-btn {
   background: linear-gradient(to bottom, #ffd700, #cc9900);
   color: #1a082c;
   border: 2px solid #fff;
-  padding: 6px;
+  padding: 0 10px;
   font-size: 0.8rem;
   font-weight: bold;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5), 0 0 6px rgba(255, 215, 0, 0.6);
   transition: transform 0.1s ease;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .drop-btn:active {
