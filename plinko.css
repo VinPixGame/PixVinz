@@ -96,6 +96,24 @@ body {
   gap: 6px;              
 }
 
+
+
+.game-title-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0.6cm 0;
+  flex-shrink: 0;
+}
+
+.game-title-img {
+  max-width: 220px;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.7)) drop-shadow(0 0 16px rgba(255, 215, 0, 0.4));
+}
+
 /* ==========================================
    PLINKO SPECIFIC LAYOUT (PREMIUM ARCADE)
    ========================================== */
@@ -218,3 +236,4 @@ canvas {
 .drop-btn:hover {
   filter: brightness(1.15);
 }
+
