@@ -1,4 +1,4 @@
-/* coincraze.js - Strictly Frozen Static Physics */
+/* coincraze.js - Omnidirectional Domino Physics & image/coin.png integration */
 document.addEventListener('DOMContentLoaded', () => {
   let coinKey = 'totalCoins';
   if (typeof getUserKey === 'function') {
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     for (let i = 0; i < 35; i++) {
       const rx = Math.random() * (playWidth - 35) + 15;
-      const ry = playHeight * 0.50 + Math.random() * (playHeight * 0.38);
+      const ry = playHeight * 0.48 + Math.random() * (playHeight * 0.40);
       spawnItem(rx, ry, 'coin', 5, 'medium', false, 'resting');
     }
     saveGameState();
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let pusherZ = 0;
   let pusherDirection = 1;
-  const pusherSpeed = 1.4;
+  const pusherSpeed = 1.5;
   const maxPushDistance = 45;
 
   function updatePusher() {
@@ -159,26 +159,60 @@ document.addEventListener('DOMContentLoaded', () => {
     pusherPlate.style.transform = `translateX(-50%) translateY(${pusherZ}px)`;
 
     const playAreaHeight = playArea.clientHeight;
-    const pusherFrontEdgeY = (playAreaHeight * 0.32) + pusherZ + 55;
+    const pusherFrontEdgeY = (playAreaHeight * 0.30) + pusherZ + 55;
     let stateChanged = false;
 
+    // Omnidirectional Domino Physics Loop
     activeItems.forEach(item => {
       if (item.state === 'resting') {
-        let moved = false;
+        let pushForceX = 0;
+        let pushForceY = 0;
 
-        // STRICT PHYSICS: Coins are 100% frozen unless the pusher plate is moving forward AND physically hits the coin from behind.
-        if (pusherDirection > 0 && item.y >= pusherFrontEdgeY - 6 && item.y <= pusherFrontEdgeY + 4) {
-          item.y += pusherSpeed;
-          moved = true;
+        // 1. Pusher plate collision from any edge (top/sides/back of coin)
+        if (pusherDirection > 0) {
+          const itemRadius = 15;
+          const plateCenterY = (playAreaHeight * 0.30) + pusherZ + 27;
+          const plateTopY = plateCenterY - 27;
+          const plateBottomY = plateCenterY + 27;
+          
+          if (item.y + itemRadius >= plateTopY && item.y - itemRadius <= plateBottomY) {
+            pushForceY += pusherSpeed * 1.1;
+          }
         }
 
-        if (moved) {
+        // 2. Neighboring coin chain collision (domino effect from ALL edges)
+        activeItems.forEach(other => {
+          if (other !== item && other.state === 'resting') {
+            const dx = item.x - other.x;
+            const dy = item.y - other.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const minDist = 28; // collision threshold
+
+            if (dist < minDist && dist > 0) {
+              const overlap = minDist - dist;
+              const angle = Math.atan2(dy, dx);
+              // Push away proportionally from overlapping coin
+              pushForceX += Math.cos(angle) * overlap * 0.45;
+              pushForceY += Math.sin(angle) * overlap * 0.45;
+            }
+          }
+        });
+
+        if (Math.abs(pushForceX) > 0.05 || Math.abs(pushForceY) > 0.05) {
+          item.x += pushForceX;
+          item.y += pushForceY;
+          
+          // Clamp inside side boundaries
+          const playWidth = playArea.clientWidth;
+          item.x = Math.max(5, Math.min(playWidth - 35, item.x));
+
+          item.element.style.left = `${item.x}px`;
           item.element.style.top = `${item.y}px`;
           stateChanged = true;
         }
 
-        // Payout edge check
-        if (item.y >= playAreaHeight - 35) {
+        // Payout edge trigger at the bottom of the table
+        if (item.y >= playAreaHeight - 32) {
           triggerPayout(item);
           stateChanged = true;
         }
@@ -194,6 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   requestAnimationFrame(updatePusher);
 
+  // Manual Coin Drop: Exactly ONE size, value = 5 coins using image/coin.png
   dropCoinBtn.addEventListener('click', () => {
     if (coinCount < DROP_COST) {
       playSound('error');
@@ -209,10 +244,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const playWidth = playArea.clientWidth;
     const randomX = Math.random() * (playWidth - 35) + 15;
     
-    // Exactly ONE size, value = 5 coins
     spawnItem(randomX, 10, 'coin', 5, 'medium', true, 'falling');
   });
 
+  // 3-Minute Automated Rare Diamond Bonus Drop Timer
   const DIAMOND_TIMER_KEY = `coincraze_last_diamond_${coinKey}`;
   setInterval(() => {
     const now = Date.now();
@@ -239,7 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     activeItems.forEach(item => {
       if (item.state === 'resting') {
-        item.y += Math.random() * 18 + 6;
+        item.y += Math.random() * 20 + 8;
         item.element.style.top = `${item.y}px`;
       }
     });
@@ -255,15 +290,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function spawnItem(startX, startY, type, value, sizeClass, isFalling, initialState) {
     const itemEl = document.createElement('div');
-    itemEl.className = `pusher-item ${sizeClass}`;
-    itemEl.textContent = type === 'diamond' ? '💎' : '🪙';
-    itemEl.style.left = `${startX - 14}px`;
+    
+    if (type === 'diamond') {
+      itemEl.className = `pusher-item diamond ${sizeClass}`;
+      itemEl.textContent = '💎';
+    } else {
+      itemEl.className = `pusher-item coin ${sizeClass}`;
+      itemEl.style.backgroundImage = "url('image/coin.png')";
+    }
+
+    itemEl.style.left = `${startX}px`;
     itemEl.style.top = `${startY}px`;
     playArea.appendChild(itemEl);
 
     const itemData = {
       element: itemEl,
-      x: startX - 14,
+      x: startX,
       y: startY,
       type: type,
       value: value,
@@ -275,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (isFalling) {
       let velocityY = 2;
-      const targetY = playArea.clientHeight * 0.46;
+      const targetY = playArea.clientHeight * 0.44;
 
       function fall() {
         if (itemData.state === 'falling') {
