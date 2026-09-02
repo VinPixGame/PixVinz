@@ -1,12 +1,15 @@
-// coincraze.js - Core Game Logic
-
 document.addEventListener('DOMContentLoaded', () => {
-  // Balance management using localStorage (matching main app)
-  let coinCount = parseFloat(localStorage.getItem('pixvinz_coins')) || 950.00;
+  let coinCount = parseFloat(localStorage.getItem('pixvinz_coins')) || 0;
   const coinCountEl = document.getElementById('coinCount');
   const playArea = document.getElementById('playArea');
+  const pusherPlate = document.getElementById('pusherPlate');
+  const dropCoinBtn = document.getElementById('dropCoinBtn');
 
-  // Initialize display
+  const DROP_COST = 5.00;
+  const WIN_REWARD = 15.00;
+
+  let activeCoins = [];
+
   updateBalanceDisplay();
 
   function updateBalanceDisplay() {
@@ -14,75 +17,115 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('pixvinz_coins', coinCount);
   }
 
-  // Handle dropping a coin on click/tap inside the play area
-  playArea.addEventListener('click', (e) => {
-    const dropCost = 5.00; // Cost to drop a coin
+  // Pusher plate movement loop
+  let pusherZ = 0;
+  let pusherDirection = 1;
+  const pusherSpeed = 1.2;
+  const maxPushDistance = 55;
 
-    if (coinCount < dropCost) {
-      alert("Not enough coins! Win more or visit the shop.");
+  function updatePusher() {
+    pusherZ += pusherSpeed * pusherDirection;
+    if (pusherZ > maxPushDistance || pusherZ < 0) {
+      pusherDirection *= -1;
+    }
+    pusherPlate.style.transform = `translate(-50%, ${pusherZ}px)`;
+
+    const pusherRect = pusherPlate.getBoundingClientRect();
+    const playAreaRect = playArea.getBoundingClientRect();
+
+    activeCoins.forEach(coin => {
+      if (coin.state === 'resting') {
+        const coinRect = coin.element.getBoundingClientRect();
+        
+        // Push coins forward if they intersect with the moving plate
+        if (coinRect.bottom >= pusherRect.top && coinRect.top <= pusherRect.bottom &&
+            coinRect.right >= pusherRect.left && coinRect.left <= pusherRect.right) {
+          coin.y += pusherSpeed * pusherDirection * 0.5;
+          coin.element.style.top = `${coin.y}px`;
+        }
+
+        // Check if coin crossed the front winning edge
+        if (coin.y >= playArea.clientHeight - 45) {
+          triggerPayout(coin);
+        }
+      }
+    });
+
+    requestAnimationFrame(updatePusher);
+  }
+
+  requestAnimationFrame(updatePusher);
+
+  // Trigger drop action via dedicated button
+  dropCoinBtn.addEventListener('click', () => {
+    if (coinCount < DROP_COST) {
+      if (typeof playSound === 'function') playSound('error');
+      alert("Not enough coins! Win more or check your balance.");
       return;
     }
 
-    // Deduct cost and update UI
-    coinCount -= dropCost;
+    if (typeof playSound === 'function') playSound('click');
+    coinCount -= DROP_COST;
     updateBalanceDisplay();
 
-    // Get click position relative to the play area
-    const rect = playArea.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    // Spawn randomly across the upper drop slot width
+    const playWidth = playArea.clientWidth;
+    const randomX = Math.random() * (playWidth - 60) + 30;
+    const startY = 10;
 
-    // Only allow drops in the upper portion of the play area
-    if (y > rect.height * 0.4) return; 
-
-    spawnCoin(x, y);
+    spawnCoin(randomX, startY);
   });
 
   function spawnCoin(startX, startY) {
-    const coin = document.createElement('div');
-    coin.className = 'pusher-coin';
-    coin.style.left = `${startX - 15}px`;
-    coin.style.top = `${startY - 15}px`;
-    
-    playArea.appendChild(coin);
+    const coinEl = document.createElement('div');
+    coinEl.className = 'pusher-coin';
+    coinEl.style.left = `${startX - 15}px`;
+    coinEl.style.top = `${startY}px`;
+    playArea.appendChild(coinEl);
 
-    // Simple physics / gravity animation down towards the tray
-    let currentY = startY;
+    const coinData = {
+      element: coinEl,
+      x: startX - 15,
+      y: startY,
+      state: 'falling'
+    };
+    activeCoins.push(coinData);
+
     let velocityY = 2;
-    const targetY = playArea.clientHeight * 0.75; // Tray drop point
+    const targetY = playArea.clientHeight * 0.32; // Lands on upper tray shelf
 
     function fall() {
-      if (currentY < targetY) {
-        velocityY += 0.6; // gravity acceleration
-        currentY += velocityY;
-        coin.style.top = `${currentY}px`;
-        requestAnimationFrame(fall);
-      } else {
-        // Landed on the tray - simulate pushing forward or payout chance
-        coin.style.top = `${targetY}px`;
-        coin.classList.add('landed');
-        
-        // Example: simulate random win collection after resting on the pusher
-        setTimeout(() => {
-          if (Math.random() > 0.6) { // 40% chance to push over the edge
-            triggerPayout(coin);
-          }
-        }, 1500);
+      if (coinData.state === 'falling') {
+        if (coinData.y < targetY) {
+          velocityY += 0.7;
+          coinData.y += velocityY;
+          coinData.element.style.top = `${coinData.y}px`;
+          requestAnimationFrame(fall);
+        } else {
+          coinData.y = targetY;
+          coinData.element.style.top = `${targetY}px`;
+          coinData.element.classList.add('landed');
+          coinData.state = 'resting';
+        }
       }
     }
 
     requestAnimationFrame(fall);
   }
 
-  function triggerPayout(coinElem) {
-    coinElem.classList.add('payout');
-    
-    // Animate toward bottom edge and add reward
-    coinCount += 15.00; // Payout reward
+  function triggerPayout(coinData) {
+    if (coinData.state === 'payout') return;
+    coinData.state = 'payout';
+
+    coinData.element.classList.add('payout');
+    coinCount += WIN_REWARD;
     updateBalanceDisplay();
 
+    if (typeof playSound === 'function') playSound('win');
+
     setTimeout(() => {
-      coinElem.remove();
+      coinData.element.remove();
+      activeCoins = activeCoins.filter(c => c !== coinData);
     }, 600);
   }
 });
