@@ -4,24 +4,67 @@ document.addEventListener('DOMContentLoaded', () => {
   const playArea = document.getElementById('playArea');
   const pusherPlate = document.getElementById('pusherPlate');
   const dropCoinBtn = document.getElementById('dropCoinBtn');
+  const shakeBtn = document.getElementById('shakeBtn');
+  const shakeBarFill = document.getElementById('shakeBarFill');
+  const pusherContainer = document.getElementById('pusherContainer');
 
   const DROP_COST = 5.00;
-  const WIN_REWARD = 15.00;
+  let shakeEnergy = 0; // 0 to 100
 
   let activeCoins = [];
 
   updateBalanceDisplay();
+
+  // 1. PRE-LOAD COINS & DIAMONDS ON THE PUSHER PLATE
+  function initPreloadedItems() {
+    const playWidth = playArea.clientWidth;
+    // Spawn a mix of pre-existing standard coins, big coins, and diamonds on the plate
+    for (let i = 0; i < 22; i++) {
+      const rx = Math.random() * (playWidth - 60) + 30;
+      const ry = Math.random() * 80 + 40; // sits on the pusher plate zone
+      
+      let type = 'coin-standard';
+      let value = 15;
+      let sizeClass = 'medium';
+
+      const rand = Math.random();
+      if (rand > 0.85) {
+        type = 'diamond';
+        value = 50;
+        sizeClass = Math.random() > 0.5 ? 'large' : 'medium';
+      } else if (rand > 0.6) {
+        sizeClass = 'large';
+        value = 25;
+      } else if (rand < 0.2) {
+        sizeClass = 'small';
+        value = 10;
+      }
+
+      spawnItem(rx, ry, type, value, sizeClass, false);
+    }
+  }
 
   function updateBalanceDisplay() {
     coinCountEl.textContent = coinCount.toFixed(2);
     localStorage.setItem('pixvinz_coins', coinCount);
   }
 
-  // Pusher plate movement loop
+  function addShakeEnergy(amount) {
+    shakeEnergy = Math.min(100, shakeEnergy + amount);
+    shakeBarFill.style.width = `${shakeEnergy}%`;
+    shakeBtn.textContent = `⚡ SHAKE (${Math.floor(shakeEnergy)}%)`;
+
+    if (shakeEnergy >= 100) {
+      shakeBtn.removeAttribute('disabled');
+      shakeBtn.classList.add('ready');
+    }
+  }
+
+  // 2. MECHANICAL PUSHER ANIMATION LOOP
   let pusherZ = 0;
   let pusherDirection = 1;
-  const pusherSpeed = 1.2;
-  const maxPushDistance = 55;
+  const pusherSpeed = 0.8;
+  const maxPushDistance = 85;
 
   function updatePusher() {
     pusherZ += pusherSpeed * pusherDirection;
@@ -31,22 +74,21 @@ document.addEventListener('DOMContentLoaded', () => {
     pusherPlate.style.transform = `translate(-50%, ${pusherZ}px)`;
 
     const pusherRect = pusherPlate.getBoundingClientRect();
-    const playAreaRect = playArea.getBoundingClientRect();
+    const playAreaHeight = playArea.clientHeight;
 
-    activeCoins.forEach(coin => {
-      if (coin.state === 'resting') {
-        const coinRect = coin.element.getBoundingClientRect();
+    activeCoins.forEach(item => {
+      if (item.state === 'resting') {
+        const itemRect = item.element.getBoundingClientRect();
         
-        // Push coins forward if they intersect with the moving plate
-        if (coinRect.bottom >= pusherRect.top && coinRect.top <= pusherRect.bottom &&
-            coinRect.right >= pusherRect.left && coinRect.left <= pusherRect.right) {
-          coin.y += pusherSpeed * pusherDirection * 0.5;
-          coin.element.style.top = `${coin.y}px`;
+        // Push items forward when the plate moves forward
+        if (pusherDirection > 0 && itemRect.bottom >= pusherRect.top && itemRect.top <= pusherRect.bottom) {
+          item.y += pusherSpeed * 0.75;
+          item.element.style.top = `${item.y}px`;
         }
 
-        // Check if coin crossed the front winning edge
-        if (coin.y >= playArea.clientHeight - 45) {
-          triggerPayout(coin);
+        // Check if item crossed the front winning edge
+        if (item.y >= playAreaHeight - 45) {
+          triggerPayout(item);
         }
       }
     });
@@ -56,76 +98,141 @@ document.addEventListener('DOMContentLoaded', () => {
 
   requestAnimationFrame(updatePusher);
 
-  // Trigger drop action via dedicated button
+  // 3. DROP COIN ACTION
   dropCoinBtn.addEventListener('click', () => {
     if (coinCount < DROP_COST) {
       if (typeof playSound === 'function') playSound('error');
-      alert("Not enough coins! Win more or check your balance.");
+      alert("Not enough coins! Check your balance.");
       return;
     }
 
-    if (typeof playSound === 'function') playSound('click');
+    if (typeof playSound === 'function') playSound('drop');
     coinCount -= DROP_COST;
     updateBalanceDisplay();
+    addShakeEnergy(8); // Building shake power with each drop
 
-    // Spawn randomly across the upper drop slot width
     const playWidth = playArea.clientWidth;
     const randomX = Math.random() * (playWidth - 60) + 30;
-    const startY = 10;
-
-    spawnCoin(randomX, startY);
-  });
-
-  function spawnCoin(startX, startY) {
-    const coinEl = document.createElement('div');
-    coinEl.className = 'pusher-coin';
-    coinEl.style.left = `${startX - 15}px`;
-    coinEl.style.top = `${startY}px`;
-    playArea.appendChild(coinEl);
-
-    const coinData = {
-      element: coinEl,
-      x: startX - 15,
-      y: startY,
-      state: 'falling'
-    };
-    activeCoins.push(coinData);
-
-    let velocityY = 2;
-    const targetY = playArea.clientHeight * 0.32; // Lands on upper tray shelf
-
-    function fall() {
-      if (coinData.state === 'falling') {
-        if (coinData.y < targetY) {
-          velocityY += 0.7;
-          coinData.y += velocityY;
-          coinData.element.style.top = `${coinData.y}px`;
-          requestAnimationFrame(fall);
-        } else {
-          coinData.y = targetY;
-          coinData.element.style.top = `${targetY}px`;
-          coinData.element.classList.add('landed');
-          coinData.state = 'resting';
-        }
-      }
+    
+    // Chance to drop a diamond or standard coin
+    let type = 'coin-standard';
+    let value = 15;
+    let sizeClass = 'medium';
+    const rand = Math.random();
+    if (rand > 0.9) {
+      type = 'diamond';
+      value = 50;
+      sizeClass = 'large';
+    } else if (rand > 0.7) {
+      value = 25;
+      sizeClass = 'large';
+    } else if (rand < 0.25) {
+      value = 10;
+      sizeClass = 'small';
     }
 
-    requestAnimationFrame(fall);
+    spawnItem(randomX, 10, type, value, sizeClass, true);
+  });
+
+  // 4. SHAKE MACHINE ACTION
+  shakeBtn.addEventListener('click', () => {
+    if (shakeEnergy < 100) return;
+
+    if (typeof playSound === 'function') playSound('win');
+    pusherContainer.classList.add('shake-anim');
+    setTimeout(() => pusherContainer.classList.remove('shake-anim'), 500);
+
+    // Jolt all resting items forward randomly to create winning cascades
+    activeCoins.forEach(item => {
+      if (item.state === 'resting') {
+        item.y += Math.random() * 35 + 15;
+        item.element.style.top = `${item.y}px`;
+      }
+    });
+
+    shakeEnergy = 0;
+    shakeBarFill.style.width = '0%';
+    shakeBtn.textContent = `⚡ SHAKE (0%)`;
+    shakeBtn.setAttribute('disabled', 'true');
+    shakeBtn.classList.remove('ready');
+  });
+
+  function spawnItem(startX, startY, type, value, sizeClass, isFalling) {
+    const itemEl = document.createElement('div');
+    itemEl.className = `pusher-item ${type} ${sizeClass}`;
+    itemEl.style.left = `${startX - 15}px`;
+    itemEl.style.top = `${startY}px`;
+    playArea.appendChild(itemEl);
+
+    const itemData = {
+      element: itemEl,
+      x: startX - 15,
+      y: startY,
+      value: value,
+      state: isFalling ? 'falling' : 'resting'
+    };
+
+    if (!isFalling) {
+      itemEl.classList.add('landed');
+    }
+
+    activeCoins.push(itemData);
+
+    if (isFalling) {
+      let velocityY = 2;
+      const targetY = playArea.clientHeight * 0.22; // Lands on pusher plate
+
+      function fall() {
+        if (itemData.state === 'falling') {
+          if (itemData.y < targetY) {
+            velocityY += 0.7;
+            itemData.y += velocityY;
+            itemData.element.style.top = `${itemData.y}px`;
+            requestAnimationFrame(fall);
+          } else {
+            itemData.y = targetY;
+            itemData.element.style.top = `${targetY}px`;
+            itemData.element.classList.add('landed');
+            itemData.state = 'resting';
+          }
+        }
+      }
+      requestAnimationFrame(fall);
+    }
   }
 
-  function triggerPayout(coinData) {
-    if (coinData.state === 'payout') return;
-    coinData.state = 'payout';
+  function triggerPayout(itemData) {
+    if (itemData.state === 'payout') return;
+    itemData.state = 'payout';
 
-    coinData.element.classList.add('payout');
-    coinCount += WIN_REWARD;
+    itemData.element.classList.add('payout');
+    coinCount += itemData.value;
     updateBalanceDisplay();
 
     if (typeof playSound === 'function') playSound('win');
 
+    // Show floating green point indicator like a real arcade game
+    showFloatingScore(itemData.x, playArea.clientHeight - 50, itemData.value);
+
     setTimeout(() => {
-      coinData.element.remove();
-      activeCoins = activeCoins.filter(c => c !== coinData);
+      itemData.element.remove();
+      activeCoins = activeCoins.filter(c => c !== itemData);
     }, 600);
   }
+
+  function showFloatingScore(x, y, value) {
+    const floatText = document.createElement('div');
+    floatText.className = 'floating-score';
+    floatText.textContent = `+${value}`;
+    floatText.style.left = `${x}px`;
+    floatText.style.top = `${y}px`;
+    playArea.appendChild(floatText);
+
+    setTimeout(() => {
+      floatText.remove();
+    }, 800);
+  }
+
+  // Initialize preloaded items on load
+  initPreloadedItems();
 });
