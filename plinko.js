@@ -197,7 +197,10 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.restore();
   }
 
-  function updatePhysics() {
+
+
+
+function updatePhysics() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     const config = difficultyConfigs[currentDifficulty];
@@ -231,14 +234,14 @@ document.addEventListener('DOMContentLoaded', () => {
       drawMarqueeBulb(perimeterCoords[i].x, perimeterCoords[i].y, state);
     }
    
-    const startYGrid = 45; // Moved down slightly to clear top marquee lights
+    const startYGrid = 45; 
     const rowHeight = (h - 110) / rows;
     const baseColSpacing = (w - 28) / (rows + 3.2);
+    const colSpacing = baseColSpacing * 1.25; // Shared globally for this frame
     
     // Draw Pegs
     for (let r = 0; r < rows; r++) {
       const pegsInRow = r + 3;
-      const colSpacing = baseColSpacing * 1.25;
       const rowWidth = (pegsInRow - 1) * colSpacing;
       const startX = (w - rowWidth) / 2;
       const y = startYGrid + r * rowHeight;
@@ -352,6 +355,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     requestAnimationFrame(updatePhysics);
   }
-
-  requestAnimationFrame(updatePhysics);
-});
+  
+                          
