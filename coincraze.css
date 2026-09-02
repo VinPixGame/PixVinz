@@ -10,7 +10,7 @@ body {
 }
 
 /* ==========================================
-   SHARED TOP BAR / HEADER
+   SHARED TOP BAR / HEADER (Optional if handled by main CSS)
    ========================================== */
 
 .top-bar {
@@ -35,13 +35,13 @@ body {
 
 .logo-container video,
 #logoVideo {
-  width: 160px; /* Slightly compact for uniform fit */
+  width: 160px;
   height: auto;
   object-fit: contain;
 }
 
 .icon-btn {
-    background: rgba(20, 10, 35, 0.8);
+  background: rgba(20, 10, 35, 0.8);
   border: 2px solid #ffd700;
   color: #ffd700;
   width: 44px;
@@ -63,8 +63,6 @@ body {
   transform: scale(1.05);
 }
 
-
-
 .coin-badge {
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid #ffd700;
@@ -80,15 +78,16 @@ body {
   gap: 6px;             
 }
 
+/* ==========================================
+   GAME CONTAINER & PLAY AREA
+   ========================================== */
 
-
-
-/* Game Wrapper Layout */
 .game-wrapper {
   display: flex;
   justify-content: center;
-  align-items: center;
-  padding: 20px 10px;
+  align-items: flex-start;
+  padding: 0 10px;
+  margin-top: -22px;
   min-height: calc(100vh - 70px);
 }
 
@@ -98,9 +97,9 @@ body {
   max-width: 420px;
   aspect-ratio: 9 / 16;
   margin: 0 auto;
+  pointer-events: none;
 }
 
-/* Ornate Game Frame Asset */
 .game-frame-bg {
   position: absolute;
   top: 0;
@@ -108,11 +107,10 @@ body {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  pointer-events: none; /* Allows clicks to pass through to the play area */
+  pointer-events: none;
   z-index: 5;
 }
 
-/* Internal Play Area mapped precisely to the frame's open cutout */
 .game-play-area {
   position: absolute;
   top: 14%;
@@ -123,10 +121,10 @@ body {
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
-  z-index: 2;
+  pointer-events: auto;
+  z-index: 6;
 }
 
-/* Falling / Resting Coins */
 .pusher-coin {
   position: absolute;
   width: 30px;
