@@ -257,18 +257,120 @@ document.addEventListener('DOMContentLoaded', () => {
         continue;
       }
 
-      // Draw Ball
-      ctx.fillStyle = '#ff0844';
+ 
+
+      // Draw Glowing Gold Ball
+      ctx.shadowColor = '#ffd700';
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = '#ffd700';
       ctx.beginPath();
       ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 1.5;
+      ctx.shadowBlur = 0;
+
+      // Inner highlight for a polished 3D metallic sphere look
+      ctx.fillStyle = '#fff9e6';
+      ctx.beginPath();
+      ctx.arc(ball.x - 2, ball.y - 2, ballRadius * 0.35, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#b38f00';
+      ctx.lineWidth = 1;
       ctx.stroke();
-    }
 
     requestAnimationFrame(updatePhysics);
   }
 
   requestAnimationFrame(updatePhysics);
 });
+
+
+
+// Add difficulty management logic in plinko.js
+
+let currentDifficulty = 'normal';
+
+// Configuration based on difficulty (rows and multipliers)
+const difficultyConfigs = {
+  normal: {
+    rows: 8,
+    multipliers: [10, 5, 2, 0.5, 0.2, 0.5, 2, 5, 10],
+    slotColors: ['#ff0844', '#ff7300', '#ffd700', '#00f2fe', '#4facfe', '#00f2fe', '#ffd700', '#ff7300', '#ff0844']
+  },
+  medium: {
+    rows: 10,
+    multipliers: [20, 10, 5, 2, 0.5, 0.2, 0.5, 2, 5, 10, 20],
+    slotColors: ['#ff0844', '#ff4500', '#ff7300', '#ffd700', '#00f2fe', '#4facfe', '#00f2fe', '#ffd700', '#ff7300', '#ff4500', '#ff0844']
+  },
+  hard: {
+    rows: 12,
+    multipliers: [50, 25, 10, 5, 1, 0.2, 0.1, 0.2, 1, 5, 10, 25, 50],
+    slotColors: ['#9c27b0', '#ff0844', '#ff4500', '#ff7300', '#ffd700', '#00f2fe', '#4facfe', '#00f2fe', '#ffd700', '#ff7300', '#ff4500', '#ff0844', '#9c27b0']
+  }
+};
+
+// Hook up difficulty buttons event listeners
+const diffBtns = document.querySelectorAll('.diff-btn');
+diffBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    diffBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentDifficulty = btn.getAttribute('data-diff');
+    playSound('click');
+  });
+});
+
+// Inside your updatePhysics function, reference rows & multipliers dynamically:
+function updatePhysics() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const config = difficultyConfigs[currentDifficulty];
+  const rows = config.rows;
+  const multipliers = config.multipliers;
+  const slotColors = config.slotColors;
+
+  const w = canvas.width;
+  const h = canvas.height;
+  const startYGrid = 30;
+  const rowHeight = (h - 110) / rows;
+  const colSpacing = w / (rows + 3.2);
+
+  // Draw Glowing Pegs
+  for (let r = 0; r < rows; r++) {
+    const pegsInRow = r + 3;
+    const rowWidth = (pegsInRow - 1) * colSpacing;
+    const startX = (w - rowWidth) / 2;
+    const y = startYGrid + r * rowHeight;
+
+    for (let c = 0; c < pegsInRow; c++) {
+      const x = startX + c * colSpacing;
+      
+      ctx.shadowColor = '#ffd700';
+      ctx.shadowBlur = 4;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  }
+
+  // Draw Slots at Bottom
+  const slotWidth = w / multipliers.length;
+  const slotY = h - 35;
+  for (let i = 0; i < multipliers.length; i++) {
+    ctx.fillStyle = slotColors[i];
+    ctx.fillRect(i * slotWidth + 1, slotY, slotWidth - 2, 32);
+    
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.strokeRect(i * slotWidth + 1, slotY, slotWidth - 2, 32);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.shadowColor = '#000';
+    ctx.shadowBlur = 4;
+    ctx.fillText(`${multipliers[i]}x`, i * slotWidth + slotWidth / 2, slotY + 20);
+    ctx.shadowBlur = 0;
+  }
+
