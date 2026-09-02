@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plinko Arcade</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="plinko.css">
+</head>
+<body>
+
+  <div class="arcade-cabinet">
+    <!-- Top Header Bar -->
+    <header class="top-bar" id="mainHeader">
+      <button class="icon-btn" id="backHeaderBtn" onclick="window.location.href='index.html'">
+        ‹
+      </button>
+      <div class="logo-container">
+        <video id="logoVideo" autoplay loop muted playsinline preload="auto">
+          <source src="image/logo.webm" type="video/webm">
+        </video>
+      </div>
+      <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
+    </header>
+
+    <!-- Plinko Arena Board -->
+    <div class="plinko-arena" id="plinkoArena">
+      <canvas id="plinkoCanvas"></canvas>
+    </div>
+
+    <!-- Control Deck -->
+    <div class="control-deck">
+      <div class="bet-selector">
+        <span class="bet-label">Bet Amount</span>
+        <div class="bet-controls">
+          <button class="bet-btn" id="decreaseBetBtn">-</button>
+          <span id="currentBetVal">10</span>
+          <button class="bet-btn" id="increaseBetBtn">+</button>
+        </div>
+      </div>
+      <button id="dropBallBtn" class="drop-btn">Drop Ball</button>
+    </div>
+  </div>
+
+  <script src="plinko.js"></script>
+</body>
+</html>
