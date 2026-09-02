@@ -1,5 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
-  let coinCount = parseFloat(localStorage.getItem('pixvinz_coins')) || 0;
+  // Matches your main app's key generator function
+  function getUserKey(key) {
+    const currentUser = localStorage.getItem('pixvinz_current_user') || 'default';
+    return `${currentUser}_${key}`;
+  }
+
+  const coinKey = getUserKey('totalCoins');
+  let coinCount = parseFloat(localStorage.getItem(coinKey)) || 0;
+  
   const coinCountEl = document.getElementById('coinCount');
   const playArea = document.getElementById('playArea');
   const pusherPlate = document.getElementById('pusherPlate');
@@ -9,12 +17,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const pusherContainer = document.getElementById('pusherContainer');
 
   const DROP_COST = 5.00;
-  let shakeEnergy = 0; // 0 to 100
+  let shakeEnergy = 0;
 
   let activeCoins = [];
 
   updateBalanceDisplay();
 
+  function updateBalanceDisplay() {
+    coinCountEl.textContent = coinCount.toFixed(2);
+    localStorage.setItem(coinKey, coinCount);
+  }
   // 1. PRE-LOAD COINS & DIAMONDS ON THE PUSHER PLATE
   function initPreloadedItems() {
     const playWidth = playArea.clientWidth;
