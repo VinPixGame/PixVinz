@@ -19,7 +19,7 @@
     </header>
 
     <main class="game-wrapper">
-      <div class="coin-pusher-container">
+      <div class="coin-pusher-container" id="pusherContainer">
         <!-- Ornate frame background asset -->
         <img src="image/coincraze1.png" alt="Coin Craze Frame" class="game-frame-bg">
         
@@ -29,8 +29,14 @@
           <div class="pusher-plate" id="pusherPlate"></div>
         </div>
 
-        <!-- Dedicated Drop Control Deck at the base of the frame -->
+        <!-- Control Deck: Shake Meter & Drop Button -->
         <div class="drop-control-deck">
+          <div class="shake-panel">
+            <div class="shake-bar-container">
+              <div class="shake-bar-fill" id="shakeBarFill"></div>
+            </div>
+            <button class="shake-btn" id="shakeBtn" disabled>⚡ SHAKE (0%)</button>
+          </div>
           <button class="drop-btn" id="dropCoinBtn">🪙 DROP COIN (-5.00)</button>
         </div>
       </div>
