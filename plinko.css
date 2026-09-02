@@ -136,7 +136,7 @@ body {
 .plinko-arena {
   flex: 3;
   width: 100%;
-  min-height: 480px;
+  min-height: 360px;
   position: relative;
   background: rgba(10, 5, 22, 0.95);
   border-radius: 16px;
