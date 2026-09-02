@@ -1,50 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PixVinz - Coin Craze</title>
-    <link rel="stylesheet" href="coincraze.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coin Craze - 3D Two-Tier Coin Pusher</title>
+  <link rel="stylesheet" href="coincraze.css">
 </head>
 <body>
-
-    <header class="top-bar">
-      <button class="icon-btn" id="backBtn">←</button>
-      <div class="logo-container">
-        <video id="logoVideo" autoplay loop muted playsinline preload="auto">
-          <source src="image/logo.webm" type="video/webm">
-        </video>
+  <div class="arcade-cabinet">
+    <!-- Top Header / Scoreboard -->
+    <header class="arcade-header">
+      <button id="backBtn" class="arcade-btn secondary-btn">← Back</button>
+      <div class="score-board">
+        <span class="label">Coins:</span> <span id="coinCount">0.00</span>
       </div>
-      <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
     </header>
 
-    <main class="game-wrapper">
-      <div class="coin-pusher-container" id="pusherContainer">
-        <!-- Ornate frame background asset -->
-        <img src="image/coincraze1.png" alt="Coin Craze Frame" class="game-frame-bg">
-        
-        <!-- Internal gameplay area mapped precisely inside the frame cutout -->
-        <div class="game-play-area" id="playArea">
-          <!-- Mechanical Pusher Plate -->
-          <div class="pusher-plate" id="pusherPlate"></div>
-        </div>
-
-        <!-- Control Deck: Shake Meter & Drop Button -->
-        <div class="drop-control-deck">
-          <div class="shake-panel">
-            <div class="shake-bar-container">
-              <div class="shake-bar-fill" id="shakeBarFill"></div>
-            </div>
-            <button class="shake-btn" id="shakeBtn" disabled>⚡ SHAKE (0%)</button>
-          </div>
-          <button class="drop-btn" id="dropCoinBtn">🪙 DROP COIN (-5.00)</button>
-        </div>
+    <!-- Main Game Frame (Interactive Border) -->
+    <div id="pusherContainer" class="pusher-container">
+      <div id="playArea" class="play-area">
+        <!-- Mechanical Pusher Plate -->
+        <div id="pusherPlate" class="pusher-plate"></div>
       </div>
-    </main>
+    </div>
 
+    <!-- Control Deck -->
+    <div class="control-deck">
+      <button id="dropCoinBtn" class="arcade-btn primary-btn">Drop Coin (5 Coins)</button>
+      <div class="shake-container">
+        <div class="shake-bar-bg">
+          <div id="shakeBarFill" class="shake-bar-fill"></div>
+        </div>
+        <button id="shakeBtn" class="arcade-btn shake-btn" disabled>⚡ SHAKE (0%)</button>
+      </div>
+    </div>
+  </div>
 
-    <script src="profile.js"></script>
-    <script src="audio.js"></script>
-    <script src="coincraze.js"></script>
+  <script src="coincraze.js"></script>
 </body>
 </html>
