@@ -50,19 +50,20 @@ document.addEventListener('DOMContentLoaded', () => {
      TWO-TIER DIMENSIONS
      ========================================================= */
 
-  const upperTop = 0.16;
-  const upperHeight = 0.28;
-  const lowerTop = 0.45;
-  const lowerHeight = 0.45;
+  const upperTop = 0.14;
+  const upperHeight = 0.30;
+
+  const lowerTop = 0.48;
+  const lowerHeight = 0.44;
 
   const EXIT_WIDTH = 76;
-  const GATE_HEIGHT = 10;
+  const GATE_HEIGHT = 12;
 
   let gateOpen = false;
   let gateTimer = null;
 
   /* =========================================================
-     CREATE LOWER DECK
+     MECHANICAL PARTS
      ========================================================= */
 
   const lowerDeck = document.createElement('div');
@@ -77,14 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
   lowerDeck.appendChild(lowerFloor);
   lowerDeck.appendChild(lowerFront);
 
-  playArea.insertBefore(
-    lowerDeck,
-    pusherPlate
-  );
-
-  /* =========================================================
-     CREATE UPPER DECK
-     ========================================================= */
+  playArea.insertBefore(lowerDeck, pusherPlate);
 
   const upperDeck = document.createElement('div');
   upperDeck.className = 'upper-deck';
@@ -98,13 +92,10 @@ document.addEventListener('DOMContentLoaded', () => {
   upperDeck.appendChild(upperFloor);
   upperDeck.appendChild(upperFront);
 
-  playArea.insertBefore(
-    upperDeck,
-    pusherPlate
-  );
+  playArea.insertBefore(upperDeck, pusherPlate);
 
   /* =========================================================
-     SINGLE CENTER PAYOUT HOLE
+     CENTER PAYOUT HOLE
      ========================================================= */
 
   const exitHole = document.createElement('div');
@@ -123,52 +114,48 @@ document.addEventListener('DOMContentLoaded', () => {
   gateGlow.className = 'coin-exit-glow';
 
   gate.appendChild(gateGlow);
-  playArea.appendChild(gate);
+  exitHole.appendChild(gate);
 
   function positionMechanicalParts() {
     const width = playArea.clientWidth;
     const height = playArea.clientHeight;
 
-    lowerDeck.style.top =
-      `${height * lowerTop}px`;
+    lowerDeck.style.position = 'absolute';
+    lowerDeck.style.left = '5%';
+    lowerDeck.style.right = '5%';
+    lowerDeck.style.top = `${height * lowerTop}px`;
+    lowerDeck.style.height = `${height * lowerHeight}px`;
+    lowerDeck.style.zIndex = '1';
 
-    lowerDeck.style.height =
-      `${height * lowerHeight}px`;
+    upperDeck.style.position = 'absolute';
+    upperDeck.style.left = '5%';
+    upperDeck.style.right = '5%';
+    upperDeck.style.top = `${height * upperTop}px`;
+    upperDeck.style.height = `${height * upperHeight}px`;
+    upperDeck.style.zIndex = '2';
 
-    upperDeck.style.top =
-      `${height * upperTop}px`;
+    exitHole.style.position = 'absolute';
+    exitHole.style.left = `${(width - EXIT_WIDTH) / 2}px`;
+    exitHole.style.width = `${EXIT_WIDTH}px`;
+    exitHole.style.height = `${EXIT_WIDTH * 0.62}px`;
+    exitHole.style.bottom = '3%';
+    exitHole.style.zIndex = '50';
 
-    upperDeck.style.height =
-      `${height * upperHeight}px`;
-
-    exitHole.style.left =
-      `${(width - EXIT_WIDTH) / 2}px`;
-
-    exitHole.style.width =
-      `${EXIT_WIDTH}px`;
-
-    exitHole.style.bottom =
-      '0px';
-
-    gate.style.left =
-      `${(width - EXIT_WIDTH) / 2}px`;
-
-    gate.style.width =
-      `${EXIT_WIDTH}px`;
-
-    gate.style.height =
-      `${GATE_HEIGHT}px`;
-
-    gate.style.bottom =
-      '0px';
+    gate.style.position = 'absolute';
+    gate.style.left = '5%';
+    gate.style.width = '90%';
+    gate.style.height = `${GATE_HEIGHT}px`;
+    gate.style.top = '50%';
+    gate.style.transform = gateOpen
+      ? 'translateY(-50%) scaleY(0.15)'
+      : 'translateY(-50%) scaleY(1)';
+    gate.style.transformOrigin = 'center center';
+    gate.style.zIndex = '51';
   }
 
   positionMechanicalParts();
 
-  window.addEventListener(
-    'resize',
-    positionMechanicalParts
-  );
+  window.addEventListener('resize', positionMechanicalParts);
 
   /* =========================================================
      GATE
@@ -177,15 +164,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function setGateState(open) {
     gateOpen = open;
 
-    gate.classList.toggle(
-      'gate-open',
-      open
-    );
+    gate.classList.toggle('gate-open', open);
+    gate.classList.toggle('gate-closed', !open);
 
-    gate.classList.toggle(
-      'gate-closed',
-      !open
-    );
+    gate.style.transform = open
+      ? 'translateY(-50%) scaleY(0.15)'
+      : 'translateY(-50%) scaleY(1)';
   }
 
   function startGateCycle() {
@@ -375,24 +359,51 @@ document.addEventListener('DOMContentLoaded', () => {
   if (savedItemsJson) {
     try {
       const parsed =
-        JSON.parse(
-          savedItemsJson
-        );
+        JSON.parse(savedItemsJson);
 
       if (
         Array.isArray(parsed) &&
         parsed.length
       ) {
         parsed.forEach(data => {
+          const deck =
+            data.deck === 'upper'
+              ? 'upper'
+              : 'lower';
+
+          const height =
+            playArea.clientHeight;
+
+          let y =
+            Number(data.y) || 20;
+
+          if (deck === 'upper') {
+            y =
+              Math.min(
+                y,
+                height *
+                  (upperTop + upperHeight) -
+                  NORMAL_COIN_RADIUS
+              );
+          } else {
+            y =
+              Math.min(
+                y,
+                height *
+                  (lowerTop + lowerHeight) -
+                  NORMAL_COIN_RADIUS
+              );
+          }
+
           spawnItem(
             Number(data.x) || 20,
-            Number(data.y) || 20,
+            y,
             data.type || 'coin',
             Number(data.value) || 5,
             data.sizeClass || 'medium',
             false,
             'resting',
-            data.deck || 'lower'
+            deck
           );
         });
       } else {
@@ -412,17 +423,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const height =
       playArea.clientHeight;
 
+    const lowerFloorY =
+      height *
+        (lowerTop + lowerHeight) -
+      14;
+
     const radius =
       NORMAL_COIN_RADIUS;
 
     for (let i = 0; i < 24; i++) {
       let x = radius;
-      let y = height * 0.60;
+      let y = lowerFloorY - radius;
       let valid = false;
 
       for (
         let attempt = 0;
-        attempt < 100;
+        attempt < 150;
         attempt++
       ) {
         x =
@@ -431,19 +447,23 @@ document.addEventListener('DOMContentLoaded', () => {
           Math.max(
             1,
             width -
-            radius * 2
+              radius * 2
           );
 
         y =
-          height * 0.55 +
+          height * 0.57 +
           Math.random() *
-          height * 0.22;
+            height * 0.22;
 
         valid = true;
 
         for (
           const other of activeItems
         ) {
+          if (other.deck !== 'lower') {
+            continue;
+          }
+
           const dx =
             x - other.x;
 
@@ -458,9 +478,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
           if (
             d <
-            radius +
-            other.radius +
-            1
+            (radius +
+              other.radius) *
+              0.78
           ) {
             valid = false;
             break;
@@ -524,8 +544,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let pusherZ = 0;
   let pusherDirection = 1;
 
-  const PUSHER_SPEED = 1.45;
-  const MAX_PUSH_DISTANCE = 30;
+  /*
+     Much slower than the previous version.
+  */
+  const PUSHER_SPEED = 0.72;
+  const MAX_PUSH_DISTANCE = 70;
 
   let lastTime =
     performance.now();
@@ -544,6 +567,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     dt = Math.min(dt, 1.5);
+
+    /*
+       The pusher physically travels across
+       the upper tray.
+    */
 
     pusherZ +=
       PUSHER_SPEED *
@@ -570,7 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `translateX(-50%) translateY(${pusherZ}px)`;
     }
 
-    const subSteps = 3;
+    const subSteps = 4;
 
     for (
       let s = 0;
@@ -609,25 +637,21 @@ document.addEventListener('DOMContentLoaded', () => {
     width,
     height
   ) {
-    const items =
-      activeItems.filter(
-        item =>
-          item.state === 'resting' ||
-          item.state === 'falling' ||
-          item.state === 'transition'
-      );
-
-    const upperBottom =
+    const upperFloor =
       height *
-      (upperTop + upperHeight);
+        (upperTop + upperHeight) -
+      14;
 
-    const lowerBottom =
+    const lowerFloor =
       height *
-      (lowerTop + lowerHeight);
+        (lowerTop + lowerHeight) -
+      14;
 
-    const lowerSurface =
-      lowerBottom -
-      12;
+    const upperFront =
+      upperFloor;
+
+    const lowerFront =
+      lowerFloor;
 
     const exitCenter =
       width / 2;
@@ -636,10 +660,10 @@ document.addEventListener('DOMContentLoaded', () => {
       EXIT_WIDTH / 2;
 
     /* =====================================================
-       FALLING / TRANSITION
+       FALLING COINS
        ===================================================== */
 
-    for (const item of items) {
+    for (const item of activeItems) {
       if (
         item.state !== 'falling' &&
         item.state !== 'transition'
@@ -648,9 +672,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       item.vy +=
-        (item.type === 'xp'
-          ? 0.8
-          : 0.9) * dt;
+        0.9 * dt;
 
       if (item.vy > 15) {
         item.vy = 15;
@@ -662,60 +684,88 @@ document.addEventListener('DOMContentLoaded', () => {
       item.y +=
         item.vy * dt;
 
+      /*
+         Solid side walls.
+      */
+
+      const leftWall =
+        item.radius + 2;
+
+      const rightWall =
+        width -
+        item.radius -
+        2;
+
       if (
         item.x <
-        item.radius
+        leftWall
       ) {
         item.x =
-          item.radius;
+          leftWall;
 
-        item.vx *= -0.2;
+        item.vx = 0;
       }
 
       if (
         item.x >
-        width -
-        item.radius
+        rightWall
       ) {
         item.x =
-          width -
-          item.radius;
+          rightWall;
 
-        item.vx *= -0.2;
+        item.vx = 0;
       }
 
       /*
-        Upper deck edge:
-        falling items pass through the front
-        and land on the lower deck.
+         FALLING FROM ABOVE
+
+         A newly dropped coin can ONLY land
+         on the upper deck.
       */
 
       if (
-        item.y >=
-        upperBottom
+        item.deck === 'upper'
       ) {
-        item.state =
-          'transition';
-
         if (
-          item.y >=
-          lowerTop * height -
-          item.radius
+          item.y +
+            item.radius >=
+          upperFloor
         ) {
+          item.y =
+            upperFloor -
+            item.radius;
+
+          item.vy = 0;
+          item.vx = 0;
           item.state =
             'resting';
+        }
+      }
 
+      /*
+         FALLING FROM UPPER TO LOWER
+
+         It lands on the LOWER deck.
+      */
+
+      else if (
+        item.deck === 'transition'
+      ) {
+        if (
+          item.y +
+            item.radius >=
+          lowerFloor
+        ) {
+          item.y =
+            lowerFloor -
+            item.radius;
+
+          item.vy = 0;
+          item.vx = 0;
+          item.state =
+            'resting';
           item.deck =
             'lower';
-
-          item.y =
-            Math.min(
-              item.y,
-              lowerSurface -
-              item.radius
-            );
-
-          item.vy *= 0.12;
         }
       }
 
@@ -723,10 +773,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* =====================================================
-       UPPER DECK
+       UPPER PUSHER
        ===================================================== */
 
-    for (const item of items) {
+    /*
+       The pusher plate starts at the rear
+       of the upper deck and travels toward
+       the front.
+
+       RESTING COINS HAVE NO GRAVITY.
+
+       They only move when the pusher
+       physically contacts them.
+    */
+
+    const pusherTop =
+      height * upperTop +
+      pusherZ;
+
+    const pusherHeight =
+      Math.max(
+        24,
+        Math.min(
+          34,
+          height * 0.055
+        )
+      );
+
+    const pusherBottom =
+      pusherTop +
+      pusherHeight;
+
+    for (const item of activeItems) {
       if (
         item.state !== 'resting' ||
         item.deck !== 'upper'
@@ -734,452 +812,515 @@ document.addEventListener('DOMContentLoaded', () => {
         continue;
       }
 
-      const upperFloor =
-        height *
-        upperTop +
-        height *
-        upperHeight -
-        14;
-
-      const movingFront =
-        upperFloor +
-        pusherZ;
-
       /*
-        Upper deck is a raised tray.
-        Coins are supported by its floor.
+         Keep the coin firmly supported
+         by the upper tray.
       */
 
       if (
         item.y +
-        item.radius >=
+          item.radius >
         upperFloor
       ) {
         item.y =
           upperFloor -
           item.radius;
 
-        if (item.vy > 0) {
-          item.vy *= -0.08;
-        }
-
-        item.vy *= 0.9;
+        item.vy = 0;
       }
 
       /*
-        Slow gravity while resting on upper deck.
-      */
+         PHYSICAL PUSH CONTACT
 
-      item.vy +=
-        0.12 * dt;
+         Only the forward-moving pusher
+         is allowed to push the coin.
 
-      /*
-        Pusher physically moves coins
-        toward the front of the upper deck.
+         Returning pusher does NOTHING.
       */
 
       if (
         pusherDirection > 0
       ) {
-        const distance =
-          Math.abs(
-            item.y -
-            movingFront
-          );
+        const coinFront =
+          item.y -
+          item.radius;
 
         if (
-          distance <
-          item.radius + 12
+          coinFront <=
+            pusherBottom + 2 &&
+          item.y +
+            item.radius >=
+            pusherTop
         ) {
-          item.vy +=
+          const pushAmount =
             PUSHER_SPEED *
-            0.65 *
-            dt;
+            dt *
+            2.4;
+
+          item.y +=
+            pushAmount;
+
+          item.vy =
+            pushAmount /
+            Math.max(
+              dt,
+              0.001
+            );
+
+          /*
+             The coin has reached the
+             front edge of the upper tray.
+
+             ONLY THE PUSHER can cause
+             this transition.
+          */
+
+          if (
+            item.y +
+              item.radius >=
+            upperFront
+          ) {
+            item.y =
+              upperFront -
+              item.radius +
+              4;
+
+            item.state =
+              'transition';
+
+            item.deck =
+              'transition';
+
+            item.vy =
+              Math.max(
+                2.5,
+                item.vy
+              );
+
+            item.vx *= 0.15;
+          }
         }
-      }
-
-      /*
-        Coins reaching the upper front
-        fall to the lower deck.
-      */
-
-      if (
-        item.y >
-        upperFloor -
-        item.radius * 0.35
-      ) {
-        item.state =
-          'falling';
-
-        item.deck =
-          'transition';
-
-        item.vy =
-          2.5;
       }
 
       renderItem(item);
     }
 
     /* =====================================================
-       LOWER DECK COLLISIONS
+       UPPER COIN PILE
+       ===================================================== */
+
+    resolveDeckCollisions(
+      activeItems.filter(
+        item =>
+          item.state === 'resting' &&
+          item.deck === 'upper'
+      ),
+      upperFloor,
+      width
+    );
+
+    /* =====================================================
+       LOWER DECK
        ===================================================== */
 
     const lowerItems =
-      items.filter(
+      activeItems.filter(
         item =>
           item.state === 'resting' &&
-          item.deck !== 'upper'
+          item.deck === 'lower'
       );
 
-    const cellSize =
-      NORMAL_COIN_SIZE + 8;
+    /*
+       CRITICAL:
 
-    const grid =
-      new Map();
+       There is NO gravity here.
 
-    function gridKey(
-      x,
-      y
-    ) {
-      return `${x},${y}`;
-    }
+       There is NO automatic downward
+       movement here.
 
-    for (
-      const item of lowerItems
-    ) {
-      const gx =
-        Math.floor(
-          item.x /
-          cellSize
+       Lower coins stay exactly where
+       they are unless another physical
+       force moves them.
+    */
+
+    for (const item of lowerItems) {
+      item.vx *=
+        Math.pow(
+          0.82,
+          dt
         );
 
-      const gy =
-        Math.floor(
-          item.y /
-          cellSize
-        );
+      item.vy = 0;
 
-      const key =
-        gridKey(
-          gx,
-          gy
-        );
-
-      if (!grid.has(key)) {
-        grid.set(
-          key,
-          []
-        );
+      if (
+        Math.abs(item.vx) <
+        0.003
+      ) {
+        item.vx = 0;
       }
 
-      grid.get(key).push(
-        item
-      );
+      item.x +=
+        item.vx * dt;
+
+      /*
+         Solid left wall.
+      */
+
+      if (
+        item.x <
+        item.radius + 2
+      ) {
+        item.x =
+          item.radius + 2;
+
+        item.vx = 0;
+      }
+
+      /*
+         Solid right wall.
+      */
+
+      if (
+        item.x >
+        width -
+          item.radius -
+          2
+      ) {
+        item.x =
+          width -
+          item.radius -
+          2;
+
+        item.vx = 0;
+      }
+
+      /*
+         Solid LOWER FLOOR.
+
+         Nothing moves toward the hole
+         simply because it exists.
+      */
+
+      if (
+        item.y >
+        lowerFront -
+          item.radius
+      ) {
+        item.y =
+          lowerFront -
+          item.radius;
+
+        item.vy = 0;
+      }
+
+      renderItem(item);
     }
 
-    for (
-      let pass = 0;
-      pass < 3;
-      pass++
+    resolveDeckCollisions(
+      lowerItems,
+      lowerFront,
+      width
+    );
+
+    /* =====================================================
+       PUSH LOWER PILE ONLY DURING
+       THE FORWARD PUSH CYCLE
+       ===================================================== */
+
+    if (
+      pusherDirection > 0 &&
+      pusherZ >
+        MAX_PUSH_DISTANCE * 0.72
     ) {
+      /*
+         This represents the physical transfer
+         of pressure from the upper moving
+         mechanism into the lower pile.
+
+         It is NOT gravity.
+
+         It only happens while the pusher
+         is actually moving forward.
+      */
+
+      const transferStrength =
+        PUSHER_SPEED *
+        dt *
+        0.9;
+
+      const lowerPushZone =
+        lowerTop * height;
+
       for (
-        const a of lowerItems
+        const item of lowerItems
       ) {
-        const agx =
-          Math.floor(
-            a.x /
-            cellSize
-          );
-
-        const agy =
-          Math.floor(
-            a.y /
-            cellSize
-          );
-
-        for (
-          let gx =
-            agx - 1;
-          gx <=
-            agx + 1;
-          gx++
+        if (
+          item.y >
+          lowerPushZone
         ) {
-          for (
-            let gy =
-              agy - 1;
-            gy <=
-              agy + 1;
-            gy++
-          ) {
-            const bucket =
-              grid.get(
-                gridKey(
-                  gx,
-                  gy
-                )
-              );
-
-            if (!bucket) {
-              continue;
-            }
-
-            for (
-              const b of bucket
-            ) {
-              if (
-                a === b ||
-                a.id > b.id
-              ) {
-                continue;
-              }
-
-              let dx =
-                b.x - a.x;
-
-              let dy =
-                b.y - a.y;
-
-              let d2 =
-                dx * dx +
-                dy * dy;
-
-              if (
-                d2 <
-                0.000001
-              ) {
-                dx = 0.01;
-                dy = 0;
-                d2 = 0.0001;
-              }
-
-              const d =
-                Math.sqrt(d2);
-
-              const minD =
-                a.radius +
-                b.radius;
-
-              if (
-                d >= minD
-              ) {
-                continue;
-              }
-
-              const nx =
-                dx / d;
-
-              const ny =
-                dy / d;
-
-              const overlap =
-                minD - d;
-
-              const correction =
-                overlap * 0.51;
-
-              a.x -=
-                nx * correction;
-
-              a.y -=
-                ny * correction;
-
-              b.x +=
-                nx * correction;
-
-              b.y +=
-                ny * correction;
-
-              const rvx =
-                b.vx - a.vx;
-
-              const rvy =
-                b.vy - a.vy;
-
-              const normalVelocity =
-                rvx * nx +
-                rvy * ny;
-
-              if (
-                normalVelocity < 0
-              ) {
-                const restitution =
-                  0.08;
-
-                const impulse =
-                  -(1 +
-                    restitution) *
-                  normalVelocity /
-                  2;
-
-                a.vx -=
-                  impulse * nx;
-
-                a.vy -=
-                  impulse * ny;
-
-                b.vx +=
-                  impulse * nx;
-
-                b.vy +=
-                  impulse * ny;
-              }
-
-              a.vx *= 0.998;
-              a.vy *= 0.998;
-
-              b.vx *= 0.998;
-              b.vy *= 0.998;
-            }
-          }
+          item.vx +=
+            (exitCenter -
+              item.x) *
+            transferStrength *
+            0.012;
         }
       }
     }
 
     /* =====================================================
-       LOWER DECK MOVEMENT
+       PAYOUT
        ===================================================== */
 
     for (
-      const item of lowerItems
+      let i =
+        activeItems.length - 1;
+      i >= 0;
+      i--
     ) {
-      item.vy +=
-        0.10 * dt;
-
-      item.x +=
-        item.vx * dt;
-
-      item.y +=
-        item.vy * dt;
-
-      item.vx *=
-        Math.pow(
-          0.968,
-          dt
-        );
-
-      item.vy *=
-        Math.pow(
-          0.978,
-          dt
-        );
+      const item =
+        activeItems[i];
 
       if (
-        Math.abs(item.vx) <
-        0.01
+        item.state !==
+        'resting' ||
+        item.deck !==
+        'lower'
       ) {
-        item.vx = 0;
-      }
-
-      if (
-        Math.abs(item.vy) <
-        0.01
-      ) {
-        item.vy = 0;
-      }
-
-      /* SIDE WALLS */
-
-      if (
-        item.x <
-        item.radius
-      ) {
-        item.x =
-          item.radius;
-
-        item.vx =
-          Math.abs(
-            item.vx
-          ) * 0.3;
-      }
-
-      if (
-        item.x >
-        width -
-        item.radius
-      ) {
-        item.x =
-          width -
-          item.radius;
-
-        item.vx =
-          -Math.abs(
-            item.vx
-          ) * 0.3;
+        continue;
       }
 
       /*
-        LOWER FLOOR
-
-        The center hole is the ONLY opening.
+         Only a coin physically sitting
+         directly over the center hole
+         can enter it.
       */
 
-      const insideExit =
+      const distanceFromCenter =
         Math.abs(
           item.x -
           exitCenter
-        ) <=
-        exitHalf -
-        item.radius * 0.1;
+        );
 
-      const bottomLimit =
+      const insideHole =
+        distanceFromCenter <
+        exitHalf -
+        item.radius * 0.25;
+
+      const atHoleEdge =
+        item.y +
+          item.radius >=
         height -
-        item.radius;
+          EXIT_WIDTH * 0.5;
 
       if (
-        item.y >
-        bottomLimit
+        insideHole &&
+        atHoleEdge &&
+        gateOpen
       ) {
-        if (
-          insideExit &&
-          gateOpen
+        triggerPayout(item);
+      }
+    }
+  }
+
+  /* =========================================================
+     DECK COLLISION / PILING
+     ========================================================= */
+
+  function resolveDeckCollisions(
+    items,
+    floor,
+    width
+  ) {
+    /*
+       Smaller physical collision radius than
+       visual radius lets coins visibly overlap
+       and pile instead of forming perfectly
+       separated circles.
+    */
+
+    const collisionScale = 0.78;
+
+    for (
+      let pass = 0;
+      pass < 4;
+      pass++
+    ) {
+      for (
+        let i = 0;
+        i < items.length;
+        i++
+      ) {
+        const a =
+          items[i];
+
+        for (
+          let j = i + 1;
+          j < items.length;
+          j++
         ) {
-          triggerPayout(item);
-          continue;
+          const b =
+            items[j];
+
+          let dx =
+            b.x - a.x;
+
+          let dy =
+            b.y - a.y;
+
+          let distance =
+            Math.sqrt(
+              dx * dx +
+              dy * dy
+            );
+
+          if (
+            distance <
+            0.001
+          ) {
+            dx = 0.01;
+            dy = 0;
+            distance = 0.01;
+          }
+
+          const physicalA =
+            a.radius *
+            collisionScale;
+
+          const physicalB =
+            b.radius *
+            collisionScale;
+
+          const minimum =
+            physicalA +
+            physicalB;
+
+          if (
+            distance >=
+            minimum
+          ) {
+            continue;
+          }
+
+          const nx =
+            dx /
+            distance;
+
+          const ny =
+            dy /
+            distance;
+
+          const overlap =
+            minimum -
+            distance;
+
+          /*
+             Very gentle separation.
+             This allows visible piling.
+          */
+
+          const correction =
+            overlap *
+            0.48;
+
+          a.x -=
+            nx *
+            correction;
+
+          a.y -=
+            ny *
+            correction;
+
+          b.x +=
+            nx *
+            correction;
+
+          b.y +=
+            ny *
+            correction;
+
+          /*
+             No vertical bouncing.
+             This prevents the unwanted
+             up/down oscillation.
+          */
+
+          a.vy = 0;
+          b.vy = 0;
+
+          /*
+             Transfer only horizontal
+             movement between coins.
+          */
+
+          const relativeVx =
+            b.vx -
+            a.vx;
+
+          if (
+            relativeVx !== 0
+          ) {
+            const transfer =
+              relativeVx *
+              0.08;
+
+            a.vx +=
+              transfer;
+
+            b.vx -=
+              transfer;
+          }
         }
-
-        /*
-          Solid floor everywhere except
-          the center hole.
-        */
-
-        item.y =
-          bottomLimit;
-
-        if (
-          item.vy > 0
-        ) {
-          item.vy *= -0.08;
-        }
-
-        item.vx *= 0.94;
       }
 
       /*
-        LOWER PUSH EFFECT
-
-        The moving upper mechanism transfers
-        pressure onto the lower coin field.
+         Keep every coin supported
+         by its deck floor.
       */
 
-      if (
-        pusherDirection > 0
+      for (
+        const item of items
       ) {
-        const pressureZone =
-          height *
-          0.57;
+        if (
+          item.y +
+            item.radius >
+          floor
+        ) {
+          item.y =
+            floor -
+            item.radius;
+
+          item.vy = 0;
+        }
 
         if (
-          item.y >
-          pressureZone
+          item.x <
+          item.radius + 2
         ) {
-          item.vy +=
-            PUSHER_SPEED *
-            0.28 *
-            dt;
+          item.x =
+            item.radius + 2;
+
+          item.vx = 0;
+        }
+
+        if (
+          item.x >
+          width -
+            item.radius -
+            2
+        ) {
+          item.x =
+            width -
+            item.radius -
+            2;
+
+          item.vx = 0;
         }
       }
+    }
 
+    for (
+      const item of items
+    ) {
       renderItem(item);
     }
   }
@@ -1189,6 +1330,10 @@ document.addEventListener('DOMContentLoaded', () => {
      ========================================================= */
 
   function renderItem(item) {
+    if (!item.element) {
+      return;
+    }
+
     item.element.style.left =
       `${item.x - item.radius}px`;
 
@@ -1215,8 +1360,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     item.element.style.zIndex =
       item.type === 'xp'
-        ? '30'
-        : '20';
+        ? '40'
+        : '30';
   }
 
   /* =========================================================
@@ -1276,7 +1421,7 @@ document.addEventListener('DOMContentLoaded', () => {
           Math.max(
             1,
             width -
-            NORMAL_COIN_RADIUS * 2
+              NORMAL_COIN_RADIUS * 2
           );
 
         spawnItem(
@@ -1358,7 +1503,7 @@ document.addEventListener('DOMContentLoaded', () => {
       Math.max(
         1,
         width -
-        XP_RADIUS * 2
+          XP_RADIUS * 2
       );
 
     spawnItem(
@@ -1410,13 +1555,14 @@ document.addEventListener('DOMContentLoaded', () => {
               item.state ===
               'resting'
             ) {
+              /*
+                 Shake is an intentional force,
+                 not natural gravity.
+              */
+
               item.vx +=
                 (Math.random() -
                   0.5) * 5;
-
-              item.vy +=
-                Math.random() * 4 +
-                1.5;
             }
           }
         );
@@ -1621,7 +1767,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       itemData.vx =
         (Math.random() - 0.5) *
-        0.6;
+        0.15;
     }
 
     activeItems.push(
