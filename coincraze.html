@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PixVinz - Coin Craze</title>
+    <link rel="stylesheet" href="coincraze.css">
+</head>
+<body>
+
+    <header class="top-bar">
+      <button class="icon-btn" onclick="playSound('click'); window.location.href='index.html'">←</button>
+      <div class="logo-container">
+        <video id="logoVideo" autoplay loop muted playsinline preload="auto">
+          <source src="image/logo.webm" type="video/webm">
+        </video>
+      </div>
+      <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
+    </header>
+
+    <main class="game-wrapper">
+      <div class="coin-pusher-container">
+        <!-- Ornate frame background asset -->
+        <img src="image/coincraze1.png" alt="Coin Craze Frame" class="game-frame-bg">
+        
+        <!-- Internal gameplay area mapped precisely inside the frame cutout -->
+        <div class="game-play-area" id="playArea">
+          <!-- Dynamic elements (coins, pusher mechanism) will render here -->
+        </div>
+      </div>
+    </main>
+
+    <script src="coincraze.js"></script>
+</body>
+</html>
