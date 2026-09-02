@@ -1,0 +1,80 @@
+/* coincraze.css - Coin Pusher Game Styling */
+
+body {
+  background-color: #0d0614;
+  color: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Game Wrapper Layout */
+.game-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 10px;
+  min-height: calc(100vh - 70px);
+}
+
+.coin-pusher-container {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 9 / 16;
+  margin: 0 auto;
+}
+
+/* Ornate Game Frame Asset */
+.game-frame-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none; /* Allows clicks to pass through to the play area */
+  z-index: 5;
+}
+
+/* Internal Play Area mapped precisely to the frame's open cutout */
+.game-play-area {
+  position: absolute;
+  top: 14%;
+  left: 10%;
+  right: 10%;
+  bottom: 12%;
+  background: radial-gradient(circle at center, rgba(30, 15, 50, 0.95), rgba(10, 5, 20, 0.98));
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 2;
+}
+
+/* Falling / Resting Coins */
+.pusher-coin {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: radial-gradient(circle at 30% 30%, #fff7ae, #ffd700 60%, #cca100);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5), 0 0 8px rgba(255, 215, 0, 0.6);
+  transform: scale(0.8);
+  transition: transform 0.2s;
+}
+
+.pusher-coin.landed {
+  transform: scale(1);
+}
+
+.pusher-coin.payout {
+  animation: coinWin 0.6s forwards ease-in-out;
+}
+
+@keyframes coinWin {
+  0% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.3); filter: brightness(1.5); }
+  100% { transform: translateY(100px) scale(0.5); opacity: 0; }
+}
