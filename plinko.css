@@ -237,3 +237,32 @@ canvas {
   filter: brightness(1.15);
 }
 
+
+
+.difficulty-selector {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 4px 0;
+  flex-shrink: 0;
+}
+
+.diff-btn {
+  background: rgba(20, 10, 35, 0.8);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  color: #b8a2e0;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.diff-btn.active {
+  background: #ffd700;
+  color: #130826;
+  border-color: #ffd700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
