@@ -1213,8 +1213,7 @@ body {
 
 <script>
 /* =========================================================
-   AERUSPIN GAME DATA
-   Game logic will be placed here in the next step.
+   AERUSPIN GAME DATA & LOCALSTORAGE SYNC
 ========================================================= */
 
 const wheelSections = [
@@ -1267,12 +1266,26 @@ const bets = {
   Jackpot: 0
 };
 
+/* --- SYNC INTEGRATION START --- */
+// Fetching keys exactly as mandated by the overarching profile logic
+const username = localStorage.getItem('currentUser') || 'guest';
+const coinsKey = `${username}_totalCoins`;
+const xpKey = `${username}_bonusXp`;
+
+// Initializing state directly from LocalStorage (defaults to 0 if null/missing)
+let coins = parseInt(localStorage.getItem(coinsKey)) || 0;
+let xp = parseInt(localStorage.getItem(xpKey)) || 0;
+
+// Function to sync current variables back to localStorage
+function saveUserData() {
+    localStorage.setItem(coinsKey, coins);
+    localStorage.setItem(xpKey, xp);
+}
+/* --- SYNC INTEGRATION END --- */
+
 let selectedChip = 5;
-let coins = 0;
-let xp = 0;
 let spinning = false;
 let wheelRotation = 0;
-
 
 /* =========================================================
    INITIAL SETUP
@@ -1493,6 +1506,92 @@ document
 
   });
 
+/* =========================================================
+   SPIN LOGIC, PAYOUTS, AND SYNCING
+========================================================= */
+
+document.getElementById("spinButton").addEventListener("click", () => {
+    if (spinning) return;
+
+    const totalBet = calculateTotalBet();
+    if (totalBet === 0 || totalBet > coins) return; 
+
+    // Lock UI during spin
+    spinning = true;
+    document.getElementById("spinButton").disabled = true;
+
+    // Deduct total bet amount from local state and IMMEDIATELY sync
+    coins -= totalBet;
+    saveUserData();
+    updateBalanceDisplay();
+
+    // Sound effect
+    const spinSound = document.getElementById("spinSound");
+    spinSound.currentTime = 0;
+    spinSound.play().catch(() => {});
+
+    // Spin mathematics
+    const spinRevolutions = 5 + Math.floor(Math.random() * 4); // Random full spins
+    const randomIndex = Math.floor(Math.random() * wheelSections.length);
+    const sectionAngle = 360 / wheelSections.length;
+
+    // Target rotation needed to land perfectly in the middle of the selected random section
+    const targetRotation = (spinRevolutions * 360) + (360 - (randomIndex * sectionAngle)) - (sectionAngle / 2);
+    
+    wheelRotation += targetRotation;
+    
+    const wheel = document.getElementById("wheel");
+    // Ensure the 3D X-axis tilt from CSS remains intact while rotating along Z
+    wheel.style.transform = `rotateX(7deg) rotateZ(${wheelRotation}deg)`;
+
+    // Wait for the CSS transition (5s as defined in .wheel-3d)
+    setTimeout(() => {
+        handleResult(wheelSections[randomIndex]);
+    }, 5000);
+});
+
+function handleResult(result) {
+    spinning = false;
+    document.getElementById("spinButton").disabled = false;
+    document.getElementById("lastResult").textContent = result.toUpperCase();
+
+    // Check winnings & XP
+    let winnings = 0;
+    let xpGained = 0;
+
+    if (bets[result] > 0) {
+        winnings = bets[result] * payouts[result];
+        xpGained = xpRewards[result] || 0;
+    }
+
+    // Add up the results to our tracking variables
+    coins += winnings;
+    xp += xpGained;
+
+    // === SYNC NEW COINS & XP BALANCE BACK TO LOCALSTORAGE ===
+    saveUserData();
+    updateBalanceDisplay();
+
+    // Reset bets
+    Object.keys(bets).forEach(k => bets[k] = 0);
+    updateBetDisplay();
+
+    // Display Win UI if the user got anything
+    if (winnings > 0) {
+        document.getElementById("winResult").textContent = result.toUpperCase();
+        document.getElementById("winCoins").textContent = `+${winnings.toLocaleString()}`;
+        document.getElementById("winXP").textContent = `+${xpGained.toLocaleString()} XP`;
+        
+        document.getElementById("winTitle").textContent = result === "Jackpot" ? "JACKPOT!" : "WINNER!";
+        
+        const winAudio = result === "Jackpot" ? document.getElementById("jackpotSound") : document.getElementById("winSound");
+        winAudio.currentTime = 0;
+        winAudio.play().catch(() => {});
+
+        document.getElementById("winOverlay").classList.add("show");
+    }
+}
+
 
 /* =========================================================
    INITIALIZE
@@ -1503,11 +1602,6 @@ createWheelLabels();
 updateBalanceDisplay();
 updateBetDisplay();
 
-/*
-   IMPORTANT:
-   The complete spin/outcome/payout/localStorage
-   system will be added into this structure next.
-*/
 </script>
 
 </body>
