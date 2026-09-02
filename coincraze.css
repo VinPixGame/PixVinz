@@ -1,10 +1,15 @@
+/* coincraze.css - Fixed Viewport, Taller Aspect Ratio, Emoji Coins/Diamonds */
+
 body {
   background-color: #0d0614;
   color: #fff;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
+  height: 100vh;
+  overflow: hidden; /* Prevents any page scrolling */
+  display: flex;
+  flex-direction: column;
 }
 
 .top-bar {
@@ -14,16 +19,18 @@ body {
   width: 100%;
   position: relative;
   flex-shrink: 0;
-  height: 60px;
+  height: 50px;
+  padding: 0 10px;
+  box-sizing: border-box;
 }
 
-.top-bar > *:nth-child(1) { position: absolute; left: 10px; z-index: 10; }
+.top-bar > *:nth-child(1) { position: absolute; left: 15px; z-index: 10; }
 .top-bar > *:nth-child(2) { width: 100%; display: flex; justify-content: center; }
-.top-bar > *:nth-child(3) { position: absolute; right: 10px; z-index: 10; }
+.top-bar > *:nth-child(3) { position: absolute; right: 15px; z-index: 10; }
 
 .logo-container video,
 #logoVideo {
-  width: 150px;
+  width: 130px;
   height: auto;
   object-fit: contain;
 }
@@ -32,13 +39,13 @@ body {
   background: rgba(20, 10, 35, 0.9);
   border: 2px solid #ffd700;
   color: #ffd700;
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
@@ -47,10 +54,10 @@ body {
 .coin-badge {
   background: rgba(0, 0, 0, 0.6);
   border: 1px solid #ffd700;
-  padding: 6px 14px;
+  padding: 5px 12px;
   border-radius: 20px;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 13px;
   color: #ffd700;
   display: flex;
   align-items: center;
@@ -58,19 +65,25 @@ body {
   box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
 }
 
+/* Game wrapper with ~2cm space below top bar and locked to screen */
 .game-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 10px 20px 10px;
-  margin-top: -10px;
+  justify-content: center;
+  flex-grow: 1;
+  margin-top: 15px; 
+  padding-bottom: 10px;
+  overflow: hidden;
 }
 
 .coin-pusher-container {
   position: relative;
   width: 100%;
-  max-width: 410px;
-  aspect-ratio: 9 / 16;
+  max-width: 390px;
+  height: 100%;
+  max-height: calc(100vh - 85px);
+  aspect-ratio: 9 / 17.5; /* Taller than width */
   margin: 0 auto;
 }
 
@@ -100,28 +113,28 @@ body {
 
 .game-play-area {
   position: absolute;
-  top: 15.5%;
+  top: 15%;
   left: 11.5%;
   right: 11.5%;
-  bottom: 14.5%;
-  background: radial-gradient(circle at center, rgba(20, 8, 35, 0.7), rgba(5, 2, 12, 0.95));
+  bottom: 15%;
+  background: radial-gradient(circle at center, rgba(20, 8, 35, 0.8), rgba(5, 2, 12, 0.98));
   border-radius: 10px;
   overflow: hidden;
   z-index: 2;
 }
 
-/* Mechanical Pusher Plate sits in the background */
+/* Mechanical Pusher Plate */
 .pusher-plate {
   position: absolute;
-  top: 36%;
+  top: 34%;
   left: 50%;
   transform: translateX(-50%);
-  width: 85%;
-  height: 70px;
+  width: 84%;
+  height: 60px;
   background: linear-gradient(135deg, #b8860b 0%, #d4af37 50%, #8b6508 100%);
   border: 2px solid #fff8dc;
-  border-radius: 8px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.6);
+  border-radius: 6px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.6);
   z-index: 1; 
 }
 
@@ -136,64 +149,58 @@ body {
   border-radius: 2px;
 }
 
-/* ALL COINS AND DIAMONDS SIT BELOW/IN FRONT OF THE PUSHER PLATE (z-index: 3) */
+/* EMOJI COINS & DIAMONDS */
 .pusher-item {
   position: absolute;
-  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 3;
-  box-shadow: 0 5px 10px rgba(0,0,0,0.6), inset 0 2px 3px rgba(255,255,255,0.7), inset 0 -3px 4px rgba(0,0,0,0.5);
+  user-select: none;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+  transition: transform 0.1s ease;
 }
 
-.pusher-item.small { width: 24px; height: 24px; }
-.pusher-item.medium { width: 32px; height: 32px; }
-.pusher-item.large { width: 42px; height: 42px; box-shadow: 0 8px 16px rgba(0,0,0,0.7), inset 0 3px 5px rgba(255,255,255,0.8), inset 0 -4px 6px rgba(0,0,0,0.6); }
-
-.pusher-item.coin-standard {
-  background: radial-gradient(circle at 35% 35%, #fffacd 0%, #ffd700 45%, #b8860b 80%, #664400 100%);
-  border: 2px solid #ffffe0;
-}
-
-.pusher-item.diamond {
-  background: radial-gradient(circle at 30% 30%, #e0ffff 0%, #00bfff 50%, #004080 100%);
-  border: 2px solid #ffffff;
-  border-radius: 35% 65% 65% 35% / 35% 35% 65% 65%;
-  box-shadow: 0 8px 18px rgba(0,191,255,0.7), inset 0 0 10px rgba(255,255,255,0.9);
-}
+/* Size tiers for emojis */
+.pusher-item.small { font-size: 18px; width: 22px; height: 22px; }
+.pusher-item.medium { font-size: 26px; width: 30px; height: 30px; }
+.pusher-item.large { font-size: 36px; width: 40px; height: 40px; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.8)); }
 
 .pusher-item.payout {
-  animation: itemWin 0.6s forwards ease-in-out;
+  animation: itemWin 0.5s forwards ease-in-out;
 }
 
 @keyframes itemWin {
-  0% { transform: scale(1); filter: brightness(1); }
-  50% { transform: scale(1.5); filter: brightness(2); }
-  100% { transform: translateY(60px) scale(0.3); opacity: 0; }
+  0% { transform: scale(1); filter: brightness(1) drop-shadow(0 4px 6px rgba(0,0,0,0.6)); }
+  50% { transform: scale(1.6); filter: brightness(2.2) drop-shadow(0 0 15px #ffd700); }
+  100% { transform: translateY(50px) scale(0.3); opacity: 0; }
 }
 
 .floating-score {
   position: absolute;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 900;
   color: #00ff66;
   text-shadow: 0 0 10px rgba(0, 255, 102, 0.9), 0 2px 4px rgba(0,0,0,0.9);
   pointer-events: none;
   z-index: 15;
-  animation: floatUp 0.8s forwards ease-out;
+  animation: floatUp 0.7s forwards ease-out;
 }
 
 @keyframes floatUp {
   0% { transform: translateY(0) scale(0.8); opacity: 1; }
-  100% { transform: translateY(-50px) scale(1.25); opacity: 0; }
+  100% { transform: translateY(-45px) scale(1.2); opacity: 0; }
 }
 
+/* Control Deck */
 .drop-control-deck {
   position: absolute;
   bottom: 2%;
-  left: 10%;
-  right: 10%;
+  left: 8%;
+  right: 8%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   z-index: 8;
 }
 
@@ -202,16 +209,16 @@ body {
   gap: 8px;
   align-items: center;
   background: rgba(15, 5, 25, 0.9);
-  padding: 6px 12px;
-  border-radius: 14px;
+  padding: 5px 10px;
+  border-radius: 12px;
   border: 1px solid rgba(255, 215, 0, 0.4);
 }
 
 .shake-bar-container {
   flex-grow: 1;
-  height: 12px;
+  height: 10px;
   background: rgba(0, 0, 0, 0.7);
-  border-radius: 6px;
+  border-radius: 5px;
   overflow: hidden;
   border: 1px solid rgba(255, 215, 0, 0.3);
 }
@@ -227,10 +234,10 @@ body {
   background: #251608;
   color: #665544;
   border: 2px solid #443322;
-  padding: 6px 12px;
-  font-size: 0.8rem;
+  padding: 5px 10px;
+  font-size: 0.75rem;
   font-weight: bold;
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: not-allowed;
   white-space: nowrap;
 }
@@ -240,7 +247,7 @@ body {
   color: #fff;
   border: 2px solid #ffcc00;
   cursor: pointer;
-  box-shadow: 0 0 12px rgba(255, 68, 0, 0.9);
+  box-shadow: 0 0 10px rgba(255, 68, 0, 0.9);
   animation: pulseShake 1.2s infinite alternate;
 }
 
@@ -253,12 +260,12 @@ body {
   background: linear-gradient(to bottom, #ffd700, #cc9900);
   color: #1a082c;
   border: 2px solid #fff;
-  padding: 12px;
-  font-size: 1rem;
+  padding: 10px;
+  font-size: 0.95rem;
   font-weight: bold;
-  border-radius: 20px;
+  border-radius: 18px;
   cursor: pointer;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5), 0 0 12px rgba(255, 215, 0, 0.6);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.6);
   transition: all 0.1s ease;
 }
 
