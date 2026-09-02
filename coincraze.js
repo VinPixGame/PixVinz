@@ -1,4 +1,4 @@
-/* coincraze.js */
+/* coincraze.js - Strictly Frozen Static Physics */
 document.addEventListener('DOMContentLoaded', () => {
   let coinKey = 'totalCoins';
   if (typeof getUserKey === 'function') {
@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let shakeEnergy = 0;
   let activeItems = [];
 
-  // Web Audio Synthesizer
   let audioCtx = null;
   function getAudioContext() {
     if (!audioCtx) {
@@ -123,8 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const playWidth = playArea.clientWidth;
     const playHeight = playArea.clientHeight;
     
-    // Initial pile of standard 5-value coins
-    for (let i = 0; i < 38; i++) {
+    for (let i = 0; i < 35; i++) {
       const rx = Math.random() * (playWidth - 35) + 15;
       const ry = playHeight * 0.50 + Math.random() * (playHeight * 0.38);
       spawnItem(rx, ry, 'coin', 5, 'medium', false, 'resting');
@@ -148,7 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Pusher Mechanism with True Static Physics (Coins stay completely frozen unless touched by pusher or colliding coins)
   let pusherZ = 0;
   let pusherDirection = 1;
   const pusherSpeed = 1.4;
@@ -169,25 +166,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (item.state === 'resting') {
         let moved = false;
 
-        // 1. Check if physical pusher plate strikes the coin from behind
-        if (pusherDirection > 0 && item.y >= pusherFrontEdgeY - 8 && item.y <= pusherFrontEdgeY + 6) {
+        // STRICT PHYSICS: Coins are 100% frozen unless the pusher plate is moving forward AND physically hits the coin from behind.
+        if (pusherDirection > 0 && item.y >= pusherFrontEdgeY - 6 && item.y <= pusherFrontEdgeY + 4) {
           item.y += pusherSpeed;
           moved = true;
         }
-
-        // 2. Check collision transfer from other moving/colliding coins
-        activeItems.forEach(other => {
-          if (other !== item && other.state === 'resting') {
-            const dx = item.x - other.x;
-            const dy = item.y - other.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            // If another coin is pressing closely behind it towards the front edge
-            if (dist < 26 && other.y > item.y && other.y - item.y < 22) {
-              item.y += 0.2;
-              moved = true;
-            }
-          }
-        });
 
         if (moved) {
           item.element.style.top = `${item.y}px`;
@@ -211,7 +194,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   requestAnimationFrame(updatePusher);
 
-  // Manual Coin Drop: Exactly ONE size, value = 5 coins! No diamonds on manual drop.
   dropCoinBtn.addEventListener('click', () => {
     if (coinCount < DROP_COST) {
       playSound('error');
@@ -227,16 +209,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const playWidth = playArea.clientWidth;
     const randomX = Math.random() * (playWidth - 35) + 15;
     
-    // Always standard coin, 5 value
+    // Exactly ONE size, value = 5 coins
     spawnItem(randomX, 10, 'coin', 5, 'medium', true, 'falling');
   });
 
-  // 3-Minute Automated Rare Diamond Bonus Drop Timer
   const DIAMOND_TIMER_KEY = `coincraze_last_diamond_${coinKey}`;
   setInterval(() => {
     const now = Date.now();
     const lastDiamondTime = parseInt(localStorage.getItem(DIAMOND_TIMER_KEY)) || 0;
-    if (now - lastDiamondTime >= 180000) { // 3 minutes
+    if (now - lastDiamondTime >= 180000) {
       localStorage.setItem(DIAMOND_TIMER_KEY, now.toString());
       spawnBonusDiamond();
     }
@@ -294,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (isFalling) {
       let velocityY = 2;
-      const targetY = playArea.clientHeight * 0.46; // Lands securely behind the pile
+      const targetY = playArea.clientHeight * 0.46;
 
       function fall() {
         if (itemData.state === 'falling') {
@@ -320,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
     itemData.state = 'payout';
 
     itemData.element.classList.add('payout');
-    coinCount += itemData.value; // Gives exact value (5 for standard coin)
+    coinCount += itemData.value;
     updateBalanceDisplay();
 
     playSound('win');
