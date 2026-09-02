@@ -236,3 +236,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize preloaded items on load
   initPreloadedItems();
 });
+
+
+// Handle back button navigation safely
+  const backBtn = document.getElementById('backBtn');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      if (typeof playSound === 'function') {
+        playSound('click');
+      }
+      window.location.href = 'index.html';
+    });
+  }
