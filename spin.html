@@ -1271,19 +1271,40 @@ const bets = {
 };
 
 /* --- SYNC INTEGRATION START --- */
-// Fetching keys exactly as mandated by the overarching profile logic
-const username = localStorage.getItem('currentUser') || 'guest';
-const coinsKey = `${username}_totalCoins`;
-const xpKey = `${username}_bonusXp`;
+// Resolving the exact user-specific keys matching profile.js logic
+function getCurrentUsername() {
+    try {
+        const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (userObj && userObj.username) {
+            return userObj.username;
+        }
+    } catch (e) {}
+    return localStorage.getItem('vinpix_username') || localStorage.getItem('currentUser') || 'guest';
+}
 
-// Initializing state directly from LocalStorage (defaults to 0 if null/missing)
+function getUserKey(keyName) {
+    const username = getCurrentUsername();
+    return username ? `${username}_${keyName}` : keyName;
+}
+
+const coinsKey = getUserKey('totalCoins');
+const xpKey = getUserKey('bonusXp');
+
+// Initializing state directly from LocalStorage using user-specific keys
 let coins = parseInt(localStorage.getItem(coinsKey)) || 0;
 let xp = parseInt(localStorage.getItem(xpKey)) || 0;
 
-// Function to sync current variables back to localStorage
+// Function to sync current variables back to localStorage and trigger external updates if available
 function saveUserData() {
     localStorage.setItem(coinsKey, coins);
     localStorage.setItem(xpKey, xp);
+    
+    if (typeof updateProfileStats === 'function') {
+        updateProfileStats();
+    }
+    if (typeof window.saveUserDataToCloud === 'function') {
+        window.saveUserDataToCloud();
+    }
 }
 /* --- SYNC INTEGRATION END --- */
 
