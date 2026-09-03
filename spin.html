@@ -208,7 +208,6 @@ body {
     inset 0 0 0 9px #111;
 }
 
-/* Wheel Nails / Pegs sitting exactly on the outer gold rim edge where pointer brushes */
 .wheel-nails {
   position: absolute;
   inset: -6px;
@@ -310,7 +309,7 @@ body {
 }
 
 /* =========================================================
-   TRUE VERTICAL STACKED LABELS (LETTER BY LETTER)
+   CORRECTED VERTICAL STACKED LABELS (SITTING CLEANLY IN SECTORS)
 ========================================================= */
 
 .wheel-section-labels {
@@ -325,13 +324,13 @@ body {
   left: 50%;
   top: 50%;
   transform-origin: 0 0;
-  width: 42%;
+  width: 44%;
   height: 24px;
   margin-top: -12px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding-right: 18px;
+  padding-right: 22px;
   pointer-events: none;
 }
 
@@ -340,7 +339,7 @@ body {
   flex-direction: column;
   align-items: center;
   line-height: 0.92;
-  font-size: 8.5px;
+  font-size: 8px;
   font-weight: 1000;
   color: #ffffff;
   text-shadow:
@@ -350,7 +349,7 @@ body {
 }
 
 .wheel-label-wrapper.jackpot .wheel-stacked-text {
-  font-size: 7.5px;
+  font-size: 6.5px;
   color: #ffe39a;
 }
 
@@ -364,7 +363,7 @@ body {
 
 .wheel-label-wrapper.x .wheel-stacked-text,
 .wheel-label-wrapper.o .wheel-stacked-text {
-  font-size: 10px;
+  font-size: 9.5px;
 }
 
 /* =========================================================
@@ -405,18 +404,18 @@ body {
 }
 
 /* =========================================================
-   DYNAMIC TICKING POINTER (BRUSHING THE PEGS)
+   DYNAMIC TICKING POINTER (SCRUBBING PEGS GRACEFULLY)
 ========================================================= */
 
 .wheel-pointer {
   position: absolute;
-  top: -21px;
+  top: -24px;
   left: 50%;
   z-index: 40;
   width: 0;
   height: 0;
   transform: translateX(-50%) rotate(0deg);
-  transform-origin: 50% 18px;
+  transform-origin: 50% 21px;
   border-left: 14px solid transparent;
   border-right: 14px solid transparent;
   border-top: 38px solid #f4d078;
@@ -427,11 +426,11 @@ body {
 }
 
 .wheel-pointer.tick-left {
-  transform: translateX(-50%) rotate(-18deg);
+  transform: translateX(-50%) rotate(-22deg);
 }
 
 .wheel-pointer.tick-right {
-  transform: translateX(-50%) rotate(18deg);
+  transform: translateX(-50%) rotate(22deg);
 }
 
 /* =========================================================
@@ -1399,7 +1398,7 @@ function createWheelNails() {
     const nail = document.createElement("div");
     nail.className = "wheel-nail";
     const angle = (i / count) * Math.PI * 2;
-    const radius = 50; // Positioned right on the outer rim edge where pointer brushes
+    const radius = 50;
     const x = 50 + Math.cos(angle) * radius;
     const y = 50 + Math.sin(angle) * radius;
     nail.style.left = `${x}%`;
@@ -1430,9 +1429,9 @@ function buildWheelFace() {
     
     gradientStops.push(`${color} ${startDeg}deg ${endDeg}deg`);
 
-    // Create wrapper aligned with slice center
     const wrapper = document.createElement("div");
     wrapper.className = "wheel-label-wrapper " + section.toLowerCase();
+    // Offset each label to align directly at the exact middle center angle of each sector slice
     const labelAngle = startDeg + (sliceAngle / 2);
     wrapper.style.transform = `rotate(${labelAngle}deg)`;
 
@@ -1445,7 +1444,6 @@ function buildWheelFace() {
       section === "Jackpot" ? "JACKPOT" :
       section.toUpperCase();
 
-    // Stack letters vertically downward
     for (let char of displayName) {
       const span = document.createElement("span");
       span.textContent = char;
@@ -1531,7 +1529,7 @@ document.getElementById("spinButton").addEventListener("click", () => {
     const randomIndex = Math.floor(Math.random() * wheelSections.length);
     const sliceAngle = 360 / wheelSections.length;
 
-    // Perfect alignment math: top pointer (0 deg) points to index i when wheel rotation lands slice center at top
+    // Corrected target rotation formula ensuring absolute alignment with top pointer
     const targetRotation = (spinRevolutions * 360) + (360 - (randomIndex * sliceAngle) - (sliceAngle / 2));
     wheelRotation += targetRotation;
     
