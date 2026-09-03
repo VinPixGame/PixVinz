@@ -1069,15 +1069,15 @@ function createWheelNails() {
     const nail = document.createElement("div");
     nail.className = "wheel-nail";
     
-    // Shift by half a slice angle so they land on the dividing lines instead of the center
-    const angleDeg = (i * sliceAngle) + (sliceAngle / 2);
+    // Align nails directly with the dividing lines (multiples of sliceAngle)
+    const angleDeg = i * sliceAngle;
     const angleRad = (angleDeg * Math.PI) / 180;
     
     nail.style.left = `${50 + Math.cos(angleRad) * 50}%`;
     nail.style.top = `${50 + Math.sin(angleRad) * 50}%`;
     container.appendChild(nail);
   }
-}
+  }
 
 function buildWheelFace() {
   const wheelFace = document.getElementById("wheelFace");
