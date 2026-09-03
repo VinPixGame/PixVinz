@@ -1188,15 +1188,15 @@ document.getElementById("spinButton").addEventListener("click", () => {
     const count = wheelSections.length;
     const sliceAngle = 360 / count;
     
-    // Pick a random divider index (0 to count-1) so a peg/divider stops directly under the pointer
-    const randomDividerIndex = Math.floor(Math.random() * count);
+    // Pick a random section index so the surface stops under the pointer
+    const randomIndex = Math.floor(Math.random() * count);
 
-    // Target that exact divider angle directly (no random slice-surface offset)
-    const targetDividerAngle = randomDividerIndex * sliceAngle;
+    // Target the center of that slice
+    const targetCenterAngle = (randomIndex * sliceAngle) + (sliceAngle / 2);
 
     const currentMod = wheelRotation % 360;
     const spinRevolutions = (6 + Math.floor(Math.random() * 4)) * 360;
-    const targetAngleFromCurrent = (360 - targetDividerAngle - currentMod + 360) % 360;
+    const targetAngleFromCurrent = (360 - targetCenterAngle - currentMod + 360) % 360;
     
     const totalDelta = spinRevolutions + targetAngleFromCurrent;
     wheelRotation += totalDelta;
@@ -1204,13 +1204,12 @@ document.getElementById("spinButton").addEventListener("click", () => {
     const wheel = document.getElementById("wheel");
     wheel.style.transform = `rotateX(7deg) rotateZ(${wheelRotation}deg)`;
 
-    // Counter-rotate the independent pegs ring layer by the exact same inverse delta
+    // Keep the pegs counter-rotating and locked to their dividers
     nailsRotation -= totalDelta;
     const nailsRing = document.getElementById("wheelNailsRing");
     if (nailsRing) {
         nailsRing.style.transform = `rotateZ(${nailsRotation}deg)`;
     }
-
     const pointer = document.getElementById("wheelPointer");
     let lastCheckedAngle = wheelRotation;
     
@@ -1245,10 +1244,8 @@ document.getElementById("spinButton").addEventListener("click", () => {
 
     setTimeout(() => {
         clearInterval(tickInterval);
-        // When a divider lands on the pointer, map it to the corresponding section index
-        handleResult(wheelSections[randomDividerIndex]);
+        handleResult(wheelSections[randomIndex]);
     }, 5000);
-});
 
 
 function handleResult(result) {
