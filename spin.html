@@ -1059,6 +1059,7 @@ function createMarqueeLights() {
   }
 }
 
+  
 function createWheelNails() {
   const container = document.getElementById("wheelNails");
   container.innerHTML = "";
@@ -1069,15 +1070,15 @@ function createWheelNails() {
     const nail = document.createElement("div");
     nail.className = "wheel-nail";
     
-    // Align nails directly with the dividing lines (multiples of sliceAngle)
-    const angleDeg = i * sliceAngle;
+    // Match the exact boundary/divider angle ((i + 1) * sliceAngle) instead of i * sliceAngle
+    const angleDeg = (i + 1) * sliceAngle;
     const angleRad = (angleDeg * Math.PI) / 180;
     
     nail.style.left = `${50 + Math.cos(angleRad) * 50}%`;
     nail.style.top = `${50 + Math.sin(angleRad) * 50}%`;
     container.appendChild(nail);
   }
-  }
+}
 
 function buildWheelFace() {
   const wheelFace = document.getElementById("wheelFace");
@@ -1212,24 +1213,51 @@ document.getElementById("spinButton").addEventListener("click", () => {
     }
 
     const pointer = document.getElementById("wheelPointer");
-    let tickCount = 0;
+    const count = wheelSections.length;
+    const sliceAngle = 360 / count;
     
-    let tickInterval = setInterval(() => {
+    let startTime = performance.now();
+    let duration = 5000;
+    let startRotation = wheelRotation - totalDelta;
+    let lastCrossedPeg = -1;
+
+    // Matches your CSS transition cubic-bezier(0.12, 0.74, 0.12, 1)
+    function easeOutCustom(t) {
+        return 1 - Math.pow(1 - t, 4);
+    }
+
+    function monitorPegHits() {
         if (!spinning) {
-            clearInterval(tickInterval);
+            pointer.style.transform = "translateX(-50%) rotate(0deg)";
             return;
         }
-        tickCount++;
-        playClickSound();
-        
-        if (tickCount % 2 === 0) {
-            pointer.classList.add("tick-left");
-            setTimeout(() => pointer.classList.remove("tick-left"), 35);
-        } else {
-            pointer.classList.add("tick-right");
-            setTimeout(() => pointer.classList.remove("tick-right"), 35);
+
+        let elapsed = performance.now() - startTime;
+        let progress = Math.min(elapsed / duration, 1);
+        let currentRot = startRotation + (totalDelta * easeOutCustom(progress));
+
+        // Detect when a peg angle crosses the top position (0° / 360°)
+        let currentPegFloat = (360 - (currentRot % 360)) / sliceAngle;
+        let currentPegIndex = Math.floor(currentPegFloat);
+
+        if (currentPegIndex !== lastCrossedPeg) {
+            playClickSound();
+            const kickDirection = Math.random() > 0.5 ? -14 : 14;
+            pointer.style.transform = `translateX(-50%) rotate(${kickDirection}deg)`;
+            setTimeout(() => {
+                pointer.style.transform = "translateX(-50%) rotate(0deg)";
+            }, 35);
+            lastCrossedPeg = currentPegIndex;
         }
-    }, 110);
+
+        if (progress < 1) {
+            requestAnimationFrame(monitorPegHits);
+        } else {
+            pointer.style.transform = "translateX(-50%) rotate(0deg)";
+        }
+    }
+
+    requestAnimationFrame(monitorPegHits);
 
     setTimeout(() => {
         clearInterval(tickInterval);
