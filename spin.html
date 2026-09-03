@@ -38,8 +38,7 @@ body {
   width: 100%;
   max-width: 520px;
   height: 100dvh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   background:
@@ -52,8 +51,7 @@ body {
 }
 
 .top-bar {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 50;
   height: 48px;
   min-height: 48px;
@@ -139,8 +137,11 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 12px;
+  justify-content: space-evenly;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  width: 100%;
 }
 
 .wheel-section {
@@ -149,13 +150,14 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 6px 0;
+  padding: 2px 0;
   perspective: 1100px;
+  /* Negative transform removed entirely, centered dynamically via flex space-evenly */
 }
 
 .wheel-stage {
   position: relative;
-  width: min(76vw, 270px);
+  width: min(88vw, 300px);
   aspect-ratio: 1 / 1;
   display: flex;
   justify-content: center;
@@ -165,7 +167,7 @@ body {
 
 .marquee-frame {
   position: absolute;
-  inset: -12px;
+  inset: -10px;
   border-radius: 50%;
   transform: translateZ(-18px);
   z-index: 10;
@@ -191,7 +193,7 @@ body {
 
 .light-train {
   position: absolute;
-  inset: -17px;
+  inset: -14px;
   border-radius: 50%;
   z-index: 20;
   pointer-events: none;
@@ -199,9 +201,9 @@ body {
 
 .marquee-bulb {
   position: absolute;
-  width: 10px;
-  height: 10px;
-  margin: -5px;
+  width: 8px;
+  height: 8px;
+  margin: -4px;
   border-radius: 50%;
   background:
     radial-gradient(
@@ -230,7 +232,7 @@ body {
 }
 
 .wheel-3d {
-  position: relative;
+  position: absolute;
   width: 95%;
   height: 95%;
   border-radius: 50%;
@@ -285,14 +287,14 @@ body {
   position: absolute;
   left: 0;
   top: 0;
-  width: 32px;
-  margin-left: -16px;
-  margin-top: -102px;
+  width: 28px;
+  margin-left: -14px;
+  margin-top: -106px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  line-height: 0.9;
+  line-height: 0.85;
   font-size: 11px;
   font-weight: 1000;
   text-align: center;
@@ -301,11 +303,11 @@ body {
 
 .wheel-label-wrapper.red .wheel-stacked-text { color: #ff4b45; text-shadow: 0 1px 2px #000; }
 .wheel-label-wrapper.blue .wheel-stacked-text { color: #55a0ff; text-shadow: 0 1px 2px #000; }
-.wheel-label-wrapper.star .wheel-stacked-text { color: #ffe15a; font-size: 14px; text-shadow: 0 1px 2px #000; }
-.wheel-label-wrapper.diamond .wheel-stacked-text { color: #4ff1e8; font-size: 14px; text-shadow: 0 1px 2px #000; }
-.wheel-label-wrapper.x .wheel-stacked-text { color: #c66cff; font-size: 13px; text-shadow: 0 1px 2px #000; }
-.wheel-label-wrapper.o .wheel-stacked-text { color: #ff62b4; font-size: 13px; text-shadow: 0 1px 2px #000; }
-.wheel-label-wrapper.jackpot .wheel-stacked-text { color: #ffffff; font-size: 7px; text-shadow: 0 1px 2px #000; }
+.wheel-label-wrapper.star .wheel-stacked-text { color: #ffe15a; font-size: 13px; text-shadow: 0 1px 2px #000; }
+.wheel-label-wrapper.diamond .wheel-stacked-text { color: #4ff1e8; font-size: 13px; text-shadow: 0 1px 2px #000; }
+.wheel-label-wrapper.x .wheel-stacked-text { color: #c66cff; font-size: 12px; text-shadow: 0 1px 2px #000; }
+.wheel-label-wrapper.o .wheel-stacked-text { color: #ff62b4; font-size: 12px; text-shadow: 0 1px 2px #000; }
+.wheel-label-wrapper.jackpot .wheel-stacked-text { color: #ffffff; font-size: 8px; text-shadow: 0 1px 2px #000; }
 
 .wheel-dividers {
   position: absolute;
@@ -350,9 +352,9 @@ body {
 
 .wheel-nail {
   position: absolute;
-  width: 8px;
-  height: 8px;
-  margin: -4px;
+  width: 6px;
+  height: 6px;
+  margin: -3px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #fff 0%, #f4d078 45%, #593e0b 100%);
   box-shadow: 0 1px 3px rgba(0,0,0,0.8);
@@ -387,29 +389,31 @@ body {
 
 .wheel-pointer {
   position: absolute;
-  top: -16px;
+  top: -14px;
   left: 50%;
   z-index: 60;
   width: 0;
   height: 0;
   transform: translateX(-50%) rotate(0deg);
   transform-origin: 50% 0px;
-  border-left: 7px solid transparent;
-  border-right: 7px solid transparent;
-  border-top: 18px solid #f4d078;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 15px solid #f4d078;
   filter: drop-shadow(0 2px 3px rgba(0,0,0,0.85));
   transition: transform 0.04s ease-out;
 }
 
 .result-display {
-  margin: 0;
-  padding: 6px 10px;
-  border-radius: 8px;
+  margin: 0 auto;
+  padding: 4px 8px;
+  border-radius: 6px;
   text-align: center;
   background:
     linear-gradient(145deg, rgba(50,35,61,0.95), rgba(12,8,18,0.98));
   border: 1px solid rgba(218,177,86,0.32);
   box-shadow: inset 0 1px rgba(255,255,255,0.08);
+  width: 100%;
+  max-width: 360px;
 }
 
 .result-title {
@@ -420,7 +424,7 @@ body {
 
 .result-value {
   margin-top: 1px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 1000;
   color: #f1cf78;
 }
@@ -428,12 +432,15 @@ body {
 .betting-section {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
 }
 
 .section-title {
   text-align: center;
-  font-size: 8px;
+  font-size: 7px;
   letter-spacing: 1.5px;
   color: #c6b8cc;
   font-weight: 800;
@@ -441,8 +448,8 @@ body {
 
 .bet-board {
   position: relative;
-  padding: 6px;
-  border-radius: 12px;
+  padding: 5px;
+  border-radius: 10px;
   background:
     linear-gradient(145deg, #30213a, #0f0916);
   border: 1px solid rgba(218,177,86,0.32);
@@ -456,13 +463,13 @@ body {
     "x . o"
     "red star blue"
     "diamond jackpot jackpot";
-  gap: 5px;
+  gap: 4px;
 }
 
 .bet-slot {
   position: relative;
-  min-height: 42px;
-  border-radius: 8px;
+  min-height: 34px;
+  border-radius: 6px;
   border: 1px solid rgba(255,255,255,0.22);
   cursor: pointer;
   user-select: none;
@@ -488,7 +495,7 @@ body {
 .bet-slot.jackpot { grid-area: jackpot; background: linear-gradient(135deg, #ff3366, #ff9933, #33cc66, #3399ff, #9933ff); border-color: rgba(255,230,130,0.8); }
 
 .bet-name {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 1000;
   letter-spacing: 0.5px;
   text-shadow: 0 1px 2px rgba(0,0,0,0.8);
@@ -496,22 +503,22 @@ body {
 
 .bet-payout {
   margin-top: 1px;
-  font-size: 7px;
+  font-size: 6px;
   opacity: 0.85;
 }
 
 .bet-chip {
   position: absolute;
-  right: 4px;
-  bottom: 4px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 3px;
+  right: 3px;
+  bottom: 3px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 2px;
   border-radius: 50%;
   display: none;
   align-items: center;
   justify-content: center;
-  font-size: 7px;
+  font-size: 6px;
   font-weight: 1000;
   color: #201507;
   background:
@@ -532,13 +539,16 @@ body {
 .chip-section {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
 }
 
 .chip-selector {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 5px;
+  gap: 4px;
 }
 
 .chip-btn {
@@ -555,7 +565,7 @@ body {
     );
   color: #171717;
   font-weight: 1000;
-  font-size: 9px;
+  font-size: 8px;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,0.65);
   transition: 0.15s ease;
@@ -571,11 +581,14 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 10px;
-  border-radius: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
   background:
     linear-gradient(145deg, #21172a, #0c0811);
   border: 1px solid rgba(255,255,255,0.09);
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
 }
 
 .summary-label {
@@ -585,7 +598,7 @@ body {
 }
 
 .summary-value {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 1000;
   color: #f0cc76;
 }
@@ -593,18 +606,19 @@ body {
 .spin-area {
   display: flex;
   justify-content: center;
-  padding: 2px 0 6px;
+  padding: 2px 0;
+  width: 100%;
 }
 
 .spin-button {
   position: relative;
-  width: min(240px, 75vw);
-  height: 42px;
+  width: min(320px, 90vw);
+  height: 52px;
   border: 0;
-  border-radius: 12px;
+  border-radius: 14px;
   cursor: pointer;
   color: #261908;
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 1000;
   letter-spacing: 2px;
   background:
@@ -616,7 +630,7 @@ body {
     );
   border: 2px solid #f7d887;
   box-shadow:
-    0 4px 8px rgba(0,0,0,0.7),
+    0 6px 12px rgba(0,0,0,0.7),
     inset 0 2px 2px rgba(255,255,255,0.65);
   transition: 0.12s ease;
 }
@@ -632,8 +646,8 @@ body {
 
 .xp-display {
   text-align: center;
-  padding-bottom: 8px;
-  font-size: 9px;
+  padding-bottom: 2px;
+  font-size: 8px;
   color: #42eaff;
   font-weight: 900;
 }
@@ -730,7 +744,6 @@ body {
             <div class="wheel-dividers" id="wheelDividers"></div>
           </div>
         </div>
-        <!-- Fixed: Added z-index and forced autoplay/muted loop so the video renders correctly on top -->
         <div class="wheel-hub">
           <video id="logoVideo" autoplay loop muted playsinline preload="auto">
             <source src="image/logo.webm" type="video/webm">
@@ -1197,7 +1210,7 @@ function handleResult(result) {
     let xpGained = 0;
 
     if (bets[result] > 0) {
-        winnings = bets[result] + (bets[result] + payouts[result]); // fixed payout logic
+        winnings = bets[result] + (bets[result] + payouts[result]);
         xpGained = xpRewards[result] || 0;
     }
 
@@ -1226,7 +1239,6 @@ buildWheelFace();
 updateBalanceDisplay();
 updateBetDisplay();
 
-// Force-play video on load and user touch interaction (bypasses mobile auto-play restrictions)
 window.addEventListener('DOMContentLoaded', () => {
   const v = document.getElementById('logoVideo');
   if (v) {
