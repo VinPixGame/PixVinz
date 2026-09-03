@@ -1167,18 +1167,25 @@ document.getElementById("spinButton").addEventListener("click", () => {
     saveUserData();
     updateBalanceDisplay();
 
-    const spinRevolutions = 6 + Math.floor(Math.random() * 4);
-    const randomIndex = Math.floor(Math.random() * wheelSections.length);
     const sliceAngle = 360 / wheelSections.length;
+    const randomIndex = Math.floor(Math.random() * wheelSections.length);
 
-    // Corrected mapping: aligns the exact conic-gradient slice angle with the top pointer
+    // Calculate exact target angle for this specific index
     const targetCenterAngle = (randomIndex * sliceAngle) + (sliceAngle / 2);
     const randomOffset = (Math.random() - 0.5) * (sliceAngle * 0.5); 
+
+    // Find current position within 360 degrees
+    const currentMod = wheelRotation % 360;
     
-    wheelRotation += (spinRevolutions * 360) + targetCenterAngle + randomOffset;
+    // Calculate precise delta rotation to land on the target slice from current position
+    const spinRevolutions = (6 + Math.floor(Math.random() * 4)) * 360;
+    const targetAngleFromCurrent = (360 - targetCenterAngle - randomOffset - currentMod + 360) % 360;
+    
+    wheelRotation += spinRevolutions + targetAngleFromCurrent;
     
     const wheel = document.getElementById("wheel");
-    wheel.style.transform = `rotateX(7deg) rotateZ(-${wheelRotation}deg)`;
+    wheel.style.transform = `rotateX(7deg) rotateZ(${wheelRotation}deg)`;
+
     const pointer = document.getElementById("wheelPointer");
     let tickCount = 0;
     
