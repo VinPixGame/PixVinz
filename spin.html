@@ -231,13 +231,16 @@ body {
   }
 }
 
+
 .wheel-3d {
   position: absolute;
+  top: 50%;
+  left: 50%;
   width: 95%;
   height: 95%;
   border-radius: 50%;
   transform-style: preserve-3d;
-  transform: rotateX(7deg);
+  transform: translate(-50%, -50%) rotateX(7deg);
   z-index: 25;
   background:
     radial-gradient(
@@ -295,7 +298,7 @@ body {
   align-items: center;
   justify-content: flex-start;
   line-height: 0.85;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 1000;
   text-align: center;
   transform-origin: 50% 50%;
@@ -417,7 +420,7 @@ body {
 }
 
 .result-title {
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 1.5px;
   color: #9e91a8;
 }
@@ -440,7 +443,7 @@ body {
 
 .section-title {
   text-align: center;
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 1.5px;
   color: #c6b8cc;
   font-weight: 800;
@@ -592,7 +595,7 @@ body {
 }
 
 .summary-label {
-  font-size: 7px;
+  font-size: 8px;
   color: #938798;
   letter-spacing: 0.8px;
 }
@@ -647,7 +650,7 @@ body {
 .xp-display {
   text-align: center;
   padding-bottom: 2px;
-  font-size: 8px;
+  font-size: 14px;
   color: #42eaff;
   font-weight: 900;
 }
