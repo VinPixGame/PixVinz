@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
-  setTimeout(resizeCanvas, 50); // Ensures correct layout sizing on mobile webviews
+  setTimeout(resizeCanvas, 50);
 
   const difficultyConfigs = {
     normal: {
@@ -208,7 +208,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const w = canvas.width;
     const h = canvas.height;
 
-    // Running Marquee Train Effect (Outside Boarder / Larger Bulbs)
     const lightSpacing = 18; 
     let perimeterCoords = [];
     
@@ -231,9 +230,11 @@ document.addEventListener('DOMContentLoaded', () => {
       drawMarqueeBulb(perimeterCoords[i].x, perimeterCoords[i].y, state);
     }
    
-    const startYGrid = 45; // Moved down slightly to clear top marquee lights
+    const startYGrid = 45;
     const rowHeight = (h - 110) / rows;
-    const colSpacing = (w - 40) / (rows + 3.2); // Inset slightly for margins
+    
+    // Adjusted colSpacing to stretch pegs wide and align perfectly with slot count (rows + 1)
+    const colSpacing = (w - 30) / (rows + 1);
     
     // Draw Pegs
     for (let r = 0; r < rows; r++) {
