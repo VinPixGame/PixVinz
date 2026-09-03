@@ -1052,12 +1052,18 @@ function createWheelNails() {
   const container = document.getElementById("wheelNails");
   container.innerHTML = "";
   const count = wheelSections.length;
+  const sliceAngle = 360 / count;
+  
   for (let i = 0; i < count; i++) {
     const nail = document.createElement("div");
     nail.className = "wheel-nail";
-    const angle = (i / count) * Math.PI * 2;
-    nail.style.left = `${50 + Math.cos(angle) * 50}%`;
-    nail.style.top = `${50 + Math.sin(angle) * 50}%`;
+    
+    // Shift by half a slice angle so they land on the dividing lines instead of the center
+    const angleDeg = (i * sliceAngle) + (sliceAngle / 2);
+    const angleRad = (angleDeg * Math.PI) / 180;
+    
+    nail.style.left = `${50 + Math.cos(angleRad) * 50}%`;
+    nail.style.top = `${50 + Math.sin(angleRad) * 50}%`;
     container.appendChild(nail);
   }
 }
