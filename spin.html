@@ -30,10 +30,6 @@ body {
   align-items: center;
 }
 
-/* =========================================================
-   MAIN APP
-========================================================= */
-
 .aeruspin-app {
   position: relative;
   width: 100%;
@@ -50,10 +46,6 @@ body {
       rgba(5, 4, 9, 0.99)
     );
 }
-
-/* =========================================================
-   TOP BAR
-========================================================= */
 
 .top-bar {
   position: relative;
@@ -138,10 +130,6 @@ body {
   color: #f2d28b;
 }
 
-/* =========================================================
-   GAME AREA
-========================================================= */
-
 .game-area {
   flex: 1;
   min-height: 0;
@@ -154,10 +142,6 @@ body {
 .game-area::-webkit-scrollbar {
   display: none;
 }
-
-/* =========================================================
-   WHEEL SECTION
-========================================================= */
 
 .wheel-section {
   position: relative;
@@ -178,10 +162,6 @@ body {
   align-items: center;
   transform-style: preserve-3d;
 }
-
-/* =========================================================
-   MARQUEE FRAME & PERIMETER NAILS (PEGS)
-========================================================= */
 
 .marquee-frame {
   position: absolute;
@@ -226,10 +206,6 @@ body {
   box-shadow: 0 0 5px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,255,255,0.9);
 }
 
-/* =========================================================
-   LIGHT TRAIN
-========================================================= */
-
 .light-train {
   position: absolute;
   inset: -18px;
@@ -270,10 +246,6 @@ body {
   }
 }
 
-/* =========================================================
-   WHEEL
-========================================================= */
-
 .wheel-3d {
   position: relative;
   width: 84%;
@@ -308,10 +280,6 @@ body {
     inset 0 0 25px rgba(0,0,0,0.65);
 }
 
-/* =========================================================
-   CORRECTED VERTICAL STACKED LABELS (SITTING CLEANLY IN SECTORS)
-========================================================= */
-
 .wheel-section-labels {
   position: absolute;
   inset: 0;
@@ -323,52 +291,37 @@ body {
   position: absolute;
   left: 50%;
   top: 50%;
+  width: 0;
+  height: 0;
   transform-origin: 0 0;
-  width: 44%;
-  height: 24px;
-  margin-top: -12px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 22px;
   pointer-events: none;
 }
 
 .wheel-stacked-text {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 32px;
+  margin-left: -16px;
+  margin-top: -110px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  line-height: 0.92;
+  justify-content: flex-start;
+  line-height: 0.9;
   font-size: 8px;
   font-weight: 1000;
-  color: #ffffff;
-  text-shadow:
-    0 1px 3px #000,
-    0 0 6px rgba(0,0,0,0.9);
-  transform: rotate(90deg);
+  text-align: center;
+  transform-origin: 50% 50%;
 }
 
-.wheel-label-wrapper.jackpot .wheel-stacked-text {
-  font-size: 6.5px;
-  color: #ffe39a;
-}
-
-.wheel-label-wrapper.diamond .wheel-stacked-text {
-  color: #dffaff;
-}
-
-.wheel-label-wrapper.star .wheel-stacked-text {
-  color: #fff4a5;
-}
-
-.wheel-label-wrapper.x .wheel-stacked-text,
-.wheel-label-wrapper.o .wheel-stacked-text {
-  font-size: 9.5px;
-}
-
-/* =========================================================
-   CENTER HUB
-========================================================= */
+.wheel-label-wrapper.red .wheel-stacked-text { color: #ff4b45; text-shadow: 0 1px 3px #000, 0 0 6px rgba(255,50,45,.65); }
+.wheel-label-wrapper.blue .wheel-stacked-text { color: #55a0ff; text-shadow: 0 1px 3px #000, 0 0 6px rgba(60,140,255,.65); }
+.wheel-label-wrapper.star .wheel-stacked-text { color: #ffe15a; text-shadow: 0 1px 3px #000, 0 0 6px rgba(255,215,60,.65); }
+.wheel-label-wrapper.diamond .wheel-stacked-text { color: #4ff1e8; text-shadow: 0 1px 3px #000, 0 0 6px rgba(40,235,225,.65); }
+.wheel-label-wrapper.x .wheel-stacked-text { color: #c66cff; font-size: 10px; text-shadow: 0 1px 3px #000, 0 0 6px rgba(180,70,255,.65); }
+.wheel-label-wrapper.o .wheel-stacked-text { color: #ff62b4; font-size: 10px; text-shadow: 0 1px 3px #000, 0 0 6px rgba(255,70,160,.65); }
+.wheel-label-wrapper.jackpot .wheel-stacked-text { color: #ffffff; font-size: 6px; text-shadow: 0 1px 3px #000, 0 0 8px rgba(255,255,255,.9); }
 
 .wheel-hub {
   position: absolute;
@@ -403,19 +356,15 @@ body {
   text-shadow: 0 1px rgba(255,255,255,0.35);
 }
 
-/* =========================================================
-   DYNAMIC TICKING POINTER (SCRUBBING PEGS GRACEFULLY)
-========================================================= */
-
 .wheel-pointer {
   position: absolute;
-  top: -24px;
+  top: -21px;
   left: 50%;
   z-index: 40;
   width: 0;
   height: 0;
   transform: translateX(-50%) rotate(0deg);
-  transform-origin: 50% 21px;
+  transform-origin: 50% 18px;
   border-left: 14px solid transparent;
   border-right: 14px solid transparent;
   border-top: 38px solid #f4d078;
@@ -426,16 +375,12 @@ body {
 }
 
 .wheel-pointer.tick-left {
-  transform: translateX(-50%) rotate(-22deg);
+  transform: translateX(-50%) rotate(-18deg);
 }
 
 .wheel-pointer.tick-right {
-  transform: translateX(-50%) rotate(22deg);
+  transform: translateX(-50%) rotate(18deg);
 }
-
-/* =========================================================
-   RESULT DISPLAY
-========================================================= */
 
 .result-display {
   min-height: 44px;
@@ -463,10 +408,6 @@ body {
   font-weight: 1000;
   color: #f1cf78;
 }
-
-/* =========================================================
-   BETTING AREA (COLOR-MATCHED)
-========================================================= */
 
 .betting-section {
   padding: 8px 12px 0;
@@ -529,41 +470,13 @@ body {
   transform: translateY(2px) scale(0.98);
 }
 
-.bet-slot.x {
-  grid-area: x;
-  background: linear-gradient(145deg, #6c228a, #2f0c3d);
-}
-
-.bet-slot.o {
-  grid-area: o;
-  background: linear-gradient(145deg, #8a225e, #3d0c27);
-}
-
-.bet-slot.red {
-  grid-area: red;
-  background: linear-gradient(145deg, #a82020, #420c0c);
-}
-
-.bet-slot.star {
-  grid-area: star;
-  background: linear-gradient(145deg, #b8860b, #4a3406);
-}
-
-.bet-slot.blue {
-  grid-area: blue;
-  background: linear-gradient(145deg, #1e4bb8, #0c204d);
-}
-
-.bet-slot.diamond {
-  grid-area: diamond;
-  background: linear-gradient(145deg, #0e8585, #053333);
-}
-
-.bet-slot.jackpot {
-  grid-area: jackpot;
-  background: linear-gradient(145deg, #d4af37, #594410);
-  border-color: rgba(255,230,130,0.7);
-}
+.bet-slot.x { grid-area: x; background: linear-gradient(145deg, #6c228a, #2f0c3d); }
+.bet-slot.o { grid-area: o; background: linear-gradient(145deg, #8a225e, #3d0c27); }
+.bet-slot.red { grid-area: red; background: linear-gradient(145deg, #a82020, #420c0c); }
+.bet-slot.star { grid-area: star; background: linear-gradient(145deg, #b8860b, #4a3406); }
+.bet-slot.blue { grid-area: blue; background: linear-gradient(145deg, #1e4bb8, #0c204d); }
+.bet-slot.diamond { grid-area: diamond; background: linear-gradient(145deg, #0e8585, #053333); }
+.bet-slot.jackpot { grid-area: jackpot; background: linear-gradient(135deg, #ff3366, #ff9933, #33cc66, #3399ff, #9933ff); border-color: rgba(255,230,130,0.8); }
 
 .bet-name {
   font-size: 14px;
@@ -578,10 +491,6 @@ body {
   opacity: 0.85;
   letter-spacing: 0.6px;
 }
-
-/* =========================================================
-   BET CHIP DISPLAY
-========================================================= */
 
 .bet-chip {
   position: absolute;
@@ -613,10 +522,6 @@ body {
 .bet-slot.has-bet .bet-chip {
   display: flex;
 }
-
-/* =========================================================
-   CHIP SELECTOR
-========================================================= */
 
 .chip-section {
   padding: 13px 12px 0;
@@ -659,10 +564,6 @@ body {
     inset 0 2px 2px rgba(255,255,255,0.7);
 }
 
-/* =========================================================
-   BET SUMMARY
-========================================================= */
-
 .bet-summary {
   display: flex;
   justify-content: space-between;
@@ -688,10 +589,6 @@ body {
   font-weight: 1000;
   color: #f0cc76;
 }
-
-/* =========================================================
-   SPIN BUTTON
-========================================================= */
 
 .spin-area {
   padding: 13px 20px 5px;
@@ -738,10 +635,6 @@ body {
   cursor: not-allowed;
 }
 
-/* =========================================================
-   XP DISPLAY
-========================================================= */
-
 .xp-display {
   text-align: center;
   padding: 7px 0 16px;
@@ -751,10 +644,6 @@ body {
   text-shadow:
     0 0 8px rgba(66,234,255,0.65);
 }
-
-/* =========================================================
-   WIN OVERLAY
-========================================================= */
 
 .win-overlay {
   position: fixed;
@@ -829,31 +718,12 @@ body {
   cursor: pointer;
 }
 
-/* =========================================================
-   MOBILE ADJUSTMENT
-========================================================= */
-
 @media (max-height: 700px) {
-  .top-bar {
-    height: 54px;
-    min-height: 54px;
-  }
-
-  .wheel-section {
-    padding-top: 12px;
-  }
-
-  .wheel-stage {
-    width: min(78vw, 350px);
-  }
-
-  .bet-slot {
-    min-height: 55px;
-  }
-
-  .spin-button {
-    height: 50px;
-  }
+  .top-bar { height: 54px; min-height: 54px; }
+  .wheel-section { padding-top: 12px; }
+  .wheel-stage { width: min(78vw, 350px); }
+  .bet-slot { min-height: 55px; }
+  .spin-button { height: 50px; }
 }
 </style>
 </head>
@@ -861,318 +731,126 @@ body {
 <body>
 
 <div class="aeruspin-app">
-
-  <!-- =====================================================
-       TOP BAR
-  ====================================================== -->
   <header class="top-bar">
-
-    <button class="back-btn" id="backButton" aria-label="Back">
-      ‹
-    </button>
-
-    <div class="logo-title">
-      AERU<span>SPIN</span>
-    </div>
-
+    <button class="back-btn" id="backButton" aria-label="Back">‹</button>
+    <div class="logo-title">AERU<span>SPIN</span></div>
     <div class="balance-box">
       <span class="balance-label">COINS</span>
       <span class="balance-value" id="coinBalance">0</span>
     </div>
-
   </header>
 
-
-  <!-- =====================================================
-       SCROLLABLE GAME AREA
-  ====================================================== -->
   <main class="game-area">
-
-    <!-- ===================================================
-         WHEEL
-    ==================================================== -->
     <section class="wheel-section">
-
       <div class="wheel-stage">
-
-        <!-- Dynamic Ticking Pointer perfectly positioned to touch pegs -->
         <div class="wheel-pointer" id="wheelPointer"></div>
-
-        <!-- Outer metallic frame -->
         <div class="marquee-frame"></div>
-
-        <!-- Light train -->
         <div class="light-train" id="lightTrain"></div>
-
-        <!-- Perimeter Nails (Pegs) positioned on outer gold rim edge -->
         <div class="wheel-nails" id="wheelNails"></div>
-
-        <!-- 3D Wheel -->
         <div class="wheel-3d" id="wheel">
-
           <div class="wheel-face" id="wheelFace">
-
-            <!-- JS generates randomized sections & stacked vertical labels -->
             <div class="wheel-section-labels" id="wheelLabels"></div>
-
           </div>
-
-          <!-- Center hub -->
-          <div class="wheel-hub">
-            <span>AERU</span>
-          </div>
-
+          <div class="wheel-hub"><span>AERU</span></div>
         </div>
-
       </div>
-
     </section>
 
-
-    <!-- ===================================================
-         RESULT
-    ==================================================== -->
     <section class="result-display">
-
-      <div class="result-title">
-        LAST RESULT
-      </div>
-
-      <div class="result-value" id="lastResult">
-        —
-      </div>
-
+      <div class="result-title">LAST RESULT</div>
+      <div class="result-value" id="lastResult">—</div>
     </section>
 
-
-    <!-- ===================================================
-         BETTING BOARD (COLOR-MATCHED)
-    ==================================================== -->
     <section class="betting-section">
-
-      <div class="section-title">
-        PLACE YOUR BET
-      </div>
-
+      <div class="section-title">PLACE YOUR BET</div>
       <div class="bet-board">
-
         <div class="bet-grid">
-
-          <!-- X -->
-          <div
-            class="bet-slot x"
-            data-bet="X"
-            data-payout="10"
-          >
+          <div class="bet-slot x" data-bet="X" data-payout="10">
             <div class="bet-name">X</div>
             <div class="bet-payout">1 : 10</div>
             <div class="bet-chip" id="chip-X">0</div>
           </div>
-
-          <!-- O -->
-          <div
-            class="bet-slot o"
-            data-bet="O"
-            data-payout="10"
-          >
+          <div class="bet-slot o" data-bet="O" data-payout="10">
             <div class="bet-name">O</div>
             <div class="bet-payout">1 : 10</div>
             <div class="bet-chip" id="chip-O">0</div>
           </div>
-
-          <!-- RED -->
-          <div
-            class="bet-slot red"
-            data-bet="Red"
-            data-payout="1"
-          >
+          <div class="bet-slot red" data-bet="Red" data-payout="1">
             <div class="bet-name">RED</div>
             <div class="bet-payout">1 : 1</div>
             <div class="bet-chip" id="chip-Red">0</div>
           </div>
-
-          <!-- STAR -->
-          <div
-            class="bet-slot star"
-            data-bet="Star"
-            data-payout="5"
-          >
+          <div class="bet-slot star" data-bet="Star" data-payout="5">
             <div class="bet-name">★ STAR</div>
             <div class="bet-payout">1 : 5</div>
             <div class="bet-chip" id="chip-Star">0</div>
           </div>
-
-          <!-- BLUE -->
-          <div
-            class="bet-slot blue"
-            data-bet="Blue"
-            data-payout="1"
-          >
+          <div class="bet-slot blue" data-bet="Blue" data-payout="1">
             <div class="bet-name">BLUE</div>
             <div class="bet-payout">1 : 1</div>
             <div class="bet-chip" id="chip-Blue">0</div>
           </div>
-
-          <!-- DIAMOND -->
-          <div
-            class="bet-slot diamond"
-            data-bet="Diamond"
-            data-payout="7"
-          >
+          <div class="bet-slot diamond" data-bet="Diamond" data-payout="7">
             <div class="bet-name">◆ DIAMOND</div>
             <div class="bet-payout">1 : 7</div>
             <div class="bet-chip" id="chip-Diamond">0</div>
           </div>
-
-          <!-- JACKPOT -->
-          <div
-            class="bet-slot jackpot"
-            data-bet="Jackpot"
-            data-payout="35"
-          >
+          <div class="bet-slot jackpot" data-bet="Jackpot" data-payout="35">
             <div class="bet-name">♛ JACKPOT</div>
             <div class="bet-payout">1 : 35</div>
             <div class="bet-chip" id="chip-Jackpot">0</div>
           </div>
-
         </div>
-
       </div>
-
     </section>
 
-
-    <!-- ===================================================
-         CHIP SELECTOR
-    ==================================================== -->
     <section class="chip-section">
-
-      <div class="section-title">
-        SELECT CHIP
-      </div>
-
+      <div class="section-title">SELECT CHIP</div>
       <div class="chip-selector">
-
-        <button class="chip-btn active" data-chip="5">
-          5
-        </button>
-
-        <button class="chip-btn" data-chip="10">
-          10
-        </button>
-
-        <button class="chip-btn" data-chip="50">
-          50
-        </button>
-
-        <button class="chip-btn" data-chip="100">
-          100
-        </button>
-
-        <button class="chip-btn" data-chip="500">
-          500
-        </button>
-
-        <button class="chip-btn" data-chip="1000">
-          1K
-        </button>
-
+        <button class="chip-btn active" data-chip="5">5</button>
+        <button class="chip-btn" data-chip="10">10</button>
+        <button class="chip-btn" data-chip="50">50</button>
+        <button class="chip-btn" data-chip="100">100</button>
+        <button class="chip-btn" data-chip="500">500</button>
+        <button class="chip-btn" data-chip="1000">1K</button>
       </div>
-
     </section>
 
-
-    <!-- ===================================================
-         BET SUMMARY
-    ==================================================== -->
     <section class="bet-summary">
-
       <div>
-        <div class="summary-label">
-          TOTAL BET
-        </div>
-        <div class="summary-value" id="totalBet">
-          0
-        </div>
+        <div class="summary-label">TOTAL BET</div>
+        <div class="summary-value" id="totalBet">0</div>
       </div>
-
       <div style="text-align:right;">
-        <div class="summary-label">
-          SELECTED CHIP
-        </div>
-        <div class="summary-value" id="selectedChip">
-          5
-        </div>
+        <div class="summary-label">SELECTED CHIP</div>
+        <div class="summary-value" id="selectedChip">5</div>
       </div>
-
     </section>
 
-
-    <!-- ===================================================
-         SPIN
-    ==================================================== -->
     <section class="spin-area">
-
-      <button class="spin-button" id="spinButton">
-        SPIN
-      </button>
-
+      <button class="spin-button" id="spinButton">SPIN</button>
     </section>
 
-
-    <!-- XP -->
-    <div class="xp-display">
-      XP <span id="xpValue">0</span>
-    </div>
-
+    <div class="xp-display">XP <span id="xpValue">0</span></div>
   </main>
 
-
-  <!-- =====================================================
-       WIN RESULT OVERLAY
-  ====================================================== -->
   <div class="win-overlay" id="winOverlay">
-
     <div class="win-panel">
-
-      <div class="win-title" id="winTitle">
-        WIN!
-      </div>
-
-      <div class="win-result" id="winResult">
-        —
-      </div>
-
-      <div class="win-coins" id="winCoins">
-        +0
-      </div>
-
-      <div class="win-xp" id="winXP">
-        +0 XP
-      </div>
-
-      <button class="close-result" id="closeResult">
-        CONTINUE
-      </button>
-
+      <div class="win-title" id="winTitle">WIN!</div>
+      <div class="win-result" id="winResult">—</div>
+      <div class="win-coins" id="winCoins">+0</div>
+      <div class="win-xp" id="winXP">+0 XP</div>
+      <button class="close-result" id="closeResult">CONTINUE</button>
     </div>
-
   </div>
-
 </div>
 
-
-<!-- =========================================================
-     AUDIO SYNTHESIS (FALLBACK SOUND EFFECTS)
-========================================================= -->
 <script>
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 
 function initAudio() {
-  if (!audioCtx) {
-    audioCtx = new AudioContext();
-  }
+  if (!audioCtx) audioCtx = new AudioContext();
 }
 
 function playClickSound() {
@@ -1232,22 +910,18 @@ function playChipSound() {
 }
 </script>
 
-
 <script src="profile.js"></script>
 <script src="playerstat.js"></script>
     
 <script>
-/* =========================================================
-   AERUSPIN GAME DATA & LOCALSTORAGE SYNC
-========================================================= */
-
+// Exactly 36 sections matching your exact requested counts: 12 Reds, 12 Blues, 4 Stars, 3 Diamonds, 1 Jackpot, 2 X, 2 O (Total = 36)
 const wheelSections = [
-  "Red", "Star", "Blue", "Diamond", "Red", "X",
-  "Blue", "Star", "Red", "Jackpot", "Blue", "O",
-  "Red", "Diamond", "Star", "Blue", "Red", "X",
-  "Blue", "Star", "Diamond", "Red", "O", "Blue",
-  "Star", "Red", "Diamond", "Blue", "X", "Star",
-  "Red", "Blue", "Jackpot", "Star", "Red", "Diamond"
+  "Red", "Blue", "Star", "Red", "Blue", "Diamond", 
+  "Red", "Blue", "Star", "Red", "Blue", "X", 
+  "Red", "Blue", "Star", "Red", "Blue", "Jackpot", 
+  "Red", "Blue", "Diamond", "Red", "Blue", "O", 
+  "Red", "Blue", "Star", "Red", "Blue", "Diamond", 
+  "Red", "Blue", "X", "Red", "Blue", "O"
 ];
 
 const optionColors = {
@@ -1257,46 +931,25 @@ const optionColors = {
   Blue: "#1e4bb8",
   Star: "#b8860b",
   Diamond: "#0e8585",
-  Jackpot: "#d4af37"
+  Jackpot: "rainbow"
 };
 
 const payouts = {
-  X: 10,
-  O: 10,
-  Red: 1,
-  Blue: 1,
-  Star: 5,
-  Diamond: 7,
-  Jackpot: 35
+  X: 10, O: 10, Red: 1, Blue: 1, Star: 5, Diamond: 7, Jackpot: 35
 };
 
 const xpRewards = {
-  X: 100,
-  O: 100,
-  Red: 10,
-  Blue: 10,
-  Star: 30,
-  Diamond: 50,
-  Jackpot: 1000
+  X: 100, O: 100, Red: 10, Blue: 10, Star: 30, Diamond: 50, Jackpot: 1000
 };
 
 const bets = {
-  X: 0,
-  O: 0,
-  Red: 0,
-  Star: 0,
-  Blue: 0,
-  Diamond: 0,
-  Jackpot: 0
+  X: 0, O: 0, Red: 0, Star: 0, Blue: 0, Diamond: 0, Jackpot: 0
 };
 
-/* --- USER PROFILE SYNC INTEGRATION --- */
 function getCurrentUsername() {
     try {
         const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
-        if (userObj && userObj.username) {
-            return userObj.username;
-        }
+        if (userObj && userObj.username) return userObj.username;
     } catch (e) {}
     return localStorage.getItem('vinpix_username') || localStorage.getItem('currentUser') || 'guest';
 }
@@ -1315,22 +968,13 @@ let xp = parseInt(localStorage.getItem(xpKey)) || 0;
 function saveUserData() {
     localStorage.setItem(coinsKey, coins);
     localStorage.setItem(xpKey, xp);
-    
-    if (typeof updateProfileStats === 'function') {
-        updateProfileStats();
-    }
-    if (typeof window.saveUserDataToCloud === 'function') {
-        window.saveUserDataToCloud();
-    }
+    if (typeof updateProfileStats === 'function') updateProfileStats();
+    if (typeof window.saveUserDataToCloud === 'function') window.saveUserDataToCloud();
 }
 
 let selectedChip = 5;
 let spinning = false;
 let wheelRotation = 0;
-
-/* =========================================================
-   INITIAL SETUP
-========================================================= */
 
 const coinBalance = document.getElementById("coinBalance");
 const xpValue = document.getElementById("xpValue");
@@ -1353,37 +997,23 @@ function updateBetDisplay() {
   Object.keys(bets).forEach(type => {
     const chip = document.getElementById(`chip-${type}`);
     if (!chip) return;
-
     chip.textContent = bets[type].toLocaleString();
     const slot = document.querySelector(`.bet-slot[data-bet="${type}"]`);
-
-    if (bets[type] > 0) {
-      slot.classList.add("has-bet");
-    } else {
-      slot.classList.remove("has-bet");
-    }
+    if (bets[type] > 0) slot.classList.add("has-bet");
+    else slot.classList.remove("has-bet");
   });
 }
-
-
-/* =========================================================
-   MARQUEE LIGHTS & PERIMETER NAILS (PEGS)
-========================================================= */
 
 function createMarqueeLights() {
   const train = document.getElementById("lightTrain");
   train.innerHTML = "";
-  const count = 36;
-
+  const count = wheelSections.length;
   for (let i = 0; i < count; i++) {
     const bulb = document.createElement("div");
     bulb.className = "marquee-bulb";
     const angle = (i / count) * Math.PI * 2;
-    const radius = 50;
-    const x = 50 + Math.cos(angle) * radius;
-    const y = 50 + Math.sin(angle) * radius;
-    bulb.style.left = `${x}%`;
-    bulb.style.top = `${y}%`;
+    bulb.style.left = `${50 + Math.cos(angle) * 50}%`;
+    bulb.style.top = `${50 + Math.sin(angle) * 50}%`;
     bulb.style.animationDelay = `${i * 0.045}s`;
     train.appendChild(bulb);
   }
@@ -1392,25 +1022,16 @@ function createMarqueeLights() {
 function createWheelNails() {
   const container = document.getElementById("wheelNails");
   container.innerHTML = "";
-  const count = 36;
-
+  const count = wheelSections.length;
   for (let i = 0; i < count; i++) {
     const nail = document.createElement("div");
     nail.className = "wheel-nail";
     const angle = (i / count) * Math.PI * 2;
-    const radius = 50;
-    const x = 50 + Math.cos(angle) * radius;
-    const y = 50 + Math.sin(angle) * radius;
-    nail.style.left = `${x}%`;
-    nail.style.top = `${y}%`;
+    nail.style.left = `${50 + Math.cos(angle) * 50}%`;
+    nail.style.top = `${50 + Math.sin(angle) * 50}%`;
     container.appendChild(nail);
   }
 }
-
-
-/* =========================================================
-   WHEEL FACE & TRUE VERTICAL STACKED LABELS
-========================================================= */
 
 function buildWheelFace() {
   const wheelFace = document.getElementById("wheelFace");
@@ -1425,13 +1046,16 @@ function buildWheelFace() {
   wheelSections.forEach((section, index) => {
     const startDeg = index * sliceAngle;
     const endDeg = (index + 1) * sliceAngle;
-    const color = optionColors[section] || "#333";
     
-    gradientStops.push(`${color} ${startDeg}deg ${endDeg}deg`);
+    if (section === "Jackpot") {
+      gradientStops.push(`#ff3366 ${startDeg}deg, #ff9933 ${startDeg + (sliceAngle * 0.25)}deg, #33cc66 ${startDeg + (sliceAngle * 0.5)}deg, #3399ff ${startDeg + (sliceAngle * 0.75)}deg, #9933ff ${endDeg}deg`);
+    } else {
+      let colorVal = optionColors[section];
+      gradientStops.push(`${colorVal || "#333"} ${startDeg}deg ${endDeg}deg`);
+    }
 
     const wrapper = document.createElement("div");
     wrapper.className = "wheel-label-wrapper " + section.toLowerCase();
-    // Offset each label to align directly at the exact middle center angle of each sector slice
     const labelAngle = startDeg + (sliceAngle / 2);
     wrapper.style.transform = `rotate(${labelAngle}deg)`;
 
@@ -1458,11 +1082,6 @@ function buildWheelFace() {
   wheelFace.appendChild(labelsContainer);
 }
 
-
-/* =========================================================
-   CHIP SELECTION
-========================================================= */
-
 document.querySelectorAll(".chip-btn").forEach(button => {
   button.addEventListener("click", () => {
     if (spinning) return;
@@ -1473,18 +1092,11 @@ document.querySelectorAll(".chip-btn").forEach(button => {
   });
 });
 
-
-/* =========================================================
-   BET PLACEMENT
-========================================================= */
-
 document.querySelectorAll(".bet-slot").forEach(slot => {
   slot.addEventListener("click", () => {
     if (spinning) return;
     const type = slot.dataset.bet;
-    const currentBet = bets[type];
-
-    if (currentBet + selectedChip > 1000) return;
+    if (bets[type] + selectedChip > 1000) return;
     if (calculateTotalBet() + selectedChip > coins) return;
 
     bets[type] += selectedChip;
@@ -1493,11 +1105,6 @@ document.querySelectorAll(".bet-slot").forEach(slot => {
   });
 });
 
-
-/* =========================================================
-   BACK BUTTON & RESULT OVERLAY
-========================================================= */
-
 document.getElementById("backButton").addEventListener("click", () => {
   window.location.href = "index.html";
 });
@@ -1505,11 +1112,6 @@ document.getElementById("backButton").addEventListener("click", () => {
 document.getElementById("closeResult").addEventListener("click", () => {
   document.getElementById("winOverlay").classList.remove("show");
 });
-
-
-/* =========================================================
-   SPIN LOGIC, PERFECT INDEX SYNC & NAIL-TICKING POINTER
-========================================================= */
 
 document.getElementById("spinButton").addEventListener("click", () => {
     if (spinning) return;
@@ -1529,7 +1131,6 @@ document.getElementById("spinButton").addEventListener("click", () => {
     const randomIndex = Math.floor(Math.random() * wheelSections.length);
     const sliceAngle = 360 / wheelSections.length;
 
-    // Corrected target rotation formula ensuring absolute alignment with top pointer
     const targetRotation = (spinRevolutions * 360) + (360 - (randomIndex * sliceAngle) - (sliceAngle / 2));
     wheelRotation += targetRotation;
     
@@ -1595,17 +1196,11 @@ function handleResult(result) {
     }
 }
 
-
-/* =========================================================
-   INITIALIZE
-========================================================= */
-
 createMarqueeLights();
 createWheelNails();
 buildWheelFace();
 updateBalanceDisplay();
 updateBetDisplay();
-
 </script>
 
 </body>
