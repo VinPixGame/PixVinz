@@ -940,6 +940,9 @@ function playChipSound() {
 <script src="profile.js"></script>
 <script src="playerstat.js"></script>
     
+
+
+
 <script>
 const wheelSections = [
   "Red", "Blue", "Star", "Red", "Blue", "Diamond", 
@@ -1168,13 +1171,11 @@ document.getElementById("spinButton").addEventListener("click", () => {
     const randomIndex = Math.floor(Math.random() * wheelSections.length);
     const sliceAngle = 360 / wheelSections.length;
 
-    // Mathematical landing calculation: lands securely on the section itself (avoiding dividers)
-    const sliceStart = randomIndex * sliceAngle;
-    const randomOffset = sliceAngle * (0.25 + Math.random() * 0.5); // safely inside the slice bounds
-    const targetAngleWithinWheel = sliceStart + randomOffset;
+    // Fixed mathematical mapping: aligns the chosen array index precisely with the top pointer position
+    const targetCenterAngle = (randomIndex * sliceAngle) + (sliceAngle / 2);
+    const randomOffset = (Math.random() - 0.5) * (sliceAngle * 0.6); // stay safely away from dividers
     
-    const targetRotation = (spinRevolutions * 360) + (360 - targetAngleWithinWheel);
-    wheelRotation += targetRotation;
+    wheelRotation += (spinRevolutions * 360) + (360 - (targetCenterAngle + randomOffset));
     
     const wheel = document.getElementById("wheel");
     wheel.style.transform = `rotateX(7deg) rotateZ(${wheelRotation}deg)`;
@@ -1244,5 +1245,7 @@ updateBalanceDisplay();
 updateBetDisplay();
 </script>
 
-</body>
-</html>
+
+ </body>
+</html> 
+  
