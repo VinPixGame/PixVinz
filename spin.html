@@ -180,12 +180,12 @@ body {
 }
 
 /* =========================================================
-   MARQUEE FRAME & PEGS (NAILS)
+   MARQUEE FRAME & PERIMETER NAILS (PEGS)
 ========================================================= */
 
 .marquee-frame {
   position: absolute;
-  inset: -10px;
+  inset: -12px;
   border-radius: 50%;
   transform: translateZ(-18px);
   background:
@@ -208,23 +208,23 @@ body {
     inset 0 0 0 9px #111;
 }
 
-/* Wheel Nails / Dividers */
+/* Wheel Nails / Pegs sitting exactly on the outer perimeter rim */
 .wheel-nails {
   position: absolute;
-  inset: 4px;
+  inset: -3px;
   border-radius: 50%;
-  z-index: 6;
+  z-index: 25;
   pointer-events: none;
 }
 
 .wheel-nail {
   position: absolute;
-  width: 9px;
-  height: 9px;
-  margin: -4.5px;
+  width: 11px;
+  height: 11px;
+  margin: -5.5px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #fff 0%, #d5a94d 50%, #4a340c 100%);
-  box-shadow: 0 0 4px rgba(0,0,0,0.9), inset 0 1px 1px rgba(255,255,255,0.8);
+  background: radial-gradient(circle at 35% 30%, #fff 0%, #f4d078 45%, #593e0b 100%);
+  box-shadow: 0 0 6px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,255,255,0.9);
 }
 
 /* =========================================================
@@ -233,7 +233,7 @@ body {
 
 .light-train {
   position: absolute;
-  inset: -1px;
+  inset: -18px;
   border-radius: 50%;
   z-index: 10;
   pointer-events: none;
@@ -298,39 +298,27 @@ body {
   transition: transform 5s cubic-bezier(0.12,0.74,0.12,1);
 }
 
-/* Wheel face */
+/* Wheel face containing distinct colors matching each bet option */
 .wheel-face {
   position: absolute;
   inset: 0;
   border-radius: 50%;
   overflow: hidden;
   transform-style: preserve-3d;
-  background:
-    conic-gradient(
-      #8c202b 0deg 10deg, #172e73 10deg 20deg, #8c202b 20deg 30deg, #172e73 30deg 40deg,
-      #8c202b 40deg 50deg, #172e73 50deg 60deg, #8c202b 60deg 70deg, #172e73 70deg 80deg,
-      #8c202b 80deg 90deg, #172e73 90deg 100deg, #8c202b 100deg 110deg, #172e73 110deg 120deg,
-      #8c202b 120deg 130deg, #172e73 130deg 140deg, #8c202b 140deg 150deg, #172e73 150deg 160deg,
-      #8c202b 160deg 170deg, #172e73 170deg 180deg, #8c202b 180deg 190deg, #172e73 190deg 200deg,
-      #8c202b 200deg 210deg, #172e73 210deg 220deg, #8c202b 220deg 230deg, #172e73 230deg 240deg,
-      #8c202b 240deg 250deg, #172e73 250deg 260deg, #8c202b 260deg 270deg, #172e73 270deg 280deg,
-      #8c202b 280deg 290deg, #172e73 290deg 300deg, #8c202b 300deg 310deg, #172e73 310deg 320deg,
-      #8c202b 320deg 330deg, #172e73 330deg 340deg, #8c202b 340deg 350deg, #172e73 350deg 360deg
-    );
   box-shadow:
     inset 0 0 0 3px rgba(255,255,255,0.16),
     inset 0 0 25px rgba(0,0,0,0.65);
 }
 
 /* =========================================================
-   SECTION LABELS (Spread Out & Neatly Inside Slots)
+   VERTICAL PREMIUM SECTION LABELS
 ========================================================= */
 
 .wheel-section-labels {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  z-index: 3;
+  z-index: 5;
 }
 
 .wheel-label {
@@ -339,25 +327,28 @@ body {
   top: 50%;
   transform-origin: 0 0;
   width: 44%;
-  height: 22px;
-  margin-top: -11px;
-  padding-left: 36px;
+  height: 30px;
+  margin-top: -15px;
+  padding-left: 28px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 1000;
-  letter-spacing: 0.5px;
+  letter-spacing: 2px;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
   color: #fff;
   text-shadow:
-    0 2px 3px #000,
-    0 0 5px rgba(255,255,255,0.25);
+    0 2px 4px #000,
+    0 0 8px rgba(0,0,0,0.9);
   pointer-events: none;
 }
 
 .wheel-label.jackpot {
   color: #ffe39a;
-  font-size: 7px;
+  font-size: 9px;
+  letter-spacing: 1px;
 }
 
 .wheel-label.diamond {
@@ -368,13 +359,18 @@ body {
   color: #fff4a5;
 }
 
+.wheel-label.x, .wheel-label.o {
+  color: #ffffff;
+  font-size: 12px;
+}
+
 /* =========================================================
    CENTER HUB
 ========================================================= */
 
 .wheel-hub {
   position: absolute;
-  z-index: 8;
+  z-index: 15;
   width: 25%;
   aspect-ratio: 1;
   border-radius: 50%;
@@ -406,33 +402,33 @@ body {
 }
 
 /* =========================================================
-   POINTER (DYNAMIC TICKING ARROW)
+   DYNAMIC TICKING POINTER (TOUCHING THE NAILS)
 ========================================================= */
 
 .wheel-pointer {
   position: absolute;
-  top: -6px;
+  top: -17px;
   left: 50%;
-  z-index: 30;
+  z-index: 35;
   width: 0;
   height: 0;
   transform: translateX(-50%) rotate(0deg);
-  transform-origin: 50% 6px;
-  border-left: 13px solid transparent;
-  border-right: 13px solid transparent;
-  border-top: 32px solid #f4d078;
+  transform-origin: 50% 15px;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 36px solid #f4d078;
   filter:
-    drop-shadow(0 4px 4px rgba(0,0,0,0.8))
-    drop-shadow(0 0 7px rgba(255,210,80,0.5));
+    drop-shadow(0 4px 5px rgba(0,0,0,0.85))
+    drop-shadow(0 0 8px rgba(255,210,80,0.6));
   transition: transform 0.04s ease-out;
 }
 
 .wheel-pointer.tick-left {
-  transform: translateX(-50%) rotate(-16deg);
+  transform: translateX(-50%) rotate(-18deg);
 }
 
 .wheel-pointer.tick-right {
-  transform: translateX(-50%) rotate(16deg);
+  transform: translateX(-50%) rotate(18deg);
 }
 
 /* =========================================================
@@ -467,7 +463,7 @@ body {
 }
 
 /* =========================================================
-   BETTING AREA
+   BETTING AREA (COLOR-MATCHED TO WHEEL)
 ========================================================= */
 
 .betting-section {
@@ -510,7 +506,7 @@ body {
   position: relative;
   min-height: 64px;
   border-radius: 13px;
-  border: 1px solid rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.22);
   cursor: pointer;
   user-select: none;
   overflow: hidden;
@@ -518,11 +514,9 @@ body {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  background:
-    linear-gradient(145deg, #382840, #17101f);
   box-shadow:
     0 5px 8px rgba(0,0,0,0.55),
-    inset 0 1px rgba(255,255,255,0.12),
+    inset 0 1px rgba(255,255,255,0.2),
     inset 0 -4px 6px rgba(0,0,0,0.5);
   transition:
     transform 0.12s ease,
@@ -533,47 +527,45 @@ body {
   transform: translateY(2px) scale(0.98);
 }
 
+/* Matching the exact color scheme of the wheel slices */
 .bet-slot.x {
   grid-area: x;
+  background: linear-gradient(145deg, #6c228a, #2f0c3d);
 }
 
 .bet-slot.o {
   grid-area: o;
+  background: linear-gradient(145deg, #8a225e, #3d0c27);
 }
 
 .bet-slot.red {
   grid-area: red;
-  background:
-    linear-gradient(145deg, #8e2635, #3d1019);
+  background: linear-gradient(145deg, #a82020, #420c0c);
 }
 
 .bet-slot.star {
   grid-area: star;
-  background:
-    linear-gradient(145deg, #8a6824, #33250c);
+  background: linear-gradient(145deg, #b8860b, #4a3406);
 }
 
 .bet-slot.blue {
   grid-area: blue;
-  background:
-    linear-gradient(145deg, #254c91, #101f45);
+  background: linear-gradient(145deg, #1e4bb8, #0c204d);
 }
 
 .bet-slot.diamond {
   grid-area: diamond;
-  background:
-    linear-gradient(145deg, #236c7c, #102f37);
+  background: linear-gradient(145deg, #0e8585, #053333);
 }
 
 .bet-slot.jackpot {
   grid-area: jackpot;
-  background:
-    linear-gradient(145deg, #9a6b1c, #38220a);
-  border-color: rgba(255,210,104,0.5);
+  background: linear-gradient(145deg, #d4af37, #594410);
+  border-color: rgba(255,230,130,0.7);
 }
 
 .bet-name {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 1000;
   letter-spacing: 1px;
   text-shadow: 0 2px 3px rgba(0,0,0,0.8);
@@ -582,7 +574,7 @@ body {
 .bet-payout {
   margin-top: 3px;
   font-size: 9px;
-  opacity: 0.72;
+  opacity: 0.85;
   letter-spacing: 0.6px;
 }
 
@@ -902,7 +894,7 @@ body {
 
       <div class="wheel-stage">
 
-        <!-- Dynamic Ticking Pointer -->
+        <!-- Dynamic Ticking Pointer touching the nails -->
         <div class="wheel-pointer" id="wheelPointer"></div>
 
         <!-- Outer metallic frame -->
@@ -911,7 +903,7 @@ body {
         <!-- Light train -->
         <div class="light-train" id="lightTrain"></div>
 
-        <!-- Real Divider Nails -->
+        <!-- Real Perimeter Divider Nails -->
         <div class="wheel-nails" id="wheelNails"></div>
 
         <!-- 3D Wheel -->
@@ -919,7 +911,7 @@ body {
 
           <div class="wheel-face" id="wheelFace">
 
-            <!-- JS will generate randomized sections -->
+            <!-- JS will generate randomized sections & vertical labels -->
             <div class="wheel-section-labels" id="wheelLabels"></div>
 
           </div>
@@ -953,7 +945,7 @@ body {
 
 
     <!-- ===================================================
-         BETTING BOARD
+         BETTING BOARD (COLOR-MATCHED)
     ==================================================== -->
     <section class="betting-section">
 
@@ -1173,7 +1165,6 @@ body {
      AUDIO SYNTHESIS (FALLBACK SOUND EFFECTS)
 ========================================================= -->
 <script>
-// Web Audio API Synthesizer for realistic click/tick/win effects without missing file errors
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 
@@ -1249,7 +1240,6 @@ function playChipSound() {
    AERUSPIN GAME DATA & LOCALSTORAGE SYNC
 ========================================================= */
 
-// Thoroughly randomized 36-item sections ensuring stars, diamonds & high value items are well separated
 const wheelSections = [
   "Red", "Star", "Blue", "Diamond", "Red", "X",
   "Blue", "Star", "Red", "Jackpot", "Blue", "O",
@@ -1258,6 +1248,16 @@ const wheelSections = [
   "Star", "Red", "Diamond", "Blue", "X", "Star",
   "Red", "Blue", "Jackpot", "Star", "Red", "Diamond"
 ];
+
+const optionColors = {
+  X: "#6c228a",
+  O: "#8a225e",
+  Red: "#a82020",
+  Blue: "#1e4bb8",
+  Star: "#b8860b",
+  Diamond: "#0e8585",
+  Jackpot: "#d4af37"
+};
 
 const payouts = {
   X: 10,
@@ -1366,7 +1366,7 @@ function updateBetDisplay() {
 
 
 /* =========================================================
-   MARQUEE LIGHTS & REAL DIVIDER NAILS
+   MARQUEE LIGHTS & PERIMETER NAILS (PEGS)
 ========================================================= */
 
 function createMarqueeLights() {
@@ -1397,7 +1397,7 @@ function createWheelNails() {
     const nail = document.createElement("div");
     nail.className = "wheel-nail";
     const angle = (i / count) * Math.PI * 2;
-    const radius = 49;
+    const radius = 50; // Positioned right on the outer rim matching pointer
     const x = 50 + Math.cos(angle) * radius;
     const y = 50 + Math.sin(angle) * radius;
     nail.style.left = `${x}%`;
@@ -1408,27 +1408,43 @@ function createWheelNails() {
 
 
 /* =========================================================
-   WHEEL LABELS
+   WHEEL FACE & VERTICAL LABELS
 ========================================================= */
 
-function createWheelLabels() {
-  const container = document.getElementById("wheelLabels");
-  container.innerHTML = "";
+function buildWheelFace() {
+  const wheelFace = document.getElementById("wheelFace");
+  const labelsContainer = document.getElementById("wheelLabels");
+  
+  wheelFace.innerHTML = "";
+  labelsContainer.innerHTML = "";
+
+  const sliceAngle = 360 / wheelSections.length;
+  let gradientStops = [];
 
   wheelSections.forEach((section, index) => {
+    const startDeg = index * sliceAngle;
+    const endDeg = (index + 1) * sliceAngle;
+    const color = optionColors[section] || "#333";
+    
+    gradientStops.push(`${color} ${startDeg}deg ${endDeg}deg`);
+
+    // Create vertical premium label
     const label = document.createElement("div");
     label.className = "wheel-label " + section.toLowerCase();
-    const angle = (index * (360 / wheelSections.length));
-    label.style.transform = `rotate(${angle}deg)`;
+    const labelAngle = startDeg + (sliceAngle / 2);
+    label.style.transform = `rotate(${labelAngle}deg)`;
 
     label.textContent =
-      section === "Star" ? "★" :
-      section === "Diamond" ? "◆" :
+      section === "Star" ? "★ STAR" :
+      section === "Diamond" ? "◆ DIAMOND" :
       section === "Jackpot" ? "JACKPOT" :
-      section;
+      section.toUpperCase();
 
-    container.appendChild(label);
+    labelsContainer.appendChild(label);
   });
+
+  wheelFace.style.background = `conic-gradient(${gradientStops.join(", ")})`;
+  wheelFace.appendChild(labelsContainer);
 }
 
 
@@ -1502,17 +1518,14 @@ document.getElementById("spinButton").addEventListener("click", () => {
     const randomIndex = Math.floor(Math.random() * wheelSections.length);
     const sectionAngle = 360 / wheelSections.length;
 
-    // Precise math aligning target section slice perfectly with pointer at top (0 deg)
     const targetRotation = (spinRevolutions * 360) + (360 - (randomIndex * sectionAngle)) - (sectionAngle / 2);
     wheelRotation += targetRotation;
     
     const wheel = document.getElementById("wheel");
     wheel.style.transform = `rotateX(7deg) rotateZ(${wheelRotation}deg)`;
 
-    // Interactive pointer deflection & tick sync with wheel nails
     const pointer = document.getElementById("wheelPointer");
     let tickCount = 0;
-    const totalTicksExpected = (spinRevolutions * 360 + (360 - (randomIndex * sectionAngle))) / sectionAngle;
     
     let tickInterval = setInterval(() => {
         if (!spinning) {
@@ -1522,7 +1535,6 @@ document.getElementById("spinButton").addEventListener("click", () => {
         tickCount++;
         playClickSound();
         
-        // Alternate twitch left and right as it hits nail dividers
         if (tickCount % 2 === 0) {
             pointer.classList.add("tick-left");
             setTimeout(() => pointer.classList.remove("tick-left"), 35);
@@ -1551,7 +1563,6 @@ function handleResult(result) {
         xpGained = xpRewards[result] || 0;
     }
 
-    // Instantly add winnings to coin balance and XP
     coins += winnings;
     xp += xpGained;
 
@@ -1579,7 +1590,7 @@ function handleResult(result) {
 
 createMarqueeLights();
 createWheelNails();
-createWheelLabels();
+buildWheelFace();
 updateBalanceDisplay();
 updateBetDisplay();
 
