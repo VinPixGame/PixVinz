@@ -1212,52 +1212,44 @@ document.getElementById("spinButton").addEventListener("click", () => {
         nailsRing.style.transform = `rotateZ(${nailsRotation}deg)`;
     }
 
-    const pointer = document.getElementById("wheelPointer");
-    const count = wheelSections.length;
-    const sliceAngle = 360 / count;
+const pointer = document.getElementById("wheelPointer");
+    let lastCheckedAngle = wheelRotation;
     
-    let startTime = performance.now();
-    let duration = 5000;
-    let startRotation = wheelRotation - totalDelta;
-    let lastCrossedPeg = -1;
-
-    // Matches your CSS transition cubic-bezier(0.12, 0.74, 0.12, 1)
-    function easeOutCustom(t) {
-        return 1 - Math.pow(1 - t, 4);
-    }
-
-    function monitorPegHits() {
+    // Check rotation continuously during the spin to trigger the pointer ONLY when a peg passes by
+    let tickInterval = setInterval(() => {
         if (!spinning) {
-            pointer.style.transform = "translateX(-50%) rotate(0deg)";
+            clearInterval(tickInterval);
+            // Reset pointer to completely straight/static when stopped
+            pointer.style.transform = `translateX(-50%) rotate(0deg)`;
             return;
         }
 
-        let elapsed = performance.now() - startTime;
-        let progress = Math.min(elapsed / duration, 1);
-        let currentRot = startRotation + (totalDelta * easeOutCustom(progress));
+        const currentRotation = getComputedStyle(wheel).transform;
+        // Read current rotation matrix to track exact movement degrees
+        if (currentRotation && currentRotation !== 'none') {
+            const values = currentRotation.split('(')[1].split(')')[0].split(',');
+            const a = values[0];
+            const b = values[1];
+            let currentAngle = Math.round(Math.atan2(b, a) * (180 / Math.PI));
+            if (currentAngle < 0) currentAngle += 360;
 
-        // Detect when a peg angle crosses the top position (0° / 360°)
-        let currentPegFloat = (360 - (currentRot % 360)) / sliceAngle;
-        let currentPegIndex = Math.floor(currentPegFloat);
+            // If the wheel has moved enough to cross a peg boundary, trigger a physical strike
+            if (Math.abs(currentAngle - lastCheckedAngle) >= 5) {
+                playClickSound();
+                // Kick left or right depending on spin direction when a peg hits it
+                const kickDirection = Math.random() > 0.5 ? -12 : 12;
+                pointer.style.transform = `translateX(-50%) rotate(${kickDirection}deg)`;
+                
+                setTimeout(() => {
+                    pointer.style.transform = `translateX(-50%) rotate(0deg)`;
+                }, 40);
 
-        if (currentPegIndex !== lastCrossedPeg) {
-            playClickSound();
-            const kickDirection = Math.random() > 0.5 ? -14 : 14;
-            pointer.style.transform = `translateX(-50%) rotate(${kickDirection}deg)`;
-            setTimeout(() => {
-                pointer.style.transform = "translateX(-50%) rotate(0deg)";
-            }, 35);
-            lastCrossedPeg = currentPegIndex;
+                lastCheckedAngle = currentAngle;
+            }
         }
+    }, 30);
 
-        if (progress < 1) {
-            requestAnimationFrame(monitorPegHits);
-        } else {
-            pointer.style.transform = "translateX(-50%) rotate(0deg)";
-        }
-    }
 
-    requestAnimationFrame(monitorPegHits);
 
     setTimeout(() => {
         clearInterval(tickInterval);
