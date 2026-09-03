@@ -287,7 +287,7 @@ body {
   top: 0;
   width: 32px;
   margin-left: -16px;
-  margin-top: -100px;
+  margin-top: -95px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -307,7 +307,28 @@ body {
 .wheel-label-wrapper.o .wheel-stacked-text { color: #ff62b4; font-size: 10px; text-shadow: 0 1px 3px #000, 0 0 6px rgba(255,70,160,.65); }
 .wheel-label-wrapper.jackpot .wheel-stacked-text { color: #ffffff; font-size: 6px; text-shadow: 0 1px 3px #000, 0 0 8px rgba(255,255,255,.9); }
 
-/* Nails positioned precisely ON the golden outer edge (rim) of the inner wheel circle */
+/* Shining Silver Dividers separating every section cleanly */
+.wheel-dividers {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.wheel-divider {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2px;
+  height: 100%;
+  margin-left: -1px;
+  margin-top: -50%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.95), #a0a0a0 50%, rgba(255,255,255,0.95));
+  box-shadow: 0 0 3px rgba(255,255,255,0.8);
+  transform-origin: 50% 50%;
+}
+
 .wheel-nails {
   position: absolute;
   top: 0px;
@@ -362,18 +383,18 @@ body {
   text-shadow: 0 1px rgba(255,255,255,0.35);
 }
 
-/* Arrow pointer anchored precisely so its bottom point touches the exact edge/rim where the pegs sit */
+/* Fixed Pointer tip anchored at the exact outer rim/peg edge, rotating base outward */
 .wheel-pointer {
   position: absolute;
-  top: -23px;
+  top: -24px;
   left: 50%;
   z-index: 60;
   width: 0;
   height: 0;
   transform: translateX(-50%) rotate(0deg);
-  transform-origin: 50% 23px;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
+  transform-origin: 50% 24px;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
   border-top: 26px solid #f4d078;
   filter:
     drop-shadow(0 3px 4px rgba(0,0,0,0.85))
@@ -755,6 +776,7 @@ body {
         <div class="wheel-3d" id="wheel">
           <div class="wheel-face" id="wheelFace">
             <div class="wheel-section-labels" id="wheelLabels"></div>
+            <div class="wheel-dividers" id="wheelDividers"></div>
           </div>
         </div>
         <div class="wheel-nails" id="wheelNails"></div>
@@ -983,8 +1005,8 @@ let wheelRotation = 0;
 
 const coinBalance = document.getElementById("coinBalance");
 const xpValue = document.getElementById("xpValue");
-const selectedChipDisplay = document.getElementById("selectedChip");
-const totalBetDisplay = document.getElementById("totalBet");
+let selectedChipDisplay = document.getElementById("selectedChip");
+let totalBetDisplay = document.getElementById("totalBet");
 
 function updateBalanceDisplay() {
   coinBalance.textContent = coins.toLocaleString();
@@ -1041,25 +1063,32 @@ function createWheelNails() {
 function buildWheelFace() {
   const wheelFace = document.getElementById("wheelFace");
   const labelsContainer = document.getElementById("wheelLabels");
+  const dividersContainer = document.getElementById("wheelDividers");
   
-  wheelFace.innerHTML = "";
   labelsContainer.innerHTML = "";
-  wheelFace.appendChild(labelsContainer);
+  dividersContainer.innerHTML = "";
 
-  const sliceAngle = 360 / wheelSections.length;
+  const count = wheelSections.length;
+  const sliceAngle = 360 / count;
   let gradientStops = [];
 
   wheelSections.forEach((section, index) => {
     const startDeg = index * sliceAngle;
     const endDeg = (index + 1) * sliceAngle;
     
+    // Add small gaps for shining silver dividers using tiny transparent segments
+    const gap = 0.5;
+    const adjustedStart = startDeg + gap;
+    const adjustedEnd = endDeg - gap;
+
     if (section === "Jackpot") {
-      gradientStops.push(`#ff3366 ${startDeg}deg, #ff9933 ${startDeg + (sliceAngle * 0.25)}deg, #33cc66 ${startDeg + (sliceAngle * 0.5)}deg, #3399ff ${startDeg + (sliceAngle * 0.75)}deg, #9933ff ${endDeg}deg`);
+      gradientStops.push(`rgba(0,0,0,0.85) ${startDeg}deg ${adjustedStart}deg, #ff3366 ${adjustedStart}deg, #ff9933 ${startDeg + (sliceAngle * 0.25)}deg, #33cc66 ${startDeg + (sliceAngle * 0.5)}deg, #3399ff ${startDeg + (sliceAngle * 0.75)}deg, #9933ff ${adjustedEnd}deg, rgba(0,0,0,0.85) ${adjustedEnd}deg ${endDeg}deg`);
     } else {
       let colorVal = optionColors[section];
-      gradientStops.push(`${colorVal || "#333"} ${startDeg}deg ${endDeg}deg`);
+      gradientStops.push(`rgba(0,0,0,0.85) ${startDeg}deg ${adjustedStart}deg, ${colorVal || "#333"} ${adjustedStart}deg ${adjustedEnd}deg, rgba(0,0,0,0.85) ${adjustedEnd}deg ${endDeg}deg`);
     }
 
+    // Stacked text inside the section
     const wrapper = document.createElement("div");
     wrapper.className = "wheel-label-wrapper " + section.toLowerCase();
     const labelAngle = startDeg + (sliceAngle / 2);
@@ -1082,6 +1111,12 @@ function buildWheelFace() {
 
     wrapper.appendChild(textContainer);
     labelsContainer.appendChild(wrapper);
+
+    // Shining Silver Divider line between sections
+    const divider = document.createElement("div");
+    divider.className = "wheel-divider";
+    divider.style.transform = `rotate(${endDeg}deg)`;
+    dividersContainer.appendChild(divider);
   });
 
   wheelFace.style.background = `conic-gradient(${gradientStops.join(", ")})`;
@@ -1137,6 +1172,7 @@ document.getElementById("spinButton").addEventListener("click", () => {
     const randomIndex = Math.floor(Math.random() * wheelSections.length);
     const sliceAngle = 360 / wheelSections.length;
 
+    // Target precisely the middle of the slice so it never lands on a divider
     const targetRotation = (spinRevolutions * 360) + (360 - (randomIndex * sliceAngle + sliceAngle / 2));
     wheelRotation += targetRotation;
     
