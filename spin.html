@@ -554,21 +554,20 @@ body {
 .chip-btn {
   aspect-ratio: 1;
   border-radius: 50%;
-  border: 2px solid #8b8b8b;
-  background:
-    radial-gradient(
-      circle at 34% 28%,
-      #f6f6f6,
-      #bcbcbc 35%,
-      #595959 75%,
-      #202020 100%
-    );
-  color: #171717;
-  font-weight: 1000;
-  font-size: 10px;
+  border: 2px solid transparent;
+  background: transparent;
+  padding: 0;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,0.65);
   transition: 0.15s ease;
+  overflow: hidden;
+}
+
+.chip-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .chip-btn.active {
@@ -807,12 +806,12 @@ body {
     <section class="chip-section">
       <div class="section-title">SELECT CHIP</div>
       <div class="chip-selector">
-        <button class="chip-btn active" data-chip="5">5</button>
-        <button class="chip-btn" data-chip="10">10</button>
-        <button class="chip-btn" data-chip="50">50</button>
-        <button class="chip-btn" data-chip="100">100</button>
-        <button class="chip-btn" data-chip="500">500</button>
-        <button class="chip-btn" data-chip="1000">1K</button>
+        <button class="chip-btn active" data-chip="5"><img src="image/5.png" alt="5"></button>
+        <button class="chip-btn" data-chip="10"><img src="image/10.png" alt="10"></button>
+        <button class="chip-btn" data-chip="50"><img src="image/50.png" alt="50"></button>
+        <button class="chip-btn" data-chip="100"><img src="image/100.png" alt="100"></button>
+        <button class="chip-btn" data-chip="500"><img src="image/500.png" alt="500"></button>
+        <button class="chip-btn" data-chip="1000"><img src="image/1000.png" alt="1000"></button>
       </div>
     </section>
 
