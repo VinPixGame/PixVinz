@@ -163,6 +163,17 @@ body {
   transform-style: preserve-3d;
 }
 
+.wheel-nails-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  z-index: 45;
+  pointer-events: none;
+  transform-style: preserve-3d;
+  transition: transform 5s cubic-bezier(0.12,0.74,0.12,1);
+}
+  
+
 .marquee-frame {
   position: absolute;
   inset: -12px;
@@ -772,13 +783,19 @@ body {
       <div class="wheel-stage">
         <div class="marquee-frame"></div>
         <div class="light-train" id="lightTrain"></div>
+        
         <div class="wheel-3d" id="wheel">
           <div class="wheel-face" id="wheelFace">
             <div class="wheel-section-labels" id="wheelLabels"></div>
             <div class="wheel-dividers" id="wheelDividers"></div>
           </div>
         </div>
-        <div class="wheel-nails" id="wheelNails"></div>
+
+        <!-- Separate independent layer for the nails so it can rotate oppositely -->
+        <div class="wheel-nails-ring" id="wheelNailsRing">
+          <div class="wheel-nails" id="wheelNails"></div>
+        </div>
+
         <div class="wheel-pointer" id="wheelPointer"></div>
       </div>
     </section>
@@ -1159,6 +1176,7 @@ document.getElementById("closeResult").addEventListener("click", () => {
   document.getElementById("winOverlay").classList.remove("show");
 });
 
+
 document.getElementById("spinButton").addEventListener("click", () => {
     if (spinning) return;
 
@@ -1187,10 +1205,14 @@ document.getElementById("spinButton").addEventListener("click", () => {
     const spinRevolutions = (6 + Math.floor(Math.random() * 4)) * 360;
     const targetAngleFromCurrent = (360 - targetCenterAngle - randomOffset - currentMod + 360) % 360;
     
-    wheelRotation += spinRevolutions + targetAngleFromCurrent;
+    const totalDelta = spinRevolutions + targetAngleFromCurrent;
+    wheelRotation += totalDelta;
     
     const wheel = document.getElementById("wheel");
     wheel.style.transform = `rotateX(7deg) rotateZ(${wheelRotation}deg)`;
+
+    nailsRotation -= totalDelta;
+    document.getElementById("wheelNailsRing").style.transform = `rotateZ(${nailsRotation}deg)`;
 
     const pointer = document.getElementById("wheelPointer");
     let tickCount = 0;
@@ -1217,6 +1239,7 @@ document.getElementById("spinButton").addEventListener("click", () => {
         handleResult(wheelSections[randomIndex]);
     }, 5000);
 });
+  
 
 function handleResult(result) {
     spinning = false;
