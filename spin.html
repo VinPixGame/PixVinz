@@ -149,13 +149,13 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 26px 10px 12px;
+  padding: 42px 10px 12px;
   perspective: 1100px;
 }
 
 .wheel-stage {
   position: relative;
-  width: min(88vw, 430px);
+  width: min(72vw, 320px);
   aspect-ratio: 1 / 1;
   display: flex;
   justify-content: center;
@@ -168,6 +168,7 @@ body {
   inset: -12px;
   border-radius: 50%;
   transform: translateZ(-18px);
+  z-index: 10;
   background:
     linear-gradient(145deg, #d8d8d8, #6e6e6e 35%, #252525 70%, #a9a9a9);
   box-shadow:
@@ -188,29 +189,11 @@ body {
     inset 0 0 0 9px #111;
 }
 
-.wheel-nails {
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  z-index: 35;
-  pointer-events: none;
-}
-
-.wheel-nail {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  margin: -5px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #fff 0%, #f4d078 45%, #593e0b 100%);
-  box-shadow: 0 0 5px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,255,255,0.9);
-}
-
 .light-train {
   position: absolute;
   inset: -18px;
   border-radius: 50%;
-  z-index: 10;
+  z-index: 20;
   pointer-events: none;
 }
 
@@ -248,11 +231,12 @@ body {
 
 .wheel-3d {
   position: relative;
-  width: 84%;
-  height: 84%;
+  width: 95%;
+  height: 95%;
   border-radius: 50%;
   transform-style: preserve-3d;
   transform: rotateX(7deg);
+  z-index: 25;
   background:
     radial-gradient(
       circle,
@@ -303,7 +287,7 @@ body {
   top: 0;
   width: 32px;
   margin-left: -16px;
-  margin-top: -110px;
+  margin-top: -100px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -322,6 +306,28 @@ body {
 .wheel-label-wrapper.x .wheel-stacked-text { color: #c66cff; font-size: 10px; text-shadow: 0 1px 3px #000, 0 0 6px rgba(180,70,255,.65); }
 .wheel-label-wrapper.o .wheel-stacked-text { color: #ff62b4; font-size: 10px; text-shadow: 0 1px 3px #000, 0 0 6px rgba(255,70,160,.65); }
 .wheel-label-wrapper.jackpot .wheel-stacked-text { color: #ffffff; font-size: 6px; text-shadow: 0 1px 3px #000, 0 0 8px rgba(255,255,255,.9); }
+
+/* Nails positioned precisely ON the golden outer edge (rim) of the inner wheel circle */
+.wheel-nails {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  border-radius: 50%;
+  z-index: 40;
+  pointer-events: none;
+}
+
+.wheel-nail {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  margin: -5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff 0%, #f4d078 45%, #593e0b 100%);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.8), inset 0 1px 2px rgba(255,255,255,0.9);
+}
 
 .wheel-hub {
   position: absolute;
@@ -356,21 +362,22 @@ body {
   text-shadow: 0 1px rgba(255,255,255,0.35);
 }
 
+/* Arrow pointer anchored precisely so its bottom point touches the exact edge/rim where the pegs sit */
 .wheel-pointer {
   position: absolute;
-  top: -21px;
+  top: -23px;
   left: 50%;
-  z-index: 40;
+  z-index: 60;
   width: 0;
   height: 0;
   transform: translateX(-50%) rotate(0deg);
-  transform-origin: 50% 18px;
-  border-left: 14px solid transparent;
-  border-right: 14px solid transparent;
-  border-top: 38px solid #f4d078;
+  transform-origin: 50% 23px;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 26px solid #f4d078;
   filter:
-    drop-shadow(0 4px 5px rgba(0,0,0,0.85))
-    drop-shadow(0 0 8px rgba(255,210,80,0.6));
+    drop-shadow(0 3px 4px rgba(0,0,0,0.85))
+    drop-shadow(0 0 6px rgba(255,210,80,0.6));
   transition: transform 0.04s ease-out;
 }
 
@@ -720,8 +727,8 @@ body {
 
 @media (max-height: 700px) {
   .top-bar { height: 54px; min-height: 54px; }
-  .wheel-section { padding-top: 12px; }
-  .wheel-stage { width: min(78vw, 350px); }
+  .wheel-section { padding-top: 32px; }
+  .wheel-stage { width: min(65vw, 280px); }
   .bet-slot { min-height: 55px; }
   .spin-button { height: 50px; }
 }
@@ -743,16 +750,15 @@ body {
   <main class="game-area">
     <section class="wheel-section">
       <div class="wheel-stage">
-        <div class="wheel-pointer" id="wheelPointer"></div>
         <div class="marquee-frame"></div>
         <div class="light-train" id="lightTrain"></div>
-        <div class="wheel-nails" id="wheelNails"></div>
         <div class="wheel-3d" id="wheel">
           <div class="wheel-face" id="wheelFace">
             <div class="wheel-section-labels" id="wheelLabels"></div>
           </div>
-          <div class="wheel-hub"><span>AERU</span></div>
         </div>
+        <div class="wheel-nails" id="wheelNails"></div>
+        <div class="wheel-pointer" id="wheelPointer"></div>
       </div>
     </section>
 
@@ -914,7 +920,6 @@ function playChipSound() {
 <script src="playerstat.js"></script>
     
 <script>
-// Exactly 36 sections matching your exact requested counts: 12 Reds, 12 Blues, 4 Stars, 3 Diamonds, 1 Jackpot, 2 X, 2 O (Total = 36)
 const wheelSections = [
   "Red", "Blue", "Star", "Red", "Blue", "Diamond", 
   "Red", "Blue", "Star", "Red", "Blue", "X", 
@@ -1039,6 +1044,7 @@ function buildWheelFace() {
   
   wheelFace.innerHTML = "";
   labelsContainer.innerHTML = "";
+  wheelFace.appendChild(labelsContainer);
 
   const sliceAngle = 360 / wheelSections.length;
   let gradientStops = [];
@@ -1079,7 +1085,7 @@ function buildWheelFace() {
   });
 
   wheelFace.style.background = `conic-gradient(${gradientStops.join(", ")})`;
-  wheelFace.appendChild(labelsContainer);
+  createWheelNails();
 }
 
 document.querySelectorAll(".chip-btn").forEach(button => {
@@ -1131,7 +1137,7 @@ document.getElementById("spinButton").addEventListener("click", () => {
     const randomIndex = Math.floor(Math.random() * wheelSections.length);
     const sliceAngle = 360 / wheelSections.length;
 
-    const targetRotation = (spinRevolutions * 360) + (360 - (randomIndex * sliceAngle) - (sliceAngle / 2));
+    const targetRotation = (spinRevolutions * 360) + (360 - (randomIndex * sliceAngle + sliceAngle / 2));
     wheelRotation += targetRotation;
     
     const wheel = document.getElementById("wheel");
@@ -1197,7 +1203,6 @@ function handleResult(result) {
 }
 
 createMarqueeLights();
-createWheelNails();
 buildWheelFace();
 updateBalanceDisplay();
 updateBetDisplay();
