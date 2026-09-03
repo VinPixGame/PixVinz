@@ -307,7 +307,6 @@ body {
 .wheel-label-wrapper.o .wheel-stacked-text { color: #ff62b4; font-size: 10px; text-shadow: 0 1px 3px #000, 0 0 6px rgba(255,70,160,.65); }
 .wheel-label-wrapper.jackpot .wheel-stacked-text { color: #ffffff; font-size: 6px; text-shadow: 0 1px 3px #000, 0 0 8px rgba(255,255,255,.9); }
 
-/* Shining Silver Dividers separating every section cleanly */
 .wheel-dividers {
   position: absolute;
   inset: 0;
@@ -383,7 +382,7 @@ body {
   text-shadow: 0 1px rgba(255,255,255,0.35);
 }
 
-/* Fixed Pointer tip anchored at the exact outer rim/peg edge, rotating base outward */
+/* Updated pointer: Base is fixed at the top edge, point/tip moves side to side */
 .wheel-pointer {
   position: absolute;
   top: -24px;
@@ -392,7 +391,7 @@ body {
   width: 0;
   height: 0;
   transform: translateX(-50%) rotate(0deg);
-  transform-origin: 50% 24px;
+  transform-origin: 50% 0px;
   border-left: 9px solid transparent;
   border-right: 9px solid transparent;
   border-top: 26px solid #f4d078;
@@ -403,11 +402,11 @@ body {
 }
 
 .wheel-pointer.tick-left {
-  transform: translateX(-50%) rotate(-18deg);
+  transform: translateX(-50%) rotate(-14deg);
 }
 
 .wheel-pointer.tick-right {
-  transform: translateX(-50%) rotate(18deg);
+  transform: translateX(-50%) rotate(14deg);
 }
 
 .result-display {
@@ -1076,7 +1075,6 @@ function buildWheelFace() {
     const startDeg = index * sliceAngle;
     const endDeg = (index + 1) * sliceAngle;
     
-    // Add small gaps for shining silver dividers using tiny transparent segments
     const gap = 0.5;
     const adjustedStart = startDeg + gap;
     const adjustedEnd = endDeg - gap;
@@ -1088,7 +1086,6 @@ function buildWheelFace() {
       gradientStops.push(`rgba(0,0,0,0.85) ${startDeg}deg ${adjustedStart}deg, ${colorVal || "#333"} ${adjustedStart}deg ${adjustedEnd}deg, rgba(0,0,0,0.85) ${adjustedEnd}deg ${endDeg}deg`);
     }
 
-    // Stacked text inside the section
     const wrapper = document.createElement("div");
     wrapper.className = "wheel-label-wrapper " + section.toLowerCase();
     const labelAngle = startDeg + (sliceAngle / 2);
@@ -1112,7 +1109,6 @@ function buildWheelFace() {
     wrapper.appendChild(textContainer);
     labelsContainer.appendChild(wrapper);
 
-    // Shining Silver Divider line between sections
     const divider = document.createElement("div");
     divider.className = "wheel-divider";
     divider.style.transform = `rotate(${endDeg}deg)`;
@@ -1172,8 +1168,12 @@ document.getElementById("spinButton").addEventListener("click", () => {
     const randomIndex = Math.floor(Math.random() * wheelSections.length);
     const sliceAngle = 360 / wheelSections.length;
 
-    // Target precisely the middle of the slice so it never lands on a divider
-    const targetRotation = (spinRevolutions * 360) + (360 - (randomIndex * sliceAngle + sliceAngle / 2));
+    // Mathematical landing calculation: lands securely on the section itself (avoiding dividers)
+    const sliceStart = randomIndex * sliceAngle;
+    const randomOffset = sliceAngle * (0.25 + Math.random() * 0.5); // safely inside the slice bounds
+    const targetAngleWithinWheel = sliceStart + randomOffset;
+    
+    const targetRotation = (spinRevolutions * 360) + (360 - targetAngleWithinWheel);
     wheelRotation += targetRotation;
     
     const wheel = document.getElementById("wheel");
