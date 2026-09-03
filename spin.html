@@ -180,7 +180,7 @@ body {
 }
 
 /* =========================================================
-   MARQUEE FRAME
+   MARQUEE FRAME & PEGS (NAILS)
 ========================================================= */
 
 .marquee-frame {
@@ -196,7 +196,6 @@ body {
     inset 0 -7px 9px rgba(0,0,0,0.75);
 }
 
-/* Deep back extrusion */
 .marquee-frame::before {
   content: "";
   position: absolute;
@@ -207,6 +206,25 @@ body {
   box-shadow:
     inset 0 0 0 5px #4e4e4e,
     inset 0 0 0 9px #111;
+}
+
+/* Wheel Nails / Dividers */
+.wheel-nails {
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.wheel-nail {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff 0%, #d5a94d 50%, #4a340c 100%);
+  box-shadow: 0 0 4px rgba(0,0,0,0.9), inset 0 1px 1px rgba(255,255,255,0.8);
 }
 
 /* =========================================================
@@ -289,42 +307,15 @@ body {
   transform-style: preserve-3d;
   background:
     conic-gradient(
-      #8c202b 0deg 10deg,
-      #172e73 10deg 20deg,
-      #8c202b 20deg 30deg,
-      #172e73 30deg 40deg,
-      #8c202b 40deg 50deg,
-      #172e73 50deg 60deg,
-      #8c202b 60deg 70deg,
-      #172e73 70deg 80deg,
-      #8c202b 80deg 90deg,
-      #172e73 90deg 100deg,
-      #8c202b 100deg 110deg,
-      #172e73 110deg 120deg,
-      #8c202b 120deg 130deg,
-      #172e73 130deg 140deg,
-      #8c202b 140deg 150deg,
-      #172e73 150deg 160deg,
-      #8c202b 160deg 170deg,
-      #172e73 170deg 180deg,
-      #8c202b 180deg 190deg,
-      #172e73 190deg 200deg,
-      #8c202b 200deg 210deg,
-      #172e73 210deg 220deg,
-      #8c202b 220deg 230deg,
-      #172e73 230deg 240deg,
-      #8c202b 240deg 250deg,
-      #172e73 250deg 260deg,
-      #8c202b 260deg 270deg,
-      #172e73 270deg 280deg,
-      #8c202b 280deg 290deg,
-      #172e73 290deg 300deg,
-      #8c202b 300deg 310deg,
-      #172e73 310deg 320deg,
-      #8c202b 320deg 330deg,
-      #172e73 330deg 340deg,
-      #8c202b 340deg 350deg,
-      #172e73 350deg 360deg
+      #8c202b 0deg 10deg, #172e73 10deg 20deg, #8c202b 20deg 30deg, #172e73 30deg 40deg,
+      #8c202b 40deg 50deg, #172e73 50deg 60deg, #8c202b 60deg 70deg, #172e73 70deg 80deg,
+      #8c202b 80deg 90deg, #172e73 90deg 100deg, #8c202b 100deg 110deg, #172e73 110deg 120deg,
+      #8c202b 120deg 130deg, #172e73 130deg 140deg, #8c202b 140deg 150deg, #172e73 150deg 160deg,
+      #8c202b 160deg 170deg, #172e73 170deg 180deg, #8c202b 180deg 190deg, #172e73 190deg 200deg,
+      #8c202b 200deg 210deg, #172e73 210deg 220deg, #8c202b 220deg 230deg, #172e73 230deg 240deg,
+      #8c202b 240deg 250deg, #172e73 250deg 260deg, #8c202b 260deg 270deg, #172e73 270deg 280deg,
+      #8c202b 280deg 290deg, #172e73 290deg 300deg, #8c202b 300deg 310deg, #172e73 310deg 320deg,
+      #8c202b 320deg 330deg, #172e73 330deg 340deg, #8c202b 340deg 350deg, #172e73 350deg 360deg
     );
   box-shadow:
     inset 0 0 0 3px rgba(255,255,255,0.16),
@@ -332,7 +323,7 @@ body {
 }
 
 /* =========================================================
-   SECTION LABELS
+   SECTION LABELS (Spread Out & Neatly Inside Slots)
 ========================================================= */
 
 .wheel-section-labels {
@@ -347,15 +338,15 @@ body {
   left: 50%;
   top: 50%;
   transform-origin: 0 0;
-  width: 50%;
-  height: 24px;
-  margin-top: -12px;
-  padding-left: 15px;
+  width: 44%;
+  height: 22px;
+  margin-top: -11px;
+  padding-left: 36px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 9px;
-  font-weight: 900;
+  justify-content: flex-start;
+  font-size: 8px;
+  font-weight: 1000;
   letter-spacing: 0.5px;
   color: #fff;
   text-shadow:
@@ -366,6 +357,7 @@ body {
 
 .wheel-label.jackpot {
   color: #ffe39a;
+  font-size: 7px;
 }
 
 .wheel-label.diamond {
@@ -414,23 +406,33 @@ body {
 }
 
 /* =========================================================
-   POINTER
+   POINTER (DYNAMIC TICKING ARROW)
 ========================================================= */
 
 .wheel-pointer {
   position: absolute;
-  top: -1px;
+  top: -6px;
   left: 50%;
   z-index: 30;
   width: 0;
   height: 0;
-  transform: translateX(-50%);
-  border-left: 15px solid transparent;
-  border-right: 15px solid transparent;
+  transform: translateX(-50%) rotate(0deg);
+  transform-origin: 50% 6px;
+  border-left: 13px solid transparent;
+  border-right: 13px solid transparent;
   border-top: 32px solid #f4d078;
   filter:
     drop-shadow(0 4px 4px rgba(0,0,0,0.8))
     drop-shadow(0 0 7px rgba(255,210,80,0.5));
+  transition: transform 0.04s ease-out;
+}
+
+.wheel-pointer.tick-left {
+  transform: translateX(-50%) rotate(-16deg);
+}
+
+.wheel-pointer.tick-right {
+  transform: translateX(-50%) rotate(16deg);
 }
 
 /* =========================================================
@@ -835,23 +837,6 @@ body {
 }
 
 /* =========================================================
-   JACKPOT EFFECT
-========================================================= */
-
-.jackpot-mode .marquee-frame {
-  animation: jackpotFrame 0.45s infinite alternate;
-}
-
-@keyframes jackpotFrame {
-  from {
-    filter: brightness(1);
-  }
-  to {
-    filter: brightness(1.8);
-  }
-}
-
-/* =========================================================
    MOBILE ADJUSTMENT
 ========================================================= */
 
@@ -917,8 +902,8 @@ body {
 
       <div class="wheel-stage">
 
-        <!-- Pointer -->
-        <div class="wheel-pointer"></div>
+        <!-- Dynamic Ticking Pointer -->
+        <div class="wheel-pointer" id="wheelPointer"></div>
 
         <!-- Outer metallic frame -->
         <div class="marquee-frame"></div>
@@ -926,12 +911,15 @@ body {
         <!-- Light train -->
         <div class="light-train" id="lightTrain"></div>
 
+        <!-- Real Divider Nails -->
+        <div class="wheel-nails" id="wheelNails"></div>
+
         <!-- 3D Wheel -->
         <div class="wheel-3d" id="wheel">
 
           <div class="wheel-face" id="wheelFace">
 
-            <!-- JS will generate all 36 sections here -->
+            <!-- JS will generate randomized sections -->
             <div class="wheel-section-labels" id="wheelLabels"></div>
 
           </div>
@@ -1182,34 +1170,75 @@ body {
 
 
 <!-- =========================================================
-     AUDIO
-     Replace these filenames later with your actual sounds.
+     AUDIO SYNTHESIS (FALLBACK SOUND EFFECTS)
 ========================================================= -->
+<script>
+// Web Audio API Synthesizer for realistic click/tick/win effects without missing file errors
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
 
-<audio id="spinSound" preload="auto">
-  <source src="sounds/spin.mp3" type="audio/mpeg">
-</audio>
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new AudioContext();
+  }
+}
 
-<audio id="tickSound" preload="auto">
-  <source src="sounds/tick.mp3" type="audio/mpeg">
-</audio>
+function playClickSound() {
+  try {
+    initAudio();
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.03);
+    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.03);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.03);
+  } catch(e) {}
+}
 
-<audio id="chipSound" preload="auto">
-  <source src="sounds/chip.mp3" type="audio/mpeg">
-</audio>
+function playWinSound(isJackpot = false) {
+  try {
+    initAudio();
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const notes = isJackpot ? [523.25, 659.25, 783.99, 1046.50, 1318.51] : [440, 554.37, 659.25, 880];
+    notes.forEach((freq, idx) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+      gain.gain.setValueAtTime(0.2, now + idx * 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.3);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now + idx * 0.08);
+      osc.stop(now + idx * 0.08 + 0.3);
+    });
+  } catch(e) {}
+}
 
-<audio id="winSound" preload="auto">
-  <source src="sounds/win.mp3" type="audio/mpeg">
-</audio>
-
-<audio id="bigWinSound" preload="auto">
-  <source src="sounds/bigwin.mp3" type="audio/mpeg">
-</audio>
-
-<audio id="jackpotSound" preload="auto">
-  <source src="sounds/jackpot.mp3" type="audio/mpeg">
-</audio>
-
+function playChipSound() {
+  try {
+    initAudio();
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.05);
+  } catch(e) {}
+}
+</script>
 
 
 <script src="profile.js"></script>
@@ -1220,22 +1249,14 @@ body {
    AERUSPIN GAME DATA & LOCALSTORAGE SYNC
 ========================================================= */
 
+// Thoroughly randomized 36-item sections ensuring stars, diamonds & high value items are well separated
 const wheelSections = [
-  "Red","Blue","Red","Blue","Red","Blue",
-  "Red","Blue","Red","Blue","Red","Blue",
-
-  "Red","Blue","Red","Blue","Red","Blue",
-  "Red","Blue","Red","Blue","Red","Blue",
-
-  "Diamond","Diamond","Diamond",
-
-  "X","X",
-
-  "O","O",
-
-  "Star","Star","Star","Star",
-
-  "Jackpot"
+  "Red", "Star", "Blue", "Diamond", "Red", "X",
+  "Blue", "Star", "Red", "Jackpot", "Blue", "O",
+  "Red", "Diamond", "Star", "Blue", "Red", "X",
+  "Blue", "Star", "Diamond", "Red", "O", "Blue",
+  "Star", "Red", "Diamond", "Blue", "X", "Star",
+  "Red", "Blue", "Jackpot", "Star", "Red", "Diamond"
 ];
 
 const payouts = {
@@ -1258,8 +1279,6 @@ const xpRewards = {
   Jackpot: 1000
 };
 
-const chipValues = [5, 10, 50, 100, 500, 1000];
-
 const bets = {
   X: 0,
   O: 0,
@@ -1270,8 +1289,7 @@ const bets = {
   Jackpot: 0
 };
 
-/* --- SYNC INTEGRATION START --- */
-// Resolving the exact user-specific keys matching profile.js logic
+/* --- USER PROFILE SYNC INTEGRATION --- */
 function getCurrentUsername() {
     try {
         const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
@@ -1290,11 +1308,9 @@ function getUserKey(keyName) {
 const coinsKey = getUserKey('totalCoins');
 const xpKey = getUserKey('bonusXp');
 
-// Initializing state directly from LocalStorage using user-specific keys
 let coins = parseInt(localStorage.getItem(coinsKey)) || 0;
 let xp = parseInt(localStorage.getItem(xpKey)) || 0;
 
-// Function to sync current variables back to localStorage and trigger external updates if available
 function saveUserData() {
     localStorage.setItem(coinsKey, coins);
     localStorage.setItem(xpKey, xp);
@@ -1306,7 +1322,6 @@ function saveUserData() {
         window.saveUserDataToCloud();
     }
 }
-/* --- SYNC INTEGRATION END --- */
 
 let selectedChip = 5;
 let spinning = false;
@@ -1331,22 +1346,15 @@ function calculateTotalBet() {
 }
 
 function updateBetDisplay() {
-  totalBetDisplay.textContent =
-    calculateTotalBet().toLocaleString();
-
-  selectedChipDisplay.textContent =
-    selectedChip.toLocaleString();
+  totalBetDisplay.textContent = calculateTotalBet().toLocaleString();
+  selectedChipDisplay.textContent = selectedChip.toLocaleString();
 
   Object.keys(bets).forEach(type => {
     const chip = document.getElementById(`chip-${type}`);
-
     if (!chip) return;
 
     chip.textContent = bets[type].toLocaleString();
-
-    const slot = document.querySelector(
-      `.bet-slot[data-bet="${type}"]`
-    );
+    const slot = document.querySelector(`.bet-slot[data-bet="${type}"]`);
 
     if (bets[type] > 0) {
       slot.classList.add("has-bet");
@@ -1358,41 +1366,43 @@ function updateBetDisplay() {
 
 
 /* =========================================================
-   MARQUEE LIGHTS
+   MARQUEE LIGHTS & REAL DIVIDER NAILS
 ========================================================= */
 
 function createMarqueeLights() {
-
   const train = document.getElementById("lightTrain");
-
   train.innerHTML = "";
-
   const count = 36;
 
   for (let i = 0; i < count; i++) {
-
     const bulb = document.createElement("div");
-
     bulb.className = "marquee-bulb";
-
-    const angle =
-      (i / count) * Math.PI * 2;
-
+    const angle = (i / count) * Math.PI * 2;
     const radius = 50;
-
-    const x =
-      50 + Math.cos(angle) * radius;
-
-    const y =
-      50 + Math.sin(angle) * radius;
-
+    const x = 50 + Math.cos(angle) * radius;
+    const y = 50 + Math.sin(angle) * radius;
     bulb.style.left = `${x}%`;
     bulb.style.top = `${y}%`;
-
-    bulb.style.animationDelay =
-      `${i * 0.045}s`;
-
+    bulb.style.animationDelay = `${i * 0.045}s`;
     train.appendChild(bulb);
+  }
+}
+
+function createWheelNails() {
+  const container = document.getElementById("wheelNails");
+  container.innerHTML = "";
+  const count = 36;
+
+  for (let i = 0; i < count; i++) {
+    const nail = document.createElement("div");
+    nail.className = "wheel-nail";
+    const angle = (i / count) * Math.PI * 2;
+    const radius = 49;
+    const x = 50 + Math.cos(angle) * radius;
+    const y = 50 + Math.sin(angle) * radius;
+    nail.style.left = `${x}%`;
+    nail.style.top = `${y}%`;
+    container.appendChild(nail);
   }
 }
 
@@ -1402,26 +1412,14 @@ function createMarqueeLights() {
 ========================================================= */
 
 function createWheelLabels() {
-
-  const container =
-    document.getElementById("wheelLabels");
-
+  const container = document.getElementById("wheelLabels");
   container.innerHTML = "";
 
   wheelSections.forEach((section, index) => {
-
-    const label =
-      document.createElement("div");
-
-    label.className =
-      "wheel-label " +
-      section.toLowerCase();
-
-    const angle =
-      (index * (360 / wheelSections.length));
-
-    label.style.transform =
-      `rotate(${angle}deg)`;
+    const label = document.createElement("div");
+    label.className = "wheel-label " + section.toLowerCase();
+    const angle = (index * (360 / wheelSections.length));
+    label.style.transform = `rotate(${angle}deg)`;
 
     label.textContent =
       section === "Star" ? "★" :
@@ -1438,27 +1436,14 @@ function createWheelLabels() {
    CHIP SELECTION
 ========================================================= */
 
-document.querySelectorAll(".chip-btn")
-.forEach(button => {
-
+document.querySelectorAll(".chip-btn").forEach(button => {
   button.addEventListener("click", () => {
-
     if (spinning) return;
-
-    document
-      .querySelectorAll(".chip-btn")
-      .forEach(btn =>
-        btn.classList.remove("active")
-      );
-
+    document.querySelectorAll(".chip-btn").forEach(btn => btn.classList.remove("active"));
     button.classList.add("active");
-
-    selectedChip =
-      Number(button.dataset.chip);
-
+    selectedChip = Number(button.dataset.chip);
     updateBetDisplay();
   });
-
 });
 
 
@@ -1466,73 +1451,37 @@ document.querySelectorAll(".chip-btn")
    BET PLACEMENT
 ========================================================= */
 
-document.querySelectorAll(".bet-slot")
-.forEach(slot => {
-
+document.querySelectorAll(".bet-slot").forEach(slot => {
   slot.addEventListener("click", () => {
-
     if (spinning) return;
+    const type = slot.dataset.bet;
+    const currentBet = bets[type];
 
-    const type =
-      slot.dataset.bet;
-
-    const currentBet =
-      bets[type];
-
-    if (currentBet + selectedChip > 1000) {
-      return;
-    }
-
-    const currentTotal =
-      calculateTotalBet();
-
-    if (currentTotal + selectedChip > coins) {
-      return;
-    }
+    if (currentBet + selectedChip > 1000) return;
+    if (calculateTotalBet() + selectedChip > coins) return;
 
     bets[type] += selectedChip;
-
-    const sound =
-      document.getElementById("chipSound");
-
-    sound.currentTime = 0;
-    sound.play().catch(() => {});
-
+    playChipSound();
     updateBetDisplay();
   });
-
 });
 
 
 /* =========================================================
-   BACK BUTTON
+   BACK BUTTON & RESULT OVERLAY
 ========================================================= */
 
-document
-  .getElementById("backButton")
-  .addEventListener("click", () => {
+document.getElementById("backButton").addEventListener("click", () => {
+  window.location.href = "index.html";
+});
 
-    window.location.href = "index.html";
-
-  });
+document.getElementById("closeResult").addEventListener("click", () => {
+  document.getElementById("winOverlay").classList.remove("show");
+});
 
 
 /* =========================================================
-   CLOSE RESULT
-========================================================= */
-
-document
-  .getElementById("closeResult")
-  .addEventListener("click", () => {
-
-    document
-      .getElementById("winOverlay")
-      .classList.remove("show");
-
-  });
-
-/* =========================================================
-   SPIN LOGIC, PAYOUTS, AND SYNCING
+   SPIN LOGIC, NAIL-TICKING POINTER & CORRECT PAYOUTS
 ========================================================= */
 
 document.getElementById("spinButton").addEventListener("click", () => {
@@ -1541,36 +1490,50 @@ document.getElementById("spinButton").addEventListener("click", () => {
     const totalBet = calculateTotalBet();
     if (totalBet === 0 || totalBet > coins) return; 
 
-    // Lock UI during spin
+    initAudio();
     spinning = true;
     document.getElementById("spinButton").disabled = true;
 
-    // Deduct total bet amount from local state and IMMEDIATELY sync
     coins -= totalBet;
     saveUserData();
     updateBalanceDisplay();
 
-    // Sound effect
-    const spinSound = document.getElementById("spinSound");
-    spinSound.currentTime = 0;
-    spinSound.play().catch(() => {});
-
-    // Spin mathematics
-    const spinRevolutions = 5 + Math.floor(Math.random() * 4); // Random full spins
+    const spinRevolutions = 6 + Math.floor(Math.random() * 4);
     const randomIndex = Math.floor(Math.random() * wheelSections.length);
     const sectionAngle = 360 / wheelSections.length;
 
-    // Target rotation needed to land perfectly in the middle of the selected random section
+    // Precise math aligning target section slice perfectly with pointer at top (0 deg)
     const targetRotation = (spinRevolutions * 360) + (360 - (randomIndex * sectionAngle)) - (sectionAngle / 2);
-    
     wheelRotation += targetRotation;
     
     const wheel = document.getElementById("wheel");
-    // Ensure the 3D X-axis tilt from CSS remains intact while rotating along Z
     wheel.style.transform = `rotateX(7deg) rotateZ(${wheelRotation}deg)`;
 
-    // Wait for the CSS transition (5s as defined in .wheel-3d)
+    // Interactive pointer deflection & tick sync with wheel nails
+    const pointer = document.getElementById("wheelPointer");
+    let tickCount = 0;
+    const totalTicksExpected = (spinRevolutions * 360 + (360 - (randomIndex * sectionAngle))) / sectionAngle;
+    
+    let tickInterval = setInterval(() => {
+        if (!spinning) {
+            clearInterval(tickInterval);
+            return;
+        }
+        tickCount++;
+        playClickSound();
+        
+        // Alternate twitch left and right as it hits nail dividers
+        if (tickCount % 2 === 0) {
+            pointer.classList.add("tick-left");
+            setTimeout(() => pointer.classList.remove("tick-left"), 35);
+        } else {
+            pointer.classList.add("tick-right");
+            setTimeout(() => pointer.classList.remove("tick-right"), 35);
+        }
+    }, 110);
+
     setTimeout(() => {
+        clearInterval(tickInterval);
         handleResult(wheelSections[randomIndex]);
     }, 5000);
 });
@@ -1580,7 +1543,6 @@ function handleResult(result) {
     document.getElementById("spinButton").disabled = false;
     document.getElementById("lastResult").textContent = result.toUpperCase();
 
-    // Check winnings & XP
     let winnings = 0;
     let xpGained = 0;
 
@@ -1589,30 +1551,23 @@ function handleResult(result) {
         xpGained = xpRewards[result] || 0;
     }
 
-    // Add up the results to our tracking variables
+    // Instantly add winnings to coin balance and XP
     coins += winnings;
     xp += xpGained;
 
-    // === SYNC NEW COINS & XP BALANCE BACK TO LOCALSTORAGE ===
     saveUserData();
     updateBalanceDisplay();
 
-    // Reset bets
     Object.keys(bets).forEach(k => bets[k] = 0);
     updateBetDisplay();
 
-    // Display Win UI if the user got anything
     if (winnings > 0) {
         document.getElementById("winResult").textContent = result.toUpperCase();
         document.getElementById("winCoins").textContent = `+${winnings.toLocaleString()}`;
         document.getElementById("winXP").textContent = `+${xpGained.toLocaleString()} XP`;
-        
         document.getElementById("winTitle").textContent = result === "Jackpot" ? "JACKPOT!" : "WINNER!";
         
-        const winAudio = result === "Jackpot" ? document.getElementById("jackpotSound") : document.getElementById("winSound");
-        winAudio.currentTime = 0;
-        winAudio.play().catch(() => {});
-
+        playWinSound(result === "Jackpot");
         document.getElementById("winOverlay").classList.add("show");
     }
 }
@@ -1623,12 +1578,12 @@ function handleResult(result) {
 ========================================================= */
 
 createMarqueeLights();
+createWheelNails();
 createWheelLabels();
 updateBalanceDisplay();
 updateBetDisplay();
 
 </script>
-
 
 </body>
 </html>
