@@ -150,9 +150,8 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0px 0;
+  padding: 10px 0;
   perspective: 1100px;
-  /* Negative transform removed entirely, centered dynamically via flex space-evenly */
 }
 
 .wheel-stage {
@@ -233,8 +232,10 @@ body {
 
 .wheel-3d {
   position: absolute;
-  width: 95%;
-  height: 95%;
+  width: 94%;
+  height: 94%;
+  inset: 0;
+  margin: auto;
   border-radius: 50%;
   transform-style: preserve-3d;
   transform: rotateX(7deg);
@@ -289,13 +290,13 @@ body {
   top: 0;
   width: 28px;
   margin-left: -14px;
-  margin-top: -106px;
+  margin-top: -100px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   line-height: 0.85;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 1000;
   text-align: center;
   transform-origin: 50% 50%;
@@ -303,11 +304,11 @@ body {
 
 .wheel-label-wrapper.red .wheel-stacked-text { color: #ff4b45; text-shadow: 0 1px 2px #000; }
 .wheel-label-wrapper.blue .wheel-stacked-text { color: #55a0ff; text-shadow: 0 1px 2px #000; }
-.wheel-label-wrapper.star .wheel-stacked-text { color: #ffe15a; font-size: 13px; text-shadow: 0 1px 2px #000; }
-.wheel-label-wrapper.diamond .wheel-stacked-text { color: #4ff1e8; font-size: 13px; text-shadow: 0 1px 2px #000; }
-.wheel-label-wrapper.x .wheel-stacked-text { color: #c66cff; font-size: 12px; text-shadow: 0 1px 2px #000; }
-.wheel-label-wrapper.o .wheel-stacked-text { color: #ff62b4; font-size: 12px; text-shadow: 0 1px 2px #000; }
-.wheel-label-wrapper.jackpot .wheel-stacked-text { color: #ffffff; font-size: 8px; text-shadow: 0 1px 2px #000; }
+.wheel-label-wrapper.star .wheel-stacked-text { color: #ffe15a; font-size: 12px; text-shadow: 0 1px 2px #000; }
+.wheel-label-wrapper.diamond .wheel-stacked-text { color: #4ff1e8; font-size: 12px; text-shadow: 0 1px 2px #000; }
+.wheel-label-wrapper.x .wheel-stacked-text { color: #c66cff; font-size: 11px; text-shadow: 0 1px 2px #000; }
+.wheel-label-wrapper.o .wheel-stacked-text { color: #ff62b4; font-size: 11px; text-shadow: 0 1px 2px #000; }
+.wheel-label-wrapper.jackpot .wheel-stacked-text { color: #ffffff; font-size: 7.5px; text-shadow: 0 1px 2px #000; }
 
 .wheel-dividers {
   position: absolute;
@@ -352,17 +353,18 @@ body {
 
 .wheel-nail {
   position: absolute;
-  width: 6px;
-  height: 6px;
-  margin: -3px;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #fff 0%, #f4d078 45%, #593e0b 100%);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.85);
+  border: 1px solid rgba(0,0,0,0.3);
 }
 
 .wheel-hub {
   position: absolute;
-  top: 50%;
+  top: calc(50% - 0.2cm);
   left: 50%;
   transform: translate(-50%, -50%) translateZ(40px);
   z-index: 55;
@@ -389,17 +391,17 @@ body {
 
 .wheel-pointer {
   position: absolute;
-  top: -14px;
+  top: -24px;
   left: 50%;
   z-index: 60;
   width: 0;
   height: 0;
   transform: translateX(-50%) rotate(0deg);
   transform-origin: 50% 0px;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 15px solid #f4d078;
-  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.85));
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 36px solid #f4d078;
+  filter: drop-shadow(0 3px 5px rgba(0,0,0,0.85));
   transition: transform 0.04s ease-out;
 }
 
@@ -554,20 +556,21 @@ body {
 .chip-btn {
   aspect-ratio: 1;
   border-radius: 50%;
-  border: 2px solid transparent;
-  background: transparent;
-  padding: 0;
+  border: 2px solid #8b8b8b;
+  background:
+    radial-gradient(
+      circle at 34% 28%,
+      #f6f6f6,
+      #bcbcbc 35%,
+      #595959 75%,
+      #202020 100%
+    );
+  color: #171717;
+  font-weight: 1000;
+  font-size: 10px;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,0.65);
   transition: 0.15s ease;
-  overflow: hidden;
-}
-
-.chip-btn img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
 }
 
 .chip-btn.active {
@@ -774,9 +777,9 @@ body {
             <div class="bet-payout">1 : 10</div>
             <div class="bet-chip" id="chip-O">0</div>
           </div>
-          <div class="bet-slot red" data-bet="Red" data-payout="1">
+          <div class="bet-slot red" data-bet="Red" data-payout="2">
             <div class="bet-name">RED</div>
-            <div class="bet-payout">1 : 1</div>
+            <div class="bet-payout">1 : 2</div>
             <div class="bet-chip" id="chip-Red">0</div>
           </div>
           <div class="bet-slot star" data-bet="Star" data-payout="5">
@@ -784,9 +787,9 @@ body {
             <div class="bet-payout">1 : 5</div>
             <div class="bet-chip" id="chip-Star">0</div>
           </div>
-          <div class="bet-slot blue" data-bet="Blue" data-payout="1">
+          <div class="bet-slot blue" data-bet="Blue" data-payout="2">
             <div class="bet-name">BLUE</div>
-            <div class="bet-payout">1 : 1</div>
+            <div class="bet-payout">1 : 2</div>
             <div class="bet-chip" id="chip-Blue">0</div>
           </div>
           <div class="bet-slot diamond" data-bet="Diamond" data-payout="7">
@@ -806,12 +809,12 @@ body {
     <section class="chip-section">
       <div class="section-title">SELECT CHIP</div>
       <div class="chip-selector">
-        <button class="chip-btn active" data-chip="5"><img src="image/5.png" alt="5"></button>
-        <button class="chip-btn" data-chip="10"><img src="image/10.png" alt="10"></button>
-        <button class="chip-btn" data-chip="50"><img src="image/50.png" alt="50"></button>
-        <button class="chip-btn" data-chip="100"><img src="image/100.png" alt="100"></button>
-        <button class="chip-btn" data-chip="500"><img src="image/500.png" alt="500"></button>
-        <button class="chip-btn" data-chip="1000"><img src="image/1000.png" alt="1000"></button>
+        <button class="chip-btn active" data-chip="5">5</button>
+        <button class="chip-btn" data-chip="10">10</button>
+        <button class="chip-btn" data-chip="50">50</button>
+        <button class="chip-btn" data-chip="100">100</button>
+        <button class="chip-btn" data-chip="500">500</button>
+        <button class="chip-btn" data-chip="1000">1K</button>
       </div>
     </section>
 
@@ -933,7 +936,7 @@ const optionColors = {
 };
 
 const payouts = {
-  X: 10, O: 10, Red: 1, Blue: 1, Star: 5, Diamond: 7, Jackpot: 35
+  X: 10, O: 10, Red: 2, Blue: 2, Star: 5, Diamond: 7, Jackpot: 35
 };
 
 const xpRewards = {
@@ -1209,7 +1212,8 @@ function handleResult(result) {
     let xpGained = 0;
 
     if (bets[result] > 0) {
-        winnings = bets[result] + (bets[result] + payouts[result]);
+        // Correct payout calculation: original bet + (bet * multiplier)
+        winnings = bets[result] + (bets[result] * payouts[result]);
         xpGained = xpRewards[result] || 0;
     }
 
