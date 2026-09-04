@@ -44,8 +44,8 @@ body {
 
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Distributes vertical space perfectly */
-
+  justify-content: flex-start;
+  gap: 12px;
   padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
 
   background: rgba(22, 10, 38, .95);
