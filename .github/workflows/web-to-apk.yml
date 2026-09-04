@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -26,38 +27,33 @@ jobs:
 
           cordova platform add android
 
-          # Copy the actual PixVinz website into the APK
-          rm -rf www/*
-          cp -r ../* www/
+          # Load PixVinz directly from GitHub Pages
+          sed -i 's|<content src="index.html" />|<content src="https://vinpixgame.github.io/PixVinz/" />|g' config.xml
 
-          # Remove repository-only files from the Cordova web folder
-          rm -rf www/.git
-          rm -rf www/.github
-          rm -rf www/myApp
-
-          # Set the visible display name
+          # App name
           sed -i 's|<name>PixVinzApp</name>|<name>PixVinz</name>|g' config.xml
 
-          # Keep network access available for Firebase, Firestore and other services
-          sed -i '/<widget /a \    <access origin="*" />' config.xml
+          # Allow PixVinz and Firebase to load inside the app
           sed -i '/<widget /a \    <allow-navigation href="*" />' config.xml
+          sed -i '/<widget /a \    <access origin="*" />' config.xml
+
+          # Remove Cordova splash screen / delay
+          sed -i '/<widget /a \    <preference name="SplashScreenDelay" value="0" />' config.xml
+          sed -i '/<widget /a \    <preference name="AutoHideSplashScreen" value="true" />' config.xml
+          sed -i '/<widget /a \    <preference name="FadeSplashScreen" value="false" />' config.xml
+          sed -i '/<widget /a \    <preference name="ShowSplashScreenSpinner" value="false" />' config.xml
 
           # Native background
           sed -i '/<widget /a \    <preference name="BackgroundColor" value="0xFF1A0B2E" />' config.xml
 
-          # Remove artificial splash delay
-          sed -i '/<widget /a \    <preference name="SplashScreenDelay" value="0" />' config.xml
-          sed -i '/<widget /a \    <preference name="FadeSplashScreen" value="false" />' config.xml
-          sed -i '/<widget /a \    <preference name="ShowSplashScreenSpinner" value="false" />' config.xml
-          sed -i '/<widget /a \    <preference name="AutoHideSplashScreen" value="true" />' config.xml
-
-          # Use PixVinz logo as the app icon
+          # App icon
           if [ -f ../image/pixvinz.png ]; then
             mkdir -p res/icon/android
             cp ../image/pixvinz.png res/icon/android/icon.png
             sed -i '/<widget /a \    <icon src="res/icon/android/icon.png" />' config.xml
           fi
 
+          # Build APK
           cordova build android --debug
 
       - name: Rename and Prepare APK
