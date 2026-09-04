@@ -21,21 +21,26 @@ jobs:
       - name: Install Cordova
         run: |
           npm install -g cordova
+          cordova --version
+          node --version
+          npm --version
 
-      - name: Create PixVinz APK
+      - name: Create PixVinz Cordova App
         run: |
           cordova create myApp com.pixvinz.app PixVinz
-          cd myApp
 
+      - name: Configure PixVinz
+        working-directory: myApp
+        run: |
           cordova platform add android
 
           # Load the live PixVinz website
-          sed -i 's|<content src="index.html" />|<content src="https://vinpixgame.github.io/PixVinz/" />|g' config.xml
+          sed -i 's|<content src="index.html" />|<content src="https://vinpixgame.github.io/PixVinz/" />|' config.xml
 
           # App name
-          sed -i 's|<name>PixVinzApp</name>|<name>PixVinz</name>|g' config.xml
+          sed -i 's|<name>PixVinzApp</name>|<name>PixVinz</name>|' config.xml
 
-          # Allow PixVinz and Firebase to load
+          # Allow the PixVinz website and Firebase services
           sed -i '/<widget /a \    <allow-navigation href="*" />' config.xml
           sed -i '/<widget /a \    <access origin="*" />' config.xml
 
@@ -44,23 +49,38 @@ jobs:
           sed -i '/<widget /a \    <preference name="AutoHideSplashScreen" value="true" />' config.xml
           sed -i '/<widget /a \    <preference name="FadeSplashScreen" value="false" />' config.xml
 
-          # Native background while PixVinz starts
+          # Background shown only while the WebView starts
           sed -i '/<widget /a \    <preference name="BackgroundColor" value="0xFF1A0B2E" />' config.xml
 
-          # PixVinz app icon
+          # PixVinz icon
           if [ -f ../image/pixvinz.png ]; then
             mkdir -p res/icon/android
             cp ../image/pixvinz.png res/icon/android/icon.png
             sed -i '/<widget /a \    <icon src="res/icon/android/icon.png" />' config.xml
           fi
 
-          # Build APK
-          cordova build android --debug
+          echo "===== CONFIG.XML ====="
+          cat config.xml
+          echo "======================"
 
-      - name: Rename APK
+      - name: Build PixVinz APK
+        working-directory: myApp
+        run: |
+          cordova build android --debug --verbose
+
+      - name: Prepare APK
         run: |
           mkdir -p final-apk
+
+          if [ ! -f myApp/platforms/android/app/build/outputs/apk/debug/app-debug.apk ]; then
+            echo "APK was not created."
+            find myApp/platforms/android -type f -name "*.apk" -print
+            exit 1
+          fi
+
           cp myApp/platforms/android/app/build/outputs/apk/debug/app-debug.apk final-apk/PixVinz.apk
+
+          ls -lh final-apk/PixVinz.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
