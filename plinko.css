@@ -121,9 +121,10 @@ body {
   gap: 10px;
 }
 .plinko-arena {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   width: 100%;
-  min-height: 360px;
+  aspect-ratio: 1 / 1;
+  min-height: 0;
   position: relative;
   background: rgba(10, 5, 22, 0.95);
   border-radius: 16px;
