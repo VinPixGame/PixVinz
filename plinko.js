@@ -412,7 +412,7 @@ for (let i = 0; i < multipliers.length; i++) {
             ball.y += ny * overlap;
 
             const dot = ball.vx * nx + ball.vy * ny;
-            ball.vx = (ball.vx - 2 * dot * nx) * 0.6 + (Math.random() - 0.5) * 0.8;
+            ball.vx = (ball.vx - 2 * dot * nx) * 0.45 + (Math.random() - 0.5) * 0.45;
             ball.vy = (ball.vy - 2 * dot * ny) * 0.6;
           }
         }
