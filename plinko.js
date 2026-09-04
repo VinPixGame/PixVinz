@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return audioCtx;
   }
 
-  function playSound(type) {
+  function playSound(type, index = 0) {
     try {
       const ctx = getAudioContext();
       if (!ctx) return;
@@ -162,13 +162,30 @@ document.addEventListener('DOMContentLoaded', () => {
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
         osc.start(now);
         osc.stop(now + 0.22);
-      } else if (type === 'error') {
+
+
+        
+            } else if (type === 'error') {
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(140, now);
         gain.gain.setValueAtTime(0.1, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
         osc.start(now);
         osc.stop(now + 0.08);
+      } else if (type === 'jar') {
+        const pianoNotes = [
+          261.63, 293.66, 329.63, 349.23, 392.00,
+          440.00, 493.88, 523.25, 587.33, 659.25,
+          698.46, 783.99, 880.00
+        ];
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(pianoNotes[index] || 523.25, now);
+        gain.gain.setValueAtTime(0.14, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        osc.start(now);
+        osc.stop(now + 0.45);
+      
       }
     } catch(e) {}
   }
@@ -451,7 +468,7 @@ for (let i = 0; i < multipliers.length; i++) {
 
         coinCount += currentBet * mult;
         updateDisplay();
-        playSound('win');
+        playSound('jar', clampedIndex);
 
         activeBalls.splice(i, 1);
         continue;
