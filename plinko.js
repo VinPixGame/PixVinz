@@ -312,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ball.y += ny * overlap;
 
             const dot = ball.vx * nx + ball.vy * ny;
-            ball.vx = (ball.vx - 2 * dot * nx) * 0.6 + (Math.random() - 0.5) * 1.5;
+            ball.vx = (ball.vx - 2 * dot * nx) * 0.6 + (Math.random() - 0.5) * 0.8;
             ball.vy = (ball.vy - 2 * dot * ny) * 0.6;
           }
         }
