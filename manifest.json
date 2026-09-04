@@ -3,8 +3,8 @@
   "short_name": "PixVinz",
   "start_url": "/PixVinz/",
   "display": "standalone",
-  "background_color": "#121212",
-  "theme_color": "#121212",
+  "background_color": "#130826",
+  "theme_color": "#130826",
   "icons": [
     {
       "src": "/PixVinz/image/vinz192.png",
