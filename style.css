@@ -33,17 +33,19 @@ body {
   overflow-y: auto;
 }
 
+
+
 /* ==========================================
-   SHARED TOP BAR / HEADER
-   ========================================== */
+   SHARED TOP BAR / HEADER
+   ========================================== */
 
 .top-bar {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center; /* Aligns all children along the same horizontal centerline */
-  width: 100%;
-  margin-bottom: 0.6cm; /* Set to 0.6cm as requested */
-  padding-top: 8px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 10px;
+  padding-top: 8px;
 }
 
 .top-bar > *:nth-child(1) { justify-self: start; }
@@ -51,49 +53,51 @@ body {
 .top-bar > *:nth-child(3) { justify-self: end; }
 
 .logo-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px; /* Constrains header height properly */
 }
-
 /* Base image styling & sizing */
 .logo-container img,
 #logoImage {
-  max-height: 90px; /* Increased logo size */
-  width: auto;
-  object-fit: contain;
-  background: transparent;
-  filter: none; /* Removed drop shadows */
-  transition: transform 0.2s ease;
+  max-height: 100px; /* Increased logo size */
+  width: auto;
+  object-fit: contain;
+  background: transparent;
+  filter: none; /* Removed drop shadows */
+  transition: transform 0.2s ease;
 }
 
 .logo-container img:hover,
 #logoImage:hover {
-  transform: scale(1.05);
-  filter: none; /* Removed drop shadows on hover */
+  transform: scale(1.05);
+  filter: none; /* Removed drop shadows on hover */
 }
 
 .icon-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  font-size: 20px;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: translateY(-12px);
 }
 
 .coin-badge {
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid #ffd700;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-weight: bold;
-  color: #ffd700;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid #ffd700;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: bold;
+  color: #ffd700;
+  transform: translateY(-12px);
 }
 
 
