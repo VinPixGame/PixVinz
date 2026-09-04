@@ -255,24 +255,124 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Draw Slots
-    const slotWidth = w / multipliers.length;
-    const slotY = h - 35;
-    for (let i = 0; i < multipliers.length; i++) {
-      ctx.fillStyle = slotColors[i];
-      ctx.fillRect(i * slotWidth + 1, slotY, slotWidth - 2, 30);
-      
-      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-      ctx.strokeRect(i * slotWidth + 1, slotY, slotWidth - 2, 30);
+    // Draw Glass Jar Slots
+const slotWidth = w / multipliers.length;
+const slotY = h - 35;
+const jarTop = h - 78;
+const jarBottom = h - 5;
 
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 10px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.shadowColor = '#000';
-      ctx.shadowBlur = 4;
-      ctx.fillText(`${multipliers[i]}x`, i * slotWidth + slotWidth / 2, slotY + 19);
-      ctx.shadowBlur = 0;
-    }
+for (let i = 0; i < multipliers.length; i++) {
+  const x = i * slotWidth;
+  const centerX = x + slotWidth / 2;
+  const jarWidth = Math.min(slotWidth - 8, 48);
+  const left = centerX - jarWidth / 2;
+
+  // Jar glass
+  const glassGradient = ctx.createLinearGradient(left, jarTop, left + jarWidth, jarTop);
+  glassGradient.addColorStop(0, 'rgba(255,255,255,0.28)');
+  glassGradient.addColorStop(0.18, 'rgba(255,255,255,0.08)');
+  glassGradient.addColorStop(0.5, 'rgba(255,255,255,0.03)');
+  glassGradient.addColorStop(0.82, 'rgba(255,255,255,0.10)');
+  glassGradient.addColorStop(1, 'rgba(255,255,255,0.25)');
+
+  ctx.save();
+
+  // Jar glow
+  ctx.shadowColor = slotColors[i];
+  ctx.shadowBlur = 10;
+
+  ctx.fillStyle = glassGradient;
+  ctx.strokeStyle = slotColors[i];
+  ctx.lineWidth = 2;
+
+  // Rounded jar body
+  ctx.beginPath();
+  ctx.roundRect(
+    left,
+    jarTop + 10,
+    jarWidth,
+    jarBottom - jarTop - 10,
+    8
+  );
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.shadowBlur = 0;
+
+  // Coins inside jar
+  const coinColor = slotColors[i];
+
+  for (let c = 0; c < 5; c++) {
+    const coinX = left + 8 + (c % 3) * 10;
+    const coinY = jarBottom - 9 - Math.floor(c / 3) * 7;
+
+    ctx.fillStyle = coinColor;
+    ctx.beginPath();
+    ctx.arc(coinX, coinY, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // Jar neck
+  ctx.fillStyle = 'rgba(255,255,255,0.10)';
+  ctx.fillRect(centerX - 10, jarTop + 2, 20, 12);
+
+  ctx.strokeStyle = slotColors[i];
+  ctx.strokeRect(centerX - 10, jarTop + 2, 20, 12);
+
+  // Wooden lid
+  ctx.fillStyle = '#5a351d';
+  ctx.strokeStyle = '#d49a45';
+  ctx.lineWidth = 2;
+
+  ctx.beginPath();
+  ctx.roundRect(centerX - 12, jarTop - 2, 24, 8, 3);
+  ctx.fill();
+  ctx.stroke();
+
+  // Rope around jar neck
+  ctx.strokeStyle = '#d99b45';
+  ctx.lineWidth = 2;
+
+  ctx.beginPath();
+  ctx.moveTo(centerX - 11, jarTop + 10);
+  ctx.lineTo(centerX + 11, jarTop + 10);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(centerX - 9, jarTop + 13);
+  ctx.lineTo(centerX + 9, jarTop + 13);
+  ctx.stroke();
+
+  // Glass highlight
+  ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+  ctx.lineWidth = 2;
+
+  ctx.beginPath();
+  ctx.moveTo(left + 7, jarTop + 20);
+  ctx.lineTo(left + 7, jarBottom - 15);
+  ctx.stroke();
+
+  // Multiplier
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 10px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = '#000';
+  ctx.shadowBlur = 5;
+
+  ctx.fillText(
+    `${multipliers[i]}x`,
+    centerX,
+    jarTop + 39
+  );
+
+  ctx.shadowBlur = 0;
+  ctx.restore();
+}
 
     // Update Balls
     for (let i = activeBalls.length - 1; i >= 0; i--) {
