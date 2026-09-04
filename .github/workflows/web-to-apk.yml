@@ -16,37 +16,38 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
-      - name: Install Cordova and Build Android APK
+      - name: Install Cordova
         run: |
           npm install -g cordova
 
+      - name: Create PixVinz APK
+        run: |
           cordova create myApp com.pixvinz.app PixVinz
           cd myApp
 
           cordova platform add android
 
-          # Load PixVinz directly from GitHub Pages
+          # Load the live PixVinz website
           sed -i 's|<content src="index.html" />|<content src="https://vinpixgame.github.io/PixVinz/" />|g' config.xml
 
           # App name
           sed -i 's|<name>PixVinzApp</name>|<name>PixVinz</name>|g' config.xml
 
-          # Allow PixVinz and Firebase to load inside the app
+          # Allow PixVinz and Firebase to load
           sed -i '/<widget /a \    <allow-navigation href="*" />' config.xml
           sed -i '/<widget /a \    <access origin="*" />' config.xml
 
-          # Remove Cordova splash screen / delay
+          # Remove Cordova splash delay
           sed -i '/<widget /a \    <preference name="SplashScreenDelay" value="0" />' config.xml
           sed -i '/<widget /a \    <preference name="AutoHideSplashScreen" value="true" />' config.xml
           sed -i '/<widget /a \    <preference name="FadeSplashScreen" value="false" />' config.xml
-          sed -i '/<widget /a \    <preference name="ShowSplashScreenSpinner" value="false" />' config.xml
 
-          # Native background
+          # Native background while PixVinz starts
           sed -i '/<widget /a \    <preference name="BackgroundColor" value="0xFF1A0B2E" />' config.xml
 
-          # App icon
+          # PixVinz app icon
           if [ -f ../image/pixvinz.png ]; then
             mkdir -p res/icon/android
             cp ../image/pixvinz.png res/icon/android/icon.png
@@ -56,12 +57,12 @@ jobs:
           # Build APK
           cordova build android --debug
 
-      - name: Rename and Prepare APK
+      - name: Rename APK
         run: |
           mkdir -p final-apk
           cp myApp/platforms/android/app/build/outputs/apk/debug/app-debug.apk final-apk/PixVinz.apk
 
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: PixVinz
