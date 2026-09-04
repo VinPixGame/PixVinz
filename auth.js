@@ -774,56 +774,66 @@ if (regPassConfirm) {
 });
 
 
-let deferredPrompt = null;
+let deferredInstallPrompt = null;
 
-const installButtons = document.querySelectorAll("#install-app-btn");
-
+// Listen for the browser's install prompt
 window.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
-    deferredPrompt = event;
+    deferredInstallPrompt = event;
 
-    installButtons.forEach(button => {
-        button.style.display = "block";
-    });
+    showInstallButtons();
 });
 
-installButtons.forEach(button => {
-    button.addEventListener("click", async () => {
+// Show both Download App buttons
+function showInstallButtons() {
+    const buttons = [
+        document.getElementById("install-app-btn-login"),
+        document.getElementById("install-app-btn-register")
+    ];
 
-        if (!deferredPrompt) {
-            console.log("Install prompt unavailable.");
-            return;
+    buttons.forEach((button) => {
+        if (button) {
+            button.style.display = "block";
         }
-
-        deferredPrompt.prompt();
-
-        const { outcome } = await deferredPrompt.userChoice;
-
-        console.log("Install:", outcome);
-
-        deferredPrompt = null;
-    });
-});
-
-window.addEventListener("appinstalled", () => {
-    deferredPrompt = null;
-
-    installButtons.forEach(button => {
-        button.textContent = "✅ APP INSTALLED";
-        button.disabled = true;
-    });
-});
-
-if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/PixVinz/sw.js", {
-            scope: "/PixVinz/"
-        })
-        .then(registration => {
-            console.log("PixVinz SW registered:", registration.scope);
-        })
-        .catch(error => {
-            console.error("SW registration failed:", error);
-        });
     });
 }
+
+// Install the app
+async function installPixVinz() {
+    if (!deferredInstallPrompt) {
+        alert(
+            "PixVinz cannot be installed right now. " +
+            "Please open this website in a supported browser such as Chrome."
+        );
+        return;
+    }
+
+    deferredInstallPrompt.prompt();
+
+    const { outcome } = await deferredInstallPrompt.userChoice;
+
+    console.log("Install result:", outcome);
+
+    deferredInstallPrompt = null;
+}
+
+// Connect both buttons
+document.addEventListener("DOMContentLoaded", () => {
+    const loginButton = document.getElementById("install-app-btn-login");
+    const registerButton = document.getElementById("install-app-btn-register");
+
+    if (loginButton) {
+        loginButton.addEventListener("click", installPixVinz);
+    }
+
+    if (registerButton) {
+        registerButton.addEventListener("click", installPixVinz);
+    }
+});
+
+// App successfully installed
+window.addEventListener("appinstalled", () => {
+    console.log("PixVinz was installed successfully!");
+
+    deferredInstallPrompt = null;
+});
