@@ -245,7 +245,7 @@ body {
 .welcome-card {
   text-align: center;
   padding: 12px 16px;
-  margin-top: 4px;
+  margin-top: 10px;
   margin-bottom: 0px;
   border: 2px solid transparent !important;
   border-image-slice: 1 !important;
