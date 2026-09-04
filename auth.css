@@ -251,7 +251,7 @@ body {
     z-index: 1;
 }
 
-.auth-logo video {
+.auth-logo {
     display: block;
 
     width: clamp(110px, 22vw, 135px);
