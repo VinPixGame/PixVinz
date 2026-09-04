@@ -11,8 +11,7 @@
 html,
 body {
   width: 100vw;
-  height: 100vh;
-  height: 100dvh;
+  height: 100svh;
   overflow: hidden;
   position: fixed;
   top: 0;
@@ -112,8 +111,7 @@ body {
 .arcade-cabinet {
   width: 100%;
   max-width: 480px;
-  height: 100vh;
-  top: 20px;
+  height: 100svh;
   display: flex;
   flex-direction: column;
   background: linear-gradient(180deg, rgba(20, 10, 35, 0.6) 0%, rgba(8, 4, 18, 0.95) 100%);
