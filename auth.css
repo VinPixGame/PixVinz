@@ -232,7 +232,7 @@ body {
 
 
 /* =========================================
-   LOGO (IMAGE ONLY)
+   LOGO (CLEAN TRANSPARENT & LARGER)
    ========================================= */
 
 .auth-logo,
@@ -249,20 +249,20 @@ body {
 .logo-container img,
 #logoImage {
     width: auto;
-    max-width: clamp(110px, 22vw, 135px);
+    max-width: clamp(140px, 30vw, 180px);
     height: auto;
-    max-height: 60px;
+    max-height: 90px;
     object-fit: contain;
     background: transparent;
-    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.35)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
-    transition: transform 0.2s ease, filter 0.2s ease;
+    filter: none;
+    transition: transform 0.2s ease;
 }
 
 .auth-logo img:hover,
 .logo-container img:hover,
 #logoImage:hover {
-    transform: scale(1.05);
-    filter: drop-shadow(0 0 14px rgba(255, 215, 0, 0.65));
+    transform: scale(1.04);
+    filter: none;
 }
 
 
@@ -729,8 +729,8 @@ body {
     .auth-logo img,
     .logo-container img,
     #logoImage {
-        max-width: 120px;
-        max-height: 48px;
+        max-width: 150px;
+        max-height: 70px;
         margin-bottom: 14px;
     }
 
@@ -819,8 +819,8 @@ body {
     .auth-logo img,
     .logo-container img,
     #logoImage {
-        max-width: 108px;
-        max-height: 42px;
+        max-width: 130px;
+        max-height: 60px;
         margin-bottom: 12px;
     }
 
@@ -900,8 +900,8 @@ body {
     .auth-logo img,
     .logo-container img,
     #logoImage {
-        max-width: 95px;
-        max-height: 38px;
+        max-width: 120px;
+        max-height: 50px;
         margin-bottom: 9px;
     }
 
