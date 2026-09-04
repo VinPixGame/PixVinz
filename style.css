@@ -54,11 +54,25 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 160px;
-  height: auto;
-  object-fit: contain;
+  height: 50px; /* Constrains header height properly */
 }
 
+/* Base image styling & sizing */
+.logo-container img,
+#logoImage {
+  max-height: 48px; /* Ideal height for header alignment */
+  width: auto;
+  object-fit: contain;
+  background: transparent;
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.35)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.logo-container img:hover,
+#logoImage:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 0 14px rgba(255, 215, 0, 0.6));
+}
 
 .icon-btn {
   background: rgba(255, 255, 255, 0.1);
@@ -1636,9 +1650,10 @@ video {
     height: 150px;
   }
 
+  .game-container .logo-container img,
   .game-container .logo-container,
-  .game-container .logo-container video,
-  .game-container #logoVideo {
+   #logoImg,
+  .game-container {
     width: 145px;
     height: 140px;
     max-width: 145px;
