@@ -78,10 +78,10 @@ body {
   width: 100%;
 }
 
-.logo-container video,
-#logoVideo {
-  width: 160px; /* Exact original uniform logo video fit width */
-  height: auto;
+.logo-container img,
+#logoImg {
+  width: auto; /* Exact original uniform logo video fit width */
+  height: 100px;
   object-fit: contain;
 }
 
