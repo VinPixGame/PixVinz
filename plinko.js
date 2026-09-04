@@ -377,7 +377,7 @@ for (let i = 0; i < multipliers.length; i++) {
     // Update Balls
     for (let i = activeBalls.length - 1; i >= 0; i--) {
       let ball = activeBalls[i];
-      ball.vy += 0.35;
+      ball.vy += currentDifficulty === 'hard' ? 0.45 : 0.35;
       ball.x += ball.vx;
       ball.y += ball.vy;
 
