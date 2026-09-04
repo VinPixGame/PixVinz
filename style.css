@@ -54,14 +54,11 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.logo-container,
-{
   width: 160px;
   height: auto;
   object-fit: contain;
 }
+
 
 .icon-btn {
   background: rgba(255, 255, 255, 0.1);
