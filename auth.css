@@ -191,22 +191,14 @@ body {
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
 
-    /*
-       GOLD MAIN GLOW
-    */
+    /* GOLD MAIN GLOW */
     box-shadow:
         0 0 6px rgba(255, 215, 0, 0.85),
         0 0 18px rgba(255, 215, 0, 0.45),
         0 0 38px rgba(255, 193, 7, 0.24),
-
-        /*
-           PURPLE AMBIENT GLOW
-        */
+        /* PURPLE AMBIENT GLOW */
         0 0 65px rgba(123, 44, 191, 0.30),
-
-        /*
-           INNER DEPTH
-        */
+        /* INNER DEPTH */
         inset 0 0 25px rgba(123, 44, 191, 0.10);
 
     margin: 0;
@@ -217,10 +209,7 @@ body {
 }
 
 
-/*
-   Subtle premium highlight inside the card
-*/
-
+/* Subtle premium highlight inside the card */
 .auth-card::before {
     content: "";
 
@@ -243,16 +232,37 @@ body {
 
 
 /* =========================================
-   LOGO
+   LOGO (IMAGE ONLY)
    ========================================= */
 
-.auth-logo {
+.auth-logo,
+.logo-container {
     position: relative;
     z-index: 1;
-    display: block;
-    width: clamp(110px, 22vw, 135px);
-    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin: 0 auto 16px;
+}
+
+.auth-logo img,
+.logo-container img,
+#logoImage {
+    width: auto;
+    max-width: clamp(110px, 22vw, 135px);
+    height: auto;
+    max-height: 60px;
+    object-fit: contain;
+    background: transparent;
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.35)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.auth-logo img:hover,
+.logo-container img:hover,
+#logoImage:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 14px rgba(255, 215, 0, 0.65));
 }
 
 
@@ -457,7 +467,6 @@ body {
 
 /* =========================================
    AVAILABLE / TAKEN
-   KEEPING YOUR CURRENT POSITION
    ========================================= */
 
 #regUserIndicator {
@@ -685,10 +694,6 @@ body {
             14px;
     }
 
-    /*
-       Larger mobile install button
-    */
-
     .glass-install-btn {
         width: 100%;
 
@@ -700,12 +705,6 @@ body {
 
         border-radius: 15px;
     }
-
-
-    /*
-       Main card stays substantial
-       instead of becoming tiny
-    */
 
     .auth-card {
         width: 100%;
@@ -727,13 +726,13 @@ body {
             inset 0 0 22px rgba(123, 44, 191, 0.09);
     }
 
-
-    .auth-logo video {
-        width: 120px;
-
+    .auth-logo img,
+    .logo-container img,
+    #logoImage {
+        max-width: 120px;
+        max-height: 48px;
         margin-bottom: 14px;
     }
-
 
     .auth-card h2 {
         font-size: 27px;
@@ -741,11 +740,9 @@ body {
         margin-bottom: 23px;
     }
 
-
     .input-group {
         margin-bottom: 14px;
     }
-
 
     .input-group input {
         min-height: 56px;
@@ -756,7 +753,6 @@ body {
         font-size: 15.5px;
     }
 
-
     .username-domain {
         min-height: 56px;
 
@@ -766,18 +762,11 @@ body {
         font-size: 0.80rem;
     }
 
-
-    /*
-       TAKEN / AVAILABLE remains
-       in the same position
-    */
-
     #regUserIndicator {
         right: 116px;
 
         font-size: 0.78rem;
     }
-
 
     .btn.btn-primary {
         min-height: 58px;
@@ -787,13 +776,11 @@ body {
         border-radius: 16px;
     }
 
-
     .auth-switch {
         font-size: 14px;
 
         margin-top: 18px;
     }
-
 
     .field-requirement,
     #regUserRequirement {
@@ -813,7 +800,6 @@ body {
             16px 11px;
     }
 
-
     .glass-install-btn {
         min-height: 55px;
 
@@ -823,7 +809,6 @@ body {
         font-size: 14px;
     }
 
-
     .auth-card {
         padding:
             29px 17px;
@@ -831,20 +816,19 @@ body {
         border-radius: 23px;
     }
 
-
-    .auth-logo video {
-        width: 108px;
-
+    .auth-logo img,
+    .logo-container img,
+    #logoImage {
+        max-width: 108px;
+        max-height: 42px;
         margin-bottom: 12px;
     }
-
 
     .auth-card h2 {
         font-size: 25px;
 
         margin-bottom: 21px;
     }
-
 
     .input-group input {
         min-height: 54px;
@@ -855,7 +839,6 @@ body {
         font-size: 15px;
     }
 
-
     .username-domain {
         min-height: 54px;
 
@@ -865,13 +848,11 @@ body {
         font-size: 0.76rem;
     }
 
-
     #regUserIndicator {
         right: 105px;
 
         font-size: 0.73rem;
     }
-
 
     .btn.btn-primary {
         min-height: 56px;
@@ -881,13 +862,11 @@ body {
         border-radius: 15px;
     }
 
-
     .auth-switch {
         font-size: 13px;
 
         margin-top: 17px;
     }
-
 
     .field-requirement,
     #regUserRequirement {
@@ -918,9 +897,11 @@ body {
         padding-bottom: 25px;
     }
 
-    .auth-logo video {
-        width: 95px;
-
+    .auth-logo img,
+    .logo-container img,
+    #logoImage {
+        max-width: 95px;
+        max-height: 38px;
         margin-bottom: 9px;
     }
 
