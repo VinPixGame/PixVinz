@@ -2,7 +2,7 @@ name: Build Web APK
 
 on:
   push:
-    branches: [ Sample  ]
+    branches: [ Sample ]
   workflow_dispatch:
 
 jobs:
@@ -20,43 +20,43 @@ jobs:
       - name: Install Cordova and Build Android APK
         run: |
           npm install -g cordova
+
           cordova create myApp com.pixvinz.app PixVinz
           cd myApp
+
           cordova platform add android
-          
-          # Point the app to your live GitHub Pages URL for automatic online updates
-          sed -i 's|<content src="index.html" />|<content src="https://vinpixgame.github.io/PixVinz/" />|g' config.xml
-          
-          # Set the visible display name of the app to PixVinz
+
+          # Copy the actual PixVinz website into the APK
+          rm -rf www/*
+          cp -r ../* www/
+
+          # Remove repository-only files from the Cordova web folder
+          rm -rf www/.git
+          rm -rf www/.github
+          rm -rf www/myApp
+
+          # Set the visible display name
           sed -i 's|<name>PixVinzApp</name>|<name>PixVinz</name>|g' config.xml
-          
-          # Force the app to stay inside the app container instead of opening an external browser
-          sed -i '/<widget /a \    <allow-navigation href="https://vinpixgame.github.io/*" />' config.xml
-          sed -i '/<widget /a \    <access origin="https://vinpixgame.github.io/*" />' config.xml
-          
-          # Match the native splash background with your dark theme color
+
+          # Keep network access available for Firebase, Firestore and other services
+          sed -i '/<widget /a \    <access origin="*" />' config.xml
+          sed -i '/<widget /a \    <allow-navigation href="*" />' config.xml
+
+          # Native background
           sed -i '/<widget /a \    <preference name="BackgroundColor" value="0xFF1A0B2E" />' config.xml
-          sed -i '/<widget /a \    <preference name="SplashScreenBackgroundColor" value="#1a0b2e" />' config.xml
-          
-          # Use your custom logo and ensure it scales correctly to match your web loading screen
-          if [ -f ../image/logo.png ]; then
-            mkdir -p res/screen/android
-            cp ../image/logo.png res/screen/android/splash.png
-            sed -i '/<widget /a \    <splash src="res/screen/android/splash.png" />' config.xml
-            sed -i '/<widget /a \    <preference name="SplashScreenDelay" value="3000" />' config.xml
-            sed -i '/<widget /a \    <preference name="FadeSplashScreen" value="true" />' config.xml
-            sed -i '/<widget /a \    <preference name="FadeSplashScreenDuration" value="500" />' config.xml
-            sed -i '/<widget /a \    <preference name="ShowSplashScreenSpinner" value="false" />' config.xml
-            sed -i '/<widget /a \    <preference name="SplashMaintainAspectRatio" value="true" />' config.xml
-          fi
-          
-          # Set up your custom app icon from the image folder
+
+          # Remove artificial splash delay
+          sed -i '/<widget /a \    <preference name="SplashScreenDelay" value="0" />' config.xml
+          sed -i '/<widget /a \    <preference name="FadeSplashScreen" value="false" />' config.xml
+          sed -i '/<widget /a \    <preference name="ShowSplashScreenSpinner" value="false" />' config.xml
+          sed -i '/<widget /a \    <preference name="AutoHideSplashScreen" value="true" />' config.xml
+
+          # Use PixVinz logo as the app icon
           if [ -f ../image/pixvinz.png ]; then
             mkdir -p res/icon/android
             cp ../image/pixvinz.png res/icon/android/icon.png
             sed -i '/<widget /a \    <icon src="res/icon/android/icon.png" />' config.xml
           fi
-
 
           cordova build android --debug
 
@@ -70,4 +70,3 @@ jobs:
         with:
           name: PixVinz
           path: final-apk/PixVinz.apk
-          
