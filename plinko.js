@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
    
     const startYGrid = 45;
-    const rowHeight = (h - 110) / rows;
+    const rowHeight = (h - 150) / rows;
     
     // Adjusted colSpacing to stretch pegs wide and align perfectly with slot count (rows + 1)
     const colSpacing = (w - 50) / (rows + 1);
