@@ -249,14 +249,9 @@ body {
 .auth-logo {
     position: relative;
     z-index: 1;
-}
-
-.auth-logo {
     display: block;
-
     width: clamp(110px, 22vw, 135px);
     height: auto;
-
     margin: 0 auto 16px;
 }
 
