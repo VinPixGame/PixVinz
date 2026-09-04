@@ -251,12 +251,23 @@ canvas {
   transition: all 0.2s ease;
 }
 
-.diff-btn.active {
+..diff-btn[data-diff="normal"].active {
   background: #ffd700;
   color: #130826;
   border-color: #ffd700;
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
+.diff-btn[data-diff="medium"].active {
+  background: #ff8c00;
+  color: #130826;
+  border-color: #ff8c00;
+  box-shadow: 0 0 10px rgba(255, 140, 0, 0.5);
+}
 
-
+.diff-btn[data-diff="hard"].active {
+  background: #ff1744;
+  color: #ffffff;
+  border-color: #ff1744;
+  box-shadow: 0 0 10px rgba(255, 23, 68, 0.5);
+}
