@@ -56,8 +56,8 @@ body {
   align-items: center;
 }
 
-.logo-container video,
-#logoVideo {
+.logo-container,
+{
   width: 160px;
   height: auto;
   object-fit: contain;
