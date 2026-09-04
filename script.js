@@ -53,10 +53,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 2. Play the logo video explicitly (Only runs for cold visits when NOT logged in)
-    const logoVideo = document.getElementById('loadingLogo');
-    if (logoVideo) {
-        logoVideo.play().catch(err => console.log("Video play prevented:", err));
+    // 2. Load the image logo (Only runs for cold visits when NOT logged in)
+    const logoImg = document.getElementById('loadingLogo');
+    if (logoImg) {
+        logoImg.src = 'image/vinz.png';
     }
 
     // 3. Grab elements for normal timer
@@ -1030,5 +1030,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
-
-
