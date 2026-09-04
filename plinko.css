@@ -40,9 +40,9 @@ body {
   padding: 10px 16px;
 }
 
-.top-bar > *:nth-child(1) { position: absolute; left: 8px; }
+.top-bar > *:nth-child(1) { position: absolute; left: 6px; }
 .top-bar > *:nth-child(2) { width: 100%; display: flex; justify-content: center; }
-.top-bar > *:nth-child(3) { position: absolute; right: 8px; }
+.top-bar > *:nth-child(3) { position: absolute; right: 6px; }
 
 .game-title-container {
   display: flex;
@@ -114,6 +114,7 @@ body {
   max-width: 480px;
   height: 100vh;
   height: 100%
+  top: 20px;
   display: flex;
   flex-direction: column;
   background: linear-gradient(180deg, rgba(20, 10, 35, 0.6) 0%, rgba(8, 4, 18, 0.95) 100%);
@@ -236,7 +237,7 @@ canvas {
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin: -4px 0 2px 0; /* Pulls the selector up slightly closer to the title */
+  margin: -4px 0 14px 0; /* Pulls the selector up slightly closer to the title */
   flex-shrink: 0;
 }
 
