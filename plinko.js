@@ -82,6 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const pegRadius = 4;
   const ballRadius = 7.5;
   let activeBalls = [];
+  let jarFlashUntil = [];
 
   if (dropBallBtn) {
     dropBallBtn.addEventListener('click', () => {
@@ -279,7 +280,7 @@ for (let i = 0; i < multipliers.length; i++) {
 
   // Jar glow
   ctx.shadowColor = slotColors[i];
-  ctx.shadowBlur = 10;
+  ctx.shadowBlur = 4;
 
   ctx.fillStyle = glassGradient;
   ctx.strokeStyle = slotColors[i];
@@ -370,8 +371,33 @@ for (let i = 0; i < multipliers.length; i++) {
     jarTop + 39
   );
 
-  ctx.shadowBlur = 0;
+    ctx.shadowBlur = 0;
   ctx.restore();
+
+  // Landing flash
+  if (jarFlashUntil[i] && Date.now() < jarFlashUntil[i]) {
+    ctx.save();
+
+    ctx.shadowColor = slotColors[i];
+    ctx.shadowBlur = 28;
+
+    ctx.fillStyle = 'rgba(255,255,255,0.28)';
+    ctx.strokeStyle = slotColors[i];
+    ctx.lineWidth = 3;
+
+    ctx.beginPath();
+    ctx.roundRect(
+      left,
+      jarTop + 10,
+      jarWidth,
+      jarBottom - jarTop - 10,
+      8
+    );
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.restore();
+  }
 }
 
     // Update Balls
