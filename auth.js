@@ -836,3 +836,32 @@ window.addEventListener("appinstalled", () => {
     deferredInstallPrompt = null;
 
 });
+
+
+
+if ("serviceWorker" in navigator) {
+
+    window.addEventListener("load", () => {
+
+        navigator.serviceWorker
+            .register("/PixVinz/sw.js")
+            .then((registration) => {
+
+                console.log(
+                    "PixVinz Service Worker registered:",
+                    registration.scope
+                );
+
+            })
+            .catch((error) => {
+
+                console.error(
+                    "PixVinz Service Worker registration failed:",
+                    error
+                );
+
+            });
+
+    });
+
+}
