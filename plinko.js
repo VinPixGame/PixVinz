@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const rowHeight = (h - 110) / rows;
     
     // Adjusted colSpacing to stretch pegs wide and align perfectly with slot count (rows + 1)
-    const colSpacing = (w - 30) / (rows + 1);
+    const colSpacing = (w - 50) / (rows + 1);
     
     // Draw Pegs
     for (let r = 0; r < rows; r++) {
