@@ -2,9 +2,9 @@
   "name": "PixVinz",
   "short_name": "PixVinz",
   "start_url": "/PixVinz/",
-  "display": "standalone",
-  "background_color": "#130826",
-  "theme_color": "#130826",
+  "display": "fullscreen",
+  "background_color": "#080314",
+  "theme_color": "#080314",
   "icons": [
     {
       "src": "/PixVinz/image/vinz192.png",
