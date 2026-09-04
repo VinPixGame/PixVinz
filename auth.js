@@ -774,66 +774,65 @@ if (regPassConfirm) {
 });
 
 
+
+
+
+// ==========================================
+// PIXVINZ PWA INSTALL
+// ==========================================
+
 let deferredInstallPrompt = null;
 
-// Listen for the browser's install prompt
 window.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
+
     deferredInstallPrompt = event;
 
-    showInstallButtons();
+    console.log("PixVinz install prompt is ready.");
 });
 
-// Show both Download App buttons
-function showInstallButtons() {
-    const buttons = [
-        document.getElementById("install-app-btn-login"),
-        document.getElementById("install-app-btn-register")
-    ];
-
-    buttons.forEach((button) => {
-        if (button) {
-            button.style.display = "block";
-        }
-    });
-}
-
-// Install the app
 async function installPixVinz() {
+
+    // Browser does not currently offer the install prompt
     if (!deferredInstallPrompt) {
         alert(
-            "PixVinz cannot be installed right now. " +
-            "Please open this website in a supported browser such as Chrome."
+            "PixVinz is not ready to install yet.\n\n" +
+            "If you're using Android Chrome, try opening PixVinz " +
+            "from the website and wait a few seconds."
         );
         return;
     }
 
     deferredInstallPrompt.prompt();
 
-    const { outcome } = await deferredInstallPrompt.userChoice;
+    const result = await deferredInstallPrompt.userChoice;
 
-    console.log("Install result:", outcome);
+    console.log("PixVinz install result:", result.outcome);
 
     deferredInstallPrompt = null;
 }
 
+
 // Connect both buttons
-document.addEventListener("DOMContentLoaded", () => {
-    const loginButton = document.getElementById("install-app-btn-login");
-    const registerButton = document.getElementById("install-app-btn-register");
+const installButtons = [
+    document.getElementById("install-app-btn-login"),
+    document.getElementById("install-app-btn-register")
+];
 
-    if (loginButton) {
-        loginButton.addEventListener("click", installPixVinz);
-    }
+installButtons.forEach((button) => {
 
-    if (registerButton) {
-        registerButton.addEventListener("click", installPixVinz);
-    }
+    if (!button) return;
+
+    button.addEventListener("click", installPixVinz);
+
 });
 
-// App successfully installed
+
+// Detect successful installation
 window.addEventListener("appinstalled", () => {
-    console.log("PixVinz was installed successfully!");
+
+    console.log("PixVinz installed successfully!");
 
     deferredInstallPrompt = null;
+
 });
