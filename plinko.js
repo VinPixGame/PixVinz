@@ -297,7 +297,7 @@ for (let i = 0; i < multipliers.length; i++) {
 
   // Jar glow
   ctx.shadowColor = slotColors[i];
-  ctx.shadowBlur = 4;
+  ctx.shadowBlur = 0;
 
   ctx.fillStyle = glassGradient;
   ctx.strokeStyle = slotColors[i];
@@ -420,7 +420,7 @@ for (let i = 0; i < multipliers.length; i++) {
     // Update Balls
     for (let i = activeBalls.length - 1; i >= 0; i--) {
       let ball = activeBalls[i];
-      ball.vy += currentDifficulty === 'hard' ? 0.45 : 0.35;
+      ball.vy += currentDifficulty === 'hard' ? 0.65 : 0.55;
       ball.x += ball.vx;
       ball.y += ball.vy;
 
@@ -468,8 +468,8 @@ for (let i = 0; i < multipliers.length; i++) {
 
         coinCount += currentBet * mult;
         updateDisplay();
-        playSound('jar', clampedIndex);
-
+        jarFlashUntil[clampedIndex] = Date.now() + 350;
+playSound('jar', clampedIndex);
         activeBalls.splice(i, 1);
         continue;
       }
