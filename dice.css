@@ -45,8 +45,8 @@ body {
     height: 40px;
 }
 
-.logo-container video,
-#logoVideo {
+.logo-container img,
+#logoImage {
     width: 160px;
     height: auto;
     object-fit: contain;
