@@ -234,7 +234,7 @@ canvas {
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin: -4px 0 2px 0; /* Pulls the selector up slightly closer to the title */
+  margin: 20px 0 2px 0;
   flex-shrink: 0;
 }
 
