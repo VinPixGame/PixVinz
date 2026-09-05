@@ -471,8 +471,9 @@ position: absolute;
 .result-value {
   margin-top: 2px;
   display: flex;
+  flex-direction: row-reverse;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 4px;
   min-height: 22px;
 }
@@ -490,6 +491,11 @@ position: absolute;
   line-height: 1;
   color: #fff;
   box-sizing: border-box;
+}
+
+.result-history-item.latest {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 
 .betting-section {
@@ -1035,30 +1041,28 @@ function updateResultHistory(result) {
   }
 
   document.getElementById("lastResult").innerHTML =
-    resultHistory.map(value => {
+    resultHistory.map((value, index) => {
       if (value === "Jackpot") {
-        return `<span class="result-history-item" style="
-          background: conic-gradient(
-            #ff0000,
-            #ff9900,
-            #ffff00,
-            #00ff66,
-            #0088ff,
-            #aa00ff,
-            #ff0000
-          );
-          box-shadow: 0 0 8px #ff00ff;
-        ">♛</span>`;
-      }
-
-      return `<span class="result-history-item" style="
+  return `<span class="result-history-item${index === resultHistory.length - 1 ? " latest" : ""}" style="
+    background: conic-gradient(
+      #ff0000,
+      #ff9900,
+      #ffff00,
+      #00ff66,
+      #0088ff,
+      #aa00ff,
+      #ff0000
+    );
+    box-shadow: 0 0 8px #ff00ff;
+  ">♛</span>`;
+}
+                        return `<span class="result-history-item${index === resultHistory.length - 1 ? " latest" : ""}" style="
         background: ${resultColors[value] || "#777"};
         color: ${value === "Star" ? "#111" : "#fff"};
       ">${resultSymbols[value] || "?"}</span>`;
     }).join("");
 }
 
-  
 const optionColors = {
   X: "#6c228a",
   O: "#8a225e",
