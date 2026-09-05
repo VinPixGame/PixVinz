@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         osc.type = 'sine';
         osc.frequency.setValueAtTime(pianoNotes[index] || 523.25, now);
-        gain.gain.setValueAtTime(0.14, now);
+        gain.gain.setValueAtTime(0.40, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
         osc.start(now);
         osc.stop(now + 0.45);
