@@ -276,32 +276,32 @@ body {
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.08s ease;
+  mix-blend-mode: screen;
 }
 
 .wheel-active-highlight.flash {
-  animation: wheelSectionFlash 0.18s ease-out;
+  animation: wheelSectionNeon 0.22s ease-out;
 }
 
 .wheel-active-highlight.locked {
   opacity: 0.9;
-  filter: brightness(1.3);
+  filter: brightness(1.5);
 }
 
-@keyframes wheelSectionFlash {
+@keyframes wheelSectionNeon {
   0% {
-    opacity: 0.5;
+    opacity: 0.25;
     filter: brightness(1);
   }
-  50% {
+  45% {
     opacity: 1;
-    filter: brightness(1.9);
+    filter: brightness(2.2);
   }
   100% {
-    opacity: 0.72;
-    filter: brightness(1.15);
+    opacity: 0.9;
+    filter: brightness(1.5);
   }
 }
-
   
 .wheel-section-labels {
   position: absolute;
@@ -1093,12 +1093,30 @@ function setWheelHighlight(index, locked = false) {
     const start = index * sliceAngle + 0.5;
     const end = (index + 1) * sliceAngle - 0.5;
 
-    highlight.style.background =
-        `conic-gradient(
-            transparent 0deg ${start}deg,
-            rgba(255,255,255,0.58) ${start}deg ${end}deg,
-            transparent ${end}deg 360deg
-        )`;
+    const section = wheelSections[index];
+
+const neonColor = {
+    Red: "#ff1744",
+    Blue: "#00e5ff",
+    Star: "#ffd600",
+    Diamond: "#00fff0",
+    X: "#d500ff",
+    O: "#ff1493",
+    Jackpot: "#ffffff"
+}[section] || "#ffffff";
+
+highlight.style.background =
+    `conic-gradient(
+        transparent 0deg ${start}deg,
+        ${neonColor} ${start}deg ${end}deg,
+        transparent ${end}deg 360deg
+    )`;
+
+highlight.style.boxShadow =
+    `0 0 8px ${neonColor},
+     0 0 18px ${neonColor},
+     0 0 30px ${neonColor},
+     inset 0 0 18px ${neonColor}`;
 
     highlight.style.opacity = "1";
     highlight.classList.toggle("locked", locked);
