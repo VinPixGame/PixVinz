@@ -469,10 +469,27 @@ position: absolute;
 }
 
 .result-value {
-  margin-top: 1px;
-  font-size: 14px;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  min-height: 22px;
+}
+
+.result-history-item {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 22px;
+  font-size: 13px;
   font-weight: 1000;
-  color: #f1cf78;
+  line-height: 1;
+  color: #fff;
+  box-sizing: border-box;
 }
 
 .betting-section {
@@ -823,9 +840,9 @@ position: absolute;
     </section>
 
     <section class="result-display">
-      <div class="result-title">LAST RESULT</div>
-      <div class="result-value" id="lastResult">—</div>
-    </section>
+  <div class="result-title">LAST RESULT</div>
+  <div class="result-value" id="lastResult"></div>
+</section>
 
     <section class="betting-section">
       <div class="section-title">PLACE YOUR BET</div>
@@ -989,6 +1006,59 @@ const wheelSections = [
   "Red", "Blue", "X", "Red", "Blue", "O"
 ];
 
+let resultHistory = [];
+
+const resultSymbols = {
+  Red: "●",
+  Blue: "●",
+  Star: "★",
+  Diamond: "◆",
+  X: "X",
+  O: "O",
+  Jackpot: "♛"
+};
+
+const resultColors = {
+  Red: "#ff0000",
+  Blue: "#0066ff",
+  Star: "#ffff00",
+  Diamond: "#00ffff",
+  X: "#bf00ff",
+  O: "#ff00aa"
+};
+
+function updateResultHistory(result) {
+  resultHistory.push(result);
+
+  if (resultHistory.length > 10) {
+    resultHistory.shift();
+  }
+
+  document.getElementById("lastResult").innerHTML =
+    resultHistory.map(value => {
+      if (value === "Jackpot") {
+        return `<span class="result-history-item" style="
+          background: conic-gradient(
+            #ff0000,
+            #ff9900,
+            #ffff00,
+            #00ff66,
+            #0088ff,
+            #aa00ff,
+            #ff0000
+          );
+          box-shadow: 0 0 8px #ff00ff;
+        ">♛</span>`;
+      }
+
+      return `<span class="result-history-item" style="
+        background: ${resultColors[value] || "#777"};
+        color: ${value === "Star" ? "#111" : "#fff"};
+      ">${resultSymbols[value] || "?"}</span>`;
+    }).join("");
+}
+
+  
 const optionColors = {
   X: "#6c228a",
   O: "#8a225e",
@@ -1365,8 +1435,7 @@ function handleResult(result, resultIndex) {
   
     
     document.getElementById("spinButton").disabled = false;
-    document.getElementById("lastResult").textContent = result.toUpperCase();
-
+    updateResultHistory(result);
     let winnings = 0;
     let xpGained = 0;
 
