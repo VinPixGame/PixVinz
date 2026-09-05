@@ -251,7 +251,7 @@ canvas {
   transition: all 0.2s ease;
 }
 
-..diff-btn[data-diff="normal"].active {
+.diff-btn[data-diff="normal"].active {
   background: #ffd700;
   color: #130826;
   border-color: #ffd700;
