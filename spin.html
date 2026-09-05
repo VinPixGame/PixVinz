@@ -399,6 +399,39 @@ body {
 }
 
 .wheel-pointer {
+  .wheel-active-highlight {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.08s ease;
+}
+
+.wheel-active-highlight.flash {
+  animation: wheelSectionFlash 0.18s ease-out;
+}
+
+.wheel-active-highlight.locked {
+  opacity: 0.9;
+  filter: brightness(1.3);
+}
+
+@keyframes wheelSectionFlash {
+  0% {
+    opacity: 0.5;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 1;
+    filter: brightness(1.9);
+  }
+  100% {
+    opacity: 0.72;
+    filter: brightness(1.15);
+  }
+}
   position: absolute;
   top: -24px;
   left: 50%;
@@ -750,6 +783,7 @@ body {
         <div class="light-train" id="lightTrain"></div>
         <div class="wheel-3d" id="wheel">
           <div class="wheel-face" id="wheelFace">
+            <div class="wheel-active-highlight" id="wheelActiveHighlight"></div>
             <div class="wheel-section-labels" id="wheelLabels"></div>
             <div class="wheel-dividers" id="wheelDividers"></div>
           </div>
@@ -1045,6 +1079,38 @@ function createWheelNails() {
   }
 }
 
+let activeWheelIndex = -1;
+
+function setWheelHighlight(index, locked = false) {
+    const highlight = document.getElementById("wheelActiveHighlight");
+    if (!highlight) return;
+
+    const count = wheelSections.length;
+    const sliceAngle = 360 / count;
+
+    const start = index * sliceAngle + 0.5;
+    const end = (index + 1) * sliceAngle - 0.5;
+
+    highlight.style.background =
+        `conic-gradient(
+            transparent 0deg ${start}deg,
+            rgba(255,255,255,0.58) ${start}deg ${end}deg,
+            transparent ${end}deg 360deg
+        )`;
+
+    highlight.style.opacity = "1";
+    highlight.classList.toggle("locked", locked);
+
+    if (!locked) {
+        highlight.classList.remove("flash");
+        void highlight.offsetWidth;
+        highlight.classList.add("flash");
+    }
+
+    activeWheelIndex = index;
+}
+  
+
 function buildWheelFace() {
   const wheelFace = document.getElementById("wheelFace");
   const labelsContainer = document.getElementById("wheelLabels");
@@ -1189,7 +1255,22 @@ document.getElementById("spinButton").addEventListener("click", () => {
             let currentAngle = Math.round(Math.atan2(b, a) * (180 / Math.PI));
             if (currentAngle < 0) currentAngle += 360;
 
-            if (Math.abs(currentAngle - lastCheckedAngle) >= 5) {
+           
+   const activeIndex =
+    Math.floor(((360 - currentAngle + 360) % 360) / sliceAngle);
+
+if (activeIndex !== activeWheelIndex) {
+    setWheelHighlight(activeIndex);
+  }     
+
+const activeIndex =
+    Math.floor(((360 - currentAngle + 360) % 360) / sliceAngle);
+
+if (activeIndex !== activeWheelIndex) {
+    setWheelHighlight(activeIndex);
+  }
+          
+  if (Math.abs(currentAngle - lastCheckedAngle) >= 5) {
                 playClickSound();
                 const kickDirection = Math.random() > 0.5 ? -10 : 10;
                 pointer.style.transform = `translateX(-50%) rotate(${kickDirection}deg)`;
@@ -1205,11 +1286,12 @@ document.getElementById("spinButton").addEventListener("click", () => {
 
     setTimeout(() => {
         clearInterval(tickInterval);
-        handleResult(wheelSections[randomIndex]);
+        handleResult(wheelSections[randomIndex], randomIndex);
     }, 5000);
 });
 
-function handleResult(result) {
+function handleResult(result, resultIndex) {
+    setWheelHighlight(resultIndex, true);
     spinning = false;
     document.getElementById("spinButton").disabled = false;
     document.getElementById("lastResult").textContent = result.toUpperCase();
