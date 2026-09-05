@@ -1231,22 +1231,23 @@ document.querySelectorAll(".chip-btn").forEach(button => {
   });
 });
 
-slot.addEventListener("click", () => {
+document.querySelectorAll(".bet-slot").forEach(slot => {
+  slot.addEventListener("click", () => {
     if (spinning) return;
     const type = slot.dataset.bet;
     if (bets[type] + selectedChip > 1000) return;
     if (calculateTotalBet() + selectedChip > coins) return;
 
     document.querySelectorAll(".bet-slot").forEach(s => {
-        s.classList.remove("winner-glow");
-        s.style.removeProperty("--win-glow");
+      s.classList.remove("winner-glow");
+      s.style.removeProperty("--win-glow");
     });
 
     bets[type] += selectedChip;
     playChipSound();
     updateBetDisplay();
+  });
 });
-
 document.getElementById("backButton").addEventListener("click", () => {
   window.location.href = "index.html";
 });
