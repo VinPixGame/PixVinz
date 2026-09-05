@@ -527,6 +527,28 @@ position: absolute;
   transition: transform 0.12s ease;
 }
 
+
+.bet-slot.winner-glow {
+  border-color: var(--win-glow);
+  box-shadow:
+    0 0 6px var(--win-glow),
+    0 0 14px var(--win-glow),
+    0 0 26px var(--win-glow),
+    inset 0 0 12px var(--win-glow);
+  filter: brightness(1.35);
+}
+
+.bet-slot.winner-glow.jackpot {
+  border-color: #fff0a0;
+  box-shadow:
+    0 0 6px #ff3366,
+    0 0 12px #ff9933,
+    0 0 18px #33cc66,
+    0 0 24px #3399ff,
+    0 0 30px #9933ff,
+    inset 0 0 14px rgba(255,255,255,0.8);
+}  
+  
 .bet-slot:active {
   transform: translateY(1px) scale(0.98);
 }
@@ -1096,13 +1118,13 @@ function setWheelHighlight(index, locked = false) {
     const section = wheelSections[index];
 
 const neonColor = {
-    Red: "#ff1744",
-    Blue: "#00e5ff",
-    Star: "#ffd600",
-    Diamond: "#00fff0",
-    X: "#d500ff",
-    O: "#ff1493",
-    Jackpot: "#ffffff"
+    Red: "#ff0000",
+    Blue: "#0066ff",
+    Star: "#ffff00",
+    Diamond: "#00ffff",
+    X: "#bf00ff",
+    O: "#ff00aa",
+    Jackpot: "#ffd700"
 }[section] || "#ffffff";
 
 highlight.style.background =
@@ -1113,11 +1135,19 @@ highlight.style.background =
     )`;
 
 highlight.style.boxShadow =
-    `0 0 8px ${neonColor},
-     0 0 18px ${neonColor},
-     0 0 30px ${neonColor},
-     inset 0 0 18px ${neonColor}`;
+    section === "Jackpot"
+    ? `0 0 8px #ff0000,
+       0 0 16px #ff9900,
+       0 0 24px #00ff66,
+       0 0 32px #0088ff,
+       0 0 40px #aa00ff,
+       inset 0 0 18px #ffffff`
+    : `0 0 8px ${neonColor},
+       0 0 18px ${neonColor},
+       0 0 30px ${neonColor},
+       inset 0 0 18px ${neonColor}`;
 
+  
     highlight.style.opacity = "1";
     highlight.classList.toggle("locked", locked);
 
@@ -1201,17 +1231,20 @@ document.querySelectorAll(".chip-btn").forEach(button => {
   });
 });
 
-document.querySelectorAll(".bet-slot").forEach(slot => {
-  slot.addEventListener("click", () => {
+slot.addEventListener("click", () => {
     if (spinning) return;
     const type = slot.dataset.bet;
     if (bets[type] + selectedChip > 1000) return;
     if (calculateTotalBet() + selectedChip > coins) return;
 
+    document.querySelectorAll(".bet-slot").forEach(s => {
+        s.classList.remove("winner-glow");
+        s.style.removeProperty("--win-glow");
+    });
+
     bets[type] += selectedChip;
     playChipSound();
     updateBetDisplay();
-  });
 });
 
 document.getElementById("backButton").addEventListener("click", () => {
@@ -1307,7 +1340,29 @@ if (activeIndex !== activeWheelIndex) {
 
 function handleResult(result, resultIndex) {
     setWheelHighlight(resultIndex, true);
-    spinning = false;
+
+    const winningSlot = document.querySelector(`.bet-slot[data-bet="${result}"]`);
+
+    if (winningSlot) {
+        const winColor = {
+            Red: "#ff0000",
+            Blue: "#0066ff",
+            Star: "#ffff00",
+            Diamond: "#00ffff",
+            X: "#bf00ff",
+            O: "#ff00aa"
+        }[result];
+
+        if (winColor) {
+            winningSlot.style.setProperty("--win-glow", winColor);
+        }
+
+        winningSlot.classList.add("winner-glow");
+    }
+
+    spinning = false;;
+  
+    
     document.getElementById("spinButton").disabled = false;
     document.getElementById("lastResult").textContent = result.toUpperCase();
 
