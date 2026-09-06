@@ -53,8 +53,30 @@ window.saveUserDataToCloud = async function() {
         const avatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
 
         // XP is independent from puzzle level.
-        // All games and rewards use this same accumulated XP value.
-        const currentXpVal = parseInt(localStorage.getItem(getUserKey('xp'))) || 0;
+        // Read the accumulated XP directly from the user's XP key.
+        const xpKey = getUserKey('xp');
+        let currentXpVal = parseInt(localStorage.getItem(xpKey));
+
+        // If the XP key is missing, use the logged-in user's stored XP.
+        if (isNaN(currentXpVal)) {
+            try {
+                const userObj = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+                currentXpVal = Number(userObj.xp) || 0;
+            } catch (e) {
+                currentXpVal = 0;
+            }
+        }
+
+        currentXpVal = Math.max(0, currentXpVal);
+
+        // Keep loggedInUser.xp synchronized with the value being saved.
+        try {
+            const userObj = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+            if (userObj) {
+                userObj.xp = currentXpVal;
+                localStorage.setItem('loggedInUser', JSON.stringify(userObj));
+            }
+        } catch (e) {}
 
         const dailyStorageKey = getDailyStorageKey();
         const dailyDataStr = localStorage.getItem(dailyStorageKey);
@@ -116,7 +138,30 @@ async function fetchUserDataFromFirestore() {
                 const prefix = username + '_';
                 if (cloudData.coins !== undefined) localStorage.setItem(prefix + 'totalCoins', cloudData.coins);
                 if (cloudData.level !== undefined) localStorage.setItem(prefix + 'currentLevel', cloudData.level);
-                if (cloudData.xp !== undefined) localStorage.setItem(prefix + 'xp', Number(cloudData.xp) || 0);
+
+                // XP SYNC:
+                // Keep the higher accumulated XP so an older Firestore value
+                // cannot overwrite newly earned local XP.
+                if (cloudData.xp !== undefined) {
+                    const cloudXp = Math.max(0, Number(cloudData.xp) || 0);
+                    const localXp = Math.max(0, parseInt(localStorage.getItem(prefix + 'xp')) || 0);
+                    const sessionXp = Math.max(0, Number(currentUser.xp) || 0);
+                    const highestXp = Math.max(cloudXp, localXp, sessionXp);
+
+                    localStorage.setItem(prefix + 'xp', highestXp);
+
+                    try {
+                        const latestUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+                        latestUser.xp = highestXp;
+                        localStorage.setItem('loggedInUser', JSON.stringify(latestUser));
+                    } catch (e) {}
+
+                    // If local XP is newer than Firestore, push it back to cloud.
+                    if (highestXp > cloudXp && typeof saveUserDataToCloud === 'function') {
+                        await saveUserDataToCloud();
+                    }
+                }
+
                 if (cloudData.avatar) localStorage.setItem(prefix + 'vinpix_avatar', cloudData.avatar);
 
                 // Sync challenge data down to local storage
@@ -883,7 +928,7 @@ window.claimDailyReward = async function() {
     if (typeof updateProfileUI === 'function') updateProfileUI();
     
     if (typeof saveUserDataToCloud === 'function') {
-        saveUserDataToCloud();
+        await saveUserDataToCloud();
     }
 
     try {
