@@ -72,59 +72,49 @@ function spendCoins(amount) {
     return true; 
 } 
 
+
 async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeStr) {
-    const totalCoinsKey = getUserKey('totalCoins');
-    const currentLevelKey = getUserKey('currentLevel');
-    const xpKey = getUserKey('xp');
+    // 1. Fetch current loggedInUser object (matching Daily Reward logic)
+    let loggedInUser = {};
+    try {
+        loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+    } catch(e) {}
 
-    let totalCoins = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
-    let maxUnlocked = parseInt(localStorage.getItem(currentLevelKey)) || 1;
-    let currentXp = parseInt(localStorage.getItem(xpKey)) || 0;
+    let currentLevel = Number(loggedInUser.level || localStorage.getItem('currentLevel') || 1);
+    let totalCoins = Number(loggedInUser.coins || localStorage.getItem('totalCoins') || 0);
+    let currentXp = Number(loggedInUser.xp || localStorage.getItem('xp') || 0);
 
+    // 2. Calculate rewards
     let tier = Math.floor((completedLevel - 1) / 10);
     let xpGained = (tier + 1) * 100;
     let coinReward = (stars || 1) * 5;
 
-    // 1. Calculate new values
     currentXp += xpGained;
     totalCoins += coinReward;
 
-    let nextLevelToUnlock = maxUnlocked;
-    if (completedLevel >= maxUnlocked) {
-        nextLevelToUnlock = completedLevel + 1;
+    if (completedLevel >= currentLevel) {
+        currentLevel = completedLevel + 1;
     }
 
-    // 2. Write straight to key-value LocalStorage
-    localStorage.setItem(xpKey, currentXp);
-    localStorage.setItem(totalCoinsKey, totalCoins);
-    localStorage.setItem(currentLevelKey, nextLevelToUnlock);
+    // 3. Update loggedInUser object AND raw localStorage keys
+    loggedInUser.level = currentLevel;
+    loggedInUser.coins = totalCoins;
+    loggedInUser.xp = currentXp;
 
-    if (finalMoves !== undefined) {
-        localStorage.setItem(getUserKey(`levelMoves_${completedLevel}`), finalMoves);
-    }
-    if (finalTimeStr !== undefined) {
-        localStorage.setItem(getUserKey(`levelTime_${completedLevel}`), finalTimeStr);
-    }
-
-    // 3. Update loggedInUser JSON object
-    try {
-        const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
-        loggedInUser.xp = currentXp;
-        loggedInUser.coins = totalCoins;
-        loggedInUser.level = nextLevelToUnlock;
-        localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
-    } catch (e) {}
+    localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+    
+    // Also save to individual keys to prevent UI mismatches
+    localStorage.setItem(getUserKey('totalCoins'), totalCoins);
+    localStorage.setItem(getUserKey('currentLevel'), currentLevel);
+    localStorage.setItem(getUserKey('xp'), currentXp);
+    localStorage.setItem('totalCoins', totalCoins);
+    localStorage.setItem('currentLevel', currentLevel);
+    localStorage.setItem('xp', currentXp);
 
     // 4. Update UI
-    updateCoinDisplay();
+    if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
 
-    const modal = document.getElementById('victoryModal') || document.getElementById('winModal');
-    if (modal) {
-        modal.classList.remove('hidden');
-        modal.style.display = 'flex';
-    }
-
-    // 5. Direct push to cloud
+    // 5. Trigger cloud save using exact same pattern as Daily Reward
     if (typeof window.saveUserDataToCloud === 'function') {
         await window.saveUserDataToCloud();
     }
