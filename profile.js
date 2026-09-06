@@ -52,7 +52,8 @@ window.saveUserDataToCloud = async function() {
         const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
         const avatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
 
-        // XP is stored independently from level.
+        // XP is independent from puzzle level.
+        // All games and rewards use this same accumulated XP value.
         const currentXpVal = parseInt(localStorage.getItem(getUserKey('xp'))) || 0;
 
         const dailyStorageKey = getDailyStorageKey();
@@ -115,7 +116,7 @@ async function fetchUserDataFromFirestore() {
                 const prefix = username + '_';
                 if (cloudData.coins !== undefined) localStorage.setItem(prefix + 'totalCoins', cloudData.coins);
                 if (cloudData.level !== undefined) localStorage.setItem(prefix + 'currentLevel', cloudData.level);
-                if (cloudData.xp !== undefined) localStorage.setItem(prefix + 'xp', cloudData.xp);
+                if (cloudData.xp !== undefined) localStorage.setItem(prefix + 'xp', Number(cloudData.xp) || 0);
                 if (cloudData.avatar) localStorage.setItem(prefix + 'vinpix_avatar', cloudData.avatar);
 
                 // Sync challenge data down to local storage
@@ -180,27 +181,53 @@ function applyAvatarToUI(avatarData) {
 function calculateLevelAndXp(totalPuzzlesSolved) {
     const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
     const xpStoreKey = currentUsername ? currentUsername + '_xp' : 'xp';
-    let totalXpEarned = parseInt(localStorage.getItem(xpStoreKey)) || 0;
 
-    let currentLevel = parseInt(localStorage.getItem(currentUsername ? currentUsername + '_currentLevel' : 'currentLevel')) || 1;
-    let cumulativeXpRequired = 1500;
-    let accumulated = 0;
-    
-    for (let lvl = 1; lvl <= 200; lvl++) {
-        let tier = Math.floor((lvl - 1) / 10);
-        let xpNeededForThisLevel = (tier + 1) * 500;
-        accumulated += xpNeededForThisLevel;
-        
-        if (lvl === currentLevel) {
-            cumulativeXpRequired = accumulated;
-            break;
+    // Total XP is accumulated independently from puzzle level.
+    const totalXpEarned = Math.max(0, parseInt(localStorage.getItem(xpStoreKey)) || 0);
+
+    const xpTiers = [
+        { minLevel: 1, maxLevel: 10, xpRequired: 500 },
+        { minLevel: 11, maxLevel: 20, xpRequired: 1000 },
+        { minLevel: 21, maxLevel: 30, xpRequired: 1500 },
+        { minLevel: 31, maxLevel: 50, xpRequired: 2000 },
+        { minLevel: 51, maxLevel: 100, xpRequired: 3000 },
+        { minLevel: 101, maxLevel: 150, xpRequired: 4000 },
+        { minLevel: 151, maxLevel: 200, xpRequired: 6000 }
+    ];
+
+    let xpLevel = 1;
+    let remainingXp = totalXpEarned;
+    let maxXp = 500;
+
+    for (const tier of xpTiers) {
+        for (let lvl = tier.minLevel; lvl <= tier.maxLevel; lvl++) {
+            xpLevel = lvl;
+            maxXp = tier.xpRequired;
+
+            if (remainingXp < tier.xpRequired) {
+                return {
+                    level: xpLevel,
+                    currentXp: remainingXp,
+                    maxXp: maxXp
+                };
+            }
+
+            if (xpLevel === 200) {
+                return {
+                    level: 200,
+                    currentXp: tier.xpRequired,
+                    maxXp: tier.xpRequired
+                };
+            }
+
+            remainingXp -= tier.xpRequired;
         }
     }
 
     return {
-        level: currentLevel,
-        currentXp: totalXpEarned > 0 ? totalXpEarned : 0, 
-        maxXp: cumulativeXpRequired > 0 ? cumulativeXpRequired : 1500
+        level: 200,
+        currentXp: maxXp,
+        maxXp: maxXp
     };
 }
 
@@ -219,18 +246,23 @@ function updateProfileStats() {
 
 function updateXpProgress() {
     const currentUsername = getCurrentUsername();
-    let currentLevelVal = parseInt(localStorage.getItem(currentUsername ? currentUsername + '_currentLevel' : 'currentLevel')) || 1;
+    const xpKey = currentUsername ? currentUsername + '_xp' : 'xp';
 
-    const currentXp = parseInt(localStorage.getItem(currentUsername ? currentUsername + '_xp' : 'xp')) || 0;
+    // XP level is calculated ONLY from accumulated XP.
+    // Puzzle currentLevel is completely separate.
+    const currentXp = Math.max(0, parseInt(localStorage.getItem(xpKey)) || 0);
     const playerProgression = calculateLevelAndXp(currentXp);
-    const progressPercent = Math.min(100, (currentXp / playerProgression.maxXp) * 100);
+
+    const progressPercent = playerProgression.maxXp > 0
+        ? Math.min(100, (playerProgression.currentXp / playerProgression.maxXp) * 100)
+        : 0;
 
     const levelNumEl = document.querySelector('#displayLevelBadge .xp-level-num');
     const xpText = document.getElementById('displayXpText');
     const xpBarFill = document.getElementById('displayXpBarFill');
 
-    if (levelNumEl) levelNumEl.textContent = currentLevelVal;
-    if (xpText) xpText.textContent = `${currentXp.toLocaleString()} / ${playerProgression.maxXp.toLocaleString()} XP`;
+    if (levelNumEl) levelNumEl.textContent = playerProgression.level;
+    if (xpText) xpText.textContent = `${playerProgression.currentXp.toLocaleString()} / ${playerProgression.maxXp.toLocaleString()} XP`;
     if (xpBarFill) xpBarFill.style.width = `${progressPercent}%`;
 
     updateProfileStats();
@@ -427,7 +459,7 @@ function checkAndUnlockBadges() {
 }
 
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const avatarLoader = document.getElementById('avatarLoader');
     if (avatarLoader) avatarLoader.style.display = 'none';
 
@@ -457,6 +489,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         applyAvatarToUI('image/avatar.png');
     }
+
+    await fetchUserDataFromFirestore();
 
     updateXpProgress();
     updateProfileStats();
@@ -820,11 +854,14 @@ window.claimDailyReward = async function() {
         if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
     }
 
+    // Daily reward XP goes into the same shared accumulated XP.
     try {
         const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
         const xpStoreKey = currentUsername ? currentUsername + '_xp' : 'xp';
         let currentXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
+
         currentXp += reward.xp;
+
         localStorage.setItem(xpStoreKey, currentXp);
 
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
