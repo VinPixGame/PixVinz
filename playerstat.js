@@ -79,23 +79,25 @@ async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeSt
 
     let totalCoins = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
     let maxUnlocked = parseInt(localStorage.getItem(currentLevelKey)) || 1;
-
     let currentXp = parseInt(localStorage.getItem(xpKey)) || 0;
+
     let tier = Math.floor((completedLevel - 1) / 10);
     let xpGained = (tier + 1) * 100;
+    let coinReward = (stars || 1) * 5;
 
+    // 1. Calculate new values
     currentXp += xpGained;
-    localStorage.setItem(xpKey, currentXp);
-
-    let targetCoins = (stars || 1) * 5;
-    totalCoins += targetCoins;
-    localStorage.setItem(totalCoinsKey, totalCoins);
+    totalCoins += coinReward;
 
     let nextLevelToUnlock = maxUnlocked;
     if (completedLevel >= maxUnlocked) {
         nextLevelToUnlock = completedLevel + 1;
-        localStorage.setItem(currentLevelKey, nextLevelToUnlock);
     }
+
+    // 2. Write straight to key-value LocalStorage
+    localStorage.setItem(xpKey, currentXp);
+    localStorage.setItem(totalCoinsKey, totalCoins);
+    localStorage.setItem(currentLevelKey, nextLevelToUnlock);
 
     if (finalMoves !== undefined) {
         localStorage.setItem(getUserKey(`levelMoves_${completedLevel}`), finalMoves);
@@ -104,16 +106,16 @@ async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeSt
         localStorage.setItem(getUserKey(`levelTime_${completedLevel}`), finalTimeStr);
     }
 
+    // 3. Update loggedInUser JSON object
     try {
         const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
-        if (loggedInUser) {
-            loggedInUser.xp = currentXp;
-            loggedInUser.coins = totalCoins;
-            loggedInUser.level = nextLevelToUnlock;
-            localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
-        }
+        loggedInUser.xp = currentXp;
+        loggedInUser.coins = totalCoins;
+        loggedInUser.level = nextLevelToUnlock;
+        localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
     } catch (e) {}
 
+    // 4. Update UI
     updateCoinDisplay();
 
     const modal = document.getElementById('victoryModal') || document.getElementById('winModal');
@@ -122,11 +124,11 @@ async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeSt
         modal.style.display = 'flex';
     }
 
+    // 5. Direct push to cloud
     if (typeof window.saveUserDataToCloud === 'function') {
-         await window.saveUserDataToCloud();
+        await window.saveUserDataToCloud();
     }
 }
-
 document.addEventListener('DOMContentLoaded', async () => {
     updateCoinDisplay();
     if (typeof fetchUserDataFromFirestore === 'function') {
