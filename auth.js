@@ -663,8 +663,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             Number(userData.level ?? 1),
 
                         // XP — FETCH CURRENT XP FROM FIRESTORE
-xp:
-    Number(userData.currentXpVal ?? 0),
+                        xp:
+                            Number(userData.xp ?? 0),
+
                         // CHALLENGE
                         challenge:
                             userData.challenge ?? null,
@@ -719,7 +720,7 @@ xp:
 
                     // XP
                     localStorage.setItem(
-                        prefix + 'xp',
+                        prefix + 'currentXpVal',
                         String(freshUserData.xp)
                     );
 
