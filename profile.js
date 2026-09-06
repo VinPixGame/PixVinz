@@ -52,13 +52,8 @@ window.saveUserDataToCloud = async function() {
         const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
         const avatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
 
-        // ==========================================
-        // XP - USE ACTUAL SAVED XP
-        // Do NOT calculate XP from level.
-        // ==========================================
-        const currentXpVal = parseInt(
-            localStorage.getItem(getUserKey('currentXpVal'))
-        ) || 0;
+        // XP is stored independently from level.
+        const currentXpVal = parseInt(localStorage.getItem(getUserKey('xp'))) || 0;
 
         const dailyStorageKey = getDailyStorageKey();
         const dailyDataStr = localStorage.getItem(dailyStorageKey);
@@ -66,10 +61,8 @@ window.saveUserDataToCloud = async function() {
 
         // --- CHALLENGE DATA ---
         // --- CHALLENGE DATA ---
-        const currentChallengeVal = parseInt(localStorage.getItem(getUserKey('currentChallenge'))) || 1;
-
+    const currentChallengeVal = parseInt(localStorage.getItem(getUserKey('currentChallenge'))) || 1;
         const userDocRef = doc(db, "players", username);
-
         await setDoc(userDocRef, {
             username: username,
             displayName: displayName,
@@ -120,34 +113,16 @@ async function fetchUserDataFromFirestore() {
 
                 // Sync stats to local storage keys used by playerstat.js
                 const prefix = username + '_';
-
-                if (cloudData.coins !== undefined) {
-                    localStorage.setItem(prefix + 'totalCoins', cloudData.coins);
-                }
-
-                if (cloudData.level !== undefined) {
-                    localStorage.setItem(prefix + 'currentLevel', cloudData.level);
-                }
-
-                // ==========================================
-                // XP - SYNC FIRESTORE XP TO LOCAL XP
-                // ==========================================
-                if (cloudData.xp !== undefined) {
-                    localStorage.setItem(
-                        prefix + 'currentXpVal',
-                        String(Number(cloudData.xp) || 0)
-                    );
-                }
-
-                if (cloudData.avatar) {
-                    localStorage.setItem(prefix + 'vinpix_avatar', cloudData.avatar);
-                }
+                if (cloudData.coins !== undefined) localStorage.setItem(prefix + 'totalCoins', cloudData.coins);
+                if (cloudData.level !== undefined) localStorage.setItem(prefix + 'currentLevel', cloudData.level);
+                if (cloudData.xp !== undefined) localStorage.setItem(prefix + 'xp', cloudData.xp);
+                if (cloudData.avatar) localStorage.setItem(prefix + 'vinpix_avatar', cloudData.avatar);
 
                 // Sync challenge data down to local storage
                 // Sync challenge data down to local storage
-                if (cloudData.challenge !== undefined) {
-                    localStorage.setItem(prefix + 'currentChallenge', cloudData.challenge);
-                }
+    if (cloudData.challenge !== undefined) {
+        localStorage.setItem(prefix + 'currentChallenge', cloudData.challenge);
+    }
 
                 // Sync daily reward state down to local storage key
                 if (cloudData.dailyRewardState) {
@@ -203,21 +178,11 @@ function applyAvatarToUI(avatarData) {
 }
 
 function calculateLevelAndXp(totalPuzzlesSolved) {
-    let totalXpEarned = 0;
-    for (let i = 1; i <= totalPuzzlesSolved; i++) {
-        let lvlForPuzzle = Math.floor((i - 1) / 5) + 1;
-        let tier = Math.floor((lvlForPuzzle - 1) / 10);
-        let xpPerPuzzle = (tier + 1) * 100;
-        totalXpEarned += xpPerPuzzle;
-    }
-
-    // Add any stored bonus XP (e.g. from daily rewards)
     const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
-    const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp';
-    let bonusXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
-    totalXpEarned += bonusXp;
+    const xpStoreKey = currentUsername ? currentUsername + '_xp' : 'xp';
+    let totalXpEarned = parseInt(localStorage.getItem(xpStoreKey)) || 0;
 
-    let currentLevel = 3; 
+    let currentLevel = parseInt(localStorage.getItem(currentUsername ? currentUsername + '_currentLevel' : 'currentLevel')) || 1;
     let cumulativeXpRequired = 1500;
     let accumulated = 0;
     
@@ -226,10 +191,7 @@ function calculateLevelAndXp(totalPuzzlesSolved) {
         let xpNeededForThisLevel = (tier + 1) * 500;
         accumulated += xpNeededForThisLevel;
         
-        if (totalXpEarned >= accumulated) {
-            currentLevel = lvl + 1;
-        } else {
-            currentLevel = lvl;
+        if (lvl === currentLevel) {
             cumulativeXpRequired = accumulated;
             break;
         }
@@ -257,64 +219,19 @@ function updateProfileStats() {
 
 function updateXpProgress() {
     const currentUsername = getCurrentUsername();
+    let currentLevelVal = parseInt(localStorage.getItem(currentUsername ? currentUsername + '_currentLevel' : 'currentLevel')) || 1;
 
-    // ==========================================
-    // XP - READ THE ACTUAL SAVED XP
-    // ==========================================
-    const currentXpVal = parseInt(
-        localStorage.getItem(
-            currentUsername ? currentUsername + '_currentXpVal' : 'currentXpVal'
-        )
-    ) || 0;
-
-    const currentLevelVal = parseInt(
-        localStorage.getItem(
-            currentUsername ? currentUsername + '_currentLevel' : 'currentLevel'
-        )
-    ) || 1;
-
-    // Determine the XP requirement using the existing level progression.
-    let cumulativeXpRequired = 1500;
-
-    for (let lvl = 1; lvl <= 200; lvl++) {
-        const tier = Math.floor((lvl - 1) / 10);
-        const xpNeededForThisLevel = (tier + 1) * 500;
-
-        cumulativeXpRequired += 0;
-
-        if (lvl === currentLevelVal) {
-            let accumulated = 0;
-
-            for (let levelCheck = 1; levelCheck <= lvl; levelCheck++) {
-                const levelTier = Math.floor((levelCheck - 1) / 10);
-                const levelXp = (levelTier + 1) * 500;
-                accumulated += levelXp;
-            }
-
-            cumulativeXpRequired = accumulated;
-            break;
-        }
-    }
-
-    const progressPercent = Math.min(
-        100,
-        (currentXpVal / cumulativeXpRequired) * 100
-    );
+    const currentXp = parseInt(localStorage.getItem(currentUsername ? currentUsername + '_xp' : 'xp')) || 0;
+    const playerProgression = calculateLevelAndXp(currentXp);
+    const progressPercent = Math.min(100, (currentXp / playerProgression.maxXp) * 100);
 
     const levelNumEl = document.querySelector('#displayLevelBadge .xp-level-num');
     const xpText = document.getElementById('displayXpText');
     const xpBarFill = document.getElementById('displayXpBarFill');
 
     if (levelNumEl) levelNumEl.textContent = currentLevelVal;
-
-    if (xpText) {
-        xpText.textContent =
-            `${currentXpVal.toLocaleString()} / ${cumulativeXpRequired.toLocaleString()} XP`;
-    }
-
-    if (xpBarFill) {
-        xpBarFill.style.width = `${progressPercent}%`;
-    }
+    if (xpText) xpText.textContent = `${currentXp.toLocaleString()} / ${playerProgression.maxXp.toLocaleString()} XP`;
+    if (xpBarFill) xpBarFill.style.width = `${progressPercent}%`;
 
     updateProfileStats();
 }
@@ -903,37 +820,18 @@ window.claimDailyReward = async function() {
         if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
     }
 
-    // ==========================================
-    // XP - ADD DAILY REWARD TO ACTUAL XP
-    // ==========================================
     try {
-        const xpKey = typeof getUserKey === 'function'
-            ? getUserKey('currentXpVal')
-            : 'currentXpVal';
+        const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
+        const xpStoreKey = currentUsername ? currentUsername + '_xp' : 'xp';
+        let currentXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
+        currentXp += reward.xp;
+        localStorage.setItem(xpStoreKey, currentXp);
 
-        let currentXpVal =
-            parseInt(localStorage.getItem(xpKey)) || 0;
-
-        currentXpVal += reward.xp;
-
-        localStorage.setItem(
-            xpKey,
-            String(currentXpVal)
-        );
-
-        // Keep the logged-in user object synchronized too
-        try {
-            const currentUser =
-                JSON.parse(localStorage.getItem('loggedInUser')) || {};
-
-            currentUser.xp = currentXpVal;
-
-            localStorage.setItem(
-                'loggedInUser',
-                JSON.stringify(currentUser)
-            );
-        } catch (e) {}
-
+        const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+        if (loggedInUser) {
+            loggedInUser.xp = currentXp;
+            localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+        }
     } catch (e) {}
 
     dailyState.streak = nextStreak;
