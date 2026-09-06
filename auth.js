@@ -1,783 +1,908 @@
-// ============================================================
-// PIXVINZ AUTH.JS
-// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. View Switching
+    const views = {
+        login: document.getElementById('loginView'),
+        register: document.getElementById('registerView')
+    };
 
-document.addEventListener("DOMContentLoaded", () => {
-
-    // ========================================================
-    // FIREBASE
-    // ========================================================
-
-    if (!window.pixvinzDb || !window.pixvinzAuth) {
-        console.error("PixVinz Firebase is not initialized.");
-        return;
-    }
-
-    const { db, doc, getDoc, setDoc } = window.pixvinzDb;
-    const { auth, createUserWithEmailAndPassword } =
-        window.pixvinzAuth;
-
-
-    // ========================================================
-    // VIEWS
-    // ========================================================
-
-    const loginView = document.getElementById("loginView");
-    const registerView = document.getElementById("registerView");
-
-    const toRegister = document.getElementById("toRegister");
-    const toLogin = document.getElementById("toLogin");
-
-
-    // ========================================================
-    // SWITCH TO REGISTER
-    // ========================================================
-
-    if (toRegister) {
-
-        toRegister.addEventListener("click", (e) => {
-
-            e.preventDefault();
-
-            loginView.classList.remove("active");
-            registerView.classList.add("active");
-
-            loginView.style.display = "none";
-            registerView.style.display = "block";
-
+    function showView(targetView) {
+        Object.values(views).forEach(v => {
+            if (v) v.classList.remove('active');
         });
 
+        if (views[targetView]) {
+            views[targetView].classList.add('active');
+        }
+    }
+
+    showView('login');
+
+    document.getElementById('toRegister')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        showView('register');
+    });
+
+    document.getElementById('toLogin')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        showView('login');
+    });
+
+
+    // 2. Format Validations
+    function validateUsername(user) {
+        return /^(?=.*[0-9])(?=.*[a-z])[a-z0-9]{6,}$/.test(user);
+    }
+
+    function validatePassword(pass) {
+        return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,12}$/.test(pass);
     }
 
 
-    // ========================================================
-    // SWITCH TO LOGIN
-    // ========================================================
-
-    if (toLogin) {
-
-        toLogin.addEventListener("click", (e) => {
-
-            e.preventDefault();
-
-            registerView.classList.remove("active");
-            loginView.classList.add("active");
-
-            registerView.style.display = "none";
-            loginView.style.display = "block";
-
-        });
-
-    }
-
-
-    // ========================================================
-    // USERNAME VALIDATION
-    // ========================================================
-
-    function validateUsername(username) {
-
-        return /^(?=.*[0-9])(?=.*[a-z])[a-z0-9]{6,}$/.test(
-            username
-        );
-
-    }
-
-
-    // ========================================================
-    // PASSWORD VALIDATION
-    // ========================================================
-
-    function validatePassword(password) {
-
-        return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,12}$/.test(
-            password
-        );
-
-    }
-
-
-    // ========================================================
-    // PASSWORD TOGGLE FUNCTION
-    // ========================================================
-
-    function setupPasswordToggle(inputId, buttonId) {
-
+    // 3. Password Toggle
+    function setupToggle(inputId, btnId) {
         const input = document.getElementById(inputId);
-        const button = document.getElementById(buttonId);
+        const btn = document.getElementById(btnId);
 
-        if (!input || !button) return;
-
-        button.addEventListener("click", () => {
-
-            if (input.type === "password") {
-
-                input.type = "text";
-                button.textContent = "Hide";
-
-            } else {
-
-                input.type = "password";
-                button.textContent = "Show";
-
-            }
-
-        });
-
+        if (input && btn) {
+            btn.addEventListener('click', () => {
+                input.type = input.type === 'password' ? 'text' : 'password';
+                btn.innerText = input.type === 'password' ? 'Show' : 'Hide';
+            });
+        }
     }
 
+    // Login password
+    setupToggle('loginPass', 'toggleLoginPass');
 
-    // ========================================================
-    // ALL THREE PASSWORD TOGGLES
-    // ========================================================
+    // Create Account password
+    setupToggle('regPass', 'toggleRegPass');
 
-    setupPasswordToggle(
-        "loginPass",
-        "toggleLoginPass"
-    );
-
-    setupPasswordToggle(
-        "regPass",
-        "toggleRegPass"
-    );
-
-    setupPasswordToggle(
-        "regPassConfirm",
-        "toggleRegPassConfirm"
-    );
+    // Repeat password
+    setupToggle('regPassConfirm', 'toggleRegPassConfirm');
 
 
-    // ========================================================
-    // REGISTER ELEMENTS
-    // ========================================================
+    // 4. Real-time Firestore Username Availability Check
+    const regUser = document.getElementById('regUser');
+    const indicator = document.getElementById('regUserIndicator');
+    const requirement = document.getElementById('regUserRequirement');
 
-    const regDisplayName =
-        document.getElementById("regDisplayName");
+    if (regUser && indicator && requirement) {
 
-    const regUser =
-        document.getElementById("regUser");
+        regUser.addEventListener('input', async () => {
 
-    const regPass =
-        document.getElementById("regPass");
+            const val = regUser.value.trim().toLowerCase();
 
-    const regPassConfirm =
-        document.getElementById("regPassConfirm");
+            regUser.value = val;
 
-    const regUserIndicator =
-        document.getElementById("regUserIndicator");
+            // EMPTY FIELD
+            if (val === '') {
 
-    const regUserRequirement =
-        document.getElementById("regUserRequirement");
+                indicator.innerText = '';
 
-    const regPassIndicator =
-        document.getElementById("regPassIndicator");
-
-    const regError =
-        document.getElementById("regError");
-
-
-    // ========================================================
-    // USERNAME INPUT
-    // ========================================================
-
-    if (regUser) {
-
-        regUser.addEventListener("input", async () => {
-
-            let username =
-                regUser.value.trim().toLowerCase();
-
-            regUser.value = username;
-
-
-            // ----------------------------------------------
-            // EMPTY
-            // ----------------------------------------------
-
-            if (!username) {
-
-                if (regUserIndicator) {
-                    regUserIndicator.textContent = "";
-                }
-
-                if (regUserRequirement) {
-
-                    regUserRequirement.textContent =
-                        "❌ Min 6 characters, lowercase letters & at least 1 number";
-
-                }
+                requirement.classList.remove('show');
 
                 return;
             }
 
+            // INVALID FORMAT
+            if (!validateUsername(val)) {
 
-            // ----------------------------------------------
-            // FORMAT CHECK
-            // ----------------------------------------------
+                indicator.innerText = '';
 
-            if (!validateUsername(username)) {
-
-                if (regUserIndicator) {
-                    regUserIndicator.textContent = "❌";
-                }
-
-                if (regUserRequirement) {
-
-                    regUserRequirement.textContent =
-                        "❌ Min 6 characters, lowercase letters & at least 1 number";
-
-                }
+                requirement.classList.add('show');
 
                 return;
             }
 
-
-            // ----------------------------------------------
-            // FORMAT VALID
-            // ----------------------------------------------
-
-            if (regUserIndicator) {
-                regUserIndicator.textContent = "⏳";
-            }
-
-            if (regUserRequirement) {
-
-                regUserRequirement.textContent =
-                    "Checking username...";
-
-            }
-
-
-            // ----------------------------------------------
-            // FIRESTORE CHECK
-            // ----------------------------------------------
+            // VALID FORMAT
+            requirement.classList.remove('show');
 
             try {
 
-                const userDocRef =
-                    doc(db, "players", username);
+                if (window.pixvinzDb) {
 
-                const snap =
-                    await getDoc(userDocRef);
+                    const { db, doc, getDoc } = window.pixvinzDb;
 
+                    const userDocRef = doc(db, 'players', val);
 
-                if (snap.exists()) {
+                    const snap = await getDoc(userDocRef);
 
-                    if (regUserIndicator) {
-                        regUserIndicator.textContent = "❌";
-                    }
+                    if (snap.exists()) {
 
-                    if (regUserRequirement) {
+                        indicator.innerText = '❌ Taken';
+                        indicator.style.color = '#ff4d4d';
 
-                        regUserRequirement.textContent =
-                            "❌ Username is already taken";
+                    } else {
+
+                        indicator.innerText = '✔ Available';
+                        indicator.style.color = '#2ecc71';
 
                     }
 
                 } else {
 
-                    if (regUserIndicator) {
-                        regUserIndicator.textContent = "✅";
-                    }
-
-                    if (regUserRequirement) {
-
-                        regUserRequirement.textContent =
-                            "✅ Username is available";
-
-                    }
+                    indicator.innerText = '⚠️ Database offline';
+                    indicator.style.color = '#f39c12';
 
                 }
 
-            } catch (error) {
+            } catch (err) {
 
-                console.error(
-                    "Username check error:",
-                    error
-                );
-
-                if (regUserIndicator) {
-                    regUserIndicator.textContent = "⚠️";
-                }
-
-                if (regUserRequirement) {
-
-                    regUserRequirement.textContent =
-                        "Unable to check username";
-
-                }
+                indicator.innerText = '✔ Available';
+                indicator.style.color = '#2ecc71';
 
             }
-
         });
-
     }
 
 
-    // ========================================================
-    // PASSWORD REQUIREMENT
-    // ========================================================
+    // ==========================================
+    // PASSWORD VALIDATION
+    // ==========================================
 
+    const regPass = document.getElementById('regPass');
+    const regPassConfirm = document.getElementById('regPassConfirm');
+
+
+    // Password requirement message
     if (regPass) {
 
-        regPass.addEventListener("input", () => {
+        const passwordRule = document.createElement('p');
 
-            const password =
-                regPass.value;
+        passwordRule.id = 'regPassRule';
 
+        passwordRule.innerText =
+            '❌ 6–12 characters, uppercase, lowercase & number';
 
-            if (!regPassIndicator) return;
-
-
-            if (!password) {
-
-                regPassIndicator.style.display = "none";
-                regPassIndicator.textContent = "";
-
-                return;
-            }
+        passwordRule.style.margin = '5px 0 10px';
+        passwordRule.style.fontSize = '12px';
+        passwordRule.style.fontWeight = 'bold';
+        passwordRule.style.color = '#ff4d4d';
+        passwordRule.style.textAlign = 'left';
+        passwordRule.style.display = 'none';
+        passwordRule.style.pointerEvents = 'none';
 
 
-            regPassIndicator.style.display = "block";
+        const passwordGroup = regPass.closest('.input-group');
+
+        if (passwordGroup) {
+
+            passwordGroup.insertAdjacentElement(
+                'afterend',
+                passwordRule
+            );
+        }
 
 
-            if (!validatePassword(password)) {
+        regPass.addEventListener('input', () => {
 
-                regPassIndicator.style.color =
-                    "#ff4d4d";
+            const value = regPass.value;
 
-                regPassIndicator.textContent =
-                    "❌ 6-12 chars, uppercase, lowercase & number required";
+
+            if (value.length === 0) {
+
+                passwordRule.style.display = 'none';
+
+            } else if (!validatePassword(value)) {
+
+                passwordRule.innerText =
+                    '❌ 6–12 characters, uppercase, lowercase & number';
+
+                passwordRule.style.display = 'block';
 
             } else {
 
-                regPassIndicator.style.color =
-                    "#4cff88";
-
-                regPassIndicator.textContent =
-                    "✅ Password requirements met";
-
+                passwordRule.style.display = 'none';
             }
 
-        });
 
+            // Also update Repeat Password validation
+            if (regPassConfirm && regPassConfirm.value.length > 0) {
+
+                updatePasswordMatch();
+            }
+        });
     }
 
 
-    // ========================================================
-    // LOGIN FORM
-    // ========================================================
+    // ==========================================
+    // REPEAT PASSWORD VALIDATION
+    // ==========================================
 
-    const loginForm =
-        document.getElementById("loginForm");
+    if (regPassConfirm) {
 
-    if (loginForm) {
+        const confirmRule = document.createElement('p');
 
-        loginForm.addEventListener("submit", async (e) => {
+        confirmRule.id = 'regPassConfirmRule';
 
-            e.preventDefault();
+        confirmRule.innerText =
+            '❌ Passwords do not match';
 
-
-            const loginUser =
-                document.getElementById("loginUser");
-
-            const loginPass =
-                document.getElementById("loginPass");
-
-            const loginError =
-                document.getElementById("loginError");
+        confirmRule.style.margin = '5px 0 10px';
+        confirmRule.style.fontSize = '12px';
+        confirmRule.style.fontWeight = 'bold';
+        confirmRule.style.color = '#ff4d4d';
+        confirmRule.style.textAlign = 'left';
+        confirmRule.style.display = 'none';
+        confirmRule.style.pointerEvents = 'none';
 
 
-            const username =
-                loginUser.value.trim().toLowerCase();
+        const confirmGroup =
+            regPassConfirm.closest('.input-group');
 
-            const password =
-                loginPass.value;
+        if (confirmGroup) {
+
+            confirmGroup.insertAdjacentElement(
+                'afterend',
+                confirmRule
+            );
+        }
 
 
-            // ----------------------------------------------
-            // CLEAR ERROR
-            // ----------------------------------------------
+        regPassConfirm.addEventListener('input', () => {
 
-            if (loginError) {
-                loginError.textContent = "";
+            updatePasswordMatch();
+        });
+
+
+        function updatePasswordMatch() {
+
+            const password = regPass
+                ? regPass.value
+                : '';
+
+            const confirmation =
+                regPassConfirm.value;
+
+
+            // Empty confirmation = no message
+            if (confirmation.length === 0) {
+
+                confirmRule.style.display = 'none';
+
+                return;
             }
 
 
-            // ----------------------------------------------
-            // BASIC VALIDATION
-            // ----------------------------------------------
+            // Passwords don't match
+            if (password !== confirmation) {
 
-            if (!username || !password) {
+                confirmRule.innerText =
+                    '❌ Passwords do not match';
 
-                if (loginError) {
+                confirmRule.style.display = 'block';
 
-                    loginError.textContent =
-                        "Please enter your username and password.";
+            } else {
 
+                confirmRule.style.display = 'none';
+            }
+        }
+    }
+
+
+    // 5. Register Submit (Firebase Auth + Firestore)
+    document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document
+            .getElementById('regUser')
+            .value
+            .trim()
+            .toLowerCase();
+
+        const displayNameInput = document
+            .getElementById('regDisplayName')
+            .value
+            .trim();
+
+        const pass = document
+            .getElementById('regPass')
+            .value;
+
+        const passConfirm = document
+            .getElementById('regPassConfirm')
+            .value;
+
+        const errElem = document.getElementById('regError');
+
+        const submitBtn = e.target.querySelector(
+            'button[type="submit"]'
+        );
+
+
+        if (!validateUsername(username)) {
+
+            if (errElem) {
+                errElem.innerText =
+                    "Invalid username format!";
+            }
+
+            return;
+        }
+
+
+        if (!validatePassword(pass)) {
+
+            if (errElem) {
+                errElem.innerText =
+                    "Invalid password format!";
+            }
+
+            return;
+        }
+
+
+        if (pass !== passConfirm) {
+
+            if (errElem) {
+                errElem.innerText =
+                    "Passwords do not match!";
+            }
+
+            return;
+        }
+
+
+        let originalBtnText = submitBtn
+            ? submitBtn.innerText
+            : "REGISTER";
+
+
+        if (submitBtn) {
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Creating account...";
+        }
+
+
+        try {
+
+            if (!window.pixvinzDb || !window.pixvinzAuth) {
+
+                if (errElem) {
+                    errElem.innerText =
+                        "Firebase connection not available.";
+                }
+
+                if (submitBtn) {
+
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = originalBtnText;
                 }
 
                 return;
             }
 
 
-            try {
-
-                // ------------------------------------------
-                // FETCH PLAYER FROM FIRESTORE
-                // ------------------------------------------
-
-                const userDocRef =
-                    doc(db, "players", username);
-
-                const snap =
-                    await getDoc(userDocRef);
+            const {
+                db,
+                doc,
+                getDoc,
+                setDoc
+            } = window.pixvinzDb;
 
 
-                if (!snap.exists()) {
+            const {
+                auth,
+                createUserWithEmailAndPassword
+            } = window.pixvinzAuth;
 
-                    if (loginError) {
 
-                        loginError.textContent =
-                            "Username or password is incorrect.";
+            const userDocRef = doc(
+                db,
+                'players',
+                username
+            );
 
-                    }
 
-                    return;
+            const userSnapshot = await getDoc(
+                userDocRef
+            );
+
+
+            if (userSnapshot.exists()) {
+
+                if (errElem) {
+                    errElem.innerText =
+                        "Username is already taken!";
                 }
 
+                if (submitBtn) {
+
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = originalBtnText;
+                }
+
+                return;
+            }
+
+
+            const dummyEmail =
+                `${username}@pixvinz.com`;
+
+
+            const userCredential =
+                await createUserWithEmailAndPassword(
+                    auth,
+                    dummyEmail,
+                    pass
+                );
+
+
+            const uid =
+                userCredential.user.uid;
+
+
+            const newUserData = {
+
+                username: username,
+
+                uid: uid,
+
+                displayName: displayNameInput,
+
+                avatar: "",
+
+                coins: 0,
+
+                level: 1,
+
+                xp: 0,
+
+                // NEW: default challenge value
+                challenge: null,
+
+                dailyrewards: {
+                    streak: 0,
+                    lastClaimDate: ""
+                },
+
+                password: pass,
+
+                createdAt: new Date()
+            };
+
+
+            await setDoc(
+                userDocRef,
+                newUserData
+            );
+
+
+            // CLEAR OLD LOCAL SESSION DATA TO PREVENT CROSS-CONTAMINATION
+            localStorage.clear();
+
+            localStorage.setItem(
+                'loggedInUser',
+                JSON.stringify(newUserData)
+            );
+
+            localStorage.setItem(
+                'skipLoading',
+                'true'
+            );
+
+
+            // Map keys for consistency
+            const prefix = username + '_';
+
+            localStorage.setItem(
+                prefix + 'totalCoins',
+                newUserData.coins
+            );
+
+            localStorage.setItem(
+                prefix + 'currentLevel',
+                newUserData.level
+            );
+
+            localStorage.setItem(
+                prefix + 'xp',
+                newUserData.xp
+            );
+
+            localStorage.setItem(
+                prefix + 'currentChallenge',
+                JSON.stringify(newUserData.challenge)
+            );
+
+            localStorage.setItem(
+                prefix + 'vinpix_avatar',
+                newUserData.avatar
+            );
+
+            localStorage.setItem(
+                `pixvinz_daily_${username}`,
+                JSON.stringify(
+                    newUserData.dailyrewards
+                )
+            );
+
+
+            if (errElem) {
+                errElem.innerText = "";
+            }
+
+            window.location.href = 'index.html';
+
+
+        } catch (err) {
+
+            console.error(
+                "Registration error:",
+                err
+            );
+
+            if (errElem) {
+
+                errElem.innerText =
+                    "Registration error: " +
+                    err.message;
+            }
+
+
+            if (submitBtn) {
+
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalBtnText;
+            }
+        }
+    });
+
+
+    // 6. Login Submit (Firestore verification & progress fetch)
+    document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
+
+        e.preventDefault();
+
+
+        const username = document
+            .getElementById('loginUser')
+            .value
+            .trim()
+            .toLowerCase();
+
+
+        const pass = document
+            .getElementById('loginPass')
+            .value;
+
+
+        const errElem =
+            document.getElementById('loginError');
+
+
+        const submitBtn =
+            e.target.querySelector(
+                'button[type="submit"]'
+            );
+
+
+        let originalBtnText = submitBtn
+            ? submitBtn.innerText
+            : "LOG IN";
+
+
+        if (submitBtn) {
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Signing in...";
+        }
+
+
+        try {
+
+            if (!window.pixvinzDb) {
+
+                if (errElem) {
+                    errElem.innerText =
+                        "Database connection not available.";
+                }
+
+                if (submitBtn) {
+
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = originalBtnText;
+                }
+
+                return;
+            }
+
+
+            const {
+                db,
+                doc,
+                getDoc
+            } = window.pixvinzDb;
+
+
+            const userDocRef = doc(
+                db,
+                'players',
+                username
+            );
+
+
+            const snap =
+                await getDoc(userDocRef);
+
+
+            if (snap.exists()) {
 
                 const userData =
                     snap.data();
 
 
-                // ------------------------------------------
-                // PASSWORD CHECK
-                // ------------------------------------------
-                //
-                // This preserves your existing login system.
-                //
+                if (userData.password === pass) {
 
-                if (
-                    userData.password &&
-                    userData.password !== password
-                ) {
+                    // ==================================================
+                    // FETCH LATEST DATA DIRECTLY FROM FIRESTORE
+                    // ==================================================
 
-                    if (loginError) {
+                    const freshUserData = {
 
-                        loginError.textContent =
-                            "Username or password is incorrect.";
+                        username:
+                            userData.username || username,
 
+                        uid:
+                            userData.uid || "",
+
+                        displayName:
+                            userData.displayName || "",
+
+                        // AVATAR
+                        avatar:
+                            userData.avatar || "",
+
+                        // COINS
+                        coins:
+                            Number(userData.coins ?? 0),
+
+                        // LEVEL
+                        level:
+                            Number(userData.level ?? 1),
+
+                        // XP
+                        xp:
+                            Number(userData.xp ?? 0),
+
+                        // CHALLENGE
+                        challenge:
+                            userData.challenge ?? null,
+
+                        // DAILY REWARDS
+                        dailyrewards:
+                            userData.dailyrewards || {
+                                streak: 0,
+                                lastClaimDate: ""
+                            }
+                    };
+
+
+                    // CLEAR PREVIOUS USER CACHE COMPLETELY FIRST
+                    localStorage.clear();
+
+                    localStorage.setItem(
+                        'loggedInUser',
+                        JSON.stringify(
+                            freshUserData
+                        )
+                    );
+
+
+                    localStorage.setItem(
+                        'skipLoading',
+                        'true'
+                    );
+
+
+                    // ==================================================
+                    // MAP FIRESTORE VALUES TO EXISTING GAME KEYS
+                    // ==================================================
+
+                    const prefix =
+                        username + '_';
+
+
+                    // COINS
+                    localStorage.setItem(
+                        prefix + 'totalCoins',
+                        String(freshUserData.coins)
+                    );
+
+
+                    // LEVEL
+                    localStorage.setItem(
+                        prefix + 'currentLevel',
+                        String(freshUserData.level)
+                    );
+
+
+                    // XP
+                    localStorage.setItem(
+                        prefix + 'xp',
+                        String(freshUserData.xp)
+                    );
+
+
+                    // CHALLENGE
+                    localStorage.setItem(
+                        prefix + 'currentChallenge',
+                        JSON.stringify(
+                            freshUserData.challenge
+                        )
+                    );
+
+
+                    // AVATAR
+                    localStorage.setItem(
+                        prefix + 'vinpix_avatar',
+                        freshUserData.avatar
+                    );
+
+
+                    // DAILY REWARDS
+                    if (freshUserData.dailyrewards) {
+
+                        localStorage.setItem(
+                            `pixvinz_daily_${username}`,
+                            JSON.stringify(
+                                freshUserData.dailyrewards
+                            )
+                        );
                     }
+
+
+                    console.log(
+                        "PixVinz Firestore player data loaded:",
+                        {
+                            xp: freshUserData.xp,
+                            coins: freshUserData.coins,
+                            challenge: freshUserData.challenge,
+                            avatar: freshUserData.avatar,
+                            level: freshUserData.level
+                        }
+                    );
+
+
+                    if (errElem) {
+                        errElem.innerText = "";
+                    }
+
+
+                    window.location.href =
+                        'index.html';
 
                     return;
                 }
+            }
 
 
-                // ==================================================
-                // GET THE LATEST PLAYER DATA FROM FIRESTORE
-                // ==================================================
+            if (errElem) {
 
-                const freshUserData = {
-
-                    username:
-                        userData.username || username,
-
-                    uid:
-                        userData.uid || "",
-
-                    displayName:
-                        userData.displayName || "",
+                errElem.innerText =
+                    "Invalid username or password!";
+            }
 
 
-                    // ----------------------------------------------
-                    // AVATAR
-                    // ----------------------------------------------
+            if (submitBtn) {
 
-                    avatar:
-                        userData.avatar || "",
-
-
-                    // ----------------------------------------------
-                    // COINS
-                    // ----------------------------------------------
-
-                    coins:
-                        Number(userData.coins ?? 0),
+                submitBtn.disabled = false;
+                submitBtn.innerText =
+                    originalBtnText;
+            }
 
 
-                    // ----------------------------------------------
-                    // LEVEL
-                    // ----------------------------------------------
+        } catch (err) {
 
-                    level:
-                        Number(userData.level ?? 1),
+            console.error(
+                "Login error:",
+                err
+            );
 
+            if (errElem) {
 
-                    // ----------------------------------------------
-                    // XP
-                    // ----------------------------------------------
-
-                    xp:
-                        Number(userData.xp ?? 0),
-
-
-                    // ----------------------------------------------
-                    // CHALLENGE
-                    // ----------------------------------------------
-
-                    challenge:
-                        userData.challenge ?? null,
+                errElem.innerText =
+                    "Login error occurred: " +
+                    err.message;
+            }
 
 
-                    // ----------------------------------------------
-                    // DAILY REWARDS
-                    // ----------------------------------------------
+            if (submitBtn) {
 
-                    dailyrewards:
-                        userData.dailyrewards || {
-                            streak: 0,
-                            lastClaimDate: ""
-                        }
-
-                };
+                submitBtn.disabled = false;
+                submitBtn.innerText =
+                    originalBtnText;
+            }
+        }
+    });
+});
 
 
-                // ==================================================
-                // CLEAR OLD LOCAL DATA
-                // ==================================================
+// ==========================================
+// PIXVINZ PWA INSTALL
+// ==========================================
 
-                localStorage.clear();
+let deferredInstallPrompt = null;
 
+window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
 
-                // ==================================================
-                // SAVE LOGGED-IN USER
-                // ==================================================
+    deferredInstallPrompt = event;
 
-                localStorage.setItem(
-                    "loggedInUser",
-                    JSON.stringify(freshUserData)
-                );
+    console.log("PixVinz install prompt is ready.");
+});
 
+async function installPixVinz() {
 
-                localStorage.setItem(
-                    "skipLoading",
-                    "true"
-                );
+    // Browser does not currently offer the install prompt
+    if (!deferredInstallPrompt) {
+        alert(
+            "PixVinz is not ready to install yet.\n\n" +
+            "If you're using Android Chrome, try opening PixVinz " +
+            "from the website and wait a few seconds."
+        );
+        return;
+    }
 
+    deferredInstallPrompt.prompt();
 
-                // ==================================================
-                // PLAYER PREFIX
-                // ==================================================
+    const result = await deferredInstallPrompt.userChoice;
 
-                const prefix =
-                    username + "_";
+    console.log("PixVinz install result:", result.outcome);
 
-
-                // ==================================================
-                // SAVE COINS
-                // ==================================================
-
-                localStorage.setItem(
-                    prefix + "totalCoins",
-                    String(freshUserData.coins)
-                );
+    deferredInstallPrompt = null;
+}
 
 
-                // ==================================================
-                // SAVE LEVEL
-                // ==================================================
+// Connect both buttons
+const installButtons = [
+    document.getElementById("install-app-btn-login"),
+    document.getElementById("install-app-btn-register")
+];
 
-                localStorage.setItem(
-                    prefix + "currentLevel",
-                    String(freshUserData.level)
-                );
+installButtons.forEach((button) => {
 
+    if (!button) return;
 
-                // ==================================================
-                // SAVE XP
-                // ==================================================
+    button.addEventListener("click", installPixVinz);
 
-                localStorage.setItem(
-                    prefix + "xp",
-                    String(freshUserData.xp)
-                );
+});
 
 
-                // ==================================================
-                // SAVE CHALLENGE
-                // ==================================================
+// Detect successful installation
+window.addEventListener("appinstalled", () => {
 
-                localStorage.setItem(
-                    prefix + "currentChallenge",
-                    JSON.stringify(
-                        freshUserData.challenge
-                    )
-                );
+    console.log("PixVinz installed successfully!");
+
+    deferredInstallPrompt = null;
+
+});
 
 
-                // ==================================================
-                // SAVE AVATAR
-                // ==================================================
+if ("serviceWorker" in navigator) {
 
-                localStorage.setItem(
-                    prefix + "vinpix_avatar",
-                    freshUserData.avatar
-                );
+    window.addEventListener("load", () => {
 
-
-                // ==================================================
-                // SAVE DAILY REWARDS
-                // ==================================================
-
-                localStorage.setItem(
-                    "pixvinz_daily_" + username,
-                    JSON.stringify(
-                        freshUserData.dailyrewards
-                    )
-                );
-
-
-                // ==================================================
-                // DEBUG
-                // ==================================================
+        navigator.serviceWorker
+            .register("/PixVinz/sw.js")
+            .then((registration) => {
 
                 console.log(
-                    "================================="
+                    "PixVinz Service Worker registered:",
+                    registration.scope
                 );
 
-                console.log(
-                    "PIXVINZ PLAYER LOADED"
-                );
-
-                console.log(
-                    "Username:",
-                    freshUserData.username
-                );
-
-                console.log(
-                    "Display Name:",
-                    freshUserData.displayName
-                );
-
-                console.log(
-                    "Coins:",
-                    freshUserData.coins
-                );
-
-                console.log(
-                    "XP:",
-                    freshUserData.xp
-                );
-
-                console.log(
-                    "Level:",
-                    freshUserData.level
-                );
-
-                console.log(
-                    "Challenge:",
-                    freshUserData.challenge
-                );
-
-                console.log(
-                    "Avatar:",
-                    freshUserData.avatar
-                );
-
-                console.log(
-                    "================================="
-                );
-
-
-                // ==================================================
-                // GO TO GAME
-                // ==================================================
-
-                window.location.href =
-                    "index.html";
-
-
-            } catch (error) {
+            })
+            .catch((error) => {
 
                 console.error(
-                    "Login error:",
+                    "PixVinz Service Worker registration failed:",
                     error
                 );
 
-                if (loginError) {
+            });
 
-                    loginError.textContent =
-                        "Unable to log in. Please try again.";
+    });
 
-                }
-
-            }
-
-        });
-
-    }
-
-
-    // ========================================================
-    // REGISTER FORM
-    // ========================================================
-
-    const registerForm =
-        document.getElementById("registerForm");
-
-
-    if (registerForm) {
-
-        registerForm.addEventListener("submit", async (e) => {
-
-            e.preventDefault();
-
-
-            // ----------------------------------------------
-            // VALUES
-            // ----------------------------------------------
-
-            const displayName =
-                regDisplayName.value.trim();
-
-            const username =
-                regUser.value.trim().toLowerCase();
-
-            const password =
-                regPass.value;
-
-            const confirmPassword =
-                regPassConfirm.value;
-
-
-            // ----------------------------------------------
-            // CLEAR ERROR
-            // ----------------------------------------------
-
-            if (regError) {
-                regError.textContent = "";
-            }
-
-
-            // ----------------------------------------------
-            // DISPLAY NAME
-            // ----------------------------------------------
-
-            if (!displayName) {
-
-                regError.textContent =
-                    "Please enter a display name.";
-
-                return;
-            }
-
-
-            // ----------------------------------------------
-            // USERNAME
-            // ----------------------------------------------
-
-            if (!validateUsername(username)) {
-
-                regError.textContent =
-                    "Username must contain
+}
