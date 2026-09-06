@@ -36,71 +36,81 @@ function goHome() {
 // --- SAFE CLOUD SYNC ---
 window.saveUserDataToCloud = async function() {
     try {
-        if (!window.pixvinzDb || !window.pixvinzDb.db) return;
-        const { db, doc, setDoc } = window.pixvinzDb;
-        const username = getCurrentUsername();
-        if (!username) return;
-
-        let displayName = username;
-        try {
-            const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
-            if (userObj && userObj.displayName) displayName = userObj.displayName;
-        } catch (e) {}
-
-        const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
-        const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
-        const avatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
-
-        const xpKey = getUserKey('xp');
-        let currentXpVal = parseInt(localStorage.getItem(xpKey));
-
-        if (isNaN(currentXpVal)) {
-            try {
-                const userObj = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
-                currentXpVal = Number(userObj.xp) || 0;
-            } catch (e) {
-                currentXpVal = 0;
-            }
+        if (!window.pixvinzDb || !window.pixvinzDb.db) {
+            console.warn("Firestore database instance not ready yet.");
+            return;
         }
 
-        currentXpVal = Math.max(0, currentXpVal);
+        const { db, doc, setDoc } = window.pixvinzDb;
+        const username = getCurrentUsername();
+        if (!username) {
+            console.warn("No logged-in username found for cloud save.");
+            return;
+        }
 
+        // 1. Always pull raw localStorage numbers directly with reliable fallbacks
+        const levelKey = getUserKey('currentLevel');
+        const coinKey = getUserKey('totalCoins');
+        const xpKey = getUserKey('xp');
+        const challengeKey = getUserKey('currentChallenge');
+        const avatarKey = getUserKey('vinpix_avatar');
+
+        let rawLevel = parseInt(localStorage.getItem(levelKey));
+        let rawCoins = parseInt(localStorage.getItem(coinKey));
+        let rawXp = parseInt(localStorage.getItem(xpKey));
+        let rawChallenge = parseInt(localStorage.getItem(challengeKey));
+
+        // Fallback to loggedInUser object if localStorage keys return NaN
+        let loggedUser = {};
         try {
-            const userObj = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
-            if (userObj) {
-                userObj.xp = currentXpVal;
-                userObj.level = currentLevel;
-                userObj.coins = totalCoins;
-                userObj.avatar = avatar;
-                localStorage.setItem('loggedInUser', JSON.stringify(userObj));
-            }
-        } catch (e) {}
+            loggedUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+        } catch(e) {}
 
+        const finalLevel = !isNaN(rawLevel) ? rawLevel : Number(loggedUser.level || 1);
+        const finalCoins = !isNaN(rawCoins) ? rawCoins : Number(loggedUser.coins || 0);
+        const finalXp = !isNaN(rawXp) ? rawXp : Number(loggedUser.xp || 0);
+        const finalChallenge = !isNaN(rawChallenge) ? rawChallenge : Number(loggedUser.challenge || 1);
+        const finalAvatar = localStorage.getItem(avatarKey) || loggedUser.avatar || '';
+        const displayName = loggedUser.displayName || username;
+
+        // Daily Reward State
         const dailyStorageKey = getDailyStorageKey();
         const dailyDataStr = localStorage.getItem(dailyStorageKey);
         const dailyRewardState = dailyDataStr ? JSON.parse(dailyDataStr) : { streak: 0, lastClaimDate: "", lastClaimTimestamp: 0 };
 
-        const currentChallengeVal = parseInt(localStorage.getItem(getUserKey('currentChallenge'))) || 1;
-        const userDocRef = doc(db, "players", username);
+        // 2. Keep local object updated so everything stays 100% in sync locally
+        loggedUser.username = username;
+        loggedUser.displayName = displayName;
+        loggedUser.level = finalLevel;
+        loggedUser.coins = finalCoins;
+        loggedUser.xp = finalXp;
+        loggedUser.challenge = finalChallenge;
+        loggedUser.avatar = finalAvatar;
+        localStorage.setItem('loggedInUser', JSON.stringify(loggedUser));
 
-        await setDoc(userDocRef, {
+        // 3. Force direct document update to Firestore
+        const userDocRef = doc(db, "players", username);
+        const payload = {
             username: username,
             displayName: displayName,
-            level: currentLevel,
-            xp: currentXpVal,
-            coins: totalCoins,
-            avatar: avatar,
+            level: Number(finalLevel),
+            coins: Number(finalCoins),
+            xp: Number(finalXp),
+            challenge: Number(finalChallenge),
+            avatar: finalAvatar,
             dailyRewardState: dailyRewardState,
-            challenge: currentChallengeVal,
             lastUpdated: new Date()
-        }, { merge: true });
-        
-        console.log("Cloud sync successful for:", username);
+        };
+
+        console.log("Sending payload to Firestore:", payload);
+
+        await setDoc(userDocRef, payload, { merge: true });
+        console.log("✅ FIRESTORE SYNC SUCCESSFUL for user:", username);
+
     } catch (error) {
-        console.warn("Cloud sync skipped or failed safely:", error);
+        console.error("❌ Firestore Cloud Save Failed:", error);
     }
 };
-
 async function fetchUserDataFromFirestore() {
     const username = getCurrentUsername();
     if (!username) return;
