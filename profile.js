@@ -82,7 +82,7 @@ window.saveUserDataToCloud = async function() {
         const dailyDataStr = localStorage.getItem(dailyStorageKey);
         const dailyRewardState = dailyDataStr ? JSON.parse(dailyDataStr) : { streak: 0, lastClaimDate: "" };
 
-        // --- CHALLENGE DATA ---
+        
         // --- CHALLENGE DATA ---
     const currentChallengeVal = parseInt(localStorage.getItem(getUserKey('currentChallenge'))) || 1;
         const userDocRef = doc(db, "players", username);
@@ -541,7 +541,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateProfileStats();
     checkAndUnlockBadges();
     loadProfileGlobalRank();
-    saveUserDataToCloud();
 });
 
 // --- EDIT NAME MODAL HANDLERS ---
