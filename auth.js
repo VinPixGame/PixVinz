@@ -662,10 +662,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         level:
                             Number(userData.level ?? 1),
 
-                        // XP
-                        xp:
-                            Number(userData.xp ?? 0),
-
+                        // XP — FETCH TOTAL XP / CURRENT XP FROM FIRESTORE
+                          xp:
+                          Number(
+                          userData.totalXP ??
+                          userData.currentXp ??
+                          userData.xp ??
+                                    0
+                                      ),
                         // CHALLENGE
                         challenge:
                             userData.challenge ?? null,
