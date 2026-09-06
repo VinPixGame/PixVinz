@@ -146,14 +146,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const vCoins = document.getElementById('vCoins');
       if (vCoins) vCoins.innerText = `+${stars * 5}`;
 
-      let xpGained = 100;
-if (currentLevel <= 10) xpGained = 100;
-else if (currentLevel <= 20) xpGained = 200;
-else if (currentLevel <= 30) xpGained = 300;
-else if (currentLevel <= 50) xpGained = 400;
-else if (currentLevel <= 100) xpGained = 500;
-else if (currentLevel <= 150) xpGained = 700;
-else if (currentLevel <= 200) xpGained = 1000;
+      let tier = Math.floor((currentLevel - 1) / 10);
+      let xpGained = (tier + 1) * 100;
       const vXp = document.getElementById('vXp');
       if (vXp) vXp.innerText = `+${xpGained}`;
 
