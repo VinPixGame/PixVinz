@@ -14,7 +14,7 @@ function getCurrentUsername() {
 
 function getUserKey(keyName) {
     const username = getCurrentUsername();
-    return `${username}_${keyName}`;
+    return username ? `${username}_${keyName}` : keyName;
 }
 
 function goHome() {
@@ -22,8 +22,7 @@ function goHome() {
     
     if (typeof showView === 'function') {
         showView('home');     
-    fetchUserDataFromFirestore();
-        
+        fetchUserDataFromFirestore();
     } else {
         const homeViewElement = document.getElementById('homeView') || window.parent.document.getElementById('homeView');
         if (homeViewElement && typeof window.parent.showView === 'function') {
@@ -52,12 +51,9 @@ window.saveUserDataToCloud = async function() {
         const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
         const avatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
 
-        // XP is independent from puzzle level.
-        // Read the accumulated XP directly from the user's XP key.
         const xpKey = getUserKey('xp');
         let currentXpVal = parseInt(localStorage.getItem(xpKey));
 
-        // If the XP key is missing, use the logged-in user's stored XP.
         if (isNaN(currentXpVal)) {
             try {
                 const userObj = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
@@ -69,23 +65,24 @@ window.saveUserDataToCloud = async function() {
 
         currentXpVal = Math.max(0, currentXpVal);
 
-        // Keep loggedInUser.xp synchronized with the value being saved.
         try {
             const userObj = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
             if (userObj) {
                 userObj.xp = currentXpVal;
+                userObj.level = currentLevel;
+                userObj.coins = totalCoins;
+                userObj.avatar = avatar;
                 localStorage.setItem('loggedInUser', JSON.stringify(userObj));
             }
         } catch (e) {}
 
         const dailyStorageKey = getDailyStorageKey();
         const dailyDataStr = localStorage.getItem(dailyStorageKey);
-        const dailyRewardState = dailyDataStr ? JSON.parse(dailyDataStr) : { streak: 0, lastClaimDate: "" };
+        const dailyRewardState = dailyDataStr ? JSON.parse(dailyDataStr) : { streak: 0, lastClaimDate: "", lastClaimTimestamp: 0 };
 
-        
-        // --- CHALLENGE DATA ---
-    const currentChallengeVal = parseInt(localStorage.getItem(getUserKey('currentChallenge'))) || 1;
+        const currentChallengeVal = parseInt(localStorage.getItem(getUserKey('currentChallenge'))) || 1;
         const userDocRef = doc(db, "players", username);
+
         await setDoc(userDocRef, {
             username: username,
             displayName: displayName,
@@ -104,7 +101,6 @@ window.saveUserDataToCloud = async function() {
     }
 };
 
-
 async function fetchUserDataFromFirestore() {
     const username = getCurrentUsername();
     if (!username) return;
@@ -117,231 +113,71 @@ async function fetchUserDataFromFirestore() {
 
             if (userSnap.exists()) {
                 const cloudData = userSnap.data();
-                const currentUser = JSON.parse(
-                    localStorage.getItem('loggedInUser')
-                ) || {};
+                const currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
 
-                /*
-                 * =====================================================
-                 * FIRESTORE IS THE SOURCE OF TRUTH
-                 * =====================================================
-                 *
-                 * Level, XP, coins and avatar are taken directly
-                 * from Firestore.
-                 *
-                 * LocalStorage is only updated as a cache so the
-                 * existing UI/game code continues working.
-                 */
+                const cloudLevel = cloudData.level !== undefined ? Number(cloudData.level) : (currentUser.level || 1);
+                const cloudXp = cloudData.xp !== undefined ? Math.max(0, Number(cloudData.xp) || 0) : Math.max(0, Number(currentUser.xp) || 0);
+                const cloudCoins = cloudData.coins !== undefined ? Math.max(0, Number(cloudData.coins) || 0) : Math.max(0, Number(currentUser.coins) || 0);
+                const cloudAvatar = cloudData.avatar !== undefined ? cloudData.avatar : (currentUser.avatar || '');
 
-                const cloudLevel =
-                    cloudData.level !== undefined
-                        ? Number(cloudData.level)
-                        : (currentUser.level || 1);
-
-                const cloudXp =
-                    cloudData.xp !== undefined
-                        ? Math.max(0, Number(cloudData.xp) || 0)
-                        : Math.max(0, Number(currentUser.xp) || 0);
-
-                const cloudCoins =
-                    cloudData.coins !== undefined
-                        ? Math.max(0, Number(cloudData.coins) || 0)
-                        : Math.max(0, Number(currentUser.coins) || 0);
-
-                const cloudAvatar =
-                    cloudData.avatar !== undefined
-                        ? cloudData.avatar
-                        : (currentUser.avatar || '');
-
-                // Merge cloud data with local session.
-                // Cloud values win for progression/profile data.
                 const updatedUser = {
                     ...currentUser,
-
-                    username:
-                        cloudData.username !== undefined
-                            ? cloudData.username
-                            : currentUser.username,
-
-                    displayName:
-                        cloudData.displayName !== undefined
-                            ? cloudData.displayName
-                            : currentUser.displayName,
-
+                    username: cloudData.username !== undefined ? cloudData.username : currentUser.username,
+                    displayName: cloudData.displayName !== undefined ? cloudData.displayName : currentUser.displayName,
                     level: cloudLevel,
                     xp: cloudXp,
                     coins: cloudCoins,
                     avatar: cloudAvatar,
-
-                    dailyRewardState:
-                        cloudData.dailyRewardState !== undefined
-                            ? cloudData.dailyRewardState
-                            : currentUser.dailyRewardState,
-
-                    challenge:
-                        cloudData.challenge !== undefined
-                            ? cloudData.challenge
-                            : currentUser.challenge
+                    dailyRewardState: cloudData.dailyRewardState !== undefined ? cloudData.dailyRewardState : currentUser.dailyRewardState,
+                    challenge: cloudData.challenge !== undefined ? cloudData.challenge : currentUser.challenge
                 };
 
-                // Save the fresh Firestore data to the session.
-                localStorage.setItem(
-                    'loggedInUser',
-                    JSON.stringify(updatedUser)
-                );
+                localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
 
-                // Sync stats to local storage keys used by the rest
-                // of the application.
                 const prefix = username + '_';
 
                 if (cloudData.coins !== undefined) {
-                    localStorage.setItem(
-                        prefix + 'totalCoins',
-                        cloudCoins
-                    );
+                    localStorage.setItem(prefix + 'totalCoins', cloudCoins);
                 }
 
                 if (cloudData.level !== undefined) {
-                    localStorage.setItem(
-                        prefix + 'currentLevel',
-                        cloudLevel
-                    );
+                    localStorage.setItem(prefix + 'currentLevel', cloudLevel);
                 }
-
-                /*
-                 * =====================================================
-                 * XP SYNC
-                 * =====================================================
-                 *
-                 * FIRESTORE XP IS THE ONLY SOURCE OF TRUTH HERE.
-                 *
-                 * Do NOT compare it with local XP.
-                 * Do NOT take the higher value.
-                 * Do NOT call saveUserDataToCloud() here.
-                 *
-                 * LocalStorage simply receives the Firestore XP
-                 * so updateXpProgress() can use the existing system.
-                 */
 
                 if (cloudData.xp !== undefined) {
-                    localStorage.setItem(
-                        prefix + 'xp',
-                        cloudXp
-                    );
-
-                    try {
-                        const latestUser = JSON.parse(
-                            localStorage.getItem(
-                                'loggedInUser'
-                            ) || '{}'
-                        );
-
-                        latestUser.xp = cloudXp;
-
-                        localStorage.setItem(
-                            'loggedInUser',
-                            JSON.stringify(latestUser)
-                        );
-                    } catch (e) {}
+                    localStorage.setItem(prefix + 'xp', cloudXp);
                 }
 
-                /*
-                 * =====================================================
-                 * AVATAR
-                 * =====================================================
-                 */
-
                 if (cloudData.avatar !== undefined) {
-                    localStorage.setItem(
-                        prefix + 'vinpix_avatar',
-                        cloudAvatar
-                    );
-
+                    localStorage.setItem(prefix + 'vinpix_avatar', cloudAvatar);
                     if (typeof applyAvatarToUI === 'function') {
-                        applyAvatarToUI(
-                            cloudAvatar || 'image/avatar.png'
-                        );
+                        applyAvatarToUI(cloudAvatar || 'image/avatar.png');
                     }
                 }
 
-                /*
-                 * =====================================================
-                 * CHALLENGE DATA
-                 * =====================================================
-                 */
-
                 if (cloudData.challenge !== undefined) {
-                    localStorage.setItem(
-                        prefix + 'currentChallenge',
-                        cloudData.challenge
-                    );
+                    localStorage.setItem(prefix + 'currentChallenge', cloudData.challenge);
                 }
 
-                /*
-                 * =====================================================
-                 * DAILY REWARD STATE
-                 * =====================================================
-                 */
-
                 if (cloudData.dailyRewardState) {
-                    const dailyStorageKey =
-                        `pixvinz_daily_${username}`;
-
-                    localStorage.setItem(
-                        dailyStorageKey,
-                        JSON.stringify(
-                            cloudData.dailyRewardState
-                        )
-                    );
-
-                    if (
-                        typeof checkDailyRewardStatus ===
-                        'function'
-                    ) {
+                    const dailyStorageKey = `pixvinz_daily_${username}`;
+                    localStorage.setItem(dailyStorageKey, JSON.stringify(cloudData.dailyRewardState));
+                    if (typeof checkDailyRewardStatus === 'function') {
                         checkDailyRewardStatus();
                     }
                 }
 
-                /*
-                 * =====================================================
-                 * UPDATE SCREEN
-                 * =====================================================
-                 */
+                if (typeof updateXpProgress === 'function') updateXpProgress();
+                if (typeof updateProfileStats === 'function') updateProfileStats();
+                if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
 
-                if (
-                    typeof updateXpProgress ===
-                    'function'
-                ) {
-                    updateXpProgress();
-                }
-
-                if (
-                    typeof updateProfileStats ===
-                    'function'
-                ) {
-                    updateProfileStats();
-                }
-
-                if (
-                    typeof updateCoinDisplay ===
-                    'function'
-                ) {
-                    updateCoinDisplay();
-                }
-
-                console.log(
-                    "Profile successfully synced from Firestore players collection!"
-                );
+                console.log("Profile successfully synced from Firestore players collection!");
             }
         }
     } catch (err) {
-        console.error(
-            "Failed to fetch data from Firestore:",
-            err
-        );
+        console.error("Failed to fetch data from Firestore:", err);
     }
 }
-
 
 function applyAvatarToUI(avatarData) {
     const avatarLoader = document.getElementById('avatarLoader');
@@ -375,7 +211,6 @@ function calculateLevelAndXp(totalPuzzlesSolved) {
     const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
     const xpStoreKey = currentUsername ? currentUsername + '_xp' : 'xp';
 
-    // Total XP is accumulated independently from puzzle level.
     const totalXpEarned = Math.max(0, parseInt(localStorage.getItem(xpStoreKey)) || 0);
 
     const xpTiers = [
@@ -424,7 +259,6 @@ function calculateLevelAndXp(totalPuzzlesSolved) {
     };
 }
 
-// --- UPDATE COINS AND LEVEL UI STATS ---
 function updateProfileStats() {
     const prefix = getCurrentUsername() ? getCurrentUsername() + '_' : '';
     const totalCoins = parseInt(localStorage.getItem(prefix + 'totalCoins')) || 0;
@@ -441,8 +275,6 @@ function updateXpProgress() {
     const currentUsername = getCurrentUsername();
     const xpKey = currentUsername ? currentUsername + '_xp' : 'xp';
 
-    // XP level is calculated ONLY from accumulated XP.
-    // Puzzle currentLevel is completely separate.
     const currentXp = Math.max(0, parseInt(localStorage.getItem(xpKey)) || 0);
     const playerProgression = calculateLevelAndXp(currentXp);
 
@@ -531,16 +363,6 @@ async function loadProfileGlobalRank() {
     }
 }
 
-
-
-
-
-        
-
-
-
-
-// Modal Helper Functions
 function showBadgeModal(icon, title, desc, glowColor, isUnlocked) {
     const modal = document.getElementById('badgeModal');
     const modalImg = document.getElementById('modalBadgeImg');
@@ -553,7 +375,6 @@ function showBadgeModal(icon, title, desc, glowColor, isUnlocked) {
     modalTitle.innerText = title;
     modalDesc.innerText = desc;
 
-    // Apply unlock status, grayscale, and color glow to the enlarged badge image
     if (isUnlocked) {
         modalImg.style.filter = `drop-shadow(0 0 20px ${glowColor})`;
         modalTitle.style.color = '#ffffff';
@@ -570,7 +391,6 @@ function closeBadgeModal() {
     if (modal) modal.style.display = 'none';
 }
 
-// --- UNIFIED DYNAMIC BADGE CHECKER & 3-COLUMN RENDERER ---
 function checkAndUnlockBadges() {
     const badgesContainer = document.getElementById('badgesGrid');
     if (!badgesContainer) return;
@@ -644,13 +464,11 @@ function checkAndUnlockBadges() {
             <span class="badge-desc" style="font-size: 7.5px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1; width: 100%; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;">${badge.desc}</span>
         `;
 
-        // Click handler to display enlarged badge
         badgeElement.onclick = () => showBadgeModal(badge.icon, badge.title, badge.desc, badge.glowColor, isUnlocked);
 
         badgesContainer.appendChild(badgeElement);
     });
 }
-
 
 document.addEventListener('DOMContentLoaded', async () => {
     const avatarLoader = document.getElementById('avatarLoader');
@@ -691,7 +509,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadProfileGlobalRank();
 });
 
-// --- EDIT NAME MODAL HANDLERS ---
 const editModal = document.getElementById('editNameModal');
 const openModalBtn = document.getElementById('openEditNameModal');
 const closeModalBtn = document.getElementById('closeEditNameModal');
@@ -703,7 +520,6 @@ if (closeModalBtn && editModal) {
     closeModalBtn.addEventListener('click', () => editModal.classList.add('hidden'));
 }
 
-// --- AVATAR UPLOAD & COMPRESSION ---
 const avatarInput = document.getElementById('avatar-input');
 const avatarLoader = document.getElementById('avatarLoader');
 
@@ -747,7 +563,7 @@ if (avatarInput) {
                     localStorage.setItem(getUserKey('vinpix_avatar'), compressedBase64);
 
                     try {
-                        await saveUserDataToCloud();
+                        await window.saveUserDataToCloud();
                     } catch (err) {
                         console.log("Cloud upload deferred.");
                     }
@@ -774,7 +590,6 @@ if (avatarInput) {
     });
 }
 
-// --- SAVE PROFILE NAME HANDLER ---
 const saveProfileBtn = document.getElementById('save-profile-btn');
 if (saveProfileBtn) {
     saveProfileBtn.addEventListener('click', async () => {
@@ -809,7 +624,7 @@ if (saveProfileBtn) {
         }
 
         try {
-            await saveUserDataToCloud();
+            await window.saveUserDataToCloud();
         } catch (e) {}
         setTimeout(() => {
             if (statusEl) statusEl.textContent = '';
@@ -818,11 +633,6 @@ if (saveProfileBtn) {
     });
 }    
 
-
-
-
-
-// --- 7-DAY DAILY CHECK-IN LOGIC (USER-TIED & SECURE) ---
 const dailyRewardsData = [
     { day: 1, coins: 15, xp: 50, label: '15 🪙' },
     { day: 2, coins: 30, xp: 100, label: '30 🪙' },
@@ -874,12 +684,12 @@ function checkDailyRewardStatus() {
         }
     } catch (e) {}
 }
+
 window.openDailyModal = function() {
     if (typeof AudioManager !== 'undefined' && typeof AudioManager.playClick === 'function') {
         AudioManager.playClick();
     }
     
-    // Render real-time calendar graphic header dynamically in the modal
     const now = new Date();
     const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
     const monthStr = months[now.getMonth()];
@@ -934,9 +744,6 @@ function renderDailyGrid() {
     const currentDayIndex = lockedOut ? dailyState.streak : (dailyState.streak + 1 > 7 ? 1 : dailyState.streak + 1);
 
     dailyRewardsData.forEach((item) => {
-        const isCompleted = item.day <= dailyState.streak && !lockedOut;
-        const isCurrent = item.day === currentDayIndex && !lockedOut;
-
         let boxBg = 'rgba(255,255,255,0.03)';
         let borderColor = 'rgba(255,215,0,0.2)';
         let textColor = '#aaa';
@@ -945,7 +752,7 @@ function renderDailyGrid() {
             boxBg = 'rgba(0, 229, 255, 0.1)';
             borderColor = '#00e5ff';
             textColor = '#00e5ff';
-        } else if (isCurrent) {
+        } else if (item.day === currentDayIndex && !lockedOut) {
             boxBg = 'rgba(255, 215, 0, 0.15)';
             borderColor = '#ffd700';
             textColor = '#ffd700';
@@ -1046,7 +853,6 @@ window.claimDailyReward = async function() {
         if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
     }
 
-    // Daily reward XP goes into the same shared accumulated XP.
     try {
         const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
         const xpStoreKey = currentUsername ? currentUsername + '_xp' : 'xp';
@@ -1072,10 +878,10 @@ window.claimDailyReward = async function() {
     checkDailyRewardStatus();
 
     if (typeof updateXpProgress === 'function') updateXpProgress();
-    if (typeof updateProfileUI === 'function') updateProfileUI();
+    if (typeof updateProfileStats === 'function') updateProfileStats();
     
-    if (typeof saveUserDataToCloud === 'function') {
-        await saveUserDataToCloud();
+    if (typeof window.saveUserDataToCloud === 'function') {
+        await window.saveUserDataToCloud();
     }
 
     try {
