@@ -104,6 +104,7 @@ window.saveUserDataToCloud = async function() {
     }
 };
 
+
 async function fetchUserDataFromFirestore() {
     const username = getCurrentUsername();
     if (!username) return;
@@ -116,83 +117,230 @@ async function fetchUserDataFromFirestore() {
 
             if (userSnap.exists()) {
                 const cloudData = userSnap.data();
-                const currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
+                const currentUser = JSON.parse(
+                    localStorage.getItem('loggedInUser')
+                ) || {};
 
-                // Merge cloud data with local session
+                /*
+                 * =====================================================
+                 * FIRESTORE IS THE SOURCE OF TRUTH
+                 * =====================================================
+                 *
+                 * Level, XP, coins and avatar are taken directly
+                 * from Firestore.
+                 *
+                 * LocalStorage is only updated as a cache so the
+                 * existing UI/game code continues working.
+                 */
+
+                const cloudLevel =
+                    cloudData.level !== undefined
+                        ? Number(cloudData.level)
+                        : (currentUser.level || 1);
+
+                const cloudXp =
+                    cloudData.xp !== undefined
+                        ? Math.max(0, Number(cloudData.xp) || 0)
+                        : Math.max(0, Number(currentUser.xp) || 0);
+
+                const cloudCoins =
+                    cloudData.coins !== undefined
+                        ? Math.max(0, Number(cloudData.coins) || 0)
+                        : Math.max(0, Number(currentUser.coins) || 0);
+
+                const cloudAvatar =
+                    cloudData.avatar !== undefined
+                        ? cloudData.avatar
+                        : (currentUser.avatar || '');
+
+                // Merge cloud data with local session.
+                // Cloud values win for progression/profile data.
                 const updatedUser = {
                     ...currentUser,
-                    username: cloudData.username || currentUser.username,
-                    displayName: cloudData.displayName || currentUser.displayName,
-                    level: cloudData.level !== undefined ? cloudData.level : (currentUser.level || 1),
-                    xp: cloudData.xp !== undefined ? cloudData.xp : (currentUser.xp || 0),
-                    coins: cloudData.coins !== undefined ? cloudData.coins : (currentUser.coins || 0),
-                    avatar: cloudData.avatar || currentUser.avatar || '',
-                    dailyRewardState: cloudData.dailyRewardState || currentUser.dailyRewardState,
-                    challenge: cloudData.challenge || currentUser.challenge || {}
+
+                    username:
+                        cloudData.username !== undefined
+                            ? cloudData.username
+                            : currentUser.username,
+
+                    displayName:
+                        cloudData.displayName !== undefined
+                            ? cloudData.displayName
+                            : currentUser.displayName,
+
+                    level: cloudLevel,
+                    xp: cloudXp,
+                    coins: cloudCoins,
+                    avatar: cloudAvatar,
+
+                    dailyRewardState:
+                        cloudData.dailyRewardState !== undefined
+                            ? cloudData.dailyRewardState
+                            : currentUser.dailyRewardState,
+
+                    challenge:
+                        cloudData.challenge !== undefined
+                            ? cloudData.challenge
+                            : currentUser.challenge
                 };
 
-                // Save fresh data back to local storage
-                localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
+                // Save the fresh Firestore data to the session.
+                localStorage.setItem(
+                    'loggedInUser',
+                    JSON.stringify(updatedUser)
+                );
 
-                // Sync stats to local storage keys used by playerstat.js
+                // Sync stats to local storage keys used by the rest
+                // of the application.
                 const prefix = username + '_';
-                if (cloudData.coins !== undefined) localStorage.setItem(prefix + 'totalCoins', cloudData.coins);
-                if (cloudData.level !== undefined) localStorage.setItem(prefix + 'currentLevel', cloudData.level);
 
-                // XP SYNC:
-                // Keep the higher accumulated XP so an older Firestore value
-                // cannot overwrite newly earned local XP.
+                if (cloudData.coins !== undefined) {
+                    localStorage.setItem(
+                        prefix + 'totalCoins',
+                        cloudCoins
+                    );
+                }
+
+                if (cloudData.level !== undefined) {
+                    localStorage.setItem(
+                        prefix + 'currentLevel',
+                        cloudLevel
+                    );
+                }
+
+                /*
+                 * =====================================================
+                 * XP SYNC
+                 * =====================================================
+                 *
+                 * FIRESTORE XP IS THE ONLY SOURCE OF TRUTH HERE.
+                 *
+                 * Do NOT compare it with local XP.
+                 * Do NOT take the higher value.
+                 * Do NOT call saveUserDataToCloud() here.
+                 *
+                 * LocalStorage simply receives the Firestore XP
+                 * so updateXpProgress() can use the existing system.
+                 */
+
                 if (cloudData.xp !== undefined) {
-                    const cloudXp = Math.max(0, Number(cloudData.xp) || 0);
-                    const localXp = Math.max(0, parseInt(localStorage.getItem(prefix + 'xp')) || 0);
-                    const sessionXp = Math.max(0, Number(currentUser.xp) || 0);
-                    const highestXp = Math.max(cloudXp, localXp, sessionXp);
-
-                    localStorage.setItem(prefix + 'xp', highestXp);
+                    localStorage.setItem(
+                        prefix + 'xp',
+                        cloudXp
+                    );
 
                     try {
-                        const latestUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
-                        latestUser.xp = highestXp;
-                        localStorage.setItem('loggedInUser', JSON.stringify(latestUser));
-                    } catch (e) {}
+                        const latestUser = JSON.parse(
+                            localStorage.getItem(
+                                'loggedInUser'
+                            ) || '{}'
+                        );
 
-                    // If local XP is newer than Firestore, push it back to cloud.
-                    if (highestXp > cloudXp && typeof saveUserDataToCloud === 'function') {
-                        await saveUserDataToCloud();
+                        latestUser.xp = cloudXp;
+
+                        localStorage.setItem(
+                            'loggedInUser',
+                            JSON.stringify(latestUser)
+                        );
+                    } catch (e) {}
+                }
+
+                /*
+                 * =====================================================
+                 * AVATAR
+                 * =====================================================
+                 */
+
+                if (cloudData.avatar !== undefined) {
+                    localStorage.setItem(
+                        prefix + 'vinpix_avatar',
+                        cloudAvatar
+                    );
+
+                    if (typeof applyAvatarToUI === 'function') {
+                        applyAvatarToUI(
+                            cloudAvatar || 'image/avatar.png'
+                        );
                     }
                 }
 
-                if (cloudData.avatar) localStorage.setItem(prefix + 'vinpix_avatar', cloudData.avatar);
+                /*
+                 * =====================================================
+                 * CHALLENGE DATA
+                 * =====================================================
+                 */
 
-                // Sync challenge data down to local storage
-                // Sync challenge data down to local storage
-    if (cloudData.challenge !== undefined) {
-        localStorage.setItem(prefix + 'currentChallenge', cloudData.challenge);
-    }
+                if (cloudData.challenge !== undefined) {
+                    localStorage.setItem(
+                        prefix + 'currentChallenge',
+                        cloudData.challenge
+                    );
+                }
 
-                // Sync daily reward state down to local storage key
+                /*
+                 * =====================================================
+                 * DAILY REWARD STATE
+                 * =====================================================
+                 */
+
                 if (cloudData.dailyRewardState) {
-                    const dailyStorageKey = `pixvinz_daily_${username}`;
-                    localStorage.setItem(dailyStorageKey, JSON.stringify(cloudData.dailyRewardState));
-                    
-                    if (typeof checkDailyRewardStatus === 'function') {
+                    const dailyStorageKey =
+                        `pixvinz_daily_${username}`;
+
+                    localStorage.setItem(
+                        dailyStorageKey,
+                        JSON.stringify(
+                            cloudData.dailyRewardState
+                        )
+                    );
+
+                    if (
+                        typeof checkDailyRewardStatus ===
+                        'function'
+                    ) {
                         checkDailyRewardStatus();
                     }
                 }
 
-                // Instantly update the screen so the user sees correct stats
-                if (typeof updateXpProgress === 'function') updateXpProgress();
-                if (typeof updateProfileStats === 'function') updateProfileStats();
-                if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+                /*
+                 * =====================================================
+                 * UPDATE SCREEN
+                 * =====================================================
+                 */
 
-                console.log("Profile successfully synced from Firestore players collection!");
+                if (
+                    typeof updateXpProgress ===
+                    'function'
+                ) {
+                    updateXpProgress();
+                }
+
+                if (
+                    typeof updateProfileStats ===
+                    'function'
+                ) {
+                    updateProfileStats();
+                }
+
+                if (
+                    typeof updateCoinDisplay ===
+                    'function'
+                ) {
+                    updateCoinDisplay();
+                }
+
+                console.log(
+                    "Profile successfully synced from Firestore players collection!"
+                );
             }
         }
     } catch (err) {
-        console.error("Failed to fetch data from Firestore:", err);
+        console.error(
+            "Failed to fetch data from Firestore:",
+            err
+        );
     }
 }
-
 
 
 function applyAvatarToUI(avatarData) {
