@@ -36,79 +36,31 @@ function goHome() {
 // --- SAFE CLOUD SYNC ---
 window.saveUserDataToCloud = async function() {
     try {
-        if (!window.pixvinzDb || !window.pixvinzDb.db) {
-            console.warn("Firestore database instance not ready yet.");
-            return;
-        }
+        const db = window.pixvinzDb || (typeof db !== 'undefined' ? db : null);
+        if (!db) return;
 
-        const { db, doc, setDoc } = window.pixvinzDb;
         const username = getCurrentUsername();
-        if (!username) {
-            console.warn("No logged-in username found for cloud save.");
-            return;
-        }
+        if (!username) return;
 
-        // 1. Always pull raw localStorage numbers directly with reliable fallbacks
-        const levelKey = getUserKey('currentLevel');
-        const coinKey = getUserKey('totalCoins');
-        const xpKey = getUserKey('xp');
-        const challengeKey = getUserKey('currentChallenge');
-        const avatarKey = getUserKey('vinpix_avatar');
+        const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+        const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
+        const currentXpVal = parseInt(localStorage.getItem(getUserKey('xp'))) || 0;
+        const currentChallengeVal = parseInt(localStorage.getItem(getUserKey('currentChallenge'))) || 1;
+        const avatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
 
-        let rawLevel = parseInt(localStorage.getItem(levelKey));
-        let rawCoins = parseInt(localStorage.getItem(coinKey));
-        let rawXp = parseInt(localStorage.getItem(xpKey));
-        let rawChallenge = parseInt(localStorage.getItem(challengeKey));
-
-        // Fallback to loggedInUser object if localStorage keys return NaN
-        let loggedUser = {};
-        try {
-            loggedUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
-        } catch(e) {}
-
-        const finalLevel = !isNaN(rawLevel) ? rawLevel : Number(loggedUser.level || 1);
-        const finalCoins = !isNaN(rawCoins) ? rawCoins : Number(loggedUser.coins || 0);
-        const finalXp = !isNaN(rawXp) ? rawXp : Number(loggedUser.xp || 0);
-        const finalChallenge = !isNaN(rawChallenge) ? rawChallenge : Number(loggedUser.challenge || 1);
-        const finalAvatar = localStorage.getItem(avatarKey) || loggedUser.avatar || '';
-        const displayName = loggedUser.displayName || username;
-
-        // Daily Reward State
-        const dailyStorageKey = getDailyStorageKey();
-        const dailyDataStr = localStorage.getItem(dailyStorageKey);
-        const dailyRewardState = dailyDataStr ? JSON.parse(dailyDataStr) : { streak: 0, lastClaimDate: "", lastClaimTimestamp: 0 };
-
-        // 2. Keep local object updated so everything stays 100% in sync locally
-        loggedUser.username = username;
-        loggedUser.displayName = displayName;
-        loggedUser.level = finalLevel;
-        loggedUser.coins = finalCoins;
-        loggedUser.xp = finalXp;
-        loggedUser.challenge = finalChallenge;
-        loggedUser.avatar = finalAvatar;
-        localStorage.setItem('loggedInUser', JSON.stringify(loggedUser));
-
-        // 3. Force direct document update to Firestore
-        const userDocRef = doc(db, "players", username);
-        const payload = {
+        await db.collection("players").doc(username).set({
             username: username,
-            displayName: displayName,
-            level: Number(finalLevel),
-            coins: Number(finalCoins),
-            xp: Number(finalXp),
-            challenge: Number(finalChallenge),
-            avatar: finalAvatar,
-            dailyRewardState: dailyRewardState,
-            lastUpdated: new Date()
-        };
+            level: currentLevel,
+            coins: totalCoins,
+            xp: currentXpVal,
+            challenge: currentChallengeVal,
+            avatar: avatar,
+            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
 
-        console.log("Sending payload to Firestore:", payload);
-
-        await setDoc(userDocRef, payload, { merge: true });
-        console.log("✅ FIRESTORE SYNC SUCCESSFUL for user:", username);
-
+        console.log("✅ Firestore Saved:", username, { currentLevel, totalCoins });
     } catch (error) {
-        console.error("❌ Firestore Cloud Save Failed:", error);
+        console.error("❌ Cloud Save Error:", error);
     }
 };
 async function fetchUserDataFromFirestore() {
