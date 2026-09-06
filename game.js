@@ -1,4 +1,4 @@
-// game.js - Complete Synchronized Logic with Guaranteed Firestore Cloud Sync
+// game.js - Complete Synchronized Logic with Safe Module DOM Bootstrapping
 
 document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -123,11 +123,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderGrid();
   }
 
-  async function checkWin() {
+  function checkWin() {
     if (!isGameStarted) return;
     const isSolved = tilesState.every((val, idx) => val === idx);
     if (isSolved) {
-      isGameStarted = false; // Prevent further tile clicks
       clearInterval(timerInterval);
       if (typeof AudioManager !== 'undefined') AudioManager.playVictory(currentLevel);
 
@@ -161,11 +160,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const currentMoves = moves;
       const currentTimeStr = timerDisplay ? timerDisplay.innerText : "00:00";
 
-      // Trigger level victory logic and ensure Cloud Sync completes!
       if (typeof handleLevelVictory === 'function') {
-        await handleLevelVictory(currentLevel, stars, currentMoves, currentTimeStr, xpGained);
-      } else if (typeof window.saveUserDataToCloud === 'function') {
-        await window.saveUserDataToCloud();
+        handleLevelVictory(currentLevel, stars, currentMoves, currentTimeStr);
       }
 
       startConfetti();
@@ -229,15 +225,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+     
+    
+      
+
   const nextLevelBtn = document.getElementById('nextLevelBtn');
   if (nextLevelBtn) {
     nextLevelBtn.onclick = async (e) => {
       e.stopPropagation();
-      e.preventDefault();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       
-      if (typeof window.saveUserDataToCloud === 'function') {
-        await window.saveUserDataToCloud();
+      if (typeof saveUserDataToCloud === 'function') {
+        await saveUserDataToCloud();
       }
 
       window.location.href = `game.html?level=${currentLevel + 1}`;
@@ -248,12 +247,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (victoryHomeBtn) {
     victoryHomeBtn.onclick = async (e) => {
       e.stopPropagation();
-      e.preventDefault();
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       localStorage.setItem('skipLoading', 'true');
       
-      if (typeof window.saveUserDataToCloud === 'function') {
-        await window.saveUserDataToCloud();
+      if (typeof saveUserDataToCloud === 'function') {
+        await saveUserDataToCloud();
       }
 
       window.location.href = 'index.html';
@@ -262,13 +260,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const backToHome = document.getElementById('backToHome');
   if (backToHome) {
-    backToHome.addEventListener('click', async (e) => {
-      e.preventDefault();
+    backToHome.addEventListener('click', async () => {
       if (typeof AudioManager !== 'undefined') AudioManager.playClick();
       localStorage.setItem('skipLoading', 'true');
       
-      if (typeof window.saveUserDataToCloud === 'function') {
-        await window.saveUserDataToCloud();
+      if (typeof saveUserDataToCloud === 'function') {
+        await saveUserDataToCloud();
       }
 
       window.location.href = 'index.html';
@@ -317,48 +314,51 @@ function openLevelPreview() {
 
   const currentLevel = getCurrentLevel();
   const previewTitle = document.getElementById('previewTitle');
-  if (previewTitle) {
-    previewTitle.textContent = `👁 LEVEL ${currentLevel} PREVIEW`;
+if (previewTitle) {
+  previewTitle.textContent = `👁 LEVEL ${currentLevel} PREVIEW`;
+}
+
+  /*
+   * =====================================================
+   * COIN CHECK
+   * =====================================================
+   *
+   * This expects your game to have a global `coins`
+   * variable.
+   *
+   * If your existing game uses a different coin variable,
+   * this is the ONLY part that needs to be connected to it.
+   */
+
+const totalCoinsKey = getUserKey('totalCoins');
+const coinsBeforePreview = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
+
+if (coinsBeforePreview < PREVIEW_COST) {
+  return;
+}
+
+let paymentSuccessful = false;
+
+try {
+  paymentSuccessful = spendCoins(PREVIEW_COST);
+} catch (error) {
+  const coinsAfterPreview =
+    parseInt(localStorage.getItem(totalCoinsKey)) || 0;
+
+  if (coinsAfterPreview === coinsBeforePreview - PREVIEW_COST) {
+    paymentSuccessful = true;
+  } else {
+    console.error('Preview coin deduction failed:', error);
   }
+}
 
-  const username = (function() {
-    try {
-      const u = JSON.parse(localStorage.getItem('loggedInUser'));
-      if (u && u.username) return u.username;
-    } catch (e) {}
-    return localStorage.getItem('vinpix_username') || '';
-  })();
-
-  const totalCoinsKey = username ? `${username}_totalCoins` : 'totalCoins';
-  const coinsBeforePreview = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
-
-  if (coinsBeforePreview < PREVIEW_COST) {
-    return;
-  }
-
-  let paymentSuccessful = false;
-
-  try {
-    if (typeof spendCoins === 'function') {
-      paymentSuccessful = spendCoins(PREVIEW_COST);
-    } else {
-      localStorage.setItem(totalCoinsKey, coinsBeforePreview - PREVIEW_COST);
-      paymentSuccessful = true;
-    }
-  } catch (error) {
-    const coinsAfterPreview = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
-    if (coinsAfterPreview === coinsBeforePreview - PREVIEW_COST) {
-      paymentSuccessful = true;
-    } else {
-      console.error('Preview coin deduction failed:', error);
-    }
-  }
-
-  if (!paymentSuccessful) {
-    return;
-  }
-
+if (!paymentSuccessful) {
+  return;
+}
+  
+  
   previewActive = true;
+
   clearInterval(previewTimer);
 
   previewImage.src = `image/level${currentLevel}.png`;
@@ -371,6 +371,7 @@ function openLevelPreview() {
 
   previewTimer = setInterval(() => {
     secondsLeft--;
+
     previewCountdown.textContent = secondsLeft;
 
     if (secondsLeft <= 0) {
@@ -385,6 +386,7 @@ function closeLevelPreview() {
 
   clearInterval(previewTimer);
   previewTimer = null;
+
   previewActive = false;
 
   if (previewPopup) {
