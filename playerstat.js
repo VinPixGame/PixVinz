@@ -1,4 +1,4 @@
-// playerstat.js - Fully synchronized with profile.js & auth.js
+// playerstat.js - Fully synchronized with profile.js & script.js
 
 function getCurrentUsername() {
     try {
@@ -27,25 +27,63 @@ function updateCoinDisplay() {
     }
 }
 
+async function fetchUserDataFromFirestore() {
+    try {
+        const username = getCurrentUsername();
+        if (!username) {
+            return;
+        }
+        
+        if (window.pixvinzDb && window.pixvinzDb.db) {
+            const { db, doc, getDoc } = window.pixvinzDb;
+            const userRef = doc(db, "players", username);
+            const docSnap = await getDoc(userRef);
+            
+            if (docSnap.exists()) {
+                const cloudData = docSnap.data();
+                
+                const localLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+                const localCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
+                
+                // Keep the highest level (prevents resetting to level 1)
+                const cloudLevel = cloudData.level || 1;
+                if (cloudLevel > localLevel) {
+                    localStorage.setItem(getUserKey('currentLevel'), cloudLevel);
+                } else if (localLevel > cloudLevel) {
+                    if (typeof saveUserDataToCloud === 'function') {
+                        await saveUserDataToCloud();
+                    }
+                }
+                
+                // Keep the highest coin balance or sync local up if local is ahead
+                const cloudCoins = cloudData.coins || 0;
+                if (cloudCoins > localCoins) {
+                    localStorage.setItem(getUserKey('totalCoins'), cloudCoins);
+                } else if (localCoins > cloudCoins) {
+                    if (typeof saveUserDataToCloud === 'function') {
+                        await saveUserDataToCloud();
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        console.warn("Cloud fetch warning (safely bypassed):", err);
+    } finally {
+        // Always update the display, even if cloud fetch fails
+        updateCoinDisplay();
+    }
+}
+
+
 function earnCoins(amount) {
     const key = getUserKey('totalCoins');
     let totalCoins = (parseInt(localStorage.getItem(key)) || 0) + amount;
     localStorage.setItem(key, totalCoins);
-
-    try {
-        const userObj = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
-        if (userObj) {
-            userObj.coins = totalCoins;
-            localStorage.setItem('loggedInUser', JSON.stringify(userObj));
-        }
-    } catch (e) {}
-
     updateCoinDisplay();
-    if (typeof window.saveUserDataToCloud === 'function') {
-        window.saveUserDataToCloud();
-    }
+    saveUserDataToCloud(); // Auto-sync to cloud when coins change!
 }
 
+// Safely deducts coins for purchases (returns true if successful, false if broke)
 function spendCoins(amount) {
     const key = getUserKey('totalCoins');
     let currentCoins = parseInt(localStorage.getItem(key)) || 0;
@@ -56,72 +94,52 @@ function spendCoins(amount) {
 
     currentCoins -= amount;
     localStorage.setItem(key, currentCoins);
-
-    try {
-        const userObj = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
-        if (userObj) {
-            userObj.coins = currentCoins;
-            localStorage.setItem('loggedInUser', JSON.stringify(userObj));
-        }
-    } catch (e) {}
-
     updateCoinDisplay();
-    if (typeof window.saveUserDataToCloud === 'function') {
-        window.saveUserDataToCloud();
-    }
+    saveUserDataToCloud(); // Auto-sync to cloud when coins change!
     return true; 
 } 
 
-
+// Handles victory, saves with profile.js keys, and triggers profile sync if available
 async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeStr) {
-    // 1. Fetch current loggedInUser object (matching Daily Reward logic)
-    let loggedInUser = {};
-    try {
-        loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
-    } catch(e) {}
+    const totalCoinsKey = getUserKey('totalCoins');
+    const currentLevelKey = getUserKey('currentLevel');
 
-    let currentLevel = Number(loggedInUser.level || localStorage.getItem('currentLevel') || 1);
-    let totalCoins = Number(loggedInUser.coins || localStorage.getItem('totalCoins') || 0);
-    let currentXp = Number(loggedInUser.xp || localStorage.getItem('xp') || 0);
+    let totalCoins = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
+    let maxUnlocked = parseInt(localStorage.getItem(currentLevelKey)) || 1;
 
-    // 2. Calculate rewards
-    let tier = Math.floor((completedLevel - 1) / 10);
-    let xpGained = (tier + 1) * 100;
-    let coinReward = (stars || 1) * 5;
+    let targetCoins = stars * 5;
+    totalCoins += targetCoins;
+    localStorage.setItem(totalCoinsKey, totalCoins);
 
-    currentXp += xpGained;
-    totalCoins += coinReward;
-
-    if (completedLevel >= currentLevel) {
-        currentLevel = completedLevel + 1;
+    let nextLevelToUnlock = maxUnlocked;
+    if (completedLevel >= maxUnlocked) {
+        nextLevelToUnlock = completedLevel + 1;
+        localStorage.setItem(currentLevelKey, nextLevelToUnlock);
     }
 
-    // 3. Update loggedInUser object AND raw localStorage keys
-    loggedInUser.level = currentLevel;
-    loggedInUser.coins = totalCoins;
-    loggedInUser.xp = currentXp;
+    // Save individual level stats using the username prefix
+    if (finalMoves !== undefined) {
+        localStorage.setItem(getUserKey(`levelMoves_${completedLevel}`), finalMoves);
+    }
+    if (finalTimeStr !== undefined) {
+        localStorage.setItem(getUserKey(`levelTime_${completedLevel}`), finalTimeStr);
+    }
 
-    localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
-    
-    // Also save to individual keys to prevent UI mismatches
-    localStorage.setItem(getUserKey('totalCoins'), totalCoins);
-    localStorage.setItem(getUserKey('currentLevel'), currentLevel);
-    localStorage.setItem(getUserKey('xp'), currentXp);
-    localStorage.setItem('totalCoins', totalCoins);
-    localStorage.setItem('currentLevel', currentLevel);
-    localStorage.setItem('xp', currentXp);
+    updateCoinDisplay();
 
-    // 4. Update UI
-    if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+    const modal = document.getElementById('victoryModal') || document.getElementById('winModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+    }
 
-    // 5. Trigger cloud save using exact same pattern as Daily Reward
-    if (typeof window.saveUserDataToCloud === 'function') {
-        await window.saveUserDataToCloud();
+    // Trigger profile.js cloud sync function if it exists
+    if (typeof saveUserDataToCloud === 'function') {
+         await saveUserDataToCloud();
     }
 }
+
 document.addEventListener('DOMContentLoaded', async () => {
     updateCoinDisplay();
-    if (typeof fetchUserDataFromFirestore === 'function') {
-        await fetchUserDataFromFirestore();
-    }
+    await fetchUserDataFromFirestore();
 });
