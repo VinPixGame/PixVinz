@@ -44,14 +44,8 @@ async function fetchUserDataFromFirestore() {
                 
                 const localLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
                 const localCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
-                const localXp = parseInt(localStorage.getItem(getUserKey('totalXp'))) || 0;
                 
-                // Sync XP down if cloud XP is available
-                if (cloudData.xp !== undefined && cloudData.xp > localXp) {
-                    localStorage.setItem(getUserKey('totalXp'), cloudData.xp);
-                }
-
-                // Keep the highest level
+                // Keep the highest level (prevents resetting to level 1)
                 const cloudLevel = cloudData.level || 1;
                 if (cloudLevel > localLevel) {
                     localStorage.setItem(getUserKey('currentLevel'), cloudLevel);
@@ -61,7 +55,7 @@ async function fetchUserDataFromFirestore() {
                     }
                 }
                 
-                // Keep the highest coin balance
+                // Keep the highest coin balance or sync local up if local is ahead
                 const cloudCoins = cloudData.coins || 0;
                 if (cloudCoins > localCoins) {
                     localStorage.setItem(getUserKey('totalCoins'), cloudCoins);
@@ -75,9 +69,11 @@ async function fetchUserDataFromFirestore() {
     } catch (err) {
         console.warn("Cloud fetch warning (safely bypassed):", err);
     } finally {
+        // Always update the display, even if cloud fetch fails
         updateCoinDisplay();
     }
 }
+
 
 function earnCoins(amount) {
     const key = getUserKey('totalCoins');
@@ -107,19 +103,13 @@ function spendCoins(amount) {
 async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeStr) {
     const totalCoinsKey = getUserKey('totalCoins');
     const currentLevelKey = getUserKey('currentLevel');
-    const totalXpKey = getUserKey('totalXp');
 
     let totalCoins = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
     let maxUnlocked = parseInt(localStorage.getItem(currentLevelKey)) || 1;
-    let currentXp = parseInt(localStorage.getItem(totalXpKey)) || 0;
 
     let targetCoins = stars * 5;
     totalCoins += targetCoins;
     localStorage.setItem(totalCoinsKey, totalCoins);
-
-    let xpEarned = 100;
-    currentXp += xpEarned;
-    localStorage.setItem(totalXpKey, currentXp);
 
     let nextLevelToUnlock = maxUnlocked;
     if (completedLevel >= maxUnlocked) {
@@ -127,6 +117,7 @@ async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeSt
         localStorage.setItem(currentLevelKey, nextLevelToUnlock);
     }
 
+    // Save individual level stats using the username prefix
     if (finalMoves !== undefined) {
         localStorage.setItem(getUserKey(`levelMoves_${completedLevel}`), finalMoves);
     }
@@ -142,8 +133,9 @@ async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeSt
         modal.style.display = 'flex';
     }
 
+    // Trigger profile.js cloud sync function if it exists
     if (typeof saveUserDataToCloud === 'function') {
-        await saveUserDataToCloud();
+         await saveUserDataToCloud();
     }
 }
 
