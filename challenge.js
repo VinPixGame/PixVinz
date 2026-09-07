@@ -451,7 +451,7 @@ if (startChallengeBtn) {
 }
 
 function handleTileClick(clickedPos) {
-      if (selectedTileIndex === null) {
+    if (selectedTileIndex === null) {
         selectedTileIndex = clickedPos;
     } else if (selectedTileIndex === clickedPos) {
         selectedTileIndex = null;
@@ -583,12 +583,22 @@ function endGame() {
             earnCoins(finalCoins);
         }
 
-        const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
-        const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp'; 
-        
-        let currentXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
-        currentXp += finalXp;
-        localStorage.setItem(xpStoreKey, currentXp);
+        // --- PERSIST EARNED XP (SYNCHRONIZED WITH GAME.JS) ---
+        const xpStoreKey = getUserKey('bonusXp');
+        let currentBonusXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
+        currentBonusXp += finalXp;
+        localStorage.setItem(xpStoreKey, currentBonusXp);
+
+        const totalXpKey = getUserKey('totalXp');
+        let currentTotalXp = parseInt(localStorage.getItem(totalXpKey)) || 0;
+        currentTotalXp += finalXp;
+        localStorage.setItem(totalXpKey, currentTotalXp);
+
+        try {
+            const userObj = JSON.parse(localStorage.getItem('loggedInUser')) || {};
+            userObj.xp = currentTotalXp;
+            localStorage.setItem('loggedInUser', JSON.stringify(userObj));
+        } catch (e) {}
 
         if (typeof saveUserDataToCloud === 'function') {
             saveUserDataToCloud();
