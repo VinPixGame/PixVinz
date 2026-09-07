@@ -353,6 +353,7 @@ body {
     0 0 5px #ffd700,
     0 2px 3px #5a3900;
 }
+
 .wheel-dividers {
   position: absolute;
   inset: 0;
@@ -424,10 +425,10 @@ body {
   pointer-events: none;
 }
 
-.wheel-hub image {
+.wheel-hub img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   pointer-events: none;
   background: transparent;
 }
@@ -1093,53 +1094,28 @@ const bets = {
   X: 0, O: 0, Red: 0, Star: 0, Blue: 0, Diamond: 0, Jackpot: 0
 };
 
-function getCurrentUsername() {
+function getActiveUserPrefix() {
+    let username = '';
     try {
         const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
-        if (userObj && userObj.username) return userObj.username;
+        if (userObj && userObj.username) username = userObj.username;
     } catch (e) {}
-    return localStorage.getItem('vinpix_username') || localStorage.getItem('currentUser') || 'guest';
+    if (!username) username = localStorage.getItem('vinpix_username') || '';
+    return username ? `${username}_` : '';
 }
 
-function getUserKey(keyName) {
-    const username = getCurrentUsername();
-    return username ? `${username}_${keyName}` : keyName;
-}
-
-const coinsKey = getUserKey('totalCoins');
-const xpKey = getUserKey('bonusXp');
-
-let coins = parseInt(localStorage.getItem(coinsKey)) || 0;
-let xp = parseInt(localStorage.getItem(xpKey)) || 0;
-
-async function syncFirestoreXP() {
-  if (typeof window.loadUserDataFromCloud === 'function') {
-    try {
-      const data = await window.loadUserDataFromCloud();
-      if (data) {
-        if (typeof data.bonusXp === 'number') {
-          xp = data.bonusXp;
-          localStorage.setItem(xpKey, xp);
-        }
-        if (typeof data.totalCoins === 'number') {
-          coins = data.totalCoins;
-          localStorage.setItem(coinsKey, coins);
-        }
-        updateBalanceDisplay();
-      }
-    } catch(e) {}
-  }
-}
+let prefix = getActiveUserPrefix();
+let coins = parseInt(localStorage.getItem(prefix + 'totalCoins')) || 0;
+let xp = parseInt(localStorage.getItem(prefix + 'totalXp')) || 0;
 
 function saveUserData() {
-    localStorage.setItem(coinsKey, coins);
-    localStorage.setItem(xpKey, xp);
+    prefix = getActiveUserPrefix();
+    localStorage.setItem(prefix + 'totalCoins', coins);
+    localStorage.setItem(prefix + 'totalXp', xp);
+    
     if (typeof updateProfileStats === 'function') updateProfileStats();
     if (typeof window.saveUserDataToCloud === 'function') {
-      window.saveUserDataToCloud({
-        totalCoins: coins,
-        bonusXp: xp
-      });
+        window.saveUserDataToCloud();
     }
 }
 
@@ -1414,8 +1390,7 @@ document.getElementById("spinButton").addEventListener("click", () => {
             let currentAngle = Math.round(Math.atan2(b, a) * (180 / Math.PI));
             if (currentAngle < 0) currentAngle += 360;
 
-            const activeIndex =
-                Math.floor(((360 - currentAngle + 360) % 360) / sliceAngle);
+            const activeIndex = Math.floor(((360 - currentAngle + 360) % 360) / sliceAngle);
 
             if (activeIndex !== activeWheelIndex) {
                 setWheelHighlight(activeIndex);
@@ -1466,6 +1441,7 @@ function handleResult(result, resultIndex) {
     spinning = false;
     document.getElementById("spinButton").disabled = false;
     updateResultHistory(result);
+    
     let winnings = 0;
     let xpGained = 0;
 
@@ -1498,7 +1474,6 @@ createMarqueeLights();
 buildWheelFace();
 updateBalanceDisplay();
 updateBetDisplay();
-syncFirestoreXP();
 
 window.addEventListener('DOMContentLoaded', () => {
   const v = document.getElementById('logoVideo');
