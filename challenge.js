@@ -1,41 +1,52 @@
-// --- CHALLENGE VIEW COIN LOADER ---
-function loadChallengeCoins() {
-    function getCurrentUser() {
-        try {
-            return JSON.parse(localStorage.getItem('loggedInUser'));
-        } catch (e) {
-            return null;
-        }
-    }
-
-    function getUserKey(keyName) {
-        const user = getCurrentUser();
-        if (!user || !user.username) return null; // Return null if no user is logged in
-        return `${user.username}_${keyName}`;
-    }
-
+// --- CHALLENGE VIEW COIN & PROGRESS LOADER ---
+async function loadChallengeData() {
     const user = getCurrentUser();
     if (!user || !user.username) {
-        // No user logged in, clear coin UI immediately
         updateChallengeUI(0);
         return;
     }
 
     const coinKey = getUserKey('totalCoins');
-    let totalCoins = parseInt(localStorage.getItem(coinKey)) || 0;
+    const challengeKey = getUserKey('currentChallenge');
 
+    let totalCoins = parseInt(localStorage.getItem(coinKey)) || 0;
+    let localChallenge = parseInt(localStorage.getItem(challengeKey)) || 1;
+
+    // Default UI setup from local cache first
+    currentChallenge = localChallenge;
+    updateChallengeUI(totalCoins);
+
+    // Fetch live data from Firestore
     if (window.pixvinzDb) {
-        const { db, doc, getDoc } = window.pixvinzDb;
-        getDoc(doc(db, 'players', user.username)).then(userSnap => {
-            if (userSnap.exists() && typeof userSnap.data().coins === 'number') {
-                totalCoins = userSnap.data().coins;
-                localStorage.setItem(coinKey, totalCoins);
-                updateChallengeUI(totalCoins);
+        try {
+            const { db, doc, getDoc } = window.pixvinzDb;
+            const userRef = doc(db, 'players', user.username);
+            const userSnap = await getDoc(userRef);
+
+            if (userSnap.exists()) {
+                const data = userSnap.data();
+
+                // 1. Sync Coins
+                if (typeof data.coins === 'number') {
+                    totalCoins = data.coins;
+                    localStorage.setItem(coinKey, totalCoins);
+                    updateChallengeUI(totalCoins);
+                }
+
+                // 2. Sync Challenge Level from Firestore
+                const cloudChallenge = data.challenge || data.currentChallenge;
+                if (typeof cloudChallenge === 'number' && cloudChallenge > 0) {
+                    currentChallenge = cloudChallenge;
+                    localStorage.setItem(challengeKey, currentChallenge);
+                }
             }
-        }).catch(err => console.warn("Firestore coin sync warning:", err));
+        } catch (err) {
+            console.warn("Firestore challenge/coin sync warning:", err);
+        }
     }
 
-    updateChallengeUI(totalCoins);
+    // Re-initialize board once Firestore sync completes
+    initBoardDOM();
 }
 
 function updateChallengeUI(coins) {
@@ -45,9 +56,29 @@ function updateChallengeUI(coins) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadChallengeCoins();
-    initBoardDOM();
+    loadChallengeData();
 });
+
+// --- HELPER TO SAVE CHALLENGE TO FIRESTORE ---
+async function saveChallengeToCloud(newChallenge) {
+    const user = getCurrentUser();
+    if (!user || !user.username) return;
+
+    // Always update LocalStorage immediately
+    const challengeKey = getUserKey('currentChallenge');
+    localStorage.setItem(challengeKey, newChallenge);
+
+    // Save to Firestore
+    if (window.pixvinzDb) {
+        try {
+            const { db, doc, setDoc } = window.pixvinzDb;
+            const userRef = doc(db, 'players', user.username);
+            await setDoc(userRef, { challenge: newChallenge }, { merge: true });
+        } catch (err) {
+            console.error("Error saving challenge to Firestore:", err);
+        }
+    }
+}
 
 // --- DYNAMIC GRID SIZE FUNCTION ---
 function getGridSizeForChallenge(challengeNum) {
@@ -62,9 +93,7 @@ function getGridSizeForChallenge(challengeNum) {
     }
 }
 
-let gridSize = getGridSizeForChallenge(getSavedChallenge());
-
-// --- LOAD SAVED CHALLENGE INSTEAD OF LEVEL ---
+// Load local challenge initially before sync resolves
 function getSavedChallenge() {
     try {
         const user = JSON.parse(localStorage.getItem('loggedInUser'));
@@ -77,6 +106,7 @@ function getSavedChallenge() {
 }
 
 let currentChallenge = getSavedChallenge();
+let gridSize = getGridSizeForChallenge(currentChallenge);
 let moves = 0;
 let timerInterval = null;
 let secondsElapsed = 0;
@@ -143,19 +173,16 @@ function checkDailyChallengeStatus() {
     let dailyCount = parseInt(localStorage.getItem(dailyCountKey)) || 0;
     const lockExpiry = parseInt(localStorage.getItem(lockTimerKey)) || 0;
 
-    // If a lock is currently active and hasn't expired yet
     if (lockExpiry > Date.now()) {
         return { locked: true, expiry: lockExpiry };
     }
 
-    // If lock expired, clear the lock and reset the daily count for the new 24-hour cycle
     if (lockExpiry > 0 && lockExpiry <= Date.now()) {
         localStorage.removeItem(lockTimerKey);
         localStorage.setItem(dailyCountKey, '0');
         dailyCount = 0;
     }
 
-    // If 3 or more challenges have been completed, start/enforce the 24-hour lock now
     if (dailyCount >= 3) {
         const twentyFourHours = 24 * 60 * 60 * 1000;
         const expiryTime = Date.now() + twentyFourHours;
@@ -174,7 +201,6 @@ function recordCompletedChallenge(challengeId) {
 
     localStorage.setItem(getUserKey(`challenge_done_${challengeId}`), 'true');
 
-    // If this completion hits the 3-challenge limit, immediately lock and set the 24-hour expiry timer
     if (dailyCount >= 3) {
         const lockTimerKey = getUserKey('challenge_lock_expiry');
         const twentyFourHours = 24 * 60 * 60 * 1000;
@@ -204,22 +230,17 @@ async function unlockNextChallengeWithCoins() {
         return;
     }
 
-    // Reset daily lock and counter
     const dailyCountKey = getUserKey('challenge_daily_count');
     const lockTimerKey = getUserKey('challenge_lock_expiry');
     localStorage.removeItem(lockTimerKey);
     localStorage.setItem(dailyCountKey, '0');
 
-    // Update Coin Display UI
-    loadChallengeCoins();
-
-    // Re-initialize board to display normal game setup
+    loadChallengeData();
     initBoardDOM();
 }
 
-// Initialize DOM elements with a smooth simulated & event-backed loader
+// Initialize DOM elements with video & board canvas
 function initBoardDOM() {
-    // Completely stop/clean up masterVideo if it exists from a previous challenge
     if (masterVideo) {
         masterVideo.pause();
         masterVideo.currentTime = 0;
@@ -228,7 +249,6 @@ function initBoardDOM() {
 
     updateGridArraysAndCSS();
 
-    // --- CHECK DAILY LOCKOUT STATUS BEFORE RENDERING ---
     const status = checkDailyChallengeStatus();
     const titleEl = document.getElementById('challengeTitle');
 
@@ -239,9 +259,7 @@ function initBoardDOM() {
     puzzleBoard.innerHTML = '';
     tilesCache = [];
 
-    // If locked out due to the 24-hour 3-challenge limit
     if (status.locked) {
-        // Ensure regular loading elements are completely hidden when locked
         const loadingOverlay = document.getElementById('challengeLoadingOverlay');
         const loadingSpinner = document.getElementById('loadingSpinner');
         const startChallengeBtn = document.getElementById('startChallengeBtn');
@@ -251,7 +269,6 @@ function initBoardDOM() {
         if (startChallengeBtn) startChallengeBtn.classList.add('hidden');
         challengeStarted = false;
 
-        // Render lock overlay message, countdown, and unlock button directly inside board
         puzzleBoard.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; color: #fff; text-align: center; padding: 20px; background: rgba(20, 10, 35, 0.95); position: absolute; top: 0; left: 0; z-index: 10; border-radius: 12px;">
                 <h2 style="color: #ff3366; margin-bottom: 10px; font-size: 22px;">🔒 Daily Limit Reached</h2>
@@ -268,7 +285,6 @@ function initBoardDOM() {
             unlockBtn.addEventListener('click', unlockNextChallengeWithCoins);
         }
 
-        // Live countdown interval updater
         const updateCountdownUI = () => {
             const timeLeft = status.expiry - Date.now();
             const countdownEl = document.getElementById('activeLockCountdown');
@@ -297,7 +313,6 @@ function initBoardDOM() {
     const loadingPercentEl = document.getElementById('loadingPercent');
     const loadingBarFill = document.getElementById('loadingBarFill');
 
-    // Show loading overlay & lock state
     if (loadingOverlay) loadingOverlay.style.display = 'flex';
     if (loadingSpinner) loadingSpinner.style.display = 'block';
     if (startChallengeBtn) startChallengeBtn.classList.add('hidden');
@@ -310,7 +325,7 @@ function initBoardDOM() {
     if (!masterVideo) {
         masterVideo = document.createElement('video');
         masterVideo.loop = true;
-        masterVideo.muted = false; // Video unmuted
+        masterVideo.muted = false;
         masterVideo.playsInline = true;
         masterVideo.setAttribute('playsinline', '');
         masterVideo.style.display = 'none';
@@ -333,10 +348,8 @@ function initBoardDOM() {
             isReadyToStart = true;
             setTimeout(() => {
                 if (loadingSpinner) loadingSpinner.style.display = 'none';
-                
                 const barContainer = document.getElementById('loadingBarContainer');
                 if (barContainer) barContainer.style.display = 'none';
-                
                 if (startChallengeBtn) startChallengeBtn.classList.remove('hidden');
             }, 200);
         }
@@ -429,7 +442,6 @@ function startRenderLoop() {
     render();
 }
 
-// Start Challenge Image Button Click Event
 if (startChallengeBtn) {
     startChallengeBtn.addEventListener('click', () => {
         masterVideo.muted = false;
@@ -438,10 +450,8 @@ if (startChallengeBtn) {
         if (loadingOverlay) loadingOverlay.style.display = 'none';
         challengeStarted = true;
 
-        // Shuffle the puzzle first
         shuffleBoard();
 
-        // Start timer immediately when Start is clicked
         secondsElapsed = 0;
         timerDisplay.textContent = "00:00";
         stopTimer();
@@ -506,7 +516,6 @@ function checkWin() {
     return boardState.every((val, index) => val === winningState[index]);
 }
 
-// --- CALCULATE STARS, COINS, AND XP ---
 function calculateChallengeRewards(timeInSeconds, moves) {
     const safeMoves = Math.max(moves, 1);
     
@@ -524,18 +533,15 @@ function calculateChallengeRewards(timeInSeconds, moves) {
     else if (stars === 2) earnedCoins = 60;
     else earnedCoins = 30;
 
-    // --- UPDATED XP FORMULA (Base 2000 XP) ---
     const baseXP = 2000;                     
-    const timePenalty = timeInSeconds * 3; // Lose 3 XP per second taken
-    const movePenalty = safeMoves * 15;    // Lose 15 XP per move made
+    const timePenalty = timeInSeconds * 3;
+    const movePenalty = safeMoves * 15;    
     
-    // Ensures a minimum floor of 100 XP so finishing always feels rewarding
     let earnedXp = Math.max(100, baseXP - timePenalty - movePenalty);
 
     return { stars, earnedCoins, earnedXp };
 }
 
-// Helper to convert MM:SS or similar timer text into total seconds
 function getTimerSeconds() {
     const parts = timerDisplay.textContent.split(':');
     if (parts.length === 2) {
@@ -545,12 +551,11 @@ function getTimerSeconds() {
 }
 
 // --- END GAME FUNCTION ---
-function endGame() {
+async function endGame() {
     stopTimer();
     isPlaying = false;
     challengeStarted = false;
 
-    // Fully stop the main puzzle video so win modal video can play independently without overlap
     if (masterVideo) {
         masterVideo.pause();
         masterVideo.currentTime = 0;
@@ -583,7 +588,6 @@ function endGame() {
             earnCoins(finalCoins);
         }
 
-        // --- PERSIST EARNED XP (SYNCHRONIZED WITH GAME.JS) ---
         const xpStoreKey = getUserKey('bonusXp');
         let currentBonusXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
         currentBonusXp += finalXp;
@@ -612,7 +616,8 @@ function endGame() {
     const currentChallengeKey = getUserKey('currentChallenge');
     let maxUnlocked = parseInt(localStorage.getItem(currentChallengeKey)) || 1;
     if (currentChallenge >= maxUnlocked && currentChallenge < 100) {
-        localStorage.setItem(currentChallengeKey, currentChallenge + 1);
+        const nextLevel = currentChallenge + 1;
+        await saveChallengeToCloud(nextLevel);
     }
 
     const winVideoContainer = document.getElementById('winVideoContainer');
@@ -622,7 +627,7 @@ function endGame() {
         winVideo.src = `challenge/challenge${currentChallenge}.mp4`;
         winVideo.autoplay = true;
         winVideo.loop = true;
-        winVideo.muted = false; // Win video unmuted
+        winVideo.muted = false;
         winVideo.playsInline = true;
         winVideoContainer.appendChild(winVideo);
         winVideo.play().catch(err => console.log("Win video play error:", err));
@@ -727,7 +732,6 @@ if (challengePreviewBtn) {
   challengePreviewBtn.addEventListener('click', async () => {
     if (!challengeStarted) return;
 
-    // Pause the main puzzle video so audio/playback doesn't overlap with preview
     if (masterVideo) {
         masterVideo.pause();
     }
@@ -749,14 +753,13 @@ if (challengePreviewBtn) {
 
     if (!success) {
       alert("Not enough coins! You need 10 coins to preview the challenge.");
-      // Resume main puzzle video if preview fails due to insufficient coins
       if (masterVideo && challengeStarted) {
           masterVideo.play().catch(err => console.log("Resume video error:", err));
       }
       return;
     }
 
-    if (typeof loadChallengeCoins === 'function') loadChallengeCoins();
+    if (typeof loadChallengeData === 'function') loadChallengeData();
 
     const modal = document.getElementById('challengePreviewModal');
     const modalVideo = document.getElementById('challengeModalVideo');
@@ -769,7 +772,7 @@ if (challengePreviewBtn) {
       if (!modalVideo.src.includes(expectedSrc)) {
           modalVideo.src = expectedSrc;
       }
-      modalVideo.muted = false; // Preview video unmuted
+      modalVideo.muted = false;
       modalVideo.play().catch(err => console.log("Modal preview video error:", err));
     }
     
@@ -811,7 +814,6 @@ function closeChallengePreviewModal() {
   if (challengePreviewTimer) clearTimeout(challengePreviewTimer);
   if (challengeCountdownInterval) clearInterval(challengeCountdownInterval);
 
-  // Resume main puzzle video when preview modal is closed
   if (masterVideo && challengeStarted) {
       masterVideo.play().catch(err => console.log("Resume main video error:", err));
   }
@@ -866,7 +868,7 @@ if (homeBtn) {
 
 // --- NEXT CHALLENGE BUTTON HANDLER ---
 if (nextChallengeBtn) {
-    nextChallengeBtn.addEventListener('click', () => {
+    nextChallengeBtn.addEventListener('click', async () => {
         if (masterVideo) {
             masterVideo.pause();
             masterVideo.currentTime = 0;
@@ -902,10 +904,8 @@ if (nextChallengeBtn) {
             return;
         }
 
-        const user = JSON.parse(localStorage.getItem('loggedInUser'));
-        if (user && user.username) {
-            localStorage.setItem(`${user.username}_currentChallenge`, currentChallenge);
-        }
+        // Save new challenge to Firestore on Next Challenge click
+        await saveChallengeToCloud(currentChallenge);
 
         initBoardDOM();
     });
