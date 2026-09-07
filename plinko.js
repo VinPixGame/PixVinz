@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let coinCount = parseFloat(localStorage.getItem(coinKey)) || 500;
   let currentBet = 10;
-  let currentDifficulty = 'normal';
+  let currentDifficulty = 'normal'; // normal (low), medium, hard (high)
   let lastDropTime = 0;
 
   const coinCountEl = document.getElementById('coinCount');
@@ -62,26 +62,27 @@ document.addEventListener('DOMContentLoaded', () => {
   resizeCanvas();
   setTimeout(resizeCanvas, 50);
 
+  // AUTHENTIC STAKE-STYLE MULTIPLIER TABLES (16 Rows)
   const difficultyConfigs = {
-    normal: {
-      rows: 8,
-      multipliers: [10, 5, 2, 0.5, 0.2, 0.5, 2, 5, 10],
-      slotColors: ['#ff0844', '#ff7300', '#ffd700', '#00f2fe', '#4facfe', '#00f2fe', '#ffd700', '#ff7300', '#ff0844']
+    normal: { // Low Risk
+      rows: 16,
+      multipliers: [16, 9, 2, 1.4, 1.2, 1.1, 1, 0.5, 0.5, 0.5, 1, 1.1, 1.2, 1.4, 2, 9, 16],
+      slotColors: ['#ff0844', '#ff4500', '#ff7300', '#ffa500', '#ffd700', '#00f2fe', '#4facfe', '#3a7bd5', '#3a7bd5', '#3a7bd5', '#4facfe', '#00f2fe', '#ffd700', '#ffa500', '#ff7300', '#ff4500', '#ff0844']
     },
-    medium: {
-      rows: 10,
-      multipliers: [20, 10, 5, 2, 0.5, 0.2, 0.5, 2, 5, 10, 20],
-      slotColors: ['#ff0844', '#ff4500', '#ff7300', '#ffd700', '#00f2fe', '#4facfe', '#00f2fe', '#ffd700', '#ff7300', '#ff4500', '#ff0844']
+    medium: { // Medium Risk
+      rows: 16,
+      multipliers: [110, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.3, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 110],
+      slotColors: ['#9c27b0', '#ff0844', '#ff4500', '#ff7300', '#ffa500', '#ffd700', '#00f2fe', '#4facfe', '#3a7bd5', '#3a7bd5', '#3a7bd5', '#3a7bd5', '#4facfe', '#00f2fe', '#ffd700', '#ffa500', '#ff7300', '#ff4500', '#ff0844', '#9c27b0']
     },
-    hard: {
-      rows: 12,
-      multipliers: [50, 25, 10, 5, 1, 0.2, 0.1, 0.2, 1, 5, 10, 25, 50],
-      slotColors: ['#9c27b0', '#ff0844', '#ff4500', '#ff7300', '#ffd700', '#00f2fe', '#4facfe', '#00f2fe', '#ffd700', '#ff7300', '#ff4500', '#ff0844', '#9c27b0']
+    hard: { // High Risk (Includes the 1000x Jackpot)
+      rows: 16,
+      multipliers: [1000, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130, 1000],
+      slotColors: ['#7b1fa2', '#9c27b0', '#ff0844', '#ff4500', '#ff7300', '#ffa500', '#ffd700', '#00f2fe', '#3a7bd5', '#3a7bd5', '#3a7bd5', '#3a7bd5', '#3a7bd5', '#00f2fe', '#ffd700', '#ffa500', '#ff7300', '#ff4500', '#ff0844', '#9c27b0', '#7b1fa2']
     }
   };
 
-  const pegRadius = 4;
-  const ballRadius = 7.5;
+  const pegRadius = 3;
+  const ballRadius = 5.5;
   let activeBalls = [];
   let jarFlashUntil = [];
 
@@ -100,13 +101,11 @@ document.addEventListener('DOMContentLoaded', () => {
       updateDisplay();
       playSound('drop');
 
-      // Visual center drop position
       const startX = canvas.width / 2;
       const startY = 18;
 
-      // Random left or right micro-velocity breaks symmetry
       const direction = Math.random() < 0.5 ? -1 : 1;
-      const initialVx = direction * (0.15 + Math.random() * 0.35);
+      const initialVx = direction * (0.12 + Math.random() * 0.25);
 
       activeBalls.push({
         x: startX,
@@ -159,19 +158,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const randomPitch = 550 + Math.random() * 350;
         osc.frequency.setValueAtTime(randomPitch, now);
         osc.frequency.exponentialRampToValueAtTime(randomPitch * 0.5, now + 0.04);
-        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.setValueAtTime(0.04, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
         osc.start(now);
         osc.stop(now + 0.04);
-      } else if (type === 'win') {
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(523.25, now);
-        osc.frequency.setValueAtTime(659.25, now + 0.06);
-        osc.frequency.setValueAtTime(783.99, now + 0.12);
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-        osc.start(now);
-        osc.stop(now + 0.22);
       } else if (type === 'error') {
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(140, now);
@@ -180,18 +170,12 @@ document.addEventListener('DOMContentLoaded', () => {
         osc.start(now);
         osc.stop(now + 0.08);
       } else if (type === 'jar') {
-        const pianoNotes = [
-          261.63, 293.66, 329.63, 349.23, 392.00,
-          440.00, 493.88, 523.25, 587.33, 659.25,
-          698.46, 783.99, 880.00
-        ];
-
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(pianoNotes[index] || 523.25, now);
-        gain.gain.setValueAtTime(0.85, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        osc.frequency.setValueAtTime(440 + index * 30, now);
+        gain.gain.setValueAtTime(0.5, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
         osc.start(now);
-        osc.stop(now + 0.45);
+        osc.stop(now + 0.3);
       }
     } catch(e) {}
   }
@@ -201,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.save();
       ctx.fillStyle = 'rgba(50, 30, 70, 0.4)';
       ctx.beginPath();
-      ctx.arc(x, y, 5, 0, Math.PI * 2);
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
       return;
@@ -213,10 +197,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ctx.save();
     ctx.shadowColor = glowColor;
-    ctx.shadowBlur = 10;
+    ctx.shadowBlur = 8;
     ctx.fillStyle = bulbColor;
     ctx.beginPath();
-    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   }
@@ -232,13 +216,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const w = canvas.width;
     const h = canvas.height;
 
-    const lightSpacing = 18; 
+    const lightSpacing = 16; 
     let perimeterCoords = [];
     
-    for (let x = 12; x < w - 12; x += lightSpacing) perimeterCoords.push({x: x, y: 10});
-    for (let y = 10; y < h - 10; y += lightSpacing) perimeterCoords.push({x: w - 10, y: y});
-    for (let x = w - 12; x > 12; x -= lightSpacing) perimeterCoords.push({x: x, y: h - 10});
-    for (let y = h - 10; y > 10; y -= lightSpacing) perimeterCoords.push({x: 10, y: y});
+    for (let x = 10; x < w - 10; x += lightSpacing) perimeterCoords.push({x: x, y: 8});
+    for (let y = 8; y < h - 8; y += lightSpacing) perimeterCoords.push({x: w - 8, y: y});
+    for (let x = w - 10; x > 10; x -= lightSpacing) perimeterCoords.push({x: x, y: h - 8});
+    for (let y = h - 8; y > 8; y -= lightSpacing) perimeterCoords.push({x: 8, y: y});
 
     const totalBulbs = perimeterCoords.length;
     const speed = 0.008; 
@@ -254,9 +238,9 @@ document.addEventListener('DOMContentLoaded', () => {
       drawMarqueeBulb(perimeterCoords[i].x, perimeterCoords[i].y, state);
     }
    
-    const startYGrid = 45;
-    const rowHeight = (h - 150) / rows;
-    const colSpacing = (w - 50) / (rows + 1);
+    const startYGrid = 35;
+    const rowHeight = (h - 110) / rows;
+    const colSpacing = (w - 30) / (rows + 2);
     
     // Draw Pegs
     for (let r = 0; r < rows; r++) {
@@ -268,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
       for (let c = 0; c < pegsInRow; c++) {
         const x = startX + c * colSpacing;
         ctx.shadowColor = '#ffd700';
-        ctx.shadowBlur = 4;
+        ctx.shadowBlur = 3;
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
         ctx.arc(x, y, pegRadius, 0, Math.PI * 2);
@@ -277,161 +261,52 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Draw Glass Jar Slots
+    // Draw Multiplier Slots
     const slotWidth = w / multipliers.length;
-    const slotY = h - 35;
-    const jarTop = h - 78;
+    const slotY = h - 25;
+    const jarTop = h - 55;
     const jarBottom = h - 5;
 
     for (let i = 0; i < multipliers.length; i++) {
       const x = i * slotWidth;
       const centerX = x + slotWidth / 2;
-      const jarWidth = Math.min(slotWidth - 8, 48);
+      const jarWidth = slotWidth - 2;
       const left = centerX - jarWidth / 2;
 
-      // Jar glass
-      const glassGradient = ctx.createLinearGradient(left, jarTop, left + jarWidth, jarTop);
-      glassGradient.addColorStop(0, 'rgba(255,255,255,0.28)');
-      glassGradient.addColorStop(0.18, 'rgba(255,255,255,0.08)');
-      glassGradient.addColorStop(0.5, 'rgba(255,255,255,0.03)');
-      glassGradient.addColorStop(0.82, 'rgba(255,255,255,0.10)');
-      glassGradient.addColorStop(1, 'rgba(255,255,255,0.25)');
-
       ctx.save();
+      ctx.fillStyle = slotColors[i] || '#ff0844';
+      ctx.fillRect(left, jarTop + 10, jarWidth, jarBottom - jarTop - 10);
 
-      ctx.shadowColor = slotColors[i];
-      ctx.shadowBlur = 0;
-
-      ctx.fillStyle = glassGradient;
-      ctx.strokeStyle = slotColors[i];
-      ctx.lineWidth = 2;
-
-      ctx.beginPath();
-      ctx.roundRect(
-        left,
-        jarTop + 10,
-        jarWidth,
-        jarBottom - jarTop - 10,
-        8
-      );
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.shadowBlur = 0;
-
-      // Coins inside jar
-      const coinColor = slotColors[i];
-
-      for (let c = 0; c < 5; c++) {
-        const coinX = left + 8 + (c % 3) * 10;
-        const coinY = jarBottom - 9 - Math.floor(c / 3) * 7;
-
-        ctx.fillStyle = coinColor;
-        ctx.beginPath();
-        ctx.arc(coinX, coinY, 4, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = 'rgba(255,255,255,0.45)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
-
-      // Jar neck
-      ctx.fillStyle = 'rgba(255,255,255,0.10)';
-      ctx.fillRect(centerX - 10, jarTop + 2, 20, 12);
-
-      ctx.strokeStyle = slotColors[i];
-      ctx.strokeRect(centerX - 10, jarTop + 2, 20, 12);
-
-      // Wooden lid
-      ctx.fillStyle = '#5a351d';
-      ctx.strokeStyle = '#d49a45';
-      ctx.lineWidth = 2;
-
-      ctx.beginPath();
-      ctx.roundRect(centerX - 12, jarTop - 2, 24, 8, 3);
-      ctx.fill();
-      ctx.stroke();
-
-      // Rope around jar neck
-      ctx.strokeStyle = '#d99b45';
-      ctx.lineWidth = 2;
-
-      ctx.beginPath();
-      ctx.moveTo(centerX - 11, jarTop + 10);
-      ctx.lineTo(centerX + 11, jarTop + 10);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(centerX - 9, jarTop + 13);
-      ctx.lineTo(centerX + 9, jarTop + 13);
-      ctx.stroke();
-
-      // Glass highlight
-      ctx.strokeStyle = 'rgba(255,255,255,0.45)';
-      ctx.lineWidth = 2;
-
-      ctx.beginPath();
-      ctx.moveTo(left + 7, jarTop + 20);
-      ctx.lineTo(left + 7, jarBottom - 15);
-      ctx.stroke();
-
-      // Multiplier
+      // Multiplier Label
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 10px sans-serif';
+      ctx.font = 'bold 8px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.shadowColor = '#000';
-      ctx.shadowBlur = 5;
-
-      ctx.fillText(
-        `${multipliers[i]}x`,
-        centerX,
-        jarTop + 39
-      );
-
-      ctx.shadowBlur = 0;
+      ctx.fillText(`${multipliers[i]}x`, centerX, jarTop + 25);
       ctx.restore();
 
-      // Landing flash
+      // Landing Flash
       if (jarFlashUntil[i] && Date.now() < jarFlashUntil[i]) {
         ctx.save();
-
-        ctx.shadowColor = slotColors[i];
-        ctx.shadowBlur = 28;
-
-        ctx.fillStyle = 'rgba(255,255,255,0.28)';
-        ctx.strokeStyle = slotColors[i];
-        ctx.lineWidth = 3;
-
-        ctx.beginPath();
-        ctx.roundRect(
-          left,
-          jarTop + 10,
-          jarWidth,
-          jarBottom - jarTop - 10,
-          8
-        );
-        ctx.fill();
-        ctx.stroke();
-
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.fillRect(left, jarTop + 10, jarWidth, jarBottom - jarTop - 10);
         ctx.restore();
       }
     }
 
-    // Update Balls with Balanced Bounce Physics
+    // Physics Engine
     for (let i = activeBalls.length - 1; i >= 0; i--) {
       let ball = activeBalls[i];
 
-      ball.vy += 0.45;
+      ball.vy += 0.35;
       ball.x += ball.vx;
       ball.y += ball.vy;
 
-      if (ball.x - ballRadius < 10) {
-        ball.x = 10 + ballRadius;
+      if (ball.x - ballRadius < 8) {
+        ball.x = 8 + ballRadius;
         ball.vx *= -0.4;
-      } else if (ball.x + ballRadius > w - 10) {
-        ball.x = w - 10 - ballRadius;
+      } else if (ball.x + ballRadius > w - 8) {
+        ball.x = w - 8 - ballRadius;
         ball.vx *= -0.4;
       }
 
@@ -458,9 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ball.y += ny * overlap;
 
             const dot = ball.vx * nx + ball.vy * ny;
-            
-            // Natural 50/50 bounce scattering
-            const scatter = (Math.random() - 0.5) * 0.4;
+            const scatter = (Math.random() - 0.5) * 0.3;
             ball.vx = (ball.vx - 2 * dot * nx) * 0.5 + scatter;
             ball.vy = (ball.vy - 2 * dot * ny) * 0.5;
           }
@@ -474,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         coinCount += currentBet * mult;
         updateDisplay();
-        jarFlashUntil[clampedIndex] = Date.now() + 350;
+        jarFlashUntil[clampedIndex] = Date.now() + 300;
         playSound('jar', clampedIndex);
         activeBalls.splice(i, 1);
         continue;
@@ -482,21 +355,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Draw Gold Ball
       ctx.shadowColor = '#ffd700';
-      ctx.shadowBlur = 12;
+      ctx.shadowBlur = 8;
       ctx.fillStyle = '#ffd700';
       ctx.beginPath();
       ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
-
-      ctx.fillStyle = '#fff9e6';
-      ctx.beginPath();
-      ctx.arc(ball.x - 2, ball.y - 2, ballRadius * 0.35, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.strokeStyle = '#b38f00';
-      ctx.lineWidth = 1;
-      ctx.stroke();
     }
 
     requestAnimationFrame(updatePhysics);
