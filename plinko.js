@@ -422,79 +422,79 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 4. Ball Physics Engine
-    for (let i = activeBalls.length - 1; i >= 0; i--) {
-      let ball = activeBalls[i];
+for (let i = activeBalls.length - 1; i >= 0; i--) {
+  let ball = activeBalls[i];
 
-      ball.vy += 0.38;
-      ball.x += ball.vx;
-      ball.y += ball.vy;
+  ball.vy += 0.85; // Increased gravity for faster drop
+  ball.x += ball.vx;
+  ball.y += ball.vy;
 
-      if (ball.x - ballRadius < 8) {
-        ball.x = 8 + ballRadius;
-        ball.vx *= -0.3;
-      } else if (ball.x + ballRadius > w - 8) {
-        ball.x = w - 8 - ballRadius;
-        ball.vx *= -0.3;
+  if (ball.x - ballRadius < 8) {
+    ball.x = 8 + ballRadius;
+    ball.vx *= -0.5;
+  } else if (ball.x + ballRadius > w - 8) {
+    ball.x = w - 8 - ballRadius;
+    ball.vx *= -0.5;
+  }
+
+  for (let r = 0; r < rows; r++) {
+    const pegsInRow = r + 3;
+    const rowWidth = (pegsInRow - 1) * colSpacing;
+    const startX = (w - rowWidth) / 2;
+    const y = startYGrid + r * rowHeight;
+
+    for (let c = 0; c < pegsInRow; c++) {
+      const px = startX + c * colSpacing;
+      const py = y;
+      const dx = ball.x - px;
+      const dy = ball.y - py;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < ballRadius + pegRadius) {
+        playSound('peg');
+        const overlap = (ballRadius + pegRadius) - dist;
+        const nx = dx / dist;
+        const ny = dy / dist;
+        
+        ball.x += nx * overlap;
+        ball.y += ny * overlap;
+
+        const dot = ball.vx * nx + ball.vy * ny;
+        const scatter = (Math.random() - 0.5) * 0.5;
+        ball.vx = (ball.vx - 1.8 * dot * nx) * 0.75 + scatter;
+        ball.vy = (ball.vy - 1.8 * dot * ny) * 0.75;
       }
-
-      for (let r = 0; r < rows; r++) {
-        const pegsInRow = r + 3;
-        const rowWidth = (pegsInRow - 1) * colSpacing;
-        const startX = (w - rowWidth) / 2;
-        const y = startYGrid + r * rowHeight;
-
-        for (let c = 0; c < pegsInRow; c++) {
-          const px = startX + c * colSpacing;
-          const py = y;
-          const dx = ball.x - px;
-          const dy = ball.y - py;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          if (dist < ballRadius + pegRadius) {
-            playSound('peg');
-            const overlap = (ballRadius + pegRadius) - dist;
-            const nx = dx / dist;
-            const ny = dy / dist;
-            
-            ball.x += nx * overlap;
-            ball.y += ny * overlap;
-
-            const dot = ball.vx * nx + ball.vy * ny;
-            const scatter = (Math.random() - 0.5) * 0.2;
-            ball.vx = (ball.vx - 2 * dot * nx) * 0.45 + scatter;
-            ball.vy = (ball.vy - 2 * dot * ny) * 0.45;
-          }
-        }
-      }
-
-      if (ball.y >= slotY) {
-        const slotIndex = Math.floor(ball.x / slotWidth);
-        const clampedIndex = Math.max(0, Math.min(multipliers.length - 1, slotIndex));
-        const mult = multipliers[clampedIndex];
-
-        coinCount += currentBet * mult;
-        updateDisplay();
-        jarFlashUntil[clampedIndex] = Date.now() + 350;
-        playSound('jar', clampedIndex);
-        activeBalls.splice(i, 1);
-        continue;
-      }
-
-      // Draw Gold Ball
-      ctx.save();
-      ctx.shadowColor = '#ffd700';
-      ctx.shadowBlur = 8;
-      ctx.fillStyle = '#ffd700';
-      ctx.beginPath();
-      ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#fff9e6';
-      ctx.beginPath();
-      ctx.arc(ball.x - 1.5, ball.y - 1.5, ballRadius * 0.35, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
     }
+  }
+
+  if (ball.y >= slotY) {
+    const slotIndex = Math.floor(ball.x / slotWidth);
+    const clampedIndex = Math.max(0, Math.min(multipliers.length - 1, slotIndex));
+    const mult = multipliers[clampedIndex];
+
+    coinCount += currentBet * mult;
+    updateDisplay();
+    jarFlashUntil[clampedIndex] = Date.now() + 350;
+    playSound('jar', clampedIndex);
+    activeBalls.splice(i, 1);
+    continue;
+  }
+
+  // Draw Gold Ball
+  ctx.save();
+  ctx.shadowColor = '#ffd700';
+  ctx.shadowBlur = 8;
+  ctx.fillStyle = '#ffd700';
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#fff9e6';
+  ctx.beginPath();
+  ctx.arc(ball.x - 1.5, ball.y - 1.5, ballRadius * 0.35, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
 
     requestAnimationFrame(updatePhysics);
   }
