@@ -48,21 +48,14 @@ window.saveUserDataToCloud = async function() {
             if (userObj && userObj.displayName) displayName = userObj.displayName;
         } catch (e) {}
 
-        // 1. Fetch current level & coins accurately from user prefix keys or loggedInUser
         const prefix = username + '_';
+
         let currentLevel = parseInt(localStorage.getItem(prefix + 'currentLevel'));
-        if (isNaN(currentLevel)) {
-            currentLevel = parseInt(localStorage.getItem('currentLevel')) || 1;
-        }
+        if (isNaN(currentLevel)) currentLevel = parseInt(localStorage.getItem('currentLevel')) || 1;
 
         let totalCoins = parseInt(localStorage.getItem(prefix + 'totalCoins'));
-        if (isNaN(totalCoins)) {
-            totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
-        }
+        if (isNaN(totalCoins)) totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
 
-        const avatar = localStorage.getItem(prefix + 'vinpix_avatar') || '';
-
-        // 2. Fetch total XP directly
         let currentXpVal = parseInt(localStorage.getItem(prefix + 'totalXp'));
         if (isNaN(currentXpVal)) {
             try {
@@ -76,13 +69,12 @@ window.saveUserDataToCloud = async function() {
             currentXpVal = playerProgression.currentXp;
         }
 
+        const avatar = localStorage.getItem(prefix + 'vinpix_avatar') || localStorage.getItem('vinpix_avatar') || '';
         const dailyStorageKey = getDailyStorageKey();
         const dailyDataStr = localStorage.getItem(dailyStorageKey);
         const dailyRewardState = dailyDataStr ? JSON.parse(dailyDataStr) : { streak: 0, lastClaimDate: "" };
-
         const currentChallengeVal = parseInt(localStorage.getItem(prefix + 'currentChallenge')) || 1;
 
-        // 3. Write updated level and XP to Firestore
         const userDocRef = doc(db, "players", username);
         await setDoc(userDocRef, {
             username: username,
@@ -96,7 +88,7 @@ window.saveUserDataToCloud = async function() {
             lastUpdated: new Date()
         }, { merge: true });
 
-        // Keep loggedInUser synced in localStorage
+        // Keep local loggedInUser object perfectly in sync
         try {
             let currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
             currentUser.level = currentLevel;
@@ -104,8 +96,7 @@ window.saveUserDataToCloud = async function() {
             currentUser.coins = totalCoins;
             localStorage.setItem('loggedInUser', JSON.stringify(currentUser));
         } catch(e) {}
-        
-        console.log("Cloud sync successful for level:", currentLevel);
+
     } catch (error) {
         console.warn("Cloud sync skipped or failed safely:", error);
     }
@@ -166,7 +157,7 @@ async function fetchUserDataFromFirestore() {
                 if (typeof updateXpProgress === 'function') updateXpProgress();
                 if (typeof updateProfileStats === 'function') updateProfileStats();
                 if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
-
+                if (cloudData.xp !== undefined) localStorage.setItem(username + '_totalXp', cloudData.xp);
                 console.log("Profile successfully synced from Firestore players collection!");
             }
         }
@@ -265,7 +256,6 @@ function updateXpProgress() {
     
     let currentLevelVal = parseInt(localStorage.getItem(prefix + 'currentLevel')) || 1;
     
-    // Check for direct synced XP from Firestore/localStorage
     let currentXpVal = parseInt(localStorage.getItem(prefix + 'totalXp'));
     if (isNaN(currentXpVal)) {
         try {
@@ -274,21 +264,16 @@ function updateXpProgress() {
         } catch(e) {}
     }
 
-    // Fallback if missing
     if (currentXpVal === undefined || currentXpVal === null || isNaN(currentXpVal)) {
         const puzzlesSolved = Math.max(0, currentLevelVal - 1);
         const playerProgression = calculateLevelAndXp(puzzlesSolved);
         currentXpVal = playerProgression.currentXp;
     }
 
-    // Pass the actual current level to calculate the correct cumulative target
     const puzzlesSolved = Math.max(0, currentLevelVal - 1);
     const progression = calculateLevelAndXp(puzzlesSolved);
     
-    // Use the dynamic target from calculateLevelAndXp or ensure cumulative total matches
     let maxXpVal = progression.maxXp > 0 ? progression.maxXp : 1500;
-
-    // If current total XP exceeds calculated target, adjust max display target to match level thresholds
     if (currentXpVal > maxXpVal) {
         maxXpVal = Math.max(currentXpVal, maxXpVal);
     }
@@ -305,7 +290,6 @@ function updateXpProgress() {
 
     updateProfileStats();
 }
-
 
 function applyProfileRankFrame(rank) {
     const frameImg = document.getElementById('profileRankFrame');
