@@ -52,15 +52,24 @@ window.saveUserDataToCloud = async function() {
         const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
         const avatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
 
-        const puzzlesSolved = Math.max(0, currentLevel - 1);
-        const playerProgression = calculateLevelAndXp(puzzlesSolved);
-        const currentXpVal = playerProgression.currentXp;
-
+        // Preserve direct XP from local storage or loggedInUser
+let currentXpVal = parseInt(localStorage.getItem(getUserKey('totalXp')));
+if (isNaN(currentXpVal)) {
+    try {
+        const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (userObj && userObj.xp !== undefined) currentXpVal = userObj.xp;
+    } catch(e) {}
+}
+if (isNaN(currentXpVal) || currentXpVal === null) {
+    const puzzlesSolved = Math.max(0, currentLevel - 1);
+    const playerProgression = calculateLevelAndXp(puzzlesSolved);
+    currentXpVal = playerProgression.currentXp;
+}
         const dailyStorageKey = getDailyStorageKey();
         const dailyDataStr = localStorage.getItem(dailyStorageKey);
         const dailyRewardState = dailyDataStr ? JSON.parse(dailyDataStr) : { streak: 0, lastClaimDate: "" };
 
-        // --- CHALLENGE DATA ---
+    
         // --- CHALLENGE DATA ---
     const currentChallengeVal = parseInt(localStorage.getItem(getUserKey('currentChallenge'))) || 1;
         const userDocRef = doc(db, "players", username);
@@ -493,11 +502,13 @@ document.addEventListener('DOMContentLoaded', () => {
         applyAvatarToUI('image/avatar.png');
     }
 
-    updateXpProgress();
-    updateProfileStats();
-    checkAndUnlockBadges();
-    loadProfileGlobalRank();
-    saveUserDataToCloud();
+    // Fetch cloud data FIRST before saving anything back to cloud
+    fetchUserDataFromFirestore().then(() => {
+        updateXpProgress();
+        updateProfileStats();
+        checkAndUnlockBadges();
+        loadProfileGlobalRank();
+    });
 });
 
 // --- EDIT NAME MODAL HANDLERS ---
