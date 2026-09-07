@@ -88,8 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (dropBallBtn) {
     dropBallBtn.addEventListener('click', () => {
       const now = Date.now();
-      // Prevents spamming overflow bugs (100ms cooldown)
-      if (now - lastDropTime < 100) return;
+      if (now - lastDropTime < 80) return;
       lastDropTime = now;
 
       if (coinCount < currentBet) {
@@ -101,17 +100,18 @@ document.addEventListener('DOMContentLoaded', () => {
       updateDisplay();
       playSound('drop');
 
-      // EXACT CENTER DROP: No random X offset!
+      // Visual center drop position
       const startX = canvas.width / 2;
       const startY = 18;
 
-      // Microscopic initial jitter so balls don't stack perfectly on top of each other
-      const initialMicroJitter = (Math.random() - 0.5) * 0.1;
+      // Random left or right micro-velocity breaks symmetry
+      const direction = Math.random() < 0.5 ? -1 : 1;
+      const initialVx = direction * (0.15 + Math.random() * 0.35);
 
       activeBalls.push({
         x: startX,
         y: startY,
-        vx: initialMicroJitter,
+        vx: initialVx,
         vy: 0
       });
     });
@@ -299,7 +299,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       ctx.save();
 
-      // Jar glow
       ctx.shadowColor = slotColors[i];
       ctx.shadowBlur = 0;
 
@@ -307,7 +306,6 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.strokeStyle = slotColors[i];
       ctx.lineWidth = 2;
 
-      // Rounded jar body
       ctx.beginPath();
       ctx.roundRect(
         left,
@@ -421,29 +419,22 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Update Balls with PURE, NATURAL PHYSICS
+    // Update Balls with Balanced Bounce Physics
     for (let i = activeBalls.length - 1; i >= 0; i--) {
       let ball = activeBalls[i];
 
-      // Standard gravity acceleration
       ball.vy += 0.45;
-      
-      // Slight natural air friction (dampens crazy outward horizontal velocity)
-      ball.vx *= 0.985;
-
       ball.x += ball.vx;
       ball.y += ball.vy;
 
-      // Soft Wall Bounds
       if (ball.x - ballRadius < 10) {
         ball.x = 10 + ballRadius;
-        ball.vx *= -0.3;
+        ball.vx *= -0.4;
       } else if (ball.x + ballRadius > w - 10) {
         ball.x = w - 10 - ballRadius;
-        ball.vx *= -0.3;
+        ball.vx *= -0.4;
       }
 
-      // Natural Collision Mechanics against pegs
       for (let r = 0; r < rows; r++) {
         const pegsInRow = r + 3;
         const rowWidth = (pegsInRow - 1) * colSpacing;
@@ -466,17 +457,16 @@ document.addEventListener('DOMContentLoaded', () => {
             ball.x += nx * overlap;
             ball.y += ny * overlap;
 
-            // Balanced restitution vector calculation (Natural 50/50 bounce split)
             const dot = ball.vx * nx + ball.vy * ny;
             
-            // Reduced elasticity multipliers prevent runaway outward velocity
-            ball.vx = (ball.vx - 2 * dot * nx) * 0.35 + (Math.random() - 0.5) * 0.15;
-            ball.vy = (ball.vy - 2 * dot * ny) * 0.45;
+            // Natural 50/50 bounce scattering
+            const scatter = (Math.random() - 0.5) * 0.4;
+            ball.vx = (ball.vx - 2 * dot * nx) * 0.5 + scatter;
+            ball.vy = (ball.vy - 2 * dot * ny) * 0.5;
           }
         }
       }
 
-      // Slot Landing Detection
       if (ball.y >= slotY) {
         const slotIndex = Math.floor(ball.x / slotWidth);
         const clampedIndex = Math.max(0, Math.min(multipliers.length - 1, slotIndex));
