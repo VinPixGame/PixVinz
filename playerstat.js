@@ -113,24 +113,20 @@ async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeSt
     let maxUnlocked = parseInt(localStorage.getItem(currentLevelKey)) || 1;
     let currentXp = parseInt(localStorage.getItem(totalXpKey)) || 0;
 
-    // 1. Award Coins
     let targetCoins = stars * 5;
     totalCoins += targetCoins;
     localStorage.setItem(totalCoinsKey, totalCoins);
 
-    // 2. Award XP (100 XP per level victory)
     let xpEarned = 100;
     currentXp += xpEarned;
     localStorage.setItem(totalXpKey, currentXp);
 
-    // 3. Unlock Next Level
     let nextLevelToUnlock = maxUnlocked;
     if (completedLevel >= maxUnlocked) {
         nextLevelToUnlock = completedLevel + 1;
         localStorage.setItem(currentLevelKey, nextLevelToUnlock);
     }
 
-    // Save individual level stats
     if (finalMoves !== undefined) {
         localStorage.setItem(getUserKey(`levelMoves_${completedLevel}`), finalMoves);
     }
@@ -146,7 +142,6 @@ async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeSt
         modal.style.display = 'flex';
     }
 
-    // Trigger profile.js cloud sync function
     if (typeof saveUserDataToCloud === 'function') {
         await saveUserDataToCloud();
     }
