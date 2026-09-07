@@ -48,33 +48,21 @@ window.saveUserDataToCloud = async function() {
             if (userObj && userObj.displayName) displayName = userObj.displayName;
         } catch (e) {}
 
-        const prefix = username + '_';
+        const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+        const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
+        const avatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
 
-        let currentLevel = parseInt(localStorage.getItem(prefix + 'currentLevel'));
-        if (isNaN(currentLevel)) currentLevel = parseInt(localStorage.getItem('currentLevel')) || 1;
+        const puzzlesSolved = Math.max(0, currentLevel - 1);
+        const playerProgression = calculateLevelAndXp(puzzlesSolved);
+        const currentXpVal = playerProgression.currentXp;
 
-        let totalCoins = parseInt(localStorage.getItem(prefix + 'totalCoins'));
-        if (isNaN(totalCoins)) totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
-
-        let currentXpVal = parseInt(localStorage.getItem(prefix + 'totalXp'));
-        if (isNaN(currentXpVal)) {
-            try {
-                const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
-                if (userObj && userObj.xp !== undefined) currentXpVal = userObj.xp;
-            } catch(e) {}
-        }
-        if (isNaN(currentXpVal) || currentXpVal === null) {
-            const puzzlesSolved = Math.max(0, currentLevel - 1);
-            const playerProgression = calculateLevelAndXp(puzzlesSolved);
-            currentXpVal = playerProgression.currentXp;
-        }
-
-        const avatar = localStorage.getItem(prefix + 'vinpix_avatar') || localStorage.getItem('vinpix_avatar') || '';
         const dailyStorageKey = getDailyStorageKey();
         const dailyDataStr = localStorage.getItem(dailyStorageKey);
         const dailyRewardState = dailyDataStr ? JSON.parse(dailyDataStr) : { streak: 0, lastClaimDate: "" };
-        const currentChallengeVal = parseInt(localStorage.getItem(prefix + 'currentChallenge')) || 1;
 
+        // --- CHALLENGE DATA ---
+        // --- CHALLENGE DATA ---
+    const currentChallengeVal = parseInt(localStorage.getItem(getUserKey('currentChallenge'))) || 1;
         const userDocRef = doc(db, "players", username);
         await setDoc(userDocRef, {
             username: username,
@@ -87,16 +75,8 @@ window.saveUserDataToCloud = async function() {
             challenge: currentChallengeVal,
             lastUpdated: new Date()
         }, { merge: true });
-
-        // Keep local loggedInUser object perfectly in sync
-        try {
-            let currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
-            currentUser.level = currentLevel;
-            currentUser.xp = currentXpVal;
-            currentUser.coins = totalCoins;
-            localStorage.setItem('loggedInUser', JSON.stringify(currentUser));
-        } catch(e) {}
-
+        
+        console.log("Cloud sync successful for:", username);
     } catch (error) {
         console.warn("Cloud sync skipped or failed safely:", error);
     }
@@ -157,7 +137,7 @@ async function fetchUserDataFromFirestore() {
                 if (typeof updateXpProgress === 'function') updateXpProgress();
                 if (typeof updateProfileStats === 'function') updateProfileStats();
                 if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
-                if (cloudData.xp !== undefined) localStorage.setItem(username + '_totalXp', cloudData.xp);
+
                 console.log("Profile successfully synced from Firestore players collection!");
             }
         }
@@ -256,29 +236,28 @@ function updateXpProgress() {
     
     let currentLevelVal = parseInt(localStorage.getItem(prefix + 'currentLevel')) || 1;
     
+    // Check for direct synced XP from Firestore first, fallback to level calculation
     let currentXpVal = parseInt(localStorage.getItem(prefix + 'totalXp'));
+    
     if (isNaN(currentXpVal)) {
+        let currentUser = {};
         try {
-            const userObj = JSON.parse(localStorage.getItem('loggedInUser')) || {};
-            currentXpVal = userObj.xp;
+            currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
         } catch(e) {}
+        currentXpVal = currentUser.xp;
     }
 
+    // Fallback calculation if no direct stored XP exists
     if (currentXpVal === undefined || currentXpVal === null || isNaN(currentXpVal)) {
         const puzzlesSolved = Math.max(0, currentLevelVal - 1);
         const playerProgression = calculateLevelAndXp(puzzlesSolved);
         currentXpVal = playerProgression.currentXp;
     }
 
-    const puzzlesSolved = Math.max(0, currentLevelVal - 1);
-    const progression = calculateLevelAndXp(puzzlesSolved);
-    
-    let maxXpVal = progression.maxXp > 0 ? progression.maxXp : 1500;
-    if (currentXpVal > maxXpVal) {
-        maxXpVal = Math.max(currentXpVal, maxXpVal);
-    }
-
-    const progressPercent = Math.min(100, (currentXpVal / maxXpVal) * 100);
+    // Calculate max XP needed for current level tier
+    let tier = Math.floor((currentLevelVal - 1) / 10);
+    let maxXpVal = (tier + 1) * 500;
+    let progressPercent = Math.min(100, (currentXpVal / maxXpVal) * 100);
 
     const levelNumEl = document.querySelector('#displayLevelBadge .xp-level-num');
     const xpText = document.getElementById('displayXpText');
@@ -290,6 +269,7 @@ function updateXpProgress() {
 
     updateProfileStats();
 }
+
 
 function applyProfileRankFrame(rank) {
     const frameImg = document.getElementById('profileRankFrame');
@@ -513,13 +493,11 @@ document.addEventListener('DOMContentLoaded', () => {
         applyAvatarToUI('image/avatar.png');
     }
 
-    // Fetch cloud data FIRST before saving anything back to cloud
-    fetchUserDataFromFirestore().then(() => {
-        updateXpProgress();
-        updateProfileStats();
-        checkAndUnlockBadges();
-        loadProfileGlobalRank();
-    });
+    updateXpProgress();
+    updateProfileStats();
+    checkAndUnlockBadges();
+    loadProfileGlobalRank();
+    saveUserDataToCloud();
 });
 
 // --- EDIT NAME MODAL HANDLERS ---
