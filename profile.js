@@ -113,12 +113,11 @@ async function fetchUserDataFromFirestore() {
                 localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
 
                 // Sync stats to local storage keys used by playerstat.js
-                const prefix = username + '_';
-                if (cloudData.coins !== undefined) localStorage.setItem(prefix + 'totalCoins', cloudData.coins);
-                if (cloudData.level !== undefined) localStorage.setItem(prefix + 'currentLevel', cloudData.level);
-                if (cloudData.avatar) localStorage.setItem(prefix + 'vinpix_avatar', cloudData.avatar);
-
-                // Sync challenge data down to local storage
+              const prefix = username + '_';
+              if (cloudData.coins !== undefined) localStorage.setItem(prefix + 'totalCoins', cloudData.coins);
+              if (cloudData.level !== undefined) localStorage.setItem(prefix + 'currentLevel', cloudData.level);
+              if (cloudData.xp !== undefined) localStorage.setItem(prefix + 'totalXp', cloudData.xp); // <--- SYNC FIRESTORE XP
+              if (cloudData.avatar) localStorage.setItem(prefix + 'vinpix_avatar', cloudData.avatar);
                 // Sync challenge data down to local storage
     if (cloudData.challenge !== undefined) {
         localStorage.setItem(prefix + 'currentChallenge', cloudData.challenge);
@@ -230,24 +229,47 @@ function updateProfileStats() {
     if (profileLevelEl) profileLevelEl.textContent = currentLevelVal;
 }
 
+// REPLACE YOUR ENTIRE updateXpProgress() FUNCTION WITH THIS:
 function updateXpProgress() {
     const currentUsername = getCurrentUsername();
-    let currentLevelVal = parseInt(localStorage.getItem(currentUsername ? currentUsername + '_currentLevel' : 'currentLevel')) || 1;
+    const prefix = currentUsername ? currentUsername + '_' : '';
+    
+    let currentLevelVal = parseInt(localStorage.getItem(prefix + 'currentLevel')) || 1;
+    
+    // Check for direct synced XP from Firestore first, fallback to level calculation
+    let currentXpVal = parseInt(localStorage.getItem(prefix + 'totalXp'));
+    
+    if (isNaN(currentXpVal)) {
+        let currentUser = {};
+        try {
+            currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
+        } catch(e) {}
+        currentXpVal = currentUser.xp;
+    }
 
-    const puzzlesSolved = Math.max(0, currentLevelVal - 1);
-    const playerProgression = calculateLevelAndXp(puzzlesSolved);
-    const progressPercent = Math.min(100, (playerProgression.currentXp / playerProgression.maxXp) * 100);
+    // Fallback calculation if no direct stored XP exists
+    if (currentXpVal === undefined || currentXpVal === null || isNaN(currentXpVal)) {
+        const puzzlesSolved = Math.max(0, currentLevelVal - 1);
+        const playerProgression = calculateLevelAndXp(puzzlesSolved);
+        currentXpVal = playerProgression.currentXp;
+    }
+
+    // Calculate max XP needed for current level tier
+    let tier = Math.floor((currentLevelVal - 1) / 10);
+    let maxXpVal = (tier + 1) * 500;
+    let progressPercent = Math.min(100, (currentXpVal / maxXpVal) * 100);
 
     const levelNumEl = document.querySelector('#displayLevelBadge .xp-level-num');
     const xpText = document.getElementById('displayXpText');
     const xpBarFill = document.getElementById('displayXpBarFill');
 
-    if (levelNumEl) levelNumEl.textContent = playerProgression.level;
-    if (xpText) xpText.textContent = `${playerProgression.currentXp.toLocaleString()} / ${playerProgression.maxXp.toLocaleString()} XP`;
+    if (levelNumEl) levelNumEl.textContent = currentLevelVal;
+    if (xpText) xpText.textContent = `${currentXpVal.toLocaleString()} / ${maxXpVal.toLocaleString()} XP`;
     if (xpBarFill) xpBarFill.style.width = `${progressPercent}%`;
 
     updateProfileStats();
 }
+
 
 function applyProfileRankFrame(rank) {
     const frameImg = document.getElementById('profileRankFrame');
