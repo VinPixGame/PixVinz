@@ -142,7 +142,6 @@ body {
   gap: 14px;
   padding: 6px 12px;
   width: 100%;
-  
 }
 
 .wheel-section {
@@ -434,7 +433,7 @@ body {
 }
 
 .wheel-pointer {
-position: absolute;
+  position: absolute;
   top: -24px;
   left: 50%;
   z-index: 60;
@@ -524,6 +523,7 @@ position: absolute;
   border: 1px solid rgba(218,177,86,0.32);
   box-shadow: 0 4px 12px rgba(0,0,0,0.6);
 }
+
 .bet-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -549,7 +549,6 @@ position: absolute;
   box-shadow: 0 2px 4px rgba(0,0,0,0.55);
   transition: transform 0.12s ease;
 }
-
 
 .bet-slot.winner-glow {
   border-color: var(--win-glow);
@@ -809,7 +808,6 @@ position: absolute;
   cursor: pointer;
 }
 
-
 /* Apply ONLY when opened in a mobile browser */
 @media (display-mode: browser) {
   html {
@@ -818,7 +816,6 @@ position: absolute;
     overflow: hidden !important;
   }
 }
-  
 </style>
 </head>
 
@@ -847,7 +844,7 @@ position: absolute;
           </div>
         </div>
         <div class="wheel-hub">
-        <img id="logoImage" src="image/vinz.png" alt="PixVinz Logo" style="background: transparent; width: 78%; height: 78%; object-fit: contain;">
+          <img id="logoImage" src="image/vinz.png" alt="PixVinz Logo" style="background: transparent; width: 78%; height: 78%; object-fit: contain;">
         </div>
         <div class="wheel-nails-ring" id="wheelNailsRing">
           <div class="wheel-nails" id="wheelNails"></div>
@@ -857,9 +854,9 @@ position: absolute;
     </section>
 
     <section class="result-display">
-  <div class="result-title">LAST RESULT</div>
-  <div class="result-value" id="lastResult"></div>
-</section>
+      <div class="result-title">LAST RESULT</div>
+      <div class="result-value" id="lastResult"></div>
+    </section>
 
     <section class="betting-section">
       <div class="section-title">PLACE YOUR BET</div>
@@ -1054,20 +1051,20 @@ function updateResultHistory(result) {
   document.getElementById("lastResult").innerHTML =
     resultHistory.map((value, index) => {
       if (value === "Jackpot") {
-  return `<span class="result-history-item${index === resultHistory.length - 1 ? " latest" : ""}" style="
-    background: conic-gradient(
-      #ff0000,
-      #ff9900,
-      #ffff00,
-      #00ff66,
-      #0088ff,
-      #aa00ff,
-      #ff0000
-    );
-    box-shadow: 0 0 8px #ff00ff;
-  ">♛</span>`;
-}
-                        return `<span class="result-history-item${index === resultHistory.length - 1 ? " latest" : ""}" style="
+        return `<span class="result-history-item${index === resultHistory.length - 1 ? " latest" : ""}" style="
+          background: conic-gradient(
+            #ff0000,
+            #ff9900,
+            #ffff00,
+            #00ff66,
+            #0088ff,
+            #aa00ff,
+            #ff0000
+          );
+          box-shadow: 0 0 8px #ff00ff;
+        ">♛</span>`;
+      }
+      return `<span class="result-history-item${index === resultHistory.length - 1 ? " latest" : ""}" style="
         background: ${resultColors[value] || "#777"};
         color: ${value === "Star" ? "#111" : "#fff"};
       ">${resultSymbols[value] || "?"}</span>`;
@@ -1115,11 +1112,35 @@ const xpKey = getUserKey('bonusXp');
 let coins = parseInt(localStorage.getItem(coinsKey)) || 0;
 let xp = parseInt(localStorage.getItem(xpKey)) || 0;
 
+async function syncFirestoreXP() {
+  if (typeof window.loadUserDataFromCloud === 'function') {
+    try {
+      const data = await window.loadUserDataFromCloud();
+      if (data) {
+        if (typeof data.bonusXp === 'number') {
+          xp = data.bonusXp;
+          localStorage.setItem(xpKey, xp);
+        }
+        if (typeof data.totalCoins === 'number') {
+          coins = data.totalCoins;
+          localStorage.setItem(coinsKey, coins);
+        }
+        updateBalanceDisplay();
+      }
+    } catch(e) {}
+  }
+}
+
 function saveUserData() {
     localStorage.setItem(coinsKey, coins);
     localStorage.setItem(xpKey, xp);
     if (typeof updateProfileStats === 'function') updateProfileStats();
-    if (typeof window.saveUserDataToCloud === 'function') window.saveUserDataToCloud();
+    if (typeof window.saveUserDataToCloud === 'function') {
+      window.saveUserDataToCloud({
+        totalCoins: coins,
+        bonusXp: xp
+      });
+    }
 }
 
 let selectedChip = 5;
@@ -1202,37 +1223,36 @@ function setWheelHighlight(index, locked = false) {
 
     const section = wheelSections[index];
 
-const neonColor = {
-    Red: "#ff0000",
-    Blue: "#0066ff",
-    Star: "#ffff00",
-    Diamond: "#00ffff",
-    X: "#bf00ff",
-    O: "#ff00aa",
-    Jackpot: "#ffd700"
-}[section] || "#ffffff";
+    const neonColor = {
+        Red: "#ff0000",
+        Blue: "#0066ff",
+        Star: "#ffff00",
+        Diamond: "#00ffff",
+        X: "#bf00ff",
+        O: "#ff00aa",
+        Jackpot: "#ffd700"
+    }[section] || "#ffffff";
 
-highlight.style.background =
-    `conic-gradient(
-        transparent 0deg ${start}deg,
-        ${neonColor} ${start}deg ${end}deg,
-        transparent ${end}deg 360deg
-    )`;
+    highlight.style.background =
+        `conic-gradient(
+            transparent 0deg ${start}deg,
+            ${neonColor} ${start}deg ${end}deg,
+            transparent ${end}deg 360deg
+        )`;
 
-highlight.style.boxShadow =
-    section === "Jackpot"
-    ? `0 0 8px #ff0000,
-       0 0 16px #ff9900,
-       0 0 24px #00ff66,
-       0 0 32px #0088ff,
-       0 0 40px #aa00ff,
-       inset 0 0 18px #ffffff`
-    : `0 0 8px ${neonColor},
-       0 0 18px ${neonColor},
-       0 0 30px ${neonColor},
-       inset 0 0 18px ${neonColor}`;
+    highlight.style.boxShadow =
+        section === "Jackpot"
+        ? `0 0 8px #ff0000,
+           0 0 16px #ff9900,
+           0 0 24px #00ff66,
+           0 0 32px #0088ff,
+           0 0 40px #aa00ff,
+           inset 0 0 18px #ffffff`
+        : `0 0 8px ${neonColor},
+           0 0 18px ${neonColor},
+           0 0 30px ${neonColor},
+           inset 0 0 18px ${neonColor}`;
 
-  
     highlight.style.opacity = "1";
     highlight.classList.toggle("locked", locked);
 
@@ -1244,7 +1264,6 @@ highlight.style.boxShadow =
 
     activeWheelIndex = index;
 }
-  
 
 function buildWheelFace() {
   const wheelFace = document.getElementById("wheelFace");
@@ -1333,6 +1352,7 @@ document.querySelectorAll(".bet-slot").forEach(slot => {
     updateBetDisplay();
   });
 });
+
 document.getElementById("backButton").addEventListener("click", () => {
   window.location.href = "index.html";
 });
@@ -1394,17 +1414,14 @@ document.getElementById("spinButton").addEventListener("click", () => {
             let currentAngle = Math.round(Math.atan2(b, a) * (180 / Math.PI));
             if (currentAngle < 0) currentAngle += 360;
 
-           
-   
+            const activeIndex =
+                Math.floor(((360 - currentAngle + 360) % 360) / sliceAngle);
 
-const activeIndex =
-    Math.floor(((360 - currentAngle + 360) % 360) / sliceAngle);
-
-if (activeIndex !== activeWheelIndex) {
-    setWheelHighlight(activeIndex);
-  }
+            if (activeIndex !== activeWheelIndex) {
+                setWheelHighlight(activeIndex);
+            }
           
-  if (Math.abs(currentAngle - lastCheckedAngle) >= 5) {
+            if (Math.abs(currentAngle - lastCheckedAngle) >= 5) {
                 playClickSound();
                 const kickDirection = Math.random() > 0.5 ? -10 : 10;
                 pointer.style.transform = `translateX(-50%) rotate(${kickDirection}deg)`;
@@ -1446,16 +1463,13 @@ function handleResult(result, resultIndex) {
         winningSlot.classList.add("winner-glow");
     }
 
-    spinning = false;;
-  
-    
+    spinning = false;
     document.getElementById("spinButton").disabled = false;
     updateResultHistory(result);
     let winnings = 0;
     let xpGained = 0;
 
     if (bets[result] > 0) {
-        // Correct payout calculation: original bet + (bet * multiplier)
         winnings = bets[result] + (bets[result] * payouts[result]);
         xpGained = xpRewards[result] || 0;
     }
@@ -1484,6 +1498,7 @@ createMarqueeLights();
 buildWheelFace();
 updateBalanceDisplay();
 updateBetDisplay();
+syncFirestoreXP();
 
 window.addEventListener('DOMContentLoaded', () => {
   const v = document.getElementById('logoVideo');
