@@ -1,5 +1,20 @@
 // game.js - Complete Synchronized Logic with Safe Module DOM Bootstrapping
 
+function getCurrentUsername() {
+  try {
+    const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
+    if (userObj && userObj.username) {
+      return userObj.username;
+    }
+  } catch (e) {}
+  return localStorage.getItem('vinpix_username') || '';
+}
+
+function getUserKey(keyName) {
+  const username = getCurrentUsername();
+  return `${username}_${keyName}`;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const currentLevel = parseInt(urlParams.get('level')) || 1;
@@ -146,10 +161,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       const vCoins = document.getElementById('vCoins');
       if (vCoins) vCoins.innerText = `+${stars * 5}`;
 
+      // Calculate level XP gained
       let tier = Math.floor((currentLevel - 1) / 10);
       let xpGained = (tier + 1) * 100;
       const vXp = document.getElementById('vXp');
       if (vXp) vXp.innerText = `+${xpGained}`;
+
+      // --- PERSIST EARNED XP ---
+      const totalXpKey = getUserKey('totalXp');
+      let currentTotalXp = parseInt(localStorage.getItem(totalXpKey)) || 0;
+      currentTotalXp += xpGained;
+      localStorage.setItem(totalXpKey, currentTotalXp);
+
+      try {
+        const userObj = JSON.parse(localStorage.getItem('loggedInUser')) || {};
+        userObj.xp = currentTotalXp;
+        localStorage.setItem('loggedInUser', JSON.stringify(userObj));
+      } catch (e) {}
 
       const starNodes = document.querySelectorAll('#victoryStars .star');
       starNodes.forEach((star, index) => {
@@ -224,10 +252,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       shuffleGrid();
     });
   }
-
-     
-    
-      
 
   const nextLevelBtn = document.getElementById('nextLevelBtn');
   if (nextLevelBtn) {
@@ -314,48 +338,35 @@ function openLevelPreview() {
 
   const currentLevel = getCurrentLevel();
   const previewTitle = document.getElementById('previewTitle');
-if (previewTitle) {
-  previewTitle.textContent = `👁 LEVEL ${currentLevel} PREVIEW`;
-}
-
-  /*
-   * =====================================================
-   * COIN CHECK
-   * =====================================================
-   *
-   * This expects your game to have a global `coins`
-   * variable.
-   *
-   * If your existing game uses a different coin variable,
-   * this is the ONLY part that needs to be connected to it.
-   */
-
-const totalCoinsKey = getUserKey('totalCoins');
-const coinsBeforePreview = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
-
-if (coinsBeforePreview < PREVIEW_COST) {
-  return;
-}
-
-let paymentSuccessful = false;
-
-try {
-  paymentSuccessful = spendCoins(PREVIEW_COST);
-} catch (error) {
-  const coinsAfterPreview =
-    parseInt(localStorage.getItem(totalCoinsKey)) || 0;
-
-  if (coinsAfterPreview === coinsBeforePreview - PREVIEW_COST) {
-    paymentSuccessful = true;
-  } else {
-    console.error('Preview coin deduction failed:', error);
+  if (previewTitle) {
+    previewTitle.textContent = `👁 LEVEL ${currentLevel} PREVIEW`;
   }
-}
 
-if (!paymentSuccessful) {
-  return;
-}
-  
+  const totalCoinsKey = getUserKey('totalCoins');
+  const coinsBeforePreview = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
+
+  if (coinsBeforePreview < PREVIEW_COST) {
+    return;
+  }
+
+  let paymentSuccessful = false;
+
+  try {
+    paymentSuccessful = spendCoins(PREVIEW_COST);
+  } catch (error) {
+    const coinsAfterPreview =
+      parseInt(localStorage.getItem(totalCoinsKey)) || 0;
+
+    if (coinsAfterPreview === coinsBeforePreview - PREVIEW_COST) {
+      paymentSuccessful = true;
+    } else {
+      console.error('Preview coin deduction failed:', error);
+    }
+  }
+
+  if (!paymentSuccessful) {
+    return;
+  }
   
   previewActive = true;
 
