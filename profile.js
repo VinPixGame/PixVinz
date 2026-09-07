@@ -146,8 +146,6 @@ async function fetchUserDataFromFirestore() {
     }
 }
 
-
-
 function applyAvatarToUI(avatarData) {
     const avatarLoader = document.getElementById('avatarLoader');
     if (!avatarData) {
@@ -176,43 +174,64 @@ function applyAvatarToUI(avatarData) {
     if (avatarLoader) avatarLoader.style.display = 'none';
 }
 
+// Helper to calculate XP needed for a specific level tier
+function getXpForLevelTier(lvl) {
+    if (lvl <= 30) return 500;
+    if (lvl <= 60) return 1000;
+    if (lvl <= 100) return 2000;
+    if (lvl <= 150) return 3000;
+    if (lvl <= 200) return 4000;
+    return 5000;
+}
+
+// Calculate independent XP level based on cumulative total XP
 function calculateLevelAndXp(totalPuzzlesSolved) {
-    let totalXpEarned = 0;
-    for (let i = 1; i <= totalPuzzlesSolved; i++) {
-        let lvlForPuzzle = Math.floor((i - 1) / 5) + 1;
-        let tier = Math.floor((lvlForPuzzle - 1) / 10);
-        let xpPerPuzzle = (tier + 1) * 100;
-        totalXpEarned += xpPerPuzzle;
+    const username = getCurrentUsername();
+    const prefix = username ? username + '_' : '';
+    
+    // Read raw total XP from local storage or loggedInUser
+    let totalXpEarned = parseInt(localStorage.getItem(prefix + 'totalXp'));
+    if (isNaN(totalXpEarned)) {
+        try {
+            const userObj = JSON.parse(localStorage.getItem('loggedInUser')) || {};
+            totalXpEarned = userObj.xp;
+        } catch(e) {}
     }
 
-    // Add any stored bonus XP (e.g. from daily rewards)
-    const currentUsername = typeof getCurrentUsername === 'function' ? getCurrentUsername() : '';
-    const xpStoreKey = currentUsername ? currentUsername + '_bonusXp' : 'bonusXp';
-    let bonusXp = parseInt(localStorage.getItem(xpStoreKey)) || 0;
-    totalXpEarned += bonusXp;
+    // Fallback if no raw total XP is stored
+    if (totalXpEarned === undefined || totalXpEarned === null || isNaN(totalXpEarned)) {
+        totalXpEarned = 0;
+        for (let i = 1; i <= totalPuzzlesSolved; i++) {
+            let lvlForPuzzle = Math.floor((i - 1) / 5) + 1;
+            let tier = Math.floor((lvlForPuzzle - 1) / 10);
+            totalXpEarned += (tier + 1) * 100;
+        }
+        const xpStoreKey = username ? username + '_bonusXp' : 'bonusXp';
+        totalXpEarned += (parseInt(localStorage.getItem(xpStoreKey)) || 0);
+    }
 
-    let currentLevel = 3; 
-    let cumulativeXpRequired = 1500;
-    let accumulated = 0;
-    
-    for (let lvl = 1; lvl <= 200; lvl++) {
-        let tier = Math.floor((lvl - 1) / 10);
-        let xpNeededForThisLevel = (tier + 1) * 500;
-        accumulated += xpNeededForThisLevel;
-        
-        if (totalXpEarned >= accumulated) {
-            currentLevel = lvl + 1;
+    // Calculate independent cumulative XP level
+    let currentXpLevel = 1;
+    let accumulatedXp = 0;
+    let targetForNextLevel = 500;
+
+    for (let lvl = 1; lvl <= 1000; lvl++) {
+        let needed = getXpForLevelTier(lvl);
+        accumulatedXp += needed;
+
+        if (totalXpEarned >= accumulatedXp) {
+            currentXpLevel = lvl + 1;
         } else {
-            currentLevel = lvl;
-            cumulativeXpRequired = accumulated;
+            currentXpLevel = lvl;
+            targetForNextLevel = accumulatedXp;
             break;
         }
     }
 
     return {
-        level: currentLevel,
-        currentXp: totalXpEarned > 0 ? totalXpEarned : 0, 
-        maxXp: cumulativeXpRequired > 0 ? cumulativeXpRequired : 1500
+        level: currentXpLevel,
+        currentXp: totalXpEarned, 
+        maxXp: targetForNextLevel
     };
 }
 
@@ -229,47 +248,28 @@ function updateProfileStats() {
     if (profileLevelEl) profileLevelEl.textContent = currentLevelVal;
 }
 
-// REPLACE YOUR ENTIRE updateXpProgress() FUNCTION WITH THIS:
+// UPDATE XP PROGRESS DISPLAY (INDEPENDENT CUMULATIVE XP LEVEL)
 function updateXpProgress() {
-    const currentUsername = getCurrentUsername();
-    const prefix = currentUsername ? currentUsername + '_' : '';
-    
-    let currentLevelVal = parseInt(localStorage.getItem(prefix + 'currentLevel')) || 1;
-    
-    // Check for direct synced XP from Firestore first, fallback to level calculation
-    let currentXpVal = parseInt(localStorage.getItem(prefix + 'totalXp'));
-    
-    if (isNaN(currentXpVal)) {
-        let currentUser = {};
-        try {
-            currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
-        } catch(e) {}
-        currentXpVal = currentUser.xp;
-    }
+    const currentLevelVal = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+    const puzzlesSolved = Math.max(0, currentLevelVal - 1);
+    const progression = calculateLevelAndXp(puzzlesSolved);
 
-    // Fallback calculation if no direct stored XP exists
-    if (currentXpVal === undefined || currentXpVal === null || isNaN(currentXpVal)) {
-        const puzzlesSolved = Math.max(0, currentLevelVal - 1);
-        const playerProgression = calculateLevelAndXp(puzzlesSolved);
-        currentXpVal = playerProgression.currentXp;
-    }
+    const xpLevelNum = progression.level;
+    const currentXpVal = progression.currentXp;
+    const maxXpVal = progression.maxXp;
 
-    // Calculate max XP needed for current level tier
-    let tier = Math.floor((currentLevelVal - 1) / 10);
-    let maxXpVal = (tier + 1) * 500;
-    let progressPercent = Math.min(100, (currentXpVal / maxXpVal) * 100);
+    const progressPercent = Math.min(100, (currentXpVal / maxXpVal) * 100);
 
-    const levelNumEl = document.querySelector('#displayLevelBadge .xp-level-num');
+    const levelBadgeEl = document.querySelector('#displayLevelBadge .xp-level-num') || document.querySelector('.xp-level-num');
     const xpText = document.getElementById('displayXpText');
     const xpBarFill = document.getElementById('displayXpBarFill');
 
-    if (levelNumEl) levelNumEl.textContent = currentLevelVal;
+    if (levelBadgeEl) levelBadgeEl.textContent = xpLevelNum;
     if (xpText) xpText.textContent = `${currentXpVal.toLocaleString()} / ${maxXpVal.toLocaleString()} XP`;
     if (xpBarFill) xpBarFill.style.width = `${progressPercent}%`;
 
     updateProfileStats();
 }
-
 
 function applyProfileRankFrame(rank) {
     const frameImg = document.getElementById('profileRankFrame');
@@ -341,15 +341,6 @@ async function loadProfileGlobalRank() {
     }
 }
 
-
-
-
-
-        
-
-
-
-
 // Modal Helper Functions
 function showBadgeModal(icon, title, desc, glowColor, isUnlocked) {
     const modal = document.getElementById('badgeModal');
@@ -363,7 +354,6 @@ function showBadgeModal(icon, title, desc, glowColor, isUnlocked) {
     modalTitle.innerText = title;
     modalDesc.innerText = desc;
 
-    // Apply unlock status, grayscale, and color glow to the enlarged badge image
     if (isUnlocked) {
         modalImg.style.filter = `drop-shadow(0 0 20px ${glowColor})`;
         modalTitle.style.color = '#ffffff';
@@ -454,13 +444,11 @@ function checkAndUnlockBadges() {
             <span class="badge-desc" style="font-size: 7.5px; color: ${isUnlocked ? '#bbb' : '#444'}; line-height: 1; width: 100%; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;">${badge.desc}</span>
         `;
 
-        // Click handler to display enlarged badge
         badgeElement.onclick = () => showBadgeModal(badge.icon, badge.title, badge.desc, badge.glowColor, isUnlocked);
 
         badgesContainer.appendChild(badgeElement);
     });
 }
-
 
 document.addEventListener('DOMContentLoaded', () => {
     const avatarLoader = document.getElementById('avatarLoader');
@@ -627,10 +615,6 @@ if (saveProfileBtn) {
     });
 }    
 
-
-
-
-
 // --- 7-DAY DAILY CHECK-IN LOGIC (USER-TIED & SECURE) ---
 const dailyRewardsData = [
     { day: 1, coins: 15, xp: 50, label: '15 🪙' },
@@ -683,12 +667,12 @@ function checkDailyRewardStatus() {
         }
     } catch (e) {}
 }
+
 window.openDailyModal = function() {
     if (typeof AudioManager !== 'undefined' && typeof AudioManager.playClick === 'function') {
         AudioManager.playClick();
     }
     
-    // Render real-time calendar graphic header dynamically in the modal
     const now = new Date();
     const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
     const monthStr = months[now.getMonth()];
