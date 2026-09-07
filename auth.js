@@ -314,9 +314,8 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'index.html';
 
         } catch (err) {
-    console.error("Login error:", err);
-    if (errElem) errElem.innerText = "Firebase Error: " + err.message; // Shows the actual technical reason
-}
+            console.error("Registration error:", err);
+            if (errElem) errElem.innerText = "Firebase Error: " + err.message;
             if (submitBtn) {
                 submitBtn.disabled = false;
                 submitBtn.innerText = originalBtnText;
@@ -358,7 +357,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const { auth, signInWithEmailAndPassword } = window.pixvinzAuth;
             const dummyEmail = `${username}@pixvinz.com`;
 
-            // Authenticate securely via Firebase Auth backend
             await signInWithEmailAndPassword(auth, dummyEmail, pass);
 
             const { db, doc, getDoc } = window.pixvinzDb;
