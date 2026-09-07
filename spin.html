@@ -808,6 +808,21 @@ position: absolute;
   font-weight: 800;
   cursor: pointer;
 }
+
+/* Apply adjustments ONLY when opened in a mobile browser */
+@media (display-mode: browser) {
+  html, body {
+    height: 100dvh;
+    overflow: hidden !important;
+  }
+
+  /* Shrinks the game container slightly so everything fits */
+  body > *:not(script) {
+    transform: scale(0.92);
+    transform-origin: top center;
+  }
+}
+  
 </style>
 </head>
 
