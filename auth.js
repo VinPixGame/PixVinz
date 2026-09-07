@@ -291,7 +291,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     lastClaimDate: "",
                     lastClaimTimestamp: 0
                 },
-                password: pass,
                 createdAt: new Date()
             };
 
