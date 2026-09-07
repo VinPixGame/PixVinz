@@ -314,8 +314,9 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'index.html';
 
         } catch (err) {
-            console.error("Registration error:", err);
-            if (errElem) errElem.innerText = "Registration error: " + err.message;
+    console.error("Login error:", err);
+    if (errElem) errElem.innerText = "Firebase Error: " + err.message; // Shows the actual technical reason
+}
             if (submitBtn) {
                 submitBtn.disabled = false;
                 submitBtn.innerText = originalBtnText;
