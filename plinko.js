@@ -61,23 +61,39 @@ document.addEventListener('DOMContentLoaded', () => {
   resizeCanvas();
   setTimeout(resizeCanvas, 50);
 
+  // Difficulty configurations with exact weighted odds for realistic rarity
   const difficultyConfigs = {
     normal: {
       rows: 8,
       multipliers: [10, 5, 2, 0.5, 0.2, 0.5, 2, 5, 10],
-      slotColors: ['#ff0844', '#ff7300', '#ffd700', '#00f2fe', '#4facfe', '#00f2fe', '#ffd700', '#ff7300', '#ff0844']
+      slotColors: ['#ff0844', '#ff7300', '#ffd700', '#00f2fe', '#4facfe', '#00f2fe', '#ffd700', '#ff7300', '#ff0844'],
+      // Probability weights (center slots are most common, edges are rare)
+      weights: [1, 4, 12, 28, 40, 28, 12, 4, 1] 
     },
     medium: {
       rows: 10,
       multipliers: [20, 10, 5, 2, 0.5, 0.2, 0.5, 2, 5, 10, 20],
-      slotColors: ['#ff0844', '#ff4500', '#ff7300', '#ffd700', '#00f2fe', '#4facfe', '#00f2fe', '#ffd700', '#ff7300', '#ff4500', '#ff0844']
+      slotColors: ['#ff0844', '#ff4500', '#ff7300', '#ffd700', '#00f2fe', '#4facfe', '#00f2fe', '#ffd700', '#ff7300', '#ff4500', '#ff0844'],
+      weights: [1, 2, 6, 15, 30, 42, 30, 15, 6, 2, 1]
     },
     hard: {
       rows: 12,
       multipliers: [50, 25, 10, 5, 1, 0.2, 0.1, 0.2, 1, 5, 10, 25, 50],
-      slotColors: ['#9c27b0', '#ff0844', '#ff4500', '#ff7300', '#ffd700', '#00f2fe', '#4facfe', '#00f2fe', '#ffd700', '#ff7300', '#ff4500', '#ff0844', '#9c27b0']
+      slotColors: ['#9c27b0', '#ff0844', '#ff4500', '#ff7300', '#ffd700', '#00f2fe', '#4facfe', '#00f2fe', '#ffd700', '#ff7300', '#ff4500', '#ff0844', '#9c27b0'],
+      weights: [1, 2, 4, 8, 18, 35, 50, 35, 18, 8, 4, 2, 1]
     }
   };
+
+  // Function to determine winning slot index prior to physics release
+  function selectWeightedSlot(weights) {
+    const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+    let randomVal = Math.random() * totalWeight;
+    for (let i = 0; i < weights.length; i++) {
+      if (randomVal < weights[i]) return i;
+      randomVal -= weights[i];
+    }
+    return Math.floor(weights.length / 2);
+  }
 
   const pegRadius = 4;
   const ballRadius = 7.5;
@@ -95,14 +111,18 @@ document.addEventListener('DOMContentLoaded', () => {
       updateDisplay();
       playSound('drop');
 
-      const startX = canvas.width / 2 + (Math.random() - 0.5) * 10;
+      const config = difficultyConfigs[currentDifficulty];
+      const targetSlot = selectWeightedSlot(config.weights);
+
+      const startX = canvas.width / 2 + (Math.random() - 0.5) * 6;
       const startY = 20;
 
       activeBalls.push({
         x: startX,
         y: startY,
-        vx: (Math.random() - 0.5) * 1.5,
-        vy: 0
+        vx: (Math.random() - 0.5) * 1.0,
+        vy: 0,
+        targetSlot: targetSlot
       });
     });
   }
@@ -162,10 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
         osc.start(now);
         osc.stop(now + 0.22);
-
-
-        
-            } else if (type === 'error') {
+      } else if (type === 'error') {
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(140, now);
         gain.gain.setValueAtTime(0.1, now);
@@ -181,11 +198,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         osc.type = 'sine';
         osc.frequency.setValueAtTime(pianoNotes[index] || 523.25, now);
-        gain.gain.setValueAtTime(0.40, now);
+        
+        // Increased jar sound volume to 0.85 for stronger audio impact
+        gain.gain.setValueAtTime(0.85, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
         osc.start(now);
         osc.stop(now + 0.45);
-      
       }
     } catch(e) {}
   }
@@ -250,8 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
    
     const startYGrid = 45;
     const rowHeight = (h - 150) / rows;
-    
-    // Adjusted colSpacing to stretch pegs wide and align perfectly with slot count (rows + 1)
     const colSpacing = (w - 50) / (rows + 1);
     
     // Draw Pegs
@@ -274,153 +290,159 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Draw Glass Jar Slots
-const slotWidth = w / multipliers.length;
-const slotY = h - 35;
-const jarTop = h - 78;
-const jarBottom = h - 5;
+    const slotWidth = w / multipliers.length;
+    const slotY = h - 35;
+    const jarTop = h - 78;
+    const jarBottom = h - 5;
 
-for (let i = 0; i < multipliers.length; i++) {
-  const x = i * slotWidth;
-  const centerX = x + slotWidth / 2;
-  const jarWidth = Math.min(slotWidth - 8, 48);
-  const left = centerX - jarWidth / 2;
+    for (let i = 0; i < multipliers.length; i++) {
+      const x = i * slotWidth;
+      const centerX = x + slotWidth / 2;
+      const jarWidth = Math.min(slotWidth - 8, 48);
+      const left = centerX - jarWidth / 2;
 
-  // Jar glass
-  const glassGradient = ctx.createLinearGradient(left, jarTop, left + jarWidth, jarTop);
-  glassGradient.addColorStop(0, 'rgba(255,255,255,0.28)');
-  glassGradient.addColorStop(0.18, 'rgba(255,255,255,0.08)');
-  glassGradient.addColorStop(0.5, 'rgba(255,255,255,0.03)');
-  glassGradient.addColorStop(0.82, 'rgba(255,255,255,0.10)');
-  glassGradient.addColorStop(1, 'rgba(255,255,255,0.25)');
+      // Jar glass
+      const glassGradient = ctx.createLinearGradient(left, jarTop, left + jarWidth, jarTop);
+      glassGradient.addColorStop(0, 'rgba(255,255,255,0.28)');
+      glassGradient.addColorStop(0.18, 'rgba(255,255,255,0.08)');
+      glassGradient.addColorStop(0.5, 'rgba(255,255,255,0.03)');
+      glassGradient.addColorStop(0.82, 'rgba(255,255,255,0.10)');
+      glassGradient.addColorStop(1, 'rgba(255,255,255,0.25)');
 
-  ctx.save();
+      ctx.save();
 
-  // Jar glow
-  ctx.shadowColor = slotColors[i];
-  ctx.shadowBlur = 0;
+      // Jar glow
+      ctx.shadowColor = slotColors[i];
+      ctx.shadowBlur = 0;
 
-  ctx.fillStyle = glassGradient;
-  ctx.strokeStyle = slotColors[i];
-  ctx.lineWidth = 2;
+      ctx.fillStyle = glassGradient;
+      ctx.strokeStyle = slotColors[i];
+      ctx.lineWidth = 2;
 
-  // Rounded jar body
-  ctx.beginPath();
-  ctx.roundRect(
-    left,
-    jarTop + 10,
-    jarWidth,
-    jarBottom - jarTop - 10,
-    8
-  );
-  ctx.fill();
-  ctx.stroke();
+      // Rounded jar body
+      ctx.beginPath();
+      ctx.roundRect(
+        left,
+        jarTop + 10,
+        jarWidth,
+        jarBottom - jarTop - 10,
+        8
+      );
+      ctx.fill();
+      ctx.stroke();
 
-  ctx.shadowBlur = 0;
+      ctx.shadowBlur = 0;
 
-  // Coins inside jar
-  const coinColor = slotColors[i];
+      // Coins inside jar
+      const coinColor = slotColors[i];
 
-  for (let c = 0; c < 5; c++) {
-    const coinX = left + 8 + (c % 3) * 10;
-    const coinY = jarBottom - 9 - Math.floor(c / 3) * 7;
+      for (let c = 0; c < 5; c++) {
+        const coinX = left + 8 + (c % 3) * 10;
+        const coinY = jarBottom - 9 - Math.floor(c / 3) * 7;
 
-    ctx.fillStyle = coinColor;
-    ctx.beginPath();
-    ctx.arc(coinX, coinY, 4, 0, Math.PI * 2);
-    ctx.fill();
+        ctx.fillStyle = coinColor;
+        ctx.beginPath();
+        ctx.arc(coinX, coinY, 4, 0, Math.PI * 2);
+        ctx.fill();
 
-    ctx.strokeStyle = 'rgba(255,255,255,0.45)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-  }
+        ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
 
-  // Jar neck
-  ctx.fillStyle = 'rgba(255,255,255,0.10)';
-  ctx.fillRect(centerX - 10, jarTop + 2, 20, 12);
+      // Jar neck
+      ctx.fillStyle = 'rgba(255,255,255,0.10)';
+      ctx.fillRect(centerX - 10, jarTop + 2, 20, 12);
 
-  ctx.strokeStyle = slotColors[i];
-  ctx.strokeRect(centerX - 10, jarTop + 2, 20, 12);
+      ctx.strokeStyle = slotColors[i];
+      ctx.strokeRect(centerX - 10, jarTop + 2, 20, 12);
 
-  // Wooden lid
-  ctx.fillStyle = '#5a351d';
-  ctx.strokeStyle = '#d49a45';
-  ctx.lineWidth = 2;
+      // Wooden lid
+      ctx.fillStyle = '#5a351d';
+      ctx.strokeStyle = '#d49a45';
+      ctx.lineWidth = 2;
 
-  ctx.beginPath();
-  ctx.roundRect(centerX - 12, jarTop - 2, 24, 8, 3);
-  ctx.fill();
-  ctx.stroke();
+      ctx.beginPath();
+      ctx.roundRect(centerX - 12, jarTop - 2, 24, 8, 3);
+      ctx.fill();
+      ctx.stroke();
 
-  // Rope around jar neck
-  ctx.strokeStyle = '#d99b45';
-  ctx.lineWidth = 2;
+      // Rope around jar neck
+      ctx.strokeStyle = '#d99b45';
+      ctx.lineWidth = 2;
 
-  ctx.beginPath();
-  ctx.moveTo(centerX - 11, jarTop + 10);
-  ctx.lineTo(centerX + 11, jarTop + 10);
-  ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(centerX - 11, jarTop + 10);
+      ctx.lineTo(centerX + 11, jarTop + 10);
+      ctx.stroke();
 
-  ctx.beginPath();
-  ctx.moveTo(centerX - 9, jarTop + 13);
-  ctx.lineTo(centerX + 9, jarTop + 13);
-  ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(centerX - 9, jarTop + 13);
+      ctx.lineTo(centerX + 9, jarTop + 13);
+      ctx.stroke();
 
-  // Glass highlight
-  ctx.strokeStyle = 'rgba(255,255,255,0.45)';
-  ctx.lineWidth = 2;
+      // Glass highlight
+      ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+      ctx.lineWidth = 2;
 
-  ctx.beginPath();
-  ctx.moveTo(left + 7, jarTop + 20);
-  ctx.lineTo(left + 7, jarBottom - 15);
-  ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(left + 7, jarTop + 20);
+      ctx.lineTo(left + 7, jarBottom - 15);
+      ctx.stroke();
 
-  // Multiplier
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 10px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.shadowColor = '#000';
-  ctx.shadowBlur = 5;
+      // Multiplier
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = '#000';
+      ctx.shadowBlur = 5;
 
-  ctx.fillText(
-    `${multipliers[i]}x`,
-    centerX,
-    jarTop + 39
-  );
+      ctx.fillText(
+        `${multipliers[i]}x`,
+        centerX,
+        jarTop + 39
+      );
 
-    ctx.shadowBlur = 0;
-  ctx.restore();
+      ctx.shadowBlur = 0;
+      ctx.restore();
 
-  // Landing flash
-  if (jarFlashUntil[i] && Date.now() < jarFlashUntil[i]) {
-    ctx.save();
+      // Landing flash
+      if (jarFlashUntil[i] && Date.now() < jarFlashUntil[i]) {
+        ctx.save();
 
-    ctx.shadowColor = slotColors[i];
-    ctx.shadowBlur = 28;
+        ctx.shadowColor = slotColors[i];
+        ctx.shadowBlur = 28;
 
-    ctx.fillStyle = 'rgba(255,255,255,0.28)';
-    ctx.strokeStyle = slotColors[i];
-    ctx.lineWidth = 3;
+        ctx.fillStyle = 'rgba(255,255,255,0.28)';
+        ctx.strokeStyle = slotColors[i];
+        ctx.lineWidth = 3;
 
-    ctx.beginPath();
-    ctx.roundRect(
-      left,
-      jarTop + 10,
-      jarWidth,
-      jarBottom - jarTop - 10,
-      8
-    );
-    ctx.fill();
-    ctx.stroke();
+        ctx.beginPath();
+        ctx.roundRect(
+          left,
+          jarTop + 10,
+          jarWidth,
+          jarBottom - jarTop - 10,
+          8
+        );
+        ctx.fill();
+        ctx.stroke();
 
-    ctx.restore();
-  }
-}
+        ctx.restore();
+      }
+    }
 
     // Update Balls
     for (let i = activeBalls.length - 1; i >= 0; i--) {
       let ball = activeBalls[i];
       ball.vy += currentDifficulty === 'hard' ? 0.65 : 0.55;
+      
+      // Calculate smooth trajectory drift toward target slot center
+      const targetCenterX = (ball.targetSlot + 0.5) * slotWidth;
+      const distanceToTarget = targetCenterX - ball.x;
+      ball.vx += distanceToTarget * 0.008; 
+
       ball.x += ball.vx;
       ball.y += ball.vy;
 
@@ -455,7 +477,7 @@ for (let i = 0; i < multipliers.length; i++) {
             ball.y += ny * overlap;
 
             const dot = ball.vx * nx + ball.vy * ny;
-            ball.vx = (ball.vx - 2 * dot * nx) * 0.45 + (Math.random() - 0.5) * 0.45;
+            ball.vx = (ball.vx - 2 * dot * nx) * 0.45 + (Math.random() - 0.5) * 0.35;
             ball.vy = (ball.vy - 2 * dot * ny) * 0.6;
           }
         }
@@ -469,7 +491,7 @@ for (let i = 0; i < multipliers.length; i++) {
         coinCount += currentBet * mult;
         updateDisplay();
         jarFlashUntil[clampedIndex] = Date.now() + 350;
-playSound('jar', clampedIndex);
+        playSound('jar', clampedIndex);
         activeBalls.splice(i, 1);
         continue;
       }
