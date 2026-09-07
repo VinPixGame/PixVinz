@@ -2116,3 +2116,15 @@ video {
   border-radius: 11px;
   filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.35));
 }
+
+
+/* Targeted STRICTLY to Mobile Web Browsers (Chrome, Safari, etc.) */
+/* Excludes Desktop Browsers and Installed PWAs */
+@media screen and (max-width: 768px) and (pointer: coarse) and (display-mode: browser) {
+  /* Replace .main-container with your main app wrapper class/ID */
+  .main-container, 
+  #appWrapper {
+    margin-top: -25px !important; /* Adjust negative offset to shift UI up */
+  }
+}
+
