@@ -1,9 +1,22 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
-  const username = currentUser.username || localStorage.getItem('vinpix_username') || 'default';
-  const coinKey = `${username}_totalCoins`;
+  // --- Active User & Key Helpers ---
+  function getActiveUserPrefix() {
+    let username = '';
+    try {
+      const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
+      if (userObj && userObj.username) username = userObj.username;
+    } catch (e) {}
+    if (!username) username = localStorage.getItem('vinpix_username') || '';
+    return username ? `${username}_` : '';
+  }
+
+  let prefix = getActiveUserPrefix();
+  let coinKey = `${prefix}totalCoins`;
+  let xpKey = `${prefix}totalXp`;
 
   let coinCount = parseFloat(localStorage.getItem(coinKey)) || 500;
+  let xpCount = parseInt(localStorage.getItem(xpKey), 10) || 0;
+  
   let currentBet = 10;
   let currentDifficulty = 'normal';
   let currentRows = 16; 
@@ -18,6 +31,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const rowsInput = document.getElementById('rowsInput');
   const rowsDisplay = document.getElementById('rowsDisplay');
 
+  // Cyan-Blue XP Display Target (Injects if not present in HTML)
+  let xpCountEl = document.getElementById('xpCountDisplay');
+  if (!xpCountEl) {
+    const xpContainer = document.createElement('div');
+    xpContainer.style.cssText = 'color: #00f2fe; font-weight: bold; font-size: 16px; margin-top: 10px; text-align: center; font-family: sans-serif;';
+    xpContainer.innerHTML = 'XP: <span id="xpCountDisplay">0</span>';
+    
+    const arena = document.getElementById('plinkoArena') || document.body;
+    arena.parentNode.insertBefore(xpContainer, arena.nextSibling);
+    xpCountEl = document.getElementById('xpCountDisplay');
+  }
+
   if (rowsInput) {
     rowsInput.value = currentRows;
     if (rowsDisplay) rowsDisplay.textContent = currentRows;
@@ -30,9 +55,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateDisplay() {
+    prefix = getActiveUserPrefix();
+    coinKey = `${prefix}totalCoins`;
+    xpKey = `${prefix}totalXp`;
+
     if (coinCountEl) coinCountEl.textContent = coinCount.toFixed(2);
     if (currentBetValEl) currentBetValEl.textContent = currentBet;
+    if (xpCountEl) xpCountEl.textContent = xpCount.toLocaleString();
+
     localStorage.setItem(coinKey, coinCount);
+    localStorage.setItem(xpKey, xpCount);
+
+    if (typeof updateProfileStats === 'function') updateProfileStats();
+    if (typeof window.saveUserDataToCloud === 'function') window.saveUserDataToCloud();
   }
   updateDisplay();
 
@@ -155,7 +190,8 @@ document.addEventListener('DOMContentLoaded', () => {
         x: startX,
         y: startY,
         vx: (Math.random() - 0.5) * 0.1,
-        vy: 0
+        vy: 0,
+        bet: currentBet
       });
     });
   }
@@ -213,7 +249,6 @@ document.addEventListener('DOMContentLoaded', () => {
         osc.start(now);
         osc.stop(now + 0.08);
       } else if (type === 'jar') {
-        // Restored soft piano scale tone with 2.0 volume
         osc.type = 'sine';
         osc.frequency.setValueAtTime(440 + index * 20, now);
         gain.gain.setValueAtTime(2.0, now);
@@ -259,7 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const w = canvas.width;
     const h = canvas.height;
 
-    // 1. Draw Marquee Bulbs
+    // 1. Marquee Bulbs
     const lightSpacing = 16; 
     let perimeterCoords = [];
     
@@ -282,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
       drawMarqueeBulb(perimeterCoords[i].x, perimeterCoords[i].y, state);
     }
    
-    // 2. Draw Peg Grid
+    // 2. Peg Grid
     const startYGrid = 35;
     const rowHeight = (h - 120) / rows;
     const colSpacing = (w - 40) / (rows + 1);
@@ -306,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 3. Draw Glass Jar Slots
+    // 3. Glass Jar Slots
     const slotWidth = w / multipliers.length;
     const slotY = h - 30;
     const jarTop = h - 70;
@@ -414,7 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 4. Pure Physics Engine
+    // 4. Physics Engine
     for (let i = activeBalls.length - 1; i >= 0; i--) {
       let ball = activeBalls[i];
 
@@ -465,7 +500,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const clampedIndex = Math.max(0, Math.min(multipliers.length - 1, slotIndex));
         const mult = multipliers[clampedIndex];
 
-        coinCount += currentBet * mult;
+        // Coin calculation
+        coinCount += ball.bet * mult;
+
+        // XP calculation (Bet x Multiplier, max cap 17,500)
+        const rawXp = Math.floor(ball.bet * mult);
+        const xpGained = Math.min(rawXp, 17500);
+        xpCount += xpGained;
+
+        // Save & trigger updates
         updateDisplay();
         jarFlashUntil[clampedIndex] = Date.now() + 350;
         playSound('jar', clampedIndex);
@@ -473,7 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
         continue;
       }
 
-      // Draw Gold Ball
+      // Render Ball
       ctx.save();
       ctx.shadowColor = '#ffd700';
       ctx.shadowBlur = 8;
