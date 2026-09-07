@@ -48,30 +48,41 @@ window.saveUserDataToCloud = async function() {
             if (userObj && userObj.displayName) displayName = userObj.displayName;
         } catch (e) {}
 
-        const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
-        const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
-        const avatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
+        // 1. Fetch current level & coins accurately from user prefix keys or loggedInUser
+        const prefix = username + '_';
+        let currentLevel = parseInt(localStorage.getItem(prefix + 'currentLevel'));
+        if (isNaN(currentLevel)) {
+            currentLevel = parseInt(localStorage.getItem('currentLevel')) || 1;
+        }
 
-        // Preserve direct XP from local storage or loggedInUser
-let currentXpVal = parseInt(localStorage.getItem(getUserKey('totalXp')));
-if (isNaN(currentXpVal)) {
-    try {
-        const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
-        if (userObj && userObj.xp !== undefined) currentXpVal = userObj.xp;
-    } catch(e) {}
-}
-if (isNaN(currentXpVal) || currentXpVal === null) {
-    const puzzlesSolved = Math.max(0, currentLevel - 1);
-    const playerProgression = calculateLevelAndXp(puzzlesSolved);
-    currentXpVal = playerProgression.currentXp;
-}
+        let totalCoins = parseInt(localStorage.getItem(prefix + 'totalCoins'));
+        if (isNaN(totalCoins)) {
+            totalCoins = parseInt(localStorage.getItem('totalCoins')) || 0;
+        }
+
+        const avatar = localStorage.getItem(prefix + 'vinpix_avatar') || '';
+
+        // 2. Fetch total XP directly
+        let currentXpVal = parseInt(localStorage.getItem(prefix + 'totalXp'));
+        if (isNaN(currentXpVal)) {
+            try {
+                const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
+                if (userObj && userObj.xp !== undefined) currentXpVal = userObj.xp;
+            } catch(e) {}
+        }
+        if (isNaN(currentXpVal) || currentXpVal === null) {
+            const puzzlesSolved = Math.max(0, currentLevel - 1);
+            const playerProgression = calculateLevelAndXp(puzzlesSolved);
+            currentXpVal = playerProgression.currentXp;
+        }
+
         const dailyStorageKey = getDailyStorageKey();
         const dailyDataStr = localStorage.getItem(dailyStorageKey);
         const dailyRewardState = dailyDataStr ? JSON.parse(dailyDataStr) : { streak: 0, lastClaimDate: "" };
 
-    
-        // --- CHALLENGE DATA ---
-    const currentChallengeVal = parseInt(localStorage.getItem(getUserKey('currentChallenge'))) || 1;
+        const currentChallengeVal = parseInt(localStorage.getItem(prefix + 'currentChallenge')) || 1;
+
+        // 3. Write updated level and XP to Firestore
         const userDocRef = doc(db, "players", username);
         await setDoc(userDocRef, {
             username: username,
@@ -84,8 +95,17 @@ if (isNaN(currentXpVal) || currentXpVal === null) {
             challenge: currentChallengeVal,
             lastUpdated: new Date()
         }, { merge: true });
+
+        // Keep loggedInUser synced in localStorage
+        try {
+            let currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
+            currentUser.level = currentLevel;
+            currentUser.xp = currentXpVal;
+            currentUser.coins = totalCoins;
+            localStorage.setItem('loggedInUser', JSON.stringify(currentUser));
+        } catch(e) {}
         
-        console.log("Cloud sync successful for:", username);
+        console.log("Cloud sync successful for level:", currentLevel);
     } catch (error) {
         console.warn("Cloud sync skipped or failed safely:", error);
     }
