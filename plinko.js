@@ -199,15 +199,15 @@ document.addEventListener('DOMContentLoaded', () => {
         osc.start(now);
         osc.stop(now + 0.03);
       } else if (type === 'peg') {
-        osc.type = 'sine';
-        const randomPitch = 550 + Math.random() * 350;
-        osc.frequency.setValueAtTime(randomPitch, now);
-        osc.frequency.exponentialRampToValueAtTime(randomPitch * 0.5, now + 0.04);
-        gain.gain.setValueAtTime(0.04, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
-        osc.start(now);
-        osc.stop(now + 0.04);
-      } else if (type === 'error') {
+  // Soft, non-musical click with ultra-short duration
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(150, now);
+  osc.frequency.exponentialRampToValueAtTime(50, now + 0.01);
+  gain.gain.setValueAtTime(0.008, now); // Extremely low volume to avoid stacking noise
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.01);
+  osc.start(now);
+  osc.stop(now + 0.01);
+}else if (type === 'error') {
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(140, now);
         gain.gain.setValueAtTime(0.1, now);
