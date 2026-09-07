@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let coinCount = parseFloat(localStorage.getItem(coinKey)) || 500;
   let currentBet = 10;
   let currentDifficulty = 'normal';
+  let lastDropTime = 0; // Drop cooldown timer
 
   const coinCountEl = document.getElementById('coinCount');
   const currentBetValEl = document.getElementById('currentBetVal');
@@ -61,30 +62,28 @@ document.addEventListener('DOMContentLoaded', () => {
   resizeCanvas();
   setTimeout(resizeCanvas, 50);
 
-  // Difficulty configurations with exact weighted odds for realistic rarity
+  // Strictly balanced probability distribution
   const difficultyConfigs = {
     normal: {
       rows: 8,
       multipliers: [10, 5, 2, 0.5, 0.2, 0.5, 2, 5, 10],
       slotColors: ['#ff0844', '#ff7300', '#ffd700', '#00f2fe', '#4facfe', '#00f2fe', '#ffd700', '#ff7300', '#ff0844'],
-      // Probability weights (center slots are most common, edges are rare)
-      weights: [1, 4, 12, 28, 40, 28, 12, 4, 1] 
+      weights: [1, 3, 10, 30, 50, 30, 10, 3, 1] 
     },
     medium: {
       rows: 10,
       multipliers: [20, 10, 5, 2, 0.5, 0.2, 0.5, 2, 5, 10, 20],
       slotColors: ['#ff0844', '#ff4500', '#ff7300', '#ffd700', '#00f2fe', '#4facfe', '#00f2fe', '#ffd700', '#ff7300', '#ff4500', '#ff0844'],
-      weights: [1, 2, 6, 15, 30, 42, 30, 15, 6, 2, 1]
+      weights: [1, 2, 5, 15, 35, 50, 35, 15, 5, 2, 1]
     },
     hard: {
       rows: 12,
       multipliers: [50, 25, 10, 5, 1, 0.2, 0.1, 0.2, 1, 5, 10, 25, 50],
       slotColors: ['#9c27b0', '#ff0844', '#ff4500', '#ff7300', '#ffd700', '#00f2fe', '#4facfe', '#00f2fe', '#ffd700', '#ff7300', '#ff4500', '#ff0844', '#9c27b0'],
-      weights: [1, 2, 4, 8, 18, 35, 50, 35, 18, 8, 4, 2, 1]
+      weights: [1, 1, 3, 6, 15, 35, 60, 35, 15, 6, 3, 1, 1]
     }
   };
 
-  // Function to determine winning slot index prior to physics release
   function selectWeightedSlot(weights) {
     const totalWeight = weights.reduce((sum, w) => sum + w, 0);
     let randomVal = Math.random() * totalWeight;
@@ -102,6 +101,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (dropBallBtn) {
     dropBallBtn.addEventListener('click', () => {
+      const now = Date.now();
+      // Throttle drops (150ms delay) and cap max simultaneous active balls
+      if (now - lastDropTime < 150 || activeBalls.length >= 12) return;
+      lastDropTime = now;
+
       if (coinCount < currentBet) {
         playSound('error');
         alert('Not enough coins!');
@@ -114,13 +118,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const config = difficultyConfigs[currentDifficulty];
       const targetSlot = selectWeightedSlot(config.weights);
 
-      const startX = canvas.width / 2 + (Math.random() - 0.5) * 6;
+      const startX = canvas.width / 2 + (Math.random() - 0.5) * 4;
       const startY = 20;
 
       activeBalls.push({
         x: startX,
         y: startY,
-        vx: (Math.random() - 0.5) * 1.0,
+        vx: (Math.random() - 0.5) * 0.5,
         vy: 0,
         targetSlot: targetSlot
       });
@@ -198,9 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         osc.type = 'sine';
         osc.frequency.setValueAtTime(pianoNotes[index] || 523.25, now);
-        
-        // Increased jar sound volume to 0.85 for stronger audio impact
-        gain.gain.setValueAtTime(0.85, now);
+        gain.gain.setValueAtTime(1.85, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
         osc.start(now);
         osc.stop(now + 0.45);
@@ -438,20 +440,24 @@ document.addEventListener('DOMContentLoaded', () => {
       let ball = activeBalls[i];
       ball.vy += currentDifficulty === 'hard' ? 0.65 : 0.55;
       
-      // Calculate smooth trajectory drift toward target slot center
+      // Calculate active attraction force toward target slot center
       const targetCenterX = (ball.targetSlot + 0.5) * slotWidth;
       const distanceToTarget = targetCenterX - ball.x;
-      ball.vx += distanceToTarget * 0.008; 
+      
+      // Apply correction steering (scaled up near the lower half)
+      const steeringStrength = ball.y > h * 0.4 ? 0.025 : 0.012;
+      ball.vx += distanceToTarget * steeringStrength; 
+      ball.vx *= 0.92; // Friction dampener to prevent overshooting velocity
 
       ball.x += ball.vx;
       ball.y += ball.vy;
 
       if (ball.x - ballRadius < 0) {
         ball.x = ballRadius;
-        ball.vx *= -0.6;
+        ball.vx *= -0.4;
       } else if (ball.x + ballRadius > w) {
         ball.x = w - ballRadius;
-        ball.vx *= -0.6;
+        ball.vx *= -0.4;
       }
 
       for (let r = 0; r < rows; r++) {
@@ -477,15 +483,15 @@ document.addEventListener('DOMContentLoaded', () => {
             ball.y += ny * overlap;
 
             const dot = ball.vx * nx + ball.vy * ny;
-            ball.vx = (ball.vx - 2 * dot * nx) * 0.45 + (Math.random() - 0.5) * 0.35;
-            ball.vy = (ball.vy - 2 * dot * ny) * 0.6;
+            ball.vx = (ball.vx - 2 * dot * nx) * 0.35 + (Math.random() - 0.5) * 0.2;
+            ball.vy = (ball.vy - 2 * dot * ny) * 0.5;
           }
         }
       }
 
       if (ball.y >= slotY) {
-        const slotIndex = Math.floor(ball.x / slotWidth);
-        const clampedIndex = Math.max(0, Math.min(multipliers.length - 1, slotIndex));
+        // Enforce exact mathematical target on landing to guarantee house edge
+        const clampedIndex = ball.targetSlot;
         const mult = multipliers[clampedIndex];
 
         coinCount += currentBet * mult;
