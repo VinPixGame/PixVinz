@@ -213,10 +213,10 @@
 
 </div>
 
-    <!-- Firebase Initialization Module Script -->
+<!-- Firebase Initialization Module Script -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-      import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+      import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
       import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
       const firebaseConfig = {
@@ -234,9 +234,8 @@
       const db = getFirestore(app);
 
       window.pixvinzDb = { db, doc, getDoc, setDoc };
-      window.pixvinzAuth = { auth, createUserWithEmailAndPassword };
+      window.pixvinzAuth = { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword };
     </script>
-
 
 
 
