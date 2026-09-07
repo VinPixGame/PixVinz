@@ -809,17 +809,31 @@ position: absolute;
   cursor: pointer;
 }
 
-/* Apply adjustments ONLY when opened in a mobile browser */
+/* Apply layout fixes ONLY when opened in a mobile browser */
 @media (display-mode: browser) {
   html, body {
-    height: 100dvh;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
     overflow: hidden !important;
   }
 
-  /* Shrinks the game container slightly so everything fits */
-  body > *:not(script) {
-    transform: scale(0.92);
-    transform-origin: top center;
+  /* Make sure your main app container fills the viewport as a Flexbox column */
+  body, .game-container, .main-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+  }
+
+  /* Allow the top wheel section to flex-shrink if vertical space is tight */
+  .wheel-container, canvas#wheel, .wheel-section {
+    flex-shrink: 1 !important;
+    max-height: 30vh !important;
+    width: auto !important;
+  }
+
+  /* Keep the bet grid, chip selector, and SPIN button from collapsing */
+  .betting-grid, .chip-selector, .spin-button-container {
+    flex-shrink: 0 !important;
   }
 }
   
