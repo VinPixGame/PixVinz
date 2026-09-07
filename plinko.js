@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let coinCount = parseFloat(localStorage.getItem(coinKey)) || 500;
   let currentBet = 10;
-  let currentDifficulty = 'normal'; // normal, medium, hard
+  let currentDifficulty = 'normal';
   let currentRows = 16; 
   let lastDropTime = 0;
 
@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const decreaseBetBtn = document.getElementById('decreaseBetBtn');
   const increaseBetBtn = document.getElementById('increaseBetBtn');
 
-  // Row selection UI elements
   const rowsInput = document.getElementById('rowsInput');
   const rowsDisplay = document.getElementById('rowsDisplay');
 
@@ -78,7 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
   resizeCanvas();
   setTimeout(resizeCanvas, 50);
 
-  // Recalibrated 60% House / 40% Player RTP Multiplier Tables
   const multiplierTables = {
     normal: {
       8:  [4.0, 1.5, 0.8, 0.5, 0.3, 0.5, 0.8, 1.5, 4.0],
@@ -138,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (dropBallBtn) {
     dropBallBtn.addEventListener('click', () => {
       const now = Date.now();
-      if (now - lastDropTime < 180) return; // Drop rate throttle
+      if (now - lastDropTime < 80) return;
       lastDropTime = now;
 
       if (coinCount < currentBet) {
@@ -200,7 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
         osc.start(now);
         osc.stop(now + 0.02);
       } else if (type === 'peg') {
-        // Soft, non-musical click with ultra-short duration
         osc.type = 'sine';
         osc.frequency.setValueAtTime(150, now);
         osc.frequency.exponentialRampToValueAtTime(50, now + 0.01);
@@ -216,13 +213,13 @@ document.addEventListener('DOMContentLoaded', () => {
         osc.start(now);
         osc.stop(now + 0.08);
       } else if (type === 'jar') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(1200, now);
-        osc.frequency.exponentialRampToValueAtTime(400, now + 0.05);
-        gain.gain.setValueAtTime(0.05, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        // Restored soft piano scale tone with 2.0 volume
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440 + index * 20, now);
+        gain.gain.setValueAtTime(2.0, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
         osc.start(now);
-        osc.stop(now + 0.05);
+        osc.stop(now + 0.3);
       }
     } catch(e) {}
   }
@@ -321,7 +318,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const jarWidth = Math.min(slotWidth - 2, 38);
       const left = centerX - jarWidth / 2;
 
-      // Glass Jar Body
       const glassGradient = ctx.createLinearGradient(left, jarTop, left + jarWidth, jarTop);
       glassGradient.addColorStop(0, 'rgba(255,255,255,0.25)');
       glassGradient.addColorStop(0.2, 'rgba(255,255,255,0.08)');
@@ -339,7 +335,6 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.fill();
       ctx.stroke();
 
-      // Stacked Coins inside Jar
       const coinColor = slotColors[i] || '#ff0844';
       for (let c = 0; c < 3; c++) {
         const coinX = left + 4 + c * 5;
@@ -355,7 +350,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.stroke();
       }
 
-      // Wooden Lid
       ctx.fillStyle = '#5a351d';
       ctx.strokeStyle = '#d49a45';
       ctx.lineWidth = 1;
@@ -365,7 +359,6 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.fill();
       ctx.stroke();
 
-      // Jar Rope
       ctx.strokeStyle = '#d99b45';
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -373,7 +366,6 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.lineTo(centerX + 7, jarTop + 8);
       ctx.stroke();
 
-      // Multiplier Label
       const isJackpot = multipliers[i] === 1000;
 
       if (isJackpot) {
@@ -406,7 +398,6 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.shadowBlur = 0;
       ctx.restore();
 
-      // Landing Flash Effect
       if (jarFlashUntil[i] && Date.now() < jarFlashUntil[i]) {
         ctx.save();
         ctx.shadowColor = slotColors[i];
@@ -423,11 +414,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 4. Fast Physics Engine with House Edge Center-Bias
+    // 4. Pure Physics Engine
     for (let i = activeBalls.length - 1; i >= 0; i--) {
       let ball = activeBalls[i];
 
-      ball.vy += 0.85; // Faster gravity drop
+      ball.vy += 0.85; 
       ball.x += ball.vx;
       ball.y += ball.vy;
 
@@ -462,14 +453,9 @@ document.addEventListener('DOMContentLoaded', () => {
             ball.y += ny * overlap;
 
             const dot = ball.vx * nx + ball.vy * ny;
-            
-            // Inward gravity pull to maintain 60% house edge
-            const centerOffset = (ball.x - w / 2) / (w / 2);
-            const houseBias = -centerOffset * 0.22; 
-
-            const scatter = (Math.random() - 0.5) * 0.45 + houseBias;
-            ball.vx = (ball.vx - 1.8 * dot * nx) * 0.70 + scatter;
-            ball.vy = (ball.vy - 1.8 * dot * ny) * 0.70;
+            const scatter = (Math.random() - 0.5) * 0.5;
+            ball.vx = (ball.vx - 1.8 * dot * nx) * 0.75 + scatter;
+            ball.vy = (ball.vy - 1.8 * dot * ny) * 0.75;
           }
         }
       }
