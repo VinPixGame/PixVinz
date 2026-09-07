@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let coinCount = parseFloat(localStorage.getItem(coinKey)) || 500;
   let currentBet = 10;
-  let currentDifficulty = 'normal';
+  let currentDifficulty = 'normal'; // normal (low), medium, hard (high)
+  let currentRows = 16; // Default to 16 rows
   let lastDropTime = 0;
 
   const coinCountEl = document.getElementById('coinCount');
@@ -13,6 +14,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const dropBallBtn = document.getElementById('dropBallBtn');
   const decreaseBetBtn = document.getElementById('decreaseBetBtn');
   const increaseBetBtn = document.getElementById('increaseBetBtn');
+
+  // Row selection UI elements
+  const rowsInput = document.getElementById('rowsInput');
+  const rowsDisplay = document.getElementById('rowsDisplay');
+
+  if (rowsInput) {
+    rowsInput.value = currentRows;
+    if (rowsDisplay) rowsDisplay.textContent = currentRows;
+
+    rowsInput.addEventListener('input', (e) => {
+      currentRows = parseInt(e.target.value, 10);
+      if (rowsDisplay) rowsDisplay.textContent = currentRows;
+      playSound('click');
+    });
+  }
 
   function updateDisplay() {
     if (coinCountEl) coinCountEl.textContent = coinCount.toFixed(2);
@@ -62,23 +78,58 @@ document.addEventListener('DOMContentLoaded', () => {
   resizeCanvas();
   setTimeout(resizeCanvas, 50);
 
-  const difficultyConfigs = {
+  // DYNAMIC MULTIPLIER GENERATOR FOR 8 TO 16 ROWS
+  // Mirrored from Stake risk/row matrices
+  const multiplierTables = {
     normal: {
-      rows: 16,
-      multipliers: [16, 9, 2, 1.4, 1.2, 1.1, 1, 0.5, 0.5, 0.5, 1, 1.1, 1.2, 1.4, 2, 9, 16],
-      slotColors: ['#ff0844', '#ff4500', '#ff7300', '#ffa500', '#ffd700', '#00f2fe', '#4facfe', '#3a7bd5', '#3a7bd5', '#3a7bd5', '#4facfe', '#00f2fe', '#ffd700', '#ffa500', '#ff7300', '#ff4500', '#ff0844']
+      8:  [5.6, 2.1, 1.1, 1, 0.5, 1, 1.1, 2.1, 5.6],
+      9:  [5.6, 2, 1.6, 1, 0.7, 0.7, 1, 1.6, 2, 5.6],
+      10: [8.9, 3, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 3, 8.9],
+      11: [8.4, 3, 1.9, 1.3, 1, 0.7, 0.7, 1, 1.3, 1.9, 3, 8.4],
+      12: [10, 3, 1.6, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 1.6, 3, 10],
+      13: [8.1, 4, 3, 1.9, 1.2, 0.9, 0.7, 0.7, 0.9, 1.2, 1.9, 3, 4, 8.1],
+      14: [7.1, 4, 1.9, 1.4, 1.3, 1.1, 1, 0.5, 1, 1.1, 1.3, 1.4, 1.9, 4, 7.1],
+      15: [15, 8, 3, 2, 1.5, 1.1, 1, 0.7, 0.7, 1, 1.1, 1.5, 2, 3, 8, 15],
+      16: [16, 9, 2, 1.4, 1.2, 1.1, 1, 0.5, 0.5, 0.5, 1, 1.1, 1.2, 1.4, 2, 9, 16]
     },
     medium: {
-      rows: 16,
-      multipliers: [110, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.3, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 110],
-      slotColors: ['#9c27b0', '#ff0844', '#ff4500', '#ff7300', '#ffa500', '#ffd700', '#00f2fe', '#4facfe', '#3a7bd5', '#3a7bd5', '#3a7bd5', '#3a7bd5', '#4facfe', '#00f2fe', '#ffd700', '#ffa500', '#ff7300', '#ff4500', '#ff0844', '#9c27b0']
+      8:  [13, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 13],
+      9:  [18, 4, 1.7, 0.9, 0.5, 0.5, 0.9, 1.7, 4, 18],
+      10: [22, 5, 2, 1.4, 0.6, 0.4, 0.6, 1.4, 2, 5, 22],
+      11: [24, 6, 3, 1.8, 0.7, 0.5, 0.5, 0.7, 1.8, 3, 6, 24],
+      12: [33, 11, 4, 2, 1.1, 0.6, 0.3, 0.6, 1.1, 2, 4, 11, 33],
+      13: [37, 11, 4, 2.5, 1.2, 0.8, 0.4, 0.4, 0.8, 1.2, 2.5, 4, 11, 37],
+      14: [58, 15, 7, 4, 1.9, 1, 0.5, 0.3, 0.5, 1, 1.9, 4, 7, 15, 58],
+      15: [88, 18, 11, 5, 3, 1.3, 0.5, 0.3, 0.3, 0.5, 1.3, 3, 5, 11, 18, 88],
+      16: [110, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.3, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 110]
     },
     hard: {
-      rows: 16,
-      multipliers: [1000, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130, 1000],
-      slotColors: ['#7b1fa2', '#9c27b0', '#ff0844', '#ff4500', '#ff7300', '#ffa500', '#ffd700', '#00f2fe', '#3a7bd5', '#3a7bd5', '#3a7bd5', '#3a7bd5', '#3a7bd5', '#00f2fe', '#ffd700', '#ffa500', '#ff7300', '#ff4500', '#ff0844', '#9c27b0', '#7b1fa2']
+      8:  [29, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 29],
+      9:  [43, 7, 2, 0.6, 0.2, 0.2, 0.6, 2, 7, 43],
+      10: [76, 10, 3, 0.9, 0.3, 0.2, 0.3, 0.9, 3, 10, 76],
+      11: [120, 14, 5.2, 1.4, 0.4, 0.2, 0.2, 0.4, 1.4, 5.2, 14, 120],
+      12: [170, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 170],
+      13: [260, 37, 11, 4, 1, 0.2, 0.2, 0.2, 0.2, 1, 4, 11, 37, 260],
+      14: [420, 56, 18, 5, 1.9, 0.3, 0.2, 0.2, 0.2, 0.3, 1.9, 5, 18, 56, 420],
+      15: [620, 83, 27, 8, 3, 0.5, 0.2, 0.2, 0.2, 0.2, 0.5, 3, 8, 27, 83, 620],
+      16: [1000, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130, 1000]
     }
   };
+
+  const colorPalette = [
+    '#7b1fa2', '#9c27b0', '#ff0844', '#ff4500', '#ff7300', 
+    '#ffa500', '#ffd700', '#00f2fe', '#3a7bd5', '#3a7bd5'
+  ];
+
+  function getSlotColors(multipliers) {
+    const len = multipliers.length;
+    const mid = Math.floor(len / 2);
+    return multipliers.map((_, idx) => {
+      const distFromCenter = Math.abs(idx - mid);
+      const colorIndex = Math.min(distFromCenter, colorPalette.length - 1);
+      return colorPalette[colorIndex];
+    });
+  }
 
   const pegRadius = 3.5;
   const ballRadius = 5.5;
@@ -168,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (type === 'jar') {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(440 + index * 20, now);
-        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.setValueAtTime(1.85, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
         osc.start(now);
         osc.stop(now + 0.3);
@@ -204,10 +255,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function updatePhysics() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const config = difficultyConfigs[currentDifficulty];
-    const rows = config.rows;
-    const multipliers = config.multipliers;
-    const slotColors = config.slotColors;
+    const rows = currentRows;
+    const multipliers = multiplierTables[currentDifficulty][rows];
+    const slotColors = getSlotColors(multipliers);
 
     const w = canvas.width;
     const h = canvas.height;
@@ -238,9 +288,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const rowHeight = (h - 120) / rows;
     const colSpacing = (w - 40) / (rows + 1);
     
-    // Draw Centered Peg Grid
+    // Draw Peg Grid (Dynamic Rows)
     for (let r = 0; r < rows; r++) {
-      const pegsInRow = r + 3; // Center peg at row 0 aligns directly below drop point
+      const pegsInRow = r + 3;
       const rowWidth = (pegsInRow - 1) * colSpacing;
       const startX = (w - rowWidth) / 2;
       const y = startYGrid + r * rowHeight;
@@ -290,12 +340,12 @@ document.addEventListener('DOMContentLoaded', () => {
       // Stacked Coins inside Jar
       const coinColor = slotColors[i] || '#ff0844';
       for (let c = 0; c < 3; c++) {
-        const coinX = left + 6 + c * 6;
+        const coinX = left + 4 + c * 5;
         const coinY = jarBottom - 6;
 
         ctx.fillStyle = coinColor;
         ctx.beginPath();
-        ctx.arc(coinX, coinY, 2.5, 0, Math.PI * 2);
+        ctx.arc(coinX, coinY, 2, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.strokeStyle = 'rgba(255,255,255,0.4)';
@@ -389,8 +439,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ball.y += ny * overlap;
 
             const dot = ball.vx * nx + ball.vy * ny;
-            
-            // Subtle random scatter retains house edge
             const scatter = (Math.random() - 0.5) * 0.2;
             ball.vx = (ball.vx - 2 * dot * nx) * 0.45 + scatter;
             ball.vy = (ball.vy - 2 * dot * ny) * 0.45;
