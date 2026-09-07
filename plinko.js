@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let coinCount = parseFloat(localStorage.getItem(coinKey)) || 500;
   let currentBet = 10;
-  let currentDifficulty = 'normal'; // normal (low), medium, hard (high)
+  let currentDifficulty = 'normal';
   let lastDropTime = 0;
 
   const coinCountEl = document.getElementById('coinCount');
@@ -62,26 +62,25 @@ document.addEventListener('DOMContentLoaded', () => {
   resizeCanvas();
   setTimeout(resizeCanvas, 50);
 
-  // AUTHENTIC STAKE-STYLE MULTIPLIER TABLES (16 Rows)
   const difficultyConfigs = {
-    normal: { // Low Risk
+    normal: {
       rows: 16,
       multipliers: [16, 9, 2, 1.4, 1.2, 1.1, 1, 0.5, 0.5, 0.5, 1, 1.1, 1.2, 1.4, 2, 9, 16],
       slotColors: ['#ff0844', '#ff4500', '#ff7300', '#ffa500', '#ffd700', '#00f2fe', '#4facfe', '#3a7bd5', '#3a7bd5', '#3a7bd5', '#4facfe', '#00f2fe', '#ffd700', '#ffa500', '#ff7300', '#ff4500', '#ff0844']
     },
-    medium: { // Medium Risk
+    medium: {
       rows: 16,
       multipliers: [110, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.3, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 110],
       slotColors: ['#9c27b0', '#ff0844', '#ff4500', '#ff7300', '#ffa500', '#ffd700', '#00f2fe', '#4facfe', '#3a7bd5', '#3a7bd5', '#3a7bd5', '#3a7bd5', '#4facfe', '#00f2fe', '#ffd700', '#ffa500', '#ff7300', '#ff4500', '#ff0844', '#9c27b0']
     },
-    hard: { // High Risk (Includes the 1000x Jackpot)
+    hard: {
       rows: 16,
       multipliers: [1000, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130, 1000],
       slotColors: ['#7b1fa2', '#9c27b0', '#ff0844', '#ff4500', '#ff7300', '#ffa500', '#ffd700', '#00f2fe', '#3a7bd5', '#3a7bd5', '#3a7bd5', '#3a7bd5', '#3a7bd5', '#00f2fe', '#ffd700', '#ffa500', '#ff7300', '#ff4500', '#ff0844', '#9c27b0', '#7b1fa2']
     }
   };
 
-  const pegRadius = 3;
+  const pegRadius = 3.5;
   const ballRadius = 5.5;
   let activeBalls = [];
   let jarFlashUntil = [];
@@ -102,15 +101,12 @@ document.addEventListener('DOMContentLoaded', () => {
       playSound('drop');
 
       const startX = canvas.width / 2;
-      const startY = 18;
-
-      const direction = Math.random() < 0.5 ? -1 : 1;
-      const initialVx = direction * (0.12 + Math.random() * 0.25);
+      const startY = 15;
 
       activeBalls.push({
         x: startX,
         y: startY,
-        vx: initialVx,
+        vx: (Math.random() - 0.5) * 0.1,
         vy: 0
       });
     });
@@ -171,8 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
         osc.stop(now + 0.08);
       } else if (type === 'jar') {
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(440 + index * 30, now);
-        gain.gain.setValueAtTime(0.5, now);
+        osc.frequency.setValueAtTime(440 + index * 20, now);
+        gain.gain.setValueAtTime(0.4, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
         osc.start(now);
         osc.stop(now + 0.3);
@@ -239,12 +235,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
    
     const startYGrid = 35;
-    const rowHeight = (h - 110) / rows;
-    const colSpacing = (w - 30) / (rows + 2);
+    const rowHeight = (h - 120) / rows;
+    const colSpacing = (w - 40) / (rows + 1);
     
-    // Draw Pegs
+    // Draw Centered Peg Grid
     for (let r = 0; r < rows; r++) {
-      const pegsInRow = r + 3;
+      const pegsInRow = r + 3; // Center peg at row 0 aligns directly below drop point
       const rowWidth = (pegsInRow - 1) * colSpacing;
       const startX = (w - rowWidth) / 2;
       const y = startYGrid + r * rowHeight;
@@ -261,53 +257,113 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Draw Multiplier Slots
+    // Draw Glass Jar Slots
     const slotWidth = w / multipliers.length;
-    const slotY = h - 25;
-    const jarTop = h - 55;
-    const jarBottom = h - 5;
+    const slotY = h - 30;
+    const jarTop = h - 70;
+    const jarBottom = h - 8;
 
     for (let i = 0; i < multipliers.length; i++) {
       const x = i * slotWidth;
       const centerX = x + slotWidth / 2;
-      const jarWidth = slotWidth - 2;
+      const jarWidth = Math.min(slotWidth - 2, 38);
       const left = centerX - jarWidth / 2;
 
+      // Glass Jar Body
+      const glassGradient = ctx.createLinearGradient(left, jarTop, left + jarWidth, jarTop);
+      glassGradient.addColorStop(0, 'rgba(255,255,255,0.25)');
+      glassGradient.addColorStop(0.2, 'rgba(255,255,255,0.08)');
+      glassGradient.addColorStop(0.5, 'rgba(255,255,255,0.02)');
+      glassGradient.addColorStop(0.8, 'rgba(255,255,255,0.08)');
+      glassGradient.addColorStop(1, 'rgba(255,255,255,0.22)');
+
       ctx.save();
-      ctx.fillStyle = slotColors[i] || '#ff0844';
-      ctx.fillRect(left, jarTop + 10, jarWidth, jarBottom - jarTop - 10);
+      ctx.fillStyle = glassGradient;
+      ctx.strokeStyle = slotColors[i] || '#ff0844';
+      ctx.lineWidth = 1.5;
+
+      ctx.beginPath();
+      ctx.roundRect(left, jarTop + 8, jarWidth, jarBottom - jarTop - 8, 5);
+      ctx.fill();
+      ctx.stroke();
+
+      // Stacked Coins inside Jar
+      const coinColor = slotColors[i] || '#ff0844';
+      for (let c = 0; c < 3; c++) {
+        const coinX = left + 6 + c * 6;
+        const coinY = jarBottom - 6;
+
+        ctx.fillStyle = coinColor;
+        ctx.beginPath();
+        ctx.arc(coinX, coinY, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+
+      // Wooden Lid
+      ctx.fillStyle = '#5a351d';
+      ctx.strokeStyle = '#d49a45';
+      ctx.lineWidth = 1;
+
+      ctx.beginPath();
+      ctx.roundRect(centerX - 8, jarTop - 2, 16, 6, 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Jar Rope
+      ctx.strokeStyle = '#d99b45';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(centerX - 7, jarTop + 8);
+      ctx.lineTo(centerX + 7, jarTop + 8);
+      ctx.stroke();
 
       // Multiplier Label
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 8px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(`${multipliers[i]}x`, centerX, jarTop + 25);
+      ctx.shadowColor = '#000';
+      ctx.shadowBlur = 3;
+
+      ctx.fillText(`${multipliers[i]}x`, centerX, jarTop + 32);
+      ctx.shadowBlur = 0;
       ctx.restore();
 
-      // Landing Flash
+      // Landing Flash Effect
       if (jarFlashUntil[i] && Date.now() < jarFlashUntil[i]) {
         ctx.save();
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
-        ctx.fillRect(left, jarTop + 10, jarWidth, jarBottom - jarTop - 10);
+        ctx.shadowColor = slotColors[i];
+        ctx.shadowBlur = 20;
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        ctx.strokeStyle = slotColors[i];
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+        ctx.roundRect(left, jarTop + 8, jarWidth, jarBottom - jarTop - 8, 5);
+        ctx.fill();
+        ctx.stroke();
         ctx.restore();
       }
     }
 
-    // Physics Engine
+    // Ball Physics Engine
     for (let i = activeBalls.length - 1; i >= 0; i--) {
       let ball = activeBalls[i];
 
-      ball.vy += 0.35;
+      ball.vy += 0.38;
       ball.x += ball.vx;
       ball.y += ball.vy;
 
       if (ball.x - ballRadius < 8) {
         ball.x = 8 + ballRadius;
-        ball.vx *= -0.4;
+        ball.vx *= -0.3;
       } else if (ball.x + ballRadius > w - 8) {
         ball.x = w - 8 - ballRadius;
-        ball.vx *= -0.4;
+        ball.vx *= -0.3;
       }
 
       for (let r = 0; r < rows; r++) {
@@ -333,9 +389,11 @@ document.addEventListener('DOMContentLoaded', () => {
             ball.y += ny * overlap;
 
             const dot = ball.vx * nx + ball.vy * ny;
-            const scatter = (Math.random() - 0.5) * 0.3;
-            ball.vx = (ball.vx - 2 * dot * nx) * 0.5 + scatter;
-            ball.vy = (ball.vy - 2 * dot * ny) * 0.5;
+            
+            // Subtle random scatter retains house edge
+            const scatter = (Math.random() - 0.5) * 0.2;
+            ball.vx = (ball.vx - 2 * dot * nx) * 0.45 + scatter;
+            ball.vy = (ball.vy - 2 * dot * ny) * 0.45;
           }
         }
       }
@@ -347,7 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         coinCount += currentBet * mult;
         updateDisplay();
-        jarFlashUntil[clampedIndex] = Date.now() + 300;
+        jarFlashUntil[clampedIndex] = Date.now() + 350;
         playSound('jar', clampedIndex);
         activeBalls.splice(i, 1);
         continue;
@@ -361,6 +419,11 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
+
+      ctx.fillStyle = '#fff9e6';
+      ctx.beginPath();
+      ctx.arc(ball.x - 1.5, ball.y - 1.5, ballRadius * 0.35, 0, Math.PI * 2);
+      ctx.fill();
     }
 
     requestAnimationFrame(updatePhysics);
