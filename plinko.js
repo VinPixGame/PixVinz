@@ -81,40 +81,40 @@ document.addEventListener('DOMContentLoaded', () => {
   // DYNAMIC MULTIPLIER GENERATOR FOR 8 TO 16 ROWS
   // Mirrored from Stake risk/row matrices
   const multiplierTables = {
-    normal: {
-      8:  [5.6, 2.1, 1.1, 1, 0.5, 1, 1.1, 2.1, 5.6],
-      9:  [5.6, 2, 1.6, 1, 0.7, 0.7, 1, 1.6, 2, 5.6],
-      10: [8.9, 3, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 3, 8.9],
-      11: [8.4, 3, 1.9, 1.3, 1, 0.7, 0.7, 1, 1.3, 1.9, 3, 8.4],
-      12: [10, 3, 1.6, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 1.6, 3, 10],
-      13: [8.1, 4, 3, 1.9, 1.2, 0.9, 0.7, 0.7, 0.9, 1.2, 1.9, 3, 4, 8.1],
-      14: [7.1, 4, 1.9, 1.4, 1.3, 1.1, 1, 0.5, 1, 1.1, 1.3, 1.4, 1.9, 4, 7.1],
-      15: [15, 8, 3, 2, 1.5, 1.1, 1, 0.7, 0.7, 1, 1.1, 1.5, 2, 3, 8, 15],
-      16: [16, 9, 2, 1.4, 1.2, 1.1, 1, 0.5, 0.5, 0.5, 1, 1.1, 1.2, 1.4, 2, 9, 16]
-    },
-    medium: {
-      8:  [13, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 13],
-      9:  [18, 4, 1.7, 0.9, 0.5, 0.5, 0.9, 1.7, 4, 18],
-      10: [22, 5, 2, 1.4, 0.6, 0.4, 0.6, 1.4, 2, 5, 22],
-      11: [24, 6, 3, 1.8, 0.7, 0.5, 0.5, 0.7, 1.8, 3, 6, 24],
-      12: [33, 11, 4, 2, 1.1, 0.6, 0.3, 0.6, 1.1, 2, 4, 11, 33],
-      13: [37, 11, 4, 2.5, 1.2, 0.8, 0.4, 0.4, 0.8, 1.2, 2.5, 4, 11, 37],
-      14: [58, 15, 7, 4, 1.9, 1, 0.5, 0.3, 0.5, 1, 1.9, 4, 7, 15, 58],
-      15: [88, 18, 11, 5, 3, 1.3, 0.5, 0.3, 0.3, 0.5, 1.3, 3, 5, 11, 18, 88],
-      16: [110, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.3, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 110]
-    },
-    hard: {
-      8:  [29, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 29],
-      9:  [43, 7, 2, 0.6, 0.2, 0.2, 0.6, 2, 7, 43],
-      10: [76, 10, 3, 0.9, 0.3, 0.2, 0.3, 0.9, 3, 10, 76],
-      11: [120, 14, 5.2, 1.4, 0.4, 0.2, 0.2, 0.4, 1.4, 5.2, 14, 120],
-      12: [170, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 170],
-      13: [260, 37, 11, 4, 1, 0.2, 0.2, 0.2, 0.2, 1, 4, 11, 37, 260],
-      14: [420, 56, 18, 5, 1.9, 0.3, 0.2, 0.2, 0.2, 0.3, 1.9, 5, 18, 56, 420],
-      15: [620, 83, 27, 8, 3, 0.5, 0.2, 0.2, 0.2, 0.2, 0.5, 3, 8, 27, 83, 620],
-      16: [1000, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130, 1000]
-    }
-  };
+  normal: {
+    8:  [5.6, 2.1, 1.1, 1, 0.5, 1, 1.1, 2.1, 5.6],
+    9:  [5.6, 2, 1.6, 1, 0.7, 0.7, 1, 1.6, 2, 5.6],
+    10: [8.9, 3, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 3, 8.9],
+    11: [8.4, 3, 1.9, 1.3, 1, 0.7, 0.7, 1, 1.3, 1.9, 3, 8.4],
+    12: [10, 3, 1.6, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 1.6, 3, 10],
+    13: [8.1, 4, 3, 1.9, 1.2, 0.9, 0.7, 0.7, 0.9, 1.2, 1.9, 3, 4, 8.1],
+    14: [7.1, 4, 1.9, 1.4, 1.3, 1.1, 1, 0.5, 1, 1.1, 1.3, 1.4, 1.9, 4, 7.1],
+    15: [15, 8, 3, 2, 1.5, 1.1, 1, 0.7, 0.7, 1, 1.1, 1.5, 2, 3, 8, 15],
+    16: [16, 9, 2, 1.4, 1.2, 1.1, 1, 0.5, 0.5, 0.5, 1, 1.1, 1.2, 1.4, 2, 9, 16] // 17 items
+  },
+  medium: {
+    8:  [13, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 13],
+    9:  [18, 4, 1.7, 0.9, 0.5, 0.5, 0.9, 1.7, 4, 18],
+    10: [22, 5, 2, 1.4, 0.6, 0.4, 0.6, 1.4, 2, 5, 22],
+    11: [24, 6, 3, 1.8, 0.7, 0.5, 0.5, 0.7, 1.8, 3, 6, 24],
+    12: [33, 11, 4, 2, 1.1, 0.6, 0.3, 0.6, 1.1, 2, 4, 11, 33],
+    13: [37, 11, 4, 2.5, 1.2, 0.8, 0.4, 0.4, 0.8, 1.2, 2.5, 4, 11, 37],
+    14: [58, 15, 7, 4, 1.9, 1, 0.5, 0.3, 0.5, 1, 1.9, 4, 7, 15, 58],
+    15: [88, 18, 11, 5, 3, 1.3, 0.5, 0.3, 0.3, 0.5, 1.3, 3, 5, 11, 18, 88],
+    16: [110, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 110] // 17 items
+  },
+  hard: {
+    8:  [29, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 29],
+    9:  [43, 7, 2, 0.6, 0.2, 0.2, 0.6, 2, 7, 43],
+    10: [76, 10, 3, 0.9, 0.3, 0.2, 0.3, 0.9, 3, 10, 76],
+    11: [120, 14, 5.2, 1.4, 0.4, 0.2, 0.2, 0.4, 1.4, 5.2, 14, 120],
+    12: [170, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 170],
+    13: [260, 37, 11, 4, 1, 0.2, 0.2, 0.2, 0.2, 1, 4, 11, 37, 260],
+    14: [420, 56, 18, 5, 1.9, 0.3, 0.2, 0.2, 0.2, 0.3, 1.9, 5, 18, 56, 420],
+    15: [620, 83, 27, 8, 3, 0.5, 0.2, 0.2, 0.2, 0.2, 0.5, 3, 8, 27, 83, 620],
+    16: [1000, 100, 26, 9, 4, 2, 0.5, 0.3, 0.2, 0.3, 0.5, 2, 4, 9, 26, 100, 1000] // 17 items
+  }
+};
 
   const colorPalette = [
     '#7b1fa2', '#9c27b0', '#ff0844', '#ff4500', '#ff7300', 
@@ -193,13 +193,15 @@ document.addEventListener('DOMContentLoaded', () => {
         osc.start(now);
         osc.stop(now + 0.04);
       } else if (type === 'drop') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(320, now);
-        osc.frequency.exponentialRampToValueAtTime(100, now + 0.12);
-        gain.gain.setValueAtTime(0.12, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-        osc.start(now);
-        osc.stop(now + 0.12);
+  // Short percussive click so fast drops don't stack into a drone
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(180, now);
+  osc.frequency.exponentialRampToValueAtTime(40, now + 0.03);
+  gain.gain.setValueAtTime(0.08, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+  osc.start(now);
+  osc.stop(now + 0.03);
+}
       } else if (type === 'peg') {
         osc.type = 'sine';
         const randomPitch = 550 + Math.random() * 350;
@@ -307,99 +309,123 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Draw Glass Jar Slots
-    const slotWidth = w / multipliers.length;
-    const slotY = h - 30;
-    const jarTop = h - 70;
-    const jarBottom = h - 8;
 
-    for (let i = 0; i < multipliers.length; i++) {
-      const x = i * slotWidth;
-      const centerX = x + slotWidth / 2;
-      const jarWidth = Math.min(slotWidth - 2, 38);
-      const left = centerX - jarWidth / 2;
+// Draw Glass Jar Slots
+const slotWidth = w / multipliers.length;
+const slotY = h - 30;
+const jarTop = h - 70;
+const jarBottom = h - 8;
 
-      // Glass Jar Body
-      const glassGradient = ctx.createLinearGradient(left, jarTop, left + jarWidth, jarTop);
-      glassGradient.addColorStop(0, 'rgba(255,255,255,0.25)');
-      glassGradient.addColorStop(0.2, 'rgba(255,255,255,0.08)');
-      glassGradient.addColorStop(0.5, 'rgba(255,255,255,0.02)');
-      glassGradient.addColorStop(0.8, 'rgba(255,255,255,0.08)');
-      glassGradient.addColorStop(1, 'rgba(255,255,255,0.22)');
+for (let i = 0; i < multipliers.length; i++) {
+  const x = i * slotWidth;
+  const centerX = x + slotWidth / 2;
+  const jarWidth = Math.min(slotWidth - 2, 38);
+  const left = centerX - jarWidth / 2;
 
-      ctx.save();
-      ctx.fillStyle = glassGradient;
-      ctx.strokeStyle = slotColors[i] || '#ff0844';
-      ctx.lineWidth = 1.5;
+  // Glass Jar Body
+  const glassGradient = ctx.createLinearGradient(left, jarTop, left + jarWidth, jarTop);
+  glassGradient.addColorStop(0, 'rgba(255,255,255,0.25)');
+  glassGradient.addColorStop(0.2, 'rgba(255,255,255,0.08)');
+  glassGradient.addColorStop(0.5, 'rgba(255,255,255,0.02)');
+  glassGradient.addColorStop(0.8, 'rgba(255,255,255,0.08)');
+  glassGradient.addColorStop(1, 'rgba(255,255,255,0.22)');
 
-      ctx.beginPath();
-      ctx.roundRect(left, jarTop + 8, jarWidth, jarBottom - jarTop - 8, 5);
-      ctx.fill();
-      ctx.stroke();
+  ctx.save();
+  ctx.fillStyle = glassGradient;
+  ctx.strokeStyle = slotColors[i] || '#ff0844';
+  ctx.lineWidth = 1.5;
 
-      // Stacked Coins inside Jar
-      const coinColor = slotColors[i] || '#ff0844';
-      for (let c = 0; c < 3; c++) {
-        const coinX = left + 4 + c * 5;
-        const coinY = jarBottom - 6;
+  ctx.beginPath();
+  ctx.roundRect(left, jarTop + 8, jarWidth, jarBottom - jarTop - 8, 5);
+  ctx.fill();
+  ctx.stroke();
 
-        ctx.fillStyle = coinColor;
-        ctx.beginPath();
-        ctx.arc(coinX, coinY, 2, 0, Math.PI * 2);
-        ctx.fill();
+  // Stacked Coins inside Jar
+  const coinColor = slotColors[i] || '#ff0844';
+  for (let c = 0; c < 3; c++) {
+    const coinX = left + 4 + c * 5;
+    const coinY = jarBottom - 6;
 
-        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-        ctx.lineWidth = 0.5;
-        ctx.stroke();
-      }
+    ctx.fillStyle = coinColor;
+    ctx.beginPath();
+    ctx.arc(coinX, coinY, 2, 0, Math.PI * 2);
+    ctx.fill();
 
-      // Wooden Lid
-      ctx.fillStyle = '#5a351d';
-      ctx.strokeStyle = '#d49a45';
-      ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+  }
 
-      ctx.beginPath();
-      ctx.roundRect(centerX - 8, jarTop - 2, 16, 6, 2);
-      ctx.fill();
-      ctx.stroke();
+  // Wooden Lid
+  ctx.fillStyle = '#5a351d';
+  ctx.strokeStyle = '#d49a45';
+  ctx.lineWidth = 1;
 
-      // Jar Rope
-      ctx.strokeStyle = '#d99b45';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(centerX - 7, jarTop + 8);
-      ctx.lineTo(centerX + 7, jarTop + 8);
-      ctx.stroke();
+  ctx.beginPath();
+  ctx.roundRect(centerX - 8, jarTop - 2, 16, 6, 2);
+  ctx.fill();
+  ctx.stroke();
 
-      // Multiplier Label
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 8px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.shadowColor = '#000';
-      ctx.shadowBlur = 3;
+  // Jar Rope
+  ctx.strokeStyle = '#d99b45';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(centerX - 7, jarTop + 8);
+  ctx.lineTo(centerX + 7, jarTop + 8);
+  ctx.stroke();
 
-      ctx.fillText(`${multipliers[i]}x`, centerX, jarTop + 32);
-      ctx.shadowBlur = 0;
-      ctx.restore();
+  // Multiplier Label (Updated Vertical + Gold Glow)
+  const isJackpot = multipliers[i] === 1000;
 
-      // Landing Flash Effect
-      if (jarFlashUntil[i] && Date.now() < jarFlashUntil[i]) {
-        ctx.save();
-        ctx.shadowColor = slotColors[i];
-        ctx.shadowBlur = 20;
-        ctx.fillStyle = 'rgba(255,255,255,0.35)';
-        ctx.strokeStyle = slotColors[i];
-        ctx.lineWidth = 2;
+  if (isJackpot) {
+    ctx.shadowColor = '#ffd700';
+    ctx.shadowBlur = 12;
+    ctx.fillStyle = '#ffe066';
+    ctx.font = 'bold 9px sans-serif';
+  } else {
+    ctx.shadowColor = '#000';
+    ctx.shadowBlur = 3;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 8px sans-serif';
+  }
 
-        ctx.beginPath();
-        ctx.roundRect(left, jarTop + 8, jarWidth, jarBottom - jarTop - 8, 5);
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-      }
-    }
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
 
+  if (multipliers[i] >= 100) {
+    const letters = ['1', '0', '0', ...(multipliers[i] === 1000 ? ['0'] : []), 'X'];
+    const startY = jarTop + 16;
+    const lineGap = 7;
+    
+    letters.forEach((char, idx) => {
+      ctx.fillText(char, centerX, startY + idx * lineGap);
+    });
+  } else {
+    ctx.fillText(`${multipliers[i]}x`, centerX, jarTop + 32);
+  }
+
+  ctx.shadowBlur = 0;
+  ctx.restore();
+
+  // Landing Flash Effect
+  if (jarFlashUntil[i] && Date.now() < jarFlashUntil[i]) {
+    ctx.save();
+    ctx.shadowColor = slotColors[i];
+    ctx.shadowBlur = 20;
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.strokeStyle = slotColors[i];
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    ctx.roundRect(left, jarTop + 8, jarWidth, jarBottom - jarTop - 8, 5);
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+    
+
+    
     // Ball Physics Engine
     for (let i = activeBalls.length - 1; i >= 0; i--) {
       let ball = activeBalls[i];
