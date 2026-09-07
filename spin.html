@@ -1416,6 +1416,17 @@ document.getElementById("spinButton").addEventListener("click", () => {
     }, 5000);
 });
 
+// Define the XP caps for each outcome
+const xpCaps = {
+  Red: 1000,
+  Blue: 1000,
+  Star: 2500,
+  Diamond: 3500,
+  X: 5000,
+  O: 5000,
+  Jackpot: 17500
+};
+
 function handleResult(result, resultIndex) {
     setWheelHighlight(resultIndex, true);
 
@@ -1445,9 +1456,13 @@ function handleResult(result, resultIndex) {
     let winnings = 0;
     let xpGained = 0;
 
+    // Calculate XP only if player bet on the winning outcome
     if (bets[result] > 0) {
         winnings = bets[result] + (bets[result] * payouts[result]);
-        xpGained = xpRewards[result] || 0;
+        
+        // Multiplier XP formula with hard cap
+        const rawXp = bets[result] * payouts[result];
+        xpGained = Math.min(rawXp, xpCaps[result] || 0);
     }
 
     coins += winnings;
