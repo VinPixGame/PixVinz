@@ -2118,13 +2118,15 @@ video {
 }
 
 
-/* Targeted STRICTLY to Mobile Web Browsers (Chrome, Safari, etc.) */
-/* Excludes Desktop Browsers and Installed PWAs */
+/* Targeted strictly to Mobile Web Browsers (Excludes Installed PWAs & Desktop) */
 @media screen and (max-width: 768px) and (pointer: coarse) and (display-mode: browser) {
-  /* Replace .main-container with your main app wrapper class/ID */
-  .main-container, 
-  #appWrapper {
-    margin-top: -25px !important; /* Adjust negative offset to shift UI up */
+  
+  /* Target body or your main app screen wrapper */
+  body, 
+  #app-container,
+  .app-container, 
+  .main-wrapper {
+    transform: translateY(-25px) !important;
   }
-}
 
+}
