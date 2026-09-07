@@ -10,6 +10,7 @@
       margin: 0;
       padding: 0;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
       font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
@@ -20,7 +21,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 10px;
+      justify-content: flex-start;
+      padding: 24px 10px 10px 10px;
       overflow-x: hidden;
     }
 
@@ -42,10 +44,16 @@
       cursor: pointer;
       font-weight: 700;
       font-size: 13px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      box-shadow: none !important;
+      outline: none !important;
       display: flex;
       align-items: center;
       gap: 5px;
+    }
+
+    .logo-img {
+      height: 28px;
+      object-fit: contain;
     }
 
     .coin-box {
@@ -59,6 +67,7 @@
       align-items: center;
       gap: 5px;
       font-size: 14px;
+      box-shadow: none !important;
     }
 
     .title {
@@ -68,19 +77,9 @@
       background: linear-gradient(135deg, #ffffff, #ffea75, #ff9900);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 2px;
+      margin-bottom: 4px;
       text-transform: uppercase;
       text-align: center;
-    }
-
-    .xp-display {
-      font-size: 11px;
-      font-weight: 700;
-      color: #00e676;
-      letter-spacing: 1px;
-      margin-bottom: 4px;
-      text-align: center;
-      text-shadow: 0 0 8px rgba(0,230,118,0.4);
     }
 
     .instruction {
@@ -101,7 +100,7 @@
       border: 1.5px solid rgba(255, 204, 0, 0.3);
       border-radius: 14px;
       padding: 8px;
-      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.9), 0 6px 20px rgba(0, 0, 0, 0.5);
+      box-shadow: none !important;
       margin-bottom: 8px;
       position: relative;
       overflow: hidden;
@@ -132,7 +131,7 @@
       transform-style: preserve-3d;
       transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
       border-radius: 6px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.6), inset 0 0 8px rgba(255,255,255,0.15);
+      box-shadow: none !important;
     }
 
     .card-slot.flipped .card-inner {
@@ -160,7 +159,7 @@
       border: 1px solid rgba(255, 204, 0, 0.4);
       color: #ffcc00;
       font-size: 12px;
-      box-shadow: inset 0 0 10px rgba(255, 204, 0, 0.25);
+      box-shadow: none !important;
     }
 
     /* Glass Neon Front Face */
@@ -168,16 +167,24 @@
       transform: rotateY(180deg);
       backdrop-filter: blur(8px);
       border: 1px solid rgba(255, 255, 255, 0.4);
-      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+      text-shadow: none !important;
     }
 
-    /* Neon Glass Color Shaders */
-    .glass-red    { background: linear-gradient(135deg, rgba(255, 51, 102, 0.85), rgba(130, 0, 35, 0.9)); box-shadow: inset 0 0 12px rgba(255, 51, 102, 0.7), 0 3px 10px rgba(255, 51, 102, 0.3); color: #fff; }
-    .glass-blue   { background: linear-gradient(135deg, rgba(37, 117, 252, 0.85), rgba(0, 45, 130, 0.9)); box-shadow: inset 0 0 12px rgba(37, 117, 252, 0.7), 0 3px 10px rgba(37, 117, 252, 0.3); color: #fff; }
-    .glass-white  { background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(160, 160, 160, 0.85)); box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.9), 0 3px 10px rgba(255, 255, 255, 0.4); color: #000; }
-    .glass-yellow { background: linear-gradient(135deg, rgba(255, 204, 0, 0.85), rgba(160, 120, 0, 0.9)); box-shadow: inset 0 0 12px rgba(255, 204, 0, 0.8), 0 3px 10px rgba(255, 204, 0, 0.3); color: #000; }
-    .glass-pink   { background: linear-gradient(135deg, rgba(255, 102, 204, 0.85), rgba(145, 10, 100, 0.9)); box-shadow: inset 0 0 12px rgba(255, 102, 204, 0.7), 0 3px 10px rgba(255, 102, 204, 0.3); color: #fff; }
-    .glass-green  { background: linear-gradient(135deg, rgba(0, 230, 118, 0.85), rgba(0, 95, 45, 0.9)); box-shadow: inset 0 0 12px rgba(0, 230, 118, 0.7), 0 3px 10px rgba(0, 230, 118, 0.3); color: #fff; }
+    /* Highlight class for player's chosen 3 cards with golden glowing borders */
+    .card-slot.highlighted .card-front {
+      border: 2px solid #ffcc00 !important;
+      box-shadow: 0 0 12px rgba(255, 204, 0, 0.8), inset 0 0 8px rgba(255, 204, 0, 0.6) !important;
+      transform: rotateY(180deg) scale(1.05);
+      z-index: 5;
+    }
+
+    /* Neon Glass Color Shaders - No default box-shadow */
+    .glass-red    { background: linear-gradient(135deg, rgba(255, 51, 102, 0.85), rgba(130, 0, 35, 0.9)); box-shadow: none !important; color: #fff; }
+    .glass-blue   { background: linear-gradient(135deg, rgba(37, 117, 252, 0.85), rgba(0, 45, 130, 0.9)); box-shadow: none !important; color: #fff; }
+    .glass-white  { background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(160, 160, 160, 0.85)); box-shadow: none !important; color: #000; }
+    .glass-yellow { background: linear-gradient(135deg, rgba(255, 204, 0, 0.85), rgba(160, 120, 0, 0.9)); box-shadow: none !important; color: #000; }
+    .glass-pink   { background: linear-gradient(135deg, rgba(255, 102, 204, 0.85), rgba(145, 10, 100, 0.9)); box-shadow: none !important; color: #fff; }
+    .glass-green  { background: linear-gradient(135deg, rgba(0, 230, 118, 0.85), rgba(0, 95, 45, 0.9)); box-shadow: none !important; color: #fff; }
 
     /* Central Dealer Deck Stack */
     .dealer-deck {
@@ -195,7 +202,7 @@
       align-items: center;
       font-size: 14px;
       color: #ffcc00;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.9), inset 0 0 8px rgba(255,204,0,0.4);
+      box-shadow: none !important;
       z-index: 10;
     }
 
@@ -208,6 +215,7 @@
       border-radius: 10px;
       padding: 6px 8px;
       margin-bottom: 8px;
+      box-shadow: none !important;
     }
 
     .history-title {
@@ -267,6 +275,8 @@
       font-weight: 800;
       font-size: 10px;
       cursor: pointer;
+      box-shadow: none !important;
+      outline: none !important;
     }
 
     .chip.active {
@@ -300,6 +310,8 @@
       padding: 5px;
       cursor: pointer;
       position: relative;
+      box-shadow: none !important;
+      outline: none !important;
     }
 
     .c-red    { background: linear-gradient(135deg, #ff3366, #a1002b); }
@@ -334,6 +346,7 @@
       max-width: 480px;
       display: flex;
       gap: 6px;
+      margin-bottom: 6px;
     }
 
     .btn {
@@ -344,6 +357,8 @@
       font-weight: 800;
       font-size: 13px;
       cursor: pointer;
+      box-shadow: none !important;
+      outline: none !important;
     }
 
     .btn-clear {
@@ -363,7 +378,19 @@
       cursor: not-allowed;
     }
 
-    /* Customized Popup Modal */
+    /* XP Display at the Bottom */
+    .xp-display {
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 800;
+      color: #00ffff; /* Cyan Blue */
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    /* Customized Popup Modal Overlay */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -394,7 +421,7 @@
       border-radius: 16px;
       padding: 20px;
       text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 15px rgba(255, 204, 0, 0.2);
+      box-shadow: none !important;
       transform: scale(0.8);
       transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
@@ -415,7 +442,23 @@
       font-size: 12px;
       color: #fff;
       margin-bottom: 16px;
-      line-height: 1.4;
+      line-height: 1.5;
+    }
+
+    .modal-cards-container {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 8px;
+      margin-bottom: 12px;
+    }
+
+    .modal-result-card {
+      width: 24px;
+      height: 34px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.4);
+      box-shadow: none !important;
     }
 
     .modal-btn {
@@ -427,7 +470,8 @@
       font-weight: 800;
       font-size: 12px;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(255, 153, 0, 0.4);
+      box-shadow: none !important;
+      outline: none !important;
     }
   </style>
 </head>
@@ -435,11 +479,11 @@
 
   <div class="header">
     <button class="btn-back" onclick="location.href='index.html'">← Home</button>
-    <div class="coin-box">🪙 <span id="userCoins">1000</span></div>
+    <img src="image/vinz.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
+    <div class="coin-box">🪙 <span id="userCoins">0</span></div>
   </div>
 
   <div class="title">Color Card Flip</div>
-  <div class="xp-display" id="userXpDisplay">XP: 0</div>
   <div class="instruction" id="instructionText">Place bets, then click START GAME!</div>
 
   <!-- Arena Table -->
@@ -477,36 +521,95 @@
     <button id="startBtn" class="btn btn-start" onclick="startGame()">START GAME</button>
   </div>
 
+  <!-- XP Display at the bottom -->
+  <div class="xp-display" id="userXpDisplay">XP: 0</div>
+
   <!-- Customized Popup Modal Overlay -->
   <div class="modal-overlay" id="customModalOverlay">
     <div class="custom-modal">
       <div class="modal-title" id="modalTitle">Notice</div>
       <div class="modal-message" id="modalMessage">Message content goes here.</div>
+      <div class="modal-cards-container" id="modalCardsContainer" style="display:none;"></div>
       <button class="modal-btn" onclick="closeModal()">OK</button>
     </div>
   </div>
 
   <script>
-    const COLORS = ['red', 'blue', 'white', 'yellow', 'pink', 'green'];
-    const HEX_MAP = {
-      red: '#ff3366', blue: '#2575fc', white: '#ffffff',
-      yellow: '#ffcc00', pink: '#ff66cc', green: '#00e676'
-    };
+    let totalCoins = parseInt(localStorage.getItem('balance')) || parseInt(localStorage.getItem('userCoins')) || 1000;
+    let userXp = parseInt(localStorage.getItem('xp')) || parseInt(localStorage.getItem('userXp')) || 0;
 
+    const COLORS = ['red', 'blue', 'white', 'yellow', 'pink', 'green'];
     let selectedChip = 10;
-    let totalCoins = parseInt(localStorage.getItem('userCoins')) || 1000;
-    let userXp = parseInt(localStorage.getItem('userXp')) || 0;
-    
     let bets = { red: 0, blue: 0, white: 0, yellow: 0, pink: 0, green: 0 };
     let gameState = 'IDLE'; 
     let deckColors = [];
     let flippedCount = 0;
     let playerPickedResults = [];
+    let chosenCardIndices = [];
     let gameHistory = [];
 
-    function showPopup(title, message) {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playSound(type) {
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      const now = audioCtx.currentTime;
+
+      if (type === 'tap') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(120, now + 0.05);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      } else if (type === 'shuffle') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.linearRampToValueAtTime(260, now + 0.08);
+        gain.gain.setValueAtTime(0.04, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      } else if (type === 'win') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now);     
+        osc.frequency.setValueAtTime(659.25, now + 0.1); 
+        osc.frequency.setValueAtTime(783.99, now + 0.2); 
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else if (type === 'lose') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.linearRampToValueAtTime(140, now + 0.18);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      }
+    }
+
+    function showPopup(title, message, resultColors = null) {
       document.getElementById('modalTitle').textContent = title;
       document.getElementById('modalMessage').innerHTML = message;
+      
+      const container = document.getElementById('modalCardsContainer');
+      if (resultColors && resultColors.length > 0) {
+        container.style.display = 'flex';
+        container.innerHTML = resultColors.map(c => `<div class="modal-result-card glass-${c}"></div>`).join('');
+      } else {
+        container.style.display = 'none';
+        container.innerHTML = '';
+      }
+
       document.getElementById('customModalOverlay').classList.add('active');
     }
 
@@ -515,7 +618,9 @@
     }
 
     function syncUserData() {
+      localStorage.setItem('balance', totalCoins);
       localStorage.setItem('userCoins', totalCoins);
+      localStorage.setItem('xp', userXp);
       localStorage.setItem('userXp', userXp);
     }
 
@@ -560,16 +665,19 @@
       selectedChip = amount;
       document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
       element.classList.add('active');
+      playSound('tap');
     }
 
     function placeBet(color) {
       if (gameState !== 'IDLE') return;
       if (totalCoins < selectedChip) {
         showPopup("Insufficient Balance", "You don't have enough coins to place this bet!");
+        playSound('lose');
         return;
       }
       totalCoins -= selectedChip;
       bets[color] += selectedChip;
+      playSound('tap');
       updateUI();
     }
 
@@ -581,6 +689,7 @@
         bets[c] = 0;
       });
       totalCoins += totalRefund;
+      playSound('tap');
       updateUI();
     }
 
@@ -588,6 +697,7 @@
       const totalBetAmount = Object.values(bets).reduce((a, b) => a + b, 0);
       if (totalBetAmount === 0) {
         showPopup("No Bets Placed", "Please place at least one bet before starting the game!");
+        playSound('lose');
         return;
       }
 
@@ -601,9 +711,11 @@
 
       flippedCount = 0;
       playerPickedResults = [];
+      chosenCardIndices = [];
 
       for (let i = 0; i < 18; i++) {
         const slot = document.getElementById(`cardSlot-${i}`);
+        slot.classList.remove('highlighted');
         const front = document.getElementById(`cardFront-${i}`);
         const color = deckColors[i];
         
@@ -617,6 +729,7 @@
 
       setTimeout(() => {
         document.getElementById('instructionText').textContent = "🔀 Shuffling neon deck...";
+        playSound('shuffle');
         for (let i = 0; i < 18; i++) {
           document.getElementById(`cardSlot-${i}`).classList.remove('flipped');
         }
@@ -631,6 +744,7 @@
           let shakes = 0;
           const shakeInterval = setInterval(() => {
             shakes++;
+            playSound('shuffle');
             const rot = (shakes % 2 === 0) ? 6 : -6;
             const scale = (shakes % 2 === 0) ? 1.05 : 0.95;
             dealerDeck.style.transform = `translate(-50%, -50%) scale(${scale}) rotate(${rot}deg)`;
@@ -673,15 +787,40 @@
       if (slot.classList.contains('flipped')) return;
 
       slot.classList.add('flipped');
+      playSound('tap');
       const color = deckColors[index];
       playerPickedResults.push(color);
+      chosenCardIndices.push(index);
       flippedCount++;
 
       document.getElementById('instructionText').textContent = `👉 Cards picked: ${flippedCount} / 3`;
 
       if (flippedCount === 3) {
         gameState = 'IDLE';
-        setTimeout(() => evaluateGameResults(), 600);
+        // Disable click events on all cards right away
+        for (let i = 0; i < 18; i++) {
+          document.getElementById(`cardSlot-${i}`).style.pointerEvents = 'none';
+        }
+
+        // Highlight the 3 chosen cards with glowing border
+        setTimeout(() => {
+          chosenCardIndices.forEach(idx => {
+            document.getElementById(`cardSlot-${idx}`).classList.add('highlighted');
+          });
+          document.getElementById('instructionText').textContent = "✨ Revealing remaining cards...";
+          
+          // Reveal all other unchosen cards after a brief pause
+          setTimeout(() => {
+            for (let i = 0; i < 18; i++) {
+              if (!chosenCardIndices.includes(i)) {
+                document.getElementById(`cardSlot-${i}`).classList.add('flipped');
+              }
+            }
+            // Evaluate game results shortly after full board reveal
+            setTimeout(() => evaluateGameResults(), 800);
+          }, 800);
+
+        }, 500);
       }
     }
 
@@ -699,11 +838,7 @@
       });
 
       totalCoins += totalWinnings;
-      userXp += 15; // Earn XP per round played
-
-      for (let i = 0; i < 18; i++) {
-        document.getElementById(`cardSlot-${i}`).style.pointerEvents = 'none';
-      }
+      userXp += 15; 
 
       gameHistory.push({ results: [...playerPickedResults], won: totalWinnings > 0 });
       if (gameHistory.length > 10) gameHistory.shift(); 
@@ -711,10 +846,12 @@
 
       if (totalWinnings > 0) {
         document.getElementById('instructionText').textContent = `🎉 YOU WON 🪙 ${totalWinnings}!`;
-        showPopup("Victory!", `🎉 You won <b>🪙 ${totalWinnings}</b>!<br><br>Picked: ${playerPickedResults.join(' • ').toUpperCase()}`);
+        playSound('win');
+        showPopup("Round Result", `You won <b>🪙 ${totalWinnings}</b>!`, playerPickedResults);
       } else {
         document.getElementById('instructionText').textContent = `😢 NO MATCHES.`;
-        showPopup("Round Over", `😢 No matches found.<br><br>Picked: ${playerPickedResults.join(' • ').toUpperCase()}`);
+        playSound('lose');
+        showPopup("Round Result", `No matches found. Better luck next time!`, playerPickedResults);
       }
 
       COLORS.forEach(c => bets[c] = 0);
