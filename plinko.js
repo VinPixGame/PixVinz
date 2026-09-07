@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let coinCount = parseFloat(localStorage.getItem(coinKey)) || 500;
   let currentBet = 10;
-  let currentDifficulty = 'normal'; // normal (low), medium, hard (high)
-  let currentRows = 16; // Default to 16 rows
+  let currentDifficulty = 'normal'; // normal, medium, hard
+  let currentRows = 16; 
   let lastDropTime = 0;
 
   const coinCountEl = document.getElementById('coinCount');
@@ -78,39 +78,40 @@ document.addEventListener('DOMContentLoaded', () => {
   resizeCanvas();
   setTimeout(resizeCanvas, 50);
 
+  // Recalibrated 60% House / 40% Player RTP Multiplier Tables
   const multiplierTables = {
     normal: {
-      8:  [5.6, 2.1, 1.1, 1, 0.5, 1, 1.1, 2.1, 5.6],
-      9:  [5.6, 2, 1.6, 1, 0.7, 0.7, 1, 1.6, 2, 5.6],
-      10: [8.9, 3, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 3, 8.9],
-      11: [8.4, 3, 1.9, 1.3, 1, 0.7, 0.7, 1, 1.3, 1.9, 3, 8.4],
-      12: [10, 3, 1.6, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 1.6, 3, 10],
-      13: [8.1, 4, 3, 1.9, 1.2, 0.9, 0.7, 0.7, 0.9, 1.2, 1.9, 3, 4, 8.1],
-      14: [7.1, 4, 1.9, 1.4, 1.3, 1.1, 1, 0.5, 1, 1.1, 1.3, 1.4, 1.9, 4, 7.1],
-      15: [15, 8, 3, 2, 1.5, 1.1, 1, 0.7, 0.7, 1, 1.1, 1.5, 2, 3, 8, 15],
-      16: [16, 9, 2, 1.4, 1.2, 1.1, 1, 0.5, 0.5, 0.5, 1, 1.1, 1.2, 1.4, 2, 9, 16]
+      8:  [4.0, 1.5, 0.8, 0.5, 0.3, 0.5, 0.8, 1.5, 4.0],
+      9:  [4.5, 1.6, 1.0, 0.6, 0.3, 0.3, 0.6, 1.0, 1.6, 4.5],
+      10: [5.0, 2.0, 1.1, 0.6, 0.4, 0.2, 0.4, 0.6, 1.1, 2.0, 5.0],
+      11: [6.0, 2.2, 1.2, 0.7, 0.4, 0.2, 0.2, 0.4, 0.7, 1.2, 2.2, 6.0],
+      12: [7.0, 2.5, 1.3, 0.8, 0.4, 0.2, 0.2, 0.2, 0.4, 0.8, 1.3, 2.5, 7.0],
+      13: [7.5, 3.0, 1.5, 0.9, 0.5, 0.3, 0.2, 0.2, 0.3, 0.5, 0.9, 1.5, 3.0, 7.5],
+      14: [8.0, 3.2, 1.6, 1.0, 0.5, 0.3, 0.2, 0.2, 0.2, 0.3, 0.5, 1.0, 1.6, 3.2, 8.0],
+      15: [10.0, 4.0, 2.0, 1.1, 0.6, 0.3, 0.2, 0.2, 0.2, 0.2, 0.3, 0.6, 1.1, 2.0, 4.0, 10.0],
+      16: [12.0, 5.0, 1.8, 1.0, 0.5, 0.3, 0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.5, 1.0, 1.8, 5.0, 12.0]
     },
     medium: {
-      8:  [13, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 13],
-      9:  [18, 4, 1.7, 0.9, 0.5, 0.5, 0.9, 1.7, 4, 18],
-      10: [22, 5, 2, 1.4, 0.6, 0.4, 0.6, 1.4, 2, 5, 22],
-      11: [24, 6, 3, 1.8, 0.7, 0.5, 0.5, 0.7, 1.8, 3, 6, 24],
-      12: [33, 11, 4, 2, 1.1, 0.6, 0.3, 0.6, 1.1, 2, 4, 11, 33],
-      13: [37, 11, 4, 2.5, 1.2, 0.8, 0.4, 0.4, 0.8, 1.2, 2.5, 4, 11, 37],
-      14: [58, 15, 7, 4, 1.9, 1, 0.5, 0.3, 0.5, 1, 1.9, 4, 7, 15, 58],
-      15: [88, 18, 11, 5, 3, 1.3, 0.5, 0.3, 0.3, 0.5, 1.3, 3, 5, 11, 18, 88],
-      16: [110, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 110]
+      8:  [8.0, 2.0, 0.8, 0.3, 0.2, 0.3, 0.8, 2.0, 8.0],
+      9:  [10.0, 2.5, 1.0, 0.4, 0.2, 0.2, 0.4, 1.0, 2.5, 10.0],
+      10: [14.0, 3.0, 1.2, 0.5, 0.2, 0.1, 0.2, 0.5, 1.2, 3.0, 14.0],
+      11: [18.0, 4.0, 1.5, 0.6, 0.3, 0.1, 0.1, 0.3, 0.6, 1.5, 4.0, 18.0],
+      12: [22.0, 5.0, 2.0, 0.7, 0.3, 0.1, 0.1, 0.1, 0.3, 0.7, 2.0, 5.0, 22.0],
+      13: [28.0, 6.0, 2.2, 0.8, 0.4, 0.2, 0.1, 0.1, 0.2, 0.4, 0.8, 2.2, 6.0, 28.0],
+      14: [40.0, 8.0, 3.0, 1.0, 0.4, 0.2, 0.1, 0.1, 0.1, 0.2, 0.4, 1.0, 3.0, 8.0, 40.0],
+      15: [60.0, 10.0, 4.0, 1.2, 0.5, 0.2, 0.1, 0.1, 0.1, 0.1, 0.2, 0.5, 1.2, 4.0, 10.0, 60.0],
+      16: [80.0, 15.0, 5.0, 1.5, 0.6, 0.3, 0.1, 0.1, 0.1, 0.1, 0.1, 0.3, 0.6, 1.5, 5.0, 15.0, 80.0]
     },
     hard: {
-      8:  [29, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 29],
-      9:  [43, 7, 2, 0.6, 0.2, 0.2, 0.6, 2, 7, 43],
-      10: [76, 10, 3, 0.9, 0.3, 0.2, 0.3, 0.9, 3, 10, 76],
-      11: [120, 14, 5.2, 1.4, 0.4, 0.2, 0.2, 0.4, 1.4, 5.2, 14, 120],
-      12: [170, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 170],
-      13: [260, 37, 11, 4, 1, 0.2, 0.2, 0.2, 0.2, 1, 4, 11, 37, 260],
-      14: [420, 56, 18, 5, 1.9, 0.3, 0.2, 0.2, 0.2, 0.3, 1.9, 5, 18, 56, 420],
-      15: [620, 83, 27, 8, 3, 0.5, 0.2, 0.2, 0.2, 0.2, 0.5, 3, 8, 27, 83, 620],
-      16: [1000, 100, 26, 9, 4, 2, 0.5, 0.3, 0.2, 0.3, 0.5, 2, 4, 9, 26, 100, 1000]
+      8:  [18.0, 2.5, 0.6, 0.2, 0.1, 0.2, 0.6, 2.5, 18.0],
+      9:  [25.0, 3.5, 0.8, 0.2, 0.1, 0.1, 0.2, 0.8, 3.5, 25.0],
+      10: [45.0, 5.0, 1.0, 0.3, 0.1, 0.1, 0.1, 0.3, 1.0, 5.0, 45.0],
+      11: [70.0, 7.0, 1.5, 0.4, 0.1, 0.1, 0.1, 0.1, 0.4, 1.5, 7.0, 70.0],
+      12: [110.0, 10.0, 2.0, 0.5, 0.2, 0.1, 0.1, 0.1, 0.2, 0.5, 2.0, 10.0, 110.0],
+      13: [170.0, 15.0, 3.0, 0.6, 0.2, 0.1, 0.1, 0.1, 0.1, 0.2, 0.6, 3.0, 170.0],
+      14: [280.0, 22.0, 4.0, 0.8, 0.2, 0.1, 0.1, 0.1, 0.1, 0.1, 0.2, 0.8, 4.0, 22.0, 280.0],
+      15: [450.0, 35.0, 6.0, 1.0, 0.3, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.3, 1.0, 6.0, 35.0, 450.0],
+      16: [1000.0, 50.0, 8.0, 1.5, 0.4, 0.2, 0.1, 0.1, 0.1, 0.1, 0.1, 0.2, 0.4, 1.5, 8.0, 50.0, 1000.0]
     }
   };
 
@@ -137,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (dropBallBtn) {
     dropBallBtn.addEventListener('click', () => {
       const now = Date.now();
-      if (now - lastDropTime < 80) return;
+      if (now - lastDropTime < 180) return; // Drop rate throttle
       lastDropTime = now;
 
       if (coinCount < currentBet) {
@@ -191,23 +192,23 @@ document.addEventListener('DOMContentLoaded', () => {
         osc.start(now);
         osc.stop(now + 0.04);
       } else if (type === 'drop') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(180, now);
-        osc.frequency.exponentialRampToValueAtTime(40, now + 0.03);
-        gain.gain.setValueAtTime(0.08, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.02);
+        gain.gain.setValueAtTime(0.03, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.02);
         osc.start(now);
-        osc.stop(now + 0.03);
+        osc.stop(now + 0.02);
       } else if (type === 'peg') {
-  // Soft, non-musical click with ultra-short duration
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(150, now);
-  osc.frequency.exponentialRampToValueAtTime(50, now + 0.01);
-  gain.gain.setValueAtTime(0.008, now); // Extremely low volume to avoid stacking noise
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.01);
-  osc.start(now);
-  osc.stop(now + 0.01);
-}else if (type === 'error') {
+        // Soft, non-musical click with ultra-short duration
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.exponentialRampToValueAtTime(50, now + 0.01);
+        gain.gain.setValueAtTime(0.008, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.01);
+        osc.start(now);
+        osc.stop(now + 0.01);
+      } else if (type === 'error') {
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(140, now);
         gain.gain.setValueAtTime(0.1, now);
@@ -215,12 +216,13 @@ document.addEventListener('DOMContentLoaded', () => {
         osc.start(now);
         osc.stop(now + 0.08);
       } else if (type === 'jar') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(440 + index * 20, now);
-        gain.gain.setValueAtTime(1.85, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1200, now);
+        osc.frequency.exponentialRampToValueAtTime(400, now + 0.05);
+        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
         osc.start(now);
-        osc.stop(now + 0.3);
+        osc.stop(now + 0.05);
       }
     } catch(e) {}
   }
@@ -421,80 +423,85 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 4. Ball Physics Engine
-for (let i = activeBalls.length - 1; i >= 0; i--) {
-  let ball = activeBalls[i];
+    // 4. Fast Physics Engine with House Edge Center-Bias
+    for (let i = activeBalls.length - 1; i >= 0; i--) {
+      let ball = activeBalls[i];
 
-  ball.vy += 0.85; // Increased gravity for faster drop
-  ball.x += ball.vx;
-  ball.y += ball.vy;
+      ball.vy += 0.85; // Faster gravity drop
+      ball.x += ball.vx;
+      ball.y += ball.vy;
 
-  if (ball.x - ballRadius < 8) {
-    ball.x = 8 + ballRadius;
-    ball.vx *= -0.5;
-  } else if (ball.x + ballRadius > w - 8) {
-    ball.x = w - 8 - ballRadius;
-    ball.vx *= -0.5;
-  }
-
-  for (let r = 0; r < rows; r++) {
-    const pegsInRow = r + 3;
-    const rowWidth = (pegsInRow - 1) * colSpacing;
-    const startX = (w - rowWidth) / 2;
-    const y = startYGrid + r * rowHeight;
-
-    for (let c = 0; c < pegsInRow; c++) {
-      const px = startX + c * colSpacing;
-      const py = y;
-      const dx = ball.x - px;
-      const dy = ball.y - py;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-
-      if (dist < ballRadius + pegRadius) {
-        playSound('peg');
-        const overlap = (ballRadius + pegRadius) - dist;
-        const nx = dx / dist;
-        const ny = dy / dist;
-        
-        ball.x += nx * overlap;
-        ball.y += ny * overlap;
-
-        const dot = ball.vx * nx + ball.vy * ny;
-        const scatter = (Math.random() - 0.5) * 0.5;
-        ball.vx = (ball.vx - 1.8 * dot * nx) * 0.75 + scatter;
-        ball.vy = (ball.vy - 1.8 * dot * ny) * 0.75;
+      if (ball.x - ballRadius < 8) {
+        ball.x = 8 + ballRadius;
+        ball.vx *= -0.5;
+      } else if (ball.x + ballRadius > w - 8) {
+        ball.x = w - 8 - ballRadius;
+        ball.vx *= -0.5;
       }
+
+      for (let r = 0; r < rows; r++) {
+        const pegsInRow = r + 3;
+        const rowWidth = (pegsInRow - 1) * colSpacing;
+        const startX = (w - rowWidth) / 2;
+        const y = startYGrid + r * rowHeight;
+
+        for (let c = 0; c < pegsInRow; c++) {
+          const px = startX + c * colSpacing;
+          const py = y;
+          const dx = ball.x - px;
+          const dy = ball.y - py;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < ballRadius + pegRadius) {
+            playSound('peg');
+            const overlap = (ballRadius + pegRadius) - dist;
+            const nx = dx / dist;
+            const ny = dy / dist;
+            
+            ball.x += nx * overlap;
+            ball.y += ny * overlap;
+
+            const dot = ball.vx * nx + ball.vy * ny;
+            
+            // Inward gravity pull to maintain 60% house edge
+            const centerOffset = (ball.x - w / 2) / (w / 2);
+            const houseBias = -centerOffset * 0.22; 
+
+            const scatter = (Math.random() - 0.5) * 0.45 + houseBias;
+            ball.vx = (ball.vx - 1.8 * dot * nx) * 0.70 + scatter;
+            ball.vy = (ball.vy - 1.8 * dot * ny) * 0.70;
+          }
+        }
+      }
+
+      if (ball.y >= slotY) {
+        const slotIndex = Math.floor(ball.x / slotWidth);
+        const clampedIndex = Math.max(0, Math.min(multipliers.length - 1, slotIndex));
+        const mult = multipliers[clampedIndex];
+
+        coinCount += currentBet * mult;
+        updateDisplay();
+        jarFlashUntil[clampedIndex] = Date.now() + 350;
+        playSound('jar', clampedIndex);
+        activeBalls.splice(i, 1);
+        continue;
+      }
+
+      // Draw Gold Ball
+      ctx.save();
+      ctx.shadowColor = '#ffd700';
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = '#ffd700';
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#fff9e6';
+      ctx.beginPath();
+      ctx.arc(ball.x - 1.5, ball.y - 1.5, ballRadius * 0.35, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
     }
-  }
-
-  if (ball.y >= slotY) {
-    const slotIndex = Math.floor(ball.x / slotWidth);
-    const clampedIndex = Math.max(0, Math.min(multipliers.length - 1, slotIndex));
-    const mult = multipliers[clampedIndex];
-
-    coinCount += currentBet * mult;
-    updateDisplay();
-    jarFlashUntil[clampedIndex] = Date.now() + 350;
-    playSound('jar', clampedIndex);
-    activeBalls.splice(i, 1);
-    continue;
-  }
-
-  // Draw Gold Ball
-  ctx.save();
-  ctx.shadowColor = '#ffd700';
-  ctx.shadowBlur = 8;
-  ctx.fillStyle = '#ffd700';
-  ctx.beginPath();
-  ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = '#fff9e6';
-  ctx.beginPath();
-  ctx.arc(ball.x - 1.5, ball.y - 1.5, ballRadius * 0.35, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-}
 
     requestAnimationFrame(updatePhysics);
   }
