@@ -326,7 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ==========================================
     // 8. LOGIN
-    // FIRESTORE VERIFICATION + DATA FETCH
+    // FIREBASE AUTH VERIFICATION + DATA FETCH
     // ==========================================
 
     document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
@@ -345,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            if (!window.pixvinzDb) {
+            if (!window.pixvinzDb || !window.pixvinzAuth) {
                 if (errElem) errElem.innerText = "Database connection not available.";
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -354,6 +354,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            const { auth, signInWithEmailAndPassword } = window.pixvinzAuth;
+            const dummyEmail = `${username}@pixvinz.com`;
+
+            // Authenticate securely via Firebase Auth backend
+            await signInWithEmailAndPassword(auth, dummyEmail, pass);
+
             const { db, doc, getDoc } = window.pixvinzDb;
             const userDocRef = doc(db, 'players', username);
             const snap = await getDoc(userDocRef);
@@ -361,44 +367,42 @@ document.addEventListener('DOMContentLoaded', () => {
             if (snap.exists()) {
                 const userData = snap.data();
 
-                if (userData.password === pass) {
-                    const freshUserData = {
-                        username: userData.username || username,
-                        uid: userData.uid || "",
-                        displayName: userData.displayName || username,
-                        avatar: userData.avatar || "",
-                        coins: Number(userData.coins ?? 0),
-                        level: Number(userData.level ?? 1),
-                        xp: Number(userData.xp ?? 0),
-                        challenge: Number(userData.challenge ?? 1),
-                        dailyRewardState: userData.dailyRewardState || {
-                            streak: 0,
-                            lastClaimDate: "",
-                            lastClaimTimestamp: 0
-                        }
-                    };
+                const freshUserData = {
+                    username: userData.username || username,
+                    uid: userData.uid || "",
+                    displayName: userData.displayName || username,
+                    avatar: userData.avatar || "",
+                    coins: Number(userData.coins ?? 0),
+                    level: Number(userData.level ?? 1),
+                    xp: Number(userData.xp ?? 0),
+                    challenge: Number(userData.challenge ?? 1),
+                    dailyRewardState: userData.dailyRewardState || {
+                        streak: 0,
+                        lastClaimDate: "",
+                        lastClaimTimestamp: 0
+                    }
+                };
 
-                    localStorage.clear();
+                localStorage.clear();
 
-                    localStorage.setItem('loggedInUser', JSON.stringify(freshUserData));
-                    localStorage.setItem('vinpix_username', freshUserData.username);
-                    localStorage.setItem('skipLoading', 'true');
+                localStorage.setItem('loggedInUser', JSON.stringify(freshUserData));
+                localStorage.setItem('vinpix_username', freshUserData.username);
+                localStorage.setItem('skipLoading', 'true');
 
-                    const prefix = freshUserData.username + '_';
-                    localStorage.setItem(prefix + 'totalCoins', String(freshUserData.coins));
-                    localStorage.setItem(prefix + 'currentLevel', String(freshUserData.level));
-                    localStorage.setItem(prefix + 'xp', String(freshUserData.xp));
-                    localStorage.setItem(prefix + 'currentChallenge', String(freshUserData.challenge));
-                    localStorage.setItem(prefix + 'vinpix_avatar', freshUserData.avatar);
-                    localStorage.setItem(`pixvinz_daily_${freshUserData.username}`, JSON.stringify(freshUserData.dailyRewardState));
+                const prefix = freshUserData.username + '_';
+                localStorage.setItem(prefix + 'totalCoins', String(freshUserData.coins));
+                localStorage.setItem(prefix + 'currentLevel', String(freshUserData.level));
+                localStorage.setItem(prefix + 'xp', String(freshUserData.xp));
+                localStorage.setItem(prefix + 'currentChallenge', String(freshUserData.challenge));
+                localStorage.setItem(prefix + 'vinpix_avatar', freshUserData.avatar);
+                localStorage.setItem(`pixvinz_daily_${freshUserData.username}`, JSON.stringify(freshUserData.dailyRewardState));
 
-                    if (errElem) errElem.innerText = "";
-                    window.location.href = 'index.html';
-                    return;
-                }
+                if (errElem) errElem.innerText = "";
+                window.location.href = 'index.html';
+                return;
             }
 
-            if (errElem) errElem.innerText = "Invalid username or password!";
+            if (errElem) errElem.innerText = "Player profile data not found!";
             if (submitBtn) {
                 submitBtn.disabled = false;
                 submitBtn.innerText = originalBtnText;
@@ -406,7 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (err) {
             console.error("Login error:", err);
-            if (errElem) errElem.innerText = "Login error occurred: " + err.message;
+            if (errElem) errElem.innerText = "Invalid username or password!";
             if (submitBtn) {
                 submitBtn.disabled = false;
                 submitBtn.innerText = originalBtnText;
