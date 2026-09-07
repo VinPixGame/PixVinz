@@ -245,28 +245,35 @@ function updateXpProgress() {
     
     let currentLevelVal = parseInt(localStorage.getItem(prefix + 'currentLevel')) || 1;
     
-    // Check for direct synced XP from Firestore first, fallback to level calculation
+    // Check for direct synced XP from Firestore/localStorage
     let currentXpVal = parseInt(localStorage.getItem(prefix + 'totalXp'));
-    
     if (isNaN(currentXpVal)) {
-        let currentUser = {};
         try {
-            currentUser = JSON.parse(localStorage.getItem('loggedInUser')) || {};
+            const userObj = JSON.parse(localStorage.getItem('loggedInUser')) || {};
+            currentXpVal = userObj.xp;
         } catch(e) {}
-        currentXpVal = currentUser.xp;
     }
 
-    // Fallback calculation if no direct stored XP exists
+    // Fallback if missing
     if (currentXpVal === undefined || currentXpVal === null || isNaN(currentXpVal)) {
         const puzzlesSolved = Math.max(0, currentLevelVal - 1);
         const playerProgression = calculateLevelAndXp(puzzlesSolved);
         currentXpVal = playerProgression.currentXp;
     }
 
-    // Calculate max XP needed for current level tier
-    let tier = Math.floor((currentLevelVal - 1) / 10);
-    let maxXpVal = (tier + 1) * 500;
-    let progressPercent = Math.min(100, (currentXpVal / maxXpVal) * 100);
+    // Pass the actual current level to calculate the correct cumulative target
+    const puzzlesSolved = Math.max(0, currentLevelVal - 1);
+    const progression = calculateLevelAndXp(puzzlesSolved);
+    
+    // Use the dynamic target from calculateLevelAndXp or ensure cumulative total matches
+    let maxXpVal = progression.maxXp > 0 ? progression.maxXp : 1500;
+
+    // If current total XP exceeds calculated target, adjust max display target to match level thresholds
+    if (currentXpVal > maxXpVal) {
+        maxXpVal = Math.max(currentXpVal, maxXpVal);
+    }
+
+    const progressPercent = Math.min(100, (currentXpVal / maxXpVal) * 100);
 
     const levelNumEl = document.querySelector('#displayLevelBadge .xp-level-num');
     const xpText = document.getElementById('displayXpText');
