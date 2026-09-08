@@ -778,9 +778,14 @@
       document.getElementById('stage-title').textContent = `Stage ${stage}`;
       document.getElementById('flip-count').textContent = flips;
 
+      // --- DYNAMIC THEMED IMAGE SET SELECTION (70 IMAGES IN GROUPS OF 10) ---
+      let themeIndex = Math.floor((stage - 1) / 10) % 7; 
+      let startImageIndex = (themeIndex * 10) + 1;
+
       let selectedImages = [];
-      for (let i = 1; i <= totalPairs; i++) {
-        selectedImages.push(`image/level${i}.png`);
+      for (let i = 0; i < totalPairs; i++) {
+        let imgNum = ((startImageIndex - 1 + i) % 70) + 1;
+        selectedImages.push(`image/level${imgNum}.png`);
       }
 
       let cardDeck = [...selectedImages, ...selectedImages];
