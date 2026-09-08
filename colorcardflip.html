@@ -452,7 +452,7 @@
   </div>
 
   <script>
-    // --- USER & CLOUD INTEGRATION (MATCHING PLINKO.JS LOGIC) ---
+    // --- USER & CLOUD INTEGRATION (FIRESTORE SYNC LOGIC) ---
     function getActiveUserPrefix() {
       let username = '';
       try {
@@ -463,17 +463,68 @@
       return username ? `${username}_` : '';
     }
 
+    function getActiveUsername() {
+      try {
+        const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (userObj && userObj.username) return userObj.username;
+      } catch (e) {}
+      return localStorage.getItem('vinpix_username') || '';
+    }
+
     let prefix = getActiveUserPrefix();
     let coinKey = `${prefix}totalCoins`;
     let xpKey = `${prefix}totalXp`;
+    let stageKey = `${prefix}memoryStage`;
 
     let coinCount = parseFloat(localStorage.getItem(coinKey)) || 500;
     let xpCount = parseInt(localStorage.getItem(xpKey), 10) || 0;
+    let currentStage = parseInt(localStorage.getItem(stageKey), 10) || 1;
 
-    function updateUserData() {
+    // Save user data to Firestore
+    window.saveUserDataToCloud = async function() {
+      const username = getActiveUsername();
+      if (!username || !window.pixvinzDb) return;
+
+      try {
+        const userDocRef = window.pixvinzDb.collection('users').doc(username);
+        await userDocRef.set({
+          totalCoins: coinCount,
+          totalXp: xpCount,
+          memoryStage: currentStage,
+          lastUpdated: new Date().toISOString()
+        }, { merge: true });
+      } catch (e) {
+        console.error("Error saving data to Firestore:", e);
+      }
+    };
+
+    // Fetch user data from Firestore
+    window.fetchUserDataFromCloud = async function() {
+      const username = getActiveUsername();
+      if (!username || !window.pixvinzDb) return;
+
+      try {
+        const userDocRef = window.pixvinzDb.collection('users').doc(username);
+        const docSnap = await userDocRef.get();
+        if (docSnap.exists) {
+          const data = docSnap.data();
+          if (data.totalCoins !== undefined) coinCount = parseFloat(data.totalCoins);
+          if (data.totalXp !== undefined) xpCount = parseInt(data.totalXp, 10);
+          if (data.memoryStage !== undefined) currentStage = parseInt(data.memoryStage, 10);
+
+          updateUserData(false);
+          startStage(currentStage);
+        }
+      } catch (e) {
+        console.error("Error fetching data from Firestore:", e);
+      }
+    };
+
+    function updateUserData(shouldSaveToCloud = true) {
       prefix = getActiveUserPrefix();
       coinKey = `${prefix}totalCoins`;
       xpKey = `${prefix}totalXp`;
+      stageKey = `${prefix}memoryStage`;
 
       const coinCountEl = document.getElementById('coinCount');
       const xpCountEl = document.getElementById('xp-count-display');
@@ -483,13 +534,15 @@
 
       localStorage.setItem(coinKey, coinCount);
       localStorage.setItem(xpKey, xpCount);
+      localStorage.setItem(stageKey, currentStage);
 
       if (typeof updateProfileStats === 'function') updateProfileStats();
-      if (typeof window.saveUserDataToCloud === 'function') window.saveUserDataToCloud();
+      if (shouldSaveToCloud && typeof window.saveUserDataToCloud === 'function') {
+        window.saveUserDataToCloud();
+      }
     }
 
     // --- GAME ENGINE LOGIC ---
-    let currentStage = 1;
     let flips = 0;
     let flippedCards = [];
     let matchedPairs = 0;
@@ -676,7 +729,6 @@
       // Apply rewards to global variables & trigger cloud save sync
       coinCount += coinsEarned;
       xpCount += xpEarned;
-      updateUserData();
 
       // UI Popup Breakdown Update
       document.getElementById('reward-coins').textContent = `+${coinsEarned}`;
@@ -693,6 +745,7 @@
         btn.textContent = "Play Again";
         btn.onclick = () => {
           currentStage = 1;
+          updateUserData(true);
           overlay.classList.remove('active');
           startStage(currentStage);
         };
@@ -703,12 +756,15 @@
         btn.onclick = nextStage;
       }
 
+      // Advance stage & persist to cloud lock out previous stage
+      currentStage++;
+      updateUserData(true);
+
       overlay.classList.add('active');
     }
 
     function nextStage() {
       document.getElementById('overlay').classList.remove('active');
-      currentStage++;
       startStage(currentStage);
     }
 
@@ -716,8 +772,11 @@
     document.addEventListener('click', initAudio, { once: true });
 
     // Initial sync and setup
-    updateUserData();
+    updateUserData(false);
     startStage(currentStage);
+    if (typeof window.fetchUserDataFromCloud === 'function') {
+      window.fetchUserDataFromCloud();
+    }
   </script>
 </body>
 </html>
