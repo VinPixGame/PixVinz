@@ -46,7 +46,7 @@
       position: relative;
       margin-top: 5px;
       flex-shrink: 0;
-      height: 46px;
+      height: 65px;
     }
 
     /* CIRCULAR BACK BUTTON */
@@ -90,9 +90,9 @@
     }
 
     .game-title-container img {
-      height: 100%;
+      height: 120%;
       width: auto;
-      max-width: 100%;
+      max-width: 220%;
       object-fit: contain;
     }
 
@@ -945,8 +945,8 @@
       for (let i = 0; i < 140; i++) {
         const isLeft = i % 2 === 0;
         const angle = isLeft 
-          ? (Math.random() * 45 + 30) * (Math.PI / 180)   // Shoots up & right (30° - 75°)
-          : (Math.random() * 45 + 105) * (Math.PI / 180); // Shoots up & left (105° - 150°)
+          ? (Math.random() * 30 + 60) * (Math.PI / 180)   // Shoots up & right (60° - 90°)
+          : (Math.random() * 30 + 90) * (Math.PI / 180); // Shoots up & left (90° - 120°)
 
         const speed = Math.random() * 18 + 14; // High explosive speed
 
