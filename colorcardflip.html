@@ -741,16 +741,10 @@
     }
 
     function getCardCountForStage(stage) {
-      if (stage <= 2) return 4;
-      if (stage <= 4) return 6;
-      if (stage <= 6) return 8;
-      if (stage <= 10) return 12;
-      if (stage <= 20) return 16;
-      if (stage <= 40) return 20;
-      if (stage <= 60) return 24;
-      if (stage <= 80) return 30;
-      return 36;
-    }
+  // Starts at 4 cards on Stage 1, adding +2 cards every 2 stages, capping at 36 max cards
+  let count = 4 + (Math.floor((stage - 1) / 2) * 2);
+  return Math.min(count, 36); 
+}
 
     function startTimer() {
       stopTimer();
