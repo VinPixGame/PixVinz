@@ -321,7 +321,7 @@
     .modal {
       background: linear-gradient(160deg, #280a50 0%, #120324 100%);
       border: 2px solid #ffd700;
-      padding: 28px 22px 22px 22px;
+      padding: 28px 20px 22px 20px;
       border-radius: 24px;
       text-align: center;
       max-width: 320px;
@@ -392,12 +392,21 @@
     .reward-item.coins .val { color: #ffd700; }
     .reward-item.xp .val { color: #00f2fe; }
 
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
     .btn {
+      flex: 1;
       background: linear-gradient(180deg, #ffe033 0%, #ffa800 100%);
       color: #120324;
       border: none;
-      padding: 12px 28px;
-      font-size: 1.05rem;
+      padding: 12px 14px;
+      font-size: 0.95rem;
       font-weight: 900;
       border-radius: 25px;
       cursor: pointer;
@@ -405,6 +414,14 @@
       transition: transform 0.1s ease, box-shadow 0.1s ease;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .btn-secondary {
+      background: linear-gradient(180deg, #3c1968 0%, #1a0833 100%);
+      color: #ffd700;
+      border: 1.5px solid #ffd700;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     }
 
     .btn:active {
@@ -501,7 +518,7 @@
     <div class="board" id="board"></div>
   </div>
 
-  <!-- PREMIUM WIN MODAL WITH CANVAS CONFETTI -->
+  <!-- PREMIUM WIN MODAL WITH HIGH-SPEED SIDE CONFETTI -->
   <div class="overlay" id="overlay">
     <canvas id="confetti-canvas"></canvas>
     <div class="modal">
@@ -520,7 +537,10 @@
         </div>
       </div>
 
-      <button class="btn" id="next-btn" onclick="nextStage()">NEXT STAGE</button>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="window.location.href='index.html'">HOME</button>
+        <button class="btn" id="next-btn" onclick="nextStage()">NEXT STAGE</button>
+      </div>
     </div>
   </div>
 
@@ -638,7 +658,6 @@
     function playVictoryMusic(stage) {
       bgMusic.pause();
       
-      // Calculates index 1 to 10 repeating in cycles of 10 stages
       let musicIndex = ((stage - 1) % 10) + 1;
       victoryMusic.src = `sounds/victory${musicIndex}.mp3`;
       victoryMusic.currentTime = 0;
@@ -847,7 +866,7 @@
       startStage(currentStage);
     }
 
-    /* CONFETTI SYSTEM */
+    /* HIGH-SPEED SIDE BURST CONFETTI CANNONS */
     let confettiAnimationId = null;
     let confettiParticles = [];
 
@@ -857,19 +876,30 @@
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
 
-      const colors = ['#ffd700', '#00f2fe', '#00ff66', '#ff007f', '#ffffff'];
+      const colors = ['#ffd700', '#00f2fe', '#00ff66', '#ff007f', '#ffffff', '#ff9900'];
       confettiParticles = [];
 
-      for (let i = 0; i < 90; i++) {
+      // Create high-velocity bursts from bottom-left and bottom-right corners
+      for (let i = 0; i < 140; i++) {
+        const isLeft = i % 2 === 0;
+        const angle = isLeft 
+          ? (Math.random() * 45 + 30) * (Math.PI / 180)   // Shoots up & right (30° - 75°)
+          : (Math.random() * 45 + 105) * (Math.PI / 180); // Shoots up & left (105° - 150°)
+
+        const speed = Math.random() * 18 + 14; // High explosive speed
+
         confettiParticles.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height - canvas.height,
-          size: Math.random() * 8 + 4,
+          x: isLeft ? 0 : canvas.width,
+          y: canvas.height * 0.85,
+          vx: Math.cos(angle) * speed,
+          vy: -Math.sin(angle) * speed,
+          gravity: 0.45,
+          drag: 0.96,
+          size: Math.random() * 8 + 6,
           color: colors[Math.floor(Math.random() * colors.length)],
-          speedY: Math.random() * 3 + 2,
-          speedX: Math.random() * 2 - 1,
           rotation: Math.random() * 360,
-          rotationSpeed: Math.random() * 10 - 5
+          rotationSpeed: Math.random() * 20 - 10,
+          opacity: 1
         });
       }
 
@@ -877,16 +907,20 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         confettiParticles.forEach((p) => {
-          p.y += p.speedY;
-          p.x += p.speedX;
+          p.vx *= p.drag;
+          p.vy *= p.drag;
+          p.vy += p.gravity;
+
+          p.x += p.vx;
+          p.y += p.vy;
           p.rotation += p.rotationSpeed;
 
-          if (p.y > canvas.height) {
-            p.y = -10;
-            p.x = Math.random() * canvas.width;
+          if (p.y > canvas.height * 0.7) {
+            p.opacity -= 0.015;
           }
 
           ctx.save();
+          ctx.globalAlpha = Math.max(0, p.opacity);
           ctx.translate(p.x, p.y);
           ctx.rotate((p.rotation * Math.PI) / 180);
           ctx.fillStyle = p.color;
@@ -894,7 +928,11 @@
           ctx.restore();
         });
 
-        confettiAnimationId = requestAnimationFrame(animate);
+        confettiParticles = confettiParticles.filter(p => p.opacity > 0);
+
+        if (confettiParticles.length > 0) {
+          confettiAnimationId = requestAnimationFrame(animate);
+        }
       }
 
       animate();
