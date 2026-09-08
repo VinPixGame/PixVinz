@@ -286,6 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 level: 1,
                 xp: 0,
                 challenge: 1,
+                stage: 1, // Added stage progress to Firestore (default: 1)
                 dailyRewardState: {
                     streak: 0,
                     lastClaimDate: "",
@@ -307,6 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem(prefix + 'currentLevel', String(newUserData.level));
             localStorage.setItem(prefix + 'xp', String(newUserData.xp));
             localStorage.setItem(prefix + 'currentChallenge', String(newUserData.challenge));
+            localStorage.setItem(prefix + 'memoryStage', String(newUserData.stage)); // Saved stage locally
             localStorage.setItem(prefix + 'vinpix_avatar', newUserData.avatar);
             localStorage.setItem(`pixvinz_daily_${username}`, JSON.stringify(newUserData.dailyRewardState));
 
@@ -375,6 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     level: Number(userData.level ?? 1),
                     xp: Number(userData.xp ?? 0),
                     challenge: Number(userData.challenge ?? 1),
+                    stage: Number(userData.stage ?? 1), // Fetched stage progress from Firestore
                     dailyRewardState: userData.dailyRewardState || {
                         streak: 0,
                         lastClaimDate: "",
@@ -393,6 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem(prefix + 'currentLevel', String(freshUserData.level));
                 localStorage.setItem(prefix + 'xp', String(freshUserData.xp));
                 localStorage.setItem(prefix + 'currentChallenge', String(freshUserData.challenge));
+                localStorage.setItem(prefix + 'memoryStage', String(freshUserData.stage)); // Synced stage to local storage
                 localStorage.setItem(prefix + 'vinpix_avatar', freshUserData.avatar);
                 localStorage.setItem(`pixvinz_daily_${freshUserData.username}`, JSON.stringify(freshUserData.dailyRewardState));
 
