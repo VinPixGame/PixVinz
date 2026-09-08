@@ -144,12 +144,12 @@
       gap: 8px;
     }
 
-    .stat-box:first-child {
+    .stat-box:not(:last-child) {
       border-right: 1px solid #3c1968;
     }
 
     .stat-icon {
-      font-size: 1.3rem;
+      font-size: 1.2rem;
     }
 
     .stat-details {
@@ -165,9 +165,13 @@
     }
 
     .stat-value {
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: bold;
       color: #fff;
+    }
+
+    #xp-count-display {
+      color: #00f2fe;
     }
 
     /* Main Board Container */
@@ -236,7 +240,7 @@
     .card-front {
       background-color: #250a48;
       background-image: url("image/vinz.png");
-      background-size: 18px 18px; /* Small logo tile dimensions */
+      background-size: 18px 18px;
       background-repeat: repeat;
       background-position: center;
     }
@@ -287,7 +291,7 @@
       padding: 22px;
       border-radius: 16px;
       text-align: center;
-      max-width: 300px;
+      max-width: 310px;
       width: 85%;
     }
 
@@ -298,10 +302,34 @@
     }
 
     .modal p {
-      margin-bottom: 18px;
+      margin-bottom: 8px;
       font-size: 0.95rem;
       color: #ddd;
     }
+
+    .reward-breakdown {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid #3c1968;
+      border-radius: 10px;
+      padding: 10px;
+      margin: 12px 0 18px 0;
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .reward-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .reward-item .val {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .reward-item.coins .val { color: #ffd700; }
+    .reward-item.xp .val { color: #00f2fe; }
 
     .btn {
       background: #ffd700;
@@ -368,7 +396,7 @@
         </svg>
       </div>
 
-      <div class="coin-badge">🪙 <span id="coinCount">8944</span></div>
+      <div class="coin-badge">🪙 <span id="coinCount">0.00</span></div>
     </div>
 
     <div class="stage-title" id="stage-title">Stage 1</div>
@@ -388,6 +416,13 @@
           <span class="stat-value" id="flip-count">0</span>
         </div>
       </div>
+      <div class="stat-box">
+        <span class="stat-icon">⚡</span>
+        <div class="stat-details">
+          <span class="stat-label">XP</span>
+          <span class="stat-value" id="xp-count-display">0</span>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -400,13 +435,61 @@
     <div class="modal">
       <h2 id="modal-title">Stage Cleared!</h2>
       <p id="modal-msg">Great job!</p>
+      
+      <div class="reward-breakdown">
+        <div class="reward-item coins">
+          <span class="val" id="reward-coins">+0</span>
+          <span class="stat-label">COINS</span>
+        </div>
+        <div class="reward-item xp">
+          <span class="val" id="reward-xp">+0</span>
+          <span class="stat-label">XP</span>
+        </div>
+      </div>
+
       <button class="btn" id="next-btn" onclick="nextStage()">Next Stage</button>
     </div>
   </div>
 
   <script>
+    // --- USER & CLOUD INTEGRATION (MATCHING PLINKO.JS LOGIC) ---
+    function getActiveUserPrefix() {
+      let username = '';
+      try {
+        const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
+        if (userObj && userObj.username) username = userObj.username;
+      } catch (e) {}
+      if (!username) username = localStorage.getItem('vinpix_username') || '';
+      return username ? `${username}_` : '';
+    }
+
+    let prefix = getActiveUserPrefix();
+    let coinKey = `${prefix}totalCoins`;
+    let xpKey = `${prefix}totalXp`;
+
+    let coinCount = parseFloat(localStorage.getItem(coinKey)) || 500;
+    let xpCount = parseInt(localStorage.getItem(xpKey), 10) || 0;
+
+    function updateUserData() {
+      prefix = getActiveUserPrefix();
+      coinKey = `${prefix}totalCoins`;
+      xpKey = `${prefix}totalXp`;
+
+      const coinCountEl = document.getElementById('coinCount');
+      const xpCountEl = document.getElementById('xp-count-display');
+
+      if (coinCountEl) coinCountEl.textContent = coinCount.toFixed(2);
+      if (xpCountEl) xpCountEl.textContent = xpCount.toLocaleString();
+
+      localStorage.setItem(coinKey, coinCount);
+      localStorage.setItem(xpKey, xpCount);
+
+      if (typeof updateProfileStats === 'function') updateProfileStats();
+      if (typeof window.saveUserDataToCloud === 'function') window.saveUserDataToCloud();
+    }
+
+    // --- GAME ENGINE LOGIC ---
     let currentStage = 1;
-    let coins = 8944;
     let flips = 0;
     let flippedCards = [];
     let matchedPairs = 0;
@@ -581,8 +664,23 @@
     }
 
     function stageComplete() {
-      coins += 10;
-      document.getElementById('coinCount').textContent = coins;
+      // DEDUCTION REWARD FORMULA
+      // Coins: 1,000 base minus 10 for every 3 full seconds elapsed
+      const timePenalty = Math.floor(secondsElapsed / 3) * 10;
+      const coinsEarned = Math.max(0, 1000 - timePenalty);
+
+      // XP: 2,000 base minus 10 for every flip made
+      const flipPenalty = flips * 10;
+      const xpEarned = Math.max(0, 2000 - flipPenalty);
+
+      // Apply rewards to global variables & trigger cloud save sync
+      coinCount += coinsEarned;
+      xpCount += xpEarned;
+      updateUserData();
+
+      // UI Popup Breakdown Update
+      document.getElementById('reward-coins').textContent = `+${coinsEarned}`;
+      document.getElementById('reward-xp').textContent = `+${xpEarned}`;
 
       const overlay = document.getElementById('overlay');
       const title = document.getElementById('modal-title');
@@ -591,7 +689,7 @@
 
       if (currentStage === 100) {
         title.textContent = "🏆 Stage 100 Cleared!";
-        msg.textContent = `Congratulations! You beat all stages!`;
+        msg.textContent = `Time: ${document.getElementById('time-count').textContent} | Flips: ${flips}`;
         btn.textContent = "Play Again";
         btn.onclick = () => {
           currentStage = 1;
@@ -617,6 +715,8 @@
     window.addEventListener('resize', () => configureGridAndSizing(getCardCountForStage(currentStage)));
     document.addEventListener('click', initAudio, { once: true });
 
+    // Initial sync and setup
+    updateUserData();
     startStage(currentStage);
   </script>
 </body>
