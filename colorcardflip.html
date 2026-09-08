@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>PixVinz Memory</title>
   <style>
-    /* RESET AND PREVENT TOUCH OUTLINES */
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
@@ -31,7 +30,6 @@
       user-select: none;
     }
 
-    /* TOP BAR CONTAINER */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -157,7 +155,6 @@
       border-radius: 8px;
     }
 
-    /* DYNAMIC CONTAINER FOR MID-SECTION FLEX SPACE */
     .board-container {
       flex: 1;
       width: 100%;
@@ -166,38 +163,54 @@
       align-items: center;
       min-height: 0;
       padding: 4px 0;
+      position: relative;
     }
 
-    /* PREMIUM BORDER WRAPPER FOR PRECISE EDGE HUGGING */
     .board-wrapper {
       position: relative;
-      background: linear-gradient(145deg, #180730, #0d031a);
-      border: 2.5px solid #ffd700;
-      border-radius: 16px;
-      padding: 10px;
-      box-shadow: 0 0 20px rgba(255, 215, 0, 0.25), inset 0 0 15px rgba(0, 0, 0, 0.8);
-      display: flex;
+      display: inline-flex;
       justify-content: center;
       align-items: center;
-      transition: all 0.2s ease-out;
+      padding: 10px;
+    }
+
+    #shape-border-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+      overflow: visible;
+    }
+
+    #shape-border-path {
+      fill: url(#bgGradient);
+      stroke: #ffd700;
+      stroke-width: 2.5;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+      filter: drop-shadow(0px 0px 10px rgba(255, 215, 0, 0.5));
     }
 
     .board {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
       align-items: center;
       justify-content: center;
+      position: relative;
+      z-index: 3;
     }
 
     .board-row {
       display: flex;
-      gap: 6px;
+      gap: 8px;
       justify-content: center;
       align-items: center;
     }
 
-    /* CARDS GROW FREELY WITHOUT ARTIFICIAL LIMITS */
     .card {
       position: relative;
       transform-style: preserve-3d;
@@ -216,7 +229,7 @@
       height: 100%;
       position: absolute;
       backface-visibility: hidden;
-      border-radius: 8px;
+      border-radius: 10px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -243,15 +256,14 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 5px;
+      border-radius: 6px;
     }
 
     .card.matched .card-face {
       border-color: #00ff66 !important;
-      filter: drop-shadow(0px 0px 8px #00ff66);
+      box-shadow: 0 0 10px #00ff66 !important;
     }
 
-    /* MODAL OVERLAY */
     .overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -375,6 +387,15 @@
 
   <div class="board-container" id="board-container">
     <div class="board-wrapper" id="board-wrapper">
+      <svg id="shape-border-svg">
+        <defs>
+          <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#180730" />
+            <stop offset="100%" stop-color="#0d031a" />
+          </linearGradient>
+        </defs>
+        <path id="shape-border-path" d="" />
+      </svg>
       <div class="board" id="board"></div>
     </div>
   </div>
@@ -500,7 +521,6 @@
     const tapSound = document.getElementById('tap-sound');
     const victoryMusic = document.getElementById('victory-music');
 
-    /* AUDIO VISUALIZER SETUP */
     let audioCtx = null;
     let analyser = null;
     let audioSourceBg = null;
@@ -622,11 +642,10 @@
       document.getElementById('time-count').textContent = `${mins}:${secs}`;
     }
 
-    /* PRECISE LAYOUT MAPPING PER STAGE */
     function getSymmetricalRowDistribution(cardCount) {
       if (cardCount === 10) return [3, 4, 3];
       if (cardCount === 14) return [3, 4, 4, 3];
-      if (cardCount === 18) return [3, 4, 4, 4, 3];  /* 18 CARDS SET TO EXACTLY 3, 4, 4, 4, 3 */
+      if (cardCount === 18) return [3, 4, 4, 4, 3];
       if (cardCount === 22) return [4, 5, 5, 5, 3];
       if (cardCount === 26) return [4, 6, 6, 6, 4];
       if (cardCount === 30) return [5, 5, 5, 5, 5, 5];
@@ -640,41 +659,104 @@
       return rowArray;
     }
 
-    /* OPTIMIZED DYNAMIC SIZING ENGINE THAT WRAPS BOARDER DIRECTLY AROUND OUTMOST CARDS */
     function configureGridAndSizing(rowLayout) {
       const container = document.getElementById('board-container');
-      const wrapper = document.getElementById('board-wrapper');
-      if (!container || !wrapper) return;
+      if (!container) return;
 
       const rows = rowLayout.length;
       const maxCols = Math.max(...rowLayout);
-      const gap = 6;
-      const padding = 20; // 10px on each side inside border wrapper
+      const gap = 8;
+      const padding = 24;
 
-      // Measure max available screen box dynamically
       const maxAvailableW = Math.min(window.innerWidth - 20, 420);
       const maxAvailableH = container.clientHeight - 10;
 
-      // Calculate pure card area without wrapper padding
       const maxGridW = maxAvailableW - padding;
       const maxGridH = maxAvailableH - padding;
 
-      // Calculate maximum possible card size that fits perfectly in both width and height
       let cardW = (maxGridW - (maxCols - 1) * gap) / maxCols;
       let cardH = (maxGridH - (rows - 1) * gap) / rows;
 
       let cardSize = Math.floor(Math.min(cardW, cardH));
-      cardSize = Math.max(26, cardSize); // Allow room to scale up fully based on screen
+      cardSize = Math.max(26, cardSize);
 
-      // Set CSS dynamic variables
       document.documentElement.style.setProperty('--card-size', `${cardSize}px`);
+    }
 
-      // Compute EXACT pixel dimensions for board-wrapper to tightly wrap the grid outer edges
-      const exactGridWidth = (maxCols * cardSize) + ((maxCols - 1) * gap);
-      const exactGridHeight = (rows * cardSize) + ((rows - 1) * gap);
+    /* STRICT ORTHOGONAL 90-DEGREE STAGGERED BOUNDING TRACER */
+    function updateDynamicShapeBorder() {
+      const wrapper = document.getElementById('board-wrapper');
+      const rows = document.querySelectorAll('.board-row');
+      const pathEl = document.getElementById('shape-border-path');
+      if (!wrapper || !rows.length || !pathEl) return;
 
-      wrapper.style.width = `${exactGridWidth + padding}px`;
-      wrapper.style.height = `${exactGridHeight + padding}px`;
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const pad = 8;
+
+      let rowData = [];
+
+      rows.forEach((row) => {
+        const cards = row.querySelectorAll('.card');
+        if (cards.length > 0) {
+          const firstRect = cards[0].getBoundingClientRect();
+          const lastRect = cards[cards.length - 1].getBoundingClientRect();
+
+          rowData.push({
+            top: Math.round(firstRect.top - wrapperRect.top - pad),
+            bottom: Math.round(firstRect.bottom - wrapperRect.top + pad),
+            left: Math.round(firstRect.left - wrapperRect.left - pad),
+            right: Math.round(lastRect.right - wrapperRect.left + pad)
+          });
+        }
+      });
+
+      if (rowData.length === 0) return;
+
+      let pts = [];
+
+      // Top row - Top edge
+      pts.push({ x: rowData[0].left, y: rowData[0].top });
+      pts.push({ x: rowData[0].right, y: rowData[0].top });
+
+      // Right side stepping (strictly 90-degree turns)
+      for (let i = 0; i < rowData.length; i++) {
+        let cur = rowData[i];
+        let nxt = rowData[i + 1];
+
+        if (nxt) {
+          let midY = Math.round((cur.bottom + nxt.top) / 2);
+          pts.push({ x: cur.right, y: midY });
+          pts.push({ x: nxt.right, y: midY });
+        } else {
+          pts.push({ x: cur.right, y: cur.bottom });
+        }
+      }
+
+      // Bottom row - Bottom edge
+      let lastRow = rowData[rowData.length - 1];
+      pts.push({ x: lastRow.left, y: lastRow.bottom });
+
+      // Left side stepping (strictly 90-degree turns)
+      for (let i = rowData.length - 1; i >= 0; i--) {
+        let cur = rowData[i];
+        let prv = rowData[i - 1];
+
+        if (prv) {
+          let midY = Math.round((cur.top + prv.bottom) / 2);
+          pts.push({ x: cur.left, y: midY });
+          pts.push({ x: prv.left, y: midY });
+        } else {
+          pts.push({ x: cur.left, y: cur.top });
+        }
+      }
+
+      let d = `M ${pts[0].x} ${pts[0].y}`;
+      for (let i = 1; i < pts.length; i++) {
+        d += ` L ${pts[i].x} ${pts[i].y}`;
+      }
+      d += ' Z';
+
+      pathEl.setAttribute('d', d);
     }
 
     function startStage(stage) {
@@ -734,6 +816,9 @@
 
       requestAnimationFrame(() => {
         configureGridAndSizing(rowLayout);
+        requestAnimationFrame(() => {
+          setTimeout(updateDynamicShapeBorder, 100);
+        });
       });
 
       startTimer();
@@ -833,7 +918,6 @@
       startStage(currentStage);
     }
 
-    /* CONFETTI SYSTEM */
     let confettiAnimationId = null;
     let confettiParticles = [];
 
@@ -918,6 +1002,7 @@
       const numCards = getCardCountForStage(currentStage);
       const rowLayout = getSymmetricalRowDistribution(numCards);
       configureGridAndSizing(rowLayout);
+      updateDynamicShapeBorder();
       const canvas = document.getElementById('confetti-canvas');
       if (canvas) {
         canvas.width = window.innerWidth;
