@@ -121,7 +121,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       flex-shrink: 0;
     }
 
@@ -132,7 +132,7 @@
       color: #ffd700;
       text-align: center;
       text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
-      margin-top: 10px;
+      margin-top: 6px;
     }
 
     /* Stats Box Container */
@@ -188,8 +188,8 @@
     .visualizer-container {
       width: 100%;
       max-width: 420px;
-      height: 32px;
-      margin-top: 10px;
+      height: 28px;
+      margin-top: 8px;
       margin-bottom: 6px;
       display: flex;
       justify-content: center;
@@ -205,11 +205,12 @@
       border-radius: 8px;
     }
 
-    /* PREMIUM BOARD WRAPPER THAT HUGS THE GRID */
+    /* PREMIUM BOARD WRAPPER THAT HUGS THE GRID AND CONSTRAINS HEIGHT */
     .board-wrapper {
       width: fit-content;
       height: fit-content;
       max-width: 98vw;
+      max-height: calc(100vh - 210px);
       background: linear-gradient(145deg, #180730, #0d031a);
       border: 2px solid transparent;
       border-image: linear-gradient(135deg, #ffd700, #3c1968, #ffd700) 1;
@@ -218,8 +219,8 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      margin: auto;
-      overflow: visible;
+      margin: 4px auto;
+      overflow: hidden;
       box-shadow: 0 0 20px rgba(255, 215, 0, 0.15), inset 0 0 15px rgba(0, 0, 0, 0.8);
       position: relative;
       flex-shrink: 0;
@@ -242,7 +243,7 @@
     .board {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       width: fit-content;
       height: fit-content;
       align-items: center;
@@ -252,7 +253,7 @@
 
     .board-row {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       justify-content: center;
       align-items: center;
     }
@@ -263,8 +264,8 @@
       transform-style: preserve-3d;
       transition: transform 0.3s ease;
       cursor: pointer;
-      width: var(--card-size, 75px);
-      height: var(--card-size, 75px);
+      width: var(--card-size, 65px);
+      height: var(--card-size, 65px);
       aspect-ratio: 1 / 1;
     }
 
@@ -767,27 +768,21 @@
     }
 
     function getSymmetricalRowDistribution(cardCount) {
-      // Custom vertical-oriented layouts prioritizing mobile tall-screen space
-      if (cardCount === 10) return [1, 4, 4, 1];        // 10 Cards: Vertical Diamond Caps
-      if (cardCount === 14) return [1, 4, 4, 4, 1];     // 14 Cards: Vertical Diamond Caps
-      if (cardCount === 18) return [1, 4, 4, 4, 4, 1];  // 18 Cards: Top 1, Center 4s, Bottom 1
-      if (cardCount === 22) return [1, 5, 5, 5, 5, 1];  // 22 Cards: Top 1, Center 5s, Bottom 1
-      if (cardCount === 26) return [1, 6, 6, 6, 6, 1];  // 26 Cards: Top 1, Center 6s, Bottom 1
-      if (cardCount === 30) return [5, 5, 5, 5, 5, 5];  // 30 Cards: 6 rows of 5
-      if (cardCount === 34) return [1, 8, 8, 8, 8, 1];  // 34 Cards: Top 1, Center 8s, Bottom 1
+      // Balanced 3-row / 4-row layouts for non-square card counts
+      if (cardCount === 10) return [3, 4, 3];         // 3 rows (5-4-3 diamond pattern)
+      if (cardCount === 14) return [4, 6, 4];         // 3 rows 
+      if (cardCount === 18) return [5, 8, 5];         // 3 rows (Stage 15 fix: clean compact diamond)
+      if (cardCount === 22) return [5, 6, 6, 5];      // 4 rows
+      if (cardCount === 26) return [6, 7, 7, 6];      // 4 rows
+      if (cardCount === 30) return [5, 5, 5, 5, 5, 5]; // 6 rows
+      if (cardCount === 34) return [5, 6, 6, 6, 6, 5]; // 6 rows
 
-      // Standard grid math prioritizing tall aspect ratio for mobile screens
-      let maxCols = Math.min(6, Math.ceil(Math.sqrt(cardCount)));
-      if (cardCount % maxCols !== 0) {
-        for (let cols = maxCols; cols >= 2; cols--) {
-          if (cardCount % cols === 0) {
-            maxCols = cols;
-            break;
-          }
-        }
+      // Rectangular grid math for standard counts (4, 6, 8, 12, 16, 20, 24, 36)
+      let maxCols = Math.ceil(Math.sqrt(cardCount));
+      while (cardCount % maxCols !== 0) {
+        maxCols++;
       }
-      
-      let rows = Math.ceil(cardCount / maxCols);
+      let rows = cardCount / maxCols;
       let rowArray = [];
       for (let i = 0; i < rows; i++) {
         rowArray.push(maxCols);
@@ -858,21 +853,20 @@
     function configureGridAndSizing(rowLayout) {
       const rows = rowLayout.length;
       const maxCols = Math.max(...rowLayout);
-      const gap = 8;
-      const wrapperPadding = 24;
+      const gap = 6;
+      const wrapperPadding = 20;
 
-      // Dynamic space calculation prioritizing screen height
-      const headerUIHeight = 210; 
-      const availableWidth = window.innerWidth - wrapperPadding - 24;
-      const availableHeight = window.innerHeight - headerUIHeight - wrapperPadding;
+      // Accurate space calculation minus header height
+      const availableWidth = window.innerWidth - wrapperPadding - 16;
+      const availableHeight = window.innerHeight - 220 - wrapperPadding;
 
       let calculatedWidth = (availableWidth - (maxCols - 1) * gap) / maxCols;
       let calculatedHeight = (availableHeight - (rows - 1) * gap) / rows;
 
+      // Dynamic sizing to maximize available display area without overflowing bounds
       let cardSize = Math.floor(Math.min(calculatedWidth, calculatedHeight));
 
-      // Expanded sizing range up to 110px for large clear cards
-      cardSize = Math.max(40, Math.min(cardSize, 110));
+      cardSize = Math.max(36, Math.min(cardSize, 85));
       document.documentElement.style.setProperty('--card-size', `${cardSize}px`);
     }
 
