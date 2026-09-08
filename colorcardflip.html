@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>PixVinz Memory</title>
   <style>
-    /* STACKED CSS: REMOVE ALL BROWSER FOCUS OUTLINES AND HIGHLIGHTS */
+    /* RESET AND BASIC LAYOUT */
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
@@ -17,11 +17,6 @@
       -webkit-touch-callout: none !important;
     }
 
-    *:focus, *:active {
-      outline: none !important;
-      box-shadow: none !important;
-    }
-
     html, body {
       width: 100%;
       height: 100%;
@@ -31,12 +26,12 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      padding: 12px;
+      justify-content: space-between;
+      padding: 8px 10px;
       user-select: none;
     }
 
-    /* TOP BAR CONTAINER WITH RELATIVE POSITIONING FOR PERFECT CENTERING */
+    /* TOP BAR CONTAINER */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -44,38 +39,26 @@
       width: 100%;
       max-width: 420px;
       position: relative;
-      margin-top: 5px;
+      height: 50px;
       flex-shrink: 0;
-      height: 65px;
     }
 
-    /* CIRCULAR BACK BUTTON */
     .icon-btn {
       background: rgba(20, 10, 35, 0.8);
       border: 2px solid #ffd700;
       color: #ffd700;
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 0 10px rgba(255, 215, 0, 0.4), inset 0 0 6px rgba(255, 215, 0, 0.2);
-      transition: all 0.2s ease;
-      text-decoration: none;
       z-index: 3;
     }
 
-    .icon-btn:hover, .icon-btn:active {
-      background: rgba(255, 215, 0, 0.15);
-      box-shadow: 0 0 15px rgba(255, 215, 0, 0.7), inset 0 0 10px rgba(255, 215, 0, 0.4);
-      transform: scale(1.05);
-    }
-
-    /* PERFECTLY CENTERED ABSOLUTE LOGO CONTAINER */
     .game-title-container {
       position: absolute;
       left: 50%;
@@ -90,60 +73,51 @@
     }
 
     .game-title-container img {
-      height: 120%;
+      height: 100%;
       width: auto;
-      max-width: 220%;
+      max-width: 180px;
       object-fit: contain;
     }
 
-    /* COIN BADGE */
     .coin-badge {
       background: rgba(0, 0, 0, 0.6);
       border: 1.5px solid #ffd700;
-      padding: 5px 10px;
+      padding: 4px 8px;
       border-radius: 20px;
       font-weight: bold;
-      font-size: 13px;
+      font-size: 12px;
       color: #ffd700;
       z-index: 3;
       display: flex;         
       align-items: center;   
-      justify-content: center; 
-      gap: 5px;   
-      box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
-      white-space: nowrap;
+      gap: 4px;   
     }
 
-    /* HEADER WRAPPER FOR SUB-ELEMENTS */
     header {
       width: 100%;
       max-width: 420px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 4px;
       flex-shrink: 0;
     }
 
-    /* Stage Indicator */
     .stage-title {
-      font-size: 1.2rem;
+      font-size: 1rem;
       font-weight: bold;
       color: #ffd700;
       text-align: center;
-      text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
-      margin-top: 6px;
+      text-shadow: 0 0 6px rgba(255, 215, 0, 0.4);
     }
 
-    /* Stats Box Container */
     .stats-container {
       display: flex;
       width: 100%;
       background: #18082e;
       border: 1.5px solid #3c1968;
-      border-radius: 12px;
-      padding: 6px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      border-radius: 10px;
+      padding: 4px;
     }
 
     .stat-box {
@@ -151,46 +125,23 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .stat-box:not(:last-child) {
       border-right: 1px solid #3c1968;
     }
 
-    .stat-icon {
-      font-size: 1.2rem;
-    }
+    .stat-icon { font-size: 1rem; }
+    .stat-details { display: flex; flex-direction: column; }
+    .stat-label { font-size: 0.55rem; color: #9a88b5; font-weight: bold; }
+    .stat-value { font-size: 0.85rem; font-weight: bold; color: #fff; }
+    #xp-count-display { color: #00f2fe; }
 
-    .stat-details {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .stat-label {
-      font-size: 0.6rem;
-      color: #9a88b5;
-      font-weight: bold;
-      letter-spacing: 0.5px;
-    }
-
-    .stat-value {
-      font-size: 0.95rem;
-      font-weight: bold;
-      color: #fff;
-    }
-
-    #xp-count-display {
-      color: #00f2fe;
-    }
-
-    /* MUSIC VISUALIZER BAR ABOVE GAME BOARD */
     .visualizer-container {
       width: 100%;
       max-width: 420px;
-      height: 28px;
-      margin-top: 8px;
-      margin-bottom: 6px;
+      height: 20px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -202,100 +153,77 @@
       height: 100%;
       background: rgba(24, 8, 46, 0.6);
       border: 1px solid rgba(255, 215, 0, 0.3);
-      border-radius: 8px;
+      border-radius: 6px;
     }
 
-    /* PREMIUM BOARD WRAPPER THAT HUGS THE GRID AND CONSTRAINS HEIGHT */
+    /* FULLY CONSTRAINED AUTO-SCALING BOARD WRAPPER */
     .board-wrapper {
-      width: fit-content;
-      height: fit-content;
-      max-width: 98vw;
-      max-height: calc(100vh - 210px);
+      flex: 1;
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       background: linear-gradient(145deg, #180730, #0d031a);
       border: 2px solid transparent;
       border-image: linear-gradient(135deg, #ffd700, #3c1968, #ffd700) 1;
-      border-radius: 18px;
-      padding: 12px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 4px auto;
+      border-radius: 14px;
+      padding: 8px;
+      margin: 4px 0;
       overflow: hidden;
-      box-shadow: 0 0 20px rgba(255, 215, 0, 0.15), inset 0 0 15px rgba(0, 0, 0, 0.8);
-      position: relative;
-      flex-shrink: 0;
+      min-height: 0; /* CRITICAL: Allows flex child to shrink below contents */
     }
 
-    .board-wrapper::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 16px;
-      padding: 2px;
-      background: linear-gradient(135deg, #ffd700, #3c1968, #00f2fe);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
-    }
-
-    /* FLEXBOX BOARD FOR PERFECT SYMMETRICAL ROW CENTERING */
     .board {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      width: fit-content;
-      height: fit-content;
+      gap: 4px;
+      width: 100%;
+      height: 100%;
       align-items: center;
       justify-content: center;
-      perspective: 1000px;
     }
 
     .board-row {
       display: flex;
-      gap: 6px;
+      gap: 4px;
       justify-content: center;
       align-items: center;
+      width: 100%;
     }
 
-    /* Card Styling */
+    /* CARDS SCALING COMPUTED BY JS AUTOMATICALLY */
     .card {
       position: relative;
       transform-style: preserve-3d;
       transition: transform 0.3s ease;
       cursor: pointer;
-      width: var(--card-size, 65px);
-      height: var(--card-size, 65px);
-      aspect-ratio: 1 / 1;
+      width: var(--card-size, 50px);
+      height: var(--card-size, 50px);
+      flex-shrink: 0;
     }
 
-    .card.flip, .card.matched {
-      transform: rotateY(180deg);
-    }
-
-    .card.matched {
-      cursor: default;
-    }
+    .card.flip, .card.matched { transform: rotateY(180deg); }
+    .card.matched { cursor: default; }
 
     .card-face {
       width: 100%;
       height: 100%;
       position: absolute;
       backface-visibility: hidden;
-      border-radius: 8px;
+      border-radius: 6px;
       display: flex;
       justify-content: center;
       align-items: center;
       user-select: none;
       border: 1.5px solid #ffd700;
       overflow: hidden;
-      transition: filter 0.3s ease, border-color 0.3s ease;
     }
 
     .card-front {
       background-color: #250a48;
       background-image: url("image/vinz.png");
-      background-size: 18px 18px;
+      background-size: 16px 16px;
       background-repeat: repeat;
       background-position: center;
     }
@@ -303,23 +231,22 @@
     .card-back {
       background: #351063;
       transform: rotateY(180deg);
-      padding: 4px;
+      padding: 2px;
     }
 
     .card-back img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      pointer-events: none;
       border-radius: 4px;
     }
 
     .card.matched .card-face {
       border-color: #00ff66 !important;
-      filter: drop-shadow(0px 0px 8px #00ff66);
+      filter: drop-shadow(0px 0px 6px #00ff66);
     }
 
-    /* PREMIUM WIN MODAL OVERLAY */
+    /* MODAL OVERLAY */
     .overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -334,18 +261,11 @@
       z-index: 100;
     }
 
-    .overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
+    .overlay.active { opacity: 1; pointer-events: auto; }
 
-    /* CONFETTI LAYERED ABOVE THE MODAL WINDOW */
     #confetti-canvas {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0; width: 100%; height: 100%;
       pointer-events: none;
       z-index: 105;
     }
@@ -353,112 +273,51 @@
     .modal {
       background: linear-gradient(160deg, #280a50 0%, #120324 100%);
       border: 2px solid #ffd700;
-      padding: 28px 20px 22px 20px;
-      border-radius: 24px;
+      padding: 20px;
+      border-radius: 20px;
       text-align: center;
-      max-width: 320px;
-      width: 88%;
-      box-shadow: 0 0 35px rgba(255, 215, 0, 0.4), inset 0 0 15px rgba(255, 215, 0, 0.15);
-      position: relative;
+      max-width: 300px;
+      width: 85%;
       z-index: 102;
-      transform: scale(0.8);
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    .overlay.active .modal {
-      transform: scale(1);
-    }
-
-    .modal-trophy {
-      font-size: 3rem;
-      line-height: 1;
-      margin-bottom: 8px;
-      filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.8));
-      animation: bounce 1.2s infinite alternate ease-in-out;
-    }
-
-    @keyframes bounce {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(-8px); }
-    }
-
-    .modal h2 {
-      color: #ffd700;
-      margin-bottom: 4px;
-      font-size: 1.6rem;
-      font-weight: 900;
-      letter-spacing: 0.5px;
-      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-    }
-
-    .modal p {
-      margin-bottom: 12px;
-      font-size: 0.85rem;
-      color: #bfa8e0;
-      font-weight: 600;
-    }
+    .modal-trophy { font-size: 2.5rem; margin-bottom: 4px; }
+    .modal h2 { color: #ffd700; margin-bottom: 4px; font-size: 1.4rem; }
+    .modal p { font-size: 0.8rem; color: #bfa8e0; }
 
     .reward-breakdown {
       background: rgba(0, 0, 0, 0.45);
       border: 1px solid #4a1d82;
-      border-radius: 14px;
-      padding: 12px 8px;
-      margin: 14px 0 20px 0;
+      border-radius: 10px;
+      padding: 8px;
+      margin: 10px 0;
       display: flex;
       justify-content: space-around;
-      box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6);
     }
 
-    .reward-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .reward-item .val {
-      font-weight: 900;
-      font-size: 1.2rem;
-      text-shadow: 0 0 6px currentColor;
-    }
-
+    .reward-item { display: flex; flex-direction: column; align-items: center; }
+    .reward-item .val { font-weight: 900; font-size: 1.1rem; }
     .reward-item.coins .val { color: #ffd700; }
     .reward-item.xp .val { color: #00f2fe; }
 
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-    }
+    .modal-actions { display: flex; gap: 8px; width: 100%; }
 
     .btn {
       flex: 1;
       background: linear-gradient(180deg, #ffe033 0%, #ffa800 100%);
       color: #120324;
       border: none;
-      padding: 12px 14px;
-      font-size: 0.95rem;
+      padding: 10px;
+      font-size: 0.85rem;
       font-weight: 900;
-      border-radius: 25px;
+      border-radius: 20px;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
-      transition: transform 0.1s ease, box-shadow 0.1s ease;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
     }
 
     .btn-secondary {
       background: linear-gradient(180deg, #3c1968 0%, #1a0833 100%);
       color: #ffd700;
       border: 1.5px solid #ffd700;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    }
-
-    .btn:active {
-      transform: scale(0.95);
-      box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
     }
   </style>
 </head>
@@ -471,16 +330,13 @@
   <header>
     <div class="top-bar">
       <button class="icon-btn" id="backToHome" onclick="window.location.href='index.html'">‹</button>
-      
-      <!-- LOGO IMAGE -->
       <div class="game-title-container">
         <img src="image/pixvinzmemory.png" alt="PixVinz Memory Logo" />
       </div>
-
       <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
     </div>
 
-    <div class="stage-title" id="stage-title">Stage 1</div>
+    <div class="stage-title" id="stage-title">Stage 15</div>
 
     <div class="stats-container">
       <div class="stat-box">
@@ -507,7 +363,6 @@
     </div>
   </header>
 
-  <!-- INTERACTIVE MUSIC ANIMATION CONTAINER ABOVE BOARD -->
   <div class="visualizer-container">
     <canvas id="music-visualizer"></canvas>
   </div>
@@ -516,7 +371,6 @@
     <div class="board" id="board"></div>
   </div>
 
-  <!-- PREMIUM WIN MODAL WITH HIGH-SPEED SIDE CONFETTI -->
   <div class="overlay" id="overlay">
     <canvas id="confetti-canvas"></canvas>
     <div class="modal">
@@ -568,45 +422,7 @@
 
     let coinCount = Math.round(parseFloat(localStorage.getItem(coinKey))) || 500;
     let xpCount = parseInt(localStorage.getItem(xpKey), 10) || 0;
-    let currentStage = parseInt(localStorage.getItem(stageKey), 10) || 1;
-
-    window.saveUserDataToCloud = async function() {
-      const username = getActiveUsername();
-      if (!username || !window.pixvinzDb) return;
-
-      try {
-        const userDocRef = window.pixvinzDb.collection('users').doc(username);
-        await userDocRef.set({
-          totalCoins: Math.round(coinCount),
-          totalXp: xpCount,
-          memoryStage: currentStage,
-          lastUpdated: new Date().toISOString()
-        }, { merge: true });
-      } catch (e) {
-        console.error("Error saving data to Firestore:", e);
-      }
-    };
-
-    window.fetchUserDataFromCloud = async function() {
-      const username = getActiveUsername();
-      if (!username || !window.pixvinzDb) return;
-
-      try {
-        const userDocRef = window.pixvinzDb.collection('users').doc(username);
-        const docSnap = await userDocRef.get();
-        if (docSnap.exists) {
-          const data = docSnap.data();
-          if (data.totalCoins !== undefined) coinCount = Math.round(parseFloat(data.totalCoins));
-          if (data.totalXp !== undefined) xpCount = parseInt(data.totalXp, 10);
-          if (data.memoryStage !== undefined) currentStage = parseInt(data.memoryStage, 10);
-
-          updateUserData(false);
-          startStage(currentStage);
-        }
-      } catch (e) {
-        console.error("Error fetching data from Firestore:", e);
-      }
-    };
+    let currentStage = parseInt(localStorage.getItem(stageKey), 10) || 15;
 
     function updateUserData(shouldSaveToCloud = true) {
       prefix = getActiveUserPrefix();
@@ -623,11 +439,6 @@
       localStorage.setItem(coinKey, Math.round(coinCount));
       localStorage.setItem(xpKey, xpCount);
       localStorage.setItem(stageKey, currentStage);
-
-      if (typeof updateProfileStats === 'function') updateProfileStats();
-      if (shouldSaveToCloud && typeof window.saveUserDataToCloud === 'function') {
-        window.saveUserDataToCloud();
-      }
     }
 
     let flips = 0;
@@ -642,83 +453,8 @@
     const tapSound = document.getElementById('tap-sound');
     const victoryMusic = document.getElementById('victory-music');
 
-    /* AUDIO VISUALIZER SETUP USING WEB AUDIO API */
-    let audioCtx = null;
-    let analyser = null;
-    let audioSourceBg = null;
-    let audioSourceVic = null;
-    let isVisualizerInit = false;
-
-    function initAudioVisualizer() {
-      if (isVisualizerInit) return;
-      try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        audioCtx = new AudioContext();
-        analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 64;
-
-        audioSourceBg = audioCtx.createMediaElementSource(bgMusic);
-        audioSourceBg.connect(analyser);
-
-        audioSourceVic = audioCtx.createMediaElementSource(victoryMusic);
-        audioSourceVic.connect(analyser);
-
-        analyser.connect(audioCtx.destination);
-        isVisualizerInit = true;
-        renderVisualizer();
-      } catch (e) {
-        console.log("Audio visualizer initialization warning:", e);
-      }
-    }
-
-    function renderVisualizer() {
-      const canvas = document.getElementById('music-visualizer');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-
-      const bufferLength = analyser.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
-
-      function draw() {
-        requestAnimationFrame(draw);
-        analyser.getByteFrequencyData(dataArray);
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        const barCount = 20;
-        const barWidth = (canvas.width / barCount) - 2;
-        let x = 1;
-
-        for (let i = 0; i < barCount; i++) {
-          const dataIndex = Math.floor((i / barCount) * bufferLength);
-          const barHeight = (dataArray[dataIndex] / 255) * (canvas.height - 4);
-
-          const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
-          gradient.addColorStop(0, '#3c1968');
-          gradient.addColorStop(0.5, '#ffd700');
-          gradient.addColorStop(1, '#00f2fe');
-
-          ctx.fillStyle = gradient;
-          ctx.fillRect(x, canvas.height - barHeight - 2, barWidth, barHeight + 2);
-
-          x += barWidth + 2;
-        }
-      }
-      draw();
-    }
-
     function initAudio() {
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-      initAudioVisualizer();
-
-      if (bgMusic.paused) {
-        bgMusic.play().catch(() => {});
-      }
+      if (bgMusic.paused) bgMusic.play().catch(() => {});
     }
 
     function playTapSound() {
@@ -726,23 +462,7 @@
       tapSound.play().catch(() => {});
     }
 
-    function playVictoryMusic(stage) {
-      bgMusic.pause();
-      
-      let musicIndex = ((stage - 1) % 10) + 1;
-      victoryMusic.src = `sounds/victory${musicIndex}.mp3`;
-      victoryMusic.currentTime = 0;
-      victoryMusic.play().catch(() => {});
-    }
-
-    function stopVictoryMusic() {
-      victoryMusic.pause();
-      victoryMusic.currentTime = 0;
-      initAudio();
-    }
-
     function getCardCountForStage(stage) {
-      // Starts at 4 cards on Stage 1, adding +2 cards every 2 stages, capping at 36 max cards
       let count = 4 + (Math.floor((stage - 1) / 2) * 2);
       return Math.min(count, 36); 
     }
@@ -767,27 +487,44 @@
       document.getElementById('time-count').textContent = `${mins}:${secs}`;
     }
 
+    /* SPECIFIC ROW DISTRIBUTION DEFINITION */
     function getSymmetricalRowDistribution(cardCount) {
-      // Balanced 3-row / 4-row layouts for non-square card counts
-      if (cardCount === 10) return [3, 4, 3];         // 3 rows (5-4-3 diamond pattern)
-      if (cardCount === 14) return [4, 6, 4];         // 3 rows 
-      if (cardCount === 18) return [5, 8, 5];         // 3 rows (Stage 15 fix: clean compact diamond)
-      if (cardCount === 22) return [5, 6, 6, 5];      // 4 rows
-      if (cardCount === 26) return [6, 7, 7, 6];      // 4 rows
-      if (cardCount === 30) return [5, 5, 5, 5, 5, 5]; // 6 rows
-      if (cardCount === 34) return [5, 6, 6, 6, 6, 5]; // 6 rows
+      if (cardCount === 10) return [3, 4, 3];
+      if (cardCount === 14) return [3, 4, 4, 3];
+      if (cardCount === 18) return [3, 4, 4, 4, 3];  /* 18 CARDS SET TO EXACTLY 3, 4, 4, 4, 3 */
+      if (cardCount === 22) return [4, 5, 5, 5, 3];
+      if (cardCount === 26) return [4, 6, 6, 6, 4];
+      if (cardCount === 30) return [5, 5, 5, 5, 5, 5];
+      if (cardCount === 34) return [5, 6, 6, 6, 6, 5];
 
-      // Rectangular grid math for standard counts (4, 6, 8, 12, 16, 20, 24, 36)
       let maxCols = Math.ceil(Math.sqrt(cardCount));
-      while (cardCount % maxCols !== 0) {
-        maxCols++;
-      }
+      while (cardCount % maxCols !== 0) maxCols++;
       let rows = cardCount / maxCols;
       let rowArray = [];
-      for (let i = 0; i < rows; i++) {
-        rowArray.push(maxCols);
-      }
+      for (let i = 0; i < rows; i++) rowArray.push(maxCols);
       return rowArray;
+    }
+
+    function configureGridAndSizing(rowLayout) {
+      const wrapper = document.getElementById('board-wrapper');
+      if (!wrapper) return;
+
+      const rows = rowLayout.length;
+      const maxCols = Math.max(...rowLayout);
+      const gap = 4;
+
+      // Real dimensions inside board-wrapper container
+      const availableWidth = wrapper.clientWidth - 16;
+      const availableHeight = wrapper.clientHeight - 16;
+
+      let cardW = (availableWidth - (maxCols - 1) * gap) / maxCols;
+      let cardH = (availableHeight - (rows - 1) * gap) / rows;
+
+      // Force card to remain a square fitted strictly within available box
+      let size = Math.floor(Math.min(cardW, cardH));
+      size = Math.max(24, size); // Prevent collapsing below visible threshold
+
+      document.documentElement.style.setProperty('--card-size', `${size}px`);
     }
 
     function startStage(stage) {
@@ -804,7 +541,6 @@
       document.getElementById('stage-title').textContent = `Stage ${stage}`;
       document.getElementById('flip-count').textContent = flips;
 
-      // Theme logic with rolling offset per stage
       let themeIndex = Math.floor((stage - 1) / 10) % 7; 
       let baseStartImage = (themeIndex * 10) + 1;
       let stageOffset = (stage - 1) % 10;
@@ -836,7 +572,7 @@
           card.innerHTML = `
             <div class="card-face card-front"></div>
             <div class="card-face card-back">
-              <img src="${imgSrc}" alt="card front image" />
+              <img src="${imgSrc}" alt="card front" />
             </div>
           `;
 
@@ -846,28 +582,12 @@
         board.appendChild(rowDiv);
       });
 
-      configureGridAndSizing(rowLayout);
+      // Double-pass layout calculation for precise dynamic container dimensions
+      requestAnimationFrame(() => {
+        configureGridAndSizing(rowLayout);
+      });
+
       startTimer();
-    }
-
-    function configureGridAndSizing(rowLayout) {
-      const rows = rowLayout.length;
-      const maxCols = Math.max(...rowLayout);
-      const gap = 6;
-      const wrapperPadding = 20;
-
-      // Accurate space calculation minus header height
-      const availableWidth = window.innerWidth - wrapperPadding - 16;
-      const availableHeight = window.innerHeight - 220 - wrapperPadding;
-
-      let calculatedWidth = (availableWidth - (maxCols - 1) * gap) / maxCols;
-      let calculatedHeight = (availableHeight - (rows - 1) * gap) / rows;
-
-      // Dynamic sizing to maximize available display area without overflowing bounds
-      let cardSize = Math.floor(Math.min(calculatedWidth, calculatedHeight));
-
-      cardSize = Math.max(36, Math.min(cardSize, 85));
-      document.documentElement.style.setProperty('--card-size', `${cardSize}px`);
     }
 
     function flipCard() {
@@ -912,157 +632,27 @@
     }
 
     function stageComplete() {
-      playVictoryMusic(currentStage);
-
-      const timePenalty = Math.floor(secondsElapsed / 3) * 10;
-      const coinsEarned = Math.max(0, 500 - timePenalty);
-
-      const flipPenalty = flips * 10;
-      const xpEarned = Math.max(0, 1000 - flipPenalty);
-
-      coinCount += coinsEarned;
-      xpCount += xpEarned;
-
-      document.getElementById('reward-coins').textContent = `+${Math.round(coinsEarned).toLocaleString()}`;
-      document.getElementById('reward-xp').textContent = `+${xpEarned.toLocaleString()}`;
-
       const overlay = document.getElementById('overlay');
-      const title = document.getElementById('modal-title');
-      const msg = document.getElementById('modal-msg');
-      const btn = document.getElementById('next-btn');
-
-      if (currentStage === 100) {
-        title.textContent = "STAGE 100 CLEARED!";
-        msg.textContent = `Time: ${document.getElementById('time-count').textContent} | Flips: ${flips}`;
-        btn.textContent = "PLAY AGAIN";
-        btn.onclick = () => {
-          stopVictoryMusic();
-          currentStage = 1;
-          updateUserData(true);
-          stopConfetti();
-          overlay.classList.remove('active');
-          startStage(currentStage);
-        };
-      } else {
-        title.textContent = `STAGE ${currentStage} CLEARED!`;
-        msg.textContent = `Time: ${document.getElementById('time-count').textContent} | Flips: ${flips}`;
-        btn.textContent = "NEXT STAGE";
-        btn.onclick = nextStage;
-      }
-
-      currentStage++;
-      updateUserData(true);
-
-      startConfetti();
       overlay.classList.add('active');
     }
 
     function nextStage() {
-      stopVictoryMusic();
-      stopConfetti();
       document.getElementById('overlay').classList.remove('active');
+      currentStage++;
+      updateUserData(true);
       startStage(currentStage);
-    }
-
-    /* HIGH-SPEED SIDE BURST CONFETTI CANNONS */
-    let confettiAnimationId = null;
-    let confettiParticles = [];
-
-    function startConfetti() {
-      const canvas = document.getElementById('confetti-canvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-
-      const colors = ['#ffd700', '#00f2fe', '#00ff66', '#ff007f', '#ffffff', '#ff9900'];
-      confettiParticles = [];
-
-      for (let i = 0; i < 140; i++) {
-        const isLeft = i % 2 === 0;
-        const angle = isLeft 
-          ? (Math.random() * 30 + 60) * (Math.PI / 180)
-          : (Math.random() * 30 + 90) * (Math.PI / 180);
-
-        const speed = Math.random() * 18 + 14;
-
-        confettiParticles.push({
-          x: isLeft ? 0 : canvas.width,
-          y: canvas.height * 0.85,
-          vx: Math.cos(angle) * speed,
-          vy: -Math.sin(angle) * speed,
-          gravity: 0.45,
-          drag: 0.96,
-          size: Math.random() * 8 + 6,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          rotation: Math.random() * 360,
-          rotationSpeed: Math.random() * 20 - 10,
-          opacity: 1
-        });
-      }
-
-      function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        confettiParticles.forEach((p) => {
-          p.vx *= p.drag;
-          p.vy *= p.drag;
-          p.vy += p.gravity;
-
-          p.x += p.vx;
-          p.y += p.vy;
-          p.rotation += p.rotationSpeed;
-
-          if (p.y > canvas.height * 0.7) {
-            p.opacity -= 0.015;
-          }
-
-          ctx.save();
-          ctx.globalAlpha = Math.max(0, p.opacity);
-          ctx.translate(p.x, p.y);
-          ctx.rotate((p.rotation * Math.PI) / 180);
-          ctx.fillStyle = p.color;
-          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-          ctx.restore();
-        });
-
-        confettiParticles = confettiParticles.filter(p => p.opacity > 0);
-
-        if (confettiParticles.length > 0) {
-          confettiAnimationId = requestAnimationFrame(animate);
-        }
-      }
-
-      animate();
-    }
-
-    function stopConfetti() {
-      if (confettiAnimationId) {
-        cancelAnimationFrame(confettiAnimationId);
-        confettiAnimationId = null;
-      }
-      const canvas = document.getElementById('confetti-canvas');
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
     window.addEventListener('resize', () => {
       const numCards = getCardCountForStage(currentStage);
       const rowLayout = getSymmetricalRowDistribution(numCards);
       configureGridAndSizing(rowLayout);
-      const canvas = document.getElementById('confetti-canvas');
-      if (canvas) {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
     });
 
     document.addEventListener('click', initAudio, { once: true });
 
     updateUserData(false);
     startStage(currentStage);
-    if (typeof window.fetchUserDataFromCloud === 'function') {
-      window.fetchUserDataFromCloud();
-    }
   </script>
 </body>
 </html>
