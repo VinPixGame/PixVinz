@@ -205,10 +205,11 @@
       border-radius: 8px;
     }
 
-    /* PREMIUM BOARD WRAPPER */
+    /* PREMIUM BOARD WRAPPER THAT HUGS THE GRID */
     .board-wrapper {
-      max-width: 100%;
       width: fit-content;
+      height: fit-content;
+      max-width: 100%;
       max-height: 100%;
       background: linear-gradient(145deg, #180730, #0d031a);
       border: 2px solid transparent;
@@ -237,16 +238,23 @@
       pointer-events: none;
     }
 
-    /* Board Dynamic Grid Centering */
+    /* FLEXBOX BOARD FOR PERFECT SYMMETRICAL ROW CENTERING */
     .board {
-      display: grid;
+      display: flex;
+      flex-direction: column;
       gap: 8px;
       width: fit-content;
       height: fit-content;
+      align-items: center;
       justify-content: center;
-      align-content: center;
-      justify-items: center;
       perspective: 1000px;
+    }
+
+    .board-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      align-items: center;
     }
 
     /* Card Styling */
@@ -764,6 +772,28 @@
       document.getElementById('time-count').textContent = `${mins}:${secs}`;
     }
 
+    function getSymmetricalRowDistribution(cardCount) {
+      // Return custom balanced row counts for non-rectangular grids
+      if (cardCount === 10) return [3, 4, 3];
+      if (cardCount === 14) return [4, 6, 4];
+      if (cardCount === 18) return [5, 8, 5];
+      if (cardCount === 22) return [6, 10, 6];
+
+      // Calculate perfect square / rectangular layouts
+      let cols = Math.ceil(Math.sqrt(cardCount));
+      while (cardCount % cols !== 0) {
+        cols++;
+      }
+      let rows = cardCount / cols;
+      
+      // Keep column count primary
+      let rowArray = [];
+      for (let i = 0; i < rows; i++) {
+        rowArray.push(cols);
+      }
+      return rowArray;
+    }
+
     function startStage(stage) {
       const board = document.getElementById('board');
       board.innerHTML = '';
@@ -778,65 +808,68 @@
       document.getElementById('stage-title').textContent = `Stage ${stage}`;
       document.getElementById('flip-count').textContent = flips;
 
-      // --- DYNAMIC THEMED IMAGE SET SELECTION (70 IMAGES IN GROUPS OF 10) ---
+      // Theme logic with rolling offset per stage
       let themeIndex = Math.floor((stage - 1) / 10) % 7; 
-      let startImageIndex = (themeIndex * 10) + 1;
+      let baseStartImage = (themeIndex * 10) + 1;
+      let stageOffset = (stage - 1) % 10;
 
       let selectedImages = [];
       for (let i = 0; i < totalPairs; i++) {
-        let imgNum = ((startImageIndex - 1 + i) % 70) + 1;
+        let imgNum = ((baseStartImage - 1 + stageOffset + i) % 70) + 1;
         selectedImages.push(`image/level${imgNum}.png`);
       }
 
       let cardDeck = [...selectedImages, ...selectedImages];
       cardDeck.sort(() => Math.random() - 0.5);
 
-      cardDeck.forEach((imgSrc) => {
-        const card = document.createElement('div');
-        card.classList.add('card');
-        card.dataset.symbol = imgSrc;
+      const rowLayout = getSymmetricalRowDistribution(numCards);
+      let cardIndex = 0;
 
-        card.innerHTML = `
-          <div class="card-face card-front"></div>
-          <div class="card-face card-back">
-            <img src="${imgSrc}" alt="card front image" />
-          </div>
-        `;
+      rowLayout.forEach((countInRow) => {
+        const rowDiv = document.createElement('div');
+        rowDiv.classList.add('board-row');
 
-        card.addEventListener('click', flipCard);
-        board.appendChild(card);
+        for (let c = 0; c < countInRow; c++) {
+          if (cardIndex >= cardDeck.length) break;
+          const imgSrc = cardDeck[cardIndex++];
+
+          const card = document.createElement('div');
+          card.classList.add('card');
+          card.dataset.symbol = imgSrc;
+
+          card.innerHTML = `
+            <div class="card-face card-front"></div>
+            <div class="card-face card-back">
+              <img src="${imgSrc}" alt="card front image" />
+            </div>
+          `;
+
+          card.addEventListener('click', flipCard);
+          rowDiv.appendChild(card);
+        }
+        board.appendChild(rowDiv);
       });
 
-      configureGridAndSizing(numCards);
+      configureGridAndSizing(rowLayout);
       startTimer();
     }
 
-    function configureGridAndSizing(cardCount) {
-      const board = document.getElementById('board');
-      
-      let cols = 2;
-      if (cardCount === 4 || cardCount === 6 || cardCount === 8) cols = 2;
-      else if (cardCount === 12) cols = 3;
-      else if (cardCount === 16 || cardCount === 20 || cardCount === 24) cols = 4;
-      else if (cardCount === 30) cols = 5;
-      else if (cardCount === 36) cols = 6;
-
-      const rows = cardCount / cols;
+    function configureGridAndSizing(rowLayout) {
+      const rows = rowLayout.length;
+      const maxCols = Math.max(...rowLayout);
       const gap = 8;
       const wrapperPadding = 32;
 
-      const maxAvailableWidth = Math.min(window.innerWidth - 40, 400) - wrapperPadding;
+      const maxAvailableWidth = Math.min(window.innerWidth - 40, 420) - wrapperPadding;
       const maxAvailableHeight = (window.innerHeight - 280) - wrapperPadding;
 
       let cardSize = Math.min(
-        (maxAvailableWidth - (cols - 1) * gap) / cols,
+        (maxAvailableWidth - (maxCols - 1) * gap) / maxCols,
         (maxAvailableHeight - (rows - 1) * gap) / rows
       );
 
-      cardSize = Math.max(40, Math.min(Math.floor(cardSize), 80));
-
+      cardSize = Math.max(38, Math.min(Math.floor(cardSize), 75));
       document.documentElement.style.setProperty('--card-size', `${cardSize}px`);
-      board.style.gridTemplateColumns = `repeat(${cols}, ${cardSize}px)`;
     }
 
     function flipCard() {
@@ -946,14 +979,13 @@
       const colors = ['#ffd700', '#00f2fe', '#00ff66', '#ff007f', '#ffffff', '#ff9900'];
       confettiParticles = [];
 
-      // Create high-velocity bursts from bottom-left and bottom-right corners
       for (let i = 0; i < 140; i++) {
         const isLeft = i % 2 === 0;
         const angle = isLeft 
-          ? (Math.random() * 30 + 60) * (Math.PI / 180)   // Shoots up & right (60° - 90°)
-          : (Math.random() * 30 + 90) * (Math.PI / 180); // Shoots up & left (90° - 120°)
+          ? (Math.random() * 30 + 60) * (Math.PI / 180)
+          : (Math.random() * 30 + 90) * (Math.PI / 180);
 
-        const speed = Math.random() * 18 + 14; // High explosive speed
+        const speed = Math.random() * 18 + 14;
 
         confettiParticles.push({
           x: isLeft ? 0 : canvas.width,
@@ -1016,7 +1048,9 @@
     }
 
     window.addEventListener('resize', () => {
-      configureGridAndSizing(getCardCountForStage(currentStage));
+      const numCards = getCardCountForStage(currentStage);
+      const rowLayout = getSymmetricalRowDistribution(numCards);
+      configureGridAndSizing(rowLayout);
       const canvas = document.getElementById('confetti-canvas');
       if (canvas) {
         canvas.width = window.innerWidth;
