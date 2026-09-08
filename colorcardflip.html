@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Memory Card</title>
+  <title>PixVinz Memory</title>
   <style>
     /* STACKED CSS: REMOVE ALL BROWSER FOCUS OUTLINES AND HIGHLIGHTS */
     *, *::before, *::after {
@@ -44,13 +44,13 @@
       width: 100%;
       max-width: 420px;
       position: relative;
-      margin-top: 20px;
+      margin-top: 10px;
       flex-shrink: 0;
     }
 
-    .top-bar > *:nth-child(1) { position: absolute; left: 0; }
+    .top-bar > *:nth-child(1) { position: absolute; left: 0; z-index: 3; }
     .top-bar > *:nth-child(2) { width: 100%; display: flex; justify-content: center; }
-    .top-bar > *:nth-child(3) { position: absolute; right: 0; }
+    .top-bar > *:nth-child(3) { position: absolute; right: 0; z-index: 3; }
 
     /* CIRCULAR BACK BUTTON */
     .icon-btn {
@@ -77,23 +77,18 @@
       transform: scale(1.05);
     }
 
-    /* PREMIUM GAME TITLE */
+    /* SVG LOGO CONTAINER */
     .game-title-container {
       display: flex;
       justify-content: center;
       align-items: center;
       width: 100%;
+      height: 55px;
     }
 
-    .game-title {
-      font-size: 1.4rem;
-      font-weight: 900;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      background: linear-gradient(180deg, #ffffff 0%, #ffd700 60%, #b38f00 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.8)) drop-shadow(0px 0px 10px rgba(255, 215, 0, 0.4));
+    .game-title-container svg {
+      max-height: 100%;
+      width: auto;
     }
 
     /* COIN BADGE */
@@ -119,7 +114,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       flex-shrink: 0;
     }
 
@@ -237,17 +232,13 @@
       transition: filter 0.3s ease, border-color 0.3s ease;
     }
 
-    /* Card Back Design (Face Down Logo vinz.png) */
+    /* Card Back Design (Face Down Repeated Small Logo Pattern) */
     .card-front {
-      background: #250a48;
-      padding: 6px;
-    }
-
-    .card-front img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      pointer-events: none;
+      background-color: #250a48;
+      background-image: url("image/vinz.png");
+      background-size: 18px 18px; /* Small logo tile dimensions */
+      background-repeat: repeat;
+      background-position: center;
     }
 
     /* Card Front Design (Face Up Level Image) */
@@ -336,12 +327,47 @@
   <audio id="tap-sound" src="select.mp3"></audio>
 
   <header>
-    <!-- Integrated Top Bar Structure -->
+    <!-- Integrated Top Bar Structure with SVG Logo -->
     <div class="top-bar">
       <button class="icon-btn" id="backToHome" onclick="window.location.href='index.html'">‹</button>
+      
       <div class="game-title-container">
-        <span class="game-title">Memory Card</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 160">
+          <defs>
+            <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#1d0738" />
+              <stop offset="100%" stop-color="#0a0214" />
+            </linearGradient>
+
+            <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#FFFFFF" />
+              <stop offset="30%" stop-color="#FFF2A3" />
+              <stop offset="70%" stop-color="#FFD700" />
+              <stop offset="100%" stop-color="#997A00" />
+            </linearGradient>
+
+            <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+
+          <rect x="10" y="10" width="480" height="140" rx="30" fill="url(#bgGrad)" stroke="#FFD700" stroke-width="3" filter="drop-shadow(0px 8px 16px rgba(0,0,0,0.8))"/>
+          <rect x="16" y="16" width="468" height="128" rx="24" fill="none" stroke="#3C1968" stroke-width="2"/>
+
+          <g transform="translate(35, 30)">
+            <rect x="0" y="10" width="55" height="75" rx="8" fill="#250a48" stroke="#FFD700" stroke-width="2" transform="rotate(-12 27 47)"/>
+            <rect x="20" y="5" width="55" height="75" rx="8" fill="#351063" stroke="#00FF66" stroke-width="2.5" filter="url(#goldGlow)" transform="rotate(8 47 42)"/>
+            <text x="47" y="52" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="28" fill="#00FF66" text-anchor="middle" transform="rotate(8 47 42)">✓</text>
+          </g>
+
+          <g transform="translate(140, 0)">
+            <text x="0" y="58" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="20" fill="#9A88B5" letter-spacing="6">PIXVINZ</text>
+            <text x="0" y="112" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="48" fill="url(#goldGrad)" letter-spacing="2" filter="drop-shadow(0px 3px 6px rgba(0,0,0,0.9))">MEMORY</text>
+          </g>
+        </svg>
       </div>
+
       <div class="coin-badge">🪙 <span id="coinCount">8944</span></div>
     </div>
 
@@ -474,9 +500,7 @@
         card.dataset.symbol = imgSrc;
 
         card.innerHTML = `
-          <div class="card-face card-front">
-            <img src="image/vinz.png" alt="card back logo" />
-          </div>
+          <div class="card-face card-front"></div>
           <div class="card-face card-back">
             <img src="${imgSrc}" alt="card front image" />
           </div>
