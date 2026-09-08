@@ -187,11 +187,11 @@
 
     #shape-border-path {
       fill: url(#bgGradient);
-      stroke: #ffd700;
+      stroke: url(#borderGradient);
       stroke-width: 2.5;
       stroke-linejoin: round;
       stroke-linecap: round;
-      filter: drop-shadow(0px 0px 10px rgba(255, 215, 0, 0.5));
+      filter: drop-shadow(0px 0px 8px rgba(157, 78, 221, 0.4));
     }
 
     .board {
@@ -392,6 +392,13 @@
           <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#180730" />
             <stop offset="100%" stop-color="#0d031a" />
+          </linearGradient>
+
+          <linearGradient id="borderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ffd700" />
+            <stop offset="35%" stop-color="#9d4edd" />
+            <stop offset="70%" stop-color="#00f2fe" />
+            <stop offset="100%" stop-color="#ffd700" />
           </linearGradient>
         </defs>
         <path id="shape-border-path" d="" />
@@ -683,7 +690,6 @@
       document.documentElement.style.setProperty('--card-size', `${cardSize}px`);
     }
 
-    /* STRICT ORTHOGONAL 90-DEGREE STAGGERED BOUNDING TRACER */
     function updateDynamicShapeBorder() {
       const wrapper = document.getElementById('board-wrapper');
       const rows = document.querySelectorAll('.board-row');
@@ -714,11 +720,9 @@
 
       let pts = [];
 
-      // Top row - Top edge
       pts.push({ x: rowData[0].left, y: rowData[0].top });
       pts.push({ x: rowData[0].right, y: rowData[0].top });
 
-      // Right side stepping (strictly 90-degree turns)
       for (let i = 0; i < rowData.length; i++) {
         let cur = rowData[i];
         let nxt = rowData[i + 1];
@@ -732,11 +736,9 @@
         }
       }
 
-      // Bottom row - Bottom edge
       let lastRow = rowData[rowData.length - 1];
       pts.push({ x: lastRow.left, y: lastRow.bottom });
 
-      // Left side stepping (strictly 90-degree turns)
       for (let i = rowData.length - 1; i >= 0; i--) {
         let cur = rowData[i];
         let prv = rowData[i - 1];
@@ -759,70 +761,85 @@
       pathEl.setAttribute('d', d);
     }
 
-    function startStage(stage) {
-      const board = document.getElementById('board');
-      board.innerHTML = '';
-      flippedCards = [];
-      matchedPairs = 0;
-      flips = 0;
-      lockBoard = false;
+function startStage(stage) {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  flippedCards = [];
+  matchedPairs = 0;
+  flips = 0;
+  lockBoard = false;
 
-      const numCards = getCardCountForStage(stage);
-      totalPairs = numCards / 2;
+  const numCards = getCardCountForStage(stage);
+  totalPairs = numCards / 2;
 
-      document.getElementById('stage-title').textContent = `Stage ${stage}`;
-      document.getElementById('flip-count').textContent = flips;
+  document.getElementById('stage-title').textContent = `Stage ${stage}`;
+  document.getElementById('flip-count').textContent = flips;
 
-      let themeIndex = Math.floor((stage - 1) / 10) % 7; 
-      let baseStartImage = (themeIndex * 10) + 1;
-      let stageOffset = (stage - 1) % 10;
+  /* --- UNIQUE RANDOMIZED IMAGE SELECTION (NO REPEAT SETS) --- */
+  // Create an array of image indices from 1 to 70
+  let imagePool = Array.from({ length: 70 }, (_, i) => i + 1);
 
-      let selectedImages = [];
-      for (let i = 0; i < totalPairs; i++) {
-        let imgNum = ((baseStartImage - 1 + stageOffset + i) % 70) + 1;
-        selectedImages.push(`image/level${imgNum}.png`);
-      }
+  // Seed generator to ensure every stage gets its own unique shuffle
+  function seededRandom(seed) {
+    let x = Math.sin(seed++) * 10000;
+    return x - Math.floor(x);
+  }
 
-      let cardDeck = [...selectedImages, ...selectedImages];
-      cardDeck.sort(() => Math.random() - 0.5);
+  // Shuffle the 70 images using the stage seed
+  let seed = stage * 999;
+  for (let i = imagePool.length - 1; i > 0; i--) {
+    let j = Math.floor(seededRandom(seed + i) * (i + 1));
+    [imagePool[i], imagePool[j]] = [imagePool[j], imagePool[i]];
+  }
 
-      const rowLayout = getSymmetricalRowDistribution(numCards);
-      let cardIndex = 0;
+  // Pick the required unique images for this stage's pairs
+  let selectedImages = [];
+  for (let i = 0; i < totalPairs; i++) {
+    selectedImages.push(`image/level${imagePool[i]}.png`);
+  }
 
-      rowLayout.forEach((countInRow) => {
-        const rowDiv = document.createElement('div');
-        rowDiv.classList.add('board-row');
+  // Duplicate pairs and shuffle card placements on the grid
+  let cardDeck = [...selectedImages, ...selectedImages];
+  cardDeck.sort(() => Math.random() - 0.5);
+  /* -------------------------------------------------------- */
 
-        for (let c = 0; c < countInRow; c++) {
-          if (cardIndex >= cardDeck.length) break;
-          const imgSrc = cardDeck[cardIndex++];
+  const rowLayout = getSymmetricalRowDistribution(numCards);
+  let cardIndex = 0;
 
-          const card = document.createElement('div');
-          card.classList.add('card');
-          card.dataset.symbol = imgSrc;
+  rowLayout.forEach((countInRow) => {
+    const rowDiv = document.createElement('div');
+    rowDiv.classList.add('board-row');
 
-          card.innerHTML = `
-            <div class="card-face card-front"></div>
-            <div class="card-face card-back">
-              <img src="${imgSrc}" alt="card front image" />
-            </div>
-          `;
+    for (let c = 0; c < countInRow; c++) {
+      if (cardIndex >= cardDeck.length) break;
+      const imgSrc = cardDeck[cardIndex++];
 
-          card.addEventListener('click', flipCard);
-          rowDiv.appendChild(card);
-        }
-        board.appendChild(rowDiv);
-      });
+      const card = document.createElement('div');
+      card.classList.add('card');
+      card.dataset.symbol = imgSrc;
 
-      requestAnimationFrame(() => {
-        configureGridAndSizing(rowLayout);
-        requestAnimationFrame(() => {
-          setTimeout(updateDynamicShapeBorder, 100);
-        });
-      });
+      card.innerHTML = `
+        <div class="card-face card-front"></div>
+        <div class="card-face card-back">
+          <img src="${imgSrc}" alt="card front image" />
+        </div>
+      `;
 
-      startTimer();
+      card.addEventListener('click', flipCard);
+      rowDiv.appendChild(card);
     }
+    board.appendChild(rowDiv);
+  });
+
+  requestAnimationFrame(() => {
+    configureGridAndSizing(rowLayout);
+    requestAnimationFrame(() => {
+      setTimeout(updateDynamicShapeBorder, 100);
+    });
+  });
+
+  startTimer();
+}
 
     function flipCard() {
       initAudio();
