@@ -36,7 +36,7 @@
       user-select: none;
     }
 
-    /* TOP BAR CONTAINER */
+    /* TOP BAR CONTAINER (FIXED OVERLAP & SPACING) */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -44,21 +44,22 @@
       width: 100%;
       max-width: 420px;
       position: relative;
-      margin-top: 10px;
+      margin-top: 5px;
       flex-shrink: 0;
+      gap: 8px;
     }
 
-    .top-bar > *:nth-child(1) { position: absolute; left: 0; z-index: 3; }
-    .top-bar > *:nth-child(2) { width: 100%; display: flex; justify-content: center; }
-    .top-bar > *:nth-child(3) { position: absolute; right: 0; z-index: 3; }
+    .top-bar > *:nth-child(1) { flex-shrink: 0; z-index: 3; }
+    .top-bar > *:nth-child(2) { flex: 1; display: flex; justify-content: center; min-width: 0; }
+    .top-bar > *:nth-child(3) { flex-shrink: 0; z-index: 3; }
 
     /* CIRCULAR BACK BUTTON */
     .icon-btn {
       background: rgba(20, 10, 35, 0.8);
       border: 2px solid #ffd700;
       color: #ffd700;
-      width: 44px;
-      height: 44px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -83,28 +84,31 @@
       justify-content: center;
       align-items: center;
       width: 100%;
-      height: 55px;
+      height: 50px;
     }
 
     .game-title-container svg {
       max-height: 100%;
       width: auto;
+      max-width: 100%;
     }
 
     /* COIN BADGE */
     .coin-badge {
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid #ffd700;
-      padding: 5px 12px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1.5px solid #ffd700;
+      padding: 5px 10px;
       border-radius: 20px;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 13px;
       color: #ffd700;
       z-index: 2;
       display: flex;         
       align-items: center;   
       justify-content: center; 
-      gap: 6px;              
+      gap: 5px;   
+      box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+      white-space: nowrap;
     }
 
     /* HEADER WRAPPER FOR SUB-ELEMENTS */
@@ -124,6 +128,7 @@
       font-weight: bold;
       color: #ffd700;
       text-align: center;
+      text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
     }
 
     /* Stats Box Container */
@@ -134,6 +139,7 @@
       border: 1.5px solid #3c1968;
       border-radius: 12px;
       padding: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
     }
 
     .stat-box {
@@ -174,28 +180,44 @@
       color: #00f2fe;
     }
 
-    /* Main Board Container */
+    /* PREMIUM BOARD WRAPPER (DYNAMIC FIT AROUND CARDS) */
     .board-wrapper {
-      width: 100%;
-      max-width: 420px;
-      flex: 1;
-      background: #150628;
-      border: 1.5px solid #3c1968;
-      border-radius: 16px;
-      padding: 10px;
+      max-width: 100%;
+      width: fit-content;
+      max-height: 100%;
+      background: linear-gradient(145deg, #180730, #0d031a);
+      border: 2px solid transparent;
+      border-image: linear-gradient(135deg, #ffd700, #3c1968, #ffd700) 1;
+      border-radius: 18px;
+      padding: 12px;
       display: flex;
       justify-content: center;
       align-items: center;
-      margin: 8px 0;
+      margin: auto;
       overflow: hidden;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.15), inset 0 0 15px rgba(0, 0, 0, 0.8);
+      position: relative;
     }
 
-    /* Board Dynamic Grid */
+    .board-wrapper::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      padding: 2px;
+      background: linear-gradient(135deg, #ffd700, #3c1968, #00f2fe);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* Board Dynamic Grid Centering */
     .board {
       display: grid;
       gap: 8px;
-      width: 100%;
-      height: 100%;
+      width: fit-content;
+      height: fit-content;
       justify-content: center;
       align-content: center;
       justify-items: center;
@@ -208,8 +230,8 @@
       transform-style: preserve-3d;
       transition: transform 0.3s ease;
       cursor: pointer;
-      width: var(--card-size, 80px);
-      height: var(--card-size, 80px);
+      width: var(--card-size, 75px);
+      height: var(--card-size, 75px);
       aspect-ratio: 1 / 1;
     }
 
@@ -293,6 +315,7 @@
       text-align: center;
       max-width: 310px;
       width: 85%;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
     }
 
     .modal h2 {
@@ -565,27 +588,17 @@
       tapSound.play().catch(() => {});
     }
 
+    // UPDATED: Standardized stage progression to ensure perfect rectangles
     function getCardCountForStage(stage) {
-      if (stage === 1) return 4;
-      if (stage === 2) return 6;
-      if (stage === 3) return 8;
-      if (stage === 4) return 10;
-      if (stage === 5) return 12;
-      if (stage === 6) return 14;
-      if (stage === 7) return 16;
-      if (stage === 8) return 18;
-      if (stage === 9) return 20;
-      if (stage === 10) return 20;
-      if (stage <= 20) return 22;
-      if (stage <= 30) return 24;
-      if (stage <= 40) return 26;
-      if (stage <= 50) return 28;
-      if (stage <= 60) return 30;
-      if (stage <= 70) return 32;
-      if (stage <= 80) return 34;
-      if (stage <= 90) return 36;
-      if (stage <= 100) return 40;
-      return 40;
+      if (stage <= 2) return 4;    // 2 x 2
+      if (stage <= 4) return 6;    // 2 x 3
+      if (stage <= 6) return 8;    // 2 x 4
+      if (stage <= 10) return 12;  // 3 x 4
+      if (stage <= 20) return 16;  // 4 x 4
+      if (stage <= 40) return 20;  // 4 x 5
+      if (stage <= 60) return 24;  // 4 x 6
+      if (stage <= 80) return 30;  // 5 x 6
+      return 36;                   // 6 x 6
     }
 
     function startTimer() {
@@ -650,29 +663,34 @@
       startTimer();
     }
 
+    // UPDATED: Grid column sizing mapped explicitly to rectangular card counts
     function configureGridAndSizing(cardCount) {
       const board = document.getElementById('board');
-      const wrapper = document.getElementById('board-wrapper');
-
+      
       let cols = 2;
-      if (cardCount === 4 || cardCount === 6) cols = 2;
-      else if (cardCount <= 12) cols = 3;
-      else if (cardCount <= 24) cols = 4;
-      else cols = 5;
+      if (cardCount === 4 || cardCount === 6 || cardCount === 8) cols = 2;
+      else if (cardCount === 12) cols = 3;
+      else if (cardCount === 16 || cardCount === 20 || cardCount === 24) cols = 4;
+      else if (cardCount === 30) cols = 5;
+      else if (cardCount === 36) cols = 6;
 
-      const rows = Math.ceil(cardCount / cols);
+      const rows = cardCount / cols;
       const gap = 8;
 
-      const availableWidth = wrapper.clientWidth - 20;
-      const availableHeight = wrapper.clientHeight - 20;
+      // Calculate max bounds based on screen size
+      const maxAvailableWidth = Math.min(window.innerWidth - 40, 400);
+      const maxAvailableHeight = window.innerHeight - 250;
 
       let cardSize = Math.min(
-        (availableWidth - (cols - 1) * gap) / cols,
-        (availableHeight - (rows - 1) * gap) / rows
+        (maxAvailableWidth - (cols - 1) * gap) / cols,
+        (maxAvailableHeight - (rows - 1) * gap) / rows
       );
 
-      document.documentElement.style.setProperty('--card-size', `${Math.floor(cardSize)}px`);
-      board.style.gridTemplateColumns = `repeat(${cols}, auto)`;
+      // Clamping minimum and maximum card dimensions
+      cardSize = Math.max(45, Math.min(Math.floor(cardSize), 85));
+
+      document.documentElement.style.setProperty('--card-size', `${cardSize}px`);
+      board.style.gridTemplateColumns = `repeat(${cols}, ${cardSize}px)`;
     }
 
     function flipCard() {
@@ -718,13 +736,13 @@
 
     function stageComplete() {
       // DEDUCTION REWARD FORMULA
-      // Coins: 1,000 base minus 10 for every 3 full seconds elapsed
+      // Coins: 500 base minus 10 for every 3 full seconds elapsed
       const timePenalty = Math.floor(secondsElapsed / 3) * 10;
-      const coinsEarned = Math.max(0, 1000 - timePenalty);
+      const coinsEarned = Math.max(0, 500 - timePenalty);
 
-      // XP: 2,000 base minus 10 for every flip made
+      // XP: 1,000 base minus 10 for every flip made
       const flipPenalty = flips * 10;
-      const xpEarned = Math.max(0, 2000 - flipPenalty);
+      const xpEarned = Math.max(0, 1000 - flipPenalty);
 
       // Apply rewards to global variables & trigger cloud save sync
       coinCount += coinsEarned;
