@@ -206,37 +206,37 @@
     }
 
     /* PREMIUM BOARD WRAPPER THAT HUGS THE GRID */
-    .board-wrapper {
-      width: fit-content;
-      height: fit-content;
-      max-width: 100%;
-      max-height: 100%;
-      background: linear-gradient(145deg, #180730, #0d031a);
-      border: 2px solid transparent;
-      border-image: linear-gradient(135deg, #ffd700, #3c1968, #ffd700) 1;
-      border-radius: 18px;
-      padding: 16px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: auto;
-      overflow: hidden;
-      box-shadow: 0 0 20px rgba(255, 215, 0, 0.15), inset 0 0 15px rgba(0, 0, 0, 0.8);
-      position: relative;
-    }
+.board-wrapper {
+  width: fit-content;
+  height: fit-content;
+  max-width: 96vw;
+  background: linear-gradient(145deg, #180730, #0d031a);
+  border: 2px solid transparent;
+  border-image: linear-gradient(135deg, #ffd700, #3c1968, #ffd700) 1;
+  border-radius: 18px;
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px auto;
+  overflow: visible;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.15), inset 0 0 15px rgba(0, 0, 0, 0.8);
+  position: relative;
+  flex-shrink: 0;
+}
 
-    .board-wrapper::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 16px;
-      padding: 2px;
-      background: linear-gradient(135deg, #ffd700, #3c1968, #00f2fe);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
-    }
+.board-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 2px;
+  background: linear-gradient(135deg, #ffd700, #3c1968, #00f2fe);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
 
     /* FLEXBOX BOARD FOR PERFECT SYMMETRICAL ROW CENTERING */
     .board {
@@ -849,22 +849,30 @@
     }
 
     function configureGridAndSizing(rowLayout) {
-      const rows = rowLayout.length;
-      const maxCols = Math.max(...rowLayout);
-      const gap = 8;
-      const wrapperPadding = 32;
+  const rows = rowLayout.length;
+  const maxCols = Math.max(...rowLayout);
+  const gap = 8;
+  const wrapperPadding = 24;
 
-      const maxAvailableWidth = Math.min(window.innerWidth - 40, 420) - wrapperPadding;
-      const maxAvailableHeight = (window.innerHeight - 280) - wrapperPadding;
+  // Measure actual board space available dynamically
+  const availableWidth = window.innerWidth - wrapperPadding - 24; 
+  
+  // Estimate header + top bar UI height (~180px instead of 280px)
+  const availableHeight = window.innerHeight - 180 - wrapperPadding; 
 
-      let cardSize = Math.min(
-        (maxAvailableWidth - (maxCols - 1) * gap) / maxCols,
-        (maxAvailableHeight - (rows - 1) * gap) / rows
-      );
+  // Calculate maximum square size that fits vertically and horizontally
+  let calculatedWidth = (availableWidth - (maxCols - 1) * gap) / maxCols;
+  let calculatedHeight = (availableHeight - (rows - 1) * gap) / rows;
 
-      cardSize = Math.max(38, Math.min(Math.floor(cardSize), 75));
-      document.documentElement.style.setProperty('--card-size', `${cardSize}px`);
-    }
+  let cardSize = Math.floor(Math.min(calculatedWidth, calculatedHeight));
+
+  // Allow larger upper bound (up to 110px) so cards stay nice and big on mobile
+  cardSize = Math.max(42, Math.min(cardSize, 110));
+
+  document.documentElement.style.setProperty('--card-size', `${cardSize}px`);
+}
+
+      
 
     function flipCard() {
       initAudio();
