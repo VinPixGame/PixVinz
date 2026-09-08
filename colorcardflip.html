@@ -132,7 +132,7 @@
       color: #ffd700;
       text-align: center;
       text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
-      margin-top: 24px;
+      margin-top: 10px;
     }
 
     /* Stats Box Container */
@@ -206,37 +206,37 @@
     }
 
     /* PREMIUM BOARD WRAPPER THAT HUGS THE GRID */
-.board-wrapper {
-  width: fit-content;
-  height: fit-content;
-  max-width: 96vw;
-  background: linear-gradient(145deg, #180730, #0d031a);
-  border: 2px solid transparent;
-  border-image: linear-gradient(135deg, #ffd700, #3c1968, #ffd700) 1;
-  border-radius: 18px;
-  padding: 16px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 10px auto;
-  overflow: visible;
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.15), inset 0 0 15px rgba(0, 0, 0, 0.8);
-  position: relative;
-  flex-shrink: 0;
-}
+    .board-wrapper {
+      width: fit-content;
+      height: fit-content;
+      max-width: 98vw;
+      background: linear-gradient(145deg, #180730, #0d031a);
+      border: 2px solid transparent;
+      border-image: linear-gradient(135deg, #ffd700, #3c1968, #ffd700) 1;
+      border-radius: 18px;
+      padding: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: auto;
+      overflow: visible;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.15), inset 0 0 15px rgba(0, 0, 0, 0.8);
+      position: relative;
+      flex-shrink: 0;
+    }
 
-.board-wrapper::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 16px;
-  padding: 2px;
-  background: linear-gradient(135deg, #ffd700, #3c1968, #00f2fe);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
+    .board-wrapper::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      padding: 2px;
+      background: linear-gradient(135deg, #ffd700, #3c1968, #00f2fe);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
 
     /* FLEXBOX BOARD FOR PERFECT SYMMETRICAL ROW CENTERING */
     .board {
@@ -741,10 +741,10 @@
     }
 
     function getCardCountForStage(stage) {
-  // Starts at 4 cards on Stage 1, adding +2 cards every 2 stages, capping at 36 max cards
-  let count = 4 + (Math.floor((stage - 1) / 2) * 2);
-  return Math.min(count, 36); 
-}
+      // Starts at 4 cards on Stage 1, adding +2 cards every 2 stages, capping at 36 max cards
+      let count = 4 + (Math.floor((stage - 1) / 2) * 2);
+      return Math.min(count, 36); 
+    }
 
     function startTimer() {
       stopTimer();
@@ -767,23 +767,30 @@
     }
 
     function getSymmetricalRowDistribution(cardCount) {
-      // Return custom balanced row counts for non-rectangular grids
-      if (cardCount === 10) return [3, 4, 3];
-      if (cardCount === 14) return [4, 6, 4];
-      if (cardCount === 18) return [5, 8, 5];
-      if (cardCount === 22) return [6, 10, 6];
+      // Custom vertical-oriented layouts prioritizing mobile tall-screen space
+      if (cardCount === 10) return [1, 4, 4, 1];        // 10 Cards: Vertical Diamond Caps
+      if (cardCount === 14) return [1, 4, 4, 4, 1];     // 14 Cards: Vertical Diamond Caps
+      if (cardCount === 18) return [1, 4, 4, 4, 4, 1];  // 18 Cards: Top 1, Center 4s, Bottom 1
+      if (cardCount === 22) return [1, 5, 5, 5, 5, 1];  // 22 Cards: Top 1, Center 5s, Bottom 1
+      if (cardCount === 26) return [1, 6, 6, 6, 6, 1];  // 26 Cards: Top 1, Center 6s, Bottom 1
+      if (cardCount === 30) return [5, 5, 5, 5, 5, 5];  // 30 Cards: 6 rows of 5
+      if (cardCount === 34) return [1, 8, 8, 8, 8, 1];  // 34 Cards: Top 1, Center 8s, Bottom 1
 
-      // Calculate perfect square / rectangular layouts
-      let cols = Math.ceil(Math.sqrt(cardCount));
-      while (cardCount % cols !== 0) {
-        cols++;
+      // Standard grid math prioritizing tall aspect ratio for mobile screens
+      let maxCols = Math.min(6, Math.ceil(Math.sqrt(cardCount)));
+      if (cardCount % maxCols !== 0) {
+        for (let cols = maxCols; cols >= 2; cols--) {
+          if (cardCount % cols === 0) {
+            maxCols = cols;
+            break;
+          }
+        }
       }
-      let rows = cardCount / cols;
       
-      // Keep column count primary
+      let rows = Math.ceil(cardCount / maxCols);
       let rowArray = [];
       for (let i = 0; i < rows; i++) {
-        rowArray.push(cols);
+        rowArray.push(maxCols);
       }
       return rowArray;
     }
@@ -849,30 +856,25 @@
     }
 
     function configureGridAndSizing(rowLayout) {
-  const rows = rowLayout.length;
-  const maxCols = Math.max(...rowLayout);
-  const gap = 8;
-  const wrapperPadding = 24;
+      const rows = rowLayout.length;
+      const maxCols = Math.max(...rowLayout);
+      const gap = 8;
+      const wrapperPadding = 24;
 
-  // Measure actual board space available dynamically
-  const availableWidth = window.innerWidth - wrapperPadding - 24; 
-  
-  // Estimate header + top bar UI height (~180px instead of 280px)
-  const availableHeight = window.innerHeight - 180 - wrapperPadding; 
+      // Dynamic space calculation prioritizing screen height
+      const headerUIHeight = 210; 
+      const availableWidth = window.innerWidth - wrapperPadding - 24;
+      const availableHeight = window.innerHeight - headerUIHeight - wrapperPadding;
 
-  // Calculate maximum square size that fits vertically and horizontally
-  let calculatedWidth = (availableWidth - (maxCols - 1) * gap) / maxCols;
-  let calculatedHeight = (availableHeight - (rows - 1) * gap) / rows;
+      let calculatedWidth = (availableWidth - (maxCols - 1) * gap) / maxCols;
+      let calculatedHeight = (availableHeight - (rows - 1) * gap) / rows;
 
-  let cardSize = Math.floor(Math.min(calculatedWidth, calculatedHeight));
+      let cardSize = Math.floor(Math.min(calculatedWidth, calculatedHeight));
 
-  // Allow larger upper bound (up to 110px) so cards stay nice and big on mobile
-  cardSize = Math.max(42, Math.min(cardSize, 110));
-
-  document.documentElement.style.setProperty('--card-size', `${cardSize}px`);
-}
-
-      
+      // Expanded sizing range up to 110px for large clear cards
+      cardSize = Math.max(40, Math.min(cardSize, 110));
+      document.documentElement.style.setProperty('--card-size', `${cardSize}px`);
+    }
 
     function flipCard() {
       initAudio();
