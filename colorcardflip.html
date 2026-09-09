@@ -673,17 +673,26 @@
       return layout;
     }
 
+    // FIXED TWO-WAY SCALING: Prioritizes maximum size based on available 
+    // vertical and horizontal bounds simultaneously so it never overflows.
     function configureGridAndSizing(rowLayout) {
       const container = document.getElementById('board-container');
       if (!container) return;
 
       const rows = rowLayout.length;
+      const maxCols = Math.max(...rowLayout);
       const gap = 3;
 
+      // Available space accounting for paddings/wrappers
+      const maxAvailableW = container.clientWidth - 20;
       const maxAvailableH = container.clientHeight - 20;
 
+      // Calculate card size constraints from both width and height
+      let cardW = (maxAvailableW - (maxCols - 1) * gap) / maxCols;
       let cardH = (maxAvailableH - (rows - 1) * gap) / rows;
-      let cardSize = Math.floor(cardH);
+
+      // Take the minimum so it expands as large as possible without overflowing width or height
+      let cardSize = Math.floor(Math.min(cardW, cardH));
       cardSize = Math.max(10, cardSize);
 
       document.documentElement.style.setProperty('--card-size', `${cardSize}px`);
