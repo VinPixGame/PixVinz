@@ -657,26 +657,58 @@
 
     
     function getSymmetricalRowDistribution(cardCount) {
+      // Special final stage override
       if (cardCount === 134) {
         return [8, 10, 10, 10, 10, 10, 9, 9, 10, 10, 10, 10, 10, 8];
       }
 
-      // Determine a target max column width based on total cards 
-      // to keep rows narrower and make cards significantly taller and larger.
-      let maxAllowedCols = 4;
-      if (cardCount > 12) maxAllowedCols = 4;
-      if (cardCount > 28) maxAllowedCols = 5;
-      if (cardCount > 50) maxAllowedCols = 6;
-      if (cardCount > 90) maxAllowedCols = 8;
+      // Grab the container dimensions dynamically to calculate optimal packing
+      const container = document.getElementById('board-container');
+      const containerW = container ? container.clientWidth - 8 : 400;
+      const containerH = container ? container.clientHeight - 8 : 400;
+      const gap = 2;
 
-      let rows = Math.ceil(cardCount / maxAllowedCols);
-      let base = Math.floor(cardCount / rows);
-      let extra = cardCount % rows;
+      let bestCols = 1;
+      let maxCardSize = 0;
+      let bestRows = cardCount;
 
-      let layout = [];
-      for (let i = 0; i < rows; i++) {
-        // Distribute extra cards to the middle/ends smoothly or keep rows uniform
-        layout.push(base + (i < extra ? 1 : 0));
+      // Iteratively test column counts to maximize space and card physical size
+      for (let cols = 1; cols <= cardCount; cols++) {
+        let rows = Math.ceil(cardCount / cols);
+        let cardW = (containerW - (cols - 1) * gap) / cols;
+        let cardH = (containerH - (rows - 1) * gap) / rows;
+        let cardSize = Math.min(cardW, cardH);
+
+        if (cardSize > maxCardSize) {
+          maxCardSize = cardSize;
+          bestCols = cols;
+          bestRows = rows;
+        }
+      }
+
+      let base = Math.floor(cardCount / bestRows);
+      let extra = cardCount % bestRows;
+
+      // Build base row counts (larger rows first)
+      let rawLayout = [];
+      for (let i = 0; i < bestRows; i++) {
+        rawLayout.push(base + (i < extra ? 1 : 0));
+      }
+
+      // Re-order the rows symmetrically (places larger/extra card rows toward the center)
+      let layout = new Array(bestRows);
+      let left = 0;
+      let right = bestRows - 1;
+
+      // Alternate placing from ends inward so top/bottom match
+      for (let i = rawLayout.length - 1; i >= 0; i--) {
+        if ((rawLayout.length - i) % 2 === 1) {
+          layout[right] = rawLayout[i];
+          right--;
+        } else {
+          layout[left] = rawLayout[i];
+          left++;
+        }
       }
 
       return layout;
