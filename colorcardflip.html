@@ -660,17 +660,51 @@
         return [8, 10, 10, 10, 10, 10, 9, 9, 10, 10, 10, 10, 10, 8];
       }
 
-      let cols = Math.ceil(Math.sqrt(cardCount));
-      let rows = Math.ceil(cardCount / cols);
+      // Smart packer: Find a row count that yields even, compact rows 
+      // maximizing vertical space without forcing overly wide bottleneck rows.
+      let bestRows = 1;
+      let bestLayout = [cardCount];
+      let bestMinRowSize = cardCount;
 
-      let base = Math.floor(cardCount / rows);
-      let extra = cardCount % rows;
-
-      let layout = [];
-      for (let i = 0; i < rows; i++) {
-        layout.push(base + (i < extra ? 1 : 0));
+      // Test potential number of rows to find the most balanced distribution
+      for (let r = 1; r <= cardCount; r++) {
+        let base = Math.floor(cardCount / r);
+        let extra = cardCount % r;
+        
+        // Don't create rows that are too small or too big compared to others
+        let layout = [];
+        for (let i = 0; i < r; i++) {
+          layout.push(base + (i < extra ? 1 : 0));
+        }
+        
+        let maxRow = Math.max(...layout);
+        let minRow = Math.min(...layout);
+        
+        // We prefer layouts where max columns don't bottleneck the card size,
+        // and rows are stacked nicely to fill vertical height.
+        if (maxRow - minRow <= 2 && r >= Math.ceil(Math.sqrt(cardCount))) {
+          bestRows = r;
+          bestLayout = layout;
+          break;
+        }
       }
-      return layout;
+
+      // Fallback if none matched tightly
+      if (bestLayout.length === 1 && cardCount > 4) {
+        // e.g. for Stage 15 (18 cards), instead of 5,5,4,4, 
+        // let's balance it more uniformly if possible or let the packer handle it.
+        let targetCols = Math.floor(Math.sqrt(cardCount * 1.2)); // slightly narrower to boost height
+        let rows = Math.ceil(cardCount / targetCols);
+        let base = Math.floor(cardCount / rows);
+        let extra = cardCount % rows;
+        let layout = [];
+        for (let i = 0; i < rows; i++) {
+          layout.push(base + (i < extra ? 1 : 0));
+        }
+        return layout;
+      }
+
+      return bestLayout;
     }
 
     // FIXED TWO-WAY SCALING: Prioritizes maximum size based on available 
