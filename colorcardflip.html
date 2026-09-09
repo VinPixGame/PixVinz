@@ -197,7 +197,7 @@
     .board {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       align-items: center;
       justify-content: center;
       position: relative;
@@ -206,7 +206,7 @@
 
     .board-row {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       justify-content: center;
       align-items: center;
     }
@@ -649,14 +649,25 @@
       document.getElementById('time-count').textContent = `${mins}:${secs}`;
     }
 
+    /* VERTICAL-PORTRAIT OPTIMIZED ROW DISTRIBUTIONS FOR ALL CARD COUNTS */
     function getSymmetricalRowDistribution(cardCount) {
+      if (cardCount === 4) return [2, 2];
+      if (cardCount === 6) return [2, 2, 2];
+      if (cardCount === 8) return [2, 4, 2];
       if (cardCount === 10) return [3, 4, 3];
+      if (cardCount === 12) return [3, 3, 3, 3];
       if (cardCount === 14) return [3, 4, 4, 3];
+      if (cardCount === 16) return [4, 4, 4, 4];
       if (cardCount === 18) return [3, 4, 4, 4, 3];
-      if (cardCount === 22) return [4, 5, 5, 5, 3];
-      if (cardCount === 26) return [4, 6, 6, 6, 4];
+      if (cardCount === 20) return [4, 4, 4, 4, 4];
+      if (cardCount === 22) return [4, 5, 4, 5, 4];
+      if (cardCount === 24) return [4, 4, 4, 4, 4, 4]; // 4 Cols x 6 Rows (Maximizes card size for Stage 21)
+      if (cardCount === 26) return [4, 5, 4, 5, 4, 4];
+      if (cardCount === 28) return [4, 5, 5, 5, 5, 4];
       if (cardCount === 30) return [5, 5, 5, 5, 5, 5];
+      if (cardCount === 32) return [4, 6, 6, 6, 6, 4];
       if (cardCount === 34) return [5, 6, 6, 6, 6, 5];
+      if (cardCount === 36) return [6, 6, 6, 6, 6, 6];
 
       let maxCols = Math.ceil(Math.sqrt(cardCount));
       while (cardCount % maxCols !== 0) maxCols++;
@@ -666,17 +677,18 @@
       return rowArray;
     }
 
+    /* MAXIMIZE CARD SIZING USING FULL AVAILABLE VERTICAL SPACE */
     function configureGridAndSizing(rowLayout) {
       const container = document.getElementById('board-container');
       if (!container) return;
 
       const rows = rowLayout.length;
       const maxCols = Math.max(...rowLayout);
-      const gap = 8;
-      const padding = 24;
+      const gap = 6;
+      const padding = 16;
 
-      const maxAvailableW = Math.min(window.innerWidth - 20, 420);
-      const maxAvailableH = container.clientHeight - 10;
+      const maxAvailableW = Math.min(window.innerWidth - 16, 420);
+      const maxAvailableH = container.clientHeight - 8;
 
       const maxGridW = maxAvailableW - padding;
       const maxGridH = maxAvailableH - padding;
@@ -685,7 +697,7 @@
       let cardH = (maxGridH - (rows - 1) * gap) / rows;
 
       let cardSize = Math.floor(Math.min(cardW, cardH));
-      cardSize = Math.max(26, cardSize);
+      cardSize = Math.max(24, cardSize);
 
       document.documentElement.style.setProperty('--card-size', `${cardSize}px`);
     }
@@ -697,7 +709,7 @@
       if (!wrapper || !rows.length || !pathEl) return;
 
       const wrapperRect = wrapper.getBoundingClientRect();
-      const pad = 8;
+      const pad = 6;
 
       let rowData = [];
 
@@ -761,85 +773,80 @@
       pathEl.setAttribute('d', d);
     }
 
-function startStage(stage) {
-  const board = document.getElementById('board');
-  board.innerHTML = '';
-  flippedCards = [];
-  matchedPairs = 0;
-  flips = 0;
-  lockBoard = false;
+    function startStage(stage) {
+      const board = document.getElementById('board');
+      board.innerHTML = '';
+      flippedCards = [];
+      matchedPairs = 0;
+      flips = 0;
+      lockBoard = false;
 
-  const numCards = getCardCountForStage(stage);
-  totalPairs = numCards / 2;
+      const numCards = getCardCountForStage(stage);
+      totalPairs = numCards / 2;
 
-  document.getElementById('stage-title').textContent = `Stage ${stage}`;
-  document.getElementById('flip-count').textContent = flips;
+      document.getElementById('stage-title').textContent = `Stage ${stage}`;
+      document.getElementById('flip-count').textContent = flips;
 
-  /* --- UNIQUE RANDOMIZED IMAGE SELECTION (NO REPEAT SETS) --- */
-  // Create an array of image indices from 1 to 70
-  let imagePool = Array.from({ length: 70 }, (_, i) => i + 1);
+      /* --- UNIQUE RANDOMIZED IMAGE SELECTION (NO REPEAT SETS) --- */
+      let imagePool = Array.from({ length: 70 }, (_, i) => i + 1);
 
-  // Seed generator to ensure every stage gets its own unique shuffle
-  function seededRandom(seed) {
-    let x = Math.sin(seed++) * 10000;
-    return x - Math.floor(x);
-  }
+      function seededRandom(seed) {
+        let x = Math.sin(seed++) * 10000;
+        return x - Math.floor(x);
+      }
 
-  // Shuffle the 70 images using the stage seed
-  let seed = stage * 999;
-  for (let i = imagePool.length - 1; i > 0; i--) {
-    let j = Math.floor(seededRandom(seed + i) * (i + 1));
-    [imagePool[i], imagePool[j]] = [imagePool[j], imagePool[i]];
-  }
+      let seed = stage * 999;
+      for (let i = imagePool.length - 1; i > 0; i--) {
+        let j = Math.floor(seededRandom(seed + i) * (i + 1));
+        [imagePool[i], imagePool[j]] = [imagePool[j], imagePool[i]];
+      }
 
-  // Pick the required unique images for this stage's pairs
-  let selectedImages = [];
-  for (let i = 0; i < totalPairs; i++) {
-    selectedImages.push(`image/level${imagePool[i]}.png`);
-  }
+      let selectedImages = [];
+      for (let i = 0; i < totalPairs; i++) {
+        selectedImages.push(`image/level${imagePool[i]}.png`);
+      }
 
-  // Duplicate pairs and shuffle card placements on the grid
-  let cardDeck = [...selectedImages, ...selectedImages];
-  cardDeck.sort(() => Math.random() - 0.5);
-  /* -------------------------------------------------------- */
+      let cardDeck = [...selectedImages, ...selectedImages];
+      cardDeck.sort(() => Math.random() - 0.5);
+      /* -------------------------------------------------------- */
 
-  const rowLayout = getSymmetricalRowDistribution(numCards);
-  let cardIndex = 0;
+      const rowLayout = getSymmetricalRowDistribution(numCards);
+      let cardIndex = 0;
 
-  rowLayout.forEach((countInRow) => {
-    const rowDiv = document.createElement('div');
-    rowDiv.classList.add('board-row');
+      rowLayout.forEach((countInRow) => {
+        const rowDiv = document.createElement('div');
+        rowDiv.classList.add('board-row');
 
-    for (let c = 0; c < countInRow; c++) {
-      if (cardIndex >= cardDeck.length) break;
-      const imgSrc = cardDeck[cardIndex++];
+        for (let c = 0; c < countInRow; c++) {
+          if (cardIndex >= cardDeck.length) break;
+          const imgSrc = cardDeck[cardIndex++];
 
-      const card = document.createElement('div');
-      card.classList.add('card');
-      card.dataset.symbol = imgSrc;
+          const card = document.createElement('div');
+          card.classList.add('card');
+          card.dataset.symbol = imgSrc;
 
-      card.innerHTML = `
-        <div class="card-face card-front"></div>
-        <div class="card-face card-back">
-          <img src="${imgSrc}" alt="card front image" />
-        </div>
-      `;
+          card.innerHTML = `
+            <div class="card-face card-front"></div>
+            <div class="card-face card-back">
+              <img src="${imgSrc}" alt="card front image" />
+            </div>
+          `;
 
-      card.addEventListener('click', flipCard);
-      rowDiv.appendChild(card);
+          card.addEventListener('click', flipCard);
+          rowDiv.appendChild(card);
+        }
+        board.appendChild(rowDiv);
+      });
+
+      requestAnimationFrame(() => {
+        configureGridAndSizing(rowLayout);
+        requestAnimationFrame(() => {
+          setTimeout(updateDynamicShapeBorder, 100);
+        });
+      });
+
+      startTimer();
     }
-    board.appendChild(rowDiv);
-  });
-
-  requestAnimationFrame(() => {
-    configureGridAndSizing(rowLayout);
-    requestAnimationFrame(() => {
-      setTimeout(updateDynamicShapeBorder, 100);
-    });
-  });
-
-  startTimer();
-}
 
     function flipCard() {
       initAudio();
