@@ -678,17 +678,13 @@
       if (!container) return;
 
       const rows = rowLayout.length;
-      const maxCols = Math.max(...rowLayout);
       const gap = 3;
 
-      const maxAvailableW = container.clientWidth - 24;
       const maxAvailableH = container.clientHeight - 20;
 
-      let cardW = (maxAvailableW - (maxCols - 1) * gap) / maxCols;
       let cardH = (maxAvailableH - (rows - 1) * gap) / rows;
-
-      let cardSize = Math.floor(Math.min(cardW, cardH));
-      cardSize = Math.max(8, cardSize);
+      let cardSize = Math.floor(cardH);
+      cardSize = Math.max(10, cardSize);
 
       document.documentElement.style.setProperty('--card-size', `${cardSize}px`);
     }
