@@ -25,9 +25,19 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      padding: 8px 10px;
+      justify-content: flex-start;
+      padding: 4px 6px;
       user-select: none;
+    }
+
+    header {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0 !important;
     }
 
     .top-bar {
@@ -35,26 +45,25 @@
       justify-content: space-between;
       align-items: center;
       width: 100%;
-      max-width: 420px;
       position: relative;
-      height: 50px;
-      flex-shrink: 0;
+      height: 42px;
+      flex-shrink: 0 !important;
     }
 
     .icon-btn {
       background: rgba(20, 10, 35, 0.8);
       border: 2px solid #ffd700;
       color: #ffd700;
-      width: 38px;
-      height: 38px;
+      width: 34px;
+      height: 34px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 16px;
       font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+      box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
       z-index: 3;
     }
 
@@ -72,51 +81,44 @@
     }
 
     .game-title-container img {
-      height: 110%;
+      height: 100%;
       width: auto;
-      max-width: 200px;
+      max-width: 160px;
       object-fit: contain;
     }
 
     .coin-badge {
       background: rgba(0, 0, 0, 0.6);
       border: 1.5px solid #ffd700;
-      padding: 4px 10px;
+      padding: 3px 8px;
       border-radius: 20px;
       font-weight: bold;
-      font-size: 13px;
+      font-size: 11px;
       color: #ffd700;
       z-index: 3;
       display: flex;         
       align-items: center;   
-      gap: 5px;   
-    }
-
-    header {
-      width: 100%;
-      max-width: 420px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
+      gap: 4px;   
     }
 
     .stage-title {
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: bold;
       color: #ffd700;
       text-align: center;
       text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+      flex-shrink: 0 !important;
     }
 
     .stats-container {
       display: flex;
       width: 100%;
+      height: 42px;
       background: #18082e;
       border: 1.5px solid #3c1968;
-      border-radius: 12px;
-      padding: 5px;
+      border-radius: 8px;
+      padding: 4px;
+      flex-shrink: 0 !important;
     }
 
     .stat-box {
@@ -124,27 +126,30 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 5px;
     }
 
     .stat-box:not(:last-child) {
       border-right: 1px solid #3c1968;
     }
 
-    .stat-icon { font-size: 1.1rem; }
+    .stat-icon { font-size: 1rem; }
     .stat-details { display: flex; flex-direction: column; }
-    .stat-label { font-size: 0.6rem; color: #9a88b5; font-weight: bold; }
-    .stat-value { font-size: 0.9rem; font-weight: bold; color: #fff; }
+    .stat-label { font-size: 0.55rem; color: #9a88b5; font-weight: bold; }
+    .stat-value { font-size: 0.8rem; font-weight: bold; color: #fff; }
     #xp-count-display { color: #00f2fe; }
 
     .visualizer-container {
       width: 100%;
       max-width: 420px;
-      height: 24px;
+      height: 32px;
+      min-height: 32px;
       display: flex;
       justify-content: center;
       align-items: center;
-      flex-shrink: 0;
+      flex-shrink: 0 !important;
+      margin-top: 2px;
+      margin-bottom: 3px;
     }
 
     #music-visualizer {
@@ -152,7 +157,7 @@
       height: 100%;
       background: rgba(24, 8, 46, 0.6);
       border: 1px solid rgba(255, 215, 0, 0.3);
-      border-radius: 8px;
+      border-radius: 4px;
     }
 
     .board-container {
@@ -162,8 +167,9 @@
       justify-content: center;
       align-items: center;
       min-height: 0;
-      padding: 4px 0;
+      padding: 4px 12px;
       position: relative;
+      overflow: hidden;
     }
 
     .board-wrapper {
@@ -171,7 +177,8 @@
       display: inline-flex;
       justify-content: center;
       align-items: center;
-      padding: 10px;
+      padding: 4px;
+      max-width: 100%;
     }
 
     #shape-border-svg {
@@ -188,16 +195,16 @@
     #shape-border-path {
       fill: url(#bgGradient);
       stroke: url(#borderGradient);
-      stroke-width: 2.5;
+      stroke-width: 2;
       stroke-linejoin: round;
       stroke-linecap: round;
-      filter: drop-shadow(0px 0px 8px rgba(157, 78, 221, 0.4));
+      filter: drop-shadow(0px 0px 5px rgba(157, 78, 221, 0.4));
     }
 
     .board {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 1px;
       align-items: center;
       justify-content: center;
       position: relative;
@@ -206,7 +213,7 @@
 
     .board-row {
       display: flex;
-      gap: 6px;
+      gap: 1px;
       justify-content: center;
       align-items: center;
     }
@@ -216,8 +223,8 @@
       transform-style: preserve-3d;
       transition: transform 0.3s ease;
       cursor: pointer;
-      width: var(--card-size, 55px);
-      height: var(--card-size, 55px);
+      width: var(--card-size, 18px);
+      height: var(--card-size, 18px);
       flex-shrink: 0;
     }
 
@@ -229,19 +236,19 @@
       height: 100%;
       position: absolute;
       backface-visibility: hidden;
-      border-radius: 10px;
+      border-radius: 3px;
       display: flex;
       justify-content: center;
       align-items: center;
       user-select: none;
-      border: 1.5px solid #ffd700;
+      border: 1px solid #ffd700;
       overflow: hidden;
     }
 
     .card-front {
       background-color: #250a48;
       background-image: url("image/vinz.png");
-      background-size: 18px 18px;
+      background-size: 6px 6px;
       background-repeat: repeat;
       background-position: center;
     }
@@ -249,19 +256,19 @@
     .card-back {
       background: #351063;
       transform: rotateY(180deg);
-      padding: 3px;
+      padding: 1px;
     }
 
     .card-back img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 6px;
+      border-radius: 2px;
     }
 
     .card.matched .card-face {
       border-color: #00ff66 !important;
-      box-shadow: 0 0 10px #00ff66 !important;
+      box-shadow: 0 0 3px #00ff66 !important;
     }
 
     .overlay {
@@ -290,45 +297,45 @@
     .modal {
       background: linear-gradient(160deg, #280a50 0%, #120324 100%);
       border: 2px solid #ffd700;
-      padding: 24px 20px;
-      border-radius: 20px;
+      padding: 20px 16px;
+      border-radius: 16px;
       text-align: center;
-      max-width: 310px;
+      max-width: 300px;
       width: 85%;
       box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
       z-index: 102;
     }
 
-    .modal-trophy { font-size: 2.8rem; margin-bottom: 4px; }
-    .modal h2 { color: #ffd700; margin-bottom: 4px; font-size: 1.5rem; font-weight: 900; }
-    .modal p { font-size: 0.85rem; color: #bfa8e0; font-weight: 600; }
+    .modal-trophy { font-size: 2.5rem; margin-bottom: 4px; }
+    .modal h2 { color: #ffd700; margin-bottom: 4px; font-size: 1.3rem; font-weight: 900; }
+    .modal p { font-size: 0.8rem; color: #bfa8e0; font-weight: 600; }
 
     .reward-breakdown {
       background: rgba(0, 0, 0, 0.45);
       border: 1px solid #4a1d82;
-      border-radius: 12px;
-      padding: 10px;
-      margin: 14px 0;
+      border-radius: 10px;
+      padding: 8px;
+      margin: 12px 0;
       display: flex;
       justify-content: space-around;
     }
 
     .reward-item { display: flex; flex-direction: column; align-items: center; }
-    .reward-item .val { font-weight: 900; font-size: 1.2rem; }
+    .reward-item .val { font-weight: 900; font-size: 1.1rem; }
     .reward-item.coins .val { color: #ffd700; }
     .reward-item.xp .val { color: #00f2fe; }
 
-    .modal-actions { display: flex; gap: 10px; width: 100%; }
+    .modal-actions { display: flex; gap: 8px; width: 100%; }
 
     .btn {
       flex: 1;
       background: linear-gradient(180deg, #ffe033 0%, #ffa800 100%);
       color: #120324;
       border: none;
-      padding: 12px;
-      font-size: 0.9rem;
+      padding: 10px;
+      font-size: 0.85rem;
       font-weight: 900;
-      border-radius: 20px;
+      border-radius: 16px;
       cursor: pointer;
     }
 
@@ -354,7 +361,7 @@
       <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
     </div>
 
-    <div class="stage-title" id="stage-title">Stage 15</div>
+    <div class="stage-title" id="stage-title">Stage 100</div>
 
     <div class="stats-container">
       <div class="stat-box">
@@ -379,11 +386,11 @@
         </div>
       </div>
     </div>
-  </header>
 
-  <div class="visualizer-container">
-    <canvas id="music-visualizer"></canvas>
-  </div>
+    <div class="visualizer-container">
+      <canvas id="music-visualizer"></canvas>
+    </div>
+  </header>
 
   <div class="board-container" id="board-container">
     <div class="board-wrapper" id="board-wrapper">
@@ -458,7 +465,7 @@
 
     let coinCount = Math.round(parseFloat(localStorage.getItem(coinKey))) || 500;
     let xpCount = parseInt(localStorage.getItem(xpKey), 10) || 0;
-    let currentStage = parseInt(localStorage.getItem(stageKey), 10) || 15;
+    let currentStage = parseInt(localStorage.getItem(stageKey), 10) || 100;
 
     window.saveUserDataToCloud = async function() {
       const username = getActiveUsername();
@@ -530,8 +537,6 @@
 
     let audioCtx = null;
     let analyser = null;
-    let audioSourceBg = null;
-    let audioSourceVic = null;
     let isVisualizerInit = false;
 
     function initAudioVisualizer() {
@@ -542,11 +547,11 @@
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 64;
 
-        audioSourceBg = audioCtx.createMediaElementSource(bgMusic);
-        audioSourceBg.connect(analyser);
+        const sourceBg = audioCtx.createMediaElementSource(bgMusic);
+        sourceBg.connect(analyser);
 
-        audioSourceVic = audioCtx.createMediaElementSource(victoryMusic);
-        audioSourceVic.connect(analyser);
+        const sourceVic = audioCtx.createMediaElementSource(victoryMusic);
+        sourceVic.connect(analyser);
 
         analyser.connect(audioCtx.destination);
         isVisualizerInit = true;
@@ -611,7 +616,6 @@
 
     function playVictoryMusic(stage) {
       bgMusic.pause();
-      
       let musicIndex = ((stage - 1) % 10) + 1;
       victoryMusic.src = `sounds/victory${musicIndex}.mp3`;
       victoryMusic.currentTime = 0;
@@ -625,8 +629,7 @@
     }
 
     function getCardCountForStage(stage) {
-      let count = 4 + (Math.floor((stage - 1) / 2) * 2);
-      return Math.min(count, 36); 
+      return 36 + (Math.floor((stage - 1) / 2) * 2); 
     }
 
     function startTimer() {
@@ -649,55 +652,44 @@
       document.getElementById('time-count').textContent = `${mins}:${secs}`;
     }
 
-    /* VERTICAL-PORTRAIT OPTIMIZED ROW DISTRIBUTIONS FOR ALL CARD COUNTS */
     function getSymmetricalRowDistribution(cardCount) {
-      if (cardCount === 4) return [2, 2];
-      if (cardCount === 6) return [2, 2, 2];
-      if (cardCount === 8) return [2, 4, 2];
-      if (cardCount === 10) return [3, 4, 3];
-      if (cardCount === 12) return [3, 3, 3, 3];
-      if (cardCount === 14) return [3, 4, 4, 3];
-      if (cardCount === 16) return [4, 4, 4, 4];
-      if (cardCount === 18) return [3, 4, 4, 4, 3];
-      if (cardCount === 20) return [4, 4, 4, 4, 4];
-      if (cardCount === 22) return [4, 5, 4, 5, 4];
-      if (cardCount === 24) return [4, 4, 4, 4, 4, 4]; // 4 Cols x 6 Rows (Maximizes card size for Stage 21)
-      if (cardCount === 26) return [4, 5, 4, 5, 4, 4];
-      if (cardCount === 28) return [4, 5, 5, 5, 5, 4];
-      if (cardCount === 30) return [5, 5, 5, 5, 5, 5];
-      if (cardCount === 32) return [4, 6, 6, 6, 6, 4];
-      if (cardCount === 34) return [5, 6, 6, 6, 6, 5];
-      if (cardCount === 36) return [6, 6, 6, 6, 6, 6];
+      if (cardCount === 134) {
+        return [8, 10, 10, 10, 10, 10, 9, 9, 10, 10, 10, 10, 10, 8];
+      }
 
       let maxCols = Math.ceil(Math.sqrt(cardCount));
-      while (cardCount % maxCols !== 0) maxCols++;
-      let rows = cardCount / maxCols;
+      let rows = Math.ceil(cardCount / maxCols);
       let rowArray = [];
-      for (let i = 0; i < rows; i++) rowArray.push(maxCols);
+
+      let baseCount = Math.floor(cardCount / rows);
+      let remainder = cardCount % rows;
+
+      for (let i = 0; i < rows; i++) {
+        rowArray.push(baseCount + (i < remainder ? 1 : 0));
+      }
+
       return rowArray;
     }
 
-    /* MAXIMIZE CARD SIZING USING FULL AVAILABLE VERTICAL SPACE */
     function configureGridAndSizing(rowLayout) {
       const container = document.getElementById('board-container');
       if (!container) return;
 
       const rows = rowLayout.length;
       const maxCols = Math.max(...rowLayout);
-      const gap = 6;
-      const padding = 16;
+      const gap = 1;
 
-      const maxAvailableW = Math.min(window.innerWidth - 16, 420);
-      const maxAvailableH = container.clientHeight - 8;
+      const horizontalPadding = 24;
+      const verticalPadding = 8;
 
-      const maxGridW = maxAvailableW - padding;
-      const maxGridH = maxAvailableH - padding;
+      const maxAvailableW = Math.min(window.innerWidth - horizontalPadding, 420 - horizontalPadding);
+      const maxAvailableH = container.clientHeight - verticalPadding;
 
-      let cardW = (maxGridW - (maxCols - 1) * gap) / maxCols;
-      let cardH = (maxGridH - (rows - 1) * gap) / rows;
+      let cardW = (maxAvailableW - (maxCols - 1) * gap) / maxCols;
+      let cardH = (maxAvailableH - (rows - 1) * gap) / rows;
 
       let cardSize = Math.floor(Math.min(cardW, cardH));
-      cardSize = Math.max(24, cardSize);
+      cardSize = Math.max(8, cardSize);
 
       document.documentElement.style.setProperty('--card-size', `${cardSize}px`);
     }
@@ -709,7 +701,7 @@
       if (!wrapper || !rows.length || !pathEl) return;
 
       const wrapperRect = wrapper.getBoundingClientRect();
-      const pad = 6;
+      const pad = 2;
 
       let rowData = [];
 
@@ -731,7 +723,6 @@
       if (rowData.length === 0) return;
 
       let pts = [];
-
       pts.push({ x: rowData[0].left, y: rowData[0].top });
       pts.push({ x: rowData[0].right, y: rowData[0].top });
 
@@ -758,7 +749,7 @@
         if (prv) {
           let midY = Math.round((cur.top + prv.bottom) / 2);
           pts.push({ x: cur.left, y: midY });
-          pts.push({ x: prv.left, y: midY });
+          pts.push({ x: prv.left, y: prv.bottom });
         } else {
           pts.push({ x: cur.left, y: cur.top });
         }
@@ -787,7 +778,6 @@
       document.getElementById('stage-title').textContent = `Stage ${stage}`;
       document.getElementById('flip-count').textContent = flips;
 
-      /* --- UNIQUE RANDOMIZED IMAGE SELECTION (NO REPEAT SETS) --- */
       let imagePool = Array.from({ length: 70 }, (_, i) => i + 1);
 
       function seededRandom(seed) {
@@ -803,12 +793,11 @@
 
       let selectedImages = [];
       for (let i = 0; i < totalPairs; i++) {
-        selectedImages.push(`image/level${imagePool[i]}.png`);
+        selectedImages.push(`image/level${imagePool[i % imagePool.length]}.png`);
       }
 
       let cardDeck = [...selectedImages, ...selectedImages];
       cardDeck.sort(() => Math.random() - 0.5);
-      /* -------------------------------------------------------- */
 
       const rowLayout = getSymmetricalRowDistribution(numCards);
       let cardIndex = 0;
