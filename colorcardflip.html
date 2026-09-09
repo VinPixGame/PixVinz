@@ -26,7 +26,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      padding: 4px 6px;
+      padding: 8px 12px;
       user-select: none;
     }
 
@@ -37,7 +37,7 @@
       flex-direction: column;
       align-items: center;
       gap: 8px;
-      flex-shrink: 0 !important;
+      flex-shrink: 0;
     }
 
     .top-bar {
@@ -46,21 +46,21 @@
       align-items: center;
       width: 100%;
       position: relative;
-      height: 42px;
-      flex-shrink: 0 !important;
+      height: 48px;
+      flex-shrink: 0;
     }
 
     .icon-btn {
       background: rgba(20, 10, 35, 0.8);
       border: 2px solid #ffd700;
       color: #ffd700;
-      width: 34px;
-      height: 34px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 18px;
       font-weight: bold;
       cursor: pointer;
       box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
@@ -83,17 +83,17 @@
     .game-title-container img {
       height: 100%;
       width: auto;
-      max-width: 160px;
+      max-width: 180px;
       object-fit: contain;
     }
 
     .coin-badge {
       background: rgba(0, 0, 0, 0.6);
       border: 1.5px solid #ffd700;
-      padding: 3px 8px;
+      padding: 4px 10px;
       border-radius: 20px;
       font-weight: bold;
-      font-size: 11px;
+      font-size: 12px;
       color: #ffd700;
       z-index: 3;
       display: flex;         
@@ -102,23 +102,23 @@
     }
 
     .stage-title {
-      font-size: 1rem;
+      font-size: 1.1rem;
       font-weight: bold;
       color: #ffd700;
       text-align: center;
       text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
-      flex-shrink: 0 !important;
+      flex-shrink: 0;
     }
 
     .stats-container {
       display: flex;
       width: 100%;
-      height: 42px;
+      height: 44px;
       background: #18082e;
       border: 1.5px solid #3c1968;
       border-radius: 8px;
       padding: 4px;
-      flex-shrink: 0 !important;
+      flex-shrink: 0;
     }
 
     .stat-box {
@@ -126,7 +126,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
+      gap: 6px;
     }
 
     .stat-box:not(:last-child) {
@@ -135,21 +135,19 @@
 
     .stat-icon { font-size: 1rem; }
     .stat-details { display: flex; flex-direction: column; }
-    .stat-label { font-size: 0.55rem; color: #9a88b5; font-weight: bold; }
-    .stat-value { font-size: 0.8rem; font-weight: bold; color: #fff; }
+    .stat-label { font-size: 0.6rem; color: #9a88b5; font-weight: bold; }
+    .stat-value { font-size: 0.85rem; font-weight: bold; color: #fff; }
     #xp-count-display { color: #00f2fe; }
 
     .visualizer-container {
       width: 100%;
       max-width: 420px;
-      height: 32px;
-      min-height: 32px;
+      height: 36px;
+      min-height: 36px;
       display: flex;
       justify-content: center;
       align-items: center;
-      flex-shrink: 0 !important;
-      margin-top: 2px;
-      margin-bottom: 3px;
+      flex-shrink: 0;
     }
 
     #music-visualizer {
@@ -157,17 +155,18 @@
       height: 100%;
       background: rgba(24, 8, 46, 0.6);
       border: 1px solid rgba(255, 215, 0, 0.3);
-      border-radius: 4px;
+      border-radius: 6px;
     }
 
     .board-container {
       flex: 1;
       width: 100%;
+      max-width: 420px;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 0;
-      padding: 4px 12px;
+      padding: 4px 8px;
       position: relative;
       overflow: hidden;
     }
@@ -177,8 +176,9 @@
       display: inline-flex;
       justify-content: center;
       align-items: center;
-      padding: 4px;
+      padding: 6px;
       max-width: 100%;
+      max-height: 100%;
     }
 
     #shape-border-svg {
@@ -195,27 +195,29 @@
     #shape-border-path {
       fill: url(#bgGradient);
       stroke: url(#borderGradient);
-      stroke-width: 2;
+      stroke-width: 2.5;
       stroke-linejoin: round;
       stroke-linecap: round;
-      filter: drop-shadow(0px 0px 5px rgba(157, 78, 221, 0.4));
+      filter: drop-shadow(0px 0px 6px rgba(157, 78, 221, 0.5));
     }
 
     .board {
       display: flex;
       flex-direction: column;
-      gap: 1px;
+      gap: 3px;
       align-items: center;
       justify-content: center;
       position: relative;
       z-index: 3;
+      max-width: 100%;
     }
 
     .board-row {
       display: flex;
-      gap: 1px;
+      gap: 3px;
       justify-content: center;
       align-items: center;
+      width: 100%;
     }
 
     .card {
@@ -223,8 +225,8 @@
       transform-style: preserve-3d;
       transition: transform 0.3s ease;
       cursor: pointer;
-      width: var(--card-size, 18px);
-      height: var(--card-size, 18px);
+      width: var(--card-size, 40px);
+      height: var(--card-size, 40px);
       flex-shrink: 0;
     }
 
@@ -236,7 +238,7 @@
       height: 100%;
       position: absolute;
       backface-visibility: hidden;
-      border-radius: 3px;
+      border-radius: 4px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -248,7 +250,7 @@
     .card-front {
       background-color: #250a48;
       background-image: url("image/vinz.png");
-      background-size: 6px 6px;
+      background-size: 8px 8px;
       background-repeat: repeat;
       background-position: center;
     }
@@ -263,12 +265,12 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 2px;
+      border-radius: 3px;
     }
 
     .card.matched .card-face {
       border-color: #00ff66 !important;
-      box-shadow: 0 0 3px #00ff66 !important;
+      box-shadow: 0 0 4px #00ff66 !important;
     }
 
     .overlay {
@@ -361,7 +363,7 @@
       <div class="coin-badge">🪙 <span id="coinCount">0</span></div>
     </div>
 
-    <div class="stage-title" id="stage-title">Stage 100</div>
+    <div class="stage-title" id="stage-title">Stage 1</div>
 
     <div class="stats-container">
       <div class="stat-box">
@@ -465,7 +467,7 @@
 
     let coinCount = Math.round(parseFloat(localStorage.getItem(coinKey))) || 500;
     let xpCount = parseInt(localStorage.getItem(xpKey), 10) || 0;
-    let currentStage = parseInt(localStorage.getItem(stageKey), 10) || 100;
+    let currentStage = parseInt(localStorage.getItem(stageKey), 10) || 1;
 
     window.saveUserDataToCloud = async function() {
       const username = getActiveUsername();
@@ -629,7 +631,8 @@
     }
 
     function getCardCountForStage(stage) {
-      return 36 + (Math.floor((stage - 1) / 2) * 2); 
+      if (stage === 100) return 134;
+      return 4 + (Math.floor((stage - 1) / 2) * 2);
     }
 
     function startTimer() {
@@ -657,18 +660,17 @@
         return [8, 10, 10, 10, 10, 10, 9, 9, 10, 10, 10, 10, 10, 8];
       }
 
-      let maxCols = Math.ceil(Math.sqrt(cardCount));
-      let rows = Math.ceil(cardCount / maxCols);
-      let rowArray = [];
+      let cols = Math.ceil(Math.sqrt(cardCount));
+      let rows = Math.ceil(cardCount / cols);
 
-      let baseCount = Math.floor(cardCount / rows);
-      let remainder = cardCount % rows;
+      let base = Math.floor(cardCount / rows);
+      let extra = cardCount % rows;
 
+      let layout = [];
       for (let i = 0; i < rows; i++) {
-        rowArray.push(baseCount + (i < remainder ? 1 : 0));
+        layout.push(base + (i < extra ? 1 : 0));
       }
-
-      return rowArray;
+      return layout;
     }
 
     function configureGridAndSizing(rowLayout) {
@@ -677,13 +679,10 @@
 
       const rows = rowLayout.length;
       const maxCols = Math.max(...rowLayout);
-      const gap = 1;
+      const gap = 3;
 
-      const horizontalPadding = 24;
-      const verticalPadding = 8;
-
-      const maxAvailableW = Math.min(window.innerWidth - horizontalPadding, 420 - horizontalPadding);
-      const maxAvailableH = container.clientHeight - verticalPadding;
+      const maxAvailableW = container.clientWidth - 24;
+      const maxAvailableH = container.clientHeight - 20;
 
       let cardW = (maxAvailableW - (maxCols - 1) * gap) / maxCols;
       let cardH = (maxAvailableH - (rows - 1) * gap) / rows;
@@ -701,7 +700,7 @@
       if (!wrapper || !rows.length || !pathEl) return;
 
       const wrapperRect = wrapper.getBoundingClientRect();
-      const pad = 2;
+      const pad = 4;
 
       let rowData = [];
 
@@ -722,45 +721,34 @@
 
       if (rowData.length === 0) return;
 
-      let pts = [];
-      pts.push({ x: rowData[0].left, y: rowData[0].top });
-      pts.push({ x: rowData[0].right, y: rowData[0].top });
-
+      let d = `M ${rowData[0].left} ${rowData[0].top}`;
+      
       for (let i = 0; i < rowData.length; i++) {
         let cur = rowData[i];
         let nxt = rowData[i + 1];
-
+        d += ` L ${cur.right} ${cur.top}`;
         if (nxt) {
-          let midY = Math.round((cur.bottom + nxt.top) / 2);
-          pts.push({ x: cur.right, y: midY });
-          pts.push({ x: nxt.right, y: midY });
+          d += ` L ${cur.right} ${nxt.top}`;
         } else {
-          pts.push({ x: cur.right, y: cur.bottom });
+          d += ` L ${cur.right} ${cur.bottom}`;
         }
       }
 
       let lastRow = rowData[rowData.length - 1];
-      pts.push({ x: lastRow.left, y: lastRow.bottom });
+      d += ` L ${lastRow.left} ${lastRow.bottom}`;
 
       for (let i = rowData.length - 1; i >= 0; i--) {
         let cur = rowData[i];
         let prv = rowData[i - 1];
-
+        d += ` L ${cur.left} ${cur.bottom}`;
         if (prv) {
-          let midY = Math.round((cur.top + prv.bottom) / 2);
-          pts.push({ x: cur.left, y: midY });
-          pts.push({ x: prv.left, y: prv.bottom });
+          d += ` L ${cur.left} ${prv.bottom}`;
         } else {
-          pts.push({ x: cur.left, y: cur.top });
+          d += ` L ${cur.left} ${cur.top}`;
         }
       }
 
-      let d = `M ${pts[0].x} ${pts[0].y}`;
-      for (let i = 1; i < pts.length; i++) {
-        d += ` L ${pts[i].x} ${pts[i].y}`;
-      }
       d += ' Z';
-
       pathEl.setAttribute('d', d);
     }
 
