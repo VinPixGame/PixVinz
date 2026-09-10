@@ -479,44 +479,45 @@
     let currentStage = parseInt(localStorage.getItem(stageKey), 10) || 1;
 
     window.saveUserDataToCloud = async function() {
-      const username = getActiveUsername();
-      if (!username || !window.pixvinzDb) return;
+  const username = getActiveUsername();
+  if (!username || !window.pixvinzDb) return;
 
-      try {
-        const userDocRef = window.pixvinzDb.collection('users').doc(username);
-        await userDocRef.set({
-          totalCoins: Math.round(coinCount),
-          totalXp: xpCount,
-          memoryStage: currentStage,
-          lastUpdated: new Date().toISOString()
-        }, { merge: true });
-      } catch (e) {}
-    };
+  try {
+    const { db, doc, setDoc } = window.pixvinzDb;
+    const userDocRef = doc(db, 'players', username);
+    await setDoc(userDocRef, {
+      coins: Math.round(coinCount),
+      xp: xpCount,
+      stage: currentStage,
+      lastUpdated: new Date().toISOString()
+    }, { merge: true });
+  } catch (e) {
+    console.error("Error saving to cloud:", e);
+  }
+};
 
+window.fetchUserDataFromCloud = async function() {
+  const username = getActiveUsername();
+  if (!username || !window.pixvinzDb) return;
+
+  try {
+    const { db, doc, getDoc } = window.pixvinzDb;
+    const userDocRef = doc(db, 'players', username);
+    const docSnap = await getDoc(userDocRef);
     
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if (data.coins !== undefined) coinCount = Math.round(parseFloat(data.coins));
+      if (data.xp !== undefined) xpCount = parseInt(data.xp, 10);
+      if (data.stage !== undefined) currentStage = parseInt(data.stage, 10);
 
-    // Fix 2: Prioritize data.xp in your cloud fetch
-    window.fetchUserDataFromCloud = async function() {
-      const username = getActiveUsername();
-      if (!username || !window.pixvinzDb) return;
-
-      try {
-        const userDocRef = window.pixvinzDb.collection('users').doc(username);
-        const docSnap = await userDocRef.get();
-        if (docSnap.exists) {
-          const data = docSnap.data();
-          if (data.totalCoins !== undefined) coinCount = Math.round(parseFloat(data.totalCoins));
-          
-          const cloudXp = data.xp !== undefined ? data.xp : data.totalXp;
-          if (cloudXp !== undefined) xpCount = parseInt(cloudXp, 10);
-
-          if (data.memoryStage !== undefined) currentStage = parseInt(data.memoryStage, 10);
-
-          updateUserData(false);
-          startStage(currentStage);
-        }
-      } catch (e) {}
-    };
+      updateUserData(false);
+      startStage(currentStage);
+    }
+  } catch (e) {
+    console.error("Error fetching from cloud:", e);
+  }
+};
 
     function updateUserData(shouldSaveToCloud = true) {
       prefix = getActiveUserPrefix();
