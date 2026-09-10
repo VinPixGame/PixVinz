@@ -363,18 +363,27 @@ const navMoreGames = document.getElementById('navMoreGames');
   }
 
   const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        
-        // Clear the session data
-        localStorage.removeItem('loggedInUser');
-        localStorage.removeItem('skipLoading');
-        
-        // Redirect to the login/register page
-        window.location.href = 'auth.html';
-    });
-  }
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      
+      // 1. Sign out from Firebase Auth if available
+      try {
+          if (window.pixvinzAuth) {
+              const { auth, signOut } = window.pixvinzAuth;
+              await signOut(auth);
+          }
+      } catch (err) {
+          console.error("Firebase sign out error:", err);
+      }
+      
+      // 2. Clear all local storage data completely to wipe stale state
+      localStorage.clear();
+      
+      // 3. Redirect to the login/register page
+      window.location.href = 'auth.html';
+  });
+}
 
   function renderLevels() {
     const grid = document.getElementById('levelsGrid');
