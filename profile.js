@@ -453,9 +453,9 @@ function checkAndUnlockBadges() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const avatarLoader = document.getElementById('avatarLoader');
-    if (avatarLoader) avatarLoader.style.display = 'none';
+    if (avatarLoader) avatarLoader.style.display = 'flex';
 
     let initialName = '';
     try {
@@ -477,6 +477,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputElem = document.getElementById('username-input');
     if (inputElem) inputElem.value = initialName;
 
+    // Pull your actual progress from the cloud first so local storage has the correct XP/coins
+    if (typeof fetchUserDataFromFirestore === 'function') {
+        await fetchUserDataFromFirestore();
+    }
+
     const savedAvatar = localStorage.getItem(getUserKey('vinpix_avatar'));
     if (savedAvatar) {
         applyAvatarToUI(savedAvatar);
@@ -488,7 +493,8 @@ document.addEventListener('DOMContentLoaded', () => {
     updateProfileStats();
     checkAndUnlockBadges();
     loadProfileGlobalRank();
-    saveUserDataToCloud();
+
+    if (avatarLoader) avatarLoader.style.display = 'none';
 });
 
 // --- EDIT NAME MODAL HANDLERS ---
