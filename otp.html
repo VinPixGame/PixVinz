@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>PixVinz Scratch Card Admin Generator</title>
+  <title>PixVinz Card Generator</title>
   <style>
     body {
       background: #0f172a;
@@ -25,40 +25,40 @@
       font-size: 1rem;
       cursor: pointer;
     }
+    button:disabled {
+      background: #64748b;
+      cursor: not-allowed;
+    }
     #status {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       color: #94a3b8;
     }
   </style>
 
-  <!-- Include Firebase App and Firestore SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-</head>
-<body>
+  <!-- Firebase SDK v12.18.0 Modules -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import { getFirestore, doc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
-  <h1>PixVinz Card Generator</h1>
-  <button onclick="runGenerator()">Generate 1,000 Cards Now</button>
-  <div id="status">Click once, then check your console and Firestore database.</div>
-
-
-<script>
     const firebaseConfig = {
       apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
-        authDomain: "pixvinz2026.firebaseapp.com",
-        projectId: "pixvinz2026",
-        storageBucket: "pixvinz2026.firebasestorage.app",
-        messagingSenderId: "45609077809",
-        appId: "1:45609077809:web:575611e46acda9f64c5910",
-        measurementId: "G-W7FSERE8ZJ"
+      authDomain: "pixvinz2026.firebaseapp.com",
+      projectId: "pixvinz2026",
+      storageBucket: "pixvinz2026.firebasestorage.app",
+      messagingSenderId: "45609077809",
+      appId: "1:45609077809:web:575611e46acda9f64c5910",
+      measurementId: "G-W7FSERE8ZJ"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-    async function runGenerator() {
+    // Expose generator function globally so the HTML button can trigger it
+    window.runGenerator = async function() {
+      const btn = document.getElementById('gen-btn');
       const statusDiv = document.getElementById('status');
-      statusDiv.textContent = "Generating 1,000 cards instantly...";
+      btn.disabled = true;
+      statusDiv.textContent = "Generating 1,000 cards... Please wait.";
 
       try {
         const prizeDefinitions = [
@@ -87,10 +87,10 @@
           }
         });
 
-        // Shuffle
+        // Randomize pool order
         masterPool.sort(() => Math.random() - 0.5);
 
-        let batch = db.batch();
+        let batch = writeBatch(db);
         let batchCount = 0;
         let totalUploaded = 0;
 
@@ -100,8 +100,7 @@
           let uniqueCode = `PV-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
           let gridSlots = [];
 
-          if (cardConfig.tierId === 'none') {
-            // Pick two distinct images to alternate safely so no icon ever hits 3 matches
+          if (cardConfig.id === 'none') {
             let imgA = allImages[Math.floor(Math.random() * allImages.length)];
             let imgB;
             do { imgB = allImages[Math.floor(Math.random() * allImages.length)]; } while (imgA === imgB);
@@ -109,7 +108,7 @@
             for (let s = 0; s < 12; s++) {
               gridSlots.push({ imageUrl: s < 6 ? imgA : imgB });
             }
-            gridSlots.sort(() => Math.random() - 0.5); // Shuffle grid positions
+            gridSlots.sort(() => Math.random() - 0.5);
           } else {
             let winningIcon = cardConfig.matchIcon;
             let winningIndices = [];
@@ -130,10 +129,10 @@
             }
           }
 
-          let cardRef = db.collection('scratch_cards').doc(cardDocId);
+          let cardRef = doc(db, 'scratch_cards', cardDocId);
           batch.set(cardRef, {
             uniqueCode: uniqueCode,
-            tierId: cardConfig.tierId,
+            tierId: cardConfig.id,
             prizeName: cardConfig.name,
             prizeType: cardConfig.type,
             prizeValue: cardConfig.value,
@@ -141,27 +140,36 @@
             isScratched: false,
             ownerId: null,
             gridSlots: gridSlots,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            createdAt: serverTimestamp()
           });
 
           batchCount++;
           totalUploaded++;
 
+          // Commit every 400 writes to stay safely beneath Firestore's 500-limit per batch
           if (batchCount === 400 || i === masterPool.length - 1) {
             await batch.commit();
-            batch = db.batch();
+            statusDiv.textContent = `Uploaded ${totalUploaded} / 1000 cards...`;
+            batch = writeBatch(db);
             batchCount = 0;
           }
         }
 
-        statusDiv.textContent = "SUCCESS! All 1,000 cards generated instantly.";
-        alert("Done! Check your Firestore console.");
+        statusDiv.textContent = "SUCCESS! All 1,000 cards generated and uploaded.";
+        alert("Done! You can now check your Firebase Firestore console and delete this file.");
       } catch (err) {
         console.error(err);
-        statusDiv.textContent = "Error: Check console.";
+        statusDiv.textContent = "Error occurred. Check console for details.";
+        btn.disabled = false;
       }
-    }
-            </script>
-  
+    };
+  </script>
+</head>
+<body>
+
+  <h1>PixVinz Card Generator</h1>
+  <button id="gen-btn" onclick="runGenerator()">Generate 1,000 Cards Now</button>
+  <div id="status">Ready to initialize Firestore collection.</div>
+
 </body>
 </html>
