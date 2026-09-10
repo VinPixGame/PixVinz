@@ -470,10 +470,10 @@
 
     let prefix = getActiveUserPrefix();
     let coinKey = `${prefix}totalCoins`;
-    let xpKey = `${prefix}totalXp`;
+    let xpKey = `${prefix}xp`;
     let stageKey = `${prefix}memoryStage`;
 
-    let coinCount = Math.round(parseFloat(localStorage.getItem(coinKey))) || 0;
+    let coinCount = Math.round(parseFloat(localStorage.getItem(coinKey))) || 500;
     let xpCount = parseInt(localStorage.getItem(xpKey), 10) || 0;
     let currentStage = parseInt(localStorage.getItem(stageKey), 10) || 1;
 
@@ -486,23 +486,26 @@
 
     window.saveUserDataToCloud = async function() {
       const username = getActiveUsername();
-      if (!username || !window.pixvinzDb) return;
+      if (!username || !window.pixvinzDb) {
+        console.warn("Firestore database reference (window.pixvinzDb) or username missing!");
+        return;
+      }
 
       try {
         const { db, doc, setDoc } = window.pixvinzDb;
         const userDocRef = doc(db, 'players', username);
         
         const payload = {
-          totalCoins: Math.round(coinCount),
-          totalXp: xpCount,
-          memoryStage: parseInt(currentStage, 10),
+          coins: Math.round(coinCount),
+          xp: xpCount,
+          stage: parseInt(currentStage, 10),
           lastUpdated: new Date().toISOString()
         };
 
         await setDoc(userDocRef, payload, { merge: true });
-        console.log("Stage saved successfully to cloud:", currentStage);
+        console.log("Stage saved successfully to Firestore cloud:", currentStage);
       } catch (e) {
-        console.error("Error saving stage to cloud:", e);
+        console.error("Error saving stage to Firestore cloud:", e);
       }
     };
 
@@ -517,14 +520,9 @@
         
         if (docSnap.exists()) {
           const data = docSnap.data();
-          if (data.totalCoins !== undefined) coinCount = Math.round(parseFloat(data.totalCoins));
-          else if (data.coins !== undefined) coinCount = Math.round(parseFloat(data.coins));
-
-          if (data.totalXp !== undefined) xpCount = parseInt(data.totalXp, 10);
-          else if (data.xp !== undefined) xpCount = parseInt(data.xp, 10);
-
-          if (data.memoryStage !== undefined) currentStage = parseInt(data.memoryStage, 10);
-          else if (data.stage !== undefined) currentStage = parseInt(data.stage, 10);
+          if (data.coins !== undefined) coinCount = Math.round(parseFloat(data.coins));
+          if (data.xp !== undefined) xpCount = parseInt(data.xp, 10);
+          if (data.stage !== undefined) currentStage = parseInt(data.stage, 10);
 
           updateUserData(false);
           startStage(currentStage);
@@ -687,7 +685,7 @@
       const secs = (secondsElapsed % 60).toString().padStart(2, '0');
       document.getElementById('time-count').textContent = `${mins}:${secs}`;
     }
-
+    
     function getSymmetricalRowDistribution(cardCount) {
       if (cardCount === 134) {
         return [8, 10, 10, 10, 10, 10, 9, 9, 10, 10, 10, 10, 10, 8];
@@ -739,7 +737,7 @@
 
       return layout;
     }
-
+      
     function configureGridAndSizing(rowLayout) {
       const container = document.getElementById('board-container');
       if (!container) return;
@@ -967,6 +965,7 @@
       coinCount += coinsEarned;
       xpCount += xpEarned;
       
+      // Increment stage so the new stage is saved
       currentStage++;
 
       document.getElementById('reward-coins').textContent = `+${Math.round(coinsEarned).toLocaleString()}`;
@@ -996,12 +995,13 @@
         btn.onclick = nextStage;
       }
 
+      // Saves data locally and triggers window.saveUserDataToCloud() instantly
       updateUserData(true);
 
       startConfetti();
       overlay.classList.add('active');
     }
-
+    
     function nextStage() {
       stopVictoryMusic();
       stopConfetti();
