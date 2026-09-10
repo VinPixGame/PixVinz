@@ -235,9 +235,11 @@
     .card.flip, .card.matched { transform: rotateY(180deg); }
     .card.matched { cursor: default; }
 
+    /* Floating zoom effect showing the image side */
     .card.floating {
       transform: scale(2.2) translateY(-15px) rotateY(180deg) !important;
       z-index: 100;
+      overflow: visible;
       box-shadow: 0 0 25px rgba(255, 215, 0, 0.9);
     }
 
@@ -358,9 +360,9 @@
 </head>
 <body>
 
-  <audio id="bg-music" src="sounds/bgmusic1.mp3" loop crossOrigin="anonymous"></audio>
+  <audio id="bg-music" src="sounds/bgmusic1.mp3" loop crossorigin="anonymous"></audio>
   <audio id="tap-sound" src="select.mp3"></audio>
-  <audio id="victory-music" crossOrigin="anonymous"></audio>
+  <audio id="victory-music" crossorigin="anonymous"></audio>
 
   <header>
     <div class="top-bar">
@@ -468,34 +470,6 @@
       return localStorage.getItem('vinpix_username') || '';
     }
 
-    function getStageFromUrl() {
-      const params = new URLSearchParams(window.location.search);
-      const stageParam = params.get('stage');
-      if (stageParam) {
-        const parsed = parseInt(stageParam, 10);
-        if (!isNaN(parsed) && parsed > 0) return parsed;
-      }
-      const match = window.location.pathname.match(/level(\d+)/i);
-      if (match) {
-        const parsed = parseInt(match[1], 10);
-        if (!isNaN(parsed) && parsed > 0) return parsed;
-      }
-      return null;
-    }
-
-    function updateUrlForStage(stage) {
-      try {
-        const newPath = `/level${stage}`;
-        window.history.replaceState({ stage: stage }, `Stage ${stage}`, newPath);
-      } catch (e) {
-        try {
-          const url = new URL(window.location);
-          url.searchParams.set('stage', stage);
-          window.history.replaceState({ stage: stage }, '', url);
-        } catch (err) {}
-      }
-    }
-
     let prefix = getActiveUserPrefix();
     let coinKey = `${prefix}totalCoins`;
     let xpKey = `${prefix}xp`;
@@ -503,10 +477,15 @@
 
     let coinCount = Math.round(parseFloat(localStorage.getItem(coinKey))) || 500;
     let xpCount = parseInt(localStorage.getItem(xpKey), 10) || 0;
-    
-    let urlStage = getStageFromUrl();
-    let storedStage = parseInt(localStorage.getItem(stageKey), 10) || 1;
-    let currentStage = urlStage !== null ? Math.max(urlStage, storedStage) : storedStage;
+    let currentStage = parseInt(localStorage.getItem(stageKey), 10) || 1;
+
+    // Function to update URL path to match current stage without breaking relative image paths
+    function updateStageUrl(stage) {
+      try {
+        const newPath = `/level${stage}`;
+        window.history.replaceState({ stage: stage }, `Stage ${stage}`, newPath);
+      } catch (e) {}
+    }
 
     window.saveUserDataToCloud = async function() {
       const username = getActiveUsername();
@@ -543,12 +522,7 @@
           const data = docSnap.data();
           if (data.coins !== undefined) coinCount = Math.round(parseFloat(data.coins));
           if (data.xp !== undefined) xpCount = parseInt(data.xp, 10);
-          if (data.stage !== undefined) {
-            const cloudStage = parseInt(data.stage, 10);
-            if (cloudStage > currentStage) {
-              currentStage = cloudStage;
-            }
-          }
+          if (data.stage !== undefined) currentStage = parseInt(data.stage, 10);
 
           updateUserData(false);
           startStage(currentStage);
@@ -574,7 +548,7 @@
       localStorage.setItem(xpKey, xpCount);
       localStorage.setItem(stageKey, currentStage);
 
-      updateUrlForStage(currentStage);
+      updateStageUrl(currentStage);
 
       if (typeof updateProfileStats === 'function') updateProfileStats();
       if (shouldSaveToCloud && typeof window.saveUserDataToCloud === 'function') {
@@ -845,7 +819,7 @@
 
     function startStage(stage) {
       currentStage = stage;
-      updateUrlForStage(stage);
+      updateStageUrl(stage);
 
       const board = document.getElementById('board');
       board.innerHTML = '';
