@@ -471,7 +471,7 @@
 
     let prefix = getActiveUserPrefix();
     let coinKey = `${prefix}totalCoins`;
-    let xpKey = `${prefix}totalXp`;
+    let xpKey = `${prefix}xp`;
     let stageKey = `${prefix}memoryStage`;
 
     let coinCount = Math.round(parseFloat(localStorage.getItem(coinKey))) || 500;
@@ -493,6 +493,9 @@
       } catch (e) {}
     };
 
+    
+
+    // Fix 2: Prioritize data.xp in your cloud fetch
     window.fetchUserDataFromCloud = async function() {
       const username = getActiveUsername();
       if (!username || !window.pixvinzDb) return;
@@ -504,8 +507,7 @@
           const data = docSnap.data();
           if (data.totalCoins !== undefined) coinCount = Math.round(parseFloat(data.totalCoins));
           
-          // Checks for either totalXp or xp from Firestore
-          const cloudXp = data.totalXp !== undefined ? data.totalXp : data.xp;
+          const cloudXp = data.xp !== undefined ? data.xp : data.totalXp;
           if (cloudXp !== undefined) xpCount = parseInt(cloudXp, 10);
 
           if (data.memoryStage !== undefined) currentStage = parseInt(data.memoryStage, 10);
