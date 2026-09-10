@@ -238,7 +238,6 @@
     .card.floating {
       transform: scale(2.2) translateY(-15px) rotateY(180deg) !important;
       z-index: 100;
-      overflow: visible;
       box-shadow: 0 0 25px rgba(255, 215, 0, 0.9);
     }
 
@@ -478,7 +477,6 @@
     let xpCount = parseInt(localStorage.getItem(xpKey), 10) || 0;
     let currentStage = parseInt(localStorage.getItem(stageKey), 10) || 1;
 
-    // Updates the browser URL to match the exact active stage (e.g. /stage1 to /stage100)
     function updateStageUrl(stage) {
       try {
         const newPath = `/stage${stage}`;
@@ -502,10 +500,7 @@
         };
 
         await setDoc(userDocRef, payload, { merge: true });
-        console.log("Stage saved successfully to cloud:", currentStage);
-      } catch (e) {
-        console.error("Error saving stage to cloud:", e);
-      }
+      } catch (e) {}
     };
 
     window.fetchUserDataFromCloud = async function() {
@@ -526,9 +521,7 @@
           updateUserData(false);
           startStage(currentStage);
         }
-      } catch (e) {
-        console.error("Error fetching from cloud:", e);
-      }
+      } catch (e) {}
     };
 
     function updateUserData(shouldSaveToCloud = true) {
