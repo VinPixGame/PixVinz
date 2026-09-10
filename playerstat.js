@@ -101,15 +101,8 @@ function spendCoins(amount) {
 
 // Handles victory, saves with profile.js keys, and triggers profile sync if available
 async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeStr) {
-    const totalCoinsKey = getUserKey('totalCoins');
     const currentLevelKey = getUserKey('currentLevel');
-
-    let totalCoins = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
     let maxUnlocked = parseInt(localStorage.getItem(currentLevelKey)) || 1;
-
-    let targetCoins = stars * 5;
-    totalCoins += targetCoins;
-    localStorage.setItem(totalCoinsKey, totalCoins);
 
     let nextLevelToUnlock = maxUnlocked;
     if (completedLevel >= maxUnlocked) {
