@@ -235,7 +235,6 @@
     .card.flip, .card.matched { transform: rotateY(180deg); }
     .card.matched { cursor: default; }
 
-/* Floating zoom effect showing the image side */
     .card.floating {
       transform: scale(2.2) translateY(-15px) rotateY(180deg) !important;
       z-index: 100;
@@ -469,6 +468,34 @@
       return localStorage.getItem('vinpix_username') || '';
     }
 
+    function getStageFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const stageParam = params.get('stage');
+      if (stageParam) {
+        const parsed = parseInt(stageParam, 10);
+        if (!isNaN(parsed) && parsed > 0) return parsed;
+      }
+      const match = window.location.pathname.match(/level(\d+)/i);
+      if (match) {
+        const parsed = parseInt(match[1], 10);
+        if (!isNaN(parsed) && parsed > 0) return parsed;
+      }
+      return null;
+    }
+
+    function updateUrlForStage(stage) {
+      try {
+        const newPath = `/level${stage}`;
+        window.history.replaceState({ stage: stage }, `Stage ${stage}`, newPath);
+      } catch (e) {
+        try {
+          const url = new URL(window.location);
+          url.searchParams.set('stage', stage);
+          window.history.replaceState({ stage: stage }, '', url);
+        } catch (err) {}
+      }
+    }
+
     let prefix = getActiveUserPrefix();
     let coinKey = `${prefix}totalCoins`;
     let xpKey = `${prefix}xp`;
@@ -476,53 +503,60 @@
 
     let coinCount = Math.round(parseFloat(localStorage.getItem(coinKey))) || 500;
     let xpCount = parseInt(localStorage.getItem(xpKey), 10) || 0;
-    let currentStage = parseInt(localStorage.getItem(stageKey), 10) || 1;
+    
+    let urlStage = getStageFromUrl();
+    let storedStage = parseInt(localStorage.getItem(stageKey), 10) || 1;
+    let currentStage = urlStage !== null ? Math.max(urlStage, storedStage) : storedStage;
 
     window.saveUserDataToCloud = async function() {
-  const username = getActiveUsername();
-  if (!username || !window.pixvinzDb) return;
+      const username = getActiveUsername();
+      if (!username || !window.pixvinzDb) return;
 
-  try {
-    const { db, doc, setDoc } = window.pixvinzDb;
-    const userDocRef = doc(db, 'players', username);
-    
-    // Explicitly package the exact values to ensure currentStage is captured accurately
-    const payload = {
-      coins: Math.round(coinCount),
-      xp: xpCount,
-      stage: parseInt(currentStage, 10),
-      lastUpdated: new Date().toISOString()
+      try {
+        const { db, doc, setDoc } = window.pixvinzDb;
+        const userDocRef = doc(db, 'players', username);
+        
+        const payload = {
+          coins: Math.round(coinCount),
+          xp: xpCount,
+          stage: parseInt(currentStage, 10),
+          lastUpdated: new Date().toISOString()
+        };
+
+        await setDoc(userDocRef, payload, { merge: true });
+        console.log("Stage saved successfully to cloud:", currentStage);
+      } catch (e) {
+        console.error("Error saving stage to cloud:", e);
+      }
     };
 
-    await setDoc(userDocRef, payload, { merge: true });
-    console.log("Stage saved successfully to cloud:", currentStage);
-  } catch (e) {
-    console.error("Error saving stage to cloud:", e);
-  }
-};
+    window.fetchUserDataFromCloud = async function() {
+      const username = getActiveUsername();
+      if (!username || !window.pixvinzDb) return;
 
-window.fetchUserDataFromCloud = async function() {
-  const username = getActiveUsername();
-  if (!username || !window.pixvinzDb) return;
+      try {
+        const { db, doc, getDoc } = window.pixvinzDb;
+        const userDocRef = doc(db, 'players', username);
+        const docSnap = await getDoc(userDocRef);
+        
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.coins !== undefined) coinCount = Math.round(parseFloat(data.coins));
+          if (data.xp !== undefined) xpCount = parseInt(data.xp, 10);
+          if (data.stage !== undefined) {
+            const cloudStage = parseInt(data.stage, 10);
+            if (cloudStage > currentStage) {
+              currentStage = cloudStage;
+            }
+          }
 
-  try {
-    const { db, doc, getDoc } = window.pixvinzDb;
-    const userDocRef = doc(db, 'players', username);
-    const docSnap = await getDoc(userDocRef);
-    
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      if (data.coins !== undefined) coinCount = Math.round(parseFloat(data.coins));
-      if (data.xp !== undefined) xpCount = parseInt(data.xp, 10);
-      if (data.stage !== undefined) currentStage = parseInt(data.stage, 10);
-
-      updateUserData(false);
-      startStage(currentStage);
-    }
-  } catch (e) {
-    console.error("Error fetching from cloud:", e);
-  }
-};
+          updateUserData(false);
+          startStage(currentStage);
+        }
+      } catch (e) {
+        console.error("Error fetching from cloud:", e);
+      }
+    };
 
     function updateUserData(shouldSaveToCloud = true) {
       prefix = getActiveUserPrefix();
@@ -539,6 +573,8 @@ window.fetchUserDataFromCloud = async function() {
       localStorage.setItem(coinKey, Math.round(coinCount));
       localStorage.setItem(xpKey, xpCount);
       localStorage.setItem(stageKey, currentStage);
+
+      updateUrlForStage(currentStage);
 
       if (typeof updateProfileStats === 'function') updateProfileStats();
       if (shouldSaveToCloud && typeof window.saveUserDataToCloud === 'function') {
@@ -676,7 +712,6 @@ window.fetchUserDataFromCloud = async function() {
       document.getElementById('time-count').textContent = `${mins}:${secs}`;
     }
 
-    
     function getSymmetricalRowDistribution(cardCount) {
       if (cardCount === 134) {
         return [8, 10, 10, 10, 10, 10, 9, 9, 10, 10, 10, 10, 10, 8];
@@ -729,8 +764,6 @@ window.fetchUserDataFromCloud = async function() {
       return layout;
     }
 
-
-      
     function configureGridAndSizing(rowLayout) {
       const container = document.getElementById('board-container');
       if (!container) return;
@@ -811,6 +844,9 @@ window.fetchUserDataFromCloud = async function() {
     }
 
     function startStage(stage) {
+      currentStage = stage;
+      updateUrlForStage(stage);
+
       const board = document.getElementById('board');
       board.innerHTML = '';
       flippedCards = [];
@@ -890,9 +926,8 @@ window.fetchUserDataFromCloud = async function() {
 
       playTapSound();
 
-      // Check current card size from computed styles (threshold for small cards in higher stages)
       const cardComputedSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-size')) || 40;
-      const isSmallCard = cardComputedSize <= 45; // Only applies to small cards in higher stages
+      const isSmallCard = cardComputedSize <= 45;
 
       if (isSmallCard) {
         this.classList.add('floating');
@@ -902,9 +937,8 @@ window.fetchUserDataFromCloud = async function() {
           this.classList.remove('floating');
           lockBoard = false;
           executeFlip(this);
-        }, 900); // 0.9 seconds zoom float duration
+        }, 900);
       } else {
-        // Immediate flip for larger cards on lower stages
         executeFlip(this);
       }
     }
@@ -957,7 +991,6 @@ window.fetchUserDataFromCloud = async function() {
       coinCount += coinsEarned;
       xpCount += xpEarned;
       
-      // Increment stage FIRST so the new stage is saved to local storage and cloud
       currentStage++;
 
       document.getElementById('reward-coins').textContent = `+${Math.round(coinsEarned).toLocaleString()}`;
@@ -987,13 +1020,12 @@ window.fetchUserDataFromCloud = async function() {
         btn.onclick = nextStage;
       }
 
-      updateUserData(true); // Now saves the incremented currentStage to cloud
+      updateUserData(true);
 
       startConfetti();
       overlay.classList.add('active');
     }
 
-    
     function nextStage() {
       stopVictoryMusic();
       stopConfetti();
