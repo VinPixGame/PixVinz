@@ -487,21 +487,30 @@
     }
 
     window.saveUserDataToCloud = async function() {
-      const username = getActiveUsername();
-      if (!username || !window.pixvinzDb) return;
+  const username = getActiveUsername();
+  if (!username || !window.pixvinzDb) return;
 
-      try {
-        const { db, doc, setDoc } = window.pixvinzDb;
-        const userDocRef = doc(db, 'players', username);
-        
-        // Explicitly package the exact values to ensure currentStage is captured accurately
-        const payload = {
-          coins: Math.round(coinCount),
-          xp: xpCount,
-          stage: parseInt(currentStage, 10),
-          lastUpdated: new Date().toISOString()
-        };
+  try {
+    const { db, doc, setDoc } = window.pixvinzDb;
+    const userDocRef = doc(db, 'players', username);
+    
+    // Explicitly grab the stage from localStorage or current variable to guarantee accuracy
+    const stageToSave = parseInt(localStorage.getItem(`${prefix}memoryStage`) || currentStage, 10);
+    
+    const payload = {
+      coins: Math.round(coinCount),
+      xp: xpCount,
+      stage: stageToSave,
+      lastUpdated: new Date().toISOString()
+    };
 
+    console.log("Sending payload to Firestore:", payload);
+    await setDoc(userDocRef, payload, { merge: true });
+    console.log("Stage successfully pushed to cloud:", stageToSave);
+  } catch (e) {
+    console.error("Error saving stage to cloud:", e);
+  }
+};
         await setDoc(userDocRef, payload, { merge: true });
         console.log("Stage saved successfully to cloud:", currentStage);
       } catch (e) {
