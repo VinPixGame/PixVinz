@@ -235,6 +235,7 @@
     .card.flip, .card.matched { transform: rotateY(180deg); }
     .card.matched { cursor: default; }
 
+/* Floating zoom effect showing the image side */
     .card.floating {
       transform: scale(2.2) translateY(-15px) rotateY(180deg) !important;
       z-index: 100;
@@ -358,9 +359,9 @@
 </head>
 <body>
 
-  <audio id="bg-music" src="sounds/bgmusic1.mp3" loop crossorigin="anonymous"></audio>
+  <audio id="bg-music" src="sounds/bgmusic1.mp3" loop crossOrigin="anonymous"></audio>
   <audio id="tap-sound" src="select.mp3"></audio>
-  <audio id="victory-music" crossorigin="anonymous"></audio>
+  <audio id="victory-music" crossOrigin="anonymous"></audio>
 
   <header>
     <div class="top-bar">
@@ -477,9 +478,10 @@
     let xpCount = parseInt(localStorage.getItem(xpKey), 10) || 0;
     let currentStage = parseInt(localStorage.getItem(stageKey), 10) || 1;
 
+    // Function to dynamically update the browser URL with the active stage
     function updateStageUrl(stage) {
       try {
-        const newPath = `/stage${stage}`;
+        const newPath = `?stage=${stage}`;
         window.history.replaceState({ stage: stage }, `Stage ${stage}`, newPath);
       } catch (e) {}
     }
@@ -492,6 +494,7 @@
         const { db, doc, setDoc } = window.pixvinzDb;
         const userDocRef = doc(db, 'players', username);
         
+        // Explicitly package the exact values to ensure currentStage is captured accurately
         const payload = {
           coins: Math.round(coinCount),
           xp: xpCount,
@@ -500,7 +503,10 @@
         };
 
         await setDoc(userDocRef, payload, { merge: true });
-      } catch (e) {}
+        console.log("Stage saved successfully to cloud:", currentStage);
+      } catch (e) {
+        console.error("Error saving stage to cloud:", e);
+      }
     };
 
     window.fetchUserDataFromCloud = async function() {
@@ -521,7 +527,9 @@
           updateUserData(false);
           startStage(currentStage);
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error("Error fetching from cloud:", e);
+      }
     };
 
     function updateUserData(shouldSaveToCloud = true) {
@@ -540,6 +548,7 @@
       localStorage.setItem(xpKey, xpCount);
       localStorage.setItem(stageKey, currentStage);
 
+      // Update the URL bar to reflect the current stage state
       updateStageUrl(currentStage);
 
       if (typeof updateProfileStats === 'function') updateProfileStats();
@@ -678,6 +687,7 @@
       document.getElementById('time-count').textContent = `${mins}:${secs}`;
     }
 
+    
     function getSymmetricalRowDistribution(cardCount) {
       if (cardCount === 134) {
         return [8, 10, 10, 10, 10, 10, 9, 9, 10, 10, 10, 10, 10, 8];
@@ -730,6 +740,8 @@
       return layout;
     }
 
+
+      
     function configureGridAndSizing(rowLayout) {
       const container = document.getElementById('board-container');
       if (!container) return;
@@ -892,8 +904,9 @@
 
       playTapSound();
 
+      // Check current card size from computed styles (threshold for small cards in higher stages)
       const cardComputedSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-size')) || 40;
-      const isSmallCard = cardComputedSize <= 45;
+      const isSmallCard = cardComputedSize <= 45; // Only applies to small cards in higher stages
 
       if (isSmallCard) {
         this.classList.add('floating');
@@ -903,8 +916,9 @@
           this.classList.remove('floating');
           lockBoard = false;
           executeFlip(this);
-        }, 900);
+        }, 900); // 0.9 seconds zoom float duration
       } else {
+        // Immediate flip for larger cards on lower stages
         executeFlip(this);
       }
     }
@@ -957,6 +971,7 @@
       coinCount += coinsEarned;
       xpCount += xpEarned;
       
+      // Increment stage FIRST so the new stage is saved to local storage and cloud
       currentStage++;
 
       document.getElementById('reward-coins').textContent = `+${Math.round(coinsEarned).toLocaleString()}`;
@@ -986,12 +1001,13 @@
         btn.onclick = nextStage;
       }
 
-      updateUserData(true);
+      updateUserData(true); // Now saves the incremented currentStage to cloud and updates URL
 
       startConfetti();
       overlay.classList.add('active');
     }
 
+    
     function nextStage() {
       stopVictoryMusic();
       stopConfetti();
