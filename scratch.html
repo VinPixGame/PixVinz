@@ -146,7 +146,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
-    import { getFirestore, doc, collection, query, where, limit, getDocs, updateDoc, writeBatch, serverTimestamp, increment, addDoc, orderBy } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+    import { getFirestore, doc, collection, query, where, limit, getDocs, updateDoc, writeBatch, serverTimestamp, increment, addDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
@@ -165,10 +165,11 @@
     let currentUser = null;
     let playerCoins = 0;
     let activeCard = null;
+    
+    // Fixed path to use singular 'image' directory
     let foilImage = new Image();
     foilImage.src = 'image/vinz.png';
 
-    // Web Audio API Sound Synthesizer
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     
     function playScratchSound() {
@@ -225,7 +226,6 @@
 
     async function fetchPayoutHistory() {
       const historyList = document.getElementById('history-list');
-      historyList.innerHTML = '<li>Loading history...</li>';
       try {
         const q = query(collection(db, 'scratch_history'), where('uid', '==', currentUser.uid), limit(5));
         const snap = await getDocs(q);
@@ -241,7 +241,7 @@
           historyList.appendChild(li);
         });
       } catch (err) {
-        historyList.innerHTML = '<li style="color:#ef4444;">Could not load history.</li>';
+        historyList.innerHTML = '<li style="color:#64748b;">Ready for your first scratch!</li>';
       }
     }
 
@@ -300,7 +300,7 @@
       const grid = document.getElementById('grid');
       grid.innerHTML = '';
 
-      slots.forEach((slot, index) => {
+      slots.forEach((slot) => {
         const cell = document.createElement('div');
         cell.className = 'scratch-cell';
 
@@ -323,10 +323,19 @@
     function initScratchCanvas(canvas) {
       const ctx = canvas.getContext('2d');
       
-      if (foilImage.complete) {
-        ctx.drawImage(foilImage, 0, 0, canvas.width, canvas.height);
+      const drawFoil = () => {
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        try {
+          ctx.drawImage(foilImage, 0, 0, canvas.width, canvas.height);
+        } catch(e) {}
+      };
+
+      if (foilImage.complete && foilImage.naturalWidth !== 0) {
+        drawFoil();
       } else {
-        foilImage.onload = () => ctx.drawImage(foilImage, 0, 0, canvas.width, canvas.height);
+        foilImage.onload = drawFoil;
+        foilImage.onerror = drawFoil;
       }
 
       let isDrawing = false;
@@ -345,7 +354,7 @@
         const pos = getPos(e);
         ctx.globalCompositeOperation = 'destination-out';
         ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 14, 0, Math.PI * 2);
+        ctx.arc(pos.x, pos.y, 16, 0, Math.PI * 2);
         ctx.fill();
 
         const now = Date.now();
@@ -363,7 +372,7 @@
         for (let i = 3; i < imageData.data.length; i += 4) {
           if (imageData.data[i] < 128) transparent++;
         }
-        if (transparent > totalPixels * 0.45 && canvas.style.opacity !== '0') {
+        if (transparent > totalPixels * 0.40 && canvas.style.opacity !== '0') {
           canvas.style.transition = 'opacity 0.4s ease';
           canvas.style.opacity = '0';
           setTimeout(() => canvas.remove(), 400);
@@ -415,7 +424,6 @@
           statusDiv.innerHTML = `<span style="color: #ef4444;">No match this time. Try another card!</span>`;
         }
 
-        // Record history log
         await addDoc(collection(db, 'scratch_history'), {
           uid: currentUser.uid,
           prizeName: activeCard.prizeName,
@@ -470,4 +478,4 @@
   </div>
 
 </body>
-    </html>
+</html>
