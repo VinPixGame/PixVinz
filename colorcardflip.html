@@ -235,7 +235,6 @@
     .card.flip, .card.matched { transform: rotateY(180deg); }
     .card.matched { cursor: default; }
 
-    /* Floating zoom effect showing the image side */
     .card.floating {
       transform: scale(2.2) translateY(-15px) rotateY(180deg) !important;
       z-index: 100;
@@ -479,10 +478,10 @@
     let xpCount = parseInt(localStorage.getItem(xpKey), 10) || 0;
     let currentStage = parseInt(localStorage.getItem(stageKey), 10) || 1;
 
-    // Function to update URL path to match current stage without breaking relative image paths
+    // Updates the browser URL to match the exact active stage (e.g. /stage1 to /stage100)
     function updateStageUrl(stage) {
       try {
-        const newPath = `/level${stage}`;
+        const newPath = `/stage${stage}`;
         window.history.replaceState({ stage: stage }, `Stage ${stage}`, newPath);
       } catch (e) {}
     }
