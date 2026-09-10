@@ -235,7 +235,6 @@
     .card.flip, .card.matched { transform: rotateY(180deg); }
     .card.matched { cursor: default; }
 
-/* Floating zoom effect showing the image side */
     .card.floating {
       transform: scale(2.2) translateY(-15px) rotateY(180deg) !important;
       z-index: 100;
@@ -471,14 +470,13 @@
 
     let prefix = getActiveUserPrefix();
     let coinKey = `${prefix}totalCoins`;
-    let xpKey = `${prefix}xp`;
+    let xpKey = `${prefix}totalXp`;
     let stageKey = `${prefix}memoryStage`;
 
-    let coinCount = Math.round(parseFloat(localStorage.getItem(coinKey))) || 500;
+    let coinCount = Math.round(parseFloat(localStorage.getItem(coinKey))) || 0;
     let xpCount = parseInt(localStorage.getItem(xpKey), 10) || 0;
     let currentStage = parseInt(localStorage.getItem(stageKey), 10) || 1;
 
-    // Function to dynamically update the browser URL with the active stage
     function updateStageUrl(stage) {
       try {
         const newPath = `?stage=${stage}`;
@@ -487,30 +485,20 @@
     }
 
     window.saveUserDataToCloud = async function() {
-  const username = getActiveUsername();
-  if (!username || !window.pixvinzDb) return;
+      const username = getActiveUsername();
+      if (!username || !window.pixvinzDb) return;
 
-  try {
-    const { db, doc, setDoc } = window.pixvinzDb;
-    const userDocRef = doc(db, 'players', username);
-    
-    // Explicitly grab the stage from localStorage or current variable to guarantee accuracy
-    const stageToSave = parseInt(localStorage.getItem(`${prefix}memoryStage`) || currentStage, 10);
-    
-    const payload = {
-      coins: Math.round(coinCount),
-      xp: xpCount,
-      stage: stageToSave,
-      lastUpdated: new Date().toISOString()
-    };
+      try {
+        const { db, doc, setDoc } = window.pixvinzDb;
+        const userDocRef = doc(db, 'players', username);
+        
+        const payload = {
+          totalCoins: Math.round(coinCount),
+          totalXp: xpCount,
+          memoryStage: parseInt(currentStage, 10),
+          lastUpdated: new Date().toISOString()
+        };
 
-    console.log("Sending payload to Firestore:", payload);
-    await setDoc(userDocRef, payload, { merge: true });
-    console.log("Stage successfully pushed to cloud:", stageToSave);
-  } catch (e) {
-    console.error("Error saving stage to cloud:", e);
-  }
-};
         await setDoc(userDocRef, payload, { merge: true });
         console.log("Stage saved successfully to cloud:", currentStage);
       } catch (e) {
@@ -529,9 +517,14 @@
         
         if (docSnap.exists()) {
           const data = docSnap.data();
-          if (data.coins !== undefined) coinCount = Math.round(parseFloat(data.coins));
-          if (data.xp !== undefined) xpCount = parseInt(data.xp, 10);
-          if (data.stage !== undefined) currentStage = parseInt(data.stage, 10);
+          if (data.totalCoins !== undefined) coinCount = Math.round(parseFloat(data.totalCoins));
+          else if (data.coins !== undefined) coinCount = Math.round(parseFloat(data.coins));
+
+          if (data.totalXp !== undefined) xpCount = parseInt(data.totalXp, 10);
+          else if (data.xp !== undefined) xpCount = parseInt(data.xp, 10);
+
+          if (data.memoryStage !== undefined) currentStage = parseInt(data.memoryStage, 10);
+          else if (data.stage !== undefined) currentStage = parseInt(data.stage, 10);
 
           updateUserData(false);
           startStage(currentStage);
@@ -557,7 +550,6 @@
       localStorage.setItem(xpKey, xpCount);
       localStorage.setItem(stageKey, currentStage);
 
-      // Update the URL bar to reflect the current stage state
       updateStageUrl(currentStage);
 
       if (typeof updateProfileStats === 'function') updateProfileStats();
@@ -696,7 +688,6 @@
       document.getElementById('time-count').textContent = `${mins}:${secs}`;
     }
 
-    
     function getSymmetricalRowDistribution(cardCount) {
       if (cardCount === 134) {
         return [8, 10, 10, 10, 10, 10, 9, 9, 10, 10, 10, 10, 10, 8];
@@ -749,8 +740,6 @@
       return layout;
     }
 
-
-      
     function configureGridAndSizing(rowLayout) {
       const container = document.getElementById('board-container');
       if (!container) return;
@@ -913,9 +902,8 @@
 
       playTapSound();
 
-      // Check current card size from computed styles (threshold for small cards in higher stages)
       const cardComputedSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-size')) || 40;
-      const isSmallCard = cardComputedSize <= 45; // Only applies to small cards in higher stages
+      const isSmallCard = cardComputedSize <= 45;
 
       if (isSmallCard) {
         this.classList.add('floating');
@@ -925,9 +913,8 @@
           this.classList.remove('floating');
           lockBoard = false;
           executeFlip(this);
-        }, 900); // 0.9 seconds zoom float duration
+        }, 900);
       } else {
-        // Immediate flip for larger cards on lower stages
         executeFlip(this);
       }
     }
@@ -980,7 +967,6 @@
       coinCount += coinsEarned;
       xpCount += xpEarned;
       
-      // Increment stage FIRST so the new stage is saved to local storage and cloud
       currentStage++;
 
       document.getElementById('reward-coins').textContent = `+${Math.round(coinsEarned).toLocaleString()}`;
@@ -1010,13 +996,12 @@
         btn.onclick = nextStage;
       }
 
-      updateUserData(true); // Now saves the incremented currentStage to cloud and updates URL
+      updateUserData(true);
 
       startConfetti();
       overlay.classList.add('active');
     }
 
-    
     function nextStage() {
       stopVictoryMusic();
       stopConfetti();
