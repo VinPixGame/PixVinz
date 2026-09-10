@@ -104,6 +104,9 @@ async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeSt
     const currentLevelKey = getUserKey('currentLevel');
     let maxUnlocked = parseInt(localStorage.getItem(currentLevelKey)) || 1;
 
+    // Check if this level has already been completed/unlocked past
+    const isReplay = completedLevel < maxUnlocked;
+
     let nextLevelToUnlock = maxUnlocked;
     if (completedLevel >= maxUnlocked) {
         nextLevelToUnlock = completedLevel + 1;
@@ -116,6 +119,28 @@ async function handleLevelVictory(completedLevel, stars, finalMoves, finalTimeSt
     }
     if (finalTimeStr !== undefined) {
         localStorage.setItem(getUserKey(`levelTime_${completedLevel}`), finalTimeStr);
+    }
+
+    // Only give rewards if it's NOT a replay (first-time completion)
+    if (!isReplay) {
+        // Example: reward 50 coins and 100 XP for first-time completion
+        const coinReward = 50;
+        const xpReward = 100;
+        
+        earnCoins(coinReward);
+
+        // Add XP for first-time completion
+        const totalXpKey = getUserKey('totalXp');
+        let currentTotalXp = parseInt(localStorage.getItem(totalXpKey)) || 0;
+        currentTotalXp += xpReward;
+        localStorage.setItem(totalXpKey, currentTotalXp);
+
+        // Sync to loggedInUser session if applicable
+        try {
+            const userObj = JSON.parse(localStorage.getItem('loggedInUser')) || {};
+            userObj.xp = currentTotalXp;
+            localStorage.setItem('loggedInUser', JSON.stringify(userObj));
+        } catch (e) {}
     }
 
     updateCoinDisplay();
