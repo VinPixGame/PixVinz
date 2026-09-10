@@ -503,7 +503,11 @@
         if (docSnap.exists) {
           const data = docSnap.data();
           if (data.totalCoins !== undefined) coinCount = Math.round(parseFloat(data.totalCoins));
-          if (data.totalXp !== undefined) xpCount = parseInt(data.totalXp, 10);
+          
+          // Checks for either totalXp or xp from Firestore
+          const cloudXp = data.totalXp !== undefined ? data.totalXp : data.xp;
+          if (cloudXp !== undefined) xpCount = parseInt(cloudXp, 10);
+
           if (data.memoryStage !== undefined) currentStage = parseInt(data.memoryStage, 10);
 
           updateUserData(false);
