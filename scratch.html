@@ -306,7 +306,8 @@
 
         const img = document.createElement('img');
         img.className = 'prize-img';
-        img.src = slot.imageUrl;
+        // Automatically fix 'images/' to 'image/' if it was generated plural
+        img.src = slot.imageUrl ? slot.imageUrl.replace('images/', 'image/') : '';
         cell.appendChild(img);
 
         const canvas = document.createElement('canvas');
