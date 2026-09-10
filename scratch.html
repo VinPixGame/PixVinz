@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PixVinz - Scratch Card</title>
+  <style>
+    body {
+      background: #0f172a;
+      color: #f8fafc;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 16px;
+    }
+    .container {
+      max-width: 460px;
+      width: 100%;
+      text-align: center;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      background: #1e293b;
+      padding: 12px 20px;
+      border-radius: 12px;
+    }
+    .promo-banner {
+      background: linear-gradient(135deg, #3b82f6, #9333ea);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+      color: #fff;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .promo-banner svg {
+      width: 64px;
+      height: 64px;
+      flex-shrink: 0;
+    }
+    .promo-banner h2 {
+      margin: 0 0 4px 0;
+      font-size: 1.25rem;
+    }
+    .promo-banner p {
+      margin: 0;
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+    button.action-btn {
+      background: #eab308;
+      color: #0f172a;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-weight: 900;
+      font-size: 1rem;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 15px;
+      box-shadow: 0 4px 12px rgba(234, 179, 8, 0.3);
+    }
+    button.action-btn:disabled {
+      background: #64748b;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      background: #1e293b;
+      padding: 16px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      position: relative;
+    }
+    .scratch-cell {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .scratch-cell img.prize-img {
+      width: 75%;
+      height: 75%;
+      object-fit: contain;
+    }
+    .scratch-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+      cursor: crosshair;
+      border-radius: 8px;
+    }
+    #status {
+      margin-top: 15px;
+      font-size: 0.95rem;
+      color: #94a3b8;
+    }
+    .history-box {
+      margin-top: 24px;
+      background: #1e293b;
+      padding: 16px;
+      border-radius: 12px;
+      text-align: left;
+    }
+    .history-box h3 {
+      margin: 0 0 10px 0;
+      font-size: 0.95rem;
+      color: #cbd5e1;
+    }
+    .history-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+    .history-list li {
+      font-size: 0.85rem;
+      padding: 6px 0;
+      border-bottom: 1px solid #334155;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+    import { getFirestore, doc, collection, query, where, limit, getDocs, updateDoc, writeBatch, serverTimestamp, increment, addDoc, orderBy } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
+      authDomain: "pixvinz2026.firebaseapp.com",
+      projectId: "pixvinz2026",
+      storageBucket: "pixvinz2026.firebasestorage.app",
+      messagingSenderId: "45609077809",
+      appId: "1:45609077809:web:575611e46acda9f64c5910",
+      measurementId: "G-W7FSERE8ZJ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let playerCoins = 0;
+    let activeCard = null;
+    let foilImage = new Image();
+    foilImage.src = 'image/vinz.png';
+
+    // Web Audio API Sound Synthesizer
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playScratchSound() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(80 + Math.random() * 40, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.05);
+    }
+
+    function playWinSound() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.setValueAtTime(554.37, now + 0.1);
+      osc.frequency.setValueAtTime(659.25, now + 0.2);
+      osc.frequency.setValueAtTime(880, now + 0.3);
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(now + 0.6);
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        await fetchPlayerData();
+        await fetchPayoutHistory();
+      } else {
+        window.location.href = 'index.html';
+      }
+    });
+
+    async function fetchPlayerData() {
+      const q = query(collection(db, 'players'), where('uid', '==', currentUser.uid), limit(1));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        const pData = snap.docs[0].data();
+        playerCoins = pData.coins || 0;
+        document.getElementById('coin-display').textContent = `${playerCoins} Coins`;
+      }
+    }
+
+    async function fetchPayoutHistory() {
+      const historyList = document.getElementById('history-list');
+      historyList.innerHTML = '<li>Loading history...</li>';
+      try {
+        const q = query(collection(db, 'scratch_history'), where('uid', '==', currentUser.uid), limit(5));
+        const snap = await getDocs(q);
+        historyList.innerHTML = '';
+        if (snap.empty) {
+          historyList.innerHTML = '<li style="color:#64748b;">No scratches yet. Buy your first card!</li>';
+          return;
+        }
+        snap.forEach(docSnap => {
+          const data = docSnap.data();
+          const li = document.createElement('li');
+          li.innerHTML = `<span>${data.prizeName}</span><span style="color:${data.won ? '#22c55e' : '#ef4444'}">${data.won ? 'WIN' : 'LOSS'}</span>`;
+          historyList.appendChild(li);
+        });
+      } catch (err) {
+        historyList.innerHTML = '<li style="color:#ef4444;">Could not load history.</li>';
+      }
+    }
+
+    window.buyAndInitializeCard = async function() {
+      if (playerCoins < 500) {
+        alert("Not enough coins! You need 500 coins to buy a scratch card.");
+        return;
+      }
+
+      const btn = document.getElementById('buy-btn');
+      const statusDiv = document.getElementById('status');
+      btn.disabled = true;
+      statusDiv.textContent = "Selecting card from the secure vault...";
+
+      try {
+        const q = query(collection(db, 'scratch_cards'), where('isBought', '==', false), limit(1));
+        const snap = await getDocs(q);
+
+        if (snap.empty) {
+          statusDiv.textContent = "All scratch cards are sold out!";
+          btn.disabled = false;
+          return;
+        }
+
+        const cardDoc = snap.docs[0];
+        activeCard = { id: cardDoc.id, ...cardDoc.data() };
+
+        const playerQuery = query(collection(db, 'players'), where('uid', '==', currentUser.uid), limit(1));
+        const playerSnap = await getDocs(playerQuery);
+        const playerDocRef = playerSnap.docs[0].ref;
+
+        const batch = writeBatch(db);
+        batch.update(playerDocRef, { coins: increment(-500) });
+        batch.update(doc(db, 'scratch_cards', activeCard.id), {
+          isBought: true,
+          ownerId: currentUser.uid,
+          purchasedAt: serverTimestamp()
+        });
+
+        await batch.commit();
+        playerCoins -= 500;
+        document.getElementById('coin-display').textContent = `${playerCoins} Coins`;
+
+        statusDiv.textContent = "Card secured! Scratch panels below to reveal your prize.";
+        btn.style.display = 'none';
+        renderGameGrid(activeCard.gridSlots);
+
+      } catch (err) {
+        console.error(err);
+        statusDiv.textContent = "Transaction error. Please try again.";
+        btn.disabled = false;
+      }
+    };
+
+    function renderGameGrid(slots) {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+
+      slots.forEach((slot, index) => {
+        const cell = document.createElement('div');
+        cell.className = 'scratch-cell';
+
+        const img = document.createElement('img');
+        img.className = 'prize-img';
+        img.src = slot.imageUrl;
+        cell.appendChild(img);
+
+        const canvas = document.createElement('canvas');
+        canvas.className = 'scratch-canvas';
+        canvas.width = 100;
+        canvas.height = 100;
+        cell.appendChild(canvas);
+
+        initScratchCanvas(canvas);
+        grid.appendChild(cell);
+      });
+    }
+
+    function initScratchCanvas(canvas) {
+      const ctx = canvas.getContext('2d');
+      
+      if (foilImage.complete) {
+        ctx.drawImage(foilImage, 0, 0, canvas.width, canvas.height);
+      } else {
+        foilImage.onload = () => ctx.drawImage(foilImage, 0, 0, canvas.width, canvas.height);
+      }
+
+      let isDrawing = false;
+      const totalPixels = canvas.width * canvas.height;
+
+      function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+      }
+
+      let lastSoundTime = 0;
+      function scratch(e) {
+        if (!isDrawing) return;
+        const pos = getPos(e);
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 14, 0, Math.PI * 2);
+        ctx.fill();
+
+        const now = Date.now();
+        if (now - lastSoundTime > 80) {
+          playScratchSound();
+          lastSoundTime = now;
+        }
+
+        checkProgress();
+      }
+
+      function checkProgress() {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let transparent = 0;
+        for (let i = 3; i < imageData.data.length; i += 4) {
+          if (imageData.data[i] < 128) transparent++;
+        }
+        if (transparent > totalPixels * 0.45 && canvas.style.opacity !== '0') {
+          canvas.style.transition = 'opacity 0.4s ease';
+          canvas.style.opacity = '0';
+          setTimeout(() => canvas.remove(), 400);
+          checkCardCompletion();
+        }
+      }
+
+      canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e); });
+      canvas.addEventListener('mousemove', scratch);
+      window.addEventListener('mouseup', () => isDrawing = false);
+
+      canvas.addEventListener('touchstart', (e) => { isDrawing = true; scratch(e); e.preventDefault(); });
+      canvas.addEventListener('touchmove', (e) => { scratch(e); e.preventDefault(); });
+      canvas.addEventListener('touchend', () => isDrawing = false);
+    }
+
+    async function checkCardCompletion() {
+      const remaining = document.querySelectorAll('.scratch-canvas');
+      if (remaining.length === 0) {
+        await updateDoc(doc(db, 'scratch_cards', activeCard.id), { isScratched: true });
+        
+        const counts = {};
+        activeCard.gridSlots.forEach(s => {
+          counts[s.imageUrl] = (counts[s.imageUrl] || 0) + 1;
+        });
+
+        let won = false;
+        for (let img in counts) {
+          if (counts[img] >= 3 && img !== 'null') {
+            won = true;
+            break;
+          }
+        }
+
+        const statusDiv = document.getElementById('status');
+        const playerQuery = query(collection(db, 'players'), where('uid', '==', currentUser.uid), limit(1));
+        const playerSnap = await getDocs(playerQuery);
+        const pRef = playerSnap.docs[0].ref;
+
+        if (won && activeCard.tierId !== 'none') {
+          playWinSound();
+          statusDiv.innerHTML = `<b style="color: #22c55e; font-size: 1.2rem;">🎉 YOU WON ${activeCard.prizeName}!</b>`;
+          if (activeCard.prizeType === 'coins') {
+            await updateDoc(pRef, { coins: increment(activeCard.prizeValue) });
+          } else if (activeCard.prizeType === 'xp') {
+            await updateDoc(pRef, { xp: increment(activeCard.prizeValue) });
+          }
+        } else {
+          statusDiv.innerHTML = `<span style="color: #ef4444;">No match this time. Try another card!</span>`;
+        }
+
+        // Record history log
+        await addDoc(collection(db, 'scratch_history'), {
+          uid: currentUser.uid,
+          prizeName: activeCard.prizeName,
+          won: won && activeCard.tierId !== 'none',
+          timestamp: serverTimestamp()
+        });
+
+        await fetchPlayerData();
+        await fetchPayoutHistory();
+
+        document.getElementById('buy-btn').style.display = 'block';
+        document.getElementById('buy-btn').disabled = false;
+        document.getElementById('buy-btn').textContent = 'Buy Another Card (500 Coins)';
+      }
+    }
+  </script>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <button onclick="location.href='index.html'" style="background:transparent; border:none; color:#f8fafc; font-weight:700; cursor:pointer;">← Home</button>
+      <div id="coin-display" style="font-weight: 800; color: #eab308;">Loading...</div>
+    </div>
+
+    <!-- SVG Banner -->
+    <div class="promo-banner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="8" r="6"/>
+        <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+      </svg>
+      <div>
+        <h2>1,000,000 XP Jackpot</h2>
+        <p>Match 3 identical icons to win big & climb the global leaderboard!</p>
+      </div>
+    </div>
+
+    <h1>PixVinz Scratch</h1>
+    <div id="grid" class="grid-container">
+      <!-- 12 slots rendered dynamically -->
+    </div>
+
+    <button id="buy-btn" class="action-btn" onclick="buyAndInitializeCard()">Buy Scratch Card (500 Coins)</button>
+    <div id="status">Purchase a card to start scratching!</div>
+
+    <div class="history-box">
+      <h3>Recent Payouts</h3>
+      <ul id="history-list" class="history-list">
+        <li>Loading history...</li>
+      </ul>
+    </div>
+  </div>
+
+</body>
+    </html>
