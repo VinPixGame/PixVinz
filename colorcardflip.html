@@ -225,7 +225,7 @@
     .card {
       position: relative;
       transform-style: preserve-3d;
-      transition: transform 0.3s ease;
+      transition: transform 0.3s ease, z-index 0.3s ease;
       cursor: pointer;
       width: var(--card-size, 40px);
       height: var(--card-size, 40px);
@@ -234,6 +234,13 @@
 
     .card.flip, .card.matched { transform: rotateY(180deg); }
     .card.matched { cursor: default; }
+
+/* Floating zoom effect specifically for small cards in higher stages */
+    .card.floating {
+      transform: scale(2.2) translateY(-12px) rotateY(0deg) !important;
+      z-index: 100;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.9);
+    }
 
     .card-face {
       width: 100%;
@@ -870,8 +877,29 @@
       if (this.classList.contains('flip') || this.classList.contains('matched')) return;
 
       playTapSound();
-      this.classList.add('flip');
-      flippedCards.push(this);
+
+      // Check current card size from computed styles (threshold for small cards in higher stages)
+      const cardComputedSize = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-size')) || 40;
+      const isSmallCard = cardComputedSize <= 45; // Only applies to small cards in higher stages
+
+      if (isSmallCard) {
+        this.classList.add('floating');
+        lockBoard = true;
+
+        setTimeout(() => {
+          this.classList.remove('floating');
+          lockBoard = false;
+          executeFlip(this);
+        }, 900); // 0.9 seconds zoom float duration
+      } else {
+        // Immediate flip for larger cards on lower stages
+        executeFlip(this);
+      }
+    }
+
+    function executeFlip(card) {
+      card.classList.add('flip');
+      flippedCards.push(card);
 
       if (flippedCards.length === 2) {
         flips++;
