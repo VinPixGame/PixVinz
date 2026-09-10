@@ -158,23 +158,55 @@ document.addEventListener('DOMContentLoaded', async () => {
       const vMoves = document.getElementById('vMoves');
       if (vMoves) vMoves.innerText = moves;
 
-      const vCoins = document.getElementById('vCoins');
-      if (vCoins) vCoins.innerText = `+${stars * 5}`;
+      // --- TIERED BASE & PERFORMANCE PENALTY REWARD SYSTEM ---
+      const maxLevelKey = getUserKey('maxLevelCompleted');
+      let maxLevelCompleted = parseInt(localStorage.getItem(maxLevelKey)) || 0;
 
-      // Calculate level XP gained
       let tier = Math.floor((currentLevel - 1) / 10);
-      let xpGained = (tier + 1) * 100;
+      let baseCoins = 500 + (tier * 500);
+      let baseXp = 1000 + (tier * 500);
+
+      let movePenaltyCoins = moves * 5;
+      let movePenaltyXp = moves * 10;
+
+      let timeUnits = Math.floor(seconds / 3);
+      let timePenaltyCoins = timeUnits * 5;
+      let timePenaltyXp = timeUnits * 10;
+
+      let earnedCoins = 0;
+      let earnedXp = 0;
+
+      // Anti-abuse check: only award coins/XP for first-time completion of a level
+      if (currentLevel > maxLevelCompleted) {
+        earnedCoins = Math.max(0, baseCoins - movePenaltyCoins - timePenaltyCoins);
+        earnedXp = Math.max(0, baseXp - movePenaltyXp - timePenaltyXp);
+        localStorage.setItem(maxLevelKey, currentLevel);
+      } else {
+        earnedCoins = 0;
+        earnedXp = 0;
+      }
+
+      const vCoins = document.getElementById('vCoins');
+      if (vCoins) vCoins.innerText = `+${earnedCoins}`;
+
       const vXp = document.getElementById('vXp');
-      if (vXp) vXp.innerText = `+${xpGained}`;
+      if (vXp) vXp.innerText = `+${earnedXp}`;
+
+      // --- PERSIST EARNED COINS ---
+      const totalCoinsKey = getUserKey('totalCoins');
+      let currentTotalCoins = parseInt(localStorage.getItem(totalCoinsKey)) || 0;
+      currentTotalCoins += earnedCoins;
+      localStorage.setItem(totalCoinsKey, currentTotalCoins);
 
       // --- PERSIST EARNED XP ---
       const totalXpKey = getUserKey('totalXp');
       let currentTotalXp = parseInt(localStorage.getItem(totalXpKey)) || 0;
-      currentTotalXp += xpGained;
+      currentTotalXp += earnedXp;
       localStorage.setItem(totalXpKey, currentTotalXp);
 
       try {
         const userObj = JSON.parse(localStorage.getItem('loggedInUser')) || {};
+        userObj.coins = currentTotalCoins;
         userObj.xp = currentTotalXp;
         localStorage.setItem('loggedInUser', JSON.stringify(userObj));
       } catch (e) {}
