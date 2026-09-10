@@ -951,6 +951,9 @@ window.fetchUserDataFromCloud = async function() {
 
       coinCount += coinsEarned;
       xpCount += xpEarned;
+      
+      // Increment stage FIRST so the new stage is saved to local storage and cloud
+      currentStage++;
 
       document.getElementById('reward-coins').textContent = `+${Math.round(coinsEarned).toLocaleString()}`;
       document.getElementById('reward-xp').textContent = `+${xpEarned.toLocaleString()}`;
@@ -960,7 +963,7 @@ window.fetchUserDataFromCloud = async function() {
       const msg = document.getElementById('modal-msg');
       const btn = document.getElementById('next-btn');
 
-      if (currentStage === 100) {
+      if (currentStage > 100) {
         title.textContent = "STAGE 100 CLEARED!";
         msg.textContent = `Time: ${document.getElementById('time-count').textContent} | Flips: ${flips}`;
         btn.textContent = "PLAY AGAIN";
@@ -973,19 +976,19 @@ window.fetchUserDataFromCloud = async function() {
           startStage(currentStage);
         };
       } else {
-        title.textContent = `STAGE ${currentStage} CLEARED!`;
+        title.textContent = `STAGE ${currentStage - 1} CLEARED!`;
         msg.textContent = `Time: ${document.getElementById('time-count').textContent} | Flips: ${flips}`;
         btn.textContent = "NEXT STAGE";
         btn.onclick = nextStage;
       }
 
-      currentStage++;
-      updateUserData(true);
+      updateUserData(true); // Now saves the incremented currentStage to cloud
 
       startConfetti();
       overlay.classList.add('active');
     }
 
+    
     function nextStage() {
       stopVictoryMusic();
       stopConfetti();
