@@ -235,11 +235,11 @@
     .card.flip, .card.matched { transform: rotateY(180deg); }
     .card.matched { cursor: default; }
 
-/* Floating zoom effect specifically for small cards in higher stages */
+/* Floating zoom effect showing the image side */
     .card.floating {
-      transform: scale(2.2) translateY(-12px) rotateY(0deg) !important;
+      transform: scale(2.2) translateY(-15px) rotateY(180deg) !important;
       z-index: 100;
-      box-shadow: 0 0 20px rgba(255, 215, 0, 0.9);
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.9);
     }
 
     .card-face {
