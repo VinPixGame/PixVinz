@@ -82,7 +82,6 @@
       padding: 16px;
       border-radius: 16px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-      position: relative;
     }
     .scratch-cell {
       position: relative;
@@ -91,14 +90,17 @@
       border-radius: 8px;
       overflow: hidden;
       background: #334155;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
     .scratch-cell img.prize-img {
-      width: 75%;
-      height: 75%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       object-fit: contain;
+      padding: 10px;
+      box-sizing: border-box;
+      z-index: 1;
     }
     .scratch-canvas {
       position: absolute;
@@ -109,6 +111,7 @@
       touch-action: none;
       cursor: crosshair;
       border-radius: 8px;
+      z-index: 2;
     }
     #status {
       margin-top: 15px;
@@ -166,7 +169,6 @@
     let playerCoins = 0;
     let activeCard = null;
     
-    // Fixed path to use singular 'image' directory
     let foilImage = new Image();
     foilImage.src = 'image/vinz.png';
 
@@ -306,14 +308,13 @@
 
         const img = document.createElement('img');
         img.className = 'prize-img';
-        // Automatically fix 'images/' to 'image/' if it was generated plural
         img.src = slot.imageUrl ? slot.imageUrl.replace('images/', 'image/') : '';
         cell.appendChild(img);
 
         const canvas = document.createElement('canvas');
         canvas.className = 'scratch-canvas';
-        canvas.width = 100;
-        canvas.height = 100;
+        canvas.width = 150;
+        canvas.height = 150;
         cell.appendChild(canvas);
 
         initScratchCanvas(canvas);
@@ -325,11 +326,18 @@
       const ctx = canvas.getContext('2d');
       
       const drawFoil = () => {
-        ctx.fillStyle = '#334155';
+        ctx.fillStyle = '#1e293b';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        try {
+        if (foilImage.complete && foilImage.naturalWidth !== 0) {
           ctx.drawImage(foilImage, 0, 0, canvas.width, canvas.height);
-        } catch(e) {}
+        } else {
+          ctx.fillStyle = '#334155';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = 'bold 14px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('SCRATCH', canvas.width / 2, canvas.height / 2);
+        }
       };
 
       if (foilImage.complete && foilImage.naturalWidth !== 0) {
@@ -353,9 +361,12 @@
       function scratch(e) {
         if (!isDrawing) return;
         const pos = getPos(e);
+        const scaleX = canvas.width / canvas.offsetWidth;
+        const scaleY = canvas.height / canvas.offsetHeight;
+        
         ctx.globalCompositeOperation = 'destination-out';
         ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 16, 0, Math.PI * 2);
+        ctx.arc(pos.x * scaleX, pos.y * scaleY, 20, 0, Math.PI * 2);
         ctx.fill();
 
         const now = Date.now();
@@ -397,12 +408,16 @@
         
         const counts = {};
         activeCard.gridSlots.forEach(s => {
-          counts[s.imageUrl] = (counts[s.imageUrl] || 0) + 1;
+          const cleanUrl = s.imageUrl ? s.imageUrl.replace('images/', 'image/') : '';
+          if (cleanUrl) {
+            counts[cleanUrl] = (counts[cleanUrl] || 0) + 1;
+          }
         });
 
+        // STRICT MATCH 3 RULE: Must have EXACTLY 3 matches for a single icon. No 4 or more!
         let won = false;
         for (let img in counts) {
-          if (counts[img] >= 3 && img !== 'null') {
+          if (counts[img] === 3) {
             won = true;
             break;
           }
@@ -415,14 +430,14 @@
 
         if (won && activeCard.tierId !== 'none') {
           playWinSound();
-          statusDiv.innerHTML = `<b style="color: #22c55e; font-size: 1.2rem;">🎉 YOU WON ${activeCard.prizeName}!</b>`;
+          statusDiv.innerHTML = `<b style="color: #22c55e; font-size: 1.2rem;">🎉 YOU WON ${activeCard.prizeName}! (Match 3)</b>`;
           if (activeCard.prizeType === 'coins') {
             await updateDoc(pRef, { coins: increment(activeCard.prizeValue) });
           } else if (activeCard.prizeType === 'xp') {
             await updateDoc(pRef, { xp: increment(activeCard.prizeValue) });
           }
         } else {
-          statusDiv.innerHTML = `<span style="color: #ef4444;">No match this time. Try another card!</span>`;
+          statusDiv.innerHTML = `<span style="color: #ef4444;">No exact Match-3. Try another card!</span>`;
         }
 
         await addDoc(collection(db, 'scratch_history'), {
@@ -458,7 +473,7 @@
       </svg>
       <div>
         <h2>1,000,000 XP Jackpot</h2>
-        <p>Match 3 identical icons to win big & climb the global leaderboard!</p>
+        <p>Match exactly 3 identical icons to win big & climb the leaderboard!</p>
       </div>
     </div>
 
