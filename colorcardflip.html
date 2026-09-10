@@ -485,14 +485,19 @@
   try {
     const { db, doc, setDoc } = window.pixvinzDb;
     const userDocRef = doc(db, 'players', username);
-    await setDoc(userDocRef, {
+    
+    // Explicitly package the exact values to ensure currentStage is captured accurately
+    const payload = {
       coins: Math.round(coinCount),
       xp: xpCount,
-      stage: currentStage,
+      stage: parseInt(currentStage, 10),
       lastUpdated: new Date().toISOString()
-    }, { merge: true });
+    };
+
+    await setDoc(userDocRef, payload, { merge: true });
+    console.log("Stage saved successfully to cloud:", currentStage);
   } catch (e) {
-    console.error("Error saving to cloud:", e);
+    console.error("Error saving stage to cloud:", e);
   }
 };
 
