@@ -470,7 +470,7 @@
 
     let prefix = getActiveUserPrefix();
     let coinKey = `${prefix}totalCoins`;
-    let xpKey = `${prefix}xp`;
+    let xpKey = `${prefix}totalXp`; // Synchronized to match plinko.js key layout
     let stageKey = `${prefix}memoryStage`;
 
     let coinCount = Math.round(parseFloat(localStorage.getItem(coinKey))) || 500;
@@ -965,7 +965,6 @@
       coinCount += coinsEarned;
       xpCount += xpEarned;
       
-      // Increment stage so the new stage is saved
       currentStage++;
 
       document.getElementById('reward-coins').textContent = `+${Math.round(coinsEarned).toLocaleString()}`;
@@ -995,7 +994,6 @@
         btn.onclick = nextStage;
       }
 
-      // Saves data locally and triggers window.saveUserDataToCloud() instantly
       updateUserData(true);
 
       startConfetti();
