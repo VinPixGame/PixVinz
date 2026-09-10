@@ -34,7 +34,7 @@ function goHome() {
     }
 }
 
-// --- SAFE CLOUD SYNC ---
+ // --- SAFE CLOUD SYNC ---
 window.saveUserDataToCloud = async function() {
     try {
         if (!window.pixvinzDb || !window.pixvinzDb.db) return;
@@ -49,6 +49,7 @@ window.saveUserDataToCloud = async function() {
         } catch (e) {}
 
         const currentLevel = parseInt(localStorage.getItem(getUserKey('currentLevel'))) || 1;
+        const currentStage = parseInt(localStorage.getItem(getUserKey('memoryStage'))) || 1;
         const totalCoins = parseInt(localStorage.getItem(getUserKey('totalCoins'))) || 0;
         const avatar = localStorage.getItem(getUserKey('vinpix_avatar')) || '';
 
@@ -61,13 +62,13 @@ window.saveUserDataToCloud = async function() {
         const dailyRewardState = dailyDataStr ? JSON.parse(dailyDataStr) : { streak: 0, lastClaimDate: "" };
 
         // --- CHALLENGE DATA ---
-        // --- CHALLENGE DATA ---
-    const currentChallengeVal = parseInt(localStorage.getItem(getUserKey('currentChallenge'))) || 1;
+        const currentChallengeVal = parseInt(localStorage.getItem(getUserKey('currentChallenge'))) || 1;
         const userDocRef = doc(db, "players", username);
         await setDoc(userDocRef, {
             username: username,
             displayName: displayName,
             level: currentLevel,
+            stage: currentStage,
             xp: currentXpVal,
             coins: totalCoins,
             avatar: avatar,
@@ -102,6 +103,7 @@ async function fetchUserDataFromFirestore() {
                     username: cloudData.username || currentUser.username,
                     displayName: cloudData.displayName || currentUser.displayName,
                     level: cloudData.level !== undefined ? cloudData.level : (currentUser.level || 1),
+                    stage: cloudData.stage !== undefined ? cloudData.stage : (currentUser.stage || 1),
                     xp: cloudData.xp !== undefined ? cloudData.xp : (currentUser.xp || 0),
                     coins: cloudData.coins !== undefined ? cloudData.coins : (currentUser.coins || 0),
                     avatar: cloudData.avatar || currentUser.avatar || '',
@@ -113,15 +115,17 @@ async function fetchUserDataFromFirestore() {
                 localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
 
                 // Sync stats to local storage keys used by playerstat.js
-              const prefix = username + '_';
-              if (cloudData.coins !== undefined) localStorage.setItem(prefix + 'totalCoins', cloudData.coins);
-              if (cloudData.level !== undefined) localStorage.setItem(prefix + 'currentLevel', cloudData.level);
-              if (cloudData.xp !== undefined) localStorage.setItem(prefix + 'totalXp', cloudData.xp); // <--- SYNC FIRESTORE XP
-              if (cloudData.avatar) localStorage.setItem(prefix + 'vinpix_avatar', cloudData.avatar);
+                const prefix = username + '_';
+                if (cloudData.coins !== undefined) localStorage.setItem(prefix + 'totalCoins', cloudData.coins);
+                if (cloudData.level !== undefined) localStorage.setItem(prefix + 'currentLevel', cloudData.level);
+                if (cloudData.stage !== undefined) localStorage.setItem(prefix + 'memoryStage', cloudData.stage);
+                if (cloudData.xp !== undefined) localStorage.setItem(prefix + 'totalXp', cloudData.xp);
+                if (cloudData.avatar) localStorage.setItem(prefix + 'vinpix_avatar', cloudData.avatar);
+                
                 // Sync challenge data down to local storage
-    if (cloudData.challenge !== undefined) {
-        localStorage.setItem(prefix + 'currentChallenge', cloudData.challenge);
-    }
+                if (cloudData.challenge !== undefined) {
+                    localStorage.setItem(prefix + 'currentChallenge', cloudData.challenge);
+                }
 
                 // Sync daily reward state down to local storage key
                 if (cloudData.dailyRewardState) {
@@ -145,7 +149,6 @@ async function fetchUserDataFromFirestore() {
         console.error("Failed to fetch data from Firestore:", err);
     }
 }
-
 function applyAvatarToUI(avatarData) {
     const avatarLoader = document.getElementById('avatarLoader');
     if (!avatarData) {
