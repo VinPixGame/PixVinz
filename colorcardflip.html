@@ -38,6 +38,7 @@
       align-items: center;
       gap: 8px;
       flex-shrink: 0;
+      margin-top: 2cm;
     }
 
     .top-bar {
@@ -46,7 +47,7 @@
       align-items: center;
       width: 100%;
       position: relative;
-      margin-top: 24px
+      margin-top: 24px;
       height: 48px;
       flex-shrink: 0;
     }
@@ -658,12 +659,10 @@
 
     
     function getSymmetricalRowDistribution(cardCount) {
-      // Special final stage override
       if (cardCount === 134) {
         return [8, 10, 10, 10, 10, 10, 9, 9, 10, 10, 10, 10, 10, 8];
       }
 
-      // Grab the container dimensions dynamically to calculate optimal packing
       const container = document.getElementById('board-container');
       const containerW = container ? container.clientWidth - 8 : 400;
       const containerH = container ? container.clientHeight - 8 : 400;
@@ -673,7 +672,6 @@
       let maxCardSize = 0;
       let bestRows = cardCount;
 
-      // Iteratively test column counts to maximize space and card physical size
       for (let cols = 1; cols <= cardCount; cols++) {
         let rows = Math.ceil(cardCount / cols);
         let cardW = (containerW - (cols - 1) * gap) / cols;
@@ -690,18 +688,15 @@
       let base = Math.floor(cardCount / bestRows);
       let extra = cardCount % bestRows;
 
-      // Build base row counts (larger rows first)
       let rawLayout = [];
       for (let i = 0; i < bestRows; i++) {
         rawLayout.push(base + (i < extra ? 1 : 0));
       }
 
-      // Re-order the rows symmetrically (places larger/extra card rows toward the center)
       let layout = new Array(bestRows);
       let left = 0;
       let right = bestRows - 1;
 
-      // Alternate placing from ends inward so top/bottom match
       for (let i = rawLayout.length - 1; i >= 0; i--) {
         if ((rawLayout.length - i) % 2 === 1) {
           layout[right] = rawLayout[i];
@@ -717,8 +712,6 @@
 
 
       
-    // FIXED TWO-WAY SCALING: Prioritizes maximum size based on available 
-    // vertical and horizontal bounds simultaneously so it never overflows.
     function configureGridAndSizing(rowLayout) {
       const container = document.getElementById('board-container');
       if (!container) return;
@@ -727,15 +720,12 @@
       const maxCols = Math.max(...rowLayout);
       const gap = 3;
 
-      // Available space accounting for paddings/wrappers
       const maxAvailableW = container.clientWidth - 20;
       const maxAvailableH = container.clientHeight - 20;
 
-      // Calculate card size constraints from both width and height
       let cardW = (maxAvailableW - (maxCols - 1) * gap) / maxCols;
       let cardH = (maxAvailableH - (rows - 1) * gap) / rows;
 
-      // Take the minimum so it expands as large as possible without overflowing width or height
       let cardSize = Math.floor(Math.min(cardW, cardH));
       cardSize = Math.max(10, cardSize);
 
