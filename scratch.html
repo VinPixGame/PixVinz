@@ -28,6 +28,17 @@
             min-height: 100vh;
         }
 
+        /* Confetti canvas overlay */
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 999;
+        }
+
         .header-bar {
             width: 100%;
             max-width: 480px;
@@ -38,6 +49,17 @@
             box-sizing: border-box;
             background: var(--surface);
             border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .audio-toggle-btn {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-main);
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
         }
 
         .back-btn {
@@ -139,16 +161,40 @@
         .buy-btn:active { transform: scale(0.98); }
         .buy-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+        .scratch-board-wrapper {
+            background: linear-gradient(145deg, #1c2133, #11141e);
+            border: 2px solid rgba(255,215,0,0.3);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+        }
+
+        .card-meta-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .card-code-badge {
+            color: var(--gold);
+            font-family: monospace;
+            font-weight: bold;
+            background: rgba(255,215,0,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
         .scratch-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
-            background: var(--surface-card);
-            padding: 16px;
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.08);
             position: relative;
-            min-height: 280px;
         }
 
         .scratch-slot {
@@ -160,33 +206,126 @@
             justify-content: center;
             position: relative;
             overflow: hidden;
-            font-size: 26px;
-            border: 1px solid rgba(255,255,255,0.05);
+            font-size: 24px;
+            border: 1px solid rgba(255,255,255,0.08);
         }
 
         .scratch-slot img {
-            width: 80%;
-            height: 80%;
+            width: 75%;
+            height: 75%;
             object-fit: contain;
         }
 
-        .scratch-cover {
+        .scratch-canvas {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #2c3247 0%, #1a1e2e 100%);
-            border: 1px dashed rgba(255,255,255,0.2);
-            border-radius: 10px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             cursor: pointer;
+            touch-action: none;
+            border-radius: 10px;
+        }
+
+        /* Winning Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 7, 15, 0.85);
+            backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
-            font-weight: bold;
-            color: var(--text-muted);
-            transition: opacity 0.3s;
-            user-select: none;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
         }
-        .scratch-cover.revealed { opacity: 0; pointer-events: none; }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: linear-gradient(145deg, #1c2133, #121522);
+            border: 2px solid var(--gold);
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.25);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-trophy {
+            font-size: 48px;
+            margin-bottom: 10px;
+            animation: bounce 1s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-8px); }
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--gold);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .modal-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .claim-form-box {
+            background: rgba(0,0,0,0.6);
+            border: 1px dashed var(--gold);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 15px;
+            text-align: left;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .claim-form-box textarea {
+            width: 100%;
+            height: 90px;
+            background: #0a0b10;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            padding: 8px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 11px;
+            resize: none;
+            box-sizing: border-box;
+            margin-top: 6px;
+        }
+
+        .modal-btn {
+            background: linear-gradient(135deg, var(--gold) 0%, #ff8800 100%);
+            color: #000;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255,215,0,0.3);
+        }
 
         .history-section {
             background: var(--surface);
@@ -241,8 +380,17 @@
 </head>
 <body>
 
+    <canvas id="confettiCanvas"></canvas>
+
+    <!-- Audio Elements -->
+    <audio id="bgMusic" src="sounds/scratch.mp3" loop></audio>
+    <audio id="scratchSfx" src="https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3" preload="auto"></audio>
+    <audio id="winSfx" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3" preload="auto"></audio>
+    <audio id="loseSfx" src="https://assets.mixkit.co/active_storage/sfx/2704/2704-preview.mp3" preload="auto"></audio>
+
     <div class="header-bar">
         <button class="back-btn" onclick="window.location.href='index.html'">← Home</button>
+        <button class="audio-toggle-btn" id="audioToggleBtn" onclick="toggleBackgroundMusic()">🎵 Music: OFF</button>
         <div class="currency-cluster">
             <div class="badge-pill">🪙 <span id="headerCoins">0</span></div>
             <div class="badge-pill" style="border-color: rgba(0,229,255,0.3); color: var(--primary);">⭐ <span id="headerXp">0</span></div>
@@ -263,7 +411,7 @@
                 </defs>
             </svg>
             <div class="poster-title">1,000,000 XP Jackpot</div>
-            <div class="poster-sub">Match exactly 3 identical icons to win big & climb the leaderboard! Cost: 500 Coins per card.</div>
+            <div class="poster-sub">Scratch to match 3 identical icons & win big! Cost: 500 Coins per card.</div>
         </div>
 
         <!-- Arena Action & Scratch Matrix -->
@@ -271,8 +419,14 @@
             <button id="buyCardBtn" class="buy-btn" onclick="buyScratchCard()">Buy Scratch Card (500 🪙)</button>
             
             <div id="scratchContainer" style="display:none; margin-top: 20px;">
-                <div class="scratch-grid" id="scratchGrid">
-                    <!-- 12 Slots populated dynamically -->
+                <div class="scratch-board-wrapper">
+                    <div class="card-meta-header">
+                        <span>PIXVINZ SECURE TICKET</span>
+                        <span>CODE: <span id="displayCardCode" class="card-code-badge">----</span></span>
+                    </div>
+                    <div class="scratch-grid" id="scratchGrid">
+                        <!-- 12 Scratch Slots populated dynamically -->
+                    </div>
                 </div>
                 <div id="resultMessage" style="margin-top: 15px; font-weight: 800; font-size: 15px;"></div>
             </div>
@@ -288,6 +442,17 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- Winning / Result Modal Overlay -->
+    <div class="modal-overlay" id="resultModal">
+        <div class="modal-card">
+            <div class="modal-trophy" id="modalTrophy">🏆</div>
+            <div class="modal-title" id="modalTitle">Victory!</div>
+            <div class="modal-subtitle" id="modalSubtitle">You matched 3 items!</div>
+            <div id="modalContentBody"></div>
+            <button class="modal-btn" onclick="closeResultModal()">Awesome!</button>
+        </div>
     </div>
 
     <!-- Firebase Initialization Module Script -->
@@ -330,8 +495,40 @@
             document.getElementById('headerXp').textContent = xp.toLocaleString();
         }
 
+        // Audio & Music Manager
+        let musicPlaying = false;
+        window.toggleBackgroundMusic = function() {
+            const bgMusic = document.getElementById('bgMusic');
+            const toggleBtn = document.getElementById('audioToggleBtn');
+            if (musicPlaying) {
+                bgMusic.pause();
+                musicPlaying = false;
+                toggleBtn.textContent = "🎵 Music: OFF";
+            } else {
+                bgMusic.play().then(() => {
+                    musicPlaying = true;
+                    toggleBtn.textContent = "🎵 Music: ON";
+                }).catch(e => {
+                    console.error("Audio playback blocked:", e);
+                    alert("Click anywhere on the page first to enable background audio.");
+                });
+            }
+        }
+
+        function playSound(type) {
+            try {
+                const sfx = document.getElementById(type);
+                if (sfx) {
+                    sfx.currentTime = 0;
+                    sfx.play().catch(e => {});
+                }
+            } catch(e) {}
+        }
+
         let activeCardData = null;
         let activeCardId = null;
+        let evaluated = false;
+        let scratchSfxTimer = null;
 
         window.buyScratchCard = async function() {
             const username = getCurrentUsername();
@@ -352,9 +549,11 @@
             buyBtn.textContent = "Fetching Card from Vault...";
 
             try {
-                // Fetch a random card directly using individual document get() to bypass collection listing restrictions
+                evaluated = false;
                 const randomCardNum = String(Math.floor(Math.random() * 1000) + 1).padStart(4, '0');
                 activeCardId = `card_${randomCardNum}`;
+                document.getElementById('displayCardCode').textContent = activeCardId.toUpperCase();
+
                 const cardRef = doc(db, "scratch_cards", activeCardId);
                 const cardSnap = await getDoc(cardRef);
 
@@ -364,7 +563,6 @@
 
                 activeCardData = cardSnap.data();
 
-                // Securely claim/buy the card in Firestore
                 if (auth.currentUser) {
                     await updateDoc(cardRef, {
                         isBought: true,
@@ -376,6 +574,7 @@
 
                 buyBtn.style.display = 'none';
                 document.getElementById('scratchContainer').style.display = 'block';
+                document.getElementById('resultMessage').textContent = '';
 
             } catch (err) {
                 console.error(err);
@@ -403,45 +602,150 @@
 
                 slot.innerHTML = `
                     ${contentHTML}
-                    <div class="scratch-cover" onclick="revealSlot(this)">SCRATCH</div>
+                    <canvas class="scratch-canvas" id="scratchCanvas_${index}"></canvas>
                 `;
                 gridEl.appendChild(slot);
+
+                initScratchCanvas(`scratchCanvas_${index}`);
             });
         }
 
-        window.revealSlot = function(coverElement) {
-            coverElement.classList.add('revealed');
+        function initScratchCanvas(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
 
-            const covers = document.querySelectorAll('.scratch-cover');
-            const unrevealed = Array.from(covers).some(c => !c.classList.contains('revealed'));
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#c0c0c0');
+            gradient.addColorStop(0.3, '#e8e8e8');
+            gradient.addColorStop(0.5, '#9a9a9a');
+            gradient.addColorStop(0.7, '#f0f0f0');
+            gradient.addColorStop(1, '#a8a8a8');
 
-            if (!unrevealed) {
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            for (let i = 0; i < 15; i++) {
+                ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 3, 3);
+            }
+
+            ctx.fillStyle = '#555';
+            ctx.font = 'bold 11px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('SCRATCH', canvas.width / 2, canvas.height / 2);
+
+            let isDrawing = false;
+
+            function scratch(e) {
+                if (!isDrawing || evaluated) return;
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+                if (!clientX || !clientY) return;
+
+                const x = clientX - rect.left;
+                const y = clientY - rect.top;
+
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(x, y, 16, 0, Math.PI * 2, false);
+                ctx.fill();
+
+                // Play scratch effect audio intermittently while actively scratching
+                if (!scratchSfxTimer) {
+                    playSound('scratchSfx');
+                    scratchSfxTimer = setTimeout(() => { scratchSfxTimer = null; }, 250);
+                }
+
+                checkScratchProgress(canvas);
+            }
+
+            canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e); });
+            canvas.addEventListener('mousemove', scratch);
+            window.addEventListener('mouseup', () => { isDrawing = false; });
+
+            canvas.addEventListener('touchstart', (e) => { isDrawing = true; scratch(e); e.preventDefault(); });
+            canvas.addEventListener('touchmove', (e) => { scratch(e); e.preventDefault(); });
+            canvas.addEventListener('touchend', () => { isDrawing = false; });
+        }
+
+        function checkScratchProgress(canvas) {
+            if (evaluated) return;
+            const ctx = canvas.getContext('2d');
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let transparentPixels = 0;
+            const totalPixels = imgData.data.length / 4;
+
+            for (let i = 3; i < imgData.data.length; i += 4) {
+                if (imgData.data[i] === 0) {
+                    transparentPixels++;
+                }
+            }
+
+            if ((transparentPixels / totalPixels) > 0.40) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+
+            const canvases = document.querySelectorAll('.scratch-canvas');
+            let allScratched = true;
+            canvases.forEach(c => {
+                const cCtx = c.getContext('2d');
+                const cData = cCtx.getImageData(0, 0, c.width, c.height);
+                let trans = 0;
+                for (let i = 3; i < cData.data.length; i += 4) {
+                    if (cData.data[i] === 0) trans++;
+                }
+                if ((trans / (cData.data.length / 4)) < 0.35) {
+                    allScratched = false;
+                }
+            });
+
+            if (allScratched && !evaluated) {
+                evaluated = true;
                 evaluateCardResult(activeCardData);
             }
         }
 
         async function evaluateCardResult(card) {
-            const resultMsg = document.getElementById('resultMessage');
             const username = getCurrentUsername();
             const prefix = username ? username + '_' : '';
-            const userUid = auth.currentUser ? auth.currentUser.uid : 'Guest';
+            const modal = document.getElementById('resultModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalSubtitle = document.getElementById('modalSubtitle');
+            const modalBody = document.getElementById('modalContentBody');
+            const modalTrophy = document.getElementById('modalTrophy');
+
+            modalBody.innerHTML = '';
 
             if (card.isWinner) {
+                playSound('winSfx');
+                startConfetti();
+                modalTrophy.textContent = '🏆';
+
                 const isMassiveWin = (card.prizeType === 'coin' && card.prizeValue >= 20000) || 
                                      (card.prizeType === 'xp' && card.prizeValue >= 50000);
 
                 if (isMassiveWin) {
-                    resultMsg.style.color = 'var(--gold)';
-                    resultMsg.innerHTML = `🏆 MASSIVE JACKPOT! You won ${card.prizeValue.toLocaleString()} ${card.prizeType.toUpperCase()}!<br>` +
-                                          `<div style="margin-top:8px; font-size:12px; background:rgba(0,0,0,0.4); padding:8px; border-radius:6px; border:1px dashed var(--gold); text-align:left;">` +
-                                          `📌 <b>Claim Instructions:</b><br>` +
-                                          `1. Screenshot this winning screen.<br>` +
-                                          `2. Send it to support along with your secure details:<br>` +
-                                          `&nbsp;&nbsp;• Username: <b>${username}</b><br>` +
-                                          `&nbsp;&nbsp;• Security UID: <code style="font-size:10px; color:var(--primary);">${userUid}</code></div>`;
+                    modalTitle.textContent = 'MASSIVE JACKPOT!';
+                    modalSubtitle.textContent = `You won ${card.prizeValue.toLocaleString()} ${card.prizeType.toUpperCase()}!`;
+                    
+                    const claimText = `claiming prize\nsend the following info to pixvinz.official@gmail.com\n\nusername: ${username}\ncard unique code: ${activeCardId}\nprize amount: ${card.prizeValue.toLocaleString()} ${card.prizeType.toUpperCase()}`;
+                    
+                    modalBody.innerHTML = `
+                        <div class="claim-form-box">
+                            📌 <b>Claim Instructions:</b><br>
+                            Send the details below to <b>pixvinz.official@gmail.com</b><br>
+                            <textarea id="claimTextArea" readonly>${claimText}</textarea>
+                            <button style="background:var(--gold); border:none; padding:6px 10px; font-weight:bold; border-radius:6px; cursor:pointer; margin-top:6px; font-size:11px;" onclick="navigator.clipboard.writeText(document.getElementById('claimTextArea').value); alert('Copied claim info!');">Copy Claim Info</button>
+                        </div>
+                    `;
                 } else {
-                    resultMsg.style.color = 'var(--gold)';
-                    resultMsg.textContent = `🎉 WINNER! You won ${card.prizeValue.toLocaleString()} ${card.prizeType.toUpperCase()}`;
+                    modalTitle.textContent = 'YOU WON!';
+                    modalSubtitle.textContent = `Prize credited: ${card.prizeValue.toLocaleString()} ${card.prizeType.toUpperCase()}`;
 
                     if (card.prizeType === 'coin') {
                         let totalCoins = parseInt(localStorage.getItem(prefix + 'totalCoins')) || 0;
@@ -455,7 +759,6 @@
                     window.updateTopBalances();
                 }
 
-                // Save to Firestore Payout History for support verification
                 try {
                     if (auth.currentUser) {
                         await setDoc(doc(collection(db, "payout_history")), {
@@ -463,6 +766,7 @@
                             winnerUsername: username,
                             prizeValue: card.prizeValue,
                             prizeType: card.prizeType,
+                            cardCode: activeCardId,
                             isManualClaim: isMassiveWin,
                             status: isMassiveWin ? 'pending_verification' : 'auto_credited',
                             timestamp: Date.now()
@@ -477,19 +781,72 @@
                     window.saveUserDataToCloud();
                 }
             } else {
-                resultMsg.style.color = '#ff5252';
-                resultMsg.textContent = `❌ No match! Better luck next time.`;
+                playSound('loseSfx');
+                modalTrophy.textContent = '❌';
+                modalTitle.textContent = 'NO MATCH';
+                modalSubtitle.textContent = 'Better luck on your next scratch ticket!';
             }
 
-            setTimeout(() => {
-                const buyBtn = document.getElementById('buyCardBtn');
-                buyBtn.disabled = false;
-                buyBtn.textContent = "Buy Another Card (500 🪙)";
-                buyBtn.style.display = 'block';
-            }, 1500);
+            modal.classList.add('active');
         }
 
-        // Fetch Real Payout History from Firestore
+        window.closeResultModal = function() {
+            document.getElementById('resultModal').classList.remove('active');
+            stopConfetti();
+
+            const buyBtn = document.getElementById('buyCardBtn');
+            buyBtn.disabled = false;
+            buyBtn.textContent = "Buy Another Card (500 🪙)";
+            buyBtn.style.display = 'block';
+        }
+
+        // Confetti Canvas Engine
+        let confettiAnimId = null;
+        function startConfetti() {
+            const canvas = document.getElementById('confettiCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#00e5ff', '#ffd700', '#9d00ff', '#ff3366', '#ffffff'];
+
+            for (let i = 0; i < 120; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    r: Math.random() * 6 + 4,
+                    dx: Math.random() * 4 - 2,
+                    dy: Math.random() * 4 + 3,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    tilt: Math.random() * 10 - 10
+                });
+            }
+
+            function render() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    ctx.beginPath();
+                    ctx.fillStyle = p.color;
+                    ctx.ellipse(p.x, p.y, p.r, p.r * 0.6, p.tilt, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    p.y += p.dy;
+                    p.x += p.dx;
+                    if (p.y > canvas.height) p.y = -10;
+                });
+                confettiAnimId = requestAnimationFrame(render);
+            }
+            render();
+        }
+
+        function stopConfetti() {
+            if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
+            const canvas = document.getElementById('confettiCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
         async function loadPayoutHistory() {
             try {
                 const historyListEl = document.getElementById('payoutHistoryList');
