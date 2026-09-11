@@ -263,7 +263,7 @@
                 </defs>
             </svg>
             <div class="poster-title">1,000,000 XP Jackpot</div>
-            <div class="poster-sub">Match exactly 3 identical icons to win big & climb the leaderboard! Cost: 505 Coins per card.</div>
+            <div class="poster-sub">Match exactly 3 identical icons to win big & climb the leaderboard! Cost: 500 Coins per card.</div>
         </div>
 
         <!-- Arena Action & Scratch Matrix -->
@@ -282,17 +282,8 @@
         <div class="history-section">
             <div class="history-title">Recent Elite Payouts</div>
             <div class="history-list" id="payoutHistoryList">
-                <div class="history-item epic">
-                    <div><span class="winner-tag">Sovereign_X</span> won <span class="prize-highlight">1,000,000 XP Jackpot</span></div>
-                    <span style="font-size:11px; color:var(--text-muted);">Just now</span>
-                </div>
-                <div class="history-item epic">
-                    <div><span class="winner-tag">CryptoKing99</span> won <span class="prize-highlight">50,000 XP</span></div>
-                    <span style="font-size:11px; color:var(--text-muted);">2m ago</span>
-                </div>
                 <div class="history-item">
-                    <div><span class="winner-tag">PixVinzPlayer</span> won <span class="prize-highlight">20,000 Coins</span></div>
-                    <span style="font-size:11px; color:var(--text-muted);">5m ago</span>
+                    <div>Loading payouts from vault...</div>
                 </div>
             </div>
         </div>
@@ -302,7 +293,8 @@
     <!-- Firebase Initialization Module Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
@@ -316,6 +308,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
         window.pixvinzDb = { db, doc, getDoc, setDoc, collection, getDocs, query, orderBy, limit };
 
@@ -338,6 +331,7 @@
         }
 
         let activeCardData = null;
+        let activeCardId = null;
 
         window.buyScratchCard = async function() {
             const username = getCurrentUsername();
@@ -349,7 +343,6 @@
                 return;
             }
 
-            // Deduct 500 coins
             coins -= 500;
             localStorage.setItem(prefix + 'totalCoins', coins);
             window.updateTopBalances();
@@ -359,16 +352,36 @@
             buyBtn.textContent = "Fetching Card from Vault...";
 
             try {
-                // Fetch a random card from Firestore pool (card_0001 to card_1000)
-                const randomCardNum = String(Math.floor(Math.random() * 1000) + 1).padStart(4, '0');
-                const cardRef = doc(db, "scratch_cards", `card_${randomCardNum}`);
-                const cardSnap = await getDoc(cardRef);
+                // Query available unbought cards from Firestore securely using getDocs with limit
+                const q = query(collection(db, "scratch_cards"), limit(50));
+                const querySnapshot = await getDocs(q);
+                
+                const availableCards = [];
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    if (!data.isBought) {
+                        availableCards.push({ id: docSnap.id, ...data });
+                    }
+                });
 
-                if (!cardSnap.exists()) {
-                    throw new Error("Card data not found in vault.");
+                if (availableCards.length === 0) {
+                    throw new Error("No unbought cards available in vault.");
                 }
 
-                activeCardData = cardSnap.data();
+                // Pick a random unbought card from the batch
+                const randomCard = availableCards[Math.floor(Math.random() * availableCards.length)];
+                activeCardData = randomCard;
+                activeCardId = randomCard.id;
+
+                // Securely claim/buy the card in Firestore via rules (onlyUpdatingPurchaseStatus)
+                if (auth.currentUser) {
+                    const cardRef = doc(db, "scratch_cards", activeCardId);
+                    await updateDoc(cardRef, {
+                        isBought: true,
+                        boughtBy: auth.currentUser.uid
+                    });
+                }
+                
                 renderScratchBoard(activeCardData);
 
                 buyBtn.style.display = 'none';
@@ -393,7 +406,6 @@
                 const slot = document.createElement('div');
                 slot.className = 'scratch-slot';
 
-                // Check if item is custom image file or filler emoji
                 let contentHTML = item;
                 if (item.endsWith('.png')) {
                     contentHTML = `<img src="image/${item}" alt="icon">`;
@@ -410,7 +422,6 @@
         window.revealSlot = function(coverElement) {
             coverElement.classList.add('revealed');
 
-            // Check if all slots are scratched
             const covers = document.querySelectorAll('.scratch-cover');
             const unrevealed = Array.from(covers).some(c => !c.classList.contains('revealed'));
 
@@ -419,7 +430,7 @@
             }
         }
 
-        function evaluateCardResult(card) {
+        async function evaluateCardResult(card) {
             const resultMsg = document.getElementById('resultMessage');
             const username = getCurrentUsername();
             const prefix = username ? username + '_' : '';
@@ -439,7 +450,22 @@
                 }
                 window.updateTopBalances();
 
-                // Trigger cloud synchronization if available
+                // Save to Firestore Payout History if user won big or normal payout
+                try {
+                    if (auth.currentUser) {
+                        await setDoc(doc(collection(db, "payout_history")), {
+                            winner: auth.currentUser.uid,
+                            winnerUsername: username,
+                            prizeValue: card.prizeValue,
+                            prizeType: card.prizeType,
+                            timestamp: Date.now()
+                        });
+                        loadPayoutHistory();
+                    }
+                } catch (e) {
+                    console.error("Error logging payout to Firestore:", e);
+                }
+
                 if (typeof window.saveUserDataToCloud === 'function') {
                     window.saveUserDataToCloud();
                 }
@@ -448,7 +474,6 @@
                 resultMsg.textContent = `❌ No match! Better luck next time.`;
             }
 
-            // Show play again button
             setTimeout(() => {
                 const buyBtn = document.getElementById('buyCardBtn');
                 buyBtn.disabled = false;
@@ -457,8 +482,45 @@
             }, 1500);
         }
 
+        // Fetch Real Payout History from Firestore
+        async function loadPayoutHistory() {
+            try {
+                const historyListEl = document.getElementById('payoutHistoryList');
+                if (!historyListEl) return;
+
+                const q = query(collection(db, "payout_history"), orderBy("timestamp", "desc"), limit(10));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    historyListEl.innerHTML = '<div class="history-item"><div>No recent payouts recorded yet.</div></div>';
+                    return;
+                }
+
+                historyListEl.innerHTML = '';
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const isEpic = data.prizeValue >= 50000;
+                    
+                    const item = document.createElement('div');
+                    item.className = `history-item ${isEpic ? 'epic' : ''}`;
+                    item.innerHTML = `
+                        <div><span class="winner-tag">${data.winnerUsername || 'Anonymous'}</span> won <span class="prize-highlight">${data.prizeValue.toLocaleString()} ${(data.prizeType || 'xp').toUpperCase()}</span></div>
+                        <span style="font-size:11px; color:var(--text-muted);">Recently</span>
+                    `;
+                    historyListEl.appendChild(item);
+                });
+            } catch (e) {
+                console.error("Error loading payouts:", e);
+                const historyListEl = document.getElementById('payoutHistoryList');
+                if (historyListEl) {
+                    historyListEl.innerHTML = '<div class="history-item"><div>Failed to load payouts from vault.</div></div>';
+                }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             window.updateTopBalances();
+            loadPayoutHistory();
         });
     </script>
 </body>
