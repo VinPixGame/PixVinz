@@ -352,30 +352,20 @@
             buyBtn.textContent = "Fetching Card from Vault...";
 
             try {
-                // Query available unbought cards from Firestore securely using getDocs with limit
-                const q = query(collection(db, "scratch_cards"), limit(50));
-                const querySnapshot = await getDocs(q);
-                
-                const availableCards = [];
-                querySnapshot.forEach((docSnap) => {
-                    const data = docSnap.data();
-                    if (!data.isBought) {
-                        availableCards.push({ id: docSnap.id, ...data });
-                    }
-                });
+                // Fetch a random card directly using individual document get() to bypass collection listing restrictions
+                const randomCardNum = String(Math.floor(Math.random() * 1000) + 1).padStart(4, '0');
+                activeCardId = `card_${randomCardNum}`;
+                const cardRef = doc(db, "scratch_cards", activeCardId);
+                const cardSnap = await getDoc(cardRef);
 
-                if (availableCards.length === 0) {
-                    throw new Error("No unbought cards available in vault.");
+                if (!cardSnap.exists()) {
+                    throw new Error("Card data not found in vault.");
                 }
 
-                // Pick a random unbought card from the batch
-                const randomCard = availableCards[Math.floor(Math.random() * availableCards.length)];
-                activeCardData = randomCard;
-                activeCardId = randomCard.id;
+                activeCardData = cardSnap.data();
 
-                // Securely claim/buy the card in Firestore via rules (onlyUpdatingPurchaseStatus)
+                // Securely claim/buy the card in Firestore
                 if (auth.currentUser) {
-                    const cardRef = doc(db, "scratch_cards", activeCardId);
                     await updateDoc(cardRef, {
                         isBought: true,
                         boughtBy: auth.currentUser.uid
@@ -434,23 +424,38 @@
             const resultMsg = document.getElementById('resultMessage');
             const username = getCurrentUsername();
             const prefix = username ? username + '_' : '';
+            const userUid = auth.currentUser ? auth.currentUser.uid : 'Guest';
 
             if (card.isWinner) {
-                resultMsg.style.color = 'var(--gold)';
-                resultMsg.textContent = `🎉 WINNER! You won ${card.prizeValue.toLocaleString()} ${card.prizeType.toUpperCase()}`;
+                const isMassiveWin = (card.prizeType === 'coin' && card.prizeValue >= 20000) || 
+                                     (card.prizeType === 'xp' && card.prizeValue >= 50000);
 
-                if (card.prizeType === 'coin') {
-                    let totalCoins = parseInt(localStorage.getItem(prefix + 'totalCoins')) || 0;
-                    totalCoins += card.prizeValue;
-                    localStorage.setItem(prefix + 'totalCoins', totalCoins);
-                } else if (card.prizeType === 'xp') {
-                    let totalXp = parseInt(localStorage.getItem(prefix + 'totalXp')) || 0;
-                    totalXp += card.prizeValue;
-                    localStorage.setItem(prefix + 'totalXp', totalXp);
+                if (isMassiveWin) {
+                    resultMsg.style.color = 'var(--gold)';
+                    resultMsg.innerHTML = `🏆 MASSIVE JACKPOT! You won ${card.prizeValue.toLocaleString()} ${card.prizeType.toUpperCase()}!<br>` +
+                                          `<div style="margin-top:8px; font-size:12px; background:rgba(0,0,0,0.4); padding:8px; border-radius:6px; border:1px dashed var(--gold); text-align:left;">` +
+                                          `📌 <b>Claim Instructions:</b><br>` +
+                                          `1. Screenshot this winning screen.<br>` +
+                                          `2. Send it to support along with your secure details:<br>` +
+                                          `&nbsp;&nbsp;• Username: <b>${username}</b><br>` +
+                                          `&nbsp;&nbsp;• Security UID: <code style="font-size:10px; color:var(--primary);">${userUid}</code></div>`;
+                } else {
+                    resultMsg.style.color = 'var(--gold)';
+                    resultMsg.textContent = `🎉 WINNER! You won ${card.prizeValue.toLocaleString()} ${card.prizeType.toUpperCase()}`;
+
+                    if (card.prizeType === 'coin') {
+                        let totalCoins = parseInt(localStorage.getItem(prefix + 'totalCoins')) || 0;
+                        totalCoins += card.prizeValue;
+                        localStorage.setItem(prefix + 'totalCoins', totalCoins);
+                    } else if (card.prizeType === 'xp') {
+                        let totalXp = parseInt(localStorage.getItem(prefix + 'totalXp')) || 0;
+                        totalXp += card.prizeValue;
+                        localStorage.setItem(prefix + 'totalXp', totalXp);
+                    }
+                    window.updateTopBalances();
                 }
-                window.updateTopBalances();
 
-                // Save to Firestore Payout History if user won big or normal payout
+                // Save to Firestore Payout History for support verification
                 try {
                     if (auth.currentUser) {
                         await setDoc(doc(collection(db, "payout_history")), {
@@ -458,6 +463,8 @@
                             winnerUsername: username,
                             prizeValue: card.prizeValue,
                             prizeType: card.prizeType,
+                            isManualClaim: isMassiveWin,
+                            status: isMassiveWin ? 'pending_verification' : 'auto_credited',
                             timestamp: Date.now()
                         });
                         loadPayoutHistory();
@@ -466,7 +473,7 @@
                     console.error("Error logging payout to Firestore:", e);
                 }
 
-                if (typeof window.saveUserDataToCloud === 'function') {
+                if (typeof window.saveUserDataToCloud === 'function' && !isMassiveWin) {
                     window.saveUserDataToCloud();
                 }
             } else {
