@@ -51,17 +51,6 @@
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
-        .audio-toggle-btn {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-main);
-            padding: 6px 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
         .back-btn {
             background: rgba(255,255,255,0.08);
             border: none;
@@ -225,6 +214,7 @@
             cursor: pointer;
             touch-action: none;
             border-radius: 10px;
+            z-index: 5;
         }
 
         /* Winning Modal Styles */
@@ -390,7 +380,6 @@
 
     <div class="header-bar">
         <button class="back-btn" onclick="window.location.href='index.html'">← Home</button>
-        <button class="audio-toggle-btn" id="audioToggleBtn" onclick="toggleBackgroundMusic()">🎵 Music: OFF</button>
         <div class="currency-cluster">
             <div class="badge-pill">🪙 <span id="headerCoins">0</span></div>
             <div class="badge-pill" style="border-color: rgba(0,229,255,0.3); color: var(--primary);">⭐ <span id="headerXp">0</span></div>
@@ -495,23 +484,16 @@
             document.getElementById('headerXp').textContent = xp.toLocaleString();
         }
 
-        // Audio & Music Manager
-        let musicPlaying = false;
-        window.toggleBackgroundMusic = function() {
+        // Auto background music handling
+        let musicStarted = false;
+        function tryStartBackgroundMusic() {
+            if (musicStarted) return;
             const bgMusic = document.getElementById('bgMusic');
-            const toggleBtn = document.getElementById('audioToggleBtn');
-            if (musicPlaying) {
-                bgMusic.pause();
-                musicPlaying = false;
-                toggleBtn.textContent = "🎵 Music: OFF";
-            } else {
+            if (bgMusic) {
+                bgMusic.volume = 0.4;
                 bgMusic.play().then(() => {
-                    musicPlaying = true;
-                    toggleBtn.textContent = "🎵 Music: ON";
-                }).catch(e => {
-                    console.error("Audio playback blocked:", e);
-                    alert("Click anywhere on the page first to enable background audio.");
-                });
+                    musicStarted = true;
+                }).catch(e => {});
             }
         }
 
@@ -531,6 +513,8 @@
         let scratchSfxTimer = null;
 
         window.buyScratchCard = async function() {
+            tryStartBackgroundMusic();
+
             const username = getCurrentUsername();
             const prefix = username ? username + '_' : '';
             let coins = parseInt(localStorage.getItem(prefix + 'totalCoins')) || 0;
@@ -606,16 +590,20 @@
                 `;
                 gridEl.appendChild(slot);
 
-                initScratchCanvas(`scratchCanvas_${index}`);
+                // Use setTimeout to allow DOM reflow so clientWidth/clientHeight are fully accurate
+                setTimeout(() => {
+                    initScratchCanvas(`scratchCanvas_${index}`);
+                }, 50);
             });
         }
 
         function initScratchCanvas(canvasId) {
             const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
             const ctx = canvas.getContext('2d');
             
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
+            canvas.width = canvas.offsetWidth || 80;
+            canvas.height = canvas.offsetHeight || 80;
 
             const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
             gradient.addColorStop(0, '#c0c0c0');
@@ -642,6 +630,8 @@
 
             function scratch(e) {
                 if (!isDrawing || evaluated) return;
+                tryStartBackgroundMusic();
+
                 const rect = canvas.getBoundingClientRect();
                 const clientX = e.clientX || (e.touches && e.touches[0].clientX);
                 const clientY = e.clientY || (e.touches && e.touches[0].clientY);
@@ -655,7 +645,6 @@
                 ctx.arc(x, y, 16, 0, Math.PI * 2, false);
                 ctx.fill();
 
-                // Play scratch effect audio intermittently while actively scratching
                 if (!scratchSfxTimer) {
                     playSound('scratchSfx');
                     scratchSfxTimer = setTimeout(() => { scratchSfxTimer = null; }, 250);
@@ -718,6 +707,10 @@
             const modalSubtitle = document.getElementById('modalSubtitle');
             const modalBody = document.getElementById('modalContentBody');
             const modalTrophy = document.getElementById('modalTrophy');
+
+            // Pause background music during win/lose modal presentation
+            const bgMusic = document.getElementById('bgMusic');
+            if (bgMusic) bgMusic.pause();
 
             modalBody.innerHTML = '';
 
@@ -794,6 +787,13 @@
             document.getElementById('resultModal').classList.remove('active');
             stopConfetti();
 
+            // Resume background music when modal closes
+            const bgMusic = document.getElementById('bgMusic');
+            if (bgMusic && musicStarted) {
+                bgMusic.play().catch(e => {});
+            }
+
+            document.getElementById('scratchContainer').style.display = 'none';
             const buyBtn = document.getElementById('buyCardBtn');
             buyBtn.disabled = false;
             buyBtn.textContent = "Buy Another Card (500 🪙)";
@@ -885,6 +885,11 @@
         document.addEventListener('DOMContentLoaded', () => {
             window.updateTopBalances();
             loadPayoutHistory();
+            
+            // Try starting audio on first user click anywhere if autoplay policies block it initially
+            window.addEventListener('click', () => {
+                tryStartBackgroundMusic();
+            }, { once: true });
         });
     </script>
 </body>
