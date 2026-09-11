@@ -28,7 +28,6 @@
             min-height: 100vh;
         }
 
-        /* Confetti canvas overlay */
         #confettiCanvas {
             position: fixed;
             top: 0;
@@ -156,6 +155,7 @@
             border-radius: 16px;
             padding: 16px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            position: relative;
         }
 
         .card-meta-header {
@@ -179,16 +179,21 @@
             border-radius: 4px;
         }
 
+        .scratch-game-area {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
         .scratch-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
-            position: relative;
         }
 
         .scratch-slot {
             aspect-ratio: 1;
-            background: #11141e;
+            background: radial-gradient(circle at center, #232c4a 0%, #111522 100%);
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -196,16 +201,18 @@
             position: relative;
             overflow: hidden;
             font-size: 24px;
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.6);
         }
 
         .scratch-slot img {
-            width: 75%;
-            height: 75%;
+            width: 70%;
+            height: 70%;
             object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
 
-        .scratch-canvas {
+        .master-scratch-canvas {
             position: absolute;
             top: 0;
             left: 0;
@@ -213,8 +220,7 @@
             height: 100%;
             cursor: pointer;
             touch-action: none;
-            border-radius: 10px;
-            z-index: 5;
+            z-index: 10;
         }
 
         /* Winning Modal Styles */
@@ -372,9 +378,8 @@
 
     <canvas id="confettiCanvas"></canvas>
 
-    <!-- Audio Elements -->
     <audio id="bgMusic" src="sounds/scratch.mp3" loop></audio>
-    <audio id="scratchSfx" src="https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3" preload="auto"></audio>
+    <audio id="scratchSfx" src="https://assets.mixkit.co/active_storage/sfx/2569/2569-preview.mp3" preload="auto"></audio>
     <audio id="winSfx" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3" preload="auto"></audio>
     <audio id="loseSfx" src="https://assets.mixkit.co/active_storage/sfx/2704/2704-preview.mp3" preload="auto"></audio>
 
@@ -388,7 +393,6 @@
 
     <div class="main-container">
         
-        <!-- Premium SVG Poster -->
         <div class="poster-card">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="url(#goldGradient)" stroke="#ffd700"/>
@@ -400,10 +404,9 @@
                 </defs>
             </svg>
             <div class="poster-title">1,000,000 XP Jackpot</div>
-            <div class="poster-sub">Scratch to match 3 identical icons & win big! Cost: 500 Coins per card.</div>
+            <div class="poster-sub">Scratch the full silver sheet to match 3 identical icons & win big! Cost: 500 Coins.</div>
         </div>
 
-        <!-- Arena Action & Scratch Matrix -->
         <div class="arena-action-box">
             <button id="buyCardBtn" class="buy-btn" onclick="buyScratchCard()">Buy Scratch Card (500 🪙)</button>
             
@@ -413,15 +416,15 @@
                         <span>PIXVINZ SECURE TICKET</span>
                         <span>CODE: <span id="displayCardCode" class="card-code-badge">----</span></span>
                     </div>
-                    <div class="scratch-grid" id="scratchGrid">
-                        <!-- 12 Scratch Slots populated dynamically -->
+                    <div class="scratch-game-area" id="scratchGameArea">
+                        <div class="scratch-grid" id="scratchGrid"></div>
+                        <canvas class="master-scratch-canvas" id="masterScratchCanvas"></canvas>
                     </div>
                 </div>
                 <div id="resultMessage" style="margin-top: 15px; font-weight: 800; font-size: 15px;"></div>
             </div>
         </div>
 
-        <!-- Recent Payouts History -->
         <div class="history-section">
             <div class="history-title">Recent Elite Payouts</div>
             <div class="history-list" id="payoutHistoryList">
@@ -440,11 +443,10 @@
             <div class="modal-title" id="modalTitle">Victory!</div>
             <div class="modal-subtitle" id="modalSubtitle">You matched 3 items!</div>
             <div id="modalContentBody"></div>
-            <button class="modal-btn" onclick="closeResultModal()">Awesome!</button>
+            <button class="modal-btn" onclick="closeResultModal()">Claim & Buy Another Card</button>
         </div>
     </div>
 
-    <!-- Firebase Initialization Module Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
@@ -484,7 +486,6 @@
             document.getElementById('headerXp').textContent = xp.toLocaleString();
         }
 
-        // Auto background music handling
         let musicStarted = false;
         function tryStartBackgroundMusic() {
             if (musicStarted) return;
@@ -575,7 +576,7 @@
             const gridEl = document.getElementById('scratchGrid');
             gridEl.innerHTML = '';
 
-            cardData.grid.forEach((item, index) => {
+            cardData.grid.forEach((item) => {
                 const slot = document.createElement('div');
                 slot.className = 'scratch-slot';
 
@@ -584,47 +585,45 @@
                     contentHTML = `<img src="image/${item}" alt="icon">`;
                 }
 
-                slot.innerHTML = `
-                    ${contentHTML}
-                    <canvas class="scratch-canvas" id="scratchCanvas_${index}"></canvas>
-                `;
+                slot.innerHTML = contentHTML;
                 gridEl.appendChild(slot);
-
-                // Use setTimeout to allow DOM reflow so clientWidth/clientHeight are fully accurate
-                setTimeout(() => {
-                    initScratchCanvas(`scratchCanvas_${index}`);
-                }, 50);
             });
+
+            setTimeout(() => {
+                initMasterCanvas();
+            }, 60);
         }
 
-        function initScratchCanvas(canvasId) {
-            const canvas = document.getElementById(canvasId);
-            if (!canvas) return;
+        function initMasterCanvas() {
+            const canvas = document.getElementById('masterScratchCanvas');
+            const area = document.getElementById('scratchGameArea');
+            if (!canvas || !area) return;
+
             const ctx = canvas.getContext('2d');
-            
-            canvas.width = canvas.offsetWidth || 80;
-            canvas.height = canvas.offsetHeight || 80;
+            canvas.width = area.offsetWidth;
+            canvas.height = area.offsetHeight;
 
             const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            gradient.addColorStop(0, '#c0c0c0');
-            gradient.addColorStop(0.3, '#e8e8e8');
-            gradient.addColorStop(0.5, '#9a9a9a');
-            gradient.addColorStop(0.7, '#f0f0f0');
-            gradient.addColorStop(1, '#a8a8a8');
+            gradient.addColorStop(0, '#a8b0c2');
+            gradient.addColorStop(0.2, '#e2e8f0');
+            gradient.addColorStop(0.4, '#94a3b8');
+            gradient.addColorStop(0.6, '#f8fafc');
+            gradient.addColorStop(0.8, '#cbd5e1');
+            gradient.addColorStop(1, '#64748b');
 
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            ctx.fillStyle = 'rgba(255,255,255,0.3)';
-            for (let i = 0; i < 15; i++) {
-                ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 3, 3);
+            ctx.fillStyle = 'rgba(255,255,255,0.45)';
+            for (let i = 0; i < 120; i++) {
+                ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2.5, 2.5);
             }
 
-            ctx.fillStyle = '#555';
-            ctx.font = 'bold 11px sans-serif';
+            ctx.fillStyle = '#334155';
+            ctx.font = 'bold 16px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('SCRATCH', canvas.width / 2, canvas.height / 2);
+            ctx.fillText('✨ SCRATCH ENTIRE BOARD TO REVEAL ✨', canvas.width / 2, canvas.height / 2);
 
             let isDrawing = false;
 
@@ -642,12 +641,12 @@
 
                 ctx.globalCompositeOperation = 'destination-out';
                 ctx.beginPath();
-                ctx.arc(x, y, 16, 0, Math.PI * 2, false);
+                ctx.arc(x, y, 22, 0, Math.PI * 2, false);
                 ctx.fill();
 
                 if (!scratchSfxTimer) {
                     playSound('scratchSfx');
-                    scratchSfxTimer = setTimeout(() => { scratchSfxTimer = null; }, 250);
+                    scratchSfxTimer = setTimeout(() => { scratchSfxTimer = null; }, 180);
                 }
 
                 checkScratchProgress(canvas);
@@ -675,26 +674,9 @@
                 }
             }
 
-            if ((transparentPixels / totalPixels) > 0.40) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-            }
-
-            const canvases = document.querySelectorAll('.scratch-canvas');
-            let allScratched = true;
-            canvases.forEach(c => {
-                const cCtx = c.getContext('2d');
-                const cData = cCtx.getImageData(0, 0, c.width, c.height);
-                let trans = 0;
-                for (let i = 3; i < cData.data.length; i += 4) {
-                    if (cData.data[i] === 0) trans++;
-                }
-                if ((trans / (cData.data.length / 4)) < 0.35) {
-                    allScratched = false;
-                }
-            });
-
-            if (allScratched && !evaluated) {
+            if ((transparentPixels / totalPixels) > 0.42 && !evaluated) {
                 evaluated = true;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 evaluateCardResult(activeCardData);
             }
         }
@@ -708,7 +690,6 @@
             const modalBody = document.getElementById('modalContentBody');
             const modalTrophy = document.getElementById('modalTrophy');
 
-            // Pause background music during win/lose modal presentation
             const bgMusic = document.getElementById('bgMusic');
             if (bgMusic) bgMusic.pause();
 
@@ -775,9 +756,9 @@
                 }
             } else {
                 playSound('loseSfx');
-                modalTrophy.textContent = '❌';
+                modalTrophy.textContent = '😅';
                 modalTitle.textContent = 'NO MATCH';
-                modalSubtitle.textContent = 'Better luck on your next scratch ticket!';
+                modalSubtitle.textContent = 'Not quite a match this time. Keep scratching for glory!';
             }
 
             modal.classList.add('active');
@@ -787,12 +768,12 @@
             document.getElementById('resultModal').classList.remove('active');
             stopConfetti();
 
-            // Resume background music when modal closes
             const bgMusic = document.getElementById('bgMusic');
             if (bgMusic && musicStarted) {
                 bgMusic.play().catch(e => {});
             }
 
+            // Keep scratchContainer visible or reset for a new card purchase
             document.getElementById('scratchContainer').style.display = 'none';
             const buyBtn = document.getElementById('buyCardBtn');
             buyBtn.disabled = false;
@@ -800,7 +781,6 @@
             buyBtn.style.display = 'block';
         }
 
-        // Confetti Canvas Engine
         let confettiAnimId = null;
         function startConfetti() {
             const canvas = document.getElementById('confettiCanvas');
@@ -886,7 +866,6 @@
             window.updateTopBalances();
             loadPayoutHistory();
             
-            // Try starting audio on first user click anywhere if autoplay policies block it initially
             window.addEventListener('click', () => {
                 tryStartBackgroundMusic();
             }, { once: true });
