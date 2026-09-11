@@ -35,7 +35,7 @@
             width: 100vw;
             height: 100vh;
             pointer-events: none;
-            z-index: 999;
+            z-index: 2000; /* Placed cleanly on top of the win modal */
         }
 
         .header-bar {
@@ -379,7 +379,8 @@
     <canvas id="confettiCanvas"></canvas>
 
     <audio id="bgMusic" src="sounds/scratch.mp3" loop></audio>
-    <audio id="scratchSfx" src="https://assets.mixkit.co/active_storage/sfx/2569/2569-preview.mp3" preload="auto"></audio>
+    <!-- Updated authentic coin/foil scraping sound effect -->
+    <audio id="scratchSfx" src="https://assets.mixkit.co/active_storage/sfx/3004/3004-preview.mp3" preload="auto"></audio>
     <audio id="winSfx" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3" preload="auto"></audio>
     <audio id="loseSfx" src="https://assets.mixkit.co/active_storage/sfx/2704/2704-preview.mp3" preload="auto"></audio>
 
@@ -387,7 +388,7 @@
         <button class="back-btn" onclick="window.location.href='index.html'">← Home</button>
         <div class="currency-cluster">
             <div class="badge-pill">🪙 <span id="headerCoins">0</span></div>
-            <div class="badge-pill" style="border-color: rgba(0,229,255,0.3); color: var(--primary);">⭐ <span id="headerXp">0</span></div>
+            <div class="badge-pill" style="border-color: rgba(0,229,255,0.3); color: var(--primary);">⚡️ <span id="headerXp">0</span></div>
         </div>
     </div>
 
@@ -404,7 +405,7 @@
                 </defs>
             </svg>
             <div class="poster-title">1,000,000 XP Jackpot</div>
-            <div class="poster-sub">Scratch the full silver sheet to match 3 identical icons & win big! Cost: 500 Coins.</div>
+            <div class="poster-sub">Scratch the silver sheet to match 3 identical icons & win big! Cost: 500 Coins.</div>
         </div>
 
         <div class="arena-action-box">
@@ -674,7 +675,8 @@
                 }
             }
 
-            if ((transparentPixels / totalPixels) > 0.42 && !evaluated) {
+            // Increased threshold to 90% clearance before evaluating results
+            if ((transparentPixels / totalPixels) > 0.90 && !evaluated) {
                 evaluated = true;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 evaluateCardResult(activeCardData);
@@ -773,7 +775,7 @@
                 bgMusic.play().catch(e => {});
             }
 
-            // Keep scratchContainer visible or reset for a new card purchase
+            // Keep scratchContainer visible with the fully scratched card intact underneath the modal
             document.getElementById('scratchContainer').style.display = 'none';
             const buyBtn = document.getElementById('buyCardBtn');
             buyBtn.disabled = false;
