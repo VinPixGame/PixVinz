@@ -2,25 +2,307 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PixVinz Scratch Card Seeder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixVinz Scratch Card Arena</title>
     <style>
-        body { font-family: sans-serif; background: #111; color: #fff; padding: 20px; text-align: center; }
-        button { padding: 15px 30px; font-size: 16px; background: #00e5ff; color: #111; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #00b3cc; }
-        #status { margin-top: 20px; font-size: 14px; color: #ffd700; white-space: pre-line; }
+        :root {
+            --bg-deep: #0a0b10;
+            --surface: #141722;
+            --surface-card: #1c2133;
+            --primary: #00e5ff;
+            --gold: #ffd700;
+            --accent-purple: #9d00ff;
+            --text-main: #ffffff;
+            --text-muted: #8b9bb4;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .header-bar {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            box-sizing: border-box;
+            background: var(--surface);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.08);
+            border: none;
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.15); }
+
+        .currency-cluster {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .badge-pill {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,215,0,0.3);
+            border-radius: 20px;
+            padding: 5px 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--gold);
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .poster-card {
+            background: linear-gradient(135deg, #1e0033 0%, #0c0219 50%, #050b1a 100%);
+            border: 2px solid rgba(157, 0, 255, 0.4);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(157, 0, 255, 0.2);
+        }
+
+        .poster-card svg {
+            width: 54px;
+            height: 54px;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 0 10px rgba(0,229,255,0.6));
+        }
+
+        .poster-title {
+            font-size: 22px;
+            font-weight: 900;
+            background: linear-gradient(90deg, #00e5ff, #ffffff, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .poster-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .arena-action-box {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .buy-btn {
+            background: linear-gradient(135deg, #00e5ff 0%, #0088cc 100%);
+            color: #050b1a;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
+            transition: transform 0.1s, opacity 0.2s;
+        }
+        .buy-btn:active { transform: scale(0.98); }
+        .buy-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .scratch-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            background: var(--surface-card);
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            position: relative;
+            min-height: 280px;
+        }
+
+        .scratch-slot {
+            aspect-ratio: 1;
+            background: #11141e;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            font-size: 26px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .scratch-slot img {
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
+        }
+
+        .scratch-cover {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #2c3247 0%, #1a1e2e 100%);
+            border: 1px dashed rgba(255,255,255,0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--text-muted);
+            transition: opacity 0.3s;
+            user-select: none;
+        }
+        .scratch-cover.revealed { opacity: 0; pointer-events: none; }
+
+        .history-section {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .history-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.03);
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            border-left: 3px solid var(--text-muted);
+        }
+
+        .history-item.epic {
+            border-left-color: var(--gold);
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        .winner-tag {
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .prize-highlight {
+            color: var(--gold);
+            font-weight: 800;
+        }
     </style>
 </head>
 <body>
 
-    <h1>PixVinz 1,000 Scratch Cards Seeder</h1>
-    <p>Generating 1,000 pre-determined scratch cards with purchase tracking, unique cryptographic validation codes, and anti-tamper hashes for Firestore.</p>
-    <button id="seedBtn">Generate & Upload 1,000 Secure Cards</button>
-    <div id="status">Ready...</div>
+    <div class="header-bar">
+        <button class="back-btn" onclick="window.location.href='index.html'">← Home</button>
+        <div class="currency-cluster">
+            <div class="badge-pill">🪙 <span id="headerCoins">0</span></div>
+            <div class="badge-pill" style="border-color: rgba(0,229,255,0.3); color: var(--primary);">⭐ <span id="headerXp">0</span></div>
+        </div>
+    </div>
 
-    <!-- Firebase SDKs -->
+    <div class="main-container">
+        
+        <!-- Premium SVG Poster -->
+        <div class="poster-card">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="url(#goldGradient)" stroke="#ffd700"/>
+                <defs>
+                    <linearGradient id="goldGradient" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#ffd700"/>
+                        <stop offset="1" stop-color="#ff8800"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+            <div class="poster-title">1,000,000 XP Jackpot</div>
+            <div class="poster-sub">Match exactly 3 identical icons to win big & climb the leaderboard! Cost: 505 Coins per card.</div>
+        </div>
+
+        <!-- Arena Action & Scratch Matrix -->
+        <div class="arena-action-box">
+            <button id="buyCardBtn" class="buy-btn" onclick="buyScratchCard()">Buy Scratch Card (500 🪙)</button>
+            
+            <div id="scratchContainer" style="display:none; margin-top: 20px;">
+                <div class="scratch-grid" id="scratchGrid">
+                    <!-- 12 Slots populated dynamically -->
+                </div>
+                <div id="resultMessage" style="margin-top: 15px; font-weight: 800; font-size: 15px;"></div>
+            </div>
+        </div>
+
+        <!-- Recent Payouts History -->
+        <div class="history-section">
+            <div class="history-title">Recent Elite Payouts</div>
+            <div class="history-list" id="payoutHistoryList">
+                <div class="history-item epic">
+                    <div><span class="winner-tag">Sovereign_X</span> won <span class="prize-highlight">1,000,000 XP Jackpot</span></div>
+                    <span style="font-size:11px; color:var(--text-muted);">Just now</span>
+                </div>
+                <div class="history-item epic">
+                    <div><span class="winner-tag">CryptoKing99</span> won <span class="prize-highlight">50,000 XP</span></div>
+                    <span style="font-size:11px; color:var(--text-muted);">2m ago</span>
+                </div>
+                <div class="history-item">
+                    <div><span class="winner-tag">PixVinzPlayer</span> won <span class="prize-highlight">20,000 Coins</span></div>
+                    <span style="font-size:11px; color:var(--text-muted);">5m ago</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Firebase Initialization Module Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDPFmx35ClB3c5vGBtv8rzVAiTK4rcwAik",
@@ -35,184 +317,148 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const customImages = [
-            { id: "100.png", type: "coin", value: 100, wins: 100 },
-            { id: "500.png", type: "coin", value: 500, wins: 70 },
-            { id: "1k.png", type: "coin", value: 1000, wins: 50 },
-            { id: "5k.png", type: "coin", value: 5000, wins: 20 },
-            { id: "20k.png", type: "coin", value: 20000, wins: 10, teaserCount: 700 },
-            { id: "1kxp.png", type: "xp", value: 1000, wins: 100 },
-            { id: "5kxp.png", type: "xp", value: 5000, wins: 30 },
-            { id: "10kxp.png", type: "xp", value: 10000, wins: 20, teaserCount: 700 },
-            { id: "50kxp.png", type: "xp", value: 50000, wins: 10, teaserCount: 600 },
-            { id: "jpxp.png", type: "xp", value: 1000000, wins: 2, teaserCount: 500 }
-        ];
+        window.pixvinzDb = { db, doc, getDoc, setDoc, collection, getDocs, query, orderBy, limit };
 
-        const fillers = ['🧩', '🪩', '💎', '🎡', '🎮', '🎲'];
+        function getCurrentUsername() {
+            try {
+                const userObj = JSON.parse(localStorage.getItem('loggedInUser'));
+                if (userObj && userObj.username) return userObj.username;
+            } catch (e) {}
+            return localStorage.getItem('vinpix_username') || 'GuestPlayer';
+        }
 
-        function shuffle(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
+        window.updateTopBalances = function() {
+            const username = getCurrentUsername();
+            const prefix = username ? username + '_' : '';
+            const coins = parseInt(localStorage.getItem(prefix + 'totalCoins')) || 0;
+            const xp = parseInt(localStorage.getItem(prefix + 'totalXp')) || 0;
+
+            document.getElementById('headerCoins').textContent = coins.toLocaleString();
+            document.getElementById('headerXp').textContent = xp.toLocaleString();
+        }
+
+        let activeCardData = null;
+
+        window.buyScratchCard = async function() {
+            const username = getCurrentUsername();
+            const prefix = username ? username + '_' : '';
+            let coins = parseInt(localStorage.getItem(prefix + 'totalCoins')) || 0;
+
+            if (coins < 500) {
+                alert("Not enough coins! You need 500 coins to buy a scratch card.");
+                return;
             }
-            return array;
-        }
 
-        // Generate a secure, unique alphanumeric character code identifier + anti-tamper signature
-        function generateSecureCodes() {
-            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            let segment1 = Array.from({length: 4}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-            let segment2 = Array.from({length: 4}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-            let segment3 = Array.from({length: 4}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-            return `PVZ-${segment1}-${segment2}-${segment3}`;
-        }
+            // Deduct 500 coins
+            coins -= 500;
+            localStorage.setItem(prefix + 'totalCoins', coins);
+            window.updateTopBalances();
 
-        async function generateHash(str) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(str);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-        document.getElementById('seedBtn').addEventListener('click', async () => {
-            const statusEl = document.getElementById('status');
-            statusEl.textContent = "Building 1,000 secure cards dataset...";
+            const buyBtn = document.getElementById('buyCardBtn');
+            buyBtn.disabled = true;
+            buyBtn.textContent = "Fetching Card from Vault...";
 
             try {
-                let winningCardsPool = [];
+                // Fetch a random card from Firestore pool (card_0001 to card_1000)
+                const randomCardNum = String(Math.floor(Math.random() * 1000) + 1).padStart(4, '0');
+                const cardRef = doc(db, "scratch_cards", `card_${randomCardNum}`);
+                const cardSnap = await getDoc(cardRef);
 
-                // 1. Build Winning Cards (362 total)
-                customImages.forEach(img => {
-                    for (let i = 0; i < img.wins; i++) {
-                        let slots = [img.id, img.id, img.id];
-                        while (slots.length < 12) {
-                            let candidate = Math.random() < 0.5 
-                                ? customImages[Math.floor(Math.random() * customImages.length)].id 
-                                : fillers[Math.floor(Math.random() * fillers.length)];
-                            
-                            if (candidate === img.id) continue;
-                            
-                            let count = slots.filter(s => s === candidate).length;
-                            if (count < 2) {
-                                slots.push(candidate);
-                            }
-                        }
-                        shuffle(slots);
-                        winningCardsPool.push({
-                            isWinner: true,
-                            prizeType: img.type,
-                            prizeValue: img.value,
-                            winningIcon: img.id,
-                            grid: slots
-                        });
-                    }
-                });
-
-                // 2. Build Losing Cards (638 total)
-                let losingCardsPool = [];
-                while (losingCardsPool.length < 638) {
-                    let slots = [];
-                    let valid = true;
-                    while (slots.length < 12) {
-                        let candidate = Math.random() < 0.5
-                            ? customImages[Math.floor(Math.random() * customImages.length)].id
-                            : fillers[Math.floor(Math.random() * fillers.length)];
-                        
-                        let count = slots.filter(s => s === candidate).length;
-                        if (count >= 2) {
-                            valid = false;
-                            break;
-                        }
-                        slots.push(candidate);
-                    }
-
-                    if (valid) {
-                        let counts = {};
-                        slots.forEach(s => counts[s] = (counts[s] || 0) + 1);
-                        let maxFreq = Math.max(...Object.values(counts));
-                        if (maxFreq < 3) {
-                            losingCardsPool.push({
-                                isWinner: false,
-                                prizeType: null,
-                                prizeValue: 0,
-                                winningIcon: null,
-                                grid: slots
-                            });
-                        }
-                    }
+                if (!cardSnap.exists()) {
+                    throw new Error("Card data not found in vault.");
                 }
 
-                // Combine and shuffle all 1,000 cards
-                let allCards = shuffle([...winningCardsPool, ...losingCardsPool]);
+                activeCardData = cardSnap.data();
+                renderScratchBoard(activeCardData);
 
-                // Apply Teaser Mechanics safely using 'of' instead of ':'
-                const teaserRules = {
-                    'jpxp.png': 500,
-                    '50kxp.png': 600,
-                    '10kxp.png': 700,
-                    '20k.png': 700
-                };
-
-                for (let [iconId, targetCount] of Object.entries(teaserRules)) {
-                    let applied = 0;
-                    for (let card of allCards) {
-                        if (applied >= targetCount) break;
-                        if (!card.isWinner && !card.grid.includes(iconId)) {
-                            let replacements = 0;
-                            for (let i = 0; i < card.grid.length && replacements < 2; i++) {
-                                if (card.grid[i] !== iconId) {
-                                    card.grid[i] = iconId;
-                                    replacements++;
-                                }
-                            }
-                            let counts = {};
-                            card.grid.forEach(s => counts[s] = (counts[s] || 0) + 1);
-                            if (Math.max(...Object.values(counts)) < 3) {
-                                applied++;
-                            } else {
-                                card.grid = shuffle([...card.grid]); 
-                            }
-                        }
-                    }
-                }
-
-                statusEl.textContent = "Generating cryptographic codes & uploading 1,000 cards to Firestore...";
-
-                // Batch upload to Firestore with unique character code identifiers & tamper hashes
-                for (let i = 0; i < allCards.length; i++) {
-                    const cardId = `card_${String(i + 1).padStart(4, '0')}`;
-                    const uniqueCode = generateSecureCodes();
-                    
-                    // Generate a cryptographic integrity hash based on card details to prevent payload tampering
-                    const rawString = `${cardId}_${allCards[i].isWinner}_${allCards[i].prizeValue}_${allCards[i].grid.join(',')}_${uniqueCode}`;
-                    const integrityHash = await generateHash(rawString);
-
-                    await setDoc(doc(db, "scratch_cards", cardId), {
-                        cardId: cardId,
-                        uniqueCode: uniqueCode,
-                        integrityHash: integrityHash,
-                        isWinner: allCards[i].isWinner,
-                        prizeType: allCards[i].prizeType,
-                        prizeValue: allCards[i].prizeValue,
-                        winningIcon: allCards[i].winningIcon,
-                        grid: allCards[i].grid,
-                        isBought: false,
-                        boughtBy: null,
-                        createdAt: new Date()
-                    });
-
-                    if ((i + 1) % 100 === 0) {
-                        statusEl.textContent = `Uploaded ${i + 1} / 1000 secure cards...`;
-                    }
-                }
-
-                statusEl.textContent = "Success! All 1,000 scratch cards generated with unique mix character codes and anti-tamper signatures uploaded to Firestore.";
+                buyBtn.style.display = 'none';
+                document.getElementById('scratchContainer').style.display = 'block';
 
             } catch (err) {
                 console.error(err);
-                statusEl.textContent = "Error during generation/upload: " + err.message;
+                alert("Error fetching scratch card. Refund issued.");
+                coins += 500;
+                localStorage.setItem(prefix + 'totalCoins', coins);
+                window.updateTopBalances();
+                buyBtn.disabled = false;
+                buyBtn.textContent = "Buy Scratch Card (500 🪙)";
             }
+        }
+
+        function renderScratchBoard(cardData) {
+            const gridEl = document.getElementById('scratchGrid');
+            gridEl.innerHTML = '';
+
+            cardData.grid.forEach((item, index) => {
+                const slot = document.createElement('div');
+                slot.className = 'scratch-slot';
+
+                // Check if item is custom image file or filler emoji
+                let contentHTML = item;
+                if (item.endsWith('.png')) {
+                    contentHTML = `<img src="image/${item}" alt="icon">`;
+                }
+
+                slot.innerHTML = `
+                    ${contentHTML}
+                    <div class="scratch-cover" onclick="revealSlot(this)">SCRATCH</div>
+                `;
+                gridEl.appendChild(slot);
+            });
+        }
+
+        window.revealSlot = function(coverElement) {
+            coverElement.classList.add('revealed');
+
+            // Check if all slots are scratched
+            const covers = document.querySelectorAll('.scratch-cover');
+            const unrevealed = Array.from(covers).some(c => !c.classList.contains('revealed'));
+
+            if (!unrevealed) {
+                evaluateCardResult(activeCardData);
+            }
+        }
+
+        function evaluateCardResult(card) {
+            const resultMsg = document.getElementById('resultMessage');
+            const username = getCurrentUsername();
+            const prefix = username ? username + '_' : '';
+
+            if (card.isWinner) {
+                resultMsg.style.color = 'var(--gold)';
+                resultMsg.textContent = `🎉 WINNER! You won ${card.prizeValue.toLocaleString()} ${card.prizeType.toUpperCase()}`;
+
+                if (card.prizeType === 'coin') {
+                    let totalCoins = parseInt(localStorage.getItem(prefix + 'totalCoins')) || 0;
+                    totalCoins += card.prizeValue;
+                    localStorage.setItem(prefix + 'totalCoins', totalCoins);
+                } else if (card.prizeType === 'xp') {
+                    let totalXp = parseInt(localStorage.getItem(prefix + 'totalXp')) || 0;
+                    totalXp += card.prizeValue;
+                    localStorage.setItem(prefix + 'totalXp', totalXp);
+                }
+                window.updateTopBalances();
+
+                // Trigger cloud synchronization if available
+                if (typeof window.saveUserDataToCloud === 'function') {
+                    window.saveUserDataToCloud();
+                }
+            } else {
+                resultMsg.style.color = '#ff5252';
+                resultMsg.textContent = `❌ No match! Better luck next time.`;
+            }
+
+            // Show play again button
+            setTimeout(() => {
+                const buyBtn = document.getElementById('buyCardBtn');
+                buyBtn.disabled = false;
+                buyBtn.textContent = "Buy Another Card (500 🪙)";
+                buyBtn.style.display = 'block';
+            }, 1500);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            window.updateTopBalances();
         });
     </script>
 </body>
