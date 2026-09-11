@@ -74,9 +74,8 @@
                                 ? customImages[Math.floor(Math.random() * customImages.length)].id 
                                 : fillers[Math.floor(Math.random() * fillers.length)];
                             
-                            if (candidate === img.id) continue; // Prevent accidental 3rd/4th matches of the winning item
+                            if (candidate === img.id) continue;
                             
-                            // Check if candidate already appears twice
                             let count = slots.filter(s => s === candidate).length;
                             if (count < 2) {
                                 slots.push(candidate);
@@ -112,7 +111,6 @@
                     }
 
                     if (valid) {
-                        // Check exact 3-match constraint safety
                         let counts = {};
                         slots.forEach(s => counts[s] = (counts[s] || 0) + 1);
                         let maxFreq = Math.max(...Object.values(counts));
@@ -131,7 +129,7 @@
                 // Combine and shuffle all 1,000 cards
                 let allCards = shuffle([...winningCardsPool, ...losingCardsPool]);
 
-                // Apply Teaser Mechanics safely to non-winning slots
+                // Apply Teaser Mechanics safely using 'of' instead of ':'
                 const teaserRules = {
                     'jpxp.png': 500,
                     '50kxp.png': 600,
@@ -139,12 +137,11 @@
                     '20k.png': 700
                 };
 
-                for (let [iconId, targetCount] : Object.entries(teaserRules)) {
+                for (let [iconId, targetCount] of Object.entries(teaserRules)) {
                     let applied = 0;
                     for (let card of allCards) {
                         if (applied >= targetCount) break;
                         if (!card.isWinner && !card.grid.includes(iconId)) {
-                            // Find elements that appear only once or fillers to replace safely as a pair
                             let replacements = 0;
                             for (let i = 0; i < card.grid.length && replacements < 2; i++) {
                                 if (card.grid[i] !== iconId) {
@@ -152,13 +149,11 @@
                                     replacements++;
                                 }
                             }
-                            // Verify validity: ensure we didn't accidentally create 3 matches
                             let counts = {};
                             card.grid.forEach(s => counts[s] = (counts[s] || 0) + 1);
                             if (Math.max(...Object.values(counts)) < 3) {
                                 applied++;
                             } else {
-                                // Revert if it broke the loss rule
                                 card.grid = shuffle([...card.grid]); 
                             }
                         }
